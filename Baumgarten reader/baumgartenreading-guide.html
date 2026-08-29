@@ -1127,8 +1127,9 @@ function processText(text, glosses) {
   });
 
   // 2. Convert §.N references to clickable links (handle §.N, N, or §§)
+  //    The source text writes these as "§.14"; they render as "§14".
   result = result.replace(/§\.(\d+)/g, (match, num) => {
-    return `<span class="para-ref" onclick="scrollToPara(${num})" title="Go to §.${num}">${match}</span>`;
+    return `<span class="para-ref" onclick="scrollToPara(${num})" title="Go to §${num}">§${num}</span>`;
   });
 
   return result;
@@ -1203,7 +1204,7 @@ function buildTextContent() {
       // Header row: §.N and AA page if available
       const header = document.createElement('div');
       header.className = 'para-num';
-      let headerHTML = `§. ${p.num}.`;
+      let headerHTML = `§${p.num}.`;
       if (p.aaPage) {
         headerHTML += ` <span class="aa-page">${p.aaPage}</span>`;
       }
@@ -1283,7 +1284,7 @@ function buildTOCItem(p) {
   const item = document.createElement('div');
   item.className = 'toc-item';
   item.setAttribute('data-para', p.num);
-  item.innerHTML = `<span class="ti-num">§.${p.num}</span>
+  item.innerHTML = `<span class="ti-num">§${p.num}</span>
     <span class="ti-label">${getParaSnippet(p)}</span>`;
   item.addEventListener('click', () => scrollToPara(p.num));
   return item;

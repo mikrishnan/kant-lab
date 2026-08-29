@@ -48,6 +48,9 @@ it nests inside until the next `'part'`. `kantRefs` is optional and renders the 
   labelled with `N` asterisks. An `@@N@@` with no matching gloss is silently dropped.
 - `§.N` anywhere in `text` is auto-linkified into a click-to-scroll cross-reference.
   This happens after gloss substitution, so `§.N` inside a gloss string also links.
+  Note the source form and the display form differ: the data keeps Baumgarten's `§.14`,
+  but every `§` in the UI renders tight against its number as `§14` — in cross-reference
+  links, paragraph headers, and TOC entries alike. Keep new `§` output in that form.
 - `aaPage` is the AA XVII page; when set it renders a green `AA 17:` tag in the
   paragraph header. It is currently `null` throughout.
 
