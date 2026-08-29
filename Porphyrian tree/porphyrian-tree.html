@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbor Porphyriana — Rule Configurator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --parchment-deeper: #d9cdb0;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #9e8d6f;
+    --node-bg: #ede3cc;
+    --node-border: #7a6348;
+    --genus-color: #2a4a1e;
+    --species-color: #1e2e4a;
+    --differentia-color: #6b2e00;
+    --individual-color: #3d1a4a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 16px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: var(--ink);
+    color: var(--parchment);
+    text-align: center;
+    padding: 1.4rem 2rem 1.2rem;
+    border-bottom: 3px double var(--accent-light);
+  }
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+  header .subtitle {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--parchment-deeper);
+    letter-spacing: 0.04em;
+    margin-top: 0.25rem;
+  }
+
+  .app-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar-wrap {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    transition: margin-left 0.3s ease;
+  }
+  #sidebar-wrap.collapsed { margin-left: -312px; }
+
+  aside {
+    width: 310px;
+    min-width: 280px;
+    background: var(--parchment-dark);
+    border-right: 2px solid var(--parchment-deeper);
+    padding: 2.2rem 1rem 1.2rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+  }
+
+  /* Collapse chevron pinned to the top-right of the panel */
+  #sidebar-collapse {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 22px; height: 22px;
+    border: 1px solid var(--line);
+    background: var(--parchment);
+    color: var(--faded);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  #sidebar-collapse:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Vertical reveal tabs, fixed at the left screen edge; shown when collapsed */
+  #reveal-tabs {
+    position: fixed;
+    left: 0;
+    top: 130px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.2s ease, transform 0.3s ease;
+  }
+  /* Hidden (slid left) whenever the sidebar panel is open */
+  #reveal-tabs.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-60px);
+  }
+  .reveal-tab {
+    width: 44px;
+    min-height: 130px;
+    padding: 1rem 0;
+    background: var(--accent);
+    color: var(--parchment);
+    border: none;
+    border-radius: 0 6px 6px 0;
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.14em;
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    box-shadow: 2px 2px 8px #00000044;
+    transition: background 0.15s, width 0.15s, box-shadow 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+  }
+  .reveal-tab:hover {
+    background: #7a5228;
+    width: 50px;
+    box-shadow: 3px 3px 12px #00000055;
+  }
+  #reveal-leibniz { background: #4a3a5c; }
+  #reveal-leibniz:hover { background: #5e4a75; }
+  #reveal-lz { background: #2e4a3a; }
+  #reveal-lz:hover { background: #3d5e4a; }
+
+  .sidebar-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--parchment);
+    text-transform: uppercase;
+    background: var(--accent);
+    padding: 0.6rem 0.8rem;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 1px 4px #00000022;
+    transition: background 0.15s;
+  }
+  .sidebar-title:hover { background: #7a5228; color: var(--parchment); }
+  .rules-chevron {
+    font-size: 0.75rem;
+    transition: transform 0.25s ease;
+    opacity: 0.85;
+  }
+  .sidebar-title.collapsed .rules-chevron { transform: rotate(-90deg); }
+
+  /* Collapsible rule sections (I–IV) */
+  #rule-sections, #leibniz-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+    max-height: 3000px;
+    opacity: 1;
+  }
+  #rule-sections.collapsed, #leibniz-section.collapsed {
+    max-height: 0;
+    opacity: 0;
+  }
+  /* Leibniz differentia rows */
+  .leibniz-diff-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .leibniz-diff-row .ldr-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    color: var(--faded);
+    min-width: 16px;
+    text-align: right;
+  }
+  .leibniz-diff-row input {
+    flex: 1;
+    background: var(--parchment);
+    border: 1px solid var(--node-border);
+    border-radius: 2px;
+    padding: 4px 7px;
+    font-family: 'EB Garamond', serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    outline: none;
+  }
+  .leibniz-diff-row input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px #5c3d1e22;
+  }
+  .leibniz-diff-row .ldr-remove {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--faded);
+    border-radius: 2px;
+    width: 22px; height: 22px;
+    padding: 0;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .leibniz-diff-row .ldr-remove:hover { color: #8b1a1a; border-color: #8b1a1a; }
+
+  .rule-section {
+    background: var(--node-bg);
+    border: 1px solid var(--node-border);
+    border-radius: 2px;
+    padding: 0.8rem 0.9rem;
+  }
+  .rule-section h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 0.76rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 0.1rem;
+  }
+  .rule-section .latin {
+    font-style: italic;
+    font-size: 0.76rem;
+    color: var(--faded);
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+  .option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.55rem;
+  }
+  .option-group:last-child { margin-bottom: 0; }
+  .option-label {
+    font-size: 0.68rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.06em;
+    color: var(--faded);
+    text-transform: uppercase;
+    margin-bottom: 0.15rem;
+  }
+  .radio-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    cursor: pointer;
+    padding: 0.25rem 0.35rem;
+    border-radius: 2px;
+    transition: background 0.15s;
+  }
+  .radio-row:hover { background: var(--parchment-deeper); }
+  .radio-row input[type=radio] {
+    margin-top: 3px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .radio-row .label-text {
+    font-size: 0.86rem;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+  .radio-row .label-sub {
+    font-size: 0.73rem;
+    font-style: italic;
+    color: var(--faded);
+    display: block;
+  }
+  .radio-row input:checked ~ .label-text { color: var(--accent); font-weight: 500; }
+
+  /* Top action bar holding Start / Reset */
+  #action-bar {
+    background: var(--parchment-dark);
+    border-bottom: 2px solid var(--parchment-deeper);
+    padding: 0.6rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-shrink: 0;
+  }
+
+  /* View toggle (Tree / Thing), pushed to the right of the action bar */
+  #view-toggle {
+    margin-left: auto;
+    display: flex;
+    border: 1px solid var(--node-border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .view-btn {
+    padding: 0.45rem 1rem;
+    background: transparent;
+    color: var(--faded);
+    border: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.15s, color 0.15s;
+  }
+  .view-btn + .view-btn { border-left: 1px solid var(--node-border); }
+  .view-btn:hover { color: var(--accent); }
+  .view-btn.active {
+    background: var(--accent);
+    color: var(--parchment);
+  }
+
+  /* Thing view canvas */
+  #thing-canvas {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.6rem 2rem;
+  }
+  #thing-inner {
+    max-width: 820px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .thing-view-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+  }
+  .thing-view-sub {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--faded);
+    margin-bottom: 1rem;
+  }
+  .thing-card {
+    background: #f0e0ec;
+    border: 1.5px solid #9e6070;
+    border-left: 4px solid #6b3060;
+    border-radius: 3px;
+    padding: 0.7rem 1rem 0.8rem;
+    box-shadow: 1px 2px 5px #00000018;
+  }
+  .thing-card .thing-name {
+    font-family: 'EB Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-style: italic;
+    color: #6b3060;
+    margin-bottom: 0.1rem;
+  }
+  .thing-card .thing-species {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.8rem;
+    color: var(--faded);
+    margin-bottom: 0.5rem;
+  }
+  .thing-card .thing-species b { color: var(--ink); font-weight: 600; font-style: normal; }
+  .thing-chain {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .thing-chain .tc-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: 'EB Garamond', serif;
+    font-size: 0.9rem;
+    padding: 1px 0;
+  }
+  .thing-chain .tc-level {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: var(--faded);
+    min-width: 54px;
+    letter-spacing: 0.05em;
+  }
+  .thing-chain .tc-genus {
+    color: var(--species-color);
+    min-width: 130px;
+  }
+  .thing-chain .tc-diff {
+    color: var(--differentia-color);
+    font-style: italic;
+  }
+  .thing-chain .tc-diff.neg { opacity: 0.75; }
+
+  /* Complete-determination block in a thing card */
+  .thing-cd {
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed #9e6070;
+  }
+  .thing-cd-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faded);
+    margin-bottom: 0.35rem;
+  }
+  .thing-cd-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .thing-cd-tag {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--differentia-color);
+    background: #fff6ee;
+    border: 1px solid #d8b8a0;
+    border-radius: 10px;
+    padding: 1px 9px;
+    opacity: 0.85;
+  }
+  .thing-empty {
+    font-family: 'EB Garamond', serif;
+    font-style: italic;
+    color: var(--faded);
+    text-align: center;
+    padding: 3rem 1rem;
+    line-height: 1.6;
+  }
+
+  /* General Claims list */
+  .claims-subhead {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 1.1rem 0 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid var(--parchment-deeper);
+  }
+  .claims-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .claim-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-family: 'EB Garamond', serif;
+    font-size: 0.95rem;
+    padding: 5px 12px;
+    background: var(--node-bg);
+    border: 1px solid var(--parchment-deeper);
+    border-left: 3px solid var(--genus-color);
+    border-radius: 2px;
+  }
+  .claim-row-neg { border-left-color: #8b1a1a; }
+  .claim-all, .claim-are {
+    font-family: 'Cinzel', serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faded);
+  }
+  .claim-term {
+    font-style: italic;
+    color: var(--differentia-color);
+    font-weight: 500;
+  }
+  .claim-term.neg { opacity: 0.78; }
+  .claim-count {
+    margin-left: auto;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    color: var(--faded);
+    opacity: 0.7;
+  }
+
+  /* Start Tree button */
+  #start-tree-btn {
+    padding: 0.5rem 1.4rem;
+    background: var(--accent);
+    color: var(--parchment);
+    border: none;
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px #00000033;
+  }
+  #start-tree-btn:hover {
+    background: #7a5228;
+    box-shadow: 0 3px 10px #00000044;
+  }
+  #reset-tree-btn {
+    padding: 0.5rem 1.1rem;
+    background: transparent;
+    color: var(--faded);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+    display: none;
+  }
+  #reset-tree-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── MAIN ── */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .canvas-header {
+    background: var(--parchment-dark);
+    border-bottom: 1px solid var(--parchment-deeper);
+    padding: 0.55rem 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .canvas-header .tree-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    color: var(--faded);
+  }
+  .legend {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.28rem;
+    font-size: 0.7rem;
+    color: var(--faded);
+    font-style: italic;
+  }
+  .legend-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    flex-shrink: 0;
+  }
+
+  #tree-canvas {
+    flex: 1;
+    overflow: auto;
+    padding: 1.5rem 1rem 1rem;
+    position: relative;
+    cursor: grab;
+  }
+  #tree-canvas.panning { cursor: grabbing; user-select: none; }
+  /* Inner wrapper sizes to the tree's natural width so overflow is scrollable
+     rather than compressed; min-width fills the viewport when the tree is small. */
+  #canvas-inner {
+    min-width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: max-content;
+    margin: 0 auto;
+  }
+
+  /* ── TREE BUILDER ── */
+  #builder-root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: max-content;
+    min-width: 600px;
+  }
+
+  /* Empty state */
+  #empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem 2rem;
+    color: var(--faded);
+    text-align: center;
+  }
+  #empty-state .empty-icon {
+    font-size: 2.5rem;
+    opacity: 0.35;
+    line-height: 1;
+  }
+  #empty-state p {
+    font-style: italic;
+    font-size: 0.95rem;
+    max-width: 300px;
+    line-height: 1.55;
+  }
+
+  /* Tree level: row of nodes */
+  .tree-level {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    position: relative;
+  }
+
+  /* Each branch column: connector + node + divider-form */
+  .branch-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 18px;
+    position: relative;
+  }
+
+  /* SVG connector line from parent to this node */
+  .branch-connector {
+    width: 2px;
+    height: 36px;
+    background: var(--line);
+    flex-shrink: 0;
+  }
+
+  /* Node box */
+  .tree-node {
+    background: var(--node-bg);
+    border: 1.5px solid var(--node-border);
+    border-radius: 4px;
+    padding: 6px 14px 5px;
+    text-align: center;
+    min-width: 110px;
+    max-width: 160px;
+    position: relative;
+    cursor: default;
+    box-shadow: 1px 2px 5px #00000022;
+    transition: box-shadow 0.15s;
+  }
+  .tree-node:hover { box-shadow: 1px 2px 10px #00000033; }
+  .tree-node.type-summum {
+    background: #e8f0e4;
+    border-color: var(--genus-color);
+    border-width: 2px;
+  }
+  .tree-node.type-genus  { background: #e0e8f5; border-color: var(--species-color); }
+  .tree-node.type-species { background: #f5efe0; border-color: var(--node-border); }
+  .tree-node.type-infima { background: #ede0f5; border-color: var(--individual-color); border-width: 1.5px; }
+  .tree-node.type-individual {
+    background: #f0e0ec;
+    border-color: #9e6070;
+    border-style: dashed;
+    border-width: 1.5px;
+  }
+  .tree-node.has-citation { cursor: pointer; }
+  .tree-node .node-name {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .tree-node.type-summum .node-name { color: var(--genus-color); font-weight: 600; }
+  .tree-node.type-infima .node-name { color: var(--individual-color); }
+  .tree-node.type-individual .node-name { font-style: italic; color: #6b3060; }
+  .tree-node .node-sub {
+    font-size: 0.7rem;
+    font-style: italic;
+    color: var(--faded);
+    margin-top: 1px;
+    white-space: nowrap;
+  }
+  .cite-dot {
+    position: absolute;
+    top: 4px; right: 5px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    opacity: 0.8;
+  }
+
+  /* Ordered differentia list inside the colored box */
+  .node-diff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    align-items: center;
+  }
+  .node-diff-list .ndl-item {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--differentia-color);
+    line-height: 1.25;
+    white-space: nowrap;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .node-diff-list .ndl-num {
+    font-family: 'Cinzel', serif;
+    font-style: normal;
+    font-size: 0.6rem;
+    color: var(--faded);
+    opacity: 0.75;
+  }
+  .node-diff-list .ndl-empty {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.78rem;
+    font-style: italic;
+    color: var(--faded);
+    opacity: 0.7;
+  }
+
+  /* Species name caption below the box */
+  .node-caption {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ink);
+    margin-top: 4px;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .node-caption.type-summum { color: var(--genus-color); font-weight: 600; }
+  .node-caption.type-infima { color: var(--individual-color); }
+  .node-caption.type-individual { font-style: italic; color: #6b3060; }
+  .node-caption .cap-sub {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--faded);
+    margin-top: 0;
+  }
+  /* Inline rename input (double-click a species caption) */
+  .node-rename-input {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--ink);
+    text-align: center;
+    margin-top: 4px;
+    width: 130px;
+    padding: 2px 5px;
+    background: var(--parchment);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    outline: none;
+    box-shadow: 0 0 0 2px #5c3d1e22;
+  }
+
+  /* Differentia label on the edge */
+  .diff-label {
+    font-size: 0.72rem;
+    font-style: italic;
+    color: var(--differentia-color);
+    margin-top: 2px;
+    margin-bottom: 1px;
+    text-align: center;
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Horizontal bar connecting siblings */
+  .sibling-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    margin-bottom: 0;
+  }
+  .sibling-bar {
+    height: 2px;
+    background: var(--line);
+    width: 100%;
+    margin: 0;
+  }
+
+  /* ── DIVIDE FORM ── */
+  .divide-form {
+    margin-top: 10px;
+    background: #f0e8d5;
+    border: 1px dashed var(--accent-light);
+    border-radius: 4px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 200px;
+    max-width: 240px;
+  }
+  .divide-form .df-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--faded);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .divide-form input[type=text] {
+    background: var(--parchment);
+    border: 1px solid var(--node-border);
+    border-radius: 2px;
+    padding: 4px 7px;
+    font-family: 'EB Garamond', serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    width: 100%;
+    outline: none;
+  }
+  .divide-form input[type=text]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px #5c3d1e22;
+  }
+  .divide-form input[type=text]::placeholder {
+    color: #b0a080;
+    font-style: italic;
+  }
+  .divide-form .df-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .divide-form .df-row label {
+    font-size: 0.72rem;
+    color: var(--faded);
+    white-space: nowrap;
+    min-width: 52px;
+    font-style: italic;
+  }
+  /* Compact inline divide button (symbol only) sitting in the differentia row */
+  .divide-form .df-divide-inline {
+    background: var(--accent);
+    color: var(--parchment);
+    border: none;
+    border-radius: 2px;
+    padding: 0;
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: auto;
+    margin: 0;
+    transition: background 0.15s;
+  }
+  .divide-form .df-divide-inline:hover { background: #7a5228; }
+
+  /* Bottom zone: hovering here (or focusing a control inside the extras) expands
+     the extras. The differentia line is outside this zone, so typing a
+     differentium does not trigger the expansion. */
+  .df-hover-zone { display: block; }
+  .df-extras {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.25s ease, opacity 0.2s ease, margin-top 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .df-hover-zone:hover .df-extras,
+  .df-extras:focus-within {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: 6px;
+  }
+  /* A faint hint shown on the collapsed form so the user knows to hover */
+  .df-more-hint {
+    font-size: 0.62rem;
+    font-style: italic;
+    color: var(--faded);
+    opacity: 0.6;
+    text-align: center;
+    margin-top: 3px;
+    transition: opacity 0.2s ease, max-height 0.2s ease;
+    max-height: 14px;
+    overflow: hidden;
+  }
+  .df-hover-zone:hover .df-more-hint,
+  .df-extras:focus-within ~ .df-more-hint {
+    opacity: 0;
+    max-height: 0;
+    margin-top: 0;
+  }
+  .df-species-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .df-species-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    color: var(--faded);
+    text-transform: uppercase;
+    user-select: none;
+  }
+  .df-species-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .df-species-row .sp-num {
+    font-size: 0.68rem;
+    color: var(--faded);
+    font-family: 'Cinzel', serif;
+    min-width: 14px;
+    text-align: right;
+  }
+  .divide-form button {
+    background: var(--accent);
+    color: var(--parchment);
+    border: none;
+    border-radius: 2px;
+    padding: 4px 10px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-transform: uppercase;
+    align-self: flex-end;
+    margin-top: 2px;
+  }
+  .divide-form button:hover { background: #7a5228; }
+  .divide-form .df-add-species {
+    background: transparent;
+    color: var(--faded);
+    border: 1px solid var(--line);
+    font-size: 0.6rem;
+    padding: 2px 7px;
+    align-self: flex-start;
+    margin-top: 0;
+  }
+  .divide-form .df-add-species:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Standalone add-differentia buttons in Wolff / Leibniz modes */
+  #leibniz-add-diff, #lz-add-diff {
+    background: transparent;
+    color: var(--faded);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  #leibniz-add-diff:hover, #lz-add-diff:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Mark-as-infima button */
+  .mark-infima-btn {
+    background: transparent;
+    color: var(--individual-color);
+    border: 1px solid var(--individual-color);
+    border-radius: 2px;
+    padding: 2px 7px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 6px;
+    transition: background 0.15s;
+  }
+  .mark-infima-btn:hover { background: #3d1a4a18; }
+
+  /* Undo division button */
+  .undo-division-btn {
+    background: transparent;
+    color: var(--faded);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 2px 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 6px;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    align-self: center;
+  }
+  .undo-division-btn:hover {
+    color: #8b1a1a;
+    border-color: #8b1a1a;
+    background: #8b1a1a0e;
+  }
+
+  /* ── TOOLTIP ── */
+  #node-tooltip {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    max-width: 310px;
+    background: #16100a;
+    border: 1px solid var(--accent-light);
+    border-top: 3px solid var(--accent-light);
+    padding: 0.75rem 0.9rem 0.8rem;
+    box-shadow: 3px 4px 16px #00000055;
+  }
+  #node-tooltip.visible { opacity: 1; }
+  #node-tooltip .tt-term {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    color: var(--parchment);
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #3a2e1a;
+    padding-bottom: 0.35rem;
+  }
+  #node-tooltip .tt-type {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--line);
+    margin-left: 0.5rem;
+    font-weight: 400;
+  }
+  #node-tooltip .tt-citations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+  #node-tooltip .tt-cite { display: flex; flex-direction: column; gap: 0.1rem; }
+  #node-tooltip .tt-source {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-light);
+  }
+  #node-tooltip .tt-passage {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--parchment-dark);
+    line-height: 1.45;
+  }
+  #node-tooltip .tt-gloss {
+    font-family: 'EB Garamond', serif;
+    font-size: 0.75rem;
+    color: var(--faded);
+    line-height: 1.4;
+    margin-top: 0.08rem;
+  }
+
+  /* ── IMPLICATIONS PANEL ── */
+  .implications {
+    background: var(--ink);
+    color: var(--parchment-dark);
+    padding: 0.7rem 1.4rem;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    border-top: 2px solid var(--accent);
+    min-height: 60px;
+    max-height: 110px;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .implications .imp-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--line);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .implications ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.1rem;
+  }
+  .implications li::before { content: "✦ "; color: var(--accent-light); font-size: 0.7rem; }
+  .implications li.warn { color: #d4a060; }
+  .implications li.warn::before { content: "⚠ "; color: #d4a060; font-size: 0.7rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Arbor Porphyriana</h1>
+  <div class="subtitle">A configurator for genus–species hierarchies in the Aristotelian–Scholastic tradition</div>
+</header>
+
+<div id="action-bar">
+  <button id="start-tree-btn">⊤ Start Tree</button>
+  <button id="reset-tree-btn">↺ Reset Tree</button>
+  <div id="view-toggle">
+    <button id="view-tree" class="view-btn active">Tree View</button>
+    <button id="view-thing" class="view-btn">Thing View</button>
+  </div>
+</div>
+
+<div class="app-body">
+
+  <div id="sidebar-wrap" class="collapsed">
+  <aside>
+    <button id="sidebar-collapse" title="Hide panel">‹</button>
+
+    <div class="sidebar-title" id="rules-toggle" title="Show or hide the rules">
+      <span>Systematic Rules</span>
+      <span class="rules-chevron">▾</span>
+    </div>
+
+    <div id="rule-sections">
+    <!-- I. Division -->
+    <div class="rule-section">
+      <h3>I. Division</h3>
+      <span class="latin">De modo divisionis</span>
+      <div class="option-group">
+        <div class="option-label">Arity</div>
+        <label class="radio-row">
+          <input type="radio" name="arity" value="binary" checked>
+          <span class="label-text">Binary <span class="label-sub">Exactly two species per genus (Porphyry, Boethius)</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="arity" value="multi">
+          <span class="label-text">Multi-member <span class="label-sub">Three or more species permitted (Aristotle, <em>Topics</em>)</span></span>
+        </label>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Exhaustiveness</div>
+        <label class="radio-row">
+          <input type="radio" name="exhaustive" value="yes" checked>
+          <span class="label-text">Exhaustive <span class="label-sub">Division must cover all genus members</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="exhaustive" value="no">
+          <span class="label-text">Non-exhaustive <span class="label-sub">Residual cases permitted</span></span>
+        </label>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Exclusivity</div>
+        <label class="radio-row">
+          <input type="radio" name="exclusive" value="yes" checked>
+          <span class="label-text">Mutually exclusive <span class="label-sub">No individual under two coordinate species</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="exclusive" value="no">
+          <span class="label-text">Overlapping permitted <span class="label-sub">Cross-classification possible (Kant's <em>Reflexionen</em>)</span></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- II. Differentiae -->
+    <div class="rule-section">
+      <h3>II. Differentiae</h3>
+      <span class="latin">De differentiis specificis</span>
+      <div class="option-group">
+        <div class="option-label">Nature</div>
+        <label class="radio-row">
+          <input type="radio" name="diff_nature" value="essential" checked>
+          <span class="label-text">Essential only <span class="label-sub">Differentia expresses the essence</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="diff_nature" value="accidental">
+          <span class="label-text">Accidental permitted <span class="label-sub">Division by contingent properties allowed</span></span>
+        </label>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Scope</div>
+        <label class="radio-row">
+          <input type="radio" name="diff_scope" value="proper" checked>
+          <span class="label-text">Proper (single genus) <span class="label-sub">Each differentia belongs to one genus</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="diff_scope" value="common">
+          <span class="label-text">Common (cross-genus) <span class="label-sub">Same differentia may recur (Baumgarten)</span></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- III. Bounds -->
+    <div class="rule-section">
+      <h3>III. Bounds of the Tree</h3>
+      <span class="latin">Summum genus et infima species</span>
+      <div class="option-group">
+        <div class="option-label">Summum genus</div>
+        <label class="radio-row">
+          <input type="radio" name="summum" value="being">
+          <span class="label-text">Ens (Being) <span class="label-sub">Most universal; Wolff, Baumgarten</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="summum" value="substance">
+          <span class="label-text">Substantia <span class="label-sub">Porphyry's own tree; Aristotle's <em>Categories</em></span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="summum" value="object" checked>
+          <span class="label-text">Obiectum (Object) <span class="label-sub">Kantian option; <em>Gegenstand überhaupt</em></span></span>
+        </label>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Infima species</div>
+        <label class="radio-row">
+          <input type="radio" name="infima" value="fixed" checked>
+          <span class="label-text">Fixed terminus <span class="label-sub">Division terminates; no species further divisible</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="infima" value="open">
+          <span class="label-text">Open downward <span class="label-sub">Division can always continue (Leibniz)</span></span>
+        </label>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Individuals</div>
+        <label class="radio-row">
+          <input type="radio" name="individuals" value="below" checked>
+          <span class="label-text">Below infima species <span class="label-sub">Individuals are the tree's terminal layer</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="individuals" value="none">
+          <span class="label-text">Not represented <span class="label-sub">Tree ends at infima species</span></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- IV. Definition -->
+    <div class="rule-section">
+      <h3>IV. Definition</h3>
+      <span class="latin">De definitione et conversione</span>
+      <div class="option-group">
+        <div class="option-label">Convertibility</div>
+        <label class="radio-row">
+          <input type="radio" name="convert" value="strict" checked>
+          <span class="label-text">Strictly reciprocal <span class="label-sub">Definition converts with definiendum</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="convert" value="loose">
+          <span class="label-text">Non-reciprocal <span class="label-sub">Genus predicated of species, not vice versa</span></span>
+        </label>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Definition by</div>
+        <label class="radio-row">
+          <input type="radio" name="def_form" value="genus_diff" checked>
+          <span class="label-text">Genus + differentia <span class="label-sub">Standard Aristotelian–Scholastic form</span></span>
+        </label>
+        <label class="radio-row">
+          <input type="radio" name="def_form" value="marks">
+          <span class="label-text">Marks (Merkmale) <span class="label-sub">Wolff / Kant: complex of partial concepts</span></span>
+        </label>
+      </div>
+    </div>
+
+    </div><!-- /#rule-sections -->
+
+    <div class="sidebar-title" id="leibniz-toggle" title="Show or hide Wolff Mode">
+      <span>Wolff Mode</span>
+      <span class="rules-chevron">▾</span>
+    </div>
+
+    <div id="leibniz-section" class="collapsed">
+      <div class="rule-section">
+        <span class="latin">Ars combinatoria</span>
+        <p style="font-size:0.8rem;line-height:1.5;color:var(--ink);margin:0.2rem 0 0.7rem;">
+          Enter a list of differentiae. On <em>Populate</em>, a fresh binary tree is
+          built from the summum genus, splitting on each differentia in turn, so the
+          bottom level manifests every combinatorial infima species (2ⁿ in all).
+        </p>
+        <div class="option-label" style="margin-bottom:0.3rem;">Enter differentiae</div>
+        <div id="leibniz-diff-list"></div>
+        <button id="leibniz-add-diff" style="margin-top:4px;">+ differentia</button>
+        <button id="leibniz-populate" style="width:100%;margin-top:0.8rem;padding:0.55rem 1rem;background:var(--accent);color:var(--parchment);border:none;border-radius:2px;font-family:'Cinzel',serif;font-size:0.76rem;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;">Populate ⊥</button>
+        <div id="leibniz-note" style="font-size:0.72rem;font-style:italic;color:var(--faded);margin-top:0.5rem;min-height:1em;"></div>
+      </div>
+    </div>
+
+    <div class="sidebar-title" id="lz-toggle" title="Show or hide Leibniz Mode">
+      <span>Leibniz Mode</span>
+      <span class="rules-chevron">▾</span>
+    </div>
+
+    <div id="lz-section" class="collapsed">
+      <div class="rule-section">
+        <span class="latin">Characteristica singularis</span>
+        <p style="font-size:0.8rem;line-height:1.5;color:var(--ink);margin:0.2rem 0 0.7rem;">
+          Like Wolff Mode, but each differentia is used <em>only once</em>. Each node
+          consumes the next differentia to split into present / non-present; the
+          differentia then belongs to that branch alone and never recurs elsewhere.
+          With n differentiae the tree has n splits and n+1 infima species.
+        </p>
+        <div class="option-label" style="margin-bottom:0.3rem;">Enter differentiae (in order of use)</div>
+        <div id="lz-diff-list"></div>
+        <button id="lz-add-diff" style="margin-top:4px;">+ differentia</button>
+        <label style="display:flex;align-items:flex-start;gap:0.45rem;margin-top:0.8rem;cursor:pointer;font-family:'EB Garamond',serif;">
+          <input type="checkbox" id="lz-complete" checked style="accent-color:#4a3a5c;margin-top:3px;flex-shrink:0;">
+          <span style="font-size:0.82rem;line-height:1.35;color:var(--ink);">Complete determination mode
+            <span style="display:block;font-size:0.72rem;font-style:italic;color:var(--faded);">Each individual takes non-D for every differentia D not already on its branch (durchgängige Bestimmung).</span>
+          </span>
+        </label>
+        <button id="lz-populate" style="width:100%;margin-top:0.8rem;padding:0.55rem 1rem;background:#4a3a5c;color:var(--parchment);border:none;border-radius:2px;font-family:'Cinzel',serif;font-size:0.76rem;letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;">Populate ⊥</button>
+        <div id="lz-note" style="font-size:0.72rem;font-style:italic;color:var(--faded);margin-top:0.5rem;min-height:1em;"></div>
+      </div>
+    </div>
+
+  </aside>
+  </div><!-- /#sidebar-wrap -->
+
+  <div id="reveal-tabs">
+    <button class="reveal-tab" id="reveal-rules" data-panel="rules" title="Show Systematic Rules">Rules ›</button>
+    <button class="reveal-tab" id="reveal-leibniz" data-panel="leibniz" title="Show Wolff Mode">Wolff ›</button>
+    <button class="reveal-tab" id="reveal-lz" data-panel="lz" title="Show Leibniz Mode">Leibniz ›</button>
+  </div>
+
+
+  <main>
+    <div class="canvas-header">
+      <span class="tree-title">Arbor — Builder</span>
+      <div style="display:flex;align-items:center;gap:1.2rem;">
+        <label style="display:flex;align-items:center;gap:0.4rem;font-family:'EB Garamond',serif;font-size:0.78rem;color:var(--faded);cursor:pointer;">
+          <input type="checkbox" id="abbrev-toggle" checked style="accent-color:var(--accent);cursor:pointer;">
+          Abbreviate species names (first letters)
+        </label>
+        <span style="font-family:'EB Garamond',serif;font-style:italic;font-size:0.75rem;color:var(--faded);">● nodes with citations — hover to read</span>
+        <div class="legend">
+          <span class="legend-item" style="color:var(--genus-color)"><span class="legend-dot"></span>Summum</span>
+          <span class="legend-item" style="color:var(--species-color)"><span class="legend-dot"></span>Genus/Species</span>
+          <span class="legend-item" style="color:var(--differentia-color)"><span class="legend-dot"></span>Differentia</span>
+          <span class="legend-item" style="color:var(--individual-color)"><span class="legend-dot"></span>Individuum</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="tree-canvas">
+      <div id="canvas-inner">
+        <div id="builder-root">
+          <div id="empty-state">
+            <div class="empty-icon">⊤</div>
+            <p>Configure your systematic rules, then click <em>Start Tree</em> to place the summum genus and begin dividing.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="thing-canvas" style="display:none;">
+      <div id="thing-inner"></div>
+    </div>
+
+    <div class="implications">
+      <div class="imp-label">Systematic Implications</div>
+      <ul id="imp-list"></ul>
+    </div>
+  </main>
+
+</div>
+
+<!-- TOOLTIP -->
+<div id="node-tooltip">
+  <div class="tt-term"><span id="tt-label"></span><span class="tt-type" id="tt-type"></span></div>
+  <div class="tt-citations" id="tt-citations"></div>
+</div>
+
+<script>
+// ─── CITATION DATABASE ────────────────────────────────────────────────────────
+const CITATIONS = {
+  'Ens': {
+    typeLabel: 'Summum Genus',
+    sources: [
+      { source: 'Wolff, Philosophia Prima (1730) §1',
+        passage: 'Ontologia est scientia entis in genere, seu quatenus ens est.',
+        gloss: 'Wolff makes Ens the apex of ontology proper — the genus over all beings.' },
+      { source: 'Baumgarten, Metaphysica (1739) §1',
+        passage: 'Ens est aliquid … omne possibile.',
+        gloss: 'Baumgarten follows Wolff: ens is the widest possible genus, comprising everything internally non-contradictory.' },
+      { source: 'Kant, Critique of Pure Reason A290/B346',
+        passage: 'The concept of being is not a real predicate — it adds nothing to the concept of a thing.',
+        gloss: 'Kant denies Ens a place as a genuine genus: existence is not a Merkmal, so no Porphyrian tree can begin there.' },
+    ]
+  },
+  'Substantia': {
+    typeLabel: 'Summum Genus',
+    sources: [
+      { source: 'Aristotle, Categories 2a11–14',
+        passage: 'Substance, in the truest and primary sense, is that which is neither predicable of a subject nor present in a subject.',
+        gloss: 'Substance is the natural apex of the Porphyrian tree as Porphyry himself constructs it.' },
+      { source: 'Porphyry, Isagoge (trans. Barnes) p. 7',
+        passage: 'Substance is a genus; under it is body … under animal are rational and irrational … under rational animal, man.',
+        gloss: 'The locus classicus for the Substantia-rooted tree.' },
+      { source: 'Aquinas, In De Anima I, lect. 1',
+        passage: 'Quia substantia dividitur in corporalem et incorporalem …',
+        gloss: 'Aquinas uses this tree to frame the question of soul; the first bifurcation is corporeal vs. incorporeal.' },
+    ]
+  },
+  'Obiectum': {
+    typeLabel: 'Summum Genus (Kantian)',
+    sources: [
+      { source: 'Kant, Critique of Pure Reason A290/B346',
+        passage: 'The highest concept … is that of an object in general (Gegenstand überhaupt).',
+        gloss: 'For Kant the most universal logical concept is Gegenstand — object in general — which divides first into possible and impossible, then into phenomena and noumena.' },
+      { source: 'Kant, Logic (Jäsche, 1800) §2',
+        passage: 'The supreme genus is the concept of an object in general … every other concept is a species or subspecies under it.',
+        gloss: 'In the Jäsche Logic Kant explicitly gives Obiectum (Gegenstand) the role that Ens has in Wolff: the apex of every logical hierarchy.' },
+      { source: 'Kant, Critique of Pure Reason A235/B294',
+        passage: 'Appearances are the only objects that can be given to us immediately … the concept of noumenon is a limiting concept.',
+        gloss: 'The primary division beneath Obiectum is phenomena / noumena — a Kantian alternative to the Scholastic corporeal/incorporeal split.' },
+    ]
+  },
+  'Homo': {
+    typeLabel: 'Infima Species',
+    sources: [
+      { source: 'Porphyry, Isagoge (trans. Barnes) p. 7',
+        passage: 'Man is an infima species … Socrates and Plato and particular men are individuals.',
+        gloss: 'Homo is the canonical example of an infima species — the lowest species not further divisible.' },
+      { source: 'Aristotle, Topics 103b15',
+        passage: 'Man is a two-footed terrestrial animal.',
+        gloss: 'The classic definition: Homo = Animal + rationale. The differentia picks out the essential form.' },
+      { source: 'Kant, Logic (Jäsche, 1800) §11 Anm.',
+        passage: 'We must always assume that there are further lower species … the concept of the infima species is a logical fiction.',
+        gloss: 'Kant revises the doctrine: for empirical concepts no infima species can be established with certainty.' },
+      { source: 'Wolff, Philosophia Rationalis §70',
+        passage: 'The infima species has no sub-species; it is defined by the full collection of differentiae from genus to terminus.',
+        gloss: 'Wolff retains the fixed infima species with cumulative inheritance of all differentiae.' },
+    ]
+  },
+  'Socrates': {
+    typeLabel: 'Individuum',
+    sources: [
+      { source: 'Porphyry, Isagoge (trans. Barnes) p. 8',
+        passage: 'The individual consists of characteristics whose collection will never be the same in any other.',
+        gloss: 'An individual is below the infima species, defined by its unique bundle of incommunicable properties.' },
+      { source: 'Aquinas, De Ente et Essentia, ch. 2',
+        passage: 'Socrates is nothing other than rationality and animality … plus this particular flesh and these particular bones.',
+        gloss: 'For Aquinas, individuation is by matter: Socrates = species-essence + designated matter.' },
+      { source: 'Leibniz, Discourse on Metaphysics §8',
+        passage: 'The concept of an individual substance … contains once for all everything that will ever happen to it.',
+        gloss: 'Leibniz\'s complete individual concept is infinitely rich: there is no lowest species because the individual contains infinitely many differentiating marks.' },
+      { source: 'Kant, Logic (Jäsche, 1800) §1',
+        passage: 'The individual concept is the representation of a single determinate object.',
+        gloss: 'Kant places individuals outside logical hierarchy: logic deals only with concepts, not with intuitions.' },
+    ]
+  },
+};
+
+// ─── TOOLTIP ENGINE ───────────────────────────────────────────────────────────
+const tooltip = document.getElementById('node-tooltip');
+const ttLabel = document.getElementById('tt-label');
+const ttType  = document.getElementById('tt-type');
+const ttCitations = document.getElementById('tt-citations');
+
+function showTooltip(nodeLabel, typeLabel, event) {
+  const data = CITATIONS[nodeLabel];
+  if (!data) return;
+  ttLabel.textContent = nodeLabel;
+  ttType.textContent = typeLabel || data.typeLabel || '';
+  ttCitations.innerHTML = '';
+  data.sources.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'tt-cite';
+    div.innerHTML = `<span class="tt-source">${s.source}</span>`
+                  + `<span class="tt-passage">${s.passage}</span>`
+                  + `<span class="tt-gloss">${s.gloss}</span>`;
+    ttCitations.appendChild(div);
+  });
+  positionTooltip(event);
+  tooltip.classList.add('visible');
+}
+function positionTooltip(event) {
+  const pad = 14, tw = 310;
+  let x = event.clientX + pad, y = event.clientY + pad;
+  if (x + tw > window.innerWidth - 10) x = event.clientX - tw - pad;
+  const th = tooltip.offsetHeight || 200;
+  if (y + th > window.innerHeight - 10) y = event.clientY - th - pad;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top  = y + 'px';
+}
+function hideTooltip() { tooltip.classList.remove('visible'); }
+
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+function getConfig() {
+  const r = n => document.querySelector(`input[name="${n}"]:checked`)?.value;
+  return {
+    arity:        r('arity'),
+    exhaustive:   r('exhaustive'),
+    exclusive:    r('exclusive'),
+    diff_nature:  r('diff_nature'),
+    diff_scope:   r('diff_scope'),
+    summum:       r('summum'),
+    infima:       r('infima'),
+    individuals:  r('individuals'),
+    convert:      r('convert'),
+    def_form:     r('def_form'),
+  };
+}
+
+// ─── TREE STATE ───────────────────────────────────────────────────────────────
+// Each node: { id, label, type, parentId, differentia, children: [] }
+let treeNodes = [];
+let nextId = 0;
+let treeStarted = false;
+let treeHistory = []; // stack of deep-copied treeNodes snapshots
+
+function snapshotHistory() {
+  treeHistory.push(JSON.parse(JSON.stringify(treeNodes)));
+  if (treeHistory.length > 50) treeHistory.shift();
+}
+
+function undoDivision(nodeId) {
+  // Remove all descendants of nodeId, restore node to undivided leaf
+  snapshotHistory(); // snapshot before (for global undo)
+  const node = getNode(nodeId);
+  if (!node) return;
+  // Collect all descendant ids
+  function collectDescendants(id) {
+    const n = getNode(id);
+    if (!n) return [];
+    const result = [];
+    n.children.forEach(cid => {
+      result.push(cid, ...collectDescendants(cid));
+    });
+    return result;
+  }
+  const toRemove = collectDescendants(nodeId);
+  treeNodes = treeNodes.filter(n => !toRemove.includes(n.id));
+  node.children = [];
+  node.isInfima = false;
+  // Restore parent type if it was promoted
+  if (node.parentId === null) node.type = 'summum';
+  else {
+    const parent = getNode(node.parentId);
+    node.type = (parent && parent.type === 'summum') ? 'genus' : 'species';
+  }
+  renderBuilder();
+}
+
+function summumLabel(cfg) {
+  if (cfg.summum === 'being')     return 'Ens';
+  if (cfg.summum === 'substance') return 'Substantia';
+  if (cfg.summum === 'object')    return 'Obiectum';
+  return 'Ens';
+}
+function summumSub(cfg) {
+  if (cfg.summum === 'being')     return 'Being in general';
+  if (cfg.summum === 'substance') return 'First category';
+  if (cfg.summum === 'object')    return 'Gegenstand überhaupt';
+  return '';
+}
+
+function addNode(label, type, parentId, differentia) {
+  const node = { id: nextId++, label, type, parentId, differentia: differentia||'', children: [], isInfima: false };
+  treeNodes.push(node);
+  if (parentId !== null) {
+    const parent = treeNodes.find(n => n.id === parentId);
+    if (parent) parent.children.push(node.id);
+  }
+  return node;
+}
+
+function getNode(id) { return treeNodes.find(n => n.id === id); }
+
+// Inline-rename a node by double-clicking its caption. Swaps in a text input
+// pre-filled with the full label; Enter or blur commits, Escape cancels.
+function editNodeName(node, captionEl, restore) {
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = node.label;
+  input.className = 'node-rename-input';
+  captionEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  let done = false;
+  const commit = save => {
+    if (done) return;
+    done = true;
+    if (save) {
+      const v = input.value.trim();
+      if (v) {
+        snapshotHistory();
+        node.label = v;
+        renderBuilder();       // full re-render so abbreviations/tooltips refresh
+        return;
+      }
+    }
+    // Cancelled or empty: put the caption back untouched
+    input.replaceWith(captionEl);
+    restore();
+  };
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); commit(true); }
+    else if (e.key === 'Escape') { e.preventDefault(); commit(false); }
+  });
+  input.addEventListener('blur', () => commit(true));
+}
+
+// Ordered list of differentiae from root down to (and including) this node.
+// All inheritance is cumulative: the full chain from root to node is shown.
+function differentiaChain(node, cfg) {
+  const chain = [];
+  let cur = node;
+  while (cur && cur.parentId !== null) {
+    if (cur.differentia) chain.unshift(cur.differentia);
+    cur = getNode(cur.parentId);
+  }
+  return chain;
+}
+
+// The species-name caption below each box is, by default, presented as the
+// sequence of first letters of its differentia chain (e.g. "p s r"). A negation
+// such as "non-rationale" abbreviates to "non-r" so the negation stays visible.
+// The differentiae shown inside the box are always complete; only the caption is
+// abbreviated, and the full species name is preserved (shown on hover / when toggled).
+let diffDisplayMode = 'abbrev'; // 'abbrev' | 'full'
+
+function abbreviateDifferentia(d) {
+  if (!d) return '';
+  const negMatch = d.match(/^non-\s*(.+)$/i);
+  if (negMatch) {
+    const stem = negMatch[1].trim();
+    return stem ? `non-${stem.charAt(0)}` : 'non-';
+  }
+  return d.charAt(0);
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderBuilder() {
+  // Keep Thing View in sync when the tree changes underneath it
+  const thingActive = document.getElementById('thing-canvas')?.style.display !== 'none'
+                   && document.getElementById('thing-canvas')?.style.display !== undefined
+                   && document.getElementById('view-thing')?.classList.contains('active');
+  if (thingActive) { try { renderThingView(); } catch (e) {} }
+
+  const root = document.getElementById('builder-root');
+  root.innerHTML = '';
+
+  if (!treeStarted || treeNodes.length === 0) {
+    root.innerHTML = `<div id="empty-state">
+      <div class="empty-icon">⊤</div>
+      <p>Configure your systematic rules, then click <em>Start Tree</em> to place the summum genus and begin dividing.</p>
+    </div>`;
+    return;
+  }
+
+  const cfg = getConfig();
+  // BFS level-by-level render
+  const rootNode = treeNodes[0];
+  renderLevel([rootNode.id], null, root, cfg, 0);
+}
+
+function renderLevel(nodeIds, parentConnectorInfo, container, cfg, depth) {
+  if (!nodeIds.length) return;
+
+  const nodes = nodeIds.map(id => getNode(id)).filter(Boolean);
+
+  // Row wrapper
+  const levelDiv = document.createElement('div');
+  levelDiv.className = 'tree-level';
+
+  // If multiple siblings, draw a horizontal bar above them with stems
+  const needsBar = nodes.length > 1;
+
+  if (needsBar) {
+    // Wrap: bar + stems rendered via flex
+    const barWrap = document.createElement('div');
+    barWrap.className = 'sibling-bar-wrap';
+    barWrap.style.cssText = 'width:100%;display:flex;flex-direction:column;align-items:center;';
+
+    const bar = document.createElement('div');
+    bar.className = 'sibling-bar';
+    barWrap.appendChild(bar);
+    container.appendChild(barWrap);
+  } else if (depth > 0) {
+    // Single connector line
+    const conn = document.createElement('div');
+    conn.className = 'branch-connector';
+    container.appendChild(conn);
+  }
+
+  container.appendChild(levelDiv);
+
+  nodes.forEach(node => {
+    const col = document.createElement('div');
+    col.className = 'branch-col';
+    levelDiv.appendChild(col);
+
+    // Connector stub if sibling bar present
+    if (needsBar) {
+      const stub = document.createElement('div');
+      stub.className = 'branch-connector';
+      col.appendChild(stub);
+    }
+
+    // (Differentiae are now shown inside the node box as an ordered list.)
+
+    // Node box — contains the ordered differentia list (species name goes below)
+    const nodeDiv = document.createElement('div');
+    nodeDiv.className = `tree-node type-${node.type}`;
+    if (CITATIONS[node.label]) {
+      nodeDiv.classList.add('has-citation');
+      const dot = document.createElement('span');
+      dot.className = 'cite-dot';
+      nodeDiv.appendChild(dot);
+      nodeDiv.addEventListener('mouseenter', e => showTooltip(node.label, node.type, e));
+      nodeDiv.addEventListener('mousemove', positionTooltip);
+      nodeDiv.addEventListener('mouseleave', hideTooltip);
+    }
+
+    if (node.type === 'summum') {
+      // Root has no differentia; show its label inside the box
+      const nameSpan = document.createElement('div');
+      nameSpan.className = 'node-name';
+      nameSpan.textContent = node.label;
+      nodeDiv.appendChild(nameSpan);
+      if (node.sublabel) {
+        const subSpan = document.createElement('div');
+        subSpan.className = 'node-sub';
+        subSpan.textContent = node.sublabel;
+        nodeDiv.appendChild(subSpan);
+      }
+    } else if (node.type === 'individual') {
+      // Individuals aren't defined by differentiae; keep the name in the box
+      const nameSpan = document.createElement('div');
+      nameSpan.className = 'node-name';
+      nameSpan.textContent = node.label;
+      nodeDiv.appendChild(nameSpan);
+      const subSpan = document.createElement('div');
+      subSpan.className = 'node-sub';
+      subSpan.textContent = node.sublabel || 'individuum';
+      nodeDiv.appendChild(subSpan);
+    } else {
+      // Genus / species / infima: box holds the ordered differentia list
+      const chain = differentiaChain(node, cfg);
+      const list = document.createElement('div');
+      list.className = 'node-diff-list';
+      if (chain.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'ndl-empty';
+        empty.textContent = '(no differentia)';
+        list.appendChild(empty);
+      } else {
+        chain.forEach((d, i) => {
+          const item = document.createElement('div');
+          item.className = 'ndl-item';
+          item.title = d;
+          const num = document.createElement('span');
+          num.className = 'ndl-num';
+          num.textContent = (i + 1) + '.';
+          const txt = document.createElement('span');
+          txt.textContent = d;
+          item.appendChild(num);
+          item.appendChild(txt);
+          list.appendChild(item);
+        });
+      }
+      nodeDiv.appendChild(list);
+    }
+
+    col.appendChild(nodeDiv);
+
+    // Species name caption beneath the box (not for the summum root, whose name is in-box)
+    if (node.type !== 'summum' && node.type !== 'individual') {
+      const caption = document.createElement('div');
+      caption.className = `node-caption type-${node.type}`;
+      const chain = differentiaChain(node, cfg);
+      const abbrev = chain.map(abbreviateDifferentia).join(' ');
+      const setCaptionText = () => {
+        if (diffDisplayMode === 'abbrev' && abbrev) {
+          caption.textContent = abbrev;
+          caption.title = node.label + '  (double-click to rename)';
+        } else {
+          caption.textContent = node.label;
+          caption.title = 'Double-click to rename';
+        }
+      };
+      setCaptionText();
+      caption.style.cursor = 'text';
+      caption.addEventListener('dblclick', () => editNodeName(node, caption, setCaptionText));
+      col.appendChild(caption);
+    }
+
+    // Controls beneath this node
+    const hasChildren = node.children.length > 0;
+    const isMarkedInfima = node.isInfima;
+    const childNodes = node.children.map(getNode).filter(Boolean);
+    const onlyIndividualChildren = hasChildren && childNodes.every(c => c.type === 'individual');
+
+    if (node.type === 'individual') {
+      // Individuals are terminal: no divide form, no further controls.
+    } else if (isMarkedInfima) {
+      // Infima species: terminal (never divisible). It may carry exactly one
+      // individual determined by it; render that individual beneath, but no
+      // divide form and no undo-division control.
+      const inf = document.createElement('div');
+      inf.style.cssText = 'font-family:Cinzel,serif;font-size:0.58rem;letter-spacing:0.1em;color:var(--individual-color);margin-top:6px;text-transform:uppercase;opacity:0.7;';
+      inf.textContent = 'Infima Species';
+      col.appendChild(inf);
+      if (childNodes.length) {
+        renderLevel(node.children, null, col, cfg, depth + 1); // its individual
+      } else if (cfg.individuals === 'below') {
+        renderIndividualForm(node, col, cfg);
+      }
+    } else if (!hasChildren) {
+      // Show divide form
+      const form = buildDivideForm(node, cfg);
+      col.appendChild(form);
+    } else {
+      // Divided genus/species: undo control + recurse into children
+      const undoBtn = document.createElement('button');
+      undoBtn.className = 'undo-division-btn';
+      undoBtn.title = 'Remove this division and all its descendants';
+      undoBtn.textContent = '↩ Undo Division';
+      undoBtn.addEventListener('click', () => undoDivision(node.id));
+      col.appendChild(undoBtn);
+      renderLevel(node.children, null, col, cfg, depth + 1);
+    }
+  });
+}
+
+function buildDivideForm(node, cfg) {
+  const isBinary = cfg.arity === 'binary';
+  const form = document.createElement('div');
+  form.className = 'divide-form';
+
+  // Differentia input, with the divide button on the same line (symbol only)
+  const diffRow = document.createElement('div');
+  diffRow.className = 'df-row';
+  const diffLabel = document.createElement('label');
+  diffLabel.textContent = 'Differentia:';
+  const diffInput = document.createElement('input');
+  diffInput.type = 'text';
+  diffInput.placeholder = isBinary ? 'e.g. rationale' : 'e.g. sensibile';
+  const divBtn = document.createElement('button');
+  divBtn.className = 'df-divide-inline';
+  divBtn.textContent = '⊥';
+  divBtn.title = 'Divide';
+  diffRow.appendChild(diffLabel);
+  diffRow.appendChild(diffInput);
+  diffRow.appendChild(divBtn);
+  form.appendChild(diffRow);
+  // Enter key in the differentia field triggers division
+  diffInput.addEventListener('keydown', e => { if (e.key === 'Enter') divBtn.click(); });
+
+  // Everything below the first line is collapsed until the form is hovered
+  const extras = document.createElement('div');
+  extras.className = 'df-extras';
+
+  // Binary: live hint showing the auto-generated negation
+  let negHint = null;
+  if (isBinary) {
+    negHint = document.createElement('div');
+    negHint.style.cssText = 'font-size:0.72rem;font-style:italic;color:var(--faded);padding-left:2px;';
+    negHint.textContent = 'Second branch: non-…';
+    extras.appendChild(negHint);
+    diffInput.addEventListener('input', () => {
+      const v = diffInput.value.trim();
+      negHint.textContent = v ? `Second branch: non-${v}` : 'Second branch: non-…';
+    });
+  }
+
+  // Species inputs
+  const speciesBlock = document.createElement('div');
+  speciesBlock.className = 'df-species-block';
+
+  const speciesTitle = document.createElement('div');
+  speciesTitle.className = 'df-species-title';
+  speciesTitle.innerHTML = 'Resulting Species';
+  speciesBlock.appendChild(speciesTitle);
+
+  const speciesWrap = document.createElement('div');
+  speciesWrap.className = 'df-species-inputs';
+  speciesBlock.appendChild(speciesWrap);
+
+  const initialCount = isBinary ? 2 : 3;
+  for (let i = 0; i < initialCount; i++) {
+    speciesWrap.appendChild(makeSpeciesRow(i + 1));
+  }
+  extras.appendChild(speciesBlock);
+
+  // Binary: show which differentia each species row falls under, updating live,
+  // and default each species name to "<differentia> <genus>" / "non-<differentia> <genus>"
+  if (isBinary) {
+    const rows = speciesWrap.querySelectorAll('.df-species-row');
+    const inputs = speciesWrap.querySelectorAll('.sp-input');
+    const tags = [];
+    rows.forEach((row, idx) => {
+      const tag = document.createElement('span');
+      tag.style.cssText = 'font-size:0.68rem;font-style:italic;color:var(--differentia-color);white-space:nowrap;min-width:56px;';
+      tag.textContent = '(—)';
+      row.appendChild(tag);
+      tags.push(tag);
+    });
+    const syncTags = () => {
+      const v = diffInput.value.trim();
+      tags[0].textContent = v ? `(${v})` : '(—)';
+      tags[1].textContent = v ? `(non-${v})` : '(—)';
+      inputs[0].placeholder = v ? `${v} ${node.label}` : 'species name';
+      inputs[1].placeholder = v ? `non-${v} ${node.label}` : 'species name';
+    };
+    diffInput.addEventListener('input', syncTags);
+    syncTags();
+  }
+
+  // Add species button (multi only)
+  if (!isBinary) {
+    const addBtn = document.createElement('button');
+    addBtn.className = 'df-add-species';
+    addBtn.textContent = '+ species';
+    addBtn.addEventListener('click', () => {
+      const count = speciesWrap.querySelectorAll('.df-species-row').length;
+      speciesWrap.appendChild(makeSpeciesRow(count + 1));
+    });
+    speciesWrap.appendChild(addBtn);
+  }
+
+  // Mark as infima button
+  const infBtn = document.createElement('button');
+  infBtn.className = 'mark-infima-btn';
+  infBtn.textContent = 'Mark as Infima Species ✦';
+  infBtn.addEventListener('click', () => {
+    snapshotHistory();
+    if (cfg.infima === 'open') {
+      node.isInfima = false;
+      const note = document.createElement('div');
+      note.style.cssText = 'font-size:0.72rem;font-style:italic;color:var(--faded);margin-top:4px;max-width:200px;';
+      note.textContent = '(Open downward — no fixed terminus; further division always possible.)';
+      form.replaceWith(note);
+    } else {
+      node.isInfima = true;
+      node.type = 'infima';
+      renderBuilder();
+    }
+  });
+  extras.appendChild(infBtn);
+
+  // Bottom hover zone: contains the collapsed extras plus a hint. Hovering the
+  // zone reveals the extras. The differentia line above is outside the zone, so
+  // typing a differentium never expands it.
+  const hoverZone = document.createElement('div');
+  hoverZone.className = 'df-hover-zone';
+
+  hoverZone.appendChild(extras);
+
+  const moreHint = document.createElement('div');
+  moreHint.className = 'df-more-hint';
+  moreHint.textContent = 'hover for species names & infima';
+  hoverZone.appendChild(moreHint);
+
+  form.appendChild(hoverZone);
+
+  // Divide action (button lives inline in the differentia row, created above)
+  divBtn.addEventListener('click', () => {
+    const diff = diffInput.value.trim();
+    const speciesInputs = Array.from(speciesWrap.querySelectorAll('.sp-input'));
+
+    // Compute the effective name for each row: typed value, else the default
+    const speciesNames = speciesInputs.map((inp, idx) => {
+      const typed = inp.value.trim();
+      if (typed) return typed;
+      if (!diff) return '';
+      if (isBinary) {
+        return idx === 0 ? `${diff} ${node.label}` : `non-${diff} ${node.label}`;
+      }
+      // Multi-member: default blank rows to "<differentia> <genus>"
+      return `${diff} ${node.label}`;
+    }).filter(Boolean);
+
+    if (speciesNames.length < 2) {
+      // Need a differentia (or explicit names) to divide
+      diffInput.focus();
+      diffInput.style.borderColor = '#8b1a1a';
+      return;
+    }
+
+    snapshotHistory();
+
+    // Determine child type
+    const childType = node.type === 'summum' ? 'genus' : 'species';
+
+    speciesNames.forEach((name, idx) => {
+      let edgeDiff = diff;
+      if (isBinary) {
+        // First branch gets the differentia; second gets its automatic negation
+        edgeDiff = idx === 0 ? diff : (diff ? `non-${diff}` : '');
+      } else if (diff) {
+        edgeDiff = diff; // same diff label for all in multi
+      }
+      const child = addNode(name, childType, node.id, edgeDiff);
+    });
+
+    node.type = node.type; // parent keeps type
+    renderBuilder();
+  });
+
+  return form;
+}
+
+function makeSpeciesRow(num) {
+  const row = document.createElement('div');
+  row.className = 'df-species-row';
+  const numLabel = document.createElement('span');
+  numLabel.className = 'sp-num';
+  numLabel.textContent = num + '.';
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.className = 'sp-input';
+  inp.placeholder = 'species name';
+  row.appendChild(numLabel);
+  row.appendChild(inp);
+  return row;
+}
+
+function renderIndividualForm(node, container, cfg) {
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'margin-top:10px;display:flex;flex-direction:column;align-items:center;gap:0;';
+
+  // Show existing individuals
+  const existing = treeNodes.filter(n => n.parentId === node.id);
+  if (existing.length > 0) {
+    const stub = document.createElement('div');
+    stub.className = 'branch-connector';
+    wrap.appendChild(stub);
+    existing.forEach(ind => {
+      const indDiv = document.createElement('div');
+      indDiv.className = 'tree-node type-individual';
+      indDiv.style.marginBottom = '6px';
+      if (CITATIONS[ind.label]) {
+        indDiv.classList.add('has-citation');
+        const dot = document.createElement('span');
+        dot.className = 'cite-dot';
+        indDiv.appendChild(dot);
+        indDiv.addEventListener('mouseenter', e => showTooltip(ind.label, 'Individuum', e));
+        indDiv.addEventListener('mousemove', positionTooltip);
+        indDiv.addEventListener('mouseleave', hideTooltip);
+      }
+      const nm = document.createElement('div');
+      nm.className = 'node-name';
+      nm.textContent = ind.label;
+      indDiv.appendChild(nm);
+      const sm = document.createElement('div');
+      sm.className = 'node-sub';
+      sm.textContent = 'individuum';
+      indDiv.appendChild(sm);
+      wrap.appendChild(indDiv);
+    });
+  }
+
+  // Add individual form — only if none exists yet (max one individual, whose
+  // identity is determined by the infima species).
+  if (existing.length === 0) {
+    const form = document.createElement('div');
+    form.className = 'divide-form';
+    form.style.minWidth = '160px';
+    const t = document.createElement('div');
+    t.className = 'df-title';
+    t.textContent = 'Add Individual';
+    form.appendChild(t);
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.placeholder = 'e.g. Socrates';
+    form.appendChild(inp);
+    const btn = document.createElement('button');
+    btn.textContent = 'Add ↓';
+    btn.addEventListener('click', () => {
+      const name = inp.value.trim();
+      if (!name) { inp.focus(); return; }
+      snapshotHistory();
+      addNode(name, 'individual', node.id, '');
+      renderBuilder();
+    });
+    form.appendChild(btn);
+    wrap.appendChild(form);
+  }
+  container.appendChild(wrap);
+}
+
+// ─── START / RESET ────────────────────────────────────────────────────────────
+document.getElementById('start-tree-btn').addEventListener('click', () => {
+  const cfg = getConfig();
+  treeNodes = [];
+  nextId = 0;
+  treeStarted = true;
+
+  const label = summumLabel(cfg);
+  const sub   = summumSub(cfg);
+  const node  = addNode(label, 'summum', null, '');
+  node.sublabel = sub;
+
+  renderBuilder();
+  renderImplications(cfg);
+
+  document.getElementById('reset-tree-btn').style.display = 'block';
+  // Free up screen space: slide the rules panel off to the left once building begins
+  setSidebar(false);
+});
+
+document.getElementById('reset-tree-btn').addEventListener('click', () => {
+  treeNodes = [];
+  nextId = 0;
+  treeStarted = false;
+  treeHistory = [];
+  renderBuilder();
+  document.getElementById('reset-tree-btn').style.display = 'none';
+  // Bring the rules panel back so you can reconfigure
+  setSidebar(true);
+});
+
+// ── PANEL COLLAPSE CONTROLS ──
+const ruleSections = document.getElementById('rule-sections');
+const rulesToggle  = document.getElementById('rules-toggle');
+const sidebarWrap  = document.getElementById('sidebar-wrap');
+const revealTabs   = document.getElementById('reveal-tabs');
+
+// Single source of truth for sidebar open/closed: syncs the panel and the
+// edge tabs (tabs visible only when the panel is closed).
+function setSidebar(open) {
+  sidebarWrap.classList.toggle('collapsed', !open);
+  revealTabs.classList.toggle('hidden', open);
+}
+
+function setRuleSections(open) {
+  ruleSections.classList.toggle('collapsed', !open);
+  rulesToggle.classList.toggle('collapsed', !open);
+}
+
+rulesToggle.addEventListener('click', () => {
+  setRuleSections(ruleSections.classList.contains('collapsed'));
+});
+
+// ── LEIBNIZ MODE ──
+const leibnizSection = document.getElementById('leibniz-section');
+const leibnizToggle  = document.getElementById('leibniz-toggle');
+leibnizToggle.classList.add('collapsed'); // starts collapsed (chevron sideways)
+
+leibnizToggle.addEventListener('click', () => {
+  const open = leibnizSection.classList.contains('collapsed');
+  leibnizSection.classList.toggle('collapsed', !open);
+  leibnizToggle.classList.toggle('collapsed', !open);
+});
+
+// Differentia input rows
+const leibnizList = document.getElementById('leibniz-diff-list');
+function addLeibnizRow(value) {
+  const row = document.createElement('div');
+  row.className = 'leibniz-diff-row';
+  const num = document.createElement('span');
+  num.className = 'ldr-num';
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.placeholder = 'e.g. rationale';
+  if (value) inp.value = value;
+  const rm = document.createElement('button');
+  rm.className = 'ldr-remove';
+  rm.textContent = '×';
+  rm.title = 'Remove';
+  rm.addEventListener('click', () => { row.remove(); renumberLeibniz(); });
+  row.appendChild(num);
+  row.appendChild(inp);
+  row.appendChild(rm);
+  leibnizList.appendChild(row);
+  renumberLeibniz();
+  return inp;
+}
+function renumberLeibniz() {
+  leibnizList.querySelectorAll('.leibniz-diff-row').forEach((r, i) => {
+    r.querySelector('.ldr-num').textContent = (i + 1) + '.';
+  });
+}
+// Seed with three empty rows
+addLeibnizRow(); addLeibnizRow(); addLeibnizRow();
+
+document.getElementById('leibniz-add-diff').addEventListener('click', () => {
+  addLeibnizRow().focus();
+});
+
+document.getElementById('leibniz-populate').addEventListener('click', () => {
+  const note = document.getElementById('leibniz-note');
+  const diffs = Array.from(leibnizList.querySelectorAll('input'))
+    .map(i => i.value.trim()).filter(Boolean);
+
+  if (diffs.length === 0) {
+    note.textContent = 'Enter at least one differentia first.';
+    return;
+  }
+  if (diffs.length > 6) {
+    note.textContent = `${diffs.length} differentiae would give 2^${diffs.length} = ${2**diffs.length} infima species — that is a lot; try 6 or fewer.`;
+    return;
+  }
+
+  snapshotHistory();
+  populateLeibniz(diffs);
+  note.textContent = `Built ${2**diffs.length} infima species from ${diffs.length} differentiae.`;
+});
+
+// Build a fresh binary tree from the summum genus. Level k splits on diffs[k]
+// (present / non-present); the 2ⁿ leaves manifest every combination.
+function populateLeibniz(diffs) {
+  const cfg = getConfig();
+  treeNodes = [];
+  nextId = 0;
+  treeStarted = true;
+
+  const root = addNode(summumLabel(cfg), 'summum', null, '');
+  root.sublabel = summumSub(cfg);
+
+  // Frontier of nodes to split at the current level
+  let frontier = [{ node: root, combo: [] }];
+
+  diffs.forEach((diff, level) => {
+    const nextFrontier = [];
+    const isLastLevel = level === diffs.length - 1;
+    frontier.forEach(({ node, combo }) => {
+      // Two children: with the differentia, and with its negation
+      [true, false].forEach(present => {
+        const edgeDiff = present ? diff : `non-${diff}`;
+        const childCombo = combo.concat([{ diff, present }]);
+        // Label: abbreviated combination, e.g. "A B ¬C"
+        const label = childCombo.map(c =>
+          (c.present ? '' : '¬') + c.diff.charAt(0).toUpperCase()
+        ).join(' ');
+        // In Leibniz mode the bottom level is always a fixed, terminal infima
+        // species — the combinatorial structure is complete, so no leaf is left
+        // open for further division regardless of the Infima Species rule.
+        const type = isLastLevel
+          ? 'infima'
+          : (node.type === 'summum' ? 'genus' : 'species');
+        const child = addNode(label, type, node.id, edgeDiff);
+        if (isLastLevel) {
+          child.isInfima = true;
+          // Each infima species determines exactly one individual, and vice
+          // versa: attach a single individual whose identity is fixed by it.
+          const indiv = addNode(label, 'individual', child.id, '');
+          indiv.sublabel = 'individuum';
+        }
+        nextFrontier.push({ node: child, combo: childCombo });
+      });
+    });
+    frontier = nextFrontier;
+  });
+
+  // Bottom level is complete: every infima species is terminal and paired with
+  // its unique individual.
+
+  document.getElementById('reset-tree-btn').style.display = 'block';
+  renderBuilder();
+  renderImplications(cfg);
+  setSidebar(false); // free up canvas space
+}
+
+// ── LEIBNIZ MODE (each differentia used once) ──
+const lzSection = document.getElementById('lz-section');
+const lzToggle  = document.getElementById('lz-toggle');
+lzToggle.classList.add('collapsed');
+
+lzToggle.addEventListener('click', () => {
+  const open = lzSection.classList.contains('collapsed');
+  lzSection.classList.toggle('collapsed', !open);
+  lzToggle.classList.toggle('collapsed', !open);
+});
+
+const lzList = document.getElementById('lz-diff-list');
+function addLzRow(value) {
+  const row = document.createElement('div');
+  row.className = 'leibniz-diff-row';
+  const num = document.createElement('span');
+  num.className = 'ldr-num';
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.placeholder = 'e.g. rationale';
+  if (value) inp.value = value;
+  const rm = document.createElement('button');
+  rm.className = 'ldr-remove';
+  rm.textContent = '×';
+  rm.title = 'Remove';
+  rm.addEventListener('click', () => { row.remove(); renumberLz(); });
+  row.appendChild(num);
+  row.appendChild(inp);
+  row.appendChild(rm);
+  lzList.appendChild(row);
+  renumberLz();
+  return inp;
+}
+function renumberLz() {
+  lzList.querySelectorAll('.leibniz-diff-row').forEach((r, i) => {
+    r.querySelector('.ldr-num').textContent = (i + 1) + '.';
+  });
+}
+addLzRow(); addLzRow(); addLzRow();
+
+document.getElementById('lz-add-diff').addEventListener('click', () => {
+  addLzRow().focus();
+});
+
+document.getElementById('lz-populate').addEventListener('click', () => {
+  const note = document.getElementById('lz-note');
+  const diffs = Array.from(lzList.querySelectorAll('input'))
+    .map(i => i.value.trim()).filter(Boolean);
+  if (diffs.length === 0) {
+    note.textContent = 'Enter at least one differentia first.';
+    return;
+  }
+  snapshotHistory();
+  populateLeibnizOnce(diffs);
+  note.textContent = `Built ${diffs.length + 1} infima species from ${diffs.length} differentiae (each used once).`;
+});
+
+// Build a tree where each differentia is consumed exactly once. Starting from
+// the summum genus, the frontier of undivided nodes is processed in order; each
+// takes the next unused differentia and splits into present / non-present. A
+// differentia therefore governs only its own branch and never recurs elsewhere.
+// With n differentiae there are n splits and n+1 terminal infima species.
+function populateLeibnizOnce(diffs) {
+  const cfg = getConfig();
+  treeNodes = [];
+  nextId = 0;
+  treeStarted = true;
+
+  const root = addNode(summumLabel(cfg), 'summum', null, '');
+  root.sublabel = summumSub(cfg);
+
+  // Queue of nodes awaiting a split, each carrying its accumulated combination.
+  const queue = [{ node: root, combo: [] }];
+
+  diffs.forEach(diff => {
+    const { node, combo } = queue.shift(); // next node to consume this differentia
+    [true, false].forEach(present => {
+      const edgeDiff = present ? diff : `non-${diff}`;
+      const childCombo = combo.concat([{ diff, present }]);
+      const label = childCombo.map(c =>
+        (c.present ? '' : '¬') + c.diff.charAt(0).toUpperCase()
+      ).join(' ');
+      const type = node.type === 'summum' ? 'genus' : 'species';
+      const child = addNode(label, type, node.id, edgeDiff);
+      queue.push({ node: child, combo: childCombo });
+    });
+  });
+
+  const complete = document.getElementById('lz-complete').checked;
+
+  // Whatever remains unsplit in the queue are the terminal infima species; give
+  // each a single individual whose identity is fixed by it.
+  queue.forEach(({ node, combo }) => {
+    node.type = 'infima';
+    node.isInfima = true;
+    const indiv = addNode(node.label, 'individual', node.id, '');
+    indiv.sublabel = 'individuum';
+    if (complete) {
+      // Complete determination: for every differentia not on this branch (in
+      // either polarity), the individual takes the negation non-D.
+      const onBranch = new Set(combo.map(c => c.diff));
+      indiv.determinations = diffs
+        .filter(d => !onBranch.has(d))
+        .map(d => `non-${d}`);
+    } else {
+      indiv.determinations = [];
+    }
+  });
+
+  document.getElementById('reset-tree-btn').style.display = 'block';
+  renderBuilder();
+  renderImplications(cfg);
+  setSidebar(false);
+}
+
+// Three reveal tabs: each opens the sidebar with its own panel expanded and the
+// others collapsed, so Rules, Wolff Mode, and Leibniz Mode behave as independent
+// top-level tabs.
+document.getElementById('sidebar-collapse').addEventListener('click', () => {
+  setSidebar(false);
+});
+
+function openPanel(which) {
+  setSidebar(true);
+  setRuleSections(which === 'rules');
+  leibnizSection.classList.toggle('collapsed', which !== 'leibniz');
+  leibnizToggle.classList.toggle('collapsed', which !== 'leibniz');
+  lzSection.classList.toggle('collapsed', which !== 'lz');
+  lzToggle.classList.toggle('collapsed', which !== 'lz');
+}
+document.getElementById('reveal-rules').addEventListener('click', () => openPanel('rules'));
+document.getElementById('reveal-leibniz').addEventListener('click', () => openPanel('leibniz'));
+document.getElementById('reveal-lz').addEventListener('click', () => openPanel('lz'));
+
+// Global Ctrl/Cmd+Z: restore last snapshot
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+    if (treeHistory.length === 0) return;
+    e.preventDefault();
+    const prev = treeHistory.pop();
+    treeNodes = prev;
+    // Rehydrate nextId
+    nextId = treeNodes.length ? Math.max(...treeNodes.map(n => n.id)) + 1 : 0;
+    renderBuilder();
+  }
+});
+
+// ─── IMPLICATIONS ─────────────────────────────────────────────────────────────
+function generateImplications(cfg) {
+  const items = [], warn = [];
+  if (cfg.arity === 'binary') items.push('Binary division: exactly 2ⁿ terminal nodes per level.');
+  if (cfg.arity === 'multi')  items.push('Multi-member division: the tree fans rather than bifurcates.');
+  if (cfg.exhaustive === 'no') warn.push('Non-exhaustive: residual classes arise; completeness not guaranteed.');
+  if (cfg.exclusive === 'no') warn.push('Overlapping species: violates classical mutual exclusivity.');
+  if (cfg.diff_nature === 'accidental') warn.push('Accidental differentiae: prohibited for scientific division (<em>An. Post.</em> 96b25).');
+  if (cfg.diff_scope === 'common') items.push('Common differentiae (Baumgarten): same contrast-pair may recur across genera.');
+  if (cfg.summum === 'object') items.push('Obiectum as apex: Kantian Gegenstand überhaupt replaces Scholastic Ens; primary division is phenomena/noumena.');
+  if (cfg.infima === 'open') warn.push('Open downward (Leibniz): no fixed infima species; finite definition is in principle impossible.');
+  if (cfg.individuals === 'none') items.push('Individuals excluded: hierarchy terminates at infima species.');
+  if (cfg.convert === 'strict') items.push('Strict reciprocal definition: definitional symmetry required at every node.');
+  if (cfg.def_form === 'marks') items.push('Definition by Merkmale (Kant/Wolff): species constituted by a complex of partial concepts.');
+  if (cfg.exclusive === 'no' && cfg.convert === 'strict') warn.push('Tension: overlapping + strict convertibility → contradiction if two species share an individual.');
+  if (cfg.infima === 'open' && cfg.def_form === 'genus_diff') warn.push('Tension: open downward + genus/differentia → infinite regress of differentiae.');
+  if (cfg.diff_nature === 'accidental' && cfg.def_form === 'genus_diff') warn.push('Tension: accidental differentiae + genus/differentia → definition does not express essence.');
+  return { items, warn };
+}
+
+function renderImplications(cfg) {
+  const { items, warn } = generateImplications(cfg);
+  const ul = document.getElementById('imp-list');
+  ul.innerHTML = '';
+  items.forEach(i => { const li = document.createElement('li'); li.innerHTML = i; ul.appendChild(li); });
+  warn.forEach(w => { const li = document.createElement('li'); li.className = 'warn'; li.innerHTML = w; ul.appendChild(li); });
+}
+
+// Implications update on rule change
+document.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', () => {
+  renderImplications(getConfig());
+  // If tree is started, a summum change requires restart notice
+}));
+
+renderImplications(getConfig());
+
+document.getElementById('abbrev-toggle').addEventListener('change', e => {
+  diffDisplayMode = e.target.checked ? 'abbrev' : 'full';
+  if (treeStarted) renderBuilder();
+});
+
+// ─── CLICK-DRAG PANNING ───────────────────────────────────────────────────────
+// Drag on empty canvas area to pan. Dragging that begins on an interactive
+// element (input, button, label, a node, or the divide form) is left alone so
+// normal interaction still works.
+(function setupPanning() {
+  const canvas = document.getElementById('tree-canvas');
+  let panning = false, startX = 0, startY = 0, startLeft = 0, startTop = 0, moved = false;
+
+  const isInteractive = el => el && el.closest(
+    'input, button, label, textarea, select, .tree-node, .divide-form, .df-hover-zone, a'
+  );
+
+  canvas.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;          // left button only
+    if (isInteractive(e.target)) return; // let controls handle their own clicks
+    panning = true; moved = false;
+    startX = e.clientX; startY = e.clientY;
+    startLeft = canvas.scrollLeft; startTop = canvas.scrollTop;
+    canvas.classList.add('panning');
+  });
+
+  window.addEventListener('mousemove', e => {
+    if (!panning) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
+    canvas.scrollLeft = startLeft - dx;
+    canvas.scrollTop  = startTop - dy;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!panning) return;
+    panning = false;
+    canvas.classList.remove('panning');
+  });
+
+  // Shift+wheel scrolls horizontally for trackpads/mice without an x-axis
+  canvas.addEventListener('wheel', e => {
+    if (e.shiftKey) {
+      canvas.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, { passive: false });
+})();
+
+// ─── THING VIEW ───────────────────────────────────────────────────────────────
+// Lists every individual and the differentiae it instantiates, from the summum
+// genus (higher) down to its infima species (lower).
+function renderThingView() {
+  const inner = document.getElementById('thing-inner');
+  inner.innerHTML = '';
+
+  const cfg = getConfig();
+  const individuals = treeNodes.filter(n => n.type === 'individual');
+
+  const title = document.createElement('div');
+  title.className = 'thing-view-title';
+  title.textContent = 'Individua';
+  inner.appendChild(title);
+
+  const sub = document.createElement('div');
+  sub.className = 'thing-view-sub';
+  sub.textContent = 'Each individual and the differentiae it instantiates, from summum genus (higher) to infima species (lower).';
+  inner.appendChild(sub);
+
+  if (!treeStarted || individuals.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'thing-empty';
+    empty.innerHTML = treeStarted
+      ? 'No individuals yet. Mark an infima species and add an individual beneath it — or use Wolff Mode to populate every combinatorial individual at once.'
+      : 'No tree yet. Start a tree (or populate one in Wolff Mode) to see its individuals here.';
+    inner.appendChild(empty);
+    return;
+  }
+
+  individuals.forEach(indiv => {
+    const species = getNode(indiv.parentId);
+    if (!species) return;
+
+    // Build the path root → … → species (higher to lower). Each step records
+    // the genus and the differentia that leads into the next node down.
+    const pathDown = [];
+    let cur = species;
+    while (cur) { pathDown.unshift(cur); cur = cur.parentId !== null ? getNode(cur.parentId) : null; }
+
+    const card = document.createElement('div');
+    card.className = 'thing-card';
+
+    const name = document.createElement('div');
+    name.className = 'thing-name';
+    name.textContent = indiv.label;
+    card.appendChild(name);
+
+    const spLine = document.createElement('div');
+    spLine.className = 'thing-species';
+    spLine.innerHTML = `infima species: <b>${species.label}</b>`;
+    card.appendChild(spLine);
+
+    const chain = document.createElement('div');
+    chain.className = 'thing-chain';
+
+    // Walk each node in the path; the differentia stored on a node is the one
+    // that distinguishes it from its parent, so it belongs to the step INTO it.
+    pathDown.forEach((n, i) => {
+      const row = document.createElement('div');
+      row.className = 'tc-row';
+
+      const level = document.createElement('span');
+      level.className = 'tc-level';
+      level.textContent = n.type === 'summum' ? 'summ. gen.'
+                        : (i === pathDown.length - 1 ? 'inf. sp.' : `level ${i}`);
+      row.appendChild(level);
+
+      const genus = document.createElement('span');
+      genus.className = 'tc-genus';
+      genus.textContent = n.label;
+      row.appendChild(genus);
+
+      const diff = document.createElement('span');
+      const isNeg = n.differentia && n.differentia.toLowerCase().startsWith('non-');
+      diff.className = 'tc-diff' + (isNeg ? ' neg' : '');
+      diff.textContent = n.differentia ? `— ${n.differentia}` : '';
+      row.appendChild(diff);
+
+      chain.appendChild(row);
+    });
+
+    card.appendChild(chain);
+
+    // Complete determination: additional non-D marks the individual carries for
+    // differentiae that never appear on its branch.
+    if (indiv.determinations && indiv.determinations.length) {
+      const cd = document.createElement('div');
+      cd.className = 'thing-cd';
+      const lbl = document.createElement('div');
+      lbl.className = 'thing-cd-label';
+      lbl.textContent = 'By complete determination';
+      cd.appendChild(lbl);
+      const tags = document.createElement('div');
+      tags.className = 'thing-cd-tags';
+      indiv.determinations.forEach(d => {
+        const t = document.createElement('span');
+        t.className = 'thing-cd-tag';
+        t.textContent = d;
+        tags.appendChild(t);
+      });
+      cd.appendChild(tags);
+      card.appendChild(cd);
+    }
+
+    inner.appendChild(card);
+  });
+
+  renderGeneralClaims(inner, individuals);
+}
+
+// Derive all true universal affirmatives "All X are Y" where X and Y are
+// differentiae. Extension of a differentium = the set of individuals whose
+// chain contains it. "All X are Y" holds iff ext(X) is non-empty and every
+// member of ext(X) is also in ext(Y). Trivial identity (X=Y) is excluded.
+function differentiaOf(individual) {
+  // Collect the differentiae along an individual's chain (species up to root)
+  const diffs = [];
+  let cur = getNode(individual.parentId);
+  while (cur) {
+    if (cur.differentia) diffs.push(cur.differentia);
+    cur = cur.parentId !== null ? getNode(cur.parentId) : null;
+  }
+  // Plus any marks the individual holds by complete determination (non-D for
+  // differentiae absent from its branch).
+  if (individual.determinations) diffs.push(...individual.determinations);
+  return diffs;
+}
+
+function renderGeneralClaims(inner, individuals) {
+  // Build extension sets keyed by differentia label
+  const ext = new Map(); // diff -> Set of individual ids
+  const order = [];       // preserve first-seen order for stable output
+  individuals.forEach(ind => {
+    differentiaOf(ind).forEach(d => {
+      if (!ext.has(d)) { ext.set(d, new Set()); order.push(d); }
+      ext.get(d).add(ind.id);
+    });
+  });
+
+  // Universal affirmatives: "All X are Y" iff ext(X) non-empty and ⊆ ext(Y).
+  const affirmatives = [];
+  order.forEach(X => {
+    order.forEach(Y => {
+      if (X === Y) return;
+      const exX = ext.get(X), exY = ext.get(Y);
+      if (exX.size === 0) return;
+      let subset = true;
+      for (const id of exX) { if (!exY.has(id)) { subset = false; break; } }
+      if (subset) affirmatives.push({ X, Y, count: exX.size });
+    });
+  });
+
+  // Universal negatives: "No X is Y" iff ext(X) and ext(Y) are disjoint (both
+  // non-empty). "No X is Y" and "No Y is X" are equivalent, so list each
+  // unordered pair once.
+  const negatives = [];
+  for (let i = 0; i < order.length; i++) {
+    for (let j = i + 1; j < order.length; j++) {
+      const X = order[i], Y = order[j];
+      const exX = ext.get(X), exY = ext.get(Y);
+      if (exX.size === 0 || exY.size === 0) continue;
+      let disjoint = true;
+      for (const id of exX) { if (exY.has(id)) { disjoint = false; break; } }
+      if (disjoint) negatives.push({ X, Y });
+    }
+  }
+
+  const heading = document.createElement('div');
+  heading.className = 'thing-view-title';
+  heading.style.marginTop = '1.8rem';
+  heading.textContent = 'General Claims';
+  inner.appendChild(heading);
+
+  // ── Sub-section: universal affirmatives ──
+  const affHead = document.createElement('div');
+  affHead.className = 'claims-subhead';
+  affHead.textContent = 'Universal affirmative — All X are Y';
+  inner.appendChild(affHead);
+
+  if (affirmatives.length === 0) {
+    inner.appendChild(claimsEmpty('No non-trivial universal affirmative claims hold among the current differentiae.'));
+  } else {
+    const list = document.createElement('div');
+    list.className = 'claims-list';
+    affirmatives.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'claim-row';
+      const negX = c.X.toLowerCase().startsWith('non-');
+      const negY = c.Y.toLowerCase().startsWith('non-');
+      row.innerHTML =
+        `<span class="claim-all">All</span> ` +
+        `<span class="claim-term${negX ? ' neg' : ''}">${c.X}</span> ` +
+        `<span class="claim-are">are</span> ` +
+        `<span class="claim-term${negY ? ' neg' : ''}">${c.Y}</span>` +
+        `<span class="claim-count">${c.count} individual${c.count === 1 ? '' : 's'}</span>`;
+      list.appendChild(row);
+    });
+    inner.appendChild(list);
+  }
+
+  // ── Sub-section: universal negatives ──
+  const negHead = document.createElement('div');
+  negHead.className = 'claims-subhead';
+  negHead.textContent = 'Universal negative — No X is Y';
+  inner.appendChild(negHead);
+
+  if (negatives.length === 0) {
+    inner.appendChild(claimsEmpty('No non-trivial universal negative claims hold among the current differentiae.'));
+  } else {
+    const list = document.createElement('div');
+    list.className = 'claims-list';
+    negatives.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'claim-row claim-row-neg';
+      const negX = c.X.toLowerCase().startsWith('non-');
+      const negY = c.Y.toLowerCase().startsWith('non-');
+      row.innerHTML =
+        `<span class="claim-all">No</span> ` +
+        `<span class="claim-term${negX ? ' neg' : ''}">${c.X}</span> ` +
+        `<span class="claim-are">is</span> ` +
+        `<span class="claim-term${negY ? ' neg' : ''}">${c.Y}</span>`;
+      list.appendChild(row);
+    });
+    inner.appendChild(list);
+  }
+}
+
+function claimsEmpty(text) {
+  const empty = document.createElement('div');
+  empty.className = 'thing-empty';
+  empty.style.padding = '1.2rem 1rem';
+  empty.textContent = text;
+  return empty;
+}
+
+// ─── VIEW TOGGLE ──────────────────────────────────────────────────────────────
+const treeCanvas  = document.getElementById('tree-canvas');
+const thingCanvas = document.getElementById('thing-canvas');
+const viewTreeBtn  = document.getElementById('view-tree');
+const viewThingBtn = document.getElementById('view-thing');
+
+function setView(which) {
+  const tree = which === 'tree';
+  treeCanvas.style.display  = tree ? '' : 'none';
+  thingCanvas.style.display = tree ? 'none' : '';
+  viewTreeBtn.classList.toggle('active', tree);
+  viewThingBtn.classList.toggle('active', !tree);
+  if (!tree) renderThingView();
+}
+viewTreeBtn.addEventListener('click', () => setView('tree'));
+viewThingBtn.addEventListener('click', () => setView('thing'));
+</script>
+</body>
+</html>

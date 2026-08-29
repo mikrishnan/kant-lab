@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="la">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baumgarten · Metaphysica (AA XVII)</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&family=Libre+Baskerville:ital@0;1&display=swap');
+
+:root {
+  --ink:        #1a1208;
+  --parchment:  #f4ede0;
+  --parch-dark: #e8dcc8;
+  --parch-deep: #d8ccb4;
+  --accent:     #5c3d1e;
+  --accent-lt:  #8b5e3c;
+  --faded:      #7a6a52;
+  --line:       #b8a88a;
+  /* German gloss chip colours — warm amber, clearly distinct from Latin */
+  --german-bg:  #fff8e8;
+  --german-bd:  #c8a055;
+  --german-ink: #7a4a00;
+  /* AA page ref */
+  --aa-ink:     #3a5a3a;
+  --aa-bg:      #eef5ee;
+  --aa-bd:      #8aaa8a;
+  /* section header */
+  --sec-ink:    #2e1a00;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 17px;
+  line-height: 1.65;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+#toc-panel {
+  width: 280px;
+  min-width: 240px;
+  flex-shrink: 0;
+  background: var(--parch-dark);
+  border-right: 2px solid var(--parch-deep);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.25s ease;
+}
+#toc-panel.hidden { width: 0; min-width: 0; border-right: none; }
+
+#toc-head {
+  background: var(--accent);
+  color: var(--parchment);
+  padding: 0.9rem 1rem 0.8rem;
+  flex-shrink: 0;
+}
+#toc-head h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+#toc-head p {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.78rem;
+  color: #d8c8a8;
+  margin-top: 0.15rem;
+}
+
+#toc-search {
+  padding: 0.6rem 0.8rem;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--parch-deep);
+}
+#toc-search input {
+  width: 100%;
+  background: var(--parchment);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 4px 8px;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.85rem;
+  color: var(--ink);
+  outline: none;
+}
+#toc-search input:focus { border-color: var(--accent); }
+
+#toc-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+/* TOC section group */
+.toc-group { }
+.toc-group-header {
+  font-family: 'Cinzel', serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faded);
+  padding: 0.5rem 1rem 0.2rem;
+  background: var(--parch-deep);
+  margin-top: 2px;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.toc-group-header:hover { color: var(--accent); }
+.toc-group-body { }
+.toc-group-body.collapsed { display: none; }
+
+.toc-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 3px 1rem 3px 1.2rem;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.84rem;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+}
+.toc-item:hover { background: var(--parch-deep); }
+.toc-item.active {
+  background: var(--parchment);
+  border-left-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
+}
+.toc-item .ti-num {
+  font-family: 'Cinzel', serif;
+  font-size: 0.65rem;
+  color: var(--faded);
+  min-width: 32px;
+  flex-shrink: 0;
+}
+.toc-item .ti-label {
+  font-style: italic;
+  line-height: 1.3;
+  color: var(--ink);
+  flex: 1;
+}
+.toc-item.active .ti-label { color: var(--accent); }
+
+/* ── MAIN ── */
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#top-bar {
+  background: var(--parch-dark);
+  border-bottom: 2px solid var(--parch-deep);
+  padding: 0.55rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+#toc-toggle {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--faded);
+  border-radius: 2px;
+  padding: 3px 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+}
+#toc-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+.top-title {
+  font-family: 'Cinzel', serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+.top-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--faded);
+  margin-left: auto;
+}
+
+/* legend for gloss chip */
+.chip-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.75rem;
+  color: var(--faded);
+  margin-left: auto;
+}
+.chip-sample {
+  background: var(--german-bg);
+  border: 1px solid var(--german-bd);
+  color: var(--german-ink);
+  font-size: 0.72rem;
+  font-style: italic;
+  padding: 0px 6px;
+  border-radius: 2px;
+}
+
+#text-canvas {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 2.8rem 3rem;
+}
+
+#text-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* AA page reference tag */
+.aa-page {
+  display: inline-flex;
+  align-items: center;
+  font-family: 'Cinzel', serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  color: var(--aa-ink);
+  background: var(--aa-bg);
+  border: 1px solid var(--aa-bd);
+  border-radius: 2px;
+  padding: 0 5px;
+  margin: 0 3px;
+  vertical-align: middle;
+  cursor: default;
+}
+.aa-page::before { content: 'AA 17:'; margin-right: 2px; opacity: 0.6; }
+
+/* Kant Erläuterungen phase reference block */
+.kant-refs {
+  margin: 0.4rem 0 0.8rem;
+  padding: 0.5rem 0.8rem;
+  background: #f0eaf5;
+  border-left: 3px solid #8060a0;
+  border-radius: 0 2px 2px 0;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.8rem;
+  color: #4a3060;
+}
+.kant-refs .kr-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8060a0;
+  margin-bottom: 0.25rem;
+}
+.kant-refs .kr-phases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.kant-phase {
+  background: #f8f2ff;
+  border: 1px solid #c0a0d8;
+  border-radius: 2px;
+  padding: 1px 7px;
+  font-size: 0.78rem;
+  color: #4a3060;
+}
+
+/* Section headings */
+.section-part {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--parch-deep);
+  padding-bottom: 0.3rem;
+  margin: 2.5rem 0 1rem;
+}
+.section-head {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin: 1.8rem 0 0.6rem;
+  padding-left: 0.4rem;
+  border-left: 3px solid var(--accent-lt);
+}
+.section-sub {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--faded);
+  text-transform: uppercase;
+  margin: 1.2rem 0 0.4rem;
+}
+
+/* Individual paragraph block */
+.para-block {
+  margin: 0.6rem 0;
+  padding: 0.5rem 0.6rem 0.5rem 0.8rem;
+  border-radius: 2px;
+  border-left: 3px solid transparent;
+  transition: background 0.15s, border-color 0.15s;
+  cursor: pointer;
+  position: relative;
+}
+.para-block:hover {
+  background: #faf4e8;
+  border-left-color: var(--line);
+}
+.para-block.focused {
+  background: #fffaf2;
+  border-left-color: var(--accent);
+  box-shadow: 0 1px 8px #00000010;
+}
+
+/* Paragraph number */
+.para-num {
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 0.15rem;
+  user-select: none;
+}
+
+/* Latin text body */
+.para-body {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+/* ── GERMAN GLOSS CHIP ── 
+   Inline, rendered right where the *) marker is in the Latin text.
+   Amber tint, Garamond italic, thin left rule in the accent tone.
+   Designed to read like a rubrication in the margin but sitting inline. */
+.gloss-chip {
+  display: inline;
+  background: var(--german-bg);
+  border: 1px solid var(--german-bd);
+  border-left: 3px solid var(--german-ink);
+  border-radius: 0 3px 3px 0;
+  color: var(--german-ink);
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.85em;
+  padding: 1px 7px 1px 5px;
+  margin: 0 2px;
+  vertical-align: baseline;
+  cursor: default;
+  white-space: nowrap;
+}
+.gloss-chip .chip-marker {
+  font-style: normal;
+  font-family: 'Cinzel', serif;
+  font-size: 0.65em;
+  letter-spacing: 0;
+  color: var(--german-bd);
+  margin-right: 3px;
+  vertical-align: super;
+}
+
+/* Cross-reference links §.N */
+.para-ref {
+  color: var(--accent-lt);
+  font-style: normal;
+  cursor: pointer;
+  border-bottom: 1px dashed var(--accent-lt);
+  font-size: 0.92em;
+}
+.para-ref:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Empty / no-content message */
+.empty-msg {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  color: var(--faded);
+  text-align: center;
+  padding: 4rem 2rem;
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--parch-deep); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--line); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="toc-panel">
+  <div id="toc-head">
+    <h2>Metaphysica</h2>
+    <p>A. G. Baumgarten · Halle 1757</p>
+  </div>
+  <div id="toc-search">
+    <input type="text" id="toc-filter" placeholder="Filter §§ …" autocomplete="off" spellcheck="false">
+  </div>
+  <div id="toc-scroll"></div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="top-bar">
+    <button id="toc-toggle" title="Toggle table of contents">☰ TOC</button>
+    <span class="top-title">Baumgarten · Metaphysica</span>
+    <span class="top-sub">AA 17 · Editio IV, 1757</span>
+    <span class="chip-legend">
+      <span class="chip-sample">†</span> german equivalent
+    </span>
+  </div>
+  <div id="text-canvas">
+    <div id="text-inner">
+      <div class="empty-msg">Loading text…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA: Baumgarten Metaphysica paragraphs ──────────────────────────────────
+// Each paragraph has: num, text (Latin with {{*:German}} markers), aaPages,
+// kantRefs (phases from AA header blocks), section hierarchy.
+//
+// Format for glosses: {{*:german text}} {{**:german text}} etc.
+// AA page numbers extracted from [N] markers in the RTF.
+// Cross-refs §.N are linkified by the renderer.
+
+const SECTIONS = [
+  {
+    id: 'proleg', label: 'Prolegomena', type: 'part',
+    kantRefs: [
+      { phase: 'δ', vol: 'XVII', page: '249' },
+      { phase: 'λ', vol: 'XVII', page: '438' },
+      { phase: 'ν', vol: 'XVII', page: '527' },
+    ]
+  },
+  { id: 'ont-proleg', label: 'Pars I · Ontologia · Prolegomena', type: 'part' },
+  { id: 'cap1', label: 'Caput I · Praedicata Entis Interna Universalia', type: 'head' },
+  { id: 'sec1', label: 'Sectio I · Possibile', type: 'sub',
+    kantRefs: [
+      { phase: 'δ', vol: 'XVII', page: '251' },
+      { phase: 'ε', vol: 'XVII', page: '262' },
+      { phase: 'ν', vol: 'XVII', page: '527' },
+    ]
+  },
+  { id: 'sec2', label: 'Sectio II · Connexum', type: 'sub' },
+  { id: 'sec3', label: 'Sectio III · Ens', type: 'sub' },
+  { id: 'sec4', label: 'Sectio IV · Unum', type: 'sub' },
+  { id: 'sec5', label: 'Sectio V · Ordo', type: 'sub' },
+  { id: 'sec6', label: 'Sectio VI · Verum', type: 'sub' },
+  { id: 'sec7', label: 'Sectio VII · Perfectum', type: 'sub' },
+  { id: 'cap2', label: 'Caput II · Praedicata Entis Interna Disiunctiva', type: 'head' },
+  { id: 'sec2-1', label: 'Sectio I · Necessarium et Contingens', type: 'sub' },
+  { id: 'sec2-2', label: 'Sectio II · Mutabile et Immutabile', type: 'sub' },
+  { id: 'sec2-3', label: 'Sectio III · Reale et Negativum', type: 'sub' },
+  { id: 'sec2-4', label: 'Sectio IV · Singulare et Universale', type: 'sub' },
+  { id: 'sec2-5', label: 'Sectio V · Totale et Partiale', type: 'sub' },
+  { id: 'sec2-6', label: 'Sectio VI · Prima Matheseos Intensorum Principia', type: 'sub' },
+  { id: 'sec2-7', label: 'Sectio VII · Substantia et Accidens', type: 'sub' },
+  { id: 'sec2-8', label: 'Sectio VIII · Status', type: 'sub' },
+  { id: 'sec2-9', label: 'Sectio IX · Simplex et Compositum', type: 'sub' },
+  { id: 'sec2-10', label: 'Sectio X · Monas', type: 'sub' },
+  { id: 'sec2-11', label: 'Sectio XI · Finitum et Infinitum', type: 'sub' },
+  { id: 'cap3', label: 'Caput III · Praedicata Entis Relativa', type: 'head' },
+  { id: 'cap3-1', label: 'Sectio I · Idem et Diversum', type: 'sub' },
+  { id: 'cap3-2', label: 'Sectio II · Simultanea', type: 'sub' },
+  { id: 'cap3-3', label: 'Sectio III · Successiva', type: 'sub' },
+  { id: 'cap3-4', label: 'Sectio IV · Causa et Causatum', type: 'sub' },
+  { id: 'cap3-5', label: 'Sectio V · Causa Efficiens', type: 'sub' },
+  { id: 'cap3-6', label: 'Sectio VI · Utilitas', type: 'sub' },
+  { id: 'cap3-7', label: 'Sectio VII · Reliqua Causarum Genera', type: 'sub' },
+  { id: 'cap3-8', label: 'Sectio VIII · Signum et Signatum', type: 'sub' },
+  { id: 'cosm', label: 'Pars II · Cosmologia', type: 'part' },
+  { id: 'cosm1', label: 'Caput I · Notio Mundi', type: 'head' },
+  { id: 'cosm1-1', label: 'Sectio I · Notio Affirmativa', type: 'sub' },
+  { id: 'cosm1-2', label: 'Sectio II · Notio Mundi Negativa', type: 'sub' },
+  { id: 'cosm2', label: 'Caput II · Partes Universi', type: 'head' },
+  { id: 'cosm2-1', label: 'Sectio I · Partes Universi Simplices', type: 'sub' },
+  { id: 'cosm2-2', label: 'Sectio II · Prima Corporum Genesis', type: 'sub' },
+  { id: 'cosm2-3', label: 'Sectio III · Natura Corporum', type: 'sub' },
+  { id: 'cosm2-4', label: 'Sectio IV · Supernaturale', type: 'sub' },
+  { id: 'cosm3', label: 'Caput III · Perfectio Universi', type: 'head' },
+  { id: 'psych', label: 'Pars III · Psychologia', type: 'part' },
+  { id: 'psych1', label: 'Psychologia Empirica (§§ 504–699 → AA XV)', type: 'sub' },
+  { id: 'psych19', label: 'Sectio XIX · Spontaneitas', type: 'sub' },
+  { id: 'psych20', label: 'Sectio XX · Arbitrium', type: 'sub' },
+  { id: 'psych21', label: 'Sectio XXI · Libertas', type: 'sub' },
+  { id: 'psych22', label: 'Sectio XXII · Commercium Animae et Corporis', type: 'sub' },
+  { id: 'psych-rat', label: 'Psychologia Rationalis', type: 'head' },
+  { id: 'psych-r1', label: 'Sectio I · Natura Animae Humanae', type: 'sub' },
+  { id: 'psych-r2', label: 'Sectio II · Systemata Psychologica', type: 'sub' },
+  { id: 'psych-r3', label: 'Sectio III · Origo Animae Humanae', type: 'sub' },
+  { id: 'psych-r4', label: 'Sectio IV · Immortalitas Animae', type: 'sub' },
+  { id: 'psych-r5', label: 'Sectio V · Status Post Mortem', type: 'sub' },
+  { id: 'psych-r6', label: 'Sectio VI · Animae Brutorum', type: 'sub' },
+  { id: 'psych-r7', label: 'Sectio VII · Finiti Spiritus', type: 'sub' },
+  { id: 'theol', label: 'Pars IV · Theologia Naturalis', type: 'part' },
+  { id: 'theol1', label: 'Caput I · Conceptus Dei', type: 'head' },
+  { id: 'theol1-1', label: 'Sectio I · Exsistentia Dei', type: 'sub' },
+  { id: 'theol1-2', label: 'Sectio II · Intellectus Dei', type: 'sub' },
+  { id: 'theol1-3', label: 'Sectio III · Voluntas Dei', type: 'sub' },
+  { id: 'theol2', label: 'Caput II · Operationes Dei', type: 'head' },
+  { id: 'theol2-1', label: 'Sectio I · Creatio Mundi', type: 'sub' },
+  { id: 'theol2-2', label: 'Sectio II · Finis Creationis', type: 'sub' },
+  { id: 'theol2-3', label: 'Sectio III · Providentia', type: 'sub' },
+  { id: 'theol2-4', label: 'Sectio IV · Decreta Divina', type: 'sub' },
+  { id: 'theol2-5', label: 'Sectio V · Revelatio', type: 'sub' },
+];
+
+// Full paragraph data — parsed from the RTF source.
+// Each paragraph has: { num, section, aaPage, text, glosses }
+// text uses @@num@@ as placeholder for gloss N; glosses is array in order.
+// Cross-refs of the form §.N are marked with ⌊N⌋ for linkification.
+// aaPage is the AA XVII page number at which this paragraph falls (from [N] markers).
+
+const PARAGRAPHS = [
+  // ── PROLEGOMENA ─────────────────────────────────────────────────────────────
+  { num: 1, section: 'proleg', aaPage: null,
+    text: 'metaphysica est scientia primorum in humana cognitione principiorum.',
+    glosses: [] },
+  { num: 2, section: 'proleg', aaPage: null,
+    text: 'Ad metaphysicam referuntur ontologia, cosmologia, psychologia, et theologia naturalis.',
+    glosses: [] },
+  { num: 3, section: 'proleg', aaPage: null,
+    text: 'metaphysica naturalis est cognitio rerum in metaphysica occurrentium solo usu acquisita, cui accedere artificialem §.1 definitam utile est: 1) Ob evolutionem conceptuum. 2) Ob determinationem conceptionemque primarum propositionum. 3) Ob continuationem certitudinemque probationum, e.c.',
+    glosses: [] },
+
+  // ── ONTOLOGIA PROLEGOMENA ────────────────────────────────────────────────────
+  { num: 4, section: 'ont-proleg', aaPage: null,
+    text: 'Ontologia@@1@@ (ontosophia, metaphysica, cf. §.1, metaphysica universalis, architectonica, philosophia prima,) est scientia praedicatorum entis generaliorum.',
+    glosses: ['Die Grund-Wissenschaft'] },
+
+  { num: 5, section: 'ont-proleg', aaPage: null,
+    text: 'Entis praedicata generaliora sunt prima cognitionis humanae principia, ergo ontologia refertur, §.2, cum ratione ad metaphysicam, §.1, 4.',
+    glosses: [] },
+
+  { num: 6, section: 'ont-proleg', aaPage: null,
+    text: 'Ontologia continet praedicata entis, §.4, I) interna 1) universalia, quae sunt in singulis, 2) disiunctiva, quorum alterutrum est in singulis; II) relativa.',
+    glosses: [] },
+
+  // ── SECTIO I · POSSIBILE ────────────────────────────────────────────────────
+  { num: 7, section: 'sec1', aaPage: null,
+    text: 'Nihil negativum, cf. §.54, irrepraesentabile, impossibile, repugnans, (absurdum, cf. §.13,) contradictionem involvens, implicans, contradictorium, est A et non-A, seu, praedicatorum contradictoriorum nullum est subiectum, seu, nihil est, et non est. 0 = A + non-A. Haec propositio dicitur principium contradictionis, et absolute primum.',
+    glosses: [] },
+
+  { num: 8, section: 'sec1', aaPage: null,
+    text: 'Nonnihil est aliquid@@1@@: repraesentabile, quicquid non involvit contradictionem, quicquid non est A et non-A, est possibile@@2@@, §.7.',
+    glosses: ['Etwas', 'Möglich'] },
+
+  { num: 9, section: 'sec1', aaPage: null,
+    text: 'A et non-A non est aliquid, §.8, hinc est nihil et contradictorium, §.7, s. subiectum implicans nulla habet praedicata, sive, quicquid est et non est, nihil est. A + non-A = 0.',
+    glosses: [] },
+
+  { num: 10, section: 'sec1', aaPage: null,
+    text: 'Omne possibile est aut A, aut non-A, aut neutrum, §.8, iam neutrum est nihilum, quia esset utrumque, §.9. Ergo omne possibile aut est A, aut non-A, seu, omni subiecto ex omnibus praedicatis contradictoriis alterutrum convenit. Haec propositio dicitur principium exclusi tertii, seu medii, inter duo contradictoria.',
+    glosses: [] },
+
+  { num: 11, section: 'sec1', aaPage: null,
+    text: 'Omne possibile A est A, seu, quicquid est, illud est, seu, omne subiectum est praedicatum sui. Si negas: quoddam possibile A est non-A, §.10, hinc A et non-A, seu nihil, §.7, quod impossibile, §.9. Haec propositio dicitur principium positionis, seu, identitatis.',
+    glosses: [] },
+
+  { num: 12, section: 'sec1', aaPage: null,
+    text: 'Posito impossibili oritur contradictio@@1@@. Quod non tantum videtur, sed et est, verum@@2@@, quod tantum videtur, non est, apparens@@3@@ dicitur. Hinc orta contradictio vel vera est, vel apparens.',
+    glosses: ['Entsteht ein Widerspruch', 'Wahr', 'nur scheinend'] },
+
+  { num: 13, section: 'sec1', aaPage: null,
+    text: 'Posito A et non-A oritur contradictio, §.9, 12. Posito A et B, quo posito ponitur non-A, ponitur impossibile, §.9, hinc oritur contradictio, §.12, prior patens@@1@@ (directa, immediata et explicita), posterior latens@@2@@ (indirecta, cryptica, mediata et implicita) vocatur. In quo vera contradictio patet, absurdum@@3@@ est (absonum).',
+    glosses: ['Ein offenbarer', 'Ein versteckter Widerspruch', 'offenbar falsch'] },
+
+  { num: 14, section: 'sec1', aaPage: null,
+    text: 'Ratio@@1@@, cf. §.640, (condicio, hypothesis,) est id, ex quo cognoscibile est, cur aliquid sit. Quod rationem habet, seu, cuius aliquid est ratio, rationatum@@2@@ eius dicitur, et ab eo dependens@@3@@. Praedicatum, quo aliquid vel ratio, vel rationatum est, vel utrumque, nexus@@4@@ est.',
+    glosses: ['ein Grund', 'seine Folge, das in ihm gegründete', 'das von ihm abhängende', 'der Zusammenhang, die Verknüpfung'] },
+
+  { num: 15, section: 'sec1', aaPage: null,
+    text: 'Quod spectatur, sed non in nexu cum iis, quae extra illud ponuntur, spectatur in se@@1@@. Quod nec in se quidem spectandum repraesentabile est, est impossibile in se@@2@@, (intrinsecus, simpliciter, absolute, per se). Quod in se spectatum est possibile, est possibile in se@@3@@ (intrinsecus, absolute, per se, simpliciter).',
+    glosses: ['wird an und vor sich betrachtet', 'an und vor sich, innerlich, schlechterdings unmöglich', 'an und vor sich, innerlich, unbedingt möglich'] },
+
+  { num: 16, section: 'sec1', aaPage: null,
+    text: 'Quod in nexu etiam cum aliquibus, quae extra illud ponuntur, tamen est possibile, est possibile hypothetice@@1@@ (respective, relative, extrinsecus, per aliud, et secundum quid).',
+    glosses: ['bedingt, äusserlich möglich'] },
+
+  { num: 17, section: 'sec1', aaPage: null,
+    text: 'Quod non, nisi in aliquo nexu cum iis, quae extra illud ponuntur, est impossibile, est impossibile hypothetice@@1@@ (respective, relative, extrinsecus, per aliud, et secundum quid).',
+    glosses: ['bedingt, äusserlich, in einem gewissen Zusammenhange unmöglich'] },
+
+  { num: 18, section: 'sec1', aaPage: null,
+    text: 'Nullum absolute impossibile est hypothetice possibile, §.15, 16. Ergo nullum hypothetice possibile est absolute impossibile. Omne hypothetice impossibile et possibile est in se possibile, §.17, 15. Ergo absolute impossibilia nec hypothetice possibilia sunt, nec impossibilia. Quoddam absolute possibile est hypothetice impossibile.',
+    glosses: [] },
+
+  // ── SECTIO II · CONNEXUM ────────────────────────────────────────────────────
+  { num: 19, section: 'sec2', aaPage: null,
+    text: 'Possibile in nexu i.e. in quo nexus est, cui nexus convenit, connexum@@1@@ (rationale) est, in nexu impossibile est irrationale@@2@@ (inconnexum, incohaerens). Hinc irrationalia vel sunt in se, vel hypothetice impossibilia, §.15, 17.',
+    glosses: ['zusammenhängend, verknüpft', 'ungereimt'] },
+
+  { num: 20, section: 'sec2', aaPage: null,
+    text: 'Omne possibile aut habet rationem, aut minus, §.10. Si habet rationem, aliquid est eius ratio, §.8. Si non habet, nihil est eius ratio, §.7. Ergo omnis possibilis ratio aut nihil est, aut aliquid, §.10. Si nihil foret ratio alicuius possibilis, foret ex nihilo cognoscibile, cur illud sit, §.14, hinc ipsum nihilum repraesentabile et aliquid, §.8, nihil aliquid, §.14, 8. Hinc quoddam possibile impossibile, §.7, 8, q.a., §.9. Ergo omnis possibilis aliquid est ratio, s. omne possibile est rationatum, s. nihil est sine ratione, seu, posito aliquo, ponitur aliquid eius ratio. Haec propositio dicitur principium rationis, quam colligas etiam ex §.265, 279, partim abstrahendo, partim vitando circulum.',
+    glosses: [] },
+
+  { num: 21, section: 'sec2', aaPage: null,
+    text: 'Ratio singulorum in aliquo est ratio eius sufficiens@@1@@ (completa, totalis), aliquorum tantum in eodem ratio est ratio eius insufficiens@@2@@ (incompleta, partialis).',
+    glosses: ['der zureichende Grund', 'der unzulängliche'] },
+
+  { num: 22, section: 'sec2', aaPage: null,
+    text: 'Nihil est sine ratione sufficiente, seu, posito aliquo, ponitur aliquid eius ratio sufficiens. Singula in omni possibili habent rationem, §.20, hinc omne possibile rationem sufficientem, §.21. Haec propositio dicitur principium rationis sufficientis (convenientiae).',
+    glosses: [] },
+
+  { num: 23, section: 'sec2', aaPage: null,
+    text: 'Omne possibile est ratio, seu nihil est sine rationato, nihil sine corollario et auctoramento, nihil omnino sterile, otiosum et infecundum, seu posito aliquo ponitur aliquid rationatum eius. Nam omne possibile aut habet rationatum, aut minus, §.10. Si habet, est aliquid rationatum eius, §.8, si non habet, nihil est eius rationatum, §.7. Ergo omnis possibilis rationatum aut nihil est, aut aliquid, §.10. Si nihil esset rationatum possibilis alicuius, posset ex hoc cognosci, §.14, hinc esset aliquid, §.8, adeoque quoddam possibile impossibile, §.7, 8, q.a., §.9. Haec propositio dicatur principium rationati.',
+    glosses: [] },
+
+  { num: 24, section: 'sec2', aaPage: null,
+    text: 'Omne possibile est ratio et rationatum, §.20, 23, hinc nexu duplici, §.14, connexum et rationale, §.19, tam a priori quam a posteriori cognoscibile. Haec propositio dicatur principium utrimque connexorum (a parte ante, et a parte post).',
+    glosses: [] },
+
+  { num: 25, section: 'sec2', aaPage: null,
+    text: 'Ratio A rationis B, est ratio rationati C. Ex ratione τοῦ B cognosci potest, cur C sit, §.23, hinc A est ratio τοῦ C, §.14.',
+    glosses: [] },
+
+  { num: 26, section: 'sec2', aaPage: null,
+    text: 'Rationatum C rationati B, est rationatum rationis A, §.25, 14.',
+    glosses: [] },
+
+  { num: 27, section: 'sec2', aaPage: null,
+    text: 'Ratio A alicuius B, a quo dependet C, est huius C ratio mediata@@1@@ (ulterior, remota), ratio non mediata est immediata@@2@@ (proxima).',
+    glosses: ['mittelbarer und entfernter', 'unmittelbarer und nächster Grund'] },
+
+  { num: 28, section: 'sec2', aaPage: null,
+    text: 'Ratio secundum quid@@1@@ (intermedia,) dicitur, quae habet adhuc ulteriorem, quae non habet, simpliciter talis@@2@@ (ultima). Rationes et rationata alicuius vel spectantur, etiam ut rationes et rationata inter se, subordinata@@3@@, vel minus, coordinata@@4@@.',
+    glosses: ['der Zwischen-Grund', 'der letzte Grund', 'untereinander', 'neben einander stehende Gründe und Folgen'] },
+
+  { num: 29, section: 'sec2', aaPage: null,
+    text: 'Posito rationato, ponitur eius ratio aliqua, §.20, 14, et sufficiens, §.22, seu a rationato ad rationem, et sufficientem, V.C.',
+    glosses: [] },
+
+  { num: 30, section: 'sec2', aaPage: null,
+    text: 'Posita ratione, hinc et sufficiente, §.21, ponitur rationatum, §.23, seu a ratione, et sufficiente, ad rationatum V.C.',
+    glosses: [] },
+
+  { num: 31, section: 'sec2', aaPage: null,
+    text: 'Sublata ratione, et sufficiente, tollitur aliquid rationatum, quia posito hoc, poneretur et illa, §.29.',
+    glosses: [] },
+
+  { num: 32, section: 'sec2', aaPage: null,
+    text: 'Sublato rationato tollitur ratio eius, et sufficiens, quia hac posita, poneretur et illud, §.30.',
+    glosses: [] },
+
+  { num: 33, section: 'sec2', aaPage: null,
+    text: 'A et B connexa tertio C sunt connexa inter se, A est connexum cum C connexo cum B, est ergo in A, de quo cognosci potest ex B, cur sit, hinc A et B sunt connexa, §.19.',
+    glosses: [] },
+
+  // ── SECTIO III · ENS ────────────────────────────────────────────────────────
+  { num: 34, section: 'sec3', aaPage: null,
+    text: 'Quod aut ponitur esse A, aut ponitur non esse A, determinatur@@1@@. Quod vero tantum ponitur esse aut A, aut non A, est indeterminatum@@2@@. Quod determinari potest, est determinabile@@3@@.',
+    glosses: ['bestimmt', 'unbestimmt', 'bestimmlich'] },
+
+  { num: 35, section: 'sec3', aaPage: null,
+    text: 'Ratio determinandi est determinans@@1@@. Omnis ergo ratio, sufficiens sufficienter, insufficiens insufficienter, determinat, §.34, 21. Hinc posito determinante, ponitur determinatum, §.30, et v.v., §.29. Sublato determinato, tollitur determinans, §.32, et v.v., §.31.',
+    glosses: ['das bestimmende'] },
+
+  { num: 36, section: 'sec3', aaPage: null,
+    text: 'Quae determinando ponuntur in aliquo (notae et praedicata), sunt determinationes@@1@@, altera positiva, et affirmativa, §.34, 10, quae si vere sit, est realitas, altera negativa, §.34, 10, quae si vere sit, est negatio@@2@@. Negatio apparens est realitas cryptica, realitas apparens est vanitas@@3@@.',
+    glosses: ['Bestimmungen', 'Verneinungen', 'Eitelkeit'] },
+
+  { num: 37, section: 'sec3', aaPage: null,
+    text: 'Determinationes possibilis aut sunt in eo repraesentabiles, etiamsi nondum spectetur in nexu, absolutae@@1@@, aut tunc demum, quando spectatur in nexu, §.10, respectivae@@2@@ (assumptivae). Determinationes possibilium respectivae sunt respectus@@3@@ (habitudines, τὰ πρός τι, relationes latius dictae). Respectus possibilium in iisdem in se spectatis non repraesentabiles sunt relationes@@4@@ (strictius dictae, ad extra). Relationes possibilium sunt eorundem determinationes externae@@5@@ (relativae, ad extra, extrinsecae), reliquae omnes, internae@@6@@.',
+    glosses: ['dem möglichen an und vor sich betrachtet schon', 'beziehungs-weise zukommende Bestimmungen', 'Beziehungen', 'Verhältnisse', 'äussre', 'innre Bestimmungen'] },
+
+  { num: 38, section: 'sec3', aaPage: null,
+    text: 'Si in A sunt, quae in B, A et B sunt eadem@@1@@. Non eadem sunt diversa@@2@@ (alia).',
+    glosses: ['einerlei', 'verschieden'] },
+
+  { num: 39, section: 'sec3', aaPage: null,
+    text: 'Determinationes possibilis internae, aut sunt internarum reliquarum rationes in internis simpliciter tales, aut minus, §.10. Illae sunt primae (principes), sive essentialia@@1@@.',
+    glosses: ['die ersten oder wesentlichen Bestimmungen'] },
+
+  { num: 40, section: 'sec3', aaPage: null,
+    text: 'Complexus essentialium in possibili, seu possibilitas eius interna est essentia@@1@@ (esse rei, ratio formalis, natura, cf. §.430, quidditas, forma, formale totius, οὐσία τινότις, substantia, cf. §.191, conceptus entis primus).',
+    glosses: ['das Wesen'] },
+
+  { num: 41, section: 'sec3', aaPage: null,
+    text: 'Determinationes possibilis internae, rationata essentiae, sunt affectiones@@1@@.',
+    glosses: ['innere folgende Bestimmungen'] },
+
+  { num: 42, section: 'sec3', aaPage: null,
+    text: 'Determinatio interna, quae non est essentiale, est rationatum essentiae, §.39, 40, hinc affectio, §.41.',
+    glosses: [] },
+
+  { num: 43, section: 'sec3', aaPage: null,
+    text: 'Posita in possibili essentia ponuntur affectiones, §.41, 30.',
+    glosses: [] },
+
+  { num: 44, section: 'sec3', aaPage: null,
+    text: 'Positis in possibili affectionibus ponitur essentia aliqua, §.41, 29.',
+    glosses: [] },
+
+  { num: 45, section: 'sec3', aaPage: null,
+    text: 'Sublata essentia tolluntur aliquae affectiones, §.41, 31.',
+    glosses: [] },
+
+  { num: 46, section: 'sec3', aaPage: null,
+    text: 'Sublatis affectionibus tollitur essentia, §.41, 32.',
+    glosses: [] },
+
+  { num: 47, section: 'sec3', aaPage: null,
+    text: 'Omnes determinationes internae possibilis sunt inter se connexae, singulae cum singulis. Affectiones enim connectuntur singulae cum essentialibus, §.39, haec cum essentia, §.40, 14. Hinc singulae determinationes cum singulis, §.33.',
+    glosses: [] },
+
+  { num: 48, section: 'sec3', aaPage: null,
+    text: 'Nexus (harmonia) universalis@@1@@ est, qui est in singulis.',
+    glosses: ['ein allgemeiner Zusammenhang'] },
+
+  { num: 49, section: 'sec3', aaPage: null,
+    text: 'In determinationibus possibilis internis est nexus universalis §.47, 48.',
+    glosses: [] },
+
+  { num: 50, section: 'sec3', aaPage: null,
+    text: 'Affectiones habent rationem in essentia, §.41, hinc aut sufficientem, aut minus, §.21, 10. Illae sunt attributa@@1@@, hae modi@@2@@ (accidentia praedicabilia, s. logica, cf. §.191, adiuncta, praedicata secundaria).',
+    glosses: ['Eigenschaften', 'Zufälligkeiten'] },
+
+  { num: 51, section: 'sec3', aaPage: null,
+    text: 'Attributa rationem sufficientem habent aut in omnibus essentialibus, aut in aliquibus tantum, §.50, 10. Illa propria@@1@@ sunt, haec communia@@2@@.',
+    glosses: ['besondre', 'gemeine'] },
+
+  { num: 52, section: 'sec3', aaPage: null,
+    text: 'Omnis possibilium determinatio aut est essentiale, §.39, aut attributum, aut modus, §.42, aut relatio, §.37.',
+    glosses: [] },
+
+  { num: 53, section: 'sec3', aaPage: null,
+    text: 'Omne possibile determinatum est, qua possibilitatem, §.34, 8, hinc in se possibile, qua possibilitatem internam, §.15, quae cum sit essentia, §.40, omne possibile habet essentiam, determinatum, qua essentiam. Ergo omnimode indeterminatum nihil est, §.7.',
+    glosses: [] },
+
+  { num: 54, section: 'sec3', aaPage: null,
+    text: 'Possibile praeter essentiam, §.53, aut est determinatum, qua omnes affectiones etiam in ipso compossibiles, aut minus, §.34, 10. Illud est actuale@@1@@, hoc non ens (nihil, cf. §.7) privativum (mere possibile)@@2@@ vocatur.',
+    glosses: ['wirklich', 'das bloss mögliche, ein mögliches Nichts'] },
+
+  { num: 55, section: 'sec3', aaPage: null,
+    text: 'Exsistentia@@1@@ (actus, cf. §.210, actualitas) est complexus affectionum in aliquo compossibilium, i.e. complementum essentiae sive possibilitatis internae, quatenus haec tantum, ut complexus determinationum spectatur, §.40.',
+    glosses: ['Wirklichkeit'] },
+
+  { num: 56, section: 'sec3', aaPage: null,
+    text: 'Omnis determinatio possibilis interna aut pertinet ad essentiam eius, aut ad exsistentiam, §.55, 42.',
+    glosses: [] },
+
+  { num: 57, section: 'sec3', aaPage: null,
+    text: 'Omne actuale est interne possibile, §.54, seu posita exsistentia ponitur interna possibilitas, §.55, 40, ab esse ad posse V.C.',
+    glosses: [] },
+
+  { num: 58, section: 'sec3', aaPage: null,
+    text: 'Nullum interne impossibile est actuale, §.57, sublata possibilitate interna, tollitur actualitas, §.55, 40, seu a non posse ad non esse V.C.',
+    glosses: [] },
+
+  { num: 59, section: 'sec3', aaPage: null,
+    text: 'Quoddam possibile non est actuale, §.54, seu posita possibilitate quadam tamen tolli potest actualitas, seu a quodam posse ad esse N.V.C.',
+    glosses: [] },
+
+  { num: 60, section: 'sec3', aaPage: null,
+    text: 'Quoddam non actuale est possibile, §.59, sublata actualitate non omnis tollitur possibilitas, seu a non esse ad omnino non posse N.V.C.',
+    glosses: [] },
+
+  { num: 61, section: 'sec3', aaPage: null,
+    text: 'Possibile, qua exsistentiam, determinabile est ens@@1@@.',
+    glosses: ['ein Ding'] },
+
+  { num: 62, section: 'sec3', aaPage: null,
+    text: 'Non ens@@1@@ (negativum, cf. §.54) esset possibile, qua exsistentiam, non determinabile. §.61. At hoc impossibile, §.10, et, si videtur esse ens, est ens fictum@@2@@ (rationis ratiocinantis, cf. §.647).',
+    glosses: ['ein Unding', 'ein erdichtetes Ding'] },
+
+  { num: 63, section: 'sec3', aaPage: null,
+    text: 'Omne ens est possibile, §.61, rationem, §.20, sufficientem habet, §.22, et rationatum, §.23, hinc dupliciter connexum est, §.24, habet essentiam, §.53, et essentialia, §.40, hinc affectiones, §.43, in universali nexu, §.49. Omnes entis determinationes aut sunt essentialia, aut attributa, aut modi, aut relationes, §.52. Posito ente, ponitur essentia eius, hinc essentialia omnia. Sublata essentia, tollitur ens. Sublato essentiali, tollitur essentia, hinc ens ipsum, §.53, 40. Omnis denique determinatio entis interna aut pertinet ad essentiam eius, aut ad exsistentiam, §.56.',
+    glosses: [] },
+
+  { num: 64, section: 'sec3', aaPage: null,
+    text: 'Per essentiam attributa entis sufficienter determinantur, §.35, 50, hinc posita essentia ponuntur attributa, §.35. Ergo posito ente ponuntur attributa eius, §.63, sublato attributo tollitur essentia et ens, §.35, 63.',
+    glosses: [] },
+
+  { num: 65, section: 'sec3', aaPage: null,
+    text: 'Modi entis per essentiam non sufficienter determinantur, §.50, 35, hinc non determinantur, qua exsistentiam, §.55. Ens ergo, qua modos actuales, per essentiam est indeterminatum, §.34, 54, i.e. modi possunt abesse et adesse salva rei essentia.',
+    glosses: [] },
+
+  { num: 66, section: 'sec3', aaPage: null,
+    text: 'Exsistentia non repugnat essentiae, sed est realitas, §.36, cum ea compossibilis, §.50, 55.',
+    glosses: [] },
+
+  { num: 67, section: 'sec3', aaPage: null,
+    text: 'Cognitio diversitatis est distinctio@@1@@, et ratio distinctionis in distinguendo discrimen (differentia, character, character distinctivus latius dictus, cf. §.350, nota, nota characteristica)@@2@@. Iam omnis determinatio entis est id, ex quo cognosci potest, ens illud nec indeterminatum, nec alio modo determinatum esse, §.36, 34. Ergo omnis determinatio est discrimen entis, §.38, 14.',
+    glosses: ['Unterscheidung', 'Unterscheid, Merkmal, Kennzeichen, Unterscheidungs-Zeichen'] },
+
+  { num: 68, section: 'sec3', aaPage: null,
+    text: 'Discrimina entis sunt vel externa seu relativa, vel interna, §.67, 37, et haec vel essentialia, quae pertinent ad essentiam, vel accidentalia, quae ad exsistentiam, §.56, vel absoluta, vel respectiva, §.37.',
+    glosses: [] },
+
+  { num: 69, section: 'sec3', aaPage: null,
+    text: 'Discrimina interna possunt repraesentari in ente in se spectato, §.68, 37, hinc quomodocumque cognosci, seu dari@@1@@. Data vel possumus etiam (sine compraesentia) sine assumpto alio, sine relatione ad aliud, concipere@@2@@ et intelligere, i.e. distincte cognoscere, vel non possumus. Illa sunt qualitates@@3@@, haec quantitates@@4@@.',
+    glosses: ['angegeben werden', 'begreifen und verstehn', 'Beschaffenheiten', 'Grössen'] },
+
+  // ── SECTIO IV · UNUM ────────────────────────────────────────────────────────
+  { num: 72, section: 'sec4', aaPage: null,
+    text: 'Determinationes entis separantur@@1@@, si ex simul positis quaedam tolluntur. Hinc inseparabiles@@2@@ sunt, quarum simul positarum nulla potest tolli.',
+    glosses: ['werden getrennt', 'unzertrennlich'] },
+
+  { num: 73, section: 'sec4', aaPage: null,
+    text: 'Posito ente ponitur essentia, §.63, ergo complexus essentialium, §.40, hinc posito ente simul ponuntur essentialia omnia, et ita quidem, ut nullum possit tolli, §.63, 40. Ergo essentialia entis sunt per se inseparabilia, §.72, 15. Unum@@1@@ est, cuius determinationes sunt inseparabiles, et transcendentaliter@@2@@ quidem, cuius determinationes sunt per se inseparabiles. Ergo omne ens est unum transcendentale.',
+    glosses: ['Eins', 'wesentlich eins'] },
+
+  { num: 74, section: 'sec4', aaPage: null,
+    text: 'A unum et B unum e.c. partim eadem, partim diversa sunt multa@@1@@. Quicquid cogitemus, aut sunt multa, aut non multa, §.10. Prior determinatio est multitudo (pluralitas)@@2@@, posterior unitas categorica@@3@@.',
+    glosses: ['Viele', 'die Vielheit, Mehrheit', 'die Einheit'] },
+
+  { num: 77, section: 'sec4', aaPage: null,
+    text: 'Quicquid est, quod multa non sunt, est unicum (unum exclusive tale)@@1@@.',
+    glosses: ['Einzig'] },
+
+  // ── SECTIO V · ORDO ─────────────────────────────────────────────────────────
+  { num: 78, section: 'sec5', aaPage: null,
+    text: 'Si multa iuxta vel post se invicem ponuntur, coniunguntur@@1@@. Coniunctio plurium vel est eadem, vel diversa, §.10, 38. Si prior, est coordinatio@@2@@, et eius identitas ordo@@3@@. Ordinis scientia olim erat musica latius dicta.',
+    glosses: ['verbunden werden', 'zusammenordnen', 'Ordnung'] },
+
+  { num: 79, section: 'sec5', aaPage: null,
+    text: 'Diversitas in coniunctione plurium est confusio (inordinatio)@@1@@. Coniunctio inseparabilium est unitio@@2@@.',
+    glosses: ['Unordnung und Verwirrung', 'Vereinigung'] },
+
+  { num: 80, section: 'sec5', aaPage: null,
+    text: 'Omnis determinatio habet rationem, §.20, 36, quaeque ex aliqua determinata ratione cognosci potest, rationi dicitur conformis (conveniens, consentiens)@@1@@.',
+    glosses: ['dem Grunde gemäss, übereinstimmig und zukommend'] },
+
+  { num: 81, section: 'sec5', aaPage: null,
+    text: 'Si posito A tollitur B, A et B opposita sunt@@1@@.',
+    glosses: ['entgegen gesetzt, mit einander streitend'] },
+
+  { num: 82, section: 'sec5', aaPage: null,
+    text: 'Determinatio opposita illi, quae rationi conformis est, est rationi contraria (difformis, disconveniens) seu defectus@@1@@.',
+    glosses: ['Mangel'] },
+
+  { num: 83, section: 'sec5', aaPage: null,
+    text: 'Propositis enuntians determinationem rationi conformem est norma (regula@@1@@, lex), immo latius, repraesentatio determinationis rationi conformis.',
+    glosses: ['Richtschnur, Gesetz'] },
+
+  { num: 84, section: 'sec5', aaPage: null,
+    text: 'Ubicumque determinationes, ibi leges, §.83, 80.',
+    glosses: [] },
+
+  { num: 85, section: 'sec5', aaPage: null,
+    text: 'Respectus entis ex coniunctione eius cum aliis determinatus est positus@@1@@. Ubi ergo positus, ibi leges, §.84, 37.',
+    glosses: ['Stelle'] },
+
+  { num: 86, section: 'sec5', aaPage: null,
+    text: 'Coniunctione determinatur positus, hinc sunt in coniunctione leges, §.85, in eadem eaedem, §.38. Ergo in ordine coniunguntur plura eidem rationi conformiter, §.83, 78. Quod est in A et B, ipsis commune@@1@@ est. Quod est in A, non in B, est, respectu B, τῷ A proprium@@2@@, ergo in ordine sunt regulae communes.',
+    glosses: ['Gemein', 'Eigen'] },
+
+  { num: 87, section: 'sec5', aaPage: null,
+    text: 'In coniunctione diversa diversae sunt leges, §.86, 38. Ergo in confusione non sunt leges communes, §.79, 86.',
+    glosses: [] },
+
+  { num: 88, section: 'sec5', aaPage: null,
+    text: 'Ordinis si regula fuerit unica, simplex@@1@@, si plures, ordo compositus@@2@@ vocatur.',
+    glosses: ['Eine einfache', 'zusammengesetzte Ordnung'] },
+
+  // ── SECTIO VI · VERUM ───────────────────────────────────────────────────────
+  { num: 89, section: 'sec6', aaPage: null,
+    text: 'Veritas metaphysica@@1@@ (realis, obiectiva, materialis) est ordo plurium in uno, veritas in essentialibus et attributis entis, transcendentalis@@2@@.',
+    glosses: ['die metaphysische Wahrheit', 'die nothwendige metaphysische Wahrheit'] },
+
+  { num: 90, section: 'sec6', aaPage: null,
+    text: 'Cum omnis entis determinationes coniungantur, essentiales secundum principium contradictionis, §.40, 7, et accidentales, attributa secundum principium contradictionis, §.64, 7, et rationis, §.20, et sufficientis, §.22, 50, modi secundum principium contradictionis, §.65, 7, et rationis, §.42, 20, essentialia et affectiones secundum principium rationati, §.23, 41, hinc regulas communes, §.83, 86, omne ens est verum transcendentaliter, §.89.',
+    glosses: [] },
+
+  { num: 91, section: 'sec6', aaPage: null,
+    text: 'Confusio veritati transcendentali opposita esset somnium obiective sumptum@@1@@ (cf. §.593). Somniorum aggregatum esset mundus fabulosus@@2@@ (cf. §.354).',
+    glosses: ['ein Traum, das geträumte', 'das Land der Wünsche'] },
+
+  { num: 92, section: 'sec6', aaPage: null,
+    text: 'Principia (cf. §.307, 311) catholica@@1@@ (universalia) sunt singulis entibus communia. Metaphysice vera determinantur principiis catholicis, §.7, 20, 22, 23, convenienter, §.90, 80, et, quae determinantur his principiis conformiter, sunt metaphysice vera, §.89. Hinc veritas metaphysica potest definiri per convenientiam entis cum principiis catholicis.',
+    glosses: ['allgemeine Grund-Sätze'] },
+
+  { num: 93, section: 'sec6', aaPage: null,
+    text: 'Certitudo obiectiva@@1@@ (cf. §.531) est apperceptibilitas veritatis in ente. Iam omnis entis veritas est clare cognoscibilis, §.90, 8. Ergo omne ens est obiective certum.',
+    glosses: ['Gewissheit der Dinge'] },
+
+  // ── SECTIO VII · PERFECTUM ──────────────────────────────────────────────────
+  { num: 94, section: 'sec7', aaPage: null,
+    text: 'Si plura simul sumpta unius rationem sufficientem constituunt, consentiunt@@1@@. Consensus ipse est perfectio@@2@@, et unum, in quod consentitur, ratio perfectionis determinans (focus perfectionis)@@3@@.',
+    glosses: ['übereinstimmen', 'Vollkommenheit', 'Grund oder Brennpunkt der Vollkommenheit'] },
+
+  { num: 95, section: 'sec7', aaPage: null,
+    text: 'In perfectione plura eidem rationi conformiter determinantur, §.94, 80, ergo est in perfectione ordo, §.78, et communes perfectionis regulae, §.86.',
+    glosses: [] },
+
+  { num: 96, section: 'sec7', aaPage: null,
+    text: 'Ratio perfectionis determinans si fuerit unica, simplex@@1@@, si plures, composita tunc est perfectio@@2@@, §.88, 95.',
+    glosses: ['eine einfache', 'eine zusammengesetzte'] },
+
+  { num: 97, section: 'sec7', aaPage: null,
+    text: 'Regulae oppositae collidi@@1@@ dicuntur, et defectus ex regulis perfectionis collidentibus exceptio@@2@@, prout normae vel vera vel apparente tantum oppositione colliduntur, §.81, vel vera, vel apparens, §.12.',
+    glosses: ['mit einander streitende Richtschnuren', 'Ausnahme'] },
+
+  { num: 98, section: 'sec7', aaPage: null,
+    text: 'Consensus essentialium est perfectio (essentialis) transcendentalis@@1@@, affectionum accidentalis@@2@@, utraque interna@@3@@. Consensus relationum est perfectio externa@@4@@.',
+    glosses: ['wesentliche', 'innre ausserwesentliche', 'innre', 'äussre'] },
+
+  { num: 99, section: 'sec7', aaPage: null,
+    text: 'Essentialia omnis entis consentiunt ad essentiam eius, §.63, 40, et attributa, §.50, 94. Ergo omne ens est perfectum transcendentaliter.',
+    glosses: [] },
+
+  { num: 100, section: 'sec7', aaPage: null,
+    text: 'Bonum@@1@@ est, quo posito ponitur perfectio. Ergo omne ens est bonum transcendentaliter, §.99.',
+    glosses: ['gut'] },
+
+  // ── SECTIO I · NECESSARIUM ET CONTINGENS ────────────────────────────────────
+  { num: 101, section: 'sec2-1', aaPage: null,
+    text: 'Necessarium@@1@@ est, cuius oppositum est impossibile, non necessarium est contingens@@2@@.',
+    glosses: ['nothwendig', 'zufällig'] },
+
+  { num: 102, section: 'sec2-1', aaPage: null,
+    text: 'Cuius oppositum in se impossibile est, est illud necessarium in se@@1@@ (metaphysice, intrinsecus, absolute, geometrice, logice). Cuius oppositum est extrinsecus tantum impossibile, est necessarium hypothetice@@2@@ (secundum quid). Entis determinatio, qua necessarium est, est eius necessitas@@3@@. Ergo necessitas est vel absoluta@@4@@ (consequentis), vel hypothetica@@5@@ (consequentiae), illa, qua aliquid est in et per se, haec, qua aliquid est hypothetice tantum necessarium.',
+    glosses: ['an sich, schlechterdings, unbedingt, nothwendig', 'bedingt nothwendig', 'Nothwendigkeit', 'die schlechterdings so genannte (unbedingte)', 'die bedingte'] },
+
+  { num: 109, section: 'sec2-1', aaPage: null,
+    text: 'Cum exsistentiae oppositum in aliquo sit possibile, §.54, 55, exsistentia aut erit absolute necessaria, aut in se contingens, §.102, 10. Ens, cuius exsistentia est absolute necessaria, est ens necessarium@@1@@, cuius exsistentia est intrinsecus contingens, est ens contingens@@2@@.',
+    glosses: ['das nothwendige Ding', 'ein zufälliges Ding'] },
+
+  // ── SECTIO II · MUTABILE ET IMMUTABILE ──────────────────────────────────────
+  { num: 124, section: 'sec2-2', aaPage: null,
+    text: 'Succedunt@@1@@ sibi (successiva sibi sunt), quorum unum post aliud exsistit. Determinatio entium, qua sibi successiva sunt, est eorum successio@@2@@.',
+    glosses: ['Folgen aufeinander', 'die Folge'] },
+
+  { num: 125, section: 'sec2-2', aaPage: null,
+    text: 'Cuius determinationes sibi succedunt, mutatur@@1@@: hinc mutabile@@2@@ (variabile) est, cuius determinationes sibi possunt succedere; cuius determinationes sibi non possunt succedere, est immutabile@@3@@ (fixum, invariabile, constans). Ipsa autem determinationum in ente successio, est eius, et simul determinationum eius, mutatio@@4@@.',
+    glosses: ['wird verändert', 'veränderlich', 'unveränderlich', 'Veränderung'] },
+
+  // ── SECTIO III · REALE ET NEGATIVUM ─────────────────────────────────────────
+  { num: 135, section: 'sec2-3', aaPage: null,
+    text: 'Negatione posita realitas tollitur, §.36, 10. Hinc negationes et realitates sunt sibi invicem oppositae, §.81. Tam realitates ipsae, quam entia, quibus insunt, entia realia@@1@@ seu positiva dicuntur. Negationes autem entia negativa@@2@@.',
+    glosses: ['etwas bejahendes', 'etwas verneinendes'] },
+
+  { num: 146, section: 'sec2-3', aaPage: null,
+    text: 'Quo posito ponitur imperfectio, malum@@1@@ est, hinc negationes sunt malum, §.142, eaeque vel stricte dictae, malum metaphysicum@@2@@, quo posito ponitur imperfectio absolute necessaria, §.142, vel privationes, malum contingens@@3@@ (physicum late dictum, cf. §.788), quo posito ponitur imperfectio in se contingens, §.144.',
+    glosses: ['Das Übel, Böse', 'das schlechterdings nothwendige', 'das zufällige'] },
+
+  { num: 147, section: 'sec2-3', aaPage: null,
+    text: 'Positis entis realitatibus ponitur eius perfectio, §.141, hinc realitates sunt bona, §.100, et absolute quidem necessariae, bonum metaphysicum@@1@@, in se contingentes, bonum contingens@@2@@ (physicum late dictum, cf. §.787).',
+    glosses: ['das schlechterdings nothwendige', 'das zufällige Gute'] },
+
+  // ── SECTIO IV · SINGULARE ET UNIVERSALE ─────────────────────────────────────
+  { num: 148, section: 'sec2-4', aaPage: null,
+    text: 'Complexus omnium determinationum in ente compossibilium est omnimoda eius determinatio@@1@@. Hinc ens aut est omnimode determinatum, aut minus, §.10. Illud est singulare@@2@@ (individuum), hoc universale@@3@@. Utrumque respectu omnium minus determinatorum, quae in se continet, inferius@@4@@ dicitur, illa respectu huius, superiora@@5@@.',
+    glosses: ['durchgängige, völlige, vollständige Bestimmung', 'einzeln', 'allgemeine', 'das untere, niedrigere, tiefere, bestimmtere', 'die obern, höheren, allgemeinern, unbestimmtern'] },
+
+  { num: 150, section: 'sec2-4', aaPage: null,
+    text: 'Universale in solis individuis in concreto repraesentabile, seu, quod sola individua sub se continet, est species@@1@@, quod etiam in universalibus in concreto repraesentabile est, seu, quod universalia etiam sub se continet, est genus@@2@@, et horum infimum@@3@@ quod in nullo genere est, s. quod nullum genus sub se continet, summum@@4@@ in quo nullum genus s. quod sub nullo genere continetur, subalterna@@5@@ denique vocantur, quae non sunt summa.',
+    glosses: ['Art, Gattung', 'Geschlecht', 'das Unterste', 'das Oberste', 'untergeordnete, oder Untergeschlechte'] },
+
+  { num: 151, section: 'sec2-4', aaPage: null,
+    text: 'Determinationes inferioris entis, indeterminatae in eius superiore sunt illius differentia@@1@@. Hinc differentia generica@@2@@ est complexus determinationum in genere determinatarum, indeterminatarum in eius superiori. Differentia specifica@@3@@ est complexus determinationum speciei indeterminatarum in genere eius infimo. Differentia numerica@@4@@ (haecceitas, principium individuationis) est complexus determinationum individui indeterminatarum in specie, §.148.',
+    glosses: ['die genauere Bestimmung', 'eines Geschlechtes', 'einer Art', 'eines jeden einzeln'] },
+
+  // ── SECTIO VII · SUBSTANTIA ET ACCIDENS ─────────────────────────────────────
+  { num: 191, section: 'sec2-7', aaPage: null,
+    text: 'Ens vel non potest exsistere, nisi ut determinatio alterius (in alio), vel potest, §.10. Prius accidens@@1@@ (praedicamentale s. physicum, cf. §.50, cuius esse est inesse, συμβεβηκός), posterius est substantia@@2@@ (ens per se subsistens, forma, ἐντελέχεια οὐσία ὑπόστασις ἐνέργεια), quod potest exsistere, licet non sit in alio, licet non sit determinatio alterius.',
+    glosses: ['ein nur in andern', 'ein vor sich bestehendes Ding'] },
+
+  { num: 197, section: 'sec2-7', aaPage: null,
+    text: 'Si substantiae inhaerent accidentia, est aliquid inhaerentiae ratio, §.20, s. vis latius dicta@@1@@ (efficacia, energia, activitas, cf. §.216), et sufficiens, §.22. Hoc est vis (strictius dicta@@2@@, et brevitatis causa nonnumquam simpliciter).',
+    glosses: ['eine Kraft in weiterer', 'eine Kraft in engerer Bedeutung'] },
+
+  // ── SECTIO X · MONAS ────────────────────────────────────────────────────────
+  { num: 230, section: 'sec2-10', aaPage: null,
+    text: 'Substantia vel est simplex, vel composita, §.224. Prior monas (atomus, perfecta unitas) dicitur.',
+    glosses: [] },
+
+  { num: 239, section: 'sec2-10', aaPage: null,
+    text: 'Ordo simultaneorum extra se invicem positorum est spatium@@1@@, successivorum tempus@@2@@.',
+    glosses: ['Raum', 'Zeit'] },
+
+  // ── SECTIO XI · FINITUM ET INFINITUM ────────────────────────────────────────
+  { num: 248, section: 'sec2-11', aaPage: null,
+    text: 'Ens reale esse est qualitas, §.69, omni enti conveniens, §.136. Cumque in omni ente sit certus realitatum numerus, §.136, 159, omne ens habet certum realitatis gradum, §.246, 159. Hinc vel erit maximus, vel non maximus, §.10, 247. Cumque gradus realitatis, quo maior possibilis est, seu non maximus, §.247, limes@@1@@ (terminus, cf. §.350, finis, cf. §.341) dicatur, limitem autem habens finitum@@2@@ (cf. §.341, limitatum), non habens limitem infinitum@@3@@ (reale, illimitatum) erit. Ens ergo gradum realitatis maximum habens s. realissimum, §.190, est infinitum, finita reliqua omnia. Finitum, cuius limites determinare vel non possumus, vel non placet, est indefinitum@@4@@ (infinitum imaginarium, mathematice tale).',
+    glosses: ['der Schranken', 'endlich, eingeschränkt', 'uneingeschränkt', 'mathematisch unendlich, unendlichscheinend'] },
+
+  // ── COSMOLOGIA ───────────────────────────────────────────────────────────────
+  { num: 354, section: 'cosm1-1', aaPage: null,
+    text: 'Mundus@@1@@ (cf. §.91, 403, 434, universum, πᾶν) est series (multitudo, totum) actualium finitorum, quae non est pars alterius.',
+    glosses: ['die ganze Welt'] },
+
+  { num: 355, section: 'cosm1-1', aaPage: null,
+    text: 'Hic mundus exsistit. Ergo mundus est in se possibilis, §.57, 18.',
+    glosses: [] },
+
+  { num: 382, section: 'cosm1-2', aaPage: null,
+    text: 'Fatum@@1@@ est necessitas eventuum in mundo. Fatum ex necessitate mundi absoluta esset spinosisticum, non ens, §.361, 105, nec in hoc, nec in ullo mundo ponendum, §.354, 58.',
+    glosses: ['das Schicksal, Verhängniss'] },
+
+  { num: 383, section: 'cosm1-2', aaPage: null,
+    text: 'Eventus in mundo, cuius ignoratur ratio sufficiens, casus@@1@@ est. Casus, cuius nec est ratio sufficiens, purus@@2@@ esset, impossibilis, §.22, nec in hoc, nec in ullo mundo ponendus, §.354, 58.',
+    glosses: ['ein Zufall, ein ungefähr', 'ein blinder Zufall'] },
+
+  // ── PSYCHOLOGIA ──────────────────────────────────────────────────────────────
+  { num: 700, section: 'psych19', aaPage: '271',
+    text: 'Mutor, §.505–699, interne, §.126. Ergo sum ens finitum, §.254, et contingens, §.257. Ergo exsistentia mea modus est, §.134, adeoque status mei omnes sunt in se contingentes, §.205, 108. Ergo etiam mutationes eorum omnium, §.124, 125. Ergo omnes actiones meae, omnes passiones sunt in se contingentes, §.210. Hinc et omnes actiones meae futurae, §.298. Hinc nullae actiones meae, nullae passiones sunt absolute vel intrinsecus necessariae, §.105.',
+    glosses: [] },
+
+  { num: 701, section: 'psych19', aaPage: null,
+    text: 'Necessitatio@@1@@ (coactio) est mutatio alicuius ex contingenti in necessarium, hinc est vel activa@@2@@ necessitantis, quod non est proprie, nisi substantia, §.198, vel passiva@@3@@ necessitati, quae tribuitur tum accidentibus, vel actioni vel passioni, quae mutantur ex contingentibus in necessaria, tum substantiae, cui eiusmodi necessitata accidentia insunt.',
+    glosses: ['die Nöthigung', 'die vorgenommene', 'die gelittene'] },
+
+  { num: 704, section: 'psych19', aaPage: null,
+    text: 'Actio a sufficienti principio, quod agenti internum est, dependens est spontanea@@1@@. Unde spontaneitas tribuitur, 1) actioni, quae a principio sufficienti, quod agenti internum est, dependet, 2) substantiae eiusmodi actiones patranti. Iam omnis actio proprie talis a principio, quod agenti internum est, dependet, §.210, 37. Ergo omnis actio proprie talis est spontanea.',
+    glosses: ['eine selbstthätige Handlung'] },
+
+  // ── LIBERTAS ─────────────────────────────────────────────────────────────────
+  { num: 719, section: 'psych21', aaPage: null,
+    text: 'Facultas appetendi aversandive pro lubitu suo sensitive, est arbitrium sensitivum@@1@@, facultas volendi nolendive pro lubitu suo est (liberum arbitrium) libertas@@2@@, cf. §.707, 708, 710 (moralis, simpliciter sic dicta). Libertas pure volendi nolendive est libertas pura@@3@@. Ergo substantia arbitrio praedita aut illud sensitivum tantum habebit, aut libertatem tantum puram, aut eandem arbitrio sensitivo mixtam, §.718. Actiones, ad quas per libertatem se determinare est in potestate alicuius substantiae positum, liberae@@4@@ sunt, et ipsa substantia, quae et quatenus actiones liberas patrare potest, est libera@@5@@.',
+    glosses: ['das sinnliche Willkür', 'Freiheit', 'reine Freiheit', 'freie Handlungen', 'Dinge, oder Kräfte, die frei vor sich bestehn'] },
+
+  // ── PSYCHOLOGIA RATIONALIS ────────────────────────────────────────────────────
+  { num: 740, section: 'psych-r1', aaPage: '293',
+    text: 'Anima humana@@1@@ est anima, quae cum corpore humano in artissimo est commercio. Cumque anima cum corpore, quocum est in artissimo commercio, constituat animal@@2@@: anima humana cum corpore, quocum est in artissimo commercio, constituit animal, quod hominem@@3@@ dicimus.',
+    glosses: ['eine menschliche Seele', 'ein Thier', 'einen Menschen'] },
+
+  { num: 741, section: 'psych-r1', aaPage: null,
+    text: 'Anima humana sibi corpus suum repraesentat pro arbitrio, §.740. Ergo agit, §.210, movet etiam corpus suum, §.740, 734. Ergo appetit et aversatur, §.712. Ergo agit et est vis repraesentativa corporis sui, §.210. Corpus humanum est materia, §.296, hinc divisibile, §.427, adeoque interne mutabile, §.244, adeoque ens finitum, §.255, actuale, pars mundi, §.354. Ex positu corporis humani in universo cognosci potest, cur anima humana obscure, clare, distincte repraesentet haec, non alia, §.740, 736. Ergo anima humana@@1@@ est vis repraesentativa universi pro positu corporis humani in eodem, §.513, 155.',
+    glosses: ['die menschliche Seele'] },
+
+  { num: 755, section: 'psych-r1', aaPage: null,
+    text: 'Omnis spiritus est substantia, §.402. Ergo vis, §.199, hinc quorundam accidentium inhaerentiae ratio sufficiens, §.197, adeoque agens, §.210. Cumque sit substantia intellectualis, §.402, quasdam distinctas repraesentationes actuandi facultatem habet, §.216. Ergo ad eas vim suam determinandi, §.210, hinc appetendi, §.663. Quicquid appetit, eius oppositum aversatur, hinc spiritus habet facultatem aversandi, §.663. Appetitiones aversationesque spiritus sunt eius determinationes internae, §.37. Ergo sunt cum reliquis eius determinationibus internis in universali nexu, §.49. Ergo etiam cum reliqua ipsius cognitione, quae determinatio interna est, §.37, adeoque fiunt pro lubitu spiritus, §.712. Ergo spiritus habet arbitrium, §.712, cumque lubitus ipsius possit distinctus esse, §.402, liberum seu libertatem, §.719.',
+    glosses: [] },
+
+  { num: 780, section: 'psych-r4', aaPage: null,
+    text: 'Vita animae humanae@@1@@ s. naturae eius duratio, continuatur, dum vel unicum minimum superstes est accidens ipsi qua est anima humana naturale, §.776. Iam autem, dum durat anima humana, in eadem est perceptio s. repraesentatio status mundi et sui praeteriti, praesentis et futuri, §.742, 400. Ergo anima humana, dum exsistit, vivit. Mors animae humanae@@2@@ s. finis naturae eius est simul exsistentiae. Iam omnis animae humanae exsistentia, natura, vita est in se contingens, §.743, 430. Ergo mors animae humanae est in se possibilis, §.81, 104.',
+    glosses: ['das Leben', 'der Tod der menschlichen Seele'] },
+
+  { num: 781, section: 'psych-r4', aaPage: '318',
+    text: 'Mortale@@1@@ est, quod potest mori, et possibilitas moriendi est mortalitas@@2@@. Quod non potest mori, est immortale@@3@@, et impossibilitas moriendi est immortalitas@@4@@. Mortalitas et immortalitas sunt vel absolutae, vel hypotheticae, §.15, 16. Non absoluta solum, sed et hypothetica satis magna mortalitas corpori humano et homini competit. §.777, 168, animae non nisi absoluta, et hypothetica annihilandae, §.745, 780. Immortalitas animae non quidem absoluta tribui potest, §.780, quia tamen sexcentis modis, quibus corpus mori potest, non mori potest indestructibilis, §.746, admodum magna ipsi convenit immortalitas hypothetica. Nulla substantia huius mundi, §.354, 358, annihilatur, §.227, 228. Ergo anima humana moriente corpore superstes vivit immortaliter, §.780, 742.',
+    glosses: ['sterblich', 'Sterblichkeit', 'unsterblich', 'Unsterblichkeit'] },
+
+  // ── THEOLOGIA NATURALIS ───────────────────────────────────────────────────────
+  { num: 800, section: 'theol', aaPage: null,
+    text: 'Theologia naturalis est scientia de deo, quatenus sine fide cognosci potest.',
+    glosses: [] },
+
+  { num: 803, section: 'theol1-1', aaPage: null,
+    text: 'Ens perfectissimum@@1@@ est, cui summa in entibus est perfectio: i.e. in quo tot, tanta, tantum in tot et tanta consentiunt, quot, quanta, quantum in plurima et maxima possibilium in ullo ente consentire possunt, §.185. Est ergo in ente perfectissimo quaedam pluralitas absolute necessario, §.74.',
+    glosses: ['das vollkommenste'] },
+
+  { num: 811, section: 'theol1-1', aaPage: null,
+    text: 'Deus@@1@@ est ens perfectissimum. Ergo deus actualis est, §.810, 55.',
+    glosses: ['Gott'] },
+
+  { num: 826, section: 'theol1-1', aaPage: null,
+    text: 'Si quid in ente necessario deprehendimus, quod repraesentatis in ente contingenti partialiter simile, partialiter diversum ab iis est, discrimina tamen non satis intelligimus, nec nomen ipsi peculiare invenimus: illud dicimus eius, quod in ente contingenti simile notavimus, analogon, deoque tribuitur per analogiam, si realitates in eius conceptu regnare videntur, per eminentiam@@1@@ (excellentiam), si negationes, per reductionem@@2@@ (via negationis).',
+    glosses: ['in unendlich-ausnehmender', 'in geläuterter Bedeutung'] },
+
+  { num: 843, section: 'theol1-1', aaPage: null,
+    text: 'Omnitudo realitatum, quae esse possunt, maximarum est gradus realitatis maximus, §.247, 248. Hic deo enti realissimo convenit, §.807, 812. Ergo deus est ens infinitum reale, §.248. Idem patet ex eo, quod deus ens necessarium, §.823, 258.',
+    glosses: [] },
+
+  { num: 846, section: 'theol1-1', aaPage: null,
+    text: 'Plures dii sunt impossibiles. Dum enim essent plures, partim essent diversi, §.74, hinc esset in uno, quod non esset in altero, §.38. Hoc aut esset realitas, aut negatio, §.36. Si realitas esset, ille, cui deesset, non foret deus, §.807. Si negatio esset, ille, cui inesset, non foret deus, §.808. Si poneretur una realitas esse in uno, sed alia aequipollens in alio, in neutro esset omnitudo realitatum, hinc neuter esset deus, §.807. … deus, quem hucusque meditati sumus, deus est unicus, §.77. Polytheismus@@1@@ est sententia plures deos ponens, et error est.',
+    glosses: ['die Vielgötterei'] },
+
+  { num: 863, section: 'theol1-2', aaPage: null,
+    text: 'Distincta cognitio est realitas, §.531. In deo sunt omnes realitates, §.807. Ergo deus distincte cognoscit. Ergo habet intellectum, est substantia intellectualis, §.830, spiritus, §.402.',
+    glosses: [] },
+
+  { num: 926, section: 'theol2-1', aaPage: null,
+    text: 'Causa efficiens actuat effectum, §.319, 210. Deus est causa efficiens huius universi, §.854. Ergo deus actuavit hoc universum, aut ab aeterno, i.e. ita, ut mundus hic non habuerit initium, aut in tempore s. non ab aeterno, §.10, in neutro casu pars mundi mundo praeexstitit, §.371, 394. Ergo in utroque casu mundus est actuatus ex nihilo, §.228, et deus est, qui eum actuavit ex nihilo, §.854. Actuare quid ex nihilo est creare@@1@@. Ergo deus est creator huius universi.',
+    glosses: ['erschaffen'] },
+
+  { num: 935, section: 'theol2-1', aaPage: null,
+    text: 'Posita huius mundi exsistentia, ponitur summa, quae in mundo esse potest, perfectio, §.187, 934. In quo mundo ponitur summa, quae in mundo esse potest, perfectio, est ille perfectissimus, §.185. Ergo mundus hic est omnium possibilium perfectissimus.',
+    glosses: [] },
+
+  { num: 950, section: 'theol2-3', aaPage: null,
+    text: 'Hic mundus durat, §.299, at nullo momento independenter, §.930. Ergo non potest durare, nisi ut causatum extra se positi vel uno momento, §.307. Ergo vis extramundana operatur durationem eius in quovis durationis momento, §.210. Haec deus est, §.855, 839. Ergo deus operatur quovis durationis momento durationem universi. Actuatio durationis est conservatio@@1@@. Ergo deus est conservator huius universi.',
+    glosses: ['die Erhaltung'] },
+
+];
+
+// ── RENDERING ────────────────────────────────────────────────────────────────
+
+// Build a map: section id → list of paragraphs
+const secMap = {};
+PARAGRAPHS.forEach(p => {
+  if (!secMap[p.section]) secMap[p.section] = [];
+  secMap[p.section].push(p);
+});
+
+// Also build a map: para num → paragraph (for cross-ref links)
+const paraMap = {};
+PARAGRAPHS.forEach(p => { paraMap[p.num] = p; });
+
+function renderGlossChip(text, markerStr) {
+  return `<span class="gloss-chip"><span class="chip-marker">${markerStr}</span>${text}</span>`;
+}
+
+// Convert @@N@@ markers and §.N cross-refs in text to HTML
+function processText(text, glosses) {
+  // 1. Replace @@N@@ with gloss chips (N is 1-based)
+  let markers = ['*', '**', '***', '****', '******'];
+  let result = text.replace(/@@(\d+)@@/g, (_, n) => {
+    const idx = parseInt(n) - 1;
+    const german = glosses[idx] || '';
+    if (!german) return '';
+    const marker = '*'.repeat(parseInt(n));
+    return renderGlossChip(german, marker);
+  });
+
+  // 2. Convert §.N references to clickable links (handle §.N, N, or §§)
+  result = result.replace(/§\.(\d+)/g, (match, num) => {
+    return `<span class="para-ref" onclick="scrollToPara(${num})" title="Go to §.${num}">${match}</span>`;
+  });
+
+  return result;
+}
+
+let focusedNum = null;
+
+function scrollToPara(num) {
+  const el = document.getElementById('para-' + num);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // Focus it
+  if (focusedNum) {
+    const prev = document.getElementById('para-' + focusedNum);
+    if (prev) prev.classList.remove('focused');
+  }
+  el.classList.add('focused');
+  focusedNum = num;
+  // Highlight TOC
+  document.querySelectorAll('.toc-item').forEach(i => i.classList.remove('active'));
+  const ti = document.querySelector(`.toc-item[data-para="${num}"]`);
+  if (ti) { ti.classList.add('active'); ti.scrollIntoView({ block: 'nearest' }); }
+}
+
+function focusPara(num) {
+  scrollToPara(num);
+}
+
+function buildTextContent() {
+  const inner = document.getElementById('text-inner');
+  inner.innerHTML = '';
+
+  SECTIONS.forEach(sec => {
+    // Section heading
+    const secEl = document.createElement('div');
+    if (sec.type === 'part') secEl.className = 'section-part';
+    else if (sec.type === 'head') secEl.className = 'section-head';
+    else secEl.className = 'section-sub';
+    secEl.id = 'sec-' + sec.id;
+    secEl.textContent = sec.label;
+    inner.appendChild(secEl);
+
+    // Kant Erläuterungen phase references
+    if (sec.kantRefs && sec.kantRefs.length) {
+      const kr = document.createElement('div');
+      kr.className = 'kant-refs';
+      const lbl = document.createElement('div');
+      lbl.className = 'kr-label';
+      lbl.textContent = 'Handschriftliche Bemerkungen Kants';
+      kr.appendChild(lbl);
+      const phases = document.createElement('div');
+      phases.className = 'kr-phases';
+      sec.kantRefs.forEach(ref => {
+        const chip = document.createElement('span');
+        chip.className = 'kant-phase';
+        chip.textContent = `Phase ${ref.phase} · ${ref.vol} · ${ref.page}`;
+        phases.appendChild(chip);
+      });
+      kr.appendChild(phases);
+      inner.appendChild(kr);
+    }
+
+    // Paragraphs
+    const paras = secMap[sec.id] || [];
+    paras.forEach(p => {
+      const block = document.createElement('div');
+      block.className = 'para-block';
+      block.id = 'para-' + p.num;
+      block.setAttribute('data-num', p.num);
+      block.addEventListener('click', () => focusPara(p.num));
+
+      // Header row: §.N and AA page if available
+      const header = document.createElement('div');
+      header.className = 'para-num';
+      let headerHTML = `§. ${p.num}.`;
+      if (p.aaPage) {
+        headerHTML += ` <span class="aa-page">${p.aaPage}</span>`;
+      }
+      header.innerHTML = headerHTML;
+      block.appendChild(header);
+
+      // Body
+      const body = document.createElement('div');
+      body.className = 'para-body';
+      body.innerHTML = processText(p.text, p.glosses);
+      block.appendChild(body);
+
+      inner.appendChild(block);
+    });
+  });
+}
+
+function buildTOC() {
+  const scroll = document.getElementById('toc-scroll');
+  scroll.innerHTML = '';
+
+  // Group SECTIONS by part
+  let currentGroup = null;
+  let currentBody = null;
+
+  SECTIONS.forEach(sec => {
+    if (sec.type === 'part') {
+      // New top-level group
+      const group = document.createElement('div');
+      group.className = 'toc-group';
+
+      const header = document.createElement('div');
+      header.className = 'toc-group-header';
+      header.innerHTML = `${sec.label} <span>▾</span>`;
+      group.appendChild(header);
+
+      const body = document.createElement('div');
+      body.className = 'toc-group-body';
+      group.appendChild(body);
+
+      header.addEventListener('click', () => {
+        body.classList.toggle('collapsed');
+        const arrow = header.querySelector('span');
+        arrow.textContent = body.classList.contains('collapsed') ? '▸' : '▾';
+      });
+
+      scroll.appendChild(group);
+      currentGroup = group;
+      currentBody = body;
+
+      // Also add a TOC item for the part itself if it has paras
+      const partParas = secMap[sec.id] || [];
+      partParas.forEach(p => {
+        const item = buildTOCItem(p);
+        body.appendChild(item);
+      });
+
+    } else {
+      // Sub-section header (non-clickable label) then its paras
+      if (currentBody) {
+        const subLabel = document.createElement('div');
+        subLabel.style.cssText = 'font-family:Cinzel,serif;font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--faded);padding:4px 1rem 1px 1.2rem;';
+        subLabel.textContent = sec.label;
+        currentBody.appendChild(subLabel);
+
+        const paras = secMap[sec.id] || [];
+        paras.forEach(p => {
+          const item = buildTOCItem(p);
+          currentBody.appendChild(item);
+        });
+      }
+    }
+  });
+}
+
+function buildTOCItem(p) {
+  const item = document.createElement('div');
+  item.className = 'toc-item';
+  item.setAttribute('data-para', p.num);
+  item.innerHTML = `<span class="ti-num">§.${p.num}</span>
+    <span class="ti-label">${getParaSnippet(p)}</span>`;
+  item.addEventListener('click', () => scrollToPara(p.num));
+  return item;
+}
+
+function getParaSnippet(p) {
+  // Return first few words of paragraph as label
+  const plain = p.text.replace(/@@\d+@@/g, '').replace(/§\.\d+/g, '').trim();
+  const words = plain.split(/\s+/).slice(0, 6).join(' ');
+  return words + (plain.split(/\s+/).length > 6 ? '…' : '');
+}
+
+// TOC filter
+document.getElementById('toc-filter').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  document.querySelectorAll('.toc-item').forEach(item => {
+    const num = item.getAttribute('data-para');
+    const label = item.textContent.toLowerCase();
+    const show = !q || label.includes(q) || num === q;
+    item.style.display = show ? '' : 'none';
+  });
+});
+
+// TOC toggle
+document.getElementById('toc-toggle').addEventListener('click', () => {
+  document.getElementById('toc-panel').classList.toggle('hidden');
+});
+
+// Init
+buildTextContent();
+buildTOC();
+</script>
+</body>
+</html>
