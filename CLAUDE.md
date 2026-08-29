@@ -9,6 +9,7 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 
 | Path | What it is |
 | --- | --- |
+| [index.html](index.html) | GitHub Pages landing page linking to the three SPAs |
 | [Baumgarten reader/](Baumgarten%20reader/) | Single-file SPA: Latin reading guide for Baumgarten's *Metaphysica* with inline German glosses |
 | [Meier reader/](Meier%20reader/) | Single-file SPA: German reading guide for Meier's *Auszug*, with a side panel of parallel passages from the tradition |
 | [Porphyrian tree/](Porphyrian%20tree/) | Single-file SPA: a configurator for building genus–species trees under user-chosen division rules |
@@ -89,6 +90,14 @@ Editing guidance:
 - The Meier reader's `TRADITION` map (parallel passages from Wolff, the Scholastics,
   and Aristotle) is annotated for 10 paragraphs out of 563; the rest show a
   "no entries yet" placeholder. This is by design — annotation is ongoing work.
+
+## Deployment
+
+The three apps are served as-is via GitHub Pages from the `main` branch root (repo
+Settings → Pages → Source: Deploy from a branch → `main` / `/`). [index.html](index.html)
+is the landing page; it just links to the three `.html` files by their existing paths.
+Because there's no build step, "deploying" a content or code change is nothing more
+than pushing to `main` — Pages picks it up automatically.
 
 ## Git
 

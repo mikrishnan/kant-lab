@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', serif;
+    display: flex;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+  }
+
+  main { max-width: 640px; width: 100%; }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    font-size: 1.9rem;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  p.tagline {
+    color: var(--faded);
+    font-style: italic;
+    margin-bottom: 2.5rem;
+    font-size: 1.05rem;
+  }
+
+  ul.apps { list-style: none; }
+
+  ul.apps li {
+    border: 1px solid var(--accent-light);
+    background: var(--parchment-dark);
+    border-radius: 6px;
+    margin-bottom: 1.1rem;
+    padding: 1.1rem 1.3rem;
+  }
+
+  ul.apps a {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 1.1rem;
+  }
+
+  ul.apps a:hover { text-decoration: underline; }
+
+  ul.apps p {
+    margin-top: 0.4rem;
+    color: var(--ink);
+    font-size: 0.98rem;
+    line-height: 1.4;
+  }
+
+  footer {
+    margin-top: 2.5rem;
+    color: var(--faded);
+    font-size: 0.9rem;
+  }
+
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Kant Lab</h1>
+  <p class="tagline">Digital-humanities tools for reading the pre-Kantian German school philosophy that Kant lectured from.</p>
+
+  <ul class="apps">
+    <li>
+      <a href="Baumgarten reader/baumgartenreading-guide.html">Baumgarten Reader</a>
+      <p>Latin reading guide for Baumgarten's <em>Metaphysica</em>, with inline German glosses.</p>
+    </li>
+    <li>
+      <a href="Meier reader/meier-reading-guide.html">Meier Reader</a>
+      <p>German reading guide for Meier's <em>Auszug aus der Vernunftlehre</em>, with a side panel of parallel passages from the tradition.</p>
+    </li>
+    <li>
+      <a href="Porphyrian tree/porphyrian-tree.html">Porphyrian Tree</a>
+      <p>A configurator for building genus&ndash;species trees under user-chosen division rules.</p>
+    </li>
+  </ul>
+
+  <footer>Source on <a href="https://github.com/mikrishnan/kant-lab">GitHub</a>.</footer>
+</main>
+</body>
+</html>
