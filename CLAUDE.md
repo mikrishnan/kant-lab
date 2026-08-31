@@ -13,29 +13,87 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | [Baumgarten reader/](Baumgarten%20reader/) | Single-file SPA: Latin reading guide for Baumgarten's *Metaphysica* with inline German glosses |
 | [Meier reader/](Meier%20reader/) | Single-file SPA: German reading guide for Meier's *Auszug*, with a side panel of parallel passages from the tradition |
 | [Porphyrian tree/](Porphyrian%20tree/) | Single-file SPA: a configurator for building genus–species trees under user-chosen division rules |
+| [data/](data/) | Generated `.js` data files shared by the readers (Adickes' phase chronology, the Reflexionen) |
+| [scripts/](scripts/) | One-off Python extractors that produce `data/` from `Textfiles/` |
 | [Textfiles/](Textfiles/) | RTF source transcriptions the SPAs' embedded data was extracted from |
 
 Each SPA directory has its own `CLAUDE.md` with the data shapes and function map for
 that app, and a `README.md` aimed at a human opening it for the first time.
 
-## Architecture: these are single-file apps
+## Architecture: one HTML file per app, plus shared generated data
 
-Every app is **one self-contained `.html` file** — markup, a `<style>` block, and a
-`<script>` block with the text data hard-coded as top-level `const`s. There is:
+Each app is **one `.html` file** — markup, a `<style>` block, and a `<script>` block
+with its own text data hard-coded as top-level `const`s. There is:
 
 - **no build step** — no `package.json`, bundler, transpiler, or lockfile;
 - **no framework** — plain DOM (`document.createElement`, `addEventListener`);
 - **no runtime dependencies** except Google Fonts loaded from a CDN;
 - **no server, no persistence** — all state lives in module-scope `let`s and is lost on reload.
 
-To run one, open the file in a browser:
+The one exception to self-containment is [data/](data/). Kant's *Reflexionen* are far
+too large to inline (a megabyte per volume), so they live in generated `.js` files that
+the readers pull in with plain `<script src>` tags:
+
+| File | Contents |
+| --- | --- |
+| [data/phases-adickes.js](data/phases-adickes.js) | Adickes' chronology of the 33 phases of Kant's hand (AA XIV:XXXV–XLIII), hand-written, with his note on each phase verbatim. Exports `PHASES`, `phaseInfo()`, `phaseYears()`. |
+| [data/reflexionen-16-meier.js](data/reflexionen-16-meier.js) | The Reflexionen on Meier's *Auszug* (AA XVI). **Generated** — see below. |
+
+They are `<script src>` includes rather than `fetch()` on purpose: a classic script tag
+works from a `file://` URL, so the apps still open by double-clicking. Top-level `const`s
+in a classic script are visible to later scripts on the page, which is why the readers can
+see `REFL_ENTRIES` and `phaseInfo` without any module wiring.
+
+To run an app, open the file in a browser:
 
 ```sh
 open "Meier reader/meier-reading-guide.html"
 ```
 
 There are no tests and no linter. Verification is visual: open the file, click through
-the affected UI, and check the browser console for errors.
+the affected UI, and check the browser console for errors. Two cheap checks are worth
+running first, since no runtime is installed to catch a typo:
+
+```sh
+# syntax-check a script without a browser (macOS ships JavaScriptCore via osascript)
+osascript -l JavaScript -e 'ObjC.import("Foundation");
+  new Function($.NSString.stringWithContentsOfFileEncodingError("data/reflexionen-16-meier.js",4,null).js); "OK"'
+```
+
+Note there is **no `node` on this machine.** Use `osascript -l JavaScript` for anything
+that needs to evaluate JS outside a browser. Beware that `eval` there does not leak
+`const`/`let` to the enclosing scope — rewrite `^const ` to `var ` first if you need the
+values.
+
+## Regenerating the Reflexionen data
+
+`data/reflexionen-*.js` is machine-extracted and **must not be hand-edited**; corrections
+belong in the extractor so they survive the next run.
+
+```sh
+textutil -convert txt -output /tmp/vol16.txt Textfiles/Vol16reflexionenMeier.rtfd/TXT.rtf
+python3 scripts/parse_refl.py /tmp/vol16.txt L --out /tmp/refl16.json
+python3 scripts/emit.py /tmp/refl16.json data/reflexionen-16-meier.js \
+  --work "G. F. Meier, Auszug aus der Vernunftlehre" --vol 16 \
+  --src Vol16reflexionenMeier.rtfd --siglum L
+```
+
+`parse_refl.py` prints a report — entry count, how many §§ were attested vs. inferred,
+unresolved phase symbols, unparsed loci. **Read it.** It is the only signal that a change
+to the RTF or the regexes broke something.
+
+Things the extractor knows about the AA's conventions, which are easy to break:
+
+- Entries are `NNNN. <phases>. <sigla>. [<locus note>]`, separated by `__________`, and
+  gathered into `===========`-delimited blocks headed `L §. 19-35. IX 35-39. [Topic.]`.
+- The transcription uses ` ` for soft line breaks, `\xa0` for spaces, `―  N  ―` for
+  AA page markers, and occasionally puts a separator and the next entry header on one line.
+- Phase symbols include **`µ` (U+00B5, micro sign, 133×)** and **`ϕ` (U+03D5)**, neither of
+  which is in the `α-ω` range. A naive `[α-ω]` class silently drops 133 entries.
+- The phase expression and the sigla often share one terminating period
+  (`γ? η? κ? λ? ν−ξ?? L 3'.`), so the sigla has to be peeled back off.
+- A capital `Α` (U+0391) in the transcription is an OCR artefact of Latin `A` ("Αus"),
+  not a phase.
 
 ## Shared conventions
 
@@ -56,7 +114,20 @@ linkified at render time into click handlers that scroll to `#para-N`, and the s
 tracks the active paragraph. If you touch rendering, preserve the `para-N` id scheme.
 
 **Citations.** Academy Edition references are given in the `AA <volume>:<page>` form
-(e.g. `AA 16:76`). Baumgarten's *Metaphysica* is AA XVII, Meier's *Auszug* is AA XVI.
+(e.g. `AA 16:76`). Baumgarten's *Metaphysica* is AA XVII, Meier's *Auszug* is AA XVI,
+the Reflexionen on each are in those same volumes, Adickes' chronology of Kant's hand is
+AA XIV, and the Jäsche *Logik* is AA IX.
+
+**Attested vs. inferred.** This is a hard rule, not a preference. Anything the tool
+worked out for itself must be visibly marked as such, and anything the Academy Edition
+says must survive into the display rather than being normalised away. Concretely, in the
+Reflexionen layer: every entry carries `src` recording whether its § came from the entry's
+own locus note, from the enclosing AA block header, or from interpolation; interpolated
+entries render with a dashed border and an `interpolated §` tag; the AA's locus note and
+phase expression are both kept verbatim (`loc.raw`, `phRaw`) alongside the parse, query
+marks and parentheses included, because the uncertainty they express is Adickes'. When
+adding a new annotation layer, give raw source metadata and an inference flag a home in
+the data shape from the start.
 
 ## Working on the content
 
