@@ -38,11 +38,12 @@ the readers pull in with plain `<script src>` tags:
 | --- | --- |
 | [data/phases-adickes.js](data/phases-adickes.js) | Adickes' chronology of the 33 phases of Kant's hand (AA XIV:XXXV–XLIII), hand-written, with his note on each phase verbatim. Exports `PHASES`, `phaseInfo()`, `phaseYears()`. |
 | [data/reflexionen-16-meier.js](data/reflexionen-16-meier.js) | The Reflexionen on Meier's *Auszug* (AA XVI). **Generated** — see below. |
+| [data/metaphysica-17.js](data/metaphysica-17.js) | Baumgarten's *Metaphysica* itself (AA XVII): 804 §§ and the work's outline. **Generated** — see below. |
 
 They are `<script src>` includes rather than `fetch()` on purpose: a classic script tag
 works from a `file://` URL, so the apps still open by double-clicking. Top-level `const`s
 in a classic script are visible to later scripts on the page, which is why the readers can
-see `REFL_ENTRIES` and `phaseInfo` without any module wiring.
+see `REFL_ENTRIES`, `MET_PARAGRAPHS` and `phaseInfo` without any module wiring.
 
 To run an app, open the file in a browser:
 
@@ -65,10 +66,12 @@ that needs to evaluate JS outside a browser. Beware that `eval` there does not l
 `const`/`let` to the enclosing scope — rewrite `^const ` to `var ` first if you need the
 values.
 
-## Regenerating the Reflexionen data
+## Regenerating the generated data
 
-`data/reflexionen-*.js` is machine-extracted and **must not be hand-edited**; corrections
-belong in the extractor so they survive the next run.
+Everything in `data/` except `phases-adickes.js` is machine-extracted and **must not be
+hand-edited**; corrections belong in the extractor so they survive the next run.
+
+### The Reflexionen on Meier
 
 ```sh
 textutil -convert txt -output /tmp/vol16.txt Textfiles/Vol16reflexionenMeier.rtfd/TXT.rtf
@@ -77,6 +80,43 @@ python3 scripts/emit.py /tmp/refl16.json data/reflexionen-16-meier.js \
   --work "G. F. Meier, Auszug aus der Vernunftlehre" --vol 16 \
   --src Vol16reflexionenMeier.rtfd --siglum L
 ```
+
+### Baumgarten's Metaphysica
+
+```sh
+textutil -convert txt -output /tmp/vol17.txt Textfiles/Baumgarten.rtfd/TXT.rtf
+python3 scripts/parse_baum.py /tmp/vol17.txt data/metaphysica-17.js
+```
+
+`parse_baum.py` prints its own report — § count, the §§ AA XVII does not print, gloss
+totals, and the volume's own irregularities it worked around. Read it; it should end
+in `clean`.
+
+What that extractor knows about this transcription, which is easy to break:
+
+- A heading and the § after it often share one physical line, separated by U+2028.
+  Split on U+2028 as well as newline, and a real `§. N.` header then always stands
+  **alone** on its line. Relaxing that anchor makes every line that merely opens with
+  a cross-reference look like a new §, inventing two dozen duplicates.
+- A bare `§. N.` whose number has already gone by is a **closing cross-reference** the
+  transcription set on its own line, not a new §: § 100 ends
+  `... est bonum transcendentaliter, §. 99.` There are eight.
+- `― 24 ―` marks the *start* of AA page 24, and can repeat as the text band resumes
+  beneath Kant's Erläuterungen. `[3]` is Baumgarten's own 1757 pagination. Both are kept.
+- `|` marks a page break inside a word. Tight against the preceding character it
+  rejoins (`evolutio|nem` → `evolutionem`); with a space before it, it fell between two
+  whole words and becomes a space.
+- **Footnote asterisk counts are not indices.** They restart when a §'s footnotes run
+  over a page, three §§ continue into `a) b) c)`, and eight are simply mislabelled.
+  Markers pair with footnotes **by position**; the printed label is kept in `marks`.
+- Two readings look like misprints — § 10 `praepositio` for `propositio`, § 92
+  `methaphysice`. They are **not** corrected in the text. `SUSPECTED_MISPRINTS` in
+  the extractor records the conjecture, the reader underlines the printed word and
+  states the conjecture beneath the §, and the run aborts if a table entry no longer
+  matches its §.
+- A lettered marker's `)` closes nothing, which is what distinguishes `felicitasa)`
+  from `(ectypon, copia)`. Letter runs must start at `a` — § 728's lone `l)` is an OCR
+  of the enumerator `1)`.
 
 `parse_refl.py` prints a report — entry count, how many §§ were attested vs. inferred,
 unresolved phase symbols, unparsed loci. **Read it.** It is the only signal that a change
@@ -151,10 +191,15 @@ Editing guidance:
 
 ## Known gaps
 
-- The **Baumgarten reader** contains 135 of the *Metaphysica*'s ~1000 sections. The
-  `SECTIONS` table covers the whole work, but `PARAGRAPHS` is populated densely for
-  §§ 1–102 and then only sparsely (scattered §§ up to 950). Most sections in the
-  sidebar therefore render as an empty heading.
+- The **Baumgarten reader** now carries every § that AA XVII prints — 804 of them,
+  §§ 1–503 and §§ 700–1000. The remaining §§ 504–699 (Psychologia empirica, Sectiones
+  I–XVIII) are **not a gap in the tool**: AA XVII does not reprint them, putting them
+  in Bd. XV instead, and the reader shows the Academy Edition's own note saying so.
+  Filling them in would mean transcribing AA XV, which is not in `Textfiles/`.
+  Baumgarten's three prefaces are also not shown, the reader being keyed to § numbers.
+- The Reflexionen on Baumgarten are **not** wired up yet, though the sources are in
+  `Textfiles/` (`Vol17reflexionenBaum.rtfd`, `vol18reflexionenBaum.rtfd`, and
+  `Vol17erlauterungenBaum.rtf`). The Meier reader's Reflexionen panel is the model.
 - The **Meier reader** has a "Baumgarten · Metaphysica" tab in the header, but
   `switchWork()` only swaps the title string — there is no Baumgarten text behind it.
   The Baumgarten text lives in its own app.
