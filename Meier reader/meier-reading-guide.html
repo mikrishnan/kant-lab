@@ -220,6 +220,45 @@ header h1 {
   border-bottom-color: var(--sienna);
 }
 
+/* A cross-reference to a § this volume does not print — Baumgarten's §. 505-699
+   point into the Psychologia empirica, which AA XVII puts in Bd. XV. */
+.xref-absent {
+  color: var(--ink-faint);
+  border-bottom-style: dotted;
+  border-bottom-color: var(--ink-faint);
+  cursor: help;
+}
+.xref-absent:hover { color: var(--ink-faint); border-bottom-color: var(--ink-faint); }
+
+/* Baumgarten's own German equivalents, printed as footnotes in the Metaphysica
+   and set here at the word they gloss. Same amber as the Baumgarten reader. */
+.gloss-chip {
+  display: inline;
+  background: #fff8e8;
+  border: 1px solid #c8a055;
+  border-radius: 2px;
+  color: #7a4a00;
+  font-size: 0.86em;
+  font-style: italic;
+  padding: 0 4px;
+  margin: 0 2px;
+  white-space: normal;
+}
+.gloss-chip .gloss-marker {
+  font-style: normal;
+  font-size: 0.82em;
+  color: #c8a055;
+  margin-right: 3px;
+}
+
+.refl-empty {
+  padding: 1.1rem 1rem;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
 /* Part body (collapsible container) */
 .part-body { overflow: hidden; transition: none; }
 .part-body.collapsed { display: none; }
@@ -975,6 +1014,7 @@ header h1 {
      includes rather than fetch() so the page still works from a file:// URL. -->
 <script src="../data/phases-adickes.js"></script>
 <script src="../data/reflexionen-16-meier.js"></script>
+<script src="../data/metaphysica-17.js"></script>
 
 <script>
 // ── Data ──
@@ -1065,15 +1105,121 @@ let focusedPara = null;
 let activeFilters = { wolff: true, scholastic: true, aristotle: true };
 
 // ── Build sidebar ──
+// ── The two works ────────────────────────────────────────────────────────────
+// Both texts are rendered through one shape so the sidebar and the main column
+// do not have to know which work they are showing:
+//
+//   { id, title, min, max, paras, citation, parts: [ { ordinal, topic, range,
+//     sections: [ { sup, title, range } ] } ], glosses, marks, hasPanels }
+//
+// `sup` is the small label above a section heading — Meier's "Der erste
+// Abschnitt:", Baumgarten's "Caput I". Precomputing it here keeps the German
+// ordinal counting out of the renderer.
+
+const ORDINAL_WORDS = ['erste', 'andere', 'dritte', 'vierte', 'fünfte',
+                       'sechste', 'siebende', 'achte', 'neunte', 'zehnte'];
+
+function meierWork() {
+  return {
+    id: 'meier',
+    title: 'G. F. Meier, <em>Auszug aus der Vernunftlehre</em> (1752)',
+    min: 1, max: 563,
+    paras: MEIER.paras,
+    citation: CITATIONS,
+    hasPanels: true,
+    parts: HIERARCHY.map(part => {
+      const colon = part.title_de.indexOf(':');
+      return {
+        ordinal: colon >= 0 ? part.title_de.slice(0, colon).trim() : part.title_de,
+        topic: colon >= 0 ? part.title_de.slice(colon + 1).trim() : '',
+        range: part.para_range,
+        sections: (part.sections || []).map((sec, i) => ({
+          sup: 'Der ' + (ORDINAL_WORDS[i] || (i + 1) + '.') + ' Abschnitt:',
+          title: sec.title_de,
+          range: sec.para_range,
+        })),
+      };
+    }),
+  };
+}
+
+// Baumgarten comes from ../data/metaphysica-17.js, the same generated file the
+// Baumgarten reader uses. MET_SECTIONS is flat — Pars, then Caput and Sectio
+// beneath it — so the Capita and Sectiones are folded into one section list per
+// Pars, each keeping its own label. Ranges are taken from the §§ actually filed
+// under a section rather than asserted, so the §§ 504–699 AA XVII omits simply
+// leave no section behind.
+function baumgartenWork() {
+  const paras = {}, glosses = {}, marks = {}, citation = {}, bySection = {};
+  MET_PARAGRAPHS.forEach(p => {
+    const k = String(p.num);
+    paras[k] = p.text;
+    if (p.glosses && p.glosses.length) { glosses[k] = p.glosses; marks[k] = p.marks; }
+    if (p.aa) citation[k] = 'AA 17:' + p.aa + (p.aaEnd ? '–' + p.aaEnd : '');
+    (bySection[p.section] = bySection[p.section] || []).push(p.num);
+  });
+  const rangeOf = id => {
+    const ns = bySection[id];
+    return ns && ns.length ? [Math.min(...ns), Math.max(...ns)] : null;
+  };
+
+  const parts = [];
+  MET_SECTIONS.forEach(sec => {
+    const range = rangeOf(sec.id);
+    if (sec.type === 'part') {
+      const bits = sec.label.split('·');
+      parts.push({
+        ordinal: bits[0].trim(),
+        topic: bits.slice(1).join('·').trim(),
+        range: range,
+        sections: [],
+        _own: range,
+      });
+      return;
+    }
+    if (!parts.length || !range) return;    // a heading with no §§ of its own
+    const bits = sec.label.split('·');
+    parts[parts.length - 1].sections.push({
+      sup: bits[0].trim(),
+      title: bits.slice(1).join('·').trim() || bits[0].trim(),
+      range: range,
+    });
+  });
+
+  // A Pars spans everything filed beneath it, not just its own §§.
+  parts.forEach(pt => {
+    const all = pt.sections.map(x => x.range).concat(pt._own ? [pt._own] : []);
+    if (all.length) {
+      pt.range = [Math.min(...all.map(r => r[0])), Math.max(...all.map(r => r[1]))];
+    }
+    // A Pars with §§ of its own *and* sections (the Prolegomena) needs those §§
+    // to appear somewhere, so give them a section of their own.
+    if (pt._own && pt.sections.length) {
+      pt.sections.unshift({ sup: '', title: pt.topic || pt.ordinal, range: pt._own });
+    }
+    delete pt._own;
+  });
+
+  return {
+    id: 'baumgarten',
+    title: 'A. G. Baumgarten, <em>Metaphysica</em> (Editio IIII, 1757)',
+    min: 1, max: 1000,
+    paras, glosses, marks, citation,
+    hasPanels: false,
+    parts,
+  };
+}
+
+let WORK = meierWork();
+
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
   sidebar.innerHTML = '';
 
-  HIERARCHY.forEach((part, partIdx) => {
+  WORK.parts.forEach((part, partIdx) => {
     const hasSubSecs = part.sections && part.sections.length > 0;
-    const isOpenInitially = partIdx < 2; // intro + part I open by default
+    const isOpenInitially = partIdx < 2; // intro + first part open by default
 
-    // Part header (always clickable to jump, also toggles if has sub-secs)
     const header = document.createElement('div');
     header.className = 'part-header';
     header.dataset.partIdx = partIdx;
@@ -1085,7 +1231,6 @@ function buildSidebar() {
       toggle.dataset.toggleFor = partIdx;
       header.appendChild(toggle);
     } else {
-      // spacer
       const sp = document.createElement('span');
       sp.style.width = '18px';
       sp.style.flexShrink = '0';
@@ -1095,36 +1240,29 @@ function buildSidebar() {
     const textWrap = document.createElement('div');
     textWrap.className = 'part-header-text';
 
-    // Parse "Erster Haupttheil: Von der gelehrten Erkenntniss" → ordinal · title on one line
-    const colonIdx = part.title_de.indexOf(':');
-    const ordinal = colonIdx >= 0 ? part.title_de.slice(0, colonIdx).trim() : part.title_de;
-    const topic   = colonIdx >= 0 ? part.title_de.slice(colonIdx + 1).trim() : '';
-
     const ordinalEl = document.createElement('span');
     ordinalEl.className = 'part-ordinal';
-    ordinalEl.textContent = ordinal;
+    ordinalEl.textContent = part.ordinal;
     textWrap.appendChild(ordinalEl);
 
-    if (topic) {
+    if (part.topic) {
       const sep = document.createElement('span');
       sep.className = 'part-sep';
       sep.textContent = ': ';
       const titleEl = document.createElement('span');
       titleEl.className = 'part-title';
-      titleEl.textContent = topic;
+      titleEl.textContent = part.topic;
       textWrap.appendChild(sep);
       textWrap.appendChild(titleEl);
     }
-    // If no topic (e.g. Einleitung), the ordinal already carries the full title — no sep needed
 
     header.appendChild(textWrap);
 
     const rangeEl = document.createElement('span');
     rangeEl.className = 'part-range';
-    rangeEl.textContent = '§' + part.para_range[0] + '–' + part.para_range[1];
+    rangeEl.textContent = '§' + part.range[0] + '–' + part.range[1];
     header.appendChild(rangeEl);
 
-    // Click: jump to first para; if has sub-secs, also toggle
     header.addEventListener('click', () => {
       if (hasSubSecs) {
         const body = document.getElementById('part-body-' + partIdx);
@@ -1132,81 +1270,49 @@ function buildSidebar() {
         body.classList.toggle('collapsed');
         if (tog) tog.classList.toggle('open');
       }
-      // Jump to first para of this part
-      scrollToParaNum(part.para_range[0], false);
+      scrollToParaNum(part.range[0], false);
     });
 
     sidebar.appendChild(header);
 
-    // Part body
     const body = document.createElement('div');
     body.className = 'part-body' + (isOpenInitially ? '' : ' collapsed');
     body.id = 'part-body-' + partIdx;
 
-    // Ordinal words for Abschnitt labels
-    const ordinalWords = ['erste', 'andere', 'dritte', 'vierte', 'fünfte',
-                          'sechste', 'siebende', 'achte', 'neunte', 'zehnte'];
+    const items = hasSubSecs
+      ? part.sections
+      : [{ sup: '', title: part.topic || part.ordinal, range: part.range }];
 
-    if (hasSubSecs) {
-      part.sections.forEach((sec, secIdx) => {
-        const item = document.createElement('div');
-        item.className = 'nav-item';
-        item.dataset.firstPara = sec.para_range[0];
-        item.dataset.lastPara  = sec.para_range[1];
+    items.forEach(sec => {
+      const item = document.createElement('div');
+      item.className = 'nav-item' + (hasSubSecs ? '' : ' part-direct');
+      item.dataset.firstPara = sec.range[0];
+      item.dataset.lastPara  = sec.range[1];
 
-        // Line 1: "Der erste Abschnitt:"
+      if (sec.sup) {
         const labelEl = document.createElement('span');
         labelEl.className = 'nav-abschnitt-label';
-        const ord = ordinalWords[secIdx] || (secIdx + 1) + '.';
-        labelEl.textContent = 'Der ' + ord + ' Abschnitt:';
-
-        // Line 2: "von der gelehrten Erkenntniss überhaupt"
-        const titleEl = document.createElement('span');
-        titleEl.className = 'nav-abschnitt-title';
-        titleEl.textContent = sec.title_de;
-
-        // Line 3: "(§10–§40)"
-        const rangeEl = document.createElement('span');
-        rangeEl.className = 'nav-abschnitt-range';
-        rangeEl.textContent = '(§\u2009' + sec.para_range[0] + '–§\u2009' + sec.para_range[1] + ')';
-
+        labelEl.textContent = sec.sup;
         item.appendChild(labelEl);
-        item.appendChild(titleEl);
-        item.appendChild(rangeEl);
-
-        item.addEventListener('click', (e) => {
-          e.stopPropagation();
-          scrollToParaNum(sec.para_range[0], true);
-        });
-
-        body.appendChild(item);
-      });
-    } else {
-      // No sub-sections: single nav item — just the italic title and range
-      const item = document.createElement('div');
-      item.className = 'nav-item part-direct';
-      item.dataset.firstPara = part.para_range[0];
-      item.dataset.lastPara  = part.para_range[1];
+      }
 
       const titleEl = document.createElement('span');
       titleEl.className = 'nav-abschnitt-title';
-      // For parts without sub-sections, show a neutral label
-      titleEl.textContent = part.title_de.split(':').slice(-1)[0].trim();
+      titleEl.textContent = sec.title;
+      item.appendChild(titleEl);
 
       const rangeEl = document.createElement('span');
       rangeEl.className = 'nav-abschnitt-range';
-      rangeEl.textContent = '(§\u2009' + part.para_range[0] + '–§\u2009' + part.para_range[1] + ')';
-
-      item.appendChild(titleEl);
+      rangeEl.textContent = '(§\u2009' + sec.range[0] + '–§\u2009' + sec.range[1] + ')';
       item.appendChild(rangeEl);
 
       item.addEventListener('click', (e) => {
         e.stopPropagation();
-        scrollToParaNum(part.para_range[0], true);
+        scrollToParaNum(sec.range[0], true);
       });
 
       body.appendChild(item);
-    }
+    });
 
     sidebar.appendChild(body);
   });
@@ -1217,89 +1323,100 @@ function buildPrimaryContent() {
   const content = document.getElementById('primaryContent');
   content.innerHTML = '';
 
-  HIERARCHY.forEach((part, partIdx) => {
+  WORK.parts.forEach(part => {
     if (part.sections && part.sections.length > 0) {
-      part.sections.forEach(sec => {
-        appendSection(content, sec.para_range, sec.sec_num, sec.title_de, part.title_en);
-      });
+      part.sections.forEach(sec => appendSection(content, sec.range, sec.sup, sec.title));
     } else {
-      appendSection(content, part.para_range, null, part.title_de.split(':').slice(-1)[0].trim(), null);
+      appendSection(content, part.range, '', part.topic || part.ordinal);
     }
   });
 }
 
 // ── Render paragraph text with clickable cross-references ──
-// Matches patterns like:  §.14.  §.15. 16.  §.25-30.  §.116-121.  §.41-65.
-function renderParaText(text) {
+// Matches Meier's compound forms — §.14, §.15. 16., §.25-30, §.116-121 — and
+// Baumgarten's spaced form, §. 640. Returns a DocumentFragment: unlike the
+// Baumgarten reader this path never touches innerHTML.
+//
+// Baumgarten's text also carries @@N@@ where the volume prints a footnote
+// marker; those become amber chips holding his own German equivalent, labelled
+// with the marker as the volume sets it. See the Baumgarten reader's CLAUDE.md
+// for why the label cannot be recomputed from N.
+function renderParaText(text, paraNum) {
   const frag = document.createDocumentFragment();
-  // Pattern: §. followed by digits, optionally followed by more digit groups or ranges,
-  // all terminated before a non-digit/non-dot/non-dash/non-space character that isn't another number
-  // We'll tokenise the text by finding §.N[...] sequences
-  const re = /§\.\d+(?:[-.\s]+\d+)*\.?/g;
-  let last = 0;
-  let m;
+  const glosses = (WORK.glosses || {})[String(paraNum)] || [];
+  const marks   = (WORK.marks   || {})[String(paraNum)] || [];
+
+  // No trailing `\.?`: in Meier the dot of `§.14.` is part of the citation, but
+  // in Baumgarten's Latin `interne, §. 126. Ergo sum` it ends the sentence, and
+  // swallowing it into the link drops that punctuation from the text.
+  const re = /§+\.?\s*\d+(?:[-.\s]+\d+)*|@@(\d+)@@/g;
+  let last = 0, m;
   while ((m = re.exec(text)) !== null) {
-    // Text before this match
-    if (m.index > last) {
-      frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+    if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+    last = m.index + m[0].length;
+
+    if (m[1] !== undefined) {
+      const idx = parseInt(m[1], 10) - 1;
+      const german = glosses[idx];
+      if (!german) continue;
+      const chip = document.createElement('span');
+      chip.className = 'gloss-chip';
+      const mk = document.createElement('span');
+      mk.className = 'gloss-marker';
+      mk.textContent = marks[idx] || '*';
+      chip.appendChild(mk);
+      chip.appendChild(document.createTextNode(german));
+      chip.title = "Baumgarten's German equivalent";
+      frag.appendChild(chip);
+      continue;
     }
-    // Extract all paragraph numbers from this reference group
+
     const rawRef = m[0];
     const nums = rawRef.match(/\d+/g) || [];
-    // Build a clickable span
     const span = document.createElement('span');
     span.className = 'xref';
-    // Display: normalise spaces, trim trailing dot
-    const display = rawRef.replace(/\s+/g, '\u202f').replace(/\.$/, '');
-    span.textContent = display;
-    // Tooltip: list all referenced §§
-    const validNums = nums.filter(n => parseInt(n) >= 1 && parseInt(n) <= 563);
-    span.title = validNums.length > 1
-      ? 'Jump to §\u2009' + validNums[0] + ' (also refs: ' + validNums.slice(1).map(n => '§'+n).join(', ') + ')'
-      : 'Jump to §\u2009' + (validNums[0] || nums[0]);
-    // Clicking jumps to first referenced paragraph
+    span.textContent = rawRef.replace(/\s+/g, '\u202f');
+    const valid = nums.filter(n => {
+      const v = parseInt(n, 10);
+      return v >= WORK.min && v <= WORK.max && WORK.paras[n] !== undefined;
+    });
+    span.title = valid.length > 1
+      ? 'Jump to §\u2009' + valid[0] + ' (also refs: ' + valid.slice(1).map(n => '§' + n).join(', ') + ')'
+      : (valid.length ? 'Jump to §\u2009' + valid[0]
+                      : 'Not in this volume: §\u2009' + nums[0]);
+    if (!valid.length) span.classList.add('xref-absent');
     span.addEventListener('click', (e) => {
       e.stopPropagation();
-      const target = parseInt(nums[0]);
-      if (target >= 1 && target <= 563) scrollToParaNum(target, true);
+      if (valid.length) scrollToParaNum(parseInt(valid[0], 10), true);
     });
     frag.appendChild(span);
-    last = m.index + m[0].length;
   }
-  // Remaining text
-  if (last < text.length) {
-    frag.appendChild(document.createTextNode(text.slice(last)));
-  }
+  if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
   return frag;
 }
 
-function appendSection(container, paraRange, secNum, titleDe, partLabel) {
+function appendSection(container, range, sup, title) {
   const block = document.createElement('div');
   block.className = 'section-block';
-  block.id = 'section-' + paraRange[0];
+  block.id = 'section-' + range[0];
 
   const heading = document.createElement('div');
   heading.className = 'section-heading';
 
-  const sup = document.createElement('span');
-  sup.className = 'section-sup';
-  sup.textContent = secNum
-    ? (secNum === 1 ? '1.' : secNum === 2 ? '2.' : secNum === 3 ? '3.' :
-       secNum === 4 ? '4.' : secNum === 5 ? '5.' : secNum === 6 ? '6.' :
-       secNum === 7 ? '7.' : secNum === 8 ? '8.' : secNum === 9 ? '9.' : '10.')
-      + ' Abschnitt'
-    : (partLabel || '');
+  const supEl = document.createElement('span');
+  supEl.className = 'section-sup';
+  supEl.textContent = sup || '';
 
   const titleEl = document.createElement('span');
   titleEl.className = 'section-title-de';
-  titleEl.textContent = titleDe;
+  titleEl.textContent = title;
 
-  heading.appendChild(sup);
+  heading.appendChild(supEl);
   heading.appendChild(titleEl);
   block.appendChild(heading);
 
-  for (let n = paraRange[0]; n <= paraRange[1]; n++) {
-    const text = MEIER.paras[String(n)];
+  for (let n = range[0]; n <= range[1]; n++) {
+    const text = WORK.paras[String(n)];
     if (!text) continue;
 
     const paraBlock = document.createElement('div');
@@ -1313,22 +1430,20 @@ function appendSection(container, paraRange, secNum, titleDe, partLabel) {
 
     const textDiv = document.createElement('div');
     textDiv.className = 'para-text';
-    textDiv.appendChild(renderParaText(text));
-    // Append AA citation tag
-    const cite = CITATIONS[String(n)];
+    textDiv.appendChild(renderParaText(text, n));
+
+    const cite = WORK.citation[String(n)];
     if (cite) {
       const citeEl = document.createElement('span');
       citeEl.className = 'para-cite';
       citeEl.textContent = cite;
-      citeEl.title = 'Academy Edition citation for § ' + n;
+      citeEl.title = 'Academy Edition citation for § ' + n;
       textDiv.appendChild(citeEl);
     }
 
     paraBlock.appendChild(numDiv);
     paraBlock.appendChild(textDiv);
-
     paraBlock.addEventListener('click', () => focusParagraph(n));
-
     block.appendChild(paraBlock);
   }
 
@@ -1349,11 +1464,11 @@ function focusParagraph(num) {
   // Update sidebar active state
   updateSidebarActive(num);
 
-  // Update tradition panel
-  renderTraditionForPara(num);
-
-  // …and Kant's Reflexionen on the same §
-  renderReflForPara(num);
+  // Both panels hold Meier material only; see resetPanels().
+  if (WORK.hasPanels) {
+    renderTraditionForPara(num);
+    renderReflForPara(num);
+  }
 }
 
 // ── Tradition panel rendering ──
@@ -1433,7 +1548,7 @@ function scrollToParaNum(num, andFocus) {
 
 function jumpToSection() {
   const val = parseInt(document.getElementById('jumpInput').value);
-  if (val >= 1 && val <= 563) {
+  if (val >= WORK.min && val <= WORK.max && WORK.paras[String(val)] !== undefined) {
     scrollToParaNum(val, true);
     document.getElementById('jumpInput').value = '';
   }
@@ -1466,14 +1581,54 @@ primaryPanel.addEventListener('scroll', () => {
 
 // ── Work switcher ──
 function switchWork(work, btn) {
+  if (WORK.id === work) return;
   document.querySelectorAll('.work-tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
-  const title = document.getElementById('workTitle');
-  if (work === 'meier') {
-    title.innerHTML = 'G. F. Meier, <em>Auszug aus der Vernunftlehre</em> (1752)';
-  } else {
-    title.innerHTML = 'A. G. Baumgarten, <em>Metaphysica</em> (1739) <span style="font-size:12px;color:var(--ink-faint);font-style:normal;">(text pending)</span>';
-  }
+
+  WORK = work === 'baumgarten' ? baumgartenWork() : meierWork();
+  document.getElementById('workTitle').innerHTML = WORK.title;
+
+  focusedPara = null;
+  clearHighlights();
+  buildSidebar();
+  buildPrimaryContent();
+  document.getElementById('primaryPanel').scrollTop = 0;
+
+  const jump = document.getElementById('jumpInput');
+  jump.min = WORK.min;
+  jump.max = WORK.max;
+  jump.placeholder = WORK.min + '–' + WORK.max;
+  jump.value = '';
+
+  resetPanels();
+}
+
+// The side panels are both keyed to Meier: TRADITION is indexed by his § numbers
+// and the Reflexionen are those of AA XVI, on the Auszug. Showing either against
+// Baumgarten's §§ would attach notes to passages they were never written on, so
+// the panels reset to a placeholder saying exactly that. This rewrites the
+// placeholder's prose only — #traditionActive and #reflScroll are left in place,
+// since switching back to Meier has to find them.
+function resetPanels() {
+  const placeholder = document.getElementById('traditionPlaceholder');
+  const active = document.getElementById('traditionActive');
+  placeholder.style.display = '';
+  active.style.display = 'none';
+  document.getElementById('phParaNum').textContent = '';
+
+  placeholder.querySelector('p').innerHTML = WORK.hasPanels
+    ? 'Click any paragraph on the left to see parallel and contrasting passages '
+      + 'from the tradition here.'
+    : 'The parallel passages are annotated against Meier\'s §§. None have been '
+      + 'written for the <em>Metaphysica</em> yet — switch back to the '
+      + '<em>Auszug</em> to use this panel.';
+
+  document.getElementById('reflScroll').innerHTML = WORK.hasPanels
+    ? ''
+    : '<div class="refl-empty">Kant\'s Reflexionen on the <em>Metaphysica</em> are '
+      + 'AA XVII 3489–4846 and AA XVIII 4847–6455, and are not loaded into this '
+      + 'reader yet. The notes this panel holds are those on Meier\'s '
+      + '<em>Auszug</em>, AA XVI, and are not shown against Baumgarten\'s §§.</div>';
 }
 
 // ── Resizer ──

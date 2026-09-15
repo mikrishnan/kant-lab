@@ -205,9 +205,11 @@ Editing guidance:
 - The Reflexionen on Baumgarten are **not** wired up yet, though the sources are in
   `Textfiles/` (`Vol17reflexionenBaum.rtfd`, `vol18reflexionenBaum.rtfd`, and
   `Vol17erlauterungenBaum.rtf`). The Meier reader's Reflexionen panel is the model.
-- The **Meier reader** has a "Baumgarten · Metaphysica" tab in the header, but
-  `switchWork()` only swaps the title string — there is no Baumgarten text behind it.
-  The Baumgarten text lives in its own app.
+- The **Meier reader**'s "Baumgarten · Metaphysica" tab now renders the real text,
+  from the same `data/metaphysica-17.js` the Baumgarten reader uses. Its two side
+  panels stay Meier-only, though: `TRADITION` is keyed to Meier's §§ and the
+  Reflexionen are AA XVI, on the *Auszug*. Both say so rather than showing Meier's
+  notes against Baumgarten's §§.
 - The Meier reader's `TRADITION` map (parallel passages from Wolff, the Scholastics,
   and Aristotle) is annotated for 10 paragraphs out of 563; the rest show a
   "no entries yet" placeholder. This is by design — annotation is ongoing work.

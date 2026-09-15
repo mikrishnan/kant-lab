@@ -49,7 +49,33 @@ Make targeted string replacements, or regenerate the whole line from a script.
 - `MEIER.paras` — `{ "1": "Die Vernunftlehre oder die Vernunftkunst …", … }`, string
   keys. 562 of the work's 563 §§ are present.
 
-`HIERARCHY` is what the sidebar and main column are built from — five top-level parts:
+## The work model
+
+The reader shows two texts through one shape, so the sidebar and the main column never
+have to know which is loaded:
+
+```js
+WORK = { id, title, min, max, paras, citation, glosses, marks, hasPanels,
+         parts: [ { ordinal, topic, range, sections: [ { sup, title, range } ] } ] }
+```
+
+`meierWork()` derives it from `HIERARCHY`; `baumgartenWork()` derives it from
+`MET_SECTIONS` / `MET_PARAGRAPHS` in `../data/metaphysica-17.js` — the same generated
+file the Baumgarten reader uses, so there is one copy of the *Metaphysica* in the repo.
+
+- `sup` is the small label above a section heading — Meier's "Der erste Abschnitt:",
+  Baumgarten's "Caput I". Precomputing it keeps the German ordinal counting out of the
+  renderer.
+- Baumgarten's `MET_SECTIONS` is flat and three deep (Pars → Caput → Sectio), so the
+  Capita and Sectiones are folded into one section list per Pars. Section ranges come
+  from the §§ actually filed under each id, never asserted — which is why the §§ 504–699
+  AA XVII omits simply leave no section behind, and why a heading with no §§ of its own
+  is skipped (60 sections render out of 74 in the data, with all 804 §§ accounted for).
+- `glosses`/`marks` are Baumgarten-only. `renderParaText` turns his `@@N@@` markers into
+  amber chips, labelled with `marks[N-1]` — the label the volume prints, which cannot be
+  recomputed from `N`. See the Baumgarten reader's CLAUDE.md.
+
+`HIERARCHY` is what `meierWork()` is built from — five top-level parts:
 
 ```js
 { id: 'part1', level: 'top',
@@ -132,9 +158,14 @@ should keep saying so.
   from the topic.
 - `buildPrimaryContent()` → `appendSection()` — emits one `.section-block` per
   *Abschnitt*, then one `.para-block#para-N` per § in its range.
-- `renderParaText(text)` — tokenises cross-references with
-  `/§\.\d+(?:[-.\s]+\d+)*\.?/g`, which handles the compound forms Meier uses
-  (`§.15. 16.`, `§.116-121.`). Returns a `DocumentFragment`; unlike the Baumgarten
+- `renderParaText(text, paraNum)` — tokenises cross-references and Baumgarten's
+  `@@N@@` gloss markers in one pass. Handles the compound forms Meier uses
+  (`§.15. 16.`, `§.116-121.`) and Baumgarten's spaced `§. 640`. The pattern
+  deliberately does **not** take a trailing dot: in Meier the dot of `§.14.` belongs to
+  the citation, but in Baumgarten's `interne, §. 126. Ergo sum` it ends the sentence, and
+  pulling it into the link drops it from the text. A reference to a § the loaded work
+  does not have gets `.xref-absent` and no click target — Baumgarten's `§. 505-699`
+  point into the volume's gap. Returns a `DocumentFragment`; unlike the Baumgarten
   reader this path never touches `innerHTML`.
 - `focusParagraph(n)` — highlights, syncs the sidebar, and repopulates the tradition
   panel. `scrollToParaNum(n, andFocus)` is the navigation entry point.
@@ -144,12 +175,15 @@ should keep saying so.
 
 ## Gotchas
 
-- **The "Baumgarten · Metaphysica" tab is a stub.** `switchWork()` only rewrites the
-  title string; there is no Baumgarten text in this file. That text lives in
-  [../Baumgarten reader/](../Baumgarten%20reader/) as its own app.
-- The § range `1–563` is hard-coded in four places: the `#jumpInput` `min`/`max`
-  attributes, `jumpToSection()`, and twice inside `renderParaText`. Change all of them
-  together.
+- **Both works share one renderer, and the side panels do not.** `switchWork()` swaps
+  `WORK` and rebuilds the sidebar and the main column. But `TRADITION` is indexed by
+  Meier's § numbers and the Reflexionen are AA XVI, *on the Auszug* — neither says
+  anything about Baumgarten's §§. `WORK.hasPanels` is false for Baumgarten,
+  `focusParagraph()` skips both panels, and `resetPanels()` puts a note in each saying
+  what they hold. Do not let Meier's notes render against Baumgarten's text.
+- The § range is no longer hard-coded: `WORK.min`/`WORK.max` drive `jumpToSection()`
+  and `renderParaText()`, and `switchWork()` resets the `#jumpInput` attributes. The
+  `min`/`max` in the markup are only the initial Meier values.
 - `MEIER.nav` and `HIERARCHY` overlap. If you correct a section title or range, fix it
   in `HIERARCHY` (what renders) and consider whether `nav` should follow.
 - The scroll-sync handler on `#primaryPanel` no-ops whenever a paragraph is focused, and
