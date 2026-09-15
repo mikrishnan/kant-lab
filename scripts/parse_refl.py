@@ -93,18 +93,30 @@ def parse_group_header(block, siglum):
 # which says something different about where on the page Kant wrote the note.
 LOCUS_KINDS = r'(?:Zu|Gegen[üu]ber|Neben|Zwischen|[ÜU]ber|Unter|Nach|In)'
 
-_LOCUS_CORE = (
-    r'(?P<kind>' + LOCUS_KINDS + r')'
-    r'\s*(?:von|dem|des|der)?\s*L?'
-    r'\s*§+\.?\s*'
-    r'(?P<nums>\d+[a-z]?(?:\s*[-–]\s*\d+)?(?:\s*\.\s*\d+[a-z]?)*)'
-    r'(?P<qual>[^\n:]{0,80}?)'
-)
+def _locus_core(siglum):
+    """The siglum sits between the preposition and the §, and in the Baumgarten
+    volumes it is usually fused to it — AA XVI writes `Zu L §. 15`, AA XVII and
+    XVIII write `ZuM §. 11` with no space. Both forms have to parse, so the
+    siglum is optional and may be flush against the preposition."""
+    return (
+        r'(?P<kind>' + LOCUS_KINDS + r')'
+        r'\s*(?:von|dem|des|der)?\s*' + siglum + r'?'
+        r'\s*§+\.?\s*'
+        r'(?P<nums>\d+[a-z]?(?:\s*[-–]\s*\d+)?(?:\s*\.\s*\d+[a-z]?)*)'
+        r'(?P<qual>[^\n:]{0,80}?)'
+    )
 
-# mid-line form, terminated by a colon
-LOCUS_INLINE_RE = re.compile(_LOCUS_CORE + r'\s*:', re.I)
-# end-of-line form, colon optional
-LOCUS_RE = re.compile(_LOCUS_CORE + r'\s*:?\s*$', re.I)
+
+# Set by configure(); the default keeps the module importable on its own.
+LOCUS_INLINE_RE = re.compile(_locus_core('L') + r'\s*:', re.I)
+LOCUS_RE = re.compile(_locus_core('L') + r'\s*:?\s*$', re.I)
+
+
+def configure(siglum):
+    """Point the locus patterns at the handbook this volume annotates."""
+    global LOCUS_INLINE_RE, LOCUS_RE
+    LOCUS_INLINE_RE = re.compile(_locus_core(siglum) + r'\s*:', re.I)
+    LOCUS_RE = re.compile(_locus_core(siglum) + r'\s*:?\s*$', re.I)
 
 
 KIND_MAP = [
@@ -166,9 +178,17 @@ def parse_locus(text):
     return loc, (text[:m.start()] + text[m.end():])
 
 
+# Where Adickes gives a prose spread instead of phase symbols. AA XVII and XVIII
+# write the decade form several ways — "70er Jahre", "60er-70er Jahre",
+# "60er — 70er Jahre", "70er- 80er Jahre" — so the dash, the spacing and the
+# repeated "er" all have to be optional.
 PROSE_DATE_RE = re.compile(
-    r'^\s*((?:[ΑA]us\s+verschiedenen\s+Zeiten[^.]*|[\d]{2}\s*[-–]\s*[\d]{2}er\s+Jahre'
-    r'|[\d]{2}er\s+Jahre)[^.]*)\.\s*(.*)$', re.I)
+    r'^\s*((?:[ΑA]us\s+verschiedenen\s+Zeiten[^.]*'
+    r'|\d{2}(?:er)?\s*[-–—]\s*\d{2}er\s+Jahre'
+    r'|\d{2}er\s+Jahre'
+    # a bare year or year range, "1790." / "1788-1790."
+    r'|1[678]\d{2}(?:\s*[-–—]\s*1[678]\d{2})?'
+    r')[^.]*)\.\s*(.*)$', re.I)
 
 PHASE_CHARS = 'α-ωµϕ'   # µ = U+00B5 micro sign, ϕ = U+03D5, both as transcribed
 PHASE_HEAD_RE = re.compile(
@@ -210,8 +230,12 @@ def parse_entry_header(rest, siglum):
     # "γ? η? κ? λ? ν−ξ?? L 3'" — the phase expression and the sigla share a
     # terminating period, so peel a trailing sigla back off into `rest`.
     if out['phaseRaw']:
+        # AA XVI separates the two with a space; AA XVII and XVIII often do not,
+        # running the sigla straight on — "ε−ι? (ξ?)M 63" — so allow the split
+        # after a closing paren or a query mark with no space at all.
         peel = re.match(r'^(?P<ph>.*?[' + PHASE_CHARS + r'][^A-Z]*?)'
-                        r'\s+(?P<sig>[A-Z]\s*[\dIVXLC].*)$', out['phaseRaw'])
+                        r'(?:\s+|(?<=[)?]))(?P<sig>[A-Z]\s*[\dIVXLC].*)$',
+                        out['phaseRaw'])
         if peel:
             out['phaseRaw'] = peel.group('ph').strip()
             rest = peel.group('sig').strip() + '. ' + rest
@@ -233,6 +257,7 @@ def parse_entry_header(rest, siglum):
 # ── main pass ────────────────────────────────────────────────────────────────
 
 def parse(path, siglum):
+    configure(siglum)
     lines = load(path).split('\n')
 
     groups = []          # {header:…, entries:[…]}
@@ -288,8 +313,39 @@ def parse(path, siglum):
     out = []
     for gi, g in enumerate(groups):
         for e in g['entries']:
-            h = parse_entry_header(e['headerRest'], siglum)
             body = e['body'][:]
+            # Some entries put the number alone on its line and the phase and
+            # sigla on the next — "3528." then "60er-70er Jahre. M 13." — which
+            # otherwise leaves the header empty and the dating stranded at the
+            # head of the text. Promote that line, but only when it really is a
+            # header: it has to yield a dating *and* a sigla, or § 3538, whose
+            # text simply begins "determinatio entis…", would be eaten.
+            if not e['headerRest'].strip() and body:
+                # The phase expression itself is sometimes broken across soft
+                # line breaks — "3719." / "ε2?" / "ι2?" — so gather the short
+                # lines that hold nothing but phase notation before trying.
+                take = 0
+                while (take < len(body) and take < 4
+                       and re.fullmatch(r'[' + PHASE_CHARS + r'\d?!()\[\]«»,.\s−–-]{1,14}',
+                                        body[take] or '')
+                       and re.search(r'[' + PHASE_CHARS + r']', body[take])):
+                    take += 1
+                if take:
+                    merged = ' '.join(body[:take]).strip()
+                    rest = body[take] if take < len(body) else ''
+                    trial = parse_entry_header(merged + '. ' + rest, siglum)
+                    if trial['phases'] and trial['siglaRaw']:
+                        del body[:take + 1]
+                        e['headerRest'] = merged + '. ' + rest
+                    else:
+                        e['headerRest'] = merged + '.'
+                        del body[:take]
+                else:
+                    trial = parse_entry_header(body[0], siglum)
+                    if (trial['phases'] or trial['proseDating']) and trial['siglaRaw']:
+                        e['headerRest'] = body.pop(0)
+
+            h = parse_entry_header(e['headerRest'], siglum)
             locus = h['locus']
 
             # locus note may be on its own line at the head of the body

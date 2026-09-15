@@ -293,6 +293,7 @@ def parse(path, report):
     stack = {}            # heading kind → id fragment, for building nested ids
     cur_sec = cur_para = None
     aa = None
+    ed = None
     last_num = 0
     pending_note = None
     i = start
@@ -345,6 +346,8 @@ def parse(path, report):
         }
         if cur_para['aaEnd'] != cur_para['aa']:
             rec['aaEnd'] = cur_para['aaEnd']
+        if cur_para['edEnd'] != cur_para['ed']:
+            rec['edEnd'] = cur_para['edEnd']
         if not body:
             report['emptyBody'].append(num)
         if cur_para['aa'] is None:
@@ -372,6 +375,19 @@ def parse(path, report):
         if RULE.match(bare):
             i += 1
             continue
+
+        # Baumgarten's own pagination runs on until the next bracket, so it is
+        # carried forward the way the AA page is. Every § then has one, which is
+        # what lets Kant's Reflexionen — located by handbook page, `M 392'.` —
+        # be matched to the §§ printed on that page.
+        edm = ED_PAGE.search(bare)
+        if edm:
+            ed = int(edm.group(1))
+            report['edPages'].add(ed)
+            if cur_para is not None and cur_para['ed'] is None:
+                cur_para['ed'] = ed
+            if cur_para is not None:
+                cur_para['edEnd'] = ed
 
         m = AA_PAGE.match(bare)
         if m:
@@ -477,8 +493,10 @@ def parse(path, report):
                 report['edPages'].add(int(edp))
             if cur_sec is None:
                 sys.exit(f'error: § {num} appears before any heading')
+            if edp:
+                ed = int(edp)
             cur_para = {'num': num, 'section': cur_sec, 'aa': aa, 'aaEnd': aa,
-                        'ed': int(edp) if edp else None, 'body': [], 'glosses': []}
+                        'ed': ed, 'edEnd': ed, 'body': [], 'glosses': []}
             last_num = num
             i += 1
             continue
@@ -489,10 +507,6 @@ def parse(path, report):
             continue
 
         if cur_para is not None:
-            if cur_para['ed'] is None:
-                edp = ED_PAGE.search(bare)
-                if edp:
-                    cur_para['ed'] = int(edp.group(1))
             cur_para['body'].append(bare)
         else:
             report['orphanLines'].append((i, bare[:80]))
@@ -541,7 +555,10 @@ HEADER = """/* ─────────────────────�
               runs over. null for the §§ that precede the volume's first page
               marker — the page is not stated there and is not guessed at.
      ed       page of Baumgarten's own 1757 pagination, which the AA prints in
-              brackets; null where no bracket falls inside the §
+              brackets, carried forward from the last bracket so every § has
+              one; edEnd where a § runs over a page. This is what lets Kant's
+              Reflexionen, which are located by handbook page (`M 392'.`), be
+              matched to the §§ printed there
      text     the Latin, with @@N@@ standing at the Nth footnote marker and
               Baumgarten's cross-references left in his own form, `§.14`
      glosses  his German equivalents; glosses[N-1] answers to @@N@@
