@@ -341,6 +341,104 @@ header h1 {
 }
 .panel-work-title { font-style: italic; font-size: 13.5px; color: var(--sienna); }
 
+/* ── search, in the primary panel header and the annotation panel ───────── */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.search-box input {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  background: var(--parchment);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  padding: 3px 7px;
+  width: 170px;
+  outline: none;
+}
+.search-box input:focus { border-color: var(--prussian); }
+.search-box input::placeholder { color: var(--ink-faint); font-style: italic; }
+.search-count {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  min-width: 62px;
+  text-align: right;
+}
+.search-nav {
+  font-family: var(--font-display);
+  font-size: 11px;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--ink-faint);
+  padding: 1px 6px;
+  cursor: pointer;
+}
+.search-nav:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-faint); }
+.search-nav:disabled { opacity: 0.35; cursor: default; }
+
+/* a hit inside the primary text */
+.search-hit { background: rgba(196,160,60,0.32); border-radius: 1px; }
+.search-hit.current {
+  background: var(--sienna);
+  color: var(--parchment);
+}
+
+/* ── annotation search results ──────────────────────────────────────────── */
+.annot-results { flex: 1; overflow-y: auto; padding: 4px 0 40px; }
+.annot-summary {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 10px 18px 6px;
+  border-bottom: 1px solid var(--rule-light);
+}
+.annot-hit {
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--rule-light);
+  cursor: pointer;
+}
+.annot-hit:hover { background: var(--parchment-dark); }
+.annot-hit-head {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-bottom: 3px;
+}
+.annot-kind {
+  font-family: var(--font-display);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid var(--rule);
+  padding: 1px 5px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+.annot-kind.refl { border-color: var(--sienna); color: var(--sienna); }
+.annot-where {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--prussian);
+}
+.annot-who { font-style: italic; font-size: 12px; color: var(--ink-faint); }
+.annot-snippet { font-size: 12.5px; line-height: 1.5; color: var(--ink); }
+.annot-snippet mark { background: rgba(196,160,60,0.38); color: inherit; }
+.annot-none {
+  padding: 1.1rem 1.1rem;
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.55;
+  color: var(--ink-faint);
+}
+
 .primary-content { padding: 36px 44px 80px; max-width: 710px; }
 
 /* Section dividers within primary content */
@@ -959,6 +1057,12 @@ header h1 {
       <div class="panel-header">
         <span class="panel-label">Primary Text</span>
         <span class="panel-work-title" id="workTitle">G. F. Meier, <em>Auszug aus der Vernunftlehre</em> (1752)</span>
+        <div class="search-box">
+          <input type="search" id="textSearch" placeholder="Search the text…" autocomplete="off" spellcheck="false">
+          <span class="search-count" id="textSearchCount"></span>
+          <button class="search-nav" id="textPrev" title="Previous match" disabled>‹</button>
+          <button class="search-nav" id="textNext" title="Next match" disabled>›</button>
+        </div>
       </div>
       <div class="primary-content" id="primaryContent"></div>
     </div>
@@ -978,6 +1082,10 @@ header h1 {
           <button class="filter-btn on-aristotle"  data-strata="aristotle"  onclick="toggleFilter(this)">Aristotle</button>
         </div>
         <div class="refl-filter" id="reflFilter" style="display:none;"></div>
+        <div class="search-box" style="margin-left:0;margin-top:7px;">
+          <input type="search" id="annotSearch" placeholder="Search tradition &amp; Reflexionen…" autocomplete="off" spellcheck="false">
+          <span class="search-count" id="annotSearchCount"></span>
+        </div>
       </div>
 
       <!-- Kant's handschriftliche Bemerkungen, keyed to the same § anchors -->
@@ -999,6 +1107,9 @@ header h1 {
           <div class="tradition-entries" id="traditionEntries"></div>
         </div>
       </div>
+
+      <!-- Results of a search across both annotation layers -->
+      <div class="annot-results" id="annotResults" style="display:none;"></div>
     </div>
 
   </div>
@@ -1341,10 +1452,29 @@ function buildPrimaryContent() {
 // marker; those become amber chips holding his own German equivalent, labelled
 // with the marker as the volume sets it. See the Baumgarten reader's CLAUDE.md
 // for why the label cannot be recomputed from N.
-function renderParaText(text, paraNum) {
+function renderParaText(text, paraNum, term) {
   const frag = document.createDocumentFragment();
   const glosses = (WORK.glosses || {})[String(paraNum)] || [];
   const marks   = (WORK.marks   || {})[String(paraNum)] || [];
+
+  // Plain runs go through here so a search term can be wrapped without
+  // disturbing the cross-reference and gloss spans built below.
+  const push = str => {
+    if (!str) return;
+    if (!term) { frag.appendChild(document.createTextNode(str)); return; }
+    const re = new RegExp(escapeRe(term), 'gi');
+    let at = 0, mm;
+    while ((mm = re.exec(str)) !== null) {
+      if (mm.index > at) frag.appendChild(document.createTextNode(str.slice(at, mm.index)));
+      const hit = document.createElement('span');
+      hit.className = 'search-hit';
+      hit.textContent = mm[0];
+      frag.appendChild(hit);
+      at = mm.index + mm[0].length;
+      if (mm[0].length === 0) re.lastIndex++;
+    }
+    if (at < str.length) frag.appendChild(document.createTextNode(str.slice(at)));
+  };
 
   // No trailing `\.?`: in Meier the dot of `§.14.` is part of the citation, but
   // in Baumgarten's Latin `interne, §. 126. Ergo sum` it ends the sentence, and
@@ -1352,7 +1482,7 @@ function renderParaText(text, paraNum) {
   const re = /§+\.?\s*\d+(?:[-.\s]+\d+)*|@@(\d+)@@/g;
   let last = 0, m;
   while ((m = re.exec(text)) !== null) {
-    if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+    push(text.slice(last, m.index));
     last = m.index + m[0].length;
 
     if (m[1] !== undefined) {
@@ -1391,8 +1521,23 @@ function renderParaText(text, paraNum) {
     });
     frag.appendChild(span);
   }
-  if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+  push(text.slice(last));
   return frag;
+}
+
+// Fill one paragraph's text node: the text itself, then the AA citation tag.
+// Search re-renders through here too, so a highlighted paragraph keeps its tag.
+function fillParaText(textDiv, n, term) {
+  textDiv.innerHTML = '';
+  textDiv.appendChild(renderParaText(WORK.paras[String(n)], n, term));
+  const cite = WORK.citation[String(n)];
+  if (cite) {
+    const citeEl = document.createElement('span');
+    citeEl.className = 'para-cite';
+    citeEl.textContent = cite;
+    citeEl.title = 'Academy Edition citation for § ' + n;
+    textDiv.appendChild(citeEl);
+  }
 }
 
 function appendSection(container, range, sup, title) {
@@ -1430,16 +1575,7 @@ function appendSection(container, range, sup, title) {
 
     const textDiv = document.createElement('div');
     textDiv.className = 'para-text';
-    textDiv.appendChild(renderParaText(text, n));
-
-    const cite = WORK.citation[String(n)];
-    if (cite) {
-      const citeEl = document.createElement('span');
-      citeEl.className = 'para-cite';
-      citeEl.textContent = cite;
-      citeEl.title = 'Academy Edition citation for § ' + n;
-      textDiv.appendChild(citeEl);
-    }
+    fillParaText(textDiv, n);
 
     paraBlock.appendChild(numDiv);
     paraBlock.appendChild(textDiv);
@@ -1579,6 +1715,228 @@ primaryPanel.addEventListener('scroll', () => {
   if (topPara) updateSidebarActive(topPara);
 });
 
+// ── Search ───────────────────────────────────────────────────────────────────
+// Two independent searches. The first runs over the primary text of whichever
+// work is loaded and highlights in place; the second runs over the annotation
+// layers — the tradition entries and Kant's Reflexionen — and lists what it
+// finds. Both are plain substring matches, case-insensitive, and deliberately
+// not diacritic-folded: in German and Latin an umlaut is a different letter.
+
+function escapeRe(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function escHtml(str) {
+  return str.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+}
+
+// A window of context around the first match, with the match marked.
+function snippet(text, term, pad) {
+  const i = text.toLowerCase().indexOf(term.toLowerCase());
+  if (i < 0) return escHtml(text.slice(0, pad * 2)) + (text.length > pad * 2 ? '…' : '');
+  const from = Math.max(0, i - pad), to = Math.min(text.length, i + term.length + pad);
+  return (from > 0 ? '…' : '')
+    + escHtml(text.slice(from, i))
+    + '<mark>' + escHtml(text.slice(i, i + term.length)) + '</mark>'
+    + escHtml(text.slice(i + term.length, to))
+    + (to < text.length ? '…' : '');
+}
+
+// ── Primary text ──
+let textTerm = '';
+let textHitParas = [];      // §§ currently rendered with highlights
+let textHits = [];          // the .search-hit spans, in document order
+let textHitIdx = -1;
+
+function runTextSearch(term) {
+  term = term.trim();
+  if (term === textTerm) return;
+  const was = textHitParas;
+  textTerm = term;
+
+  // Searching re-renders paragraphs, which would strip a lemma or Satz highlight
+  // out of some of them and leave it standing in others. Drop it wholesale so the
+  // two highlighting schemes never show a half-cleared state.
+  clearHighlights();
+
+  const now = [];
+  if (term.length >= 2) {
+    const needle = term.toLowerCase();
+    Object.keys(WORK.paras).forEach(k => {
+      if (WORK.paras[k].toLowerCase().indexOf(needle) >= 0) now.push(parseInt(k, 10));
+    });
+    now.sort((a, b) => a - b);
+  }
+
+  // Re-render only what changed state: paragraphs that gained or lost hits.
+  const touch = new Set(was.concat(now));
+  touch.forEach(n => {
+    const el = paraTextEl(n);
+    if (el) fillParaText(el, n, now.indexOf(n) >= 0 ? term : undefined);
+  });
+  textHitParas = now;
+
+  textHits = Array.prototype.slice.call(
+    document.getElementById('primaryContent').querySelectorAll('.search-hit'));
+  textHitIdx = -1;
+
+  const count = document.getElementById('textSearchCount');
+  if (!term) count.textContent = '';
+  else if (term.length < 2) count.textContent = '…';
+  else count.textContent = textHits.length
+    ? textHits.length + ' in ' + now.length + ' §§'
+    : 'none';
+
+  const none = textHits.length === 0;
+  document.getElementById('textPrev').disabled = none;
+  document.getElementById('textNext').disabled = none;
+  if (!none) stepTextHit(1);
+}
+
+function stepTextHit(dir) {
+  if (!textHits.length) return;
+  if (textHitIdx >= 0 && textHits[textHitIdx]) textHits[textHitIdx].classList.remove('current');
+  textHitIdx = (textHitIdx + dir + textHits.length) % textHits.length;
+  const el = textHits[textHitIdx];
+  el.classList.add('current');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('textSearchCount').textContent =
+    (textHitIdx + 1) + '/' + textHits.length;
+}
+
+// ── Tradition and Reflexionen ──
+let annotTerm = '';
+
+function annotSearchable() { return WORK.hasPanels; }
+
+function runAnnotSearch(term) {
+  term = term.trim();
+  annotTerm = term;
+  const box = document.getElementById('annotResults');
+  const count = document.getElementById('annotSearchCount');
+
+  if (term.length < 2) {
+    box.style.display = 'none';
+    count.textContent = term ? '…' : '';
+    switchPanel(activePanel);          // restore the normal panel bodies
+    return;
+  }
+
+  // Both layers are Meier's; see resetPanels().
+  if (!annotSearchable()) {
+    document.getElementById('traditionBody').style.display = 'none';
+    document.getElementById('reflBody').classList.remove('active');
+    box.style.display = 'block';
+    box.innerHTML = '<div class="annot-none">The tradition entries and the Reflexionen '
+      + 'in this panel are both keyed to Meier\'s <em>Auszug</em>. Switch to it to '
+      + 'search them.</div>';
+    count.textContent = '';
+    return;
+  }
+
+  const needle = term.toLowerCase();
+  const hits = [];
+
+  Object.keys(TRADITION).forEach(k => {
+    TRADITION[k].forEach(e => {
+      const hay = [e.author, e.source, e.text, e.relation].join(' ');
+      if (hay.toLowerCase().indexOf(needle) < 0) return;
+      const where = e.text.toLowerCase().indexOf(needle) >= 0 ? e.text
+                  : e.author + ' · ' + e.source;
+      hits.push({ kind: 'tradition', para: parseInt(k, 10),
+                  who: e.author + ' · ' + e.source, body: where });
+    });
+  });
+
+  REFL_ENTRIES.forEach(e => {
+    const hay = [e.text, e.phRaw, e.sig, e.loc && e.loc.raw].filter(Boolean).join(' ');
+    if (hay.toLowerCase().indexOf(needle) < 0) return;
+    const body = (e.text || '').indexOf('\n') >= 0 ? e.text.replace(/\n/g, ' ') : (e.text || '');
+    hits.push({ kind: 'refl', para: (e.paras && e.paras[0]) || null, r: e.r,
+                who: 'Refl. ' + e.r + (e.phRaw ? ' · ' + e.phRaw : '')
+                     + (e.aa ? ' · AA 16:' + e.aa : ''),
+                body: body || (e.loc && e.loc.raw) || '' });
+  });
+
+  hits.sort((a, b) => (a.para || 1e9) - (b.para || 1e9));
+  count.textContent = hits.length ? hits.length + ' found' : 'none';
+
+  document.getElementById('traditionBody').style.display = 'none';
+  document.getElementById('reflBody').classList.remove('active');
+  box.style.display = 'block';
+  box.innerHTML = '';
+
+  if (!hits.length) {
+    box.innerHTML = '<div class="annot-none">Nothing in the tradition entries or the '
+      + 'Reflexionen matches that.</div>';
+    return;
+  }
+
+  const sum = document.createElement('div');
+  sum.className = 'annot-summary';
+  const nt = hits.filter(h => h.kind === 'tradition').length;
+  sum.textContent = nt + ' tradition · ' + (hits.length - nt) + ' Reflexionen';
+  box.appendChild(sum);
+
+  hits.forEach(h => {
+    const row = document.createElement('div');
+    row.className = 'annot-hit';
+
+    const head = document.createElement('div');
+    head.className = 'annot-hit-head';
+    const kind = document.createElement('span');
+    kind.className = 'annot-kind' + (h.kind === 'refl' ? ' refl' : '');
+    kind.textContent = h.kind === 'refl' ? 'Refl.' : 'Trad.';
+    head.appendChild(kind);
+    if (h.para) {
+      const where = document.createElement('span');
+      where.className = 'annot-where';
+      where.textContent = '§\u2009' + h.para;
+      head.appendChild(where);
+    }
+    const who = document.createElement('span');
+    who.className = 'annot-who';
+    who.textContent = h.who;
+    head.appendChild(who);
+    row.appendChild(head);
+
+    const snip = document.createElement('div');
+    snip.className = 'annot-snippet';
+    snip.innerHTML = snippet(h.body, term, 90);
+    row.appendChild(snip);
+
+    row.addEventListener('click', () => {
+      document.getElementById('annotSearch').value = '';
+      runAnnotSearch('');
+      switchPanel(h.kind === 'refl' ? 'reflexionen' : 'tradition');
+      if (h.para) scrollToParaNum(h.para, true);
+    });
+
+    box.appendChild(row);
+  });
+}
+
+// ── Wiring ──
+let textSearchTimer = null;
+document.getElementById('textSearch').addEventListener('input', function () {
+  clearTimeout(textSearchTimer);
+  const v = this.value;
+  textSearchTimer = setTimeout(() => runTextSearch(v), 180);
+});
+document.getElementById('textSearch').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') { e.preventDefault(); stepTextHit(e.shiftKey ? -1 : 1); }
+  if (e.key === 'Escape') { this.value = ''; runTextSearch(''); }
+});
+document.getElementById('textPrev').addEventListener('click', () => stepTextHit(-1));
+document.getElementById('textNext').addEventListener('click', () => stepTextHit(1));
+
+let annotSearchTimer = null;
+document.getElementById('annotSearch').addEventListener('input', function () {
+  clearTimeout(annotSearchTimer);
+  const v = this.value;
+  annotSearchTimer = setTimeout(() => runAnnotSearch(v), 180);
+});
+document.getElementById('annotSearch').addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') { this.value = ''; runAnnotSearch(''); }
+});
+
 // ── Work switcher ──
 function switchWork(work, btn) {
   if (WORK.id === work) return;
@@ -1590,6 +1948,14 @@ function switchWork(work, btn) {
 
   focusedPara = null;
   clearHighlights();
+  document.getElementById('textSearch').value = '';
+  document.getElementById('annotSearch').value = '';
+  textTerm = ''; textHitParas = []; textHits = []; textHitIdx = -1;
+  document.getElementById('textSearchCount').textContent = '';
+  document.getElementById('annotSearchCount').textContent = '';
+  document.getElementById('annotResults').style.display = 'none';
+  document.getElementById('textPrev').disabled = true;
+  document.getElementById('textNext').disabled = true;
   buildSidebar();
   buildPrimaryContent();
   document.getElementById('primaryPanel').scrollTop = 0;

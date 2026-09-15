@@ -150,6 +150,34 @@ via `wrapRange()`, which walks text nodes so it survives the cross-reference `<s
 approximated by splitting on sentence-final punctuation — the tooltip says so, and it
 should keep saying so.
 
+## Search
+
+Two independent searches, both plain case-insensitive substring matches. Neither folds
+diacritics on purpose — in German and Latin an umlaut is a different letter, and a
+scholar searching `uber` should not be handed `über`.
+
+**The primary text**, from the box in the primary panel header. `runTextSearch(term)`
+scans `WORK.paras`, then re-renders only the paragraphs that gained or lost hits —
+`was ∪ now` — by calling `fillParaText(el, n, term)`. Matches are wrapped as
+`.search-hit` by the `push()` helper inside `renderParaText`, which handles the plain
+runs *between* the cross-reference and gloss spans, so highlighting never disturbs
+either. `stepTextHit(±1)` walks the hits in document order, moving a `.current` class;
+Enter and Shift-Enter in the box do the same, Escape clears. Minimum two characters,
+180 ms debounce.
+
+Searching calls `clearHighlights()` first. A re-render would strip a lemma or Satz
+highlight out of the paragraphs it touches and leave it standing in the rest, so the
+two highlighting schemes are never allowed to coexist half-cleared.
+
+**The annotation layers**, from the box under the panel tabs. `runAnnotSearch(term)`
+scans `TRADITION` (author, source, text, relation) and `REFL_ENTRIES` (text, `phRaw`,
+`sig`, `loc.raw`) together, and lists the hits in `#annotResults`, which is shown in
+place of both panel bodies. Clicking a hit clears the search, switches to the tab the
+hit came from, and jumps to its §. Both layers are Meier's, so on Baumgarten the search
+says so rather than returning nothing.
+
+Both searches are reset by `switchWork()`.
+
 ## Function map
 
 - `buildSidebar()` — walks `HIERARCHY` into collapsible part headers plus `.nav-item`
@@ -158,7 +186,9 @@ should keep saying so.
   from the topic.
 - `buildPrimaryContent()` → `appendSection()` — emits one `.section-block` per
   *Abschnitt*, then one `.para-block#para-N` per § in its range.
-- `renderParaText(text, paraNum)` — tokenises cross-references and Baumgarten's
+- `fillParaText(textDiv, n, term)` — fills one `.para-text`: the text, then the AA
+  citation tag. Search re-renders through it, so a highlighted § keeps its tag.
+- `renderParaText(text, paraNum, term)` — tokenises cross-references and Baumgarten's
   `@@N@@` gloss markers in one pass. Handles the compound forms Meier uses
   (`§.15. 16.`, `§.116-121.`) and Baumgarten's spaced `§. 640`. The pattern
   deliberately does **not** take a trailing dot: in Meier the dot of `§.14.` belongs to

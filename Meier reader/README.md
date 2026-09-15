@@ -36,6 +36,12 @@ connection is used only to fetch the display fonts; it works offline with fallba
   top of the panel filter by stratum, and the divider between the two columns can be
   dragged to rebalance them.
 - **A jump box** in the header: type a § number and press Enter.
+- **Two searches.** The box above the text searches the work you are reading and
+  highlights every match in place; the counter shows which hit you are on, and `‹ ›`
+  or Enter / Shift-Enter step through them. The box under the panel tabs searches the
+  annotation layers instead — the tradition entries and Kant's Reflexionen together —
+  and lists what it finds, with the § each hit belongs to; click a result to go there.
+  Both are case-sensitive about umlauts, so *über* and *uber* are different words.
 
 ## Coverage
 
