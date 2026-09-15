@@ -54,11 +54,16 @@ Baumgarten's *Metaphysica* — all 804 §§ that AA XVII prints, with his own Ge
 equivalents set as amber chips at the words they gloss. The sidebar and the jump box
 follow the work you are in.
 
-The two right-hand panels do not follow it, and say so. The parallel passages are
-annotated against Meier's § numbers, and the Reflexionen in that panel are AA XVI,
-written on the *Auszug* — neither bears on Baumgarten's §§, so neither is shown against
-them. Kant's notes on the *Metaphysica* are a different corpus (AA XVII 3489–4846 and
-AA XVIII 4847–6455) and are not loaded yet.
+The **Reflexionen** panel follows it. On the Baumgarten tab it shows Kant's notes on
+the *Metaphysica* — 2967 of them, Refl. 3489–6455 from AA XVII and XVIII — listed for
+whichever § you are reading, with the notes the Academy Edition locates precisely
+first and those placed only by block or by page of Kant's own copy after. A further
+708 belong to no numbered § at all: Kant writing on the prefaces and the Synopsis, on
+loose sheets, and in his copy of Eberhard. None of those has been filed against a §
+it says nothing about, and a button at the foot of the panel opens them on their own.
+
+The tradition panel does not follow it, and says so. The parallel passages are
+annotated against Meier's § numbers, so they are not shown against Baumgarten's.
 
 The same text, with its Synopsis and Kant's marginalia by section, has its own app in
 [../Baumgarten reader/](../Baumgarten%20reader/); both read the one generated

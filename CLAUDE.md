@@ -39,6 +39,7 @@ the readers pull in with plain `<script src>` tags:
 | [data/phases-adickes.js](data/phases-adickes.js) | Adickes' chronology of the 33 phases of Kant's hand (AA XIV:XXXV–XLIII), hand-written, with his note on each phase verbatim. Exports `PHASES`, `phaseInfo()`, `phaseYears()`. |
 | [data/reflexionen-16-meier.js](data/reflexionen-16-meier.js) | The Reflexionen on Meier's *Auszug* (AA XVI). **Generated** — see below. |
 | [data/metaphysica-17.js](data/metaphysica-17.js) | Baumgarten's *Metaphysica* itself (AA XVII): 804 §§ and the work's outline. **Generated** — see below. |
+| [data/reflexionen-17-18-baumgarten.js](data/reflexionen-17-18-baumgarten.js) | The Reflexionen on Baumgarten's *Metaphysica* (AA XVII–XVIII), 2967 of them. **Generated** — see below. |
 
 They are `<script src>` includes rather than `fetch()` on purpose: a classic script tag
 works from a `file://` URL, so the apps still open by double-clicking. Top-level `const`s
@@ -80,6 +81,34 @@ python3 scripts/emit.py /tmp/refl16.json data/reflexionen-16-meier.js \
   --work "G. F. Meier, Auszug aus der Vernunftlehre" --vol 16 \
   --src Vol16reflexionenMeier.rtfd --siglum L
 ```
+
+### The Reflexionen on Baumgarten
+
+```sh
+textutil -convert txt -output /tmp/erl17.txt  Textfiles/Vol17erlauterungenBaum.rtf
+textutil -convert txt -output /tmp/refl17.txt Textfiles/Vol17reflexionenBaum.rtfd/TXT.rtf
+textutil -convert txt -output /tmp/refl18.txt Textfiles/vol18reflexionenBaum.rtfd/TXT.rtf
+for f in erl17 refl17 refl18; do
+  python3 scripts/parse_refl.py /tmp/$f.txt M --out /tmp/$f.json
+done
+python3 scripts/emit_baum_refl.py data/reflexionen-17-18-baumgarten.js \
+    --erl17 /tmp/erl17.json --refl17 /tmp/refl17.json --refl18 /tmp/refl18.json \
+    --met data/metaphysica-17.js
+```
+
+`parse_refl.py` is shared with the Meier pipeline and is siglum-parametric; pass `M`.
+Things AA XVII and XVIII do that AA XVI does not, all of which the parser now handles:
+the siglum runs onto the preposition (`ZuM §. 11`) and onto the phase expression
+(`ε−ι? (ξ?)M 63`); the number is sometimes alone on its line with the dating on the
+next; the phase expression itself is sometimes broken across soft line breaks; and the
+decade datings are written four ways.
+
+`emit_baum_refl.py` does the anchoring and records `src` on every entry —
+`locus`, `block`, `page`, or `none`. **Not everything in these volumes is on
+Baumgarten**: 104 entries are in Kant's copy of Eberhard's *Vorbereitung zur
+natürlichen Theologie*, 91 are loose sheets (where `L Bl.` is *loses Blatt*, **not**
+Meier's siglum L), and 459 are on the Roman-numbered front matter. None of those gets
+a §, and they must not be given one.
 
 ### Baumgarten's Metaphysica
 
@@ -202,9 +231,12 @@ Editing guidance:
   in Bd. XV instead, and the reader shows the Academy Edition's own note saying so.
   Filling them in would mean transcribing AA XV, which is not in `Textfiles/`.
   Baumgarten's three prefaces are also not shown, the reader being keyed to § numbers.
-- The Reflexionen on Baumgarten are **not** wired up yet, though the sources are in
-  `Textfiles/` (`Vol17reflexionenBaum.rtfd`, `vol18reflexionenBaum.rtfd`, and
-  `Vol17erlauterungenBaum.rtf`). The Meier reader's Reflexionen panel is the model.
+- The Reflexionen on Baumgarten are extracted and shown in the **Meier reader's**
+  Baumgarten tab, but the standalone **Baumgarten reader** has no side panel at all,
+  so they do not appear there. That app still shows only the phases-by-section block.
+- 708 of the 2967 Baumgarten Reflexionen belong to no numbered § — the front matter,
+  loose sheets, and Kant's copy of Eberhard. They are reachable only through the
+  panel's "belong to no §" view, not by clicking a §.
 - The **Meier reader**'s "Baumgarten · Metaphysica" tab now renders the real text,
   from the same `data/metaphysica-17.js` the Baumgarten reader uses. Its two side
   panels stay Meier-only, though: `TRADITION` is keyed to Meier's §§ and the

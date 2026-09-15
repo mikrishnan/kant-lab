@@ -107,6 +107,39 @@ Only 10 paragraphs are annotated (§§ 1, 10, 14, 15, 115, 155, 292, 353, 362, 4
 everything else falls through to a placeholder. Extending this map is the app's main
 intended growth path — no code change is needed to add entries.
 
+## Two Reflexionen corpora
+
+Kant annotated both handbooks, and the panel shows whichever belongs to the loaded
+work. `MEIER_CORPUS` and `BAUM_CORPUS` each carry their volume, work name, entries,
+§ index, and a `provenance(e)` returning the `{cls, text, title}` of the footer tag —
+the vocabularies differ, so this cannot be one shared function. `buildReflEntry(idx,
+corpus)` renders a card from either.
+
+| | Meier | Baumgarten |
+| --- | --- | --- |
+| data | `reflexionen-16-meier.js` | `reflexionen-17-18-baumgarten.js` |
+| AA | XVI | XVII and XVIII |
+| Refl. | 1619–3488 (1870) | 3489–6455 (2967) |
+| §§ covered | 497 of 563 | 726 of 804 |
+| layout | by AA block, sub-divided by § | a flat list per § |
+
+**Why the layouts differ.** AA XVI files 788 entries under a block header alone, so a
+per-§ list would repeat them seventeen times and the block has to be the container.
+AA XVII–XVIII are not built that way: the Erläuterungen have no blocks at all, and
+elsewhere the blocks are thinner. A plain list of what stands at the § in view is both
+simpler and closer to how those notes read — median 12 entries a §, 112 at the most,
+so no windowing is needed either. Within a §, locus-attested notes are listed before
+those placed only by block or by handbook page.
+
+**Nothing in the corpus is unreachable.** 708 Baumgarten Reflexionen belong to no § —
+Kant on the Roman-numbered front matter, on loose sheets, and in his copy of
+Eberhard's *Vorbereitung zur natürlichen Theologie* — and none of them is filed against
+a § it says nothing about. `showReflMElsewhere()` gives them their own view, reached
+from a button at the foot of every § and from a search hit with no §.
+
+**The era filter is Meier-only** and is hidden on Baumgarten; it is built from that
+corpus's phase distribution.
+
 ## The Reflexionen panel
 
 The right-hand panel has two tabs, driven by `switchPanel('tradition'|'reflexionen')`.
@@ -199,6 +232,8 @@ Both searches are reset by `switchWork()`.
   reader this path never touches `innerHTML`.
 - `focusParagraph(n)` — highlights, syncs the sidebar, and repopulates the tradition
   panel. `scrollToParaNum(n, andFocus)` is the navigation entry point.
+- `renderReflMForPara(n)` — the Baumgarten panel: a flat list for one §, plus the
+  way in to the 708 entries that belong to no §. `showReflMElsewhere()` renders those.
 - `toggleFilter(btn)` — flips one stratum in `activeFilters` and re-renders the panel.
 - The resizer is a `mousedown`/`mousemove`/`mouseup` trio clamping the tradition panel
   to 200–600 px.
