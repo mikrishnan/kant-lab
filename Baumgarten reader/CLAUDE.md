@@ -12,7 +12,7 @@ See the [root CLAUDE.md](../CLAUDE.md) for conventions shared across the suite.
 | Lines | Contents |
 | --- | --- |
 | 1–450 | `<head>`, Google Fonts import, `:root` palette, all CSS |
-| 451–480 | Markup: `#toc-panel` sidebar, `#top-bar`, `#text-canvas`; the `<script src>` for the data |
+| 451–480 | Markup: `#toc-panel` sidebar, `#top-bar`, `#text-canvas`, `#synopsis-overlay`; the `<script src>` for the data |
 | 490–520 | `KANT_REFS`, and the `SECTIONS` / `PARAGRAPHS` adapter over the generated data |
 | 525–760 | Rendering, TOC building, event wiring, init |
 
@@ -52,6 +52,28 @@ id to the phases of Kant's marginalia and renders the purple "Handschriftliche
 Bemerkungen Kants" block. The volume prints such a block for the Prolegomena and for
 Possibile and nowhere else, which is why it is not in the generated data.
 
+`MET_SYNOPSIS` is Baumgarten's own conspectus of the whole work, printed at AA 17:19–23
+before the text, flat and in reading order:
+
+```js
+{ m: 'a)', t: 'possibile S. I. §. 7-18.', ref: 'S. I', from: 7, to: 18, ed: 'XLIV' }
+```
+
+- **The printed indentation is not reconstructed, on purpose.** The Synopsis is a deeply
+  indented outline on the page, but the indentation is in neither the RTF (four `\li`
+  runs in the whole section) nor the text conversion. It cannot be recovered from the
+  markers either: the volume letters several levels in Greek, the transcription renders
+  some of those as Latin lookalikes (γ as `g)`, η as `h)`, ω as `w)`), and `a)`/`b)` are
+  therefore shared between two series that only diverge at their third member. Inventing
+  a tree would be exactly the inference the repo forbids passing off as the source's.
+  The markers sit in a gutter and carry the outline, as they do on the page.
+- `ref` is the `P.`/`C.`/`S.` token the entry names, which *is* in the text.
+- `from`/`to` drive the § links. Where `MET_BY_NUM` has no such §, the reference renders
+  as `.syn-ref.absent` instead of a link — those are the §§ 504–699 AA XVII omits.
+- The transcription is missing two pages of the Synopsis, so §§ 280–518 are absent from
+  it. The panel prints a `.syn-gap` note where the numbering breaks; the break is found
+  at render time from the data, not hard-coded.
+
 `MET_PARAGRAPHS` is a flat array in section order:
 
 ```js
@@ -90,6 +112,11 @@ Possibile and nowhere else, which is why it is not in the generated data.
 
 ## Function map
 
+- `buildSynopsis()` / `openSynopsis()` / `closeSynopsis()` — the Synopsis overlay,
+  opened by `#synopsis-btn` in the top bar and closed by its button, a backdrop click,
+  or Escape. `buildSynopsis()` is idempotent; it returns early once the rows exist.
+  `synopsisRef()` linkifies a § reference while leaving the entry's wording verbatim,
+  and `synopsisGo()` closes the overlay before scrolling.
 - `processText(p)` — the `@@N@@` → chip and `§. N` → link substitution. Takes the whole
   paragraph, since it needs `marks` as well as `glosses`. Returns an HTML string
   assigned via `innerHTML`.

@@ -183,6 +183,139 @@ body {
 }
 #toc-toggle:hover { color: var(--accent); border-color: var(--accent); }
 
+/* Same affordance as the TOC toggle — both open something. */
+#synopsis-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--faded);
+  border-radius: 2px;
+  padding: 3px 9px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+#synopsis-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ── Baumgarten's Synopsis, as an overlay ── */
+#synopsis-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 18, 8, 0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+  padding: 3vh 1rem;
+}
+#synopsis-overlay.open { display: flex; }
+
+#synopsis-panel {
+  background: var(--parchment);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  box-shadow: 0 8px 40px rgba(26, 18, 8, 0.35);
+  width: min(760px, 100%);
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#synopsis-head {
+  background: var(--accent);
+  color: var(--parchment);
+  padding: 0.8rem 1.2rem 0.7rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.8rem;
+  flex-shrink: 0;
+}
+#synopsis-head h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+#synopsis-head .syn-sub {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.78rem;
+  color: #d8c8a8;
+}
+#synopsis-close {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid rgba(244, 237, 224, 0.4);
+  color: var(--parchment);
+  border-radius: 2px;
+  padding: 1px 8px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+#synopsis-close:hover { background: rgba(244, 237, 224, 0.15); }
+
+#synopsis-scroll { overflow-y: auto; padding: 1rem 1.4rem 1.6rem; }
+
+/* The printed Synopsis is a deep indented outline, but its indentation is in
+   neither the RTF nor the text conversion, so it is not reconstructed here —
+   the markers are set in a gutter and carry the structure themselves. */
+.syn-provenance {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--faded);
+  border-bottom: 1px solid var(--parch-deep);
+  padding-bottom: 0.7rem;
+  margin-bottom: 0.8rem;
+}
+.syn-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 1px 0;
+  line-height: 1.5;
+}
+.syn-marker {
+  flex: 0 0 2.6rem;
+  text-align: right;
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  color: var(--accent-lt);
+}
+.syn-text { flex: 1; font-size: 0.93rem; }
+.syn-ref {
+  color: var(--accent);
+  border-bottom: 1px solid var(--parch-deep);
+  cursor: pointer;
+}
+.syn-ref:hover { border-bottom-color: var(--accent); background: var(--parch-dark); }
+/* A § the Synopsis names that AA XVII does not print. */
+.syn-ref.absent {
+  color: var(--faded);
+  border-bottom: 1px dotted var(--line);
+  cursor: help;
+}
+.syn-gap {
+  margin: 0.6rem 0 0.6rem 3.2rem;
+  padding: 0.45rem 0.8rem;
+  background: var(--parch-dark);
+  border-left: 3px solid var(--line);
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--faded);
+}
+.syn-page {
+  margin: 0.7rem 0 0.2rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--line);
+}
+
 .top-title {
   font-family: 'Cinzel', serif;
   font-size: 0.82rem;
@@ -480,6 +613,7 @@ body {
 <div id="main">
   <div id="top-bar">
     <button id="toc-toggle" title="Toggle table of contents">☰ TOC</button>
+    <button id="synopsis-btn" title="Baumgarten's own conspectus of the whole work">Synopsis</button>
     <span class="top-title">Baumgarten · Metaphysica</span>
     <span class="top-sub">AA 17 · Editio IV, 1757</span>
     <span class="chip-legend">
@@ -490,6 +624,18 @@ body {
     <div id="text-inner">
       <div class="empty-msg">Loading text…</div>
     </div>
+  </div>
+</div>
+
+<!-- Baumgarten's Synopsis, AA 17:19–23 -->
+<div id="synopsis-overlay">
+  <div id="synopsis-panel">
+    <div id="synopsis-head">
+      <h2>Synopsis</h2>
+      <span class="syn-sub">Baumgarten's conspectus of the whole work</span>
+      <button id="synopsis-close">Close</button>
+    </div>
+    <div id="synopsis-scroll"></div>
   </div>
 </div>
 
@@ -763,6 +909,95 @@ function getParaSnippet(p) {
   const words = plain.split(/\s+/).slice(0, 6).join(' ');
   return words + (plain.split(/\s+/).length > 6 ? '…' : '');
 }
+
+// ── SYNOPSIS ─────────────────────────────────────────────────────────────────
+// Baumgarten's own conspectus, rendered flat. Its printed indentation survives
+// neither the RTF nor the text conversion, so it is not reconstructed; the
+// markers stand in a gutter and carry the outline themselves, as they do on the
+// page. Each § it names is a link, except where AA XVII does not print that §.
+
+function synopsisRef(text) {
+  // Turn the entry's own § reference into links, leaving the wording verbatim.
+  return text.replace(/§+\.?\s*\d+(?:\s*[-–]\s*\d+)?/g, match => {
+    const first = parseInt(match.match(/\d+/)[0], 10);
+    if (MET_BY_NUM[first] === undefined) {
+      return `<span class="syn-ref absent" title="AA XVII does not print this §">${match}</span>`;
+    }
+    return `<span class="syn-ref" onclick="synopsisGo(${first})">${match}</span>`;
+  });
+}
+
+function synopsisGo(num) {
+  closeSynopsis();
+  scrollToPara(num);
+}
+
+function buildSynopsis() {
+  const scroll = document.getElementById('synopsis-scroll');
+  if (scroll.childElementCount) return;          // built once
+
+  const prov = document.createElement('div');
+  prov.className = 'syn-provenance';
+  prov.textContent =
+    'AA 17:19–23, from the front matter of the 1757 edition. The printed Synopsis '
+    + 'is an indented outline, but its indentation is not preserved in the source '
+    + 'transcription and has not been reconstructed here — the markers are set in '
+    + 'the gutter exactly as the volume letters them. Click a § to go to it.';
+  scroll.appendChild(prov);
+
+  let page = null, lastTo = null;
+  MET_SYNOPSIS.forEach(e => {
+    if (e.ed !== page) {
+      page = e.ed;
+      const pg = document.createElement('div');
+      pg.className = 'syn-page';
+      pg.textContent = '1757, p. ' + page;
+      scroll.appendChild(pg);
+    }
+
+    // Two pages of the Synopsis are absent from the transcription; say so where
+    // the break falls rather than letting the numbering jump silently.
+    if (e.from !== undefined) {
+      if (lastTo !== null && e.from > lastTo + 1) {
+        const g = document.createElement('div');
+        g.className = 'syn-gap';
+        g.textContent = `§§ ${lastTo + 1}–${e.from - 1} — the Synopsis covers these, but `
+          + `the pages carrying them are not in the source transcription.`;
+        scroll.appendChild(g);
+      }
+      lastTo = Math.max(lastTo === null ? e.to : lastTo, e.to);
+    }
+
+    const row = document.createElement('div');
+    row.className = 'syn-row';
+    const mk = document.createElement('span');
+    mk.className = 'syn-marker';
+    mk.textContent = e.m || '';
+    const tx = document.createElement('span');
+    tx.className = 'syn-text';
+    tx.innerHTML = synopsisRef(e.t);
+    row.appendChild(mk);
+    row.appendChild(tx);
+    scroll.appendChild(row);
+  });
+}
+
+function openSynopsis() {
+  buildSynopsis();
+  document.getElementById('synopsis-overlay').classList.add('open');
+}
+function closeSynopsis() {
+  document.getElementById('synopsis-overlay').classList.remove('open');
+}
+
+document.getElementById('synopsis-btn').addEventListener('click', openSynopsis);
+document.getElementById('synopsis-close').addEventListener('click', closeSynopsis);
+document.getElementById('synopsis-overlay').addEventListener('click', e => {
+  if (e.target.id === 'synopsis-overlay') closeSynopsis();   // click the backdrop
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSynopsis();
+});
 
 // TOC filter
 document.getElementById('toc-filter').addEventListener('input', function() {

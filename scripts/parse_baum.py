@@ -88,6 +88,22 @@ HEAD_KIND = re.compile(
 # The AA's own note standing in for the §§ it prints in another volume.
 GAP_NOTE = re.compile(r'^\s*Sectio\b.*abgedruckt\.\s*$')
 
+# --- Baumgarten's own Synopsis, AA 17:19-23 (orig. pp. XLIV-LIV) -------------
+SYNOPSIS_START = re.compile(r'^\s*(?:\[([IVXL]+)\]\s*)?SYNOPSIS\.?\s*$')
+ROMAN_PAGE = re.compile(r'^\s*\[([IVXL]+)\]\s*$')
+# `I.)` `1)` `A)` `a)` `α)`. The volume letters several levels in Greek, but the
+# transcription renders some of those Greek letters as Latin lookalikes — γ as
+# `g)`, δ as `d)`, η as `h)`, ω as `w)`, ζ as `z)`, ν as `n)`. Kept as printed.
+SYN_MARKER = re.compile(r'^([IVX]+\.\)|\d+\)|[A-Za-zΑ-Ωα-ω]\))\s*')
+# `P. I`, `C. II`, `S. IIII` — the Pars / Caput / Sectio an entry names. These
+# are in the text, unlike the indentation, so they are the one structural fact
+# the Synopsis gives us outright.
+SYN_STRUCT = re.compile(r'\b([PCS])\.\s*([IVX]+)\b')
+# A § reference in the Synopsis: `§. 7-18`, `§. 821`, or a run of separate §§
+# under one sign — `§. 37. 38.` at Ontologia C. I, the only one in the section.
+SYN_RANGE = re.compile(
+    r'§+\.?\s*(\d+)(?:\s*[-–]\s*(\d+))?((?:\s*[.,]\s*\d+(?:\s*[-–]\s*\d+)?)*)')
+
 ROMAN = {'PARS': 'Pars', 'CAPUT': 'Caput', 'SECTIO': 'Sectio',
          'PROLEGOMENA': 'Prolegomena'}
 TYPE = {'PARS': 'part', 'CAPUT': 'head', 'SECTIO': 'sub', 'PROLEGOMENA': 'sub'}
@@ -191,6 +207,79 @@ def split_footnotes(line, report):
     return out
 
 
+def parse_synopsis(lines, report):
+    """Baumgarten's own conspectus of the whole work, printed before the text.
+
+    Rendered flat, in reading order, deliberately. The printed Synopsis is a
+    deeply indented outline, but **the indentation is not in the source** — it
+    survives neither the RTF (four `\\li` runs in the whole section) nor the text
+    conversion. Reconstructing it from the markers alone cannot be done reliably:
+    `a)` and `b)` are shared between the Latin series and the Greek one the
+    transcription transliterates, so `a) b) g) d)` and `a) b) c)` are
+    indistinguishable until their third member. Inventing a tree here would be
+    exactly the inference the repository forbids presenting as the source's, so
+    each entry keeps its marker as printed and the reader shows them in a gutter.
+
+    What *is* attested is kept: the `P.`/`C.`/`S.` token an entry names, its §
+    range, and the 1757 page it falls on.
+    """
+    try:
+        i = next(k for k, l in enumerate(lines) if SYNOPSIS_START.match(l.strip()))
+    except StopIteration:
+        report['synopsisMissing'] = True
+        return []
+
+    m = SYNOPSIS_START.match(lines[i].strip())
+    ed = m.group(1)
+    entries, pending = [], None
+    i += 1
+    while i < len(lines):
+        bare = lines[i].strip()
+        i += 1
+        if not bare:
+            continue
+        if RULE.match(bare):
+            break
+        if AA_PAGE.match(bare):
+            continue
+        pg = ROMAN_PAGE.match(bare)
+        if pg:
+            ed = pg.group(1)
+            continue
+
+        mk = SYN_MARKER.match(bare)
+        marker, text = (mk.group(1), bare[mk.end():].strip()) if mk else (None, bare)
+        # The volume sometimes breaks a marker onto its own line (`β)` then
+        # `intellectus S. II.`); join it back onto what it labels.
+        if marker and not text:
+            pending = marker
+            continue
+        if pending:
+            marker, pending = pending, None
+
+        rec = {'m': marker, 't': text, 'ed': ed}
+        st = SYN_STRUCT.search(text)
+        if st:
+            rec['ref'] = f'{st.group(1)}. {st.group(2)}'
+        paras = []
+        for a, b, more in SYN_RANGE.findall(text):
+            paras.append((int(a), int(b) if b else int(a)))
+            for n in re.findall(r'(\d+)(?:\s*[-–]\s*(\d+))?', more):
+                paras.append((int(n[0]), int(n[1]) if n[1] else int(n[0])))
+        if paras:
+            rec['from'], rec['to'] = paras[0][0], paras[-1][1]
+        entries.append(rec)
+
+    # The transcription drops two of the Synopsis's pages, so its § coverage is
+    # not continuous. Find the break rather than letting it pass unremarked.
+    spans = [(e['from'], e['to']) for e in entries if 'from' in e]
+    for (_, a), (b, _) in zip(spans, spans[1:]):
+        if b > a + 1:
+            report['synopsisGaps'].append((a + 1, b - 1))
+    report['synopsisEntries'] = len(entries)
+    return entries
+
+
 def parse(path, report):
     lines = read_lines(path)
     try:
@@ -198,6 +287,7 @@ def parse(path, report):
     except StopIteration:
         sys.exit(f'error: never found the body start ({BODY_START!r}) in {path}')
     report['frontMatterLines'] = start
+    synopsis = parse_synopsis(lines[:start], report)
 
     sections, paragraphs = [], []
     stack = {}            # heading kind → id fragment, for building nested ids
@@ -409,7 +499,7 @@ def parse(path, report):
         i += 1
 
     flush()
-    return sections, paragraphs
+    return sections, paragraphs, synopsis
 
 
 HEADER = """/* ─────────────────────────────────────────────────────────────────────────────
@@ -431,6 +521,18 @@ HEADER = """/* ─────────────────────�
             numerals included — he writes IIII and XVIIII, not IV and XIX
      type   part | head | sub, from PARS | CAPUT | SECTIO
      note   an AA editorial note standing where text would otherwise be
+
+   Synopsis fields (MET_SYNOPSIS) — Baumgarten's conspectus of the whole work,
+   printed at AA 17:19–23 before the text
+     m    the entry's marker as the volume sets it, `α)` `g)` `A)` `1)`. Several
+          levels are lettered in Greek and the transcription renders some of
+          those as Latin lookalikes (γ as `g`, η as `h`, ω as `w`); kept as
+          printed. The printed *indentation* is not in the source at all and is
+          deliberately not reconstructed — see parse_synopsis().
+     t    the entry text, verbatim
+     ref  the Pars / Caput / Sectio it names, where it names one
+     from, to   the § range it covers, where it gives one
+     ed   the 1757 page (Roman, as the volume numbers its front matter)
 
    Paragraph fields
      num      the § number
@@ -456,7 +558,7 @@ HEADER = """/* ─────────────────────�
 """
 
 
-def emit(out, sections, paragraphs, meta):
+def emit(out, sections, paragraphs, synopsis, meta):
     J = lambda o: json.dumps(o, ensure_ascii=False, separators=(',', ':'))
     with open(out, 'w', encoding='utf-8') as f:
         f.write(HEADER.format(npara=len(paragraphs), nsec=len(sections)))
@@ -469,6 +571,13 @@ def emit(out, sections, paragraphs, meta):
         f.write('const MET_PARAGRAPHS = [\n')
         for p in paragraphs:
             f.write(' ' + J(p) + ',\n')
+        f.write('];\n\n')
+        f.write("/* Baumgarten's own Synopsis, AA 17:19–23, flat and in reading order.\n"
+                "   The printed indentation is not in the source and is not invented here;\n"
+                "   `m` is the marker as the volume sets it. */\n")
+        f.write('const MET_SYNOPSIS = [\n')
+        for e in synopsis:
+            f.write(' ' + J(e) + ',\n')
         f.write('];\n\n')
         f.write('/* § → index into MET_PARAGRAPHS */\n')
         f.write('const MET_BY_NUM = '
@@ -499,10 +608,10 @@ def main():
     report = {'artefacts': Counter(), 'countMismatch': [], 'labelDisagrees': [],
               'orphanLines': [], 'emptyBody': [], 'dupSectionIds': [],
               'noAaPage': [], 'trailingRefs': [], 'rejectedLetters': [],
-              'flagged': [],
+              'flagged': [], 'synopsisGaps': [], 'synopsisEntries': 0,
               'edPages': set(),
               'parenRepairs': 0, 'frontMatterLines': 0}
-    sections, paragraphs = parse(a.txt, report)
+    sections, paragraphs, synopsis = parse(a.txt, report)
 
     nums = [p['num'] for p in paragraphs]
     dup = sorted(n for n, c in Counter(nums).items() if c > 1)
@@ -524,7 +633,7 @@ def main():
                      + gapnotes,
         },
     }
-    emit(a.out, sections, paragraphs, meta)
+    emit(a.out, sections, paragraphs, synopsis, meta)
 
     glossed = [p for p in paragraphs if p['glosses']]
     pages = [p['aa'] for p in paragraphs if p['aa']] + \
@@ -544,6 +653,7 @@ def main():
     print(f'  front matter       {report["frontMatterLines"]} lines skipped '
           f'(prefaces, Erläuterungen title)')
     print(f'  AA gap notes kept  {len(meta["gap"]["notes"])}')
+    print(f'  Synopsis entries   {report["synopsisEntries"]}')
 
     problems = 0
 
@@ -570,6 +680,8 @@ def main():
          report['trailingRefs'], lambda x: f'§{x[0]} ends »§. {x[1]}.«')
     line('·', 'footnote label differs from its body marker', report['labelDisagrees'],
          lambda x: f'§{x[0]}#{x[1]} body {x[2]}) vs note {x[3]})')
+    line('·', 'Synopsis §§ the transcription does not reach', report['synopsisGaps'],
+         lambda x: f'{x[0]}–{x[1]}')
     line('·', 'suspected misprints flagged (text left as printed)',
          report['flagged'], lambda x: f'§{x[0]} »{x[1]}«')
     line('·', 'letter out of sequence, read as an enumerator not a marker',

@@ -32,6 +32,10 @@ connection is used only to fetch the display fonts; it works offline with fallba
 - **Kant's marginalia flagged by section.** Where the Academy Edition records
   *Handschriftliche Bemerkungen* on a section, a purple block lists the phases of
   Kant's notes (Adickes' δ, ε, λ, ν datings) and their AA XVII page.
+- **Baumgarten's Synopsis**, behind the `Synopsis` button in the top bar: his own
+  conspectus of the whole work, printed before the text in 1757. Every § in it is a
+  link. It is the one place the *Psychologia empirica* sections appear at all, since
+  AA XVII omits their text — so it is where you can see what §§ 504–699 contain.
 - **Both paginations.** Each § carries the AA XVII page it falls on and, where the
   volume marks one, the page of Baumgarten's own 1757 edition.
 

@@ -109,6 +109,11 @@ What that extractor knows about this transcription, which is easy to break:
 - **Footnote asterisk counts are not indices.** They restart when a §'s footnotes run
   over a page, three §§ continue into `a) b) c)`, and eight are simply mislabelled.
   Markers pair with footnotes **by position**; the printed label is kept in `marks`.
+- The **Synopsis** (AA 17:19–23) is extracted too, into `MET_SYNOPSIS`, and shown
+  behind a button in the reader. Its printed indentation is in neither the RTF nor the
+  text conversion and is **not** reconstructed — see `parse_synopsis()` for why the
+  markers cannot supply it. The transcription also drops two of its pages, so §§ 280–518
+  are missing from it; the extractor reports the break and the panel prints it.
 - Two readings look like misprints — § 10 `praepositio` for `propositio`, § 92
   `methaphysice`. They are **not** corrected in the text. `SUSPECTED_MISPRINTS` in
   the extractor records the conjecture, the reader underlines the printed word and
