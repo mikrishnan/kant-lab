@@ -51,29 +51,16 @@ Make targeted string replacements, or regenerate the whole line from a script.
 
 ## The work model
 
-The reader shows two texts through one shape, so the sidebar and the main column never
-have to know which is loaded:
+`WORK` is the one shape the sidebar, the main column, the jump box and the text search
+read the text through, rather than reaching for `MEIER` and `HIERARCHY` directly:
 
 ```js
-WORK = { id, title, min, max, paras, citation, glosses, marks, hasPanels,
+WORK = { title, min, max, paras, citation,
          parts: [ { ordinal, topic, range, sections: [ { sup, title, range } ] } ] }
 ```
 
-`meierWork()` derives it from `HIERARCHY`; `baumgartenWork()` derives it from
-`MET_SECTIONS` / `MET_PARAGRAPHS` in `../data/metaphysica-17.js` — the same generated
-file the Baumgarten reader uses, so there is one copy of the *Metaphysica* in the repo.
-
-- `sup` is the small label above a section heading — Meier's "Der erste Abschnitt:",
-  Baumgarten's "Caput I". Precomputing it keeps the German ordinal counting out of the
-  renderer.
-- Baumgarten's `MET_SECTIONS` is flat and three deep (Pars → Caput → Sectio), so the
-  Capita and Sectiones are folded into one section list per Pars. Section ranges come
-  from the §§ actually filed under each id, never asserted — which is why the §§ 504–699
-  AA XVII omits simply leave no section behind, and why a heading with no §§ of its own
-  is skipped (60 sections render out of 74 in the data, with all 804 §§ accounted for).
-- `glosses`/`marks` are Baumgarten-only. `renderParaText` turns his `@@N@@` markers into
-  amber chips, labelled with `marks[N-1]` — the label the volume prints, which cannot be
-  recomputed from `N`. See the Baumgarten reader's CLAUDE.md.
+`sup` is the small label above a section heading, "Der erste Abschnitt:". Precomputing
+it keeps the German ordinal counting out of the renderer.
 
 `HIERARCHY` is what `meierWork()` is built from — five top-level parts:
 
@@ -106,39 +93,6 @@ each paragraph.
 Only 10 paragraphs are annotated (§§ 1, 10, 14, 15, 115, 155, 292, 353, 362, 414);
 everything else falls through to a placeholder. Extending this map is the app's main
 intended growth path — no code change is needed to add entries.
-
-## Two Reflexionen corpora
-
-Kant annotated both handbooks, and the panel shows whichever belongs to the loaded
-work. `MEIER_CORPUS` and `BAUM_CORPUS` each carry their volume, work name, entries,
-§ index, and a `provenance(e)` returning the `{cls, text, title}` of the footer tag —
-the vocabularies differ, so this cannot be one shared function. `buildReflEntry(idx,
-corpus)` renders a card from either.
-
-| | Meier | Baumgarten |
-| --- | --- | --- |
-| data | `reflexionen-16-meier.js` | `reflexionen-17-18-baumgarten.js` |
-| AA | XVI | XVII and XVIII |
-| Refl. | 1619–3488 (1870) | 3489–6455 (2967) |
-| §§ covered | 497 of 563 | 726 of 804 |
-| layout | by AA block, sub-divided by § | a flat list per § |
-
-**Why the layouts differ.** AA XVI files 788 entries under a block header alone, so a
-per-§ list would repeat them seventeen times and the block has to be the container.
-AA XVII–XVIII are not built that way: the Erläuterungen have no blocks at all, and
-elsewhere the blocks are thinner. A plain list of what stands at the § in view is both
-simpler and closer to how those notes read — median 12 entries a §, 112 at the most,
-so no windowing is needed either. Within a §, locus-attested notes are listed before
-those placed only by block or by handbook page.
-
-**Nothing in the corpus is unreachable.** 708 Baumgarten Reflexionen belong to no § —
-Kant on the Roman-numbered front matter, on loose sheets, and in his copy of
-Eberhard's *Vorbereitung zur natürlichen Theologie* — and none of them is filed against
-a § it says nothing about. `showReflMElsewhere()` gives them their own view, reached
-from a button at the foot of every § and from a search hit with no §.
-
-**The era filter is Meier-only** and is hidden on Baumgarten; it is built from that
-corpus's phase distribution.
 
 ## The Reflexionen panel
 
@@ -202,12 +156,12 @@ Searching calls `clearHighlights()` first. A re-render would strip a lemma or Sa
 highlight out of the paragraphs it touches and leave it standing in the rest, so the
 two highlighting schemes are never allowed to coexist half-cleared.
 
-**The annotation layers**, from the box under the panel tabs. `runAnnotSearch(term)`
-scans `TRADITION` (author, source, text, relation) and `REFL_ENTRIES` (text, `phRaw`,
-`sig`, `loc.raw`) together, and lists the hits in `#annotResults`, which is shown in
-place of both panel bodies. Clicking a hit clears the search, switches to the tab the
-hit came from, and jumps to its §. Both layers are Meier's, so on Baumgarten the search
-says so rather than returning nothing.
+**The annotation layer**, from the box under the panel tabs, **scoped to the tab you
+are on**. On Tradition `runAnnotSearch(term)` scans `TRADITION` (author, source, text,
+relation); on Reflexionen it scans `REFL_ENTRIES` (text, `phRaw`, `sig`, `loc.raw`).
+Hits go in `#annotResults`, shown in place of both panel bodies; clicking one clears the
+search and jumps to its §. `switchPanel()` re-runs an active search against the newly
+selected layer, so the same term can be carried across in one click without retyping.
 
 Both searches are reset by `switchWork()`.
 
@@ -232,20 +186,16 @@ Both searches are reset by `switchWork()`.
   reader this path never touches `innerHTML`.
 - `focusParagraph(n)` — highlights, syncs the sidebar, and repopulates the tradition
   panel. `scrollToParaNum(n, andFocus)` is the navigation entry point.
-- `renderReflMForPara(n)` — the Baumgarten panel: a flat list for one §, plus the
-  way in to the 708 entries that belong to no §. `showReflMElsewhere()` renders those.
 - `toggleFilter(btn)` — flips one stratum in `activeFilters` and re-renders the panel.
 - The resizer is a `mousedown`/`mousemove`/`mouseup` trio clamping the tradition panel
   to 200–600 px.
 
 ## Gotchas
 
-- **Both works share one renderer, and the side panels do not.** `switchWork()` swaps
-  `WORK` and rebuilds the sidebar and the main column. But `TRADITION` is indexed by
-  Meier's § numbers and the Reflexionen are AA XVI, *on the Auszug* — neither says
-  anything about Baumgarten's §§. `WORK.hasPanels` is false for Baumgarten,
-  `focusParagraph()` skips both panels, and `resetPanels()` puts a note in each saying
-  what they hold. Do not let Meier's notes render against Baumgarten's text.
+- **This reader is Meier's only.** Baumgarten's *Metaphysica* has its own app in
+  [../Baumgarten reader/](../Baumgarten%20reader/), and both `TRADITION` and the
+  Reflexionen here are indexed to Meier's §§ — they say nothing about Baumgarten's.
+  A Baumgarten tab was tried here and removed; do not reintroduce one.
 - The § range is no longer hard-coded: `WORK.min`/`WORK.max` drive `jumpToSection()`
   and `renderParaText()`, and `switchWork()` resets the `#jumpInput` attributes. The
   `min`/`max` in the markup are only the initial Meier values.

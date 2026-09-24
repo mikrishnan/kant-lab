@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kant Reading Guide — Meier &amp; Baumgarten</title>
+<title>Kant Reading Guide — Meier, Auszug aus der Vernunftlehre</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -100,22 +100,6 @@ header h1 {
   transition: all 0.12s;
 }
 .jump-box button:hover { border-color: var(--prussian); color: var(--parchment); }
-.work-tabs { display: flex; gap: 4px; flex-shrink: 0; }
-.work-tab {
-  font-family: var(--font-display);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 5px 13px;
-  border: 1px solid #444460;
-  background: transparent;
-  color: #9999BB;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-.work-tab.active { background: var(--prussian); color: var(--parchment); border-color: var(--prussian); }
-.work-tab:hover:not(.active) { border-color: #8888AA; color: var(--parchment); }
 
 /* ── App body ── */
 .app-body { display: flex; flex: 1; overflow: hidden; }
@@ -220,44 +204,8 @@ header h1 {
   border-bottom-color: var(--sienna);
 }
 
-/* A cross-reference to a § this volume does not print — Baumgarten's §. 505-699
-   point into the Psychologia empirica, which AA XVII puts in Bd. XV. */
-.xref-absent {
-  color: var(--ink-faint);
-  border-bottom-style: dotted;
-  border-bottom-color: var(--ink-faint);
-  cursor: help;
-}
-.xref-absent:hover { color: var(--ink-faint); border-bottom-color: var(--ink-faint); }
 
-/* Baumgarten's own German equivalents, printed as footnotes in the Metaphysica
-   and set here at the word they gloss. Same amber as the Baumgarten reader. */
-.gloss-chip {
-  display: inline;
-  background: #fff8e8;
-  border: 1px solid #c8a055;
-  border-radius: 2px;
-  color: #7a4a00;
-  font-size: 0.86em;
-  font-style: italic;
-  padding: 0 4px;
-  margin: 0 2px;
-  white-space: normal;
-}
-.gloss-chip .gloss-marker {
-  font-style: normal;
-  font-size: 0.82em;
-  color: #c8a055;
-  margin-right: 3px;
-}
 
-.refl-empty {
-  padding: 1.1rem 1rem;
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--ink-faint);
-  font-style: italic;
-}
 
 /* Part body (collapsible container) */
 .part-body { overflow: hidden; transition: none; }
@@ -756,7 +704,6 @@ header h1 {
   letter-spacing: 0.06em;
   color: var(--ink);
 }
-.r-para-count { font-size: 10.5px; color: var(--ink-faint); flex-shrink: 0; }
 .r-para-topic {
   font-size: 12px;
   font-style: italic;
@@ -927,46 +874,7 @@ header h1 {
 .r-prov.locus { border-color: var(--strata-aristotle); color: var(--strata-aristotle); }
 .r-prov.group { border-color: var(--rule); }
 .r-prov.interp { border-color: #AA6B6B; color: #8A4A4A; border-style: dashed; }
-/* Baumgarten only: a § reached through the page of Kant's handbook rather than
-   a locus note, and a note that belongs to no § at all. */
-.r-prov.page { border-color: var(--strata-wolff); color: var(--strata-wolff); }
-.r-prov.other { border-color: var(--rule); color: var(--ink-faint); font-style: italic; }
 
-/* the way in to the Reflexionen that attach to no § */
-.r-elsewhere {
-  margin: 14px 18px 4px;
-  padding-top: 10px;
-  border-top: 1px solid var(--rule-light);
-}
-.r-elsewhere-btn {
-  display: block;
-  width: 100%;
-  font-family: var(--font-display);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  background: none;
-  border: 1px solid var(--rule);
-  color: var(--ink-faint);
-  padding: 5px 9px;
-  margin: 8px 0 6px;
-  cursor: pointer;
-}
-.r-elsewhere-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
-.r-elsewhere-note {
-  display: block;
-  font-size: 11.5px;
-  font-style: italic;
-  line-height: 1.45;
-  color: var(--ink-faint);
-}
-.r-para-count {
-  font-family: var(--font-display);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  color: var(--ink-faint);
-  margin-left: auto;
-}
 
 .r-edge {
   text-align: center;
@@ -1079,10 +987,6 @@ header h1 {
     <input type="number" id="jumpInput" min="1" max="563" placeholder="1–563">
     <button onclick="jumpToSection()">Go</button>
   </div>
-  <div class="work-tabs">
-    <button class="work-tab active" onclick="switchWork('meier',this)">Meier · Logic</button>
-    <button class="work-tab" onclick="switchWork('baumgarten',this)">Baumgarten · Metaphysica</button>
-  </div>
 </header>
 
 <div class="app-body">
@@ -1123,7 +1027,7 @@ header h1 {
         </div>
         <div class="refl-filter" id="reflFilter" style="display:none;"></div>
         <div class="search-box" style="margin-left:0;margin-top:7px;">
-          <input type="search" id="annotSearch" placeholder="Search tradition &amp; Reflexionen…" autocomplete="off" spellcheck="false">
+          <input type="search" id="annotSearch" placeholder="Search this tab…" autocomplete="off" spellcheck="false">
           <span class="search-count" id="annotSearchCount"></span>
         </div>
       </div>
@@ -1165,8 +1069,6 @@ header h1 {
      includes rather than fetch() so the page still works from a file:// URL. -->
 <script src="../data/phases-adickes.js"></script>
 <script src="../data/reflexionen-16-meier.js"></script>
-<script src="../data/metaphysica-17.js"></script>
-<script src="../data/reflexionen-17-18-baumgarten.js"></script>
 
 <script>
 // ── Data ──
@@ -1257,116 +1159,39 @@ let focusedPara = null;
 let activeFilters = { wolff: true, scholastic: true, aristotle: true };
 
 // ── Build sidebar ──
-// ── The two works ────────────────────────────────────────────────────────────
-// Both texts are rendered through one shape so the sidebar and the main column
-// do not have to know which work they are showing:
+// ── The work ────────────────────────────────────────────────────────────────
+// The sidebar, the main column, the jump box and the text search all read the
+// text through this one shape rather than reaching for MEIER and HIERARCHY
+// directly. Baumgarten's Metaphysica is a separate app, in ../Baumgarten reader/.
 //
-//   { id, title, min, max, paras, citation, parts: [ { ordinal, topic, range,
-//     sections: [ { sup, title, range } ] } ], glosses, marks,
-//     hasTradition, hasRefl }
+//   { title, min, max, paras, citation,
+//     parts: [ { ordinal, topic, range, sections: [ { sup, title, range } ] } ] }
 //
-// `sup` is the small label above a section heading — Meier's "Der erste
-// Abschnitt:", Baumgarten's "Caput I". Precomputing it here keeps the German
-// ordinal counting out of the renderer.
+// `sup` is the small label above a section heading, "Der erste Abschnitt:".
+// Precomputing it keeps the German ordinal counting out of the renderer.
 
 const ORDINAL_WORDS = ['erste', 'andere', 'dritte', 'vierte', 'fünfte',
                        'sechste', 'siebende', 'achte', 'neunte', 'zehnte'];
 
-function meierWork() {
-  return {
-    id: 'meier',
-    title: 'G. F. Meier, <em>Auszug aus der Vernunftlehre</em> (1752)',
-    min: 1, max: 563,
-    paras: MEIER.paras,
-    citation: CITATIONS,
-    hasTradition: true,
-    hasRefl: true,
-    parts: HIERARCHY.map(part => {
-      const colon = part.title_de.indexOf(':');
-      return {
-        ordinal: colon >= 0 ? part.title_de.slice(0, colon).trim() : part.title_de,
-        topic: colon >= 0 ? part.title_de.slice(colon + 1).trim() : '',
-        range: part.para_range,
-        sections: (part.sections || []).map((sec, i) => ({
-          sup: 'Der ' + (ORDINAL_WORDS[i] || (i + 1) + '.') + ' Abschnitt:',
-          title: sec.title_de,
-          range: sec.para_range,
-        })),
-      };
-    }),
-  };
-}
-
-// Baumgarten comes from ../data/metaphysica-17.js, the same generated file the
-// Baumgarten reader uses. MET_SECTIONS is flat — Pars, then Caput and Sectio
-// beneath it — so the Capita and Sectiones are folded into one section list per
-// Pars, each keeping its own label. Ranges are taken from the §§ actually filed
-// under a section rather than asserted, so the §§ 504–699 AA XVII omits simply
-// leave no section behind.
-function baumgartenWork() {
-  const paras = {}, glosses = {}, marks = {}, citation = {}, bySection = {};
-  MET_PARAGRAPHS.forEach(p => {
-    const k = String(p.num);
-    paras[k] = p.text;
-    if (p.glosses && p.glosses.length) { glosses[k] = p.glosses; marks[k] = p.marks; }
-    if (p.aa) citation[k] = 'AA 17:' + p.aa + (p.aaEnd ? '–' + p.aaEnd : '');
-    (bySection[p.section] = bySection[p.section] || []).push(p.num);
-  });
-  const rangeOf = id => {
-    const ns = bySection[id];
-    return ns && ns.length ? [Math.min(...ns), Math.max(...ns)] : null;
-  };
-
-  const parts = [];
-  MET_SECTIONS.forEach(sec => {
-    const range = rangeOf(sec.id);
-    if (sec.type === 'part') {
-      const bits = sec.label.split('·');
-      parts.push({
-        ordinal: bits[0].trim(),
-        topic: bits.slice(1).join('·').trim(),
-        range: range,
-        sections: [],
-        _own: range,
-      });
-      return;
-    }
-    if (!parts.length || !range) return;    // a heading with no §§ of its own
-    const bits = sec.label.split('·');
-    parts[parts.length - 1].sections.push({
-      sup: bits[0].trim(),
-      title: bits.slice(1).join('·').trim() || bits[0].trim(),
-      range: range,
-    });
-  });
-
-  // A Pars spans everything filed beneath it, not just its own §§.
-  parts.forEach(pt => {
-    const all = pt.sections.map(x => x.range).concat(pt._own ? [pt._own] : []);
-    if (all.length) {
-      pt.range = [Math.min(...all.map(r => r[0])), Math.max(...all.map(r => r[1]))];
-    }
-    // A Pars with §§ of its own *and* sections (the Prolegomena) needs those §§
-    // to appear somewhere, so give them a section of their own.
-    if (pt._own && pt.sections.length) {
-      pt.sections.unshift({ sup: '', title: pt.topic || pt.ordinal, range: pt._own });
-    }
-    delete pt._own;
-  });
-
-  return {
-    id: 'baumgarten',
-    title: 'A. G. Baumgarten, <em>Metaphysica</em> (Editio IIII, 1757)',
-    min: 1, max: 1000,
-    paras, glosses, marks, citation,
-    hasTradition: false,   // TRADITION is keyed to Meier's §§
-    hasRefl: true,         // but AA XVII–XVIII are on this text
-
-    parts,
-  };
-}
-
-let WORK = meierWork();
+const WORK = {
+  title: 'G. F. Meier, <em>Auszug aus der Vernunftlehre</em> (1752)',
+  min: 1, max: 563,
+  paras: MEIER.paras,
+  citation: CITATIONS,
+  parts: HIERARCHY.map(part => {
+    const colon = part.title_de.indexOf(':');
+    return {
+      ordinal: colon >= 0 ? part.title_de.slice(0, colon).trim() : part.title_de,
+      topic: colon >= 0 ? part.title_de.slice(colon + 1).trim() : '',
+      range: part.para_range,
+      sections: (part.sections || []).map((sec, i) => ({
+        sup: 'Der ' + (ORDINAL_WORDS[i] || (i + 1) + '.') + ' Abschnitt:',
+        title: sec.title_de,
+        range: sec.para_range,
+      })),
+    };
+  }),
+};
 
 function buildSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -1489,21 +1314,15 @@ function buildPrimaryContent() {
 }
 
 // ── Render paragraph text with clickable cross-references ──
-// Matches Meier's compound forms — §.14, §.15. 16., §.25-30, §.116-121 — and
-// Baumgarten's spaced form, §. 640. Returns a DocumentFragment: unlike the
-// Baumgarten reader this path never touches innerHTML.
-//
-// Baumgarten's text also carries @@N@@ where the volume prints a footnote
-// marker; those become amber chips holding his own German equivalent, labelled
-// with the marker as the volume sets it. See the Baumgarten reader's CLAUDE.md
-// for why the label cannot be recomputed from N.
+// Matches the compound forms Meier uses — §.14, §.15. 16., §.25-30, §.116-121.
+// Returns a DocumentFragment: unlike the Baumgarten reader this path never
+// touches innerHTML.
 function renderParaText(text, paraNum, term) {
   const frag = document.createDocumentFragment();
-  const glosses = (WORK.glosses || {})[String(paraNum)] || [];
   const marks   = (WORK.marks   || {})[String(paraNum)] || [];
 
   // Plain runs go through here so a search term can be wrapped without
-  // disturbing the cross-reference and gloss spans built below.
+  // disturbing the cross-reference spans built below.
   const push = str => {
     if (!str) return;
     if (!term) { frag.appendChild(document.createTextNode(str)); return; }
@@ -1521,45 +1340,24 @@ function renderParaText(text, paraNum, term) {
     if (at < str.length) frag.appendChild(document.createTextNode(str.slice(at)));
   };
 
-  // No trailing `\.?`: in Meier the dot of `§.14.` is part of the citation, but
-  // in Baumgarten's Latin `interne, §. 126. Ergo sum` it ends the sentence, and
-  // swallowing it into the link drops that punctuation from the text.
-  const re = /§+\.?\s*\d+(?:[-.\s]+\d+)*|@@(\d+)@@/g;
+  const re = /§+\.?\s*\d+(?:[-.\s]+\d+)*/g;
   let last = 0, m;
   while ((m = re.exec(text)) !== null) {
     push(text.slice(last, m.index));
     last = m.index + m[0].length;
 
-    if (m[1] !== undefined) {
-      const idx = parseInt(m[1], 10) - 1;
-      const german = glosses[idx];
-      if (!german) continue;
-      const chip = document.createElement('span');
-      chip.className = 'gloss-chip';
-      const mk = document.createElement('span');
-      mk.className = 'gloss-marker';
-      mk.textContent = marks[idx] || '*';
-      chip.appendChild(mk);
-      chip.appendChild(document.createTextNode(german));
-      chip.title = "Baumgarten's German equivalent";
-      frag.appendChild(chip);
-      continue;
-    }
-
     const rawRef = m[0];
     const nums = rawRef.match(/\d+/g) || [];
     const span = document.createElement('span');
     span.className = 'xref';
-    span.textContent = rawRef.replace(/\s+/g, '\u202f');
+    span.textContent = rawRef.replace(/\s+/g, '\u202f').replace(/\.$/, '');
     const valid = nums.filter(n => {
       const v = parseInt(n, 10);
-      return v >= WORK.min && v <= WORK.max && WORK.paras[n] !== undefined;
+      return v >= WORK.min && v <= WORK.max;
     });
     span.title = valid.length > 1
       ? 'Jump to §\u2009' + valid[0] + ' (also refs: ' + valid.slice(1).map(n => '§' + n).join(', ') + ')'
-      : (valid.length ? 'Jump to §\u2009' + valid[0]
-                      : 'Not in this volume: §\u2009' + nums[0]);
-    if (!valid.length) span.classList.add('xref-absent');
+      : 'Jump to §\u2009' + (valid[0] || nums[0]);
     span.addEventListener('click', (e) => {
       e.stopPropagation();
       if (valid.length) scrollToParaNum(parseInt(valid[0], 10), true);
@@ -1645,11 +1443,8 @@ function focusParagraph(num) {
   // Update sidebar active state
   updateSidebarActive(num);
 
-  if (WORK.hasTradition) renderTraditionForPara(num);
-  if (WORK.hasRefl) {
-    if (WORK.id === 'baumgarten') renderReflMForPara(num);
-    else renderReflForPara(num);
-  }
+  renderTraditionForPara(num);
+  renderReflForPara(num);
 }
 
 // ── Tradition panel rendering ──
@@ -1849,8 +1644,6 @@ function stepTextHit(dir) {
 // ── Tradition and Reflexionen ──
 let annotTerm = '';
 
-function annotSearchable() { return true; }   // both works have a corpus to search
-
 function runAnnotSearch(term) {
   term = term.trim();
   annotTerm = term;
@@ -1867,10 +1660,10 @@ function runAnnotSearch(term) {
   const needle = term.toLowerCase();
   const hits = [];
 
-  // The tradition entries are indexed to Meier's §§ and mean nothing against
-  // Baumgarten's, so they are only searched on the work they belong to. The
-  // Reflexionen are searched in whichever corpus is loaded.
-  if (WORK.hasTradition) {
+  // The search is scoped to the tab you are on: the Tradition tab searches the
+  // parallel passages, the Reflexionen tab searches Kant's notes. Switching tabs
+  // re-runs it, so the same term can be taken to the other layer in one click.
+  if (activePanel === 'tradition') {
     Object.keys(TRADITION).forEach(k => {
       TRADITION[k].forEach(e => {
         const hay = [e.author, e.source, e.text, e.relation].join(' ');
@@ -1881,18 +1674,17 @@ function runAnnotSearch(term) {
                     who: e.author + ' · ' + e.source, body: where });
       });
     });
+  } else {
+    REFL_ENTRIES.forEach(e => {
+      const hay = [e.text, e.phRaw, e.sig, e.loc && e.loc.raw].filter(Boolean).join(' ');
+      if (hay.toLowerCase().indexOf(needle) < 0) return;
+      const body = (e.text || '').indexOf('\n') >= 0 ? e.text.replace(/\n/g, ' ') : (e.text || '');
+      hits.push({ kind: 'refl', para: (e.paras && e.paras[0]) || null, r: e.r,
+                  who: 'Refl. ' + e.r + (e.phRaw ? ' · ' + e.phRaw : '')
+                       + (e.aa ? ' · AA 16:' + e.aa : ''),
+                  body: body || (e.loc && e.loc.raw) || '' });
+    });
   }
-
-  const C = WORK.id === 'baumgarten' ? BAUM_CORPUS : MEIER_CORPUS;
-  C.entries.forEach(e => {
-    const hay = [e.text, e.phRaw, e.sig, e.loc && e.loc.raw].filter(Boolean).join(' ');
-    if (hay.toLowerCase().indexOf(needle) < 0) return;
-    const body = (e.text || '').indexOf('\n') >= 0 ? e.text.replace(/\n/g, ' ') : (e.text || '');
-    hits.push({ kind: 'refl', para: (e.paras && e.paras[0]) || null, r: e.r,
-                who: 'Refl. ' + e.r + (e.phRaw ? ' · ' + e.phRaw : '')
-                     + (e.aa ? ' · AA ' + (e.vol || C.vol) + ':' + e.aa : ''),
-                body: body || (e.loc && e.loc.raw) || '' });
-  });
 
   hits.sort((a, b) => (a.para || 1e9) - (b.para || 1e9));
   count.textContent = hits.length ? hits.length + ' found' : 'none';
@@ -1902,16 +1694,16 @@ function runAnnotSearch(term) {
   box.style.display = 'block';
   box.innerHTML = '';
 
+  const layer = activePanel === 'tradition' ? 'tradition entries' : 'Reflexionen';
   if (!hits.length) {
-    box.innerHTML = '<div class="annot-none">Nothing in the tradition entries or the '
-      + 'Reflexionen matches that.</div>';
+    box.innerHTML = '<div class="annot-none">Nothing in the ' + layer
+      + ' matches that. The other tab searches the other layer.</div>';
     return;
   }
 
   const sum = document.createElement('div');
   sum.className = 'annot-summary';
-  const nt = hits.filter(h => h.kind === 'tradition').length;
-  sum.textContent = nt + ' tradition · ' + (hits.length - nt) + ' Reflexionen';
+  sum.textContent = hits.length + ' in the ' + layer;
   box.appendChild(sum);
 
   hits.forEach(h => {
@@ -1946,7 +1738,6 @@ function runAnnotSearch(term) {
       runAnnotSearch('');
       switchPanel(h.kind === 'refl' ? 'reflexionen' : 'tradition');
       if (h.para) scrollToParaNum(h.para, true);
-      else if (WORK.id === 'baumgarten') showReflMElsewhere();
     });
 
     box.appendChild(row);
@@ -1976,73 +1767,6 @@ document.getElementById('annotSearch').addEventListener('input', function () {
 document.getElementById('annotSearch').addEventListener('keydown', function (e) {
   if (e.key === 'Escape') { this.value = ''; runAnnotSearch(''); }
 });
-
-// ── Work switcher ──
-function switchWork(work, btn) {
-  if (WORK.id === work) return;
-  document.querySelectorAll('.work-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-
-  WORK = work === 'baumgarten' ? baumgartenWork() : meierWork();
-  document.getElementById('workTitle').innerHTML = WORK.title;
-
-  focusedPara = null;
-  clearHighlights();
-  document.getElementById('textSearch').value = '';
-  document.getElementById('annotSearch').value = '';
-  textTerm = ''; textHitParas = []; textHits = []; textHitIdx = -1;
-  document.getElementById('textSearchCount').textContent = '';
-  document.getElementById('annotSearchCount').textContent = '';
-  document.getElementById('annotResults').style.display = 'none';
-  document.getElementById('textPrev').disabled = true;
-  document.getElementById('textNext').disabled = true;
-  buildSidebar();
-  buildPrimaryContent();
-  document.getElementById('primaryPanel').scrollTop = 0;
-
-  const jump = document.getElementById('jumpInput');
-  jump.min = WORK.min;
-  jump.max = WORK.max;
-  jump.placeholder = WORK.min + '–' + WORK.max;
-  jump.value = '';
-
-  resetPanels();
-}
-
-// The side panels are both keyed to Meier: TRADITION is indexed by his § numbers
-// and the Reflexionen are those of AA XVI, on the Auszug. Showing either against
-// Baumgarten's §§ would attach notes to passages they were never written on, so
-// the panels reset to a placeholder saying exactly that. This rewrites the
-// placeholder's prose only — #traditionActive and #reflScroll are left in place,
-// since switching back to Meier has to find them.
-function resetPanels() {
-  const placeholder = document.getElementById('traditionPlaceholder');
-  const active = document.getElementById('traditionActive');
-  placeholder.style.display = '';
-  active.style.display = 'none';
-  document.getElementById('phParaNum').textContent = '';
-
-  placeholder.querySelector('p').innerHTML = WORK.hasTradition
-    ? 'Click any paragraph on the left to see parallel and contrasting passages '
-      + 'from the tradition here.'
-    : 'The parallel passages are annotated against Meier\'s §§. None have been '
-      + 'written for the <em>Metaphysica</em> yet — switch back to the '
-      + '<em>Auszug</em> to use this panel.';
-
-  document.getElementById('reflScroll').innerHTML = '';
-  reflMPara = null;
-  document.getElementById('reflCount').textContent = '';
-
-  // the Reflexionen tab names the corpus it is showing
-  document.getElementById('tabReflexionen').title = WORK.id === 'baumgarten'
-    ? REFLM_META.count + ' Reflexionen (Refl. ' + REFLM_META.rMin + '–'
-      + REFLM_META.rMax + ') on the Metaphysica, AA XVII and XVIII.'
-    : REFL_META.count + ' Reflexionen (Refl. ' + REFL_META.rMin + '–'
-      + REFL_META.rMax + ') on the Auszug, AA XVI.';
-  // the era filter is built from the Meier corpus; hide it on Baumgarten
-  document.getElementById('reflFilter').style.display =
-    (activePanel === 'reflexionen' && WORK.id !== 'baumgarten') ? 'flex' : 'none';
-}
 
 // ── Resizer ──
 const resizer = document.getElementById('resizer');
@@ -2191,11 +1915,6 @@ function applyReflFilter() {
 
 function updateReflCount() {
   const el = document.getElementById('reflCount');
-  if (WORK.id === 'baumgarten') {
-    const n = (REFLM_BY_PARA[String(reflMPara)] || []).length;
-    el.textContent = n ? ' ' + n : '';
-    return;
-  }
   if (reflFocusPara === null) { el.textContent = ''; return; }
   const idxs = REFL_BY_PARA[String(reflFocusPara)] || [];
   const shown = idxs.filter(i => entryVisible(REFL_ENTRIES[i])).length;
@@ -2204,67 +1923,8 @@ function updateReflCount() {
 }
 
 // ── one Reflexion card ──
-// One Reflexion card. `corpus` says which of the two it came from, since the
-// volume, the handbook and the vocabulary of § provenance all differ between
-// Kant's notes on Meier (AA XVI) and on Baumgarten (AA XVII–XVIII).
-// ── the two Reflexionen corpora ──────────────────────────────────────────────
-// Kant annotated both handbooks, but the Academy Edition presents the two very
-// differently, so each corpus carries its own volume, work name and vocabulary
-// for saying how a Reflexion got its §.
-const MEIER_CORPUS = {
-  id: 'meier', vol: 16, work: 'Auszug aus der Vernunftlehre',
-  entries: typeof REFL_ENTRIES !== 'undefined' ? REFL_ENTRIES : [],
-  byPara: typeof REFL_BY_PARA !== 'undefined' ? REFL_BY_PARA : {},
-  provenance(e) {
-    if (e.interp) return { cls: 'interp', text: 'interpolated §', title: e.front
-      ? 'A note on the front matter of the Auszug, which precedes § 1. The AA '
-        + 'states no §; it is filed at § 1 by this tool, not by the edition.'
-      : 'The AA states no § for this Reflexion. The § was inferred from the '
-        + 'surrounding entries by this tool and is not attested.' };
-    if (e.src === 'locus') return { cls: 'locus', text: '§ attested',
-      title: 'The § comes from this Reflexion’s own locus note in the AA.' };
-    return { cls: 'group', text: '§ from AA block',
-      title: 'The AA states no § for this Reflexion individually; the § range '
-           + 'comes from the block header it stands under.' };
-  },
-};
-
-const BAUM_CORPUS = {
-  id: 'baumgarten', vol: 17, work: 'Metaphysica',
-  entries: typeof REFLM_ENTRIES !== 'undefined' ? REFLM_ENTRIES : [],
-  byPara: typeof REFLM_BY_PARA !== 'undefined' ? REFLM_BY_PARA : {},
-  provenance(e) {
-    if (e.other) return { cls: 'other', text: 'another handbook',
-      title: 'Not written in the Metaphysica at all, but in ' + e.other
-           + '. It is shown here because the Academy Edition prints it in the '
-           + 'same volume, and it is attached to no § of Baumgarten.' };
-    if (e.blatt) return { cls: 'other', text: 'loses Blatt',
-      title: 'A loose sheet rather than the handbook, so the AA gives it no '
-           + 'place in Baumgarten’s text.' };
-    if (e.front) return { cls: 'other', text: 'front matter',
-      title: 'Kant writing on the Roman-numbered front matter — the prefaces '
-           + 'and the Synopsis — which precedes § 1.' };
-    if (e.interp) return { cls: 'interp', text: 'interpolated §',
-      title: 'The AA states no § for this Reflexion. The § was inferred from '
-           + 'the surrounding entries by this tool and is not attested.' };
-    if (e.src === 'locus') return { cls: 'locus', text: '§ attested',
-      title: 'The § comes from this Reflexion’s own locus note in the AA.' };
-    if (e.src === 'block') return { cls: 'group', text: '§ from AA block',
-      title: 'The AA states no § for this Reflexion individually; the § range '
-           + 'comes from the block header it stands under.' };
-    if (e.src === 'page') return { cls: 'page', text: '§ from handbook page',
-      title: 'The AA locates this note only to a page of Kant’s copy (' + e.sig
-           + '). The §§ are those the 1757 edition prints on that page — '
-           + 'attested from both sides, but it names every § on the page, not '
-           + 'the one Kant wrote against.' };
-    return { cls: 'interp', text: 'no § stated',
-      title: 'Nothing in the AA locates this Reflexion in the text.' };
-  },
-};
-
-function buildReflEntry(idx, corpus) {
-  const C = corpus || MEIER_CORPUS;
-  const e = C.entries[idx];
+function buildReflEntry(idx) {
+  const e = REFL_ENTRIES[idx];
   const div = document.createElement('div');
   div.className = 'r-entry' + (e.interp ? ' interp' : '') + (e.vacat ? ' vacat' : '');
   div.dataset.idx = idx;
@@ -2302,7 +1962,7 @@ function buildReflEntry(idx, corpus) {
   if (e.aa) {
     const aa = document.createElement('span');
     aa.className = 'r-aa';
-    aa.textContent = 'AA ' + (e.vol || C.vol) + ':' + e.aa + (e.aaEnd ? '–' + e.aaEnd : '');
+    aa.textContent = 'AA 16:' + e.aa + (e.aaEnd ? '–' + e.aaEnd : '');
     head.appendChild(aa);
   }
   div.appendChild(head);
@@ -2378,16 +2038,30 @@ function buildReflEntry(idx, corpus) {
     const s = document.createElement('span');
     s.className = 'r-sig';
     s.textContent = e.sig;
-    s.title = 'Where the note stands in Kant’s own copy of the ' + C.work +
-              ' (sheet and page, as the AA gives it). A prime marks the ' +
+    s.title = 'Where the note stands in Kant’s own copy of the Auszug ' +
+              '(sheet and page, as the AA gives it). A prime marks the ' +
               'interleaved page.';
     foot.appendChild(s);
   }
   const prov = document.createElement('span');
-  const tag = C.provenance(e);
-  prov.className = 'r-prov ' + tag.cls;
-  prov.textContent = tag.text;
-  prov.title = tag.title;
+  if (e.interp) {
+    prov.className = 'r-prov interp';
+    prov.textContent = 'interpolated §';
+    prov.title = e.front
+      ? 'A note on the front matter of the Auszug, which precedes § 1. The AA ' +
+        'states no §; it is filed at § 1 by this tool, not by the edition.'
+      : 'The AA states no § for this Reflexion. The § was inferred from the ' +
+        'surrounding entries by this tool and is not attested.';
+  } else if (e.src === 'locus') {
+    prov.className = 'r-prov locus';
+    prov.textContent = '§ attested';
+    prov.title = 'The § comes from this Reflexion’s own locus note in the AA.';
+  } else {
+    prov.className = 'r-prov group';
+    prov.textContent = '§ from AA block';
+    prov.title = 'The AA states no § for this Reflexion individually; the § ' +
+                 'range comes from the block header it stands under.';
+  }
   foot.appendChild(prov);
   div.appendChild(foot);
 
@@ -2482,7 +2156,7 @@ function buildReflGroup(gi) {
     const body = document.createElement('div');
     body.className = 'r-entries';
     if (!single) body.dataset.para = p;
-    bySub.get(p).forEach(i => body.appendChild(buildReflEntry(i, MEIER_CORPUS)));
+    bySub.get(p).forEach(i => body.appendChild(buildReflEntry(i)));
     wrap.appendChild(body);
   });
 
@@ -2501,7 +2175,7 @@ function buildReflGroup(gi) {
     }
     const body = document.createElement('div');
     body.className = 'r-entries';
-    blockOnly.forEach(i => body.appendChild(buildReflEntry(i, MEIER_CORPUS)));
+    blockOnly.forEach(i => body.appendChild(buildReflEntry(i)));
     wrap.appendChild(body);
   }
   return wrap;
@@ -2628,96 +2302,6 @@ function renderReflForPara(num) {
   updateReflCount();
 }
 
-// ── Baumgarten's Reflexionen, per § ──────────────────────────────────────────
-// AA XVII and XVIII are not arranged like AA XVI. The Erläuterungen have no
-// block structure at all and the blocks elsewhere are thinner, so there is no
-// point mirroring the volume's own sequence the way the Meier panel does.
-// A plain list of what stands at the § in view is both simpler and closer to
-// how these notes read — median 12 entries a §, 112 at the most.
-let reflMPara = null;
-
-function renderReflMForPara(num) {
-  reflMPara = num;
-  const scroll = document.getElementById('reflScroll');
-  scroll.innerHTML = '';
-
-  const idxs = REFLM_BY_PARA[String(num)] || [];
-  const head = document.createElement('div');
-  head.className = 'r-para-head';
-  const line = document.createElement('div');
-  line.className = 'r-para-head-line';
-  const n = document.createElement('span');
-  n.className = 'r-para-num';
-  n.textContent = '§ ' + num;
-  line.appendChild(n);
-  const cnt = document.createElement('span');
-  cnt.className = 'r-para-count';
-  cnt.textContent = idxs.length === 1 ? '1 Reflexion' : idxs.length + ' Reflexionen';
-  line.appendChild(cnt);
-  head.appendChild(line);
-  scroll.appendChild(head);
-
-  if (!idxs.length) {
-    const none = document.createElement('div');
-    none.className = 'r-sub-hint';
-    none.textContent = 'The Academy Edition records no Reflexion at § ' + num + '.';
-    scroll.appendChild(none);
-  } else {
-    // locus-attested notes first, then those placed only by block or page
-    const order = { locus: 0, page: 1, block: 2 };
-    idxs.slice()
-        .sort((a, b) => (order[REFLM_ENTRIES[a].src] ?? 3) - (order[REFLM_ENTRIES[b].src] ?? 3)
-                        || REFLM_ENTRIES[a].r - REFLM_ENTRIES[b].r)
-        .forEach(i => scroll.appendChild(buildReflEntry(i, BAUM_CORPUS)));
-  }
-
-  // Nothing in the corpus is allowed to be unreachable: the notes on the front
-  // matter, the loose sheets and the other handbooks belong to no §, so they
-  // get their own way in rather than being filed against a § they say nothing
-  // about.
-  const foot = document.createElement('div');
-  foot.className = 'r-elsewhere';
-  foot.innerHTML = '<button class="r-elsewhere-btn" id="reflMElsewhere">'
-    + REFLM_OFFPARA.length + ' Reflexionen belong to no §</button>'
-    + '<span class="r-elsewhere-note">Kant on the prefaces and the Synopsis, on '
-    + 'loose sheets, and in his copy of Eberhard.</span>';
-  scroll.appendChild(foot);
-  document.getElementById('reflMElsewhere').onclick = showReflMElsewhere;
-
-  updateReflCount();
-}
-
-// entries the AA attaches to no § of the Metaphysica, in AA order
-const REFLM_OFFPARA = (typeof REFLM_ENTRIES === 'undefined' ? [] : REFLM_ENTRIES)
-  .map((e, i) => [e, i]).filter(([e]) => !e.paras || !e.paras.length).map(([, i]) => i);
-
-function showReflMElsewhere() {
-  const scroll = document.getElementById('reflScroll');
-  scroll.innerHTML = '';
-  const head = document.createElement('div');
-  head.className = 'r-para-head';
-  head.innerHTML = '<div class="r-para-head-line">'
-    + '<span class="r-para-num">No §</span>'
-    + '<span class="r-para-count">' + REFLM_OFFPARA.length + ' Reflexionen</span></div>';
-  scroll.appendChild(head);
-
-  const note = document.createElement('div');
-  note.className = 'r-sub-hint';
-  note.textContent = 'These are printed in AA XVII and XVIII but attach to no '
-    + 'numbered § of the Metaphysica: Kant writing on the Roman-numbered front '
-    + 'matter, on loose sheets, and in his copy of Eberhard’s Vorbereitung zur '
-    + 'natürlichen Theologie. None of them has been filed against a § here.';
-  scroll.appendChild(note);
-
-  const back = document.createElement('button');
-  back.className = 'r-elsewhere-btn';
-  back.textContent = '‹ back to § ' + (reflMPara || 1);
-  back.onclick = () => renderReflMForPara(reflMPara || 1);
-  scroll.appendChild(back);
-
-  REFLM_OFFPARA.forEach(i => scroll.appendChild(buildReflEntry(i, BAUM_CORPUS)));
-}
-
 // ── panel tabs ──
 function switchPanel(which) {
   activePanel = which;
@@ -2728,15 +2312,12 @@ function switchPanel(which) {
   document.getElementById('traditionBody').style.display  = which === 'tradition' ? 'flex' : 'none';
   document.getElementById('reflBody').classList.toggle('active', which === 'reflexionen');
   if (which === 'reflexionen') {
-    if (WORK.id === 'baumgarten') {
-      renderReflMForPara(focusedPara === null ? (reflMPara || 1) : focusedPara);
-    } else if (reflFocusPara === null) {
-      renderReflForPara(focusedPara === null ? 1 : focusedPara);
-    } else {
-      scrollReflToFocusSettled();   // couldn't scroll while the panel was hidden
-    }
+    if (reflFocusPara === null) renderReflForPara(focusedPara === null ? 1 : focusedPara);
+    else scrollReflToFocusSettled();   // couldn't scroll while the panel was hidden
   }
-  if (WORK.id === 'baumgarten') document.getElementById('reflFilter').style.display = 'none';
+  // A search in progress follows you to the other tab and re-runs there, so the
+  // term does not have to be retyped to look in the other layer.
+  if (annotTerm && annotTerm.length >= 2) runAnnotSearch(annotTerm);
 }
 
 // ── Adickes overlay ──

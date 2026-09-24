@@ -160,7 +160,7 @@ Things the extractor knows about the AA's conventions, which are easy to break:
 
 - Entries are `NNNN. <phases>. <sigla>. [<locus note>]`, separated by `__________`, and
   gathered into `===========`-delimited blocks headed `L §. 19-35. IX 35-39. [Topic.]`.
-- The transcription uses ` ` for soft line breaks, `\xa0` for spaces, `―  N  ―` for
+- The transcription uses `` for soft line breaks, `\xa0` for spaces, `―  N  ―` for
   AA page markers, and occasionally puts a separator and the next entry header on one line.
 - Phase symbols include **`µ` (U+00B5, micro sign, 133×)** and **`ϕ` (U+03D5)**, neither of
   which is in the `α-ω` range. A naive `[α-ω]` class silently drops 133 entries.
@@ -231,17 +231,17 @@ Editing guidance:
   in Bd. XV instead, and the reader shows the Academy Edition's own note saying so.
   Filling them in would mean transcribing AA XV, which is not in `Textfiles/`.
   Baumgarten's three prefaces are also not shown, the reader being keyed to § numbers.
-- The Reflexionen on Baumgarten are extracted and shown in the **Meier reader's**
-  Baumgarten tab, but the standalone **Baumgarten reader** has no side panel at all,
-  so they do not appear there. That app still shows only the phases-by-section block.
-- 708 of the 2967 Baumgarten Reflexionen belong to no numbered § — the front matter,
-  loose sheets, and Kant's copy of Eberhard. They are reachable only through the
-  panel's "belong to no §" view, not by clicking a §.
-- The **Meier reader**'s "Baumgarten · Metaphysica" tab now renders the real text,
-  from the same `data/metaphysica-17.js` the Baumgarten reader uses. Its two side
-  panels stay Meier-only, though: `TRADITION` is keyed to Meier's §§ and the
-  Reflexionen are AA XVI, on the *Auszug*. Both say so rather than showing Meier's
-  notes against Baumgarten's §§.
+- The Reflexionen on Baumgarten now have a side panel in the **Baumgarten reader**
+  itself, tracking the § in view. 708 of the 2967 belong to no numbered § — the front
+  matter, loose sheets, and Kant's copy of Eberhard — and are reachable only through
+  that panel's "belong to no §" view, not by clicking a §. The AA also files notes
+  against §§ 655–662, which AA XVII does not print; every one of those is filed
+  against a printed § as well, so none is stranded.
+- **Each reader is one work's.** The Meier reader had a "Baumgarten · Metaphysica"
+  tab for a while; it was removed. `TRADITION` is keyed to Meier's §§ and the AA XVI
+  Reflexionen are on the *Auszug*, so neither side panel said anything about
+  Baumgarten's §§, and the *Metaphysica* now has the better home of its own. Do not
+  reintroduce a second work into either app.
 - The Meier reader's `TRADITION` map (parallel passages from Wolff, the Scholastics,
   and Aristotle) is annotated for 10 paragraphs out of 563; the rest show a
   "no entries yet" placeholder. This is by design — annotation is ongoing work.

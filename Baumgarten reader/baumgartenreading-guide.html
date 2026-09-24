@@ -26,6 +26,17 @@
   --aa-bd:      #8aaa8a;
   /* section header */
   --sec-ink:    #2e1a00;
+  /* Reflexionen panel */
+  --panel-bg:   #faf7f0;
+  /* Bands of Adickes' chronology, used to colour a phase chip by its decade.
+     The same six tones the Meier reader uses, so a phase reads the same in
+     both apps. Boundaries are Adickes' own (AA 14:XXXV). */
+  --era-1750:   #7a6a4a;
+  --era-1760:   #5c6e3a;
+  --era-1770:   #8b5e3c;
+  --era-1780:   #3b5068;
+  --era-1790:   #6b4f7a;
+  --era-none:   #9a9a9a;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -351,6 +362,11 @@ body {
   border-radius: 2px;
 }
 
+#reading-row {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
 #text-canvas {
   flex: 1;
   overflow-y: auto;
@@ -588,6 +604,344 @@ body {
   font-size: 1.05rem;
 }
 
+/* ── REFLEXIONEN PANEL ──────────────────────────────────────────────────────
+   Kant's handschriftliche Bemerkungen on the § in view, from AA XVII and XVIII.
+   The card styling is the Meier reader's, mapped onto this app's palette so a
+   Reflexion looks the same in both readers. */
+#refl-show {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--faded);
+  border-radius: 2px;
+  padding: 3px 9px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+#refl-show:hover { color: var(--accent); border-color: var(--accent); }
+
+#refl-resizer {
+  width: 4px;
+  background: var(--parch-deep);
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+#refl-resizer:hover { background: var(--accent-lt); }
+#refl-resizer.hidden { display: none; }
+
+#refl-panel {
+  width: 380px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel-bg);
+  border-left: 1px solid var(--line);
+}
+#refl-panel.hidden { display: none; }
+
+#refl-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  background: var(--parch-dark);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+#refl-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+#refl-count {
+  font-family: 'EB Garamond', serif;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--faded);
+}
+#refl-toggle {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--faded);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+#refl-toggle:hover { color: var(--accent); }
+
+#refl-scroll { flex: 1; overflow-y: auto; padding-bottom: 1.5rem; }
+
+/* the § the list belongs to */
+.r-para-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--parch-dark);
+  border-bottom: 1px solid var(--parch-deep);
+  padding: 6px 18px 7px;
+}
+.r-para-head-line { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.r-para-num {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+.r-para-count { font-size: 10.5px; color: var(--faded); flex-shrink: 0; }
+.r-sub-hint {
+  margin: 9px 18px 0;
+  padding: 7px 10px;
+  background: var(--parch-dark);
+  border: 1px solid var(--parch-deep);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--faded);
+}
+
+/* one Reflexion */
+.r-entry {
+  position: relative;
+  background: white;
+  border-left: 3px solid var(--line);
+  border-radius: 0 2px 2px 0;
+  margin: 7px 18px 0;
+  padding: 9px 12px 10px 30px;
+  transition: box-shadow 0.12s;
+  cursor: pointer;
+}
+.r-entry:hover { box-shadow: 0 1px 6px #00000017; }
+.r-entry.interp { border-left-style: dashed; background: #fbfaf5; }
+/* manuscript-placement glyph, in the card's left gutter */
+.r-glyph {
+  position: absolute;
+  left: 8px;
+  top: 9px;
+  width: 15px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--faded);
+  cursor: help;
+  user-select: none;
+}
+.r-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.r-num {
+  font-family: 'Cinzel', serif;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faded);
+}
+.r-phase {
+  font-family: 'EB Garamond', serif;
+  font-size: 12px;
+  border: 1px solid currentColor;
+  padding: 0 5px 1px;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.r-phase:hover { background: #0000000d; }
+.r-phase .r-phase-sym { font-size: 13.5px; font-weight: 500; }
+.r-phase .r-phase-yr { font-size: 10.5px; opacity: 0.85; margin-left: 3px; }
+.r-phase.undated { border-style: dashed; }
+.era-1750 { color: var(--era-1750); }
+.era-1760 { color: var(--era-1760); }
+.era-1770 { color: var(--era-1770); }
+.era-1780 { color: var(--era-1780); }
+.era-1790 { color: var(--era-1790); }
+.era-none { color: var(--era-none); }
+.r-aa {
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--aa-ink);
+  border: 1px solid currentColor;
+  padding: 1px 5px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+/* the AA's dating verbatim, where it says more than the symbols do */
+.r-phraw {
+  font-size: 11.5px;
+  color: var(--faded);
+  font-style: italic;
+  margin-bottom: 3px;
+}
+/* the AA locus note, verbatim */
+.r-locus {
+  font-size: 11.5px;
+  color: var(--ink);
+  background: var(--parchment);
+  border: 1px solid var(--parch-deep);
+  padding: 3px 7px;
+  margin-bottom: 5px;
+  line-height: 1.45;
+}
+.r-locus-raw { font-style: italic; }
+.r-chip {
+  display: inline-block;
+  font-family: 'Cinzel', serif;
+  font-size: 8px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  color: var(--faded);
+  padding: 0 4px;
+  margin: 3px 3px 0 0;
+  background: white;
+}
+.r-chip.lemma {
+  font-family: 'EB Garamond', serif;
+  font-size: 11.5px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--accent-lt);
+  border-color: var(--accent-lt);
+  cursor: pointer;
+}
+.r-chip.lemma:hover { background: #8b5e3c1a; }
+.r-chip.satz { color: var(--accent-lt); border-color: var(--accent-lt); cursor: pointer; }
+.r-text { font-size: 14px; line-height: 1.62; color: var(--ink); white-space: pre-wrap; }
+.r-foot { display: flex; align-items: baseline; gap: 7px; margin-top: 6px; flex-wrap: wrap; }
+.r-sig { font-size: 11px; font-style: italic; color: var(--faded); }
+/* How the § was arrived at — attested, or worked out, and from what. */
+.r-prov {
+  font-family: 'Cinzel', serif;
+  font-size: 7.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  color: var(--faded);
+  margin-left: auto;
+}
+.r-prov.locus { border-color: var(--aa-ink); color: var(--aa-ink); }
+.r-prov.group { border-color: var(--line); }
+.r-prov.interp { border-color: #aa6b6b; color: #8a4a4a; border-style: dashed; }
+.r-prov.page { border-color: var(--era-1780); color: var(--era-1780); }
+.r-prov.other { border-color: var(--line); color: var(--faded); font-style: italic; }
+
+/* the way in to the Reflexionen that attach to no § */
+.r-elsewhere {
+  margin: 14px 18px 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--parch-deep);
+}
+.r-elsewhere-btn {
+  display: block;
+  width: calc(100% - 36px);
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--faded);
+  padding: 5px 9px;
+  margin: 8px 18px 6px;
+  cursor: pointer;
+}
+.r-elsewhere .r-elsewhere-btn { width: 100%; margin: 8px 0 6px; }
+.r-elsewhere-btn:hover { color: var(--ink); border-color: var(--accent); }
+.r-elsewhere-note {
+  display: block;
+  font-size: 11.5px;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--faded);
+}
+
+/* ── Adickes overlay ── his note on the phase behind a chip */
+.adickes-veil {
+  position: fixed;
+  inset: 0;
+  background: #1a120859;
+  z-index: 200;
+  display: none;
+}
+.adickes-veil.open { display: block; }
+.adickes-box {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(620px, 92vw);
+  max-height: 82vh;
+  overflow-y: auto;
+  background: var(--parchment);
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 40px #1a120844;
+  padding: 22px 26px 26px;
+}
+.adickes-box h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 15px;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+.adickes-sub {
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--faded);
+  margin-bottom: 14px;
+}
+.adickes-years { font-size: 16px; color: var(--accent-lt); margin-bottom: 12px; }
+.adickes-note {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ink);
+  border-left: 2px solid var(--line);
+  padding-left: 13px;
+  white-space: pre-wrap;
+}
+.adickes-flag {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--parch-dark);
+  border: 1px solid var(--parch-deep);
+  padding: 8px 11px;
+  margin-bottom: 12px;
+}
+.adickes-close {
+  float: right;
+  font-family: 'Cinzel', serif;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--faded);
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.adickes-close:hover { color: var(--ink); border-color: var(--accent); }
+
+/* ── lemma / Satz highlight in the primary text ── */
+.lemma-hit {
+  background: #8b5e3c38;
+  box-shadow: 0 1px 0 var(--accent-lt);
+}
+.satz-hit { background: #8b5e3c21; }
+.para-block.part-anfang::before,
+.para-block.part-schluss::after {
+  content: '⌐';
+  color: var(--accent-lt);
+  font-size: 15px;
+  margin-right: 4px;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -614,16 +968,31 @@ body {
   <div id="top-bar">
     <button id="toc-toggle" title="Toggle table of contents">☰ TOC</button>
     <button id="synopsis-btn" title="Baumgarten's own conspectus of the whole work">Synopsis</button>
+    <button id="refl-show" title="Show Kant's Reflexionen beside the text" style="display:none;">Reflexionen</button>
     <span class="top-title">Baumgarten · Metaphysica</span>
     <span class="top-sub">AA 17 · Editio IV, 1757</span>
     <span class="chip-legend">
       <span class="chip-sample">†</span> german equivalent
     </span>
   </div>
-  <div id="text-canvas">
-    <div id="text-inner">
-      <div class="empty-msg">Loading text…</div>
+  <div id="reading-row">
+    <div id="text-canvas">
+      <div id="text-inner">
+        <div class="empty-msg">Loading text…</div>
+      </div>
     </div>
+
+    <div id="refl-resizer" title="Drag to resize"></div>
+
+    <!-- Kant's handschriftliche Bemerkungen on the § in view -->
+    <aside id="refl-panel">
+      <div id="refl-head">
+        <span id="refl-label">Reflexionen</span>
+        <span id="refl-count"></span>
+        <button id="refl-toggle" title="Hide the Reflexionen">×</button>
+      </div>
+      <div id="refl-scroll"></div>
+    </aside>
   </div>
 </div>
 
@@ -639,9 +1008,16 @@ body {
   </div>
 </div>
 
+<!-- Adickes on one phase of Kant's hand, AA 14:XXXV–XLIII; opened from a phase chip -->
+<div class="adickes-veil" id="adickesVeil">
+  <div class="adickes-box" id="adickesBox"></div>
+</div>
+
 <!-- The Metaphysica text itself. A classic <script src>, not fetch(), so the
      reader still opens by double-clicking from a file:// URL. -->
 <script src="../data/metaphysica-17.js"></script>
+<script src="../data/phases-adickes.js"></script>
+<script src="../data/reflexionen-17-18-baumgarten.js"></script>
 
 <script>
 // ── DATA: Baumgarten Metaphysica paragraphs ──────────────────────────────────
@@ -722,7 +1098,7 @@ function processText(p) {
 
 let focusedNum = null;
 
-function scrollToPara(num) {
+function scrollToPara(num, andPanel = true) {
   const el = document.getElementById('para-' + num);
   if (!el) return;
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -737,6 +1113,9 @@ function scrollToPara(num) {
   document.querySelectorAll('.toc-item').forEach(i => i.classList.remove('active'));
   const ti = document.querySelector(`.toc-item[data-para="${num}"]`);
   if (ti) { ti.classList.add('active'); ti.scrollIntoView({ block: 'nearest' }); }
+  // Move the Reflexionen to the § now in view. The highlighting functions call
+  // this to reach their own §, and must not have the panel rebuilt under them.
+  if (andPanel && reflOpen && reflPara !== num) renderReflForPara(num);
 }
 
 function focusPara(num) {
@@ -990,6 +1369,530 @@ function closeSynopsis() {
   document.getElementById('synopsis-overlay').classList.remove('open');
 }
 
+// ── REFLEXIONEN ──────────────────────────────────────────────────────────────
+// Kant's handschriftliche Bemerkungen on the Metaphysica: 2967 of them, Refl.
+// 3489–6455, from AA XVII and XVIII, in ../data/reflexionen-17-18-baumgarten.js.
+// The panel lists what stands at the § in view. AA XVII–XVIII are not arranged
+// the way AA XVI is — the Erläuterungen have no block structure at all and the
+// blocks elsewhere are thin — so there is nothing to be gained by mirroring the
+// volume's own sequence. A plain list per § is closer to how these read; the
+// median § has 12 entries and the largest 112, so no windowing is needed.
+
+// How the AA says a note is placed on the page, and the gutter glyph for it.
+const REFL_KIND = {
+  'zu':        { glyph: '→', de: 'Zu …',        en: 'attached to the passage; placement not further specified' },
+  'gegenüber': { glyph: '‖', de: 'Gegenüber …', en: 'on the facing (interleaved) page, opposite the passage' },
+  'neben':     { glyph: '▎', de: 'Neben …',     en: 'beside the passage, in the same margin' },
+  'zwischen':  { glyph: '↕', de: 'Zwischen …',  en: 'between the printed lines, or between two §§' },
+  'über':      { glyph: '↑', de: 'Über …',      en: 'above the line' },
+  'unter':     { glyph: '↓', de: 'Unter …',     en: 'below the line' },
+  'nach':      { glyph: '»', de: 'Nach …',      en: 'after the passage' },
+  'in':        { glyph: '⊂', de: 'In …',        en: 'written into the printed text itself' }
+};
+
+// Decade bands, used only to colour a phase chip. Boundaries are Adickes' own:
+// α/β are the 1750s, θ the 1780s, ω 1790–1804 (AA 14:XXXV).
+const ERAS = [
+  { key: '1750', cls: 'era-1750', lo: 0,    hi: 1759 },
+  { key: '1760', cls: 'era-1760', lo: 1760, hi: 1769 },
+  { key: '1770', cls: 'era-1770', lo: 1770, hi: 1779 },
+  { key: '1780', cls: 'era-1780', lo: 1780, hi: 1789 },
+  { key: '1790', cls: 'era-1790', lo: 1790, hi: 9999 },
+  { key: 'none', cls: 'era-none', lo: null, hi: null }
+];
+
+// The corpus, and the vocabulary for saying how each entry got its §. Every
+// entry carries `src`, and the tag is the only place the reader can see whether
+// a § is the Academy Edition's or this tool's — so nothing is normalised away.
+const BAUM_CORPUS = {
+  vol: 17, work: 'Metaphysica',
+  entries: typeof REFLM_ENTRIES !== 'undefined' ? REFLM_ENTRIES : [],
+  byPara: typeof REFLM_BY_PARA !== 'undefined' ? REFLM_BY_PARA : {},
+  provenance(e) {
+    if (e.other) return { cls: 'other', text: 'another handbook',
+      title: 'Not written in the Metaphysica at all, but in ' + e.other
+           + '. It is shown here because the Academy Edition prints it in the '
+           + 'same volume, and it is attached to no § of Baumgarten.' };
+    if (e.blatt) return { cls: 'other', text: 'loses Blatt',
+      title: 'A loose sheet rather than the handbook, so the AA gives it no '
+           + 'place in Baumgarten’s text.' };
+    if (e.front) return { cls: 'other', text: 'front matter',
+      title: 'Kant writing on the Roman-numbered front matter — the prefaces '
+           + 'and the Synopsis — which precedes § 1.' };
+    if (e.interp) return { cls: 'interp', text: 'interpolated §',
+      title: 'The AA states no § for this Reflexion. The § was inferred from '
+           + 'the surrounding entries by this tool and is not attested.' };
+    if (e.src === 'locus') return { cls: 'locus', text: '§ attested',
+      title: 'The § comes from this Reflexion’s own locus note in the AA.' };
+    if (e.src === 'block') return { cls: 'group', text: '§ from AA block',
+      title: 'The AA states no § for this Reflexion individually; the § range '
+           + 'comes from the block header it stands under.' };
+    if (e.src === 'page') return { cls: 'page', text: '§ from handbook page',
+      title: 'The AA locates this note only to a page of Kant’s copy (' + e.sig
+           + '). The §§ are those the 1757 edition prints on that page — '
+           + 'attested from both sides, but it names every § on the page, not '
+           + 'the one Kant wrote against.' };
+    return { cls: 'interp', text: 'no § stated',
+      title: 'Nothing in the AA locates this Reflexion in the text.' };
+  },
+};
+
+// The entries the AA attaches to no § of the Metaphysica, in AA order. Nothing
+// in the corpus is allowed to be unreachable, and none of these may be filed
+// against a § it says nothing about, so they get a view of their own.
+const REFL_OFFPARA = BAUM_CORPUS.entries
+  .map((e, i) => [e, i]).filter(([e]) => !e.paras || !e.paras.length).map(([, i]) => i);
+
+let reflPara = null;       // the § the panel is currently showing
+let reflOpen = true;
+
+/** Which era band a phase symbol falls in; 'none' where Adickes gives no date. */
+function eraOf(sym) {
+  const p = phaseInfo(sym);
+  if (!p || p.from == null) return 'none';
+  for (const e of ERAS) {
+    if (e.lo !== null && p.from >= e.lo && p.from <= e.hi) return e.key;
+  }
+  return 'none';
+}
+
+function buildReflEntry(idx) {
+  const C = BAUM_CORPUS;
+  const e = C.entries[idx];
+  const div = document.createElement('div');
+  div.className = 'r-entry' + (e.interp ? ' interp' : '');
+  div.dataset.idx = idx;
+
+  // gutter glyph for where on the page the note stands
+  const kind = e.loc && e.loc.kind ? REFL_KIND[e.loc.kind] : null;
+  const g = document.createElement('span');
+  g.className = 'r-glyph';
+  g.textContent = kind ? kind.glyph : '·';
+  g.title = kind ? kind.de + ' — ' + kind.en
+                 : 'The AA gives no placement note for this Reflexion';
+  div.appendChild(g);
+
+  // header: number · phase chips · AA page
+  const head = document.createElement('div');
+  head.className = 'r-head';
+  const num = document.createElement('span');
+  num.className = 'r-num';
+  num.textContent = 'Refl. ' + e.r;
+  head.appendChild(num);
+
+  (e.ph || []).forEach(sym => {
+    const p = phaseInfo(sym);
+    const b = document.createElement('button');
+    b.className = 'r-phase ' + ERAS.find(x => x.key === eraOf(sym)).cls +
+                  (p && p.years ? '' : ' undated');
+    b.innerHTML = '<span class="r-phase-sym"></span><span class="r-phase-yr"></span>';
+    b.querySelector('.r-phase-sym').textContent = p ? p.sym : sym;
+    b.querySelector('.r-phase-yr').textContent = p && p.years ? p.years : 'undat.';
+    b.title = 'Adickes’ phase ' + (p ? p.sym : sym) + ' — click for his note';
+    b.onclick = ev => { ev.stopPropagation(); openAdickes(sym); };
+    head.appendChild(b);
+  });
+
+  if (e.aa) {
+    const aa = document.createElement('span');
+    aa.className = 'r-aa';
+    aa.textContent = 'AA ' + (e.vol || C.vol) + ':' + e.aa + (e.aaEnd ? '–' + e.aaEnd : '');
+    head.appendChild(aa);
+  }
+  div.appendChild(head);
+
+  // the AA's phase expression verbatim, where it says more than the symbols do.
+  // Adickes' query marks and parentheses are his own uncertainty and are kept.
+  const symJoin = (e.ph || []).join('');
+  if (e.phRaw && e.phRaw.replace(/[\s.]/g, '') !== symJoin) {
+    const pr = document.createElement('div');
+    pr.className = 'r-phraw';
+    pr.textContent = 'AA: ' + e.phRaw;
+    pr.title = 'The Academy Edition’s dating verbatim. Query marks and ' +
+               'parentheses are Adickes’ own expression of uncertainty.';
+    div.appendChild(pr);
+  }
+
+  // the locus note, verbatim, plus whatever could be parsed out of it
+  if (e.loc && e.loc.raw) {
+    const lo = document.createElement('div');
+    lo.className = 'r-locus';
+    const raw = document.createElement('span');
+    raw.className = 'r-locus-raw';
+    raw.textContent = e.loc.raw;
+    lo.appendChild(raw);
+
+    if (e.loc.satz && e.loc.satz.length) {
+      const c = document.createElement('span');
+      c.className = 'r-chip satz';
+      c.textContent = 'Satz ' + e.loc.satz.join('·');
+      c.title = 'Highlight sentence ' + e.loc.satz.join(', ') + ' of the § in the ' +
+                'text on the left. Sentences are counted by splitting on ' +
+                'sentence-final punctuation, so the count is approximate.';
+      c.onclick = ev => { ev.stopPropagation(); highlightSatz(e); };
+      lo.appendChild(document.createElement('br'));
+      lo.appendChild(c);
+    }
+    if (e.loc.nr && e.loc.nr.length) {
+      const c = document.createElement('span');
+      c.className = 'r-chip';
+      c.textContent = 'Nr. ' + e.loc.nr.join('·');
+      c.title = 'The numbered item within the § that the note attaches to';
+      lo.appendChild(c);
+    }
+    if (e.loc.part) {
+      const c = document.createElement('span');
+      c.className = 'r-chip';
+      c.textContent = e.loc.part;
+      c.title = 'Where in the § the note stands';
+      lo.appendChild(c);
+    }
+    if (e.loc.lemma) {
+      const c = document.createElement('span');
+      c.className = 'r-chip lemma';
+      c.textContent = '»' + e.loc.lemma + '«';
+      c.title = 'The words of Baumgarten the AA says this note annotates — ' +
+                'click to find them in the text on the left';
+      c.onclick = ev => { ev.stopPropagation(); highlightLemma(e); };
+      lo.appendChild(c);
+    }
+    div.appendChild(lo);
+  }
+
+  // the Reflexion itself
+  const t = document.createElement('div');
+  t.className = 'r-text';
+  t.textContent = e.text;
+  div.appendChild(t);
+
+  // footer: Kant's own page, and how the § was arrived at
+  const foot = document.createElement('div');
+  foot.className = 'r-foot';
+  if (e.sig) {
+    const s = document.createElement('span');
+    s.className = 'r-sig';
+    s.textContent = e.sig;
+    s.title = 'Where the note stands in Kant’s own copy of the ' + C.work +
+              ' (sheet and page, as the AA gives it). A prime marks the ' +
+              'interleaved page.';
+    foot.appendChild(s);
+  }
+  const prov = document.createElement('span');
+  const tag = C.provenance(e);
+  prov.className = 'r-prov ' + tag.cls;
+  prov.textContent = tag.text;
+  prov.title = tag.title;
+  foot.appendChild(prov);
+  div.appendChild(foot);
+
+  div.onclick = () => {
+    if (e.loc && e.loc.lemma) highlightLemma(e);
+    else if (e.loc && e.loc.satz && e.loc.satz.length) highlightSatz(e);
+  };
+  return div;
+}
+
+function renderReflForPara(num) {
+  reflPara = num;
+  const scroll = document.getElementById('refl-scroll');
+  if (!scroll) return;
+  scroll.innerHTML = '';
+
+  const idxs = BAUM_CORPUS.byPara[String(num)] || [];
+  const head = document.createElement('div');
+  head.className = 'r-para-head';
+  head.innerHTML = '<div class="r-para-head-line">'
+    + '<span class="r-para-num">§' + num + '</span>'
+    + '<span class="r-para-count">'
+    + (idxs.length === 1 ? '1 Reflexion' : idxs.length + ' Reflexionen')
+    + '</span></div>';
+  scroll.appendChild(head);
+
+  if (!idxs.length) {
+    const none = document.createElement('div');
+    none.className = 'r-sub-hint';
+    none.textContent = 'The Academy Edition records no Reflexion at §' + num + '.';
+    scroll.appendChild(none);
+  } else {
+    // locus-attested notes first, then those placed only by page or by block
+    const order = { locus: 0, page: 1, block: 2 };
+    idxs.slice()
+        .sort((a, b) => ((order[BAUM_CORPUS.entries[a].src] ?? 3)
+                       - (order[BAUM_CORPUS.entries[b].src] ?? 3))
+                        || BAUM_CORPUS.entries[a].r - BAUM_CORPUS.entries[b].r)
+        .forEach(i => scroll.appendChild(buildReflEntry(i)));
+  }
+
+  const foot = document.createElement('div');
+  foot.className = 'r-elsewhere';
+  foot.innerHTML = '<button class="r-elsewhere-btn" id="refl-elsewhere">'
+    + REFL_OFFPARA.length + ' Reflexionen belong to no §</button>'
+    + '<span class="r-elsewhere-note">Kant on the prefaces and the Synopsis, on '
+    + 'loose sheets, and in his copy of Eberhard.</span>';
+  scroll.appendChild(foot);
+  document.getElementById('refl-elsewhere').onclick = showReflElsewhere;
+
+  updateReflCount(idxs.length);
+}
+
+function showReflElsewhere() {
+  const scroll = document.getElementById('refl-scroll');
+  scroll.innerHTML = '';
+  const head = document.createElement('div');
+  head.className = 'r-para-head';
+  head.innerHTML = '<div class="r-para-head-line">'
+    + '<span class="r-para-num">No §</span>'
+    + '<span class="r-para-count">' + REFL_OFFPARA.length + ' Reflexionen</span></div>';
+  scroll.appendChild(head);
+
+  const note = document.createElement('div');
+  note.className = 'r-sub-hint';
+  note.textContent = 'These are printed in AA XVII and XVIII but attach to no '
+    + 'numbered § of the Metaphysica: Kant writing on the Roman-numbered front '
+    + 'matter, on loose sheets, and in his copy of Eberhard’s Vorbereitung zur '
+    + 'natürlichen Theologie. None of them has been filed against a § here.';
+  scroll.appendChild(note);
+
+  const back = document.createElement('button');
+  back.className = 'r-elsewhere-btn';
+  back.textContent = '‹ back to §' + (reflPara || 1);
+  back.onclick = () => renderReflForPara(reflPara || 1);
+  scroll.appendChild(back);
+
+  REFL_OFFPARA.forEach(i => scroll.appendChild(buildReflEntry(i)));
+  updateReflCount(REFL_OFFPARA.length);
+}
+
+function updateReflCount(n) {
+  document.getElementById('refl-count').textContent =
+    n === 1 ? '1 note' : n + ' notes';
+}
+
+function showReflPanel(on) {
+  reflOpen = on;
+  document.getElementById('refl-panel').classList.toggle('hidden', !on);
+  document.getElementById('refl-resizer').classList.toggle('hidden', !on);
+  document.getElementById('refl-show').style.display = on ? 'none' : '';
+  if (on) renderReflForPara(focusedNum === null ? (reflPara || 1) : focusedNum);
+}
+
+// ── Adickes overlay ── his note on one phase of Kant's hand
+function openAdickes(sym) {
+  const p = phaseInfo(sym);
+  const box = document.getElementById('adickesBox');
+  box.innerHTML = '';
+
+  const close = document.createElement('button');
+  close.className = 'adickes-close';
+  close.textContent = 'close';
+  close.onclick = closeAdickes;
+  box.appendChild(close);
+
+  const h = document.createElement('h3');
+  h.textContent = 'Phase ' + (p ? p.sym : sym);
+  box.appendChild(h);
+
+  const sub = document.createElement('div');
+  sub.className = 'adickes-sub';
+  sub.textContent = 'Adickes’ chronology of Kant’s hand · ' +
+                    (p && p.aa ? p.aa : 'AA 14:XXXV–XLIII');
+  box.appendChild(sub);
+
+  const yr = document.createElement('div');
+  yr.className = 'adickes-years';
+  yr.textContent = p && p.years ? p.years : 'Adickes gives no date for this phase.';
+  box.appendChild(yr);
+
+  // Everything Adickes qualifies his own dating with, kept as a qualification
+  // rather than folded into the year span above.
+  const flag = msg => {
+    const d = document.createElement('div');
+    d.className = 'adickes-flag';
+    d.textContent = msg;
+    box.appendChild(d);
+  };
+  if (p && p.inherited) {
+    flag('Dated from phase ' + p.inheritedFrom + '. ' + p.inheritedReason);
+  }
+  if (p && p.relative) flag('Relative position only: ' + p.relative);
+  if (p && p.significance) flag('Significance: ' + p.significance);
+  if (p && p.covers) flag('Covers: ' + p.covers);
+  if (p && p.editorial) flag(p.editorial);
+  if (p && p.notInAdickesTable) {
+    flag('This label is not one of Adickes’ 33 tabled phases; see the note above.');
+  }
+  if (p && p.unlisted) flag('Adickes does not table this exponent of the letter.');
+  if (!p || p.unknown) {
+    flag('This label could not be matched against Adickes’ table. It may be a ' +
+         'transcription artefact; check the Academy Edition directly.');
+  }
+
+  if (p && p.note) {
+    const n = document.createElement('div');
+    n.className = 'adickes-note';
+    n.textContent = p.note;
+    box.appendChild(n);
+  }
+
+  const preLbl = document.createElement('div');
+  preLbl.className = 'adickes-sub';
+  preLbl.style.marginTop = '18px';
+  preLbl.textContent = 'On the notation generally · ' + ADICKES_PREAMBLE.aa;
+  box.appendChild(preLbl);
+  const pre = document.createElement('div');
+  pre.className = 'adickes-note';
+  pre.style.marginTop = '14px';
+  pre.style.fontSize = '12.5px';
+  pre.textContent = ADICKES_PREAMBLE.text;
+  box.appendChild(pre);
+
+  document.getElementById('adickesVeil').classList.add('open');
+}
+function closeAdickes() {
+  document.getElementById('adickesVeil').classList.remove('open');
+}
+
+/* ── highlighting the annotated words in the primary text ──────────────────
+   The AA often names the exact lemma a note attaches to ("»quicquid est,
+   illud«") or a sentence number. Both are worth showing in the text itself
+   rather than only stating. */
+
+function clearHighlights() {
+  document.querySelectorAll('.lemma-hit, .satz-hit').forEach(el => {
+    const parent = el.parentNode;
+    while (el.firstChild) parent.insertBefore(el.firstChild, el);
+    parent.removeChild(el);
+    parent.normalize();
+  });
+  document.querySelectorAll('.part-anfang, .part-schluss')
+    .forEach(el => el.classList.remove('part-anfang', 'part-schluss'));
+}
+
+function paraTextEl(n) {
+  const p = document.getElementById('para-' + n);
+  return p ? p.querySelector('.para-body') : null;
+}
+
+/* The text nodes of a § that carry Baumgarten's Latin. His own German
+   equivalents are set inline as chips, and the AA's lemmata are the Latin, so
+   the chips are excluded from both the haystack and the wrapping. */
+function paraTextNodes(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentElement && n.parentElement.closest('.gloss-chip')
+      ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+  });
+  const out = [];
+  let n;
+  while ((n = walker.nextNode())) out.push(n);
+  return out;
+}
+
+function targetPara(entry) {
+  // prefer the § the entry's own locus names
+  const cands = (entry.loc && entry.loc.paras && entry.loc.paras.length)
+    ? entry.loc.paras : (entry.paras || []);
+  for (const p of cands) if (paraTextEl(p)) return p;
+  return null;
+}
+
+function wrapRange(root, start, end, cls) {
+  // walk the Latin text nodes, wrapping the [start,end) slice of their concatenation
+  let pos = 0, made = null;
+  const jobs = [];
+  for (const node of paraTextNodes(root)) {
+    const len = node.nodeValue.length;
+    const a = Math.max(start, pos), b = Math.min(end, pos + len);
+    if (a < b) jobs.push([node, a - pos, b - pos]);
+    pos += len;
+    if (pos >= end) break;
+  }
+  jobs.forEach(([n, a, b]) => {
+    const mid = n.splitText(a);
+    if (b - a < mid.nodeValue.length) mid.splitText(b - a);
+    const span = document.createElement('span');
+    span.className = cls;
+    mid.parentNode.insertBefore(span, mid);
+    span.appendChild(mid);
+    if (!made) made = span;
+  });
+  return made;
+}
+
+function highlightLemma(entry) {
+  clearHighlights();
+  const n = targetPara(entry);
+  if (n === null) return;
+  const el = paraTextEl(n);
+  const lemma = entry.loc.lemma;
+  // the AA abbreviates long lemmata as "first words — last words"
+  const parts = lemma.split(/\s*[—–]\s*/).filter(Boolean);
+  const text = paraTextNodes(el).map(x => x.nodeValue).join('');
+  let first = null;
+
+  /* Two passes, the second case-insensitive. The AA quotes a lemma from
+     mid-sentence, so it lowercases a word the § happens to open with —
+     § 161 »minimum« against "Minimum est solo nihilo maius". Folding case
+     is as far as this goes: it is the same word, differently capitalised.
+     Seven lemmata still find nothing, because the AA is not quoting the
+     printed word at all — it normalises Baumgarten's spelling (»subposita«
+     for *supposita*, »ejusdem« for *eiusdem*), cites Kant's German
+     (»angestrengt«), or composes a topic label of its own
+     (»identitas numerica«). Those must stay unhighlighted; a looser match
+     would put the mark on words Kant did not annotate. */
+  for (const fold of [false, true]) {
+    const hay  = fold ? text.toLowerCase() : text;
+    const seek = fold ? parts.map(p => p.toLowerCase()) : parts;
+    const whole = fold ? lemma.toLowerCase() : lemma;
+    if (seek.length === 2) {
+      const a = hay.indexOf(seek[0]);
+      const b = a < 0 ? -1 : hay.indexOf(seek[1], a + seek[0].length);
+      if (a >= 0 && b >= 0) first = wrapRange(el, a, b + seek[1].length, 'lemma-hit');
+    }
+    if (!first) {
+      const one = seek[0] || whole;
+      const a = hay.indexOf(one);
+      if (a >= 0) first = wrapRange(el, a, a + one.length, 'lemma-hit');
+    }
+    if (first) break;
+  }
+  markPart(entry, n);
+  scrollToPara(n, false);
+  if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function highlightSatz(entry) {
+  clearHighlights();
+  const n = targetPara(entry);
+  if (n === null) return;
+  const el = paraTextEl(n);
+  const hay = paraTextNodes(el).map(x => x.nodeValue).join('');
+  // approximate: split on sentence-final punctuation followed by a capital
+  const bounds = [];
+  let last = 0;
+  const re = /[.!?:](?=\s+[A-ZÄÖÜ»(]|\s*$)/g;
+  let m;
+  while ((m = re.exec(hay))) { bounds.push([last, m.index + 1]); last = m.index + 1; }
+  if (last < hay.length) bounds.push([last, hay.length]);
+
+  let first = null;
+  entry.loc.satz.slice().reverse().forEach(s => {
+    const b = bounds[s - 1];
+    if (b) first = wrapRange(el, b[0], b[1], 'satz-hit') || first;
+  });
+  markPart(entry, n);
+  scrollToPara(n, false);
+  if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function markPart(entry, n) {
+  const part = entry.loc && entry.loc.part;
+  if (!part) return;
+  const block = document.getElementById('para-' + n);
+  if (!block) return;
+  if (/Anfang/i.test(part)) block.classList.add('part-anfang');
+  else if (/Schluss|Ende/i.test(part)) block.classList.add('part-schluss');
+}
+
 document.getElementById('synopsis-btn').addEventListener('click', openSynopsis);
 document.getElementById('synopsis-close').addEventListener('click', closeSynopsis);
 document.getElementById('synopsis-overlay').addEventListener('click', e => {
@@ -1015,9 +1918,67 @@ document.getElementById('toc-toggle').addEventListener('click', () => {
   document.getElementById('toc-panel').classList.toggle('hidden');
 });
 
+// Reflexionen panel: show, hide, and Escape out of the Adickes overlay
+document.getElementById('refl-toggle').addEventListener('click', () => showReflPanel(false));
+document.getElementById('refl-show').addEventListener('click', () => showReflPanel(true));
+document.getElementById('adickesVeil').addEventListener('click', e => {
+  if (e.target.id === 'adickesVeil') closeAdickes();   // click the backdrop
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAdickes();
+});
+
+// Panel resizer, clamped the same way the Meier reader's is
+const reflResizer = document.getElementById('refl-resizer');
+const reflPanelEl = document.getElementById('refl-panel');
+let reflResizing = false;
+reflResizer.addEventListener('mousedown', () => {
+  reflResizing = true;
+  document.body.style.cursor = 'col-resize';
+  document.body.style.userSelect = 'none';
+});
+document.addEventListener('mousemove', e => {
+  if (!reflResizing) return;
+  const w = document.getElementById('reading-row').getBoundingClientRect().right - e.clientX;
+  if (w > 260 && w < 640) reflPanelEl.style.width = w + 'px';
+});
+document.addEventListener('mouseup', () => {
+  reflResizing = false;
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
+});
+
+/* Follow the § in view. The reader's own navigation goes through
+   scrollToPara(), but plain scrolling does not, and the panel is worth having
+   track the text. An IntersectionObserver rather than a scroll handler: there
+   are 804 §§, and measuring them all on every frame is not affordable. The
+   root margin narrows the root to a band across the top of the canvas, so
+   `visible` holds only the §§ in that band and its lowest number is the one
+   being read. */
+function watchParasInView() {
+  const canvas = document.getElementById('text-canvas');
+  const visible = new Set();
+  const obs = new IntersectionObserver(recs => {
+    recs.forEach(r => {
+      const n = +r.target.dataset.num;
+      if (r.isIntersecting) visible.add(n); else visible.delete(n);
+    });
+    if (!reflOpen || !visible.size) return;
+    const top = Math.min(...visible);
+    if (top !== reflPara) renderReflForPara(top);
+  }, { root: canvas, rootMargin: '-80px 0px -62% 0px' });
+  canvas.querySelectorAll('.para-block').forEach(b => obs.observe(b));
+}
+
 // Init
 buildTextContent();
 buildTOC();
+document.getElementById('refl-show').title =
+  REFLM_META.count + ' Reflexionen (Refl. ' + REFLM_META.rMin + '–' + REFLM_META.rMax +
+  ') on the Metaphysica, AA ' + REFLM_META.volumes.join(' and ') + '.';
+document.getElementById('refl-label').title = document.getElementById('refl-show').title;
+renderReflForPara(1);
+watchParasInView();
 </script>
 </body>
 </html>

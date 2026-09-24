@@ -1,9 +1,9 @@
 # Baumgarten reader
 
-Single-file SPA: [baumgartenreading-guide.html](baumgartenreading-guide.html) (~760 lines)
-plus the generated text in [../data/metaphysica-17.js](../data/metaphysica-17.js).
-Reads Baumgarten's *Metaphysica* (4th ed., Halle 1757 = AA XVII) in Latin, with
-Baumgarten's own German equivalents rendered inline as amber chips.
+Single-file SPA: [baumgartenreading-guide.html](baumgartenreading-guide.html) (~1960 lines)
+plus three generated data files. Reads Baumgarten's *Metaphysica* (4th ed., Halle 1757
+= AA XVII) in Latin, with Baumgarten's own German equivalents rendered inline as amber
+chips and Kant's Reflexionen on the § in view in a side panel.
 
 See the [root CLAUDE.md](../CLAUDE.md) for conventions shared across the suite.
 
@@ -11,24 +11,33 @@ See the [root CLAUDE.md](../CLAUDE.md) for conventions shared across the suite.
 
 | Lines | Contents |
 | --- | --- |
-| 1–450 | `<head>`, Google Fonts import, `:root` palette, all CSS |
-| 451–480 | Markup: `#toc-panel` sidebar, `#top-bar`, `#text-canvas`, `#synopsis-overlay`; the `<script src>` for the data |
-| 490–520 | `KANT_REFS`, and the `SECTIONS` / `PARAGRAPHS` adapter over the generated data |
-| 525–760 | Rendering, TOC building, event wiring, init |
+| 1–950 | `<head>`, Google Fonts import, `:root` palette, all CSS |
+| 952–1015 | Markup: `#toc-panel` sidebar, `#top-bar`, `#reading-row` (= `#text-canvas` + `#refl-panel`), `#synopsis-overlay`, `#adickesVeil`; the three `<script src>` tags |
+| 1017–1100 | `KANT_REFS`, and the `SECTIONS` / `PARAGRAPHS` adapter over the generated data |
+| 1101–1400 | Text rendering, TOC building, the Synopsis overlay |
+| 1400–1870 | The Reflexionen layer: corpus, cards, panel, Adickes overlay, text highlighting |
+| 1870–1960 | Event wiring and init |
 
-Everything is rendered by JS into two empty containers (`#toc-scroll`, `#text-inner`);
-there is no static content in the markup.
+Everything is rendered by JS into three empty containers (`#toc-scroll`, `#text-inner`,
+`#refl-scroll`); there is no static content in the markup.
 
-## Where the text lives
+## The three data files
 
-The text is **not** in this file. It is in `../data/metaphysica-17.js`, machine-extracted
-from `Textfiles/Baumgarten.rtfd` by `scripts/parse_baum.py`, and loaded by a classic
-`<script src>` tag so the app still opens from a `file://` URL. That file publishes
-`MET_META`, `MET_SECTIONS`, `MET_PARAGRAPHS` and `MET_BY_NUM` as top-level `const`s.
+| File | Publishes | Used for |
+| --- | --- | --- |
+| [../data/metaphysica-17.js](../data/metaphysica-17.js) | `MET_META`, `MET_SECTIONS`, `MET_PARAGRAPHS`, `MET_BY_NUM`, `MET_SYNOPSIS` | the text, the outline, the Synopsis |
+| [../data/reflexionen-17-18-baumgarten.js](../data/reflexionen-17-18-baumgarten.js) | `REFLM_META`, `REFLM_ENTRIES`, `REFLM_GROUPS`, `REFLM_BY_PARA` | the Reflexionen panel |
+| [../data/phases-adickes.js](../data/phases-adickes.js) | `PHASES`, `phaseInfo()`, `phaseYears()`, `ADICKES_PREAMBLE` | dating a Reflexion, and the Adickes overlay |
 
-**Do not hand-edit it.** Text corrections go in the extractor, which prints a report
-you are expected to read. See "Regenerating the Metaphysica data" in the root
-CLAUDE.md.
+All three are classic `<script src>` includes rather than `fetch()`, so the app still
+opens from a `file://` URL and their top-level `const`s are simply visible here.
+
+**None of them may be hand-edited.** `metaphysica-17.js` is extracted from
+`Textfiles/Baumgarten.rtfd` by `scripts/parse_baum.py` and the Reflexionen from three
+more RTFs by `scripts/parse_refl.py` + `scripts/emit_baum_refl.py`; both print a report
+you are expected to read. Text corrections go in the extractor, so they survive the
+next run. See "Regenerating the generated data" in the root CLAUDE.md.
+`phases-adickes.js` is the exception — it is hand-written from AA XIV.
 
 ## Data shapes
 
@@ -110,6 +119,33 @@ before the text, flat and in reading order:
 - `ed` is the page of Baumgarten's own 1757 pagination, which the AA prints in brackets;
   `null` where no bracket falls inside the §. It renders as a grey `1757 p.` tag.
 
+`REFLM_ENTRIES` is Kant's notes, flat and in AA order:
+
+```js
+{ r: 3489, vol: 17, part: 'erl', ph: ['κ','σ'], phRaw: 'κ−σ', sig: 'M 4.',
+  hb: 'M', pg: 4, grp: 0, src: 'locus', paras: [11], aa: 5,
+  loc: { raw: 'ZuM §. 11»quicquid est, illud«', kind: 'zu', paras: [11],
+         lemma: 'quicquid est, illud' },
+  text: 'drükt propositiones tavtologicas aus.' }
+```
+
+- `src` is how the § was arrived at, and is the whole point of the footer tag:
+  `locus` (1648) from the entry's own locus note, `block` (557) from the AA block
+  heading above it, `page` (31) off the page of Kant's copy, `none` (731) not stated.
+  `interp` (23) marks a § this tool interpolated from the surrounding entries.
+- `paras` is absent or empty on **708** entries. They are not filed against any §
+  and must never be: `front` (459) is the Roman-numbered front matter, `blatt` (91)
+  a *loses Blatt*, and `other` (107) names another handbook — chiefly Kant's copy of
+  Eberhard's *Vorbereitung*. `REFL_OFFPARA` collects them for the panel's no-§ view.
+- `phRaw` is Adickes' dating **verbatim**; `ph` is the parse. The card prints `phRaw`
+  whenever it says more than the symbols do, because the query marks and parentheses
+  are Adickes' own uncertainty. Same for `loc.raw` against the rest of `loc`.
+- `loc.kind` is one of the eight keys of `REFL_KIND`, which supplies the gutter glyph.
+- `sig` is the place in Kant's own copy; a prime marks the interleaved page.
+- `REFLM_BY_PARA` maps a § number to entry indices. It has **726** keys, eight of
+  which (655–662) are §§ AA XVII does not print. Nothing is lost: every entry under
+  those eight is also filed under a § that *is* printed.
+
 ## Function map
 
 - `buildSynopsis()` / `openSynopsis()` / `closeSynopsis()` — the Synopsis overlay,
@@ -124,10 +160,39 @@ before the text, flat and in reading order:
   `kantRefs` block + the paragraphs from `secMap[sec.id]`.
 - `buildTOC()` / `buildTOCItem()` — mirrors the same walk into the sidebar;
   `getParaSnippet()` produces each entry's label from the paragraph's first six words.
-- `scrollToPara(num)` — the single navigation entry point. Scrolls, moves the
-  `.focused` highlight, and syncs the TOC. `focusPara()` just delegates to it.
+- `scrollToPara(num, andPanel = true)` — the single navigation entry point. Scrolls,
+  moves the `.focused` highlight, syncs the TOC, and moves the Reflexionen panel.
+  `focusPara()` just delegates to it. The highlighting functions pass `andPanel:
+  false`, since they are already reaching a § *from* a card and must not have the
+  panel rebuilt under them.
 - The sidebar filter matches the typed string against TOC item text, or an exact
   paragraph number.
+
+### The Reflexionen panel
+
+- `BAUM_CORPUS` wraps the entries, the § index, and `provenance(e)`, which returns
+  the `{cls, text, title}` of the footer tag. It is the one place that decides how a
+  § was arrived at, and it must stay exhaustive — `src: 'none'` with no `front` /
+  `blatt` / `other` flag still gets a tag ("no § stated"), never nothing.
+- `buildReflEntry(idx)` builds one card. `renderReflForPara(num)` fills the panel
+  for a §, sorting locus-attested notes before those placed only by page or block,
+  and always appends the way in to `showReflElsewhere()`.
+- `showReflPanel(on)` hides and restores the panel; `#refl-show` in the top bar is
+  the way back, and is `display:none` while the panel is open.
+- `watchParasInView()` keeps the panel on the § being read. It is an
+  `IntersectionObserver` with a root margin that narrows the root to a band across
+  the top of the canvas, **not** a scroll handler: there are 804 §§ and measuring
+  them all per frame is not affordable. The lowest § number in the band wins.
+- `openAdickes(sym)` / `closeAdickes()` — Adickes' note on one phase of Kant's hand,
+  from `phaseInfo()`, opened by a phase chip. Every qualification he attaches to a
+  dating (`inherited`, `relative`, `covers`, `unlisted`, …) gets its own flag block;
+  do not fold them into the year span.
+- `highlightLemma(entry)` / `highlightSatz(entry)` — find the words the AA says a
+  note annotates, in the Latin on the left. `clearHighlights()` first, always.
+  `paraTextNodes()` is what makes this work here: it walks the § excluding
+  `.gloss-chip` subtrees, because Baumgarten's German equivalents are set *inline*
+  and the AA's lemmata are his Latin. Feed `wrapRange()` offsets computed from the
+  same walk, or the two will disagree.
 
 ## Gotchas
 
@@ -142,3 +207,20 @@ before the text, flat and in reading order:
 - A cross-reference to a § in the 504–699 gap (§ 700 opens with `Mutor, §. 505-699`)
   renders as a link that goes nowhere, since there is no `#para-505` to scroll to.
 - Only the first number of a run is linked: `§. 20, 23` links 20 and leaves 23 plain.
+- **The two Reflexionen corpora are not interchangeable.** This app loads AA XVII–XVIII,
+  on the *Metaphysica*; the Meier reader loads AA XVI, on the *Auszug*. The card
+  renderer looks alike in both, but the `provenance()` vocabularies differ and so do
+  the panel layouts — the Meier panel is grouped by AA block because AA XVI files 788
+  entries under a block header alone, which is not how XVII–XVIII are built. Do not
+  try to share one implementation across the two apps.
+- **Lemma highlighting finds 75 of the 82 lemmata, and the other 7 must stay
+  unfound.** `highlightLemma()` tries an exact match and then a case-folded one,
+  and stops there. The remaining seven fail because the AA is not quoting the
+  printed word: it normalises Baumgarten's spelling (»subposita« for *supposita*,
+  »ejusdem« for *eiusdem*), cites Kant's own German (»angestrengt«), or composes a
+  topic label of its own (»identitas numerica«, »absolutismus theologicus«). A
+  fuzzier match would put the mark on words Kant did not annotate, which is worse
+  than no mark. A lemma that spans a gloss chip is likewise not found, since the
+  chip's German is not part of Baumgarten's sentence.
+- `Escape` is bound twice, once for the Synopsis and once for the Adickes overlay.
+  Both are idempotent, so whichever is open closes.
