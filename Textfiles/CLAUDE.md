@@ -6,6 +6,7 @@ Upstream RTF transcriptions the readers' embedded data was extracted from.
 | --- | --- |
 | `Meier.rtf` (~525 KB) | G. F. Meier, *Auszug aus der Vernunftlehre* (AA XVI), with the Academy Edition's *Nachgelassenes zur Logik* apparatus |
 | `Baumgarten.rtfd/TXT.rtf` (~870 KB) | A. G. Baumgarten, *Metaphysica* (AA XVII); `Attachment.png` is an incidental 48×48 image bundled by the RTFD format |
+| `Vol9Logic.rtfd/TXT.rtf` (~483 KB) | The Jäsche *Logik* (AA IX:1–150): Jäsche's Vorrede, the Einleitung, and the Elementarlehre and Methodenlehre, §§ 1–120. Nothing is extracted from it yet. Same incidental 48×48 `Attachment.png` |
 
 ## Status
 
