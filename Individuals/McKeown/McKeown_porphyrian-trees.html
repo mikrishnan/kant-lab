@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbor Porphyriana — Trees of Genus and Species in Medieval Pedagogy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --vellum:      #E8E2D0;
+    --vellum-dark: #D9D1BA;
+    --ink:         #1C1814;
+    --ink-faded:   #4A4238;
+    --verdigris:   #3E6B5F;
+    --verdigris-lt:#5A8F80;
+    --rubric:      #7A2828;
+    --rubric-lt:   #9E3A3A;
+    --gold:        #8B6914;
+  }
+
+  html { font-size: 16px; }
+
+  body {
+    background: var(--vellum);
+    color: var(--ink);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-weight: 300;
+    min-height: 100vh;
+    line-height: 1.65;
+  }
+
+  /* ── MASTHEAD ── */
+  header {
+    border-bottom: 1.5px solid var(--ink-faded);
+    padding: 2.5rem 3rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: baseline;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .site-title {
+    font-family: 'IM Fell English', serif;
+    font-size: 2.1rem;
+    letter-spacing: 0.01em;
+    color: var(--rubric);
+    line-height: 1.2;
+  }
+
+  .site-subtitle {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink-faded);
+    font-weight: 300;
+  }
+
+  .header-desc {
+    margin-top: 0.75rem;
+    max-width: 70ch;
+    font-size: 0.97rem;
+    color: var(--ink-faded);
+    line-height: 1.7;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 120px);
+  }
+
+  /* ── SIDEBAR ── */
+  aside {
+    border-right: 1px solid var(--vellum-dark);
+    padding: 2rem 1.5rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-label {
+    font-family: 'IM Fell English', serif;
+    font-size: 0.78rem;
+    color: var(--verdigris);
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid var(--vellum-dark);
+    padding-bottom: 0.5rem;
+  }
+
+  .tree-nav {
+    list-style: none;
+  }
+
+  .tree-nav li {
+    margin-bottom: 0.1rem;
+  }
+
+  .tree-nav button {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.55rem 0.7rem;
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--ink-faded);
+    line-height: 1.35;
+    border-radius: 2px;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .tree-nav button:hover {
+    background: var(--vellum-dark);
+    color: var(--ink);
+  }
+
+  .tree-nav button.active {
+    background: var(--verdigris);
+    color: #fff;
+  }
+
+  .tree-nav .century {
+    font-style: italic;
+    font-size: 0.77rem;
+    opacity: 0.75;
+    display: block;
+  }
+
+  /* ── MAIN CONTENT ── */
+  main {
+    padding: 2.5rem 3rem 4rem;
+    overflow-y: auto;
+  }
+
+  .tree-view {
+    display: none;
+  }
+  .tree-view.visible {
+    display: block;
+  }
+
+  .tree-heading {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.75rem;
+    color: var(--rubric);
+    line-height: 1.25;
+    margin-bottom: 0.3rem;
+  }
+
+  .tree-meta {
+    font-style: italic;
+    color: var(--ink-faded);
+    font-size: 0.92rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--vellum-dark);
+  }
+
+  .tree-meta strong {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--verdigris);
+  }
+
+  .tree-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .container { grid-template-columns: 1fr; }
+    aside { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--vellum-dark); }
+    main { padding: 1.5rem; }
+    .tree-body { grid-template-columns: 1fr; }
+    header { padding: 1.5rem; }
+  }
+
+  /* ── SVG TREE ── */
+  .tree-diagram {
+    width: 100%;
+    background: #F2EDE0;
+    border: 1px solid var(--vellum-dark);
+    border-radius: 2px;
+    padding: 1rem 0;
+  }
+
+  .tree-diagram text {
+    font-family: 'Crimson Pro', Georgia, serif;
+  }
+
+  /* ── DESCRIPTION PANEL ── */
+  .tree-info h3 {
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    color: var(--verdigris);
+    margin-bottom: 0.6rem;
+    margin-top: 1.4rem;
+  }
+  .tree-info h3:first-child { margin-top: 0; }
+
+  .tree-info p {
+    font-size: 0.95rem;
+    color: var(--ink-faded);
+    line-height: 1.75;
+    max-width: 52ch;
+  }
+
+  .tree-info blockquote {
+    margin: 0.8rem 0;
+    padding: 0.6rem 1rem;
+    border-left: 2.5px solid var(--rubric);
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-faded);
+    background: rgba(0,0,0,0.03);
+  }
+
+  .predicables-list {
+    list-style: none;
+    margin-top: 0.5rem;
+  }
+
+  .predicables-list li {
+    font-size: 0.9rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px dotted var(--vellum-dark);
+    color: var(--ink-faded);
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .pred-term {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: var(--rubric);
+    min-width: 80px;
+  }
+
+  .intro-panel {
+    padding: 2rem 0;
+    max-width: 68ch;
+  }
+
+  .intro-panel h2 {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.5rem;
+    color: var(--rubric);
+    margin-bottom: 1rem;
+  }
+
+  .intro-panel p {
+    font-size: 0.97rem;
+    color: var(--ink-faded);
+    margin-bottom: 1rem;
+    line-height: 1.75;
+  }
+
+  .intro-panel .prompt {
+    margin-top: 2rem;
+    font-style: italic;
+    color: var(--verdigris);
+    font-size: 0.92rem;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
+  .tag {
+    background: var(--vellum-dark);
+    color: var(--ink-faded);
+    font-size: 0.78rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 2px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <h1 class="site-title">Arbor Porphyriana</h1>
+    <span class="site-subtitle">Trees of Genus and Species in Medieval Pedagogy</span>
+  </div>
+  <p class="header-desc">
+    A catalogue of Porphyrian trees — diagrammatic representations of Aristotelian categories derived from Porphyry's <em>Isagoge</em> — as they appear across medieval logical and grammatical treatises from the ninth to the fifteenth century.
+  </p>
+</header>
+
+<div class="container">
+  <aside>
+    <div class="sidebar-label">Select a Tree</div>
+    <ul class="tree-nav" id="treeNav">
+      <li>
+        <button onclick="showTree('boethius')" id="btn-boethius">
+          Boethius, <em>In Isag.</em>
+          <span class="century">c. 510 — two commentaries</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('alcuin')" id="btn-alcuin">
+          Alcuin, <em>Dialectica</em>
+          <span class="century">c. 790</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('eriugena')" id="btn-eriugena">
+          Eriugena, <em>De Divisione Naturae</em>
+          <span class="century">c. 865</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('garlandus')" id="btn-garlandus">
+          Garlandus Compotista, <em>Dialectica</em>
+          <span class="century">early 11th c.</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('anselm')" id="btn-anselm">
+          Anselm of Canterbury, <em>De grammatico</em>
+          <span class="century">c. 1080</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('abelard')" id="btn-abelard">
+          Peter Abelard, <em>Logica Ingredientibus</em>
+          <span class="century">c. 1120</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('gilbertus')" id="btn-gilbertus">
+          Gilbert of Poitiers, <em>Comm. in Boethium</em>
+          <span class="century">c. 1140</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('john')" id="btn-john">
+          John of Salisbury, <em>Metalogicon</em>
+          <span class="century">1159</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('aquinas')" id="btn-aquinas">
+          Thomas Aquinas, <em>In Porphyrium</em>
+          <span class="century">c. 1269</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('lull')" id="btn-lull">
+          Ramon Lull, <em>Arbor Scientiae</em>
+          <span class="century">1295</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('ockham')" id="btn-ockham">
+          William of Ockham, <em>Summa Logicae</em>
+          <span class="century">c. 1323</span>
+        </button>
+      </li>
+      <li>
+        <button onclick="showTree('buridan')" id="btn-buridan">
+          Jean Buridan, <em>Summulae de Dialectica</em>
+          <span class="century">c. 1335</span>
+        </button>
+      </li>
+    </ul>
+  </aside>
+
+  <main id="mainContent">
+
+    <!-- INTRO -->
+    <div class="tree-view visible" id="tree-intro">
+      <div class="intro-panel">
+        <h2>On the Porphyrian Tree</h2>
+        <p>
+          Porphyry of Tyre (c. 234–305 ad) opened his <em>Isagoge</em> — an introduction to Aristotle's <em>Categories</em> — with a discussion of five predicables: genus, species, differentia, proprium, and accidens. Medieval commentators, translating and expanding this work, gave the logical relationships a visual form: a branching diagram descending from the most general genus (<em>substantia</em>) through successive differentiations to the lowest species and finally to the individual.
+        </p>
+        <p>
+          These diagrams, known as <em>arbores Porphyrianae</em>, became standard equipment in medieval logic instruction. They appear in manuscript margins, in diagrams prefacing school texts, and as elaborate illustrations in encyclopaedic works. Each tradition adapted the tree differently — varying the root, branch structure, labelling conventions, and the extent of the hierarchy.
+        </p>
+        <p>
+          This catalogue presents twelve trees drawn from pedagogical contexts spanning the Carolingian schools to the late medieval universities, with reconstruction diagrams and contextual notes.
+        </p>
+        <p class="prompt">← Select a treatise from the left to examine its tree.</p>
+      </div>
+    </div>
+
+    <!-- BOETHIUS -->
+    <div class="tree-view" id="tree-boethius">
+      <h2 class="tree-heading">Boethius — <em>In Isagogen Porphyrii</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> Anicius Manlius Severinus Boethius &nbsp;·&nbsp;
+        <strong>Date:</strong> c. 504–510 &nbsp;·&nbsp;
+        <strong>Language:</strong> Latin
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 460" xmlns="http://www.w3.org/2000/svg">
+            <!-- Branches -->
+            <line x1="160" y1="50" x2="160" y2="90" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="90" x2="80" y2="140" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="90" x2="240" y2="140" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="140" x2="80" y2="185" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="240" y1="140" x2="240" y2="185" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="185" x2="40" y2="240" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="185" x2="120" y2="240" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="240" y1="185" x2="200" y2="240" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="240" y1="185" x2="280" y2="240" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="120" y1="240" x2="120" y2="295" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="120" y1="295" x2="80" y2="345" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="120" y1="295" x2="160" y2="345" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="120" y1="345" x2="120" y2="395" stroke="#3E6B5F" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <!-- Nodes -->
+            <rect x="110" y="28" width="100" height="24" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1"/>
+            <text x="160" y="44" text-anchor="middle" font-size="11" fill="#1C1814" font-style="italic">Substantia</text>
+
+            <rect x="30" y="128" width="100" height="20" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="80" y="142" text-anchor="middle" font-size="9.5" fill="#7A2828">Corporalis</text>
+            <rect x="190" y="128" width="100" height="20" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="240" y="142" text-anchor="middle" font-size="9.5" fill="#7A2828">Incorporalis</text>
+
+            <rect x="30" y="175" width="100" height="18" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="188" text-anchor="middle" font-size="9" fill="#4A4238" font-style="italic">Corpus</text>
+            <rect x="190" y="175" width="100" height="18" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="240" y="188" text-anchor="middle" font-size="9" fill="#4A4238" font-style="italic">Anima</text>
+
+            <rect x="-5" y="230" width="90" height="18" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="40" y="243" text-anchor="middle" font-size="8.5" fill="#8B6914">Animatum</text>
+            <rect x="75" y="230" width="90" height="18" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="120" y="243" text-anchor="middle" font-size="8.5" fill="#4A4238" font-style="italic">Vivum</text>
+            <rect x="155" y="230" width="90" height="18" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="200" y="243" text-anchor="middle" font-size="8.5" fill="#8B6914">Rationale</text>
+            <rect x="235" y="230" width="90" height="18" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="280" y="243" text-anchor="middle" font-size="8.5" fill="#8B6914">Irrationale</text>
+
+            <rect x="70" y="283" width="100" height="18" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="120" y="296" text-anchor="middle" font-size="8.5" fill="#4A4238" font-style="italic">Animal</text>
+
+            <rect x="30" y="333" width="90" height="18" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="75" y="346" text-anchor="middle" font-size="8.5" fill="#7A2828">Mortale</text>
+            <rect x="115" y="333" width="90" height="18" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="160" y="346" text-anchor="middle" font-size="8.5" fill="#7A2828">Immortale</text>
+
+            <rect x="65" y="385" width="110" height="22" fill="#3E6B5F"/>
+            <text x="120" y="400" text-anchor="middle" font-size="9.5" fill="#fff" font-style="italic">Homo</text>
+
+            <text x="160" y="435" text-anchor="middle" font-size="8" fill="#8B6914" font-style="italic">↓  individua (Socrates, Plato…)</text>
+            <!-- Legend -->
+            <rect x="5" y="8" width="8" height="8" fill="none" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="17" y="16" font-size="7" fill="#4A4238">differentia</text>
+            <rect x="70" y="8" width="8" height="8" fill="none" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="82" y="16" font-size="7" fill="#4A4238">genus intermedium</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Boethius produced two Latin commentaries on Porphyry's <em>Isagoge</em> — a simpler one based on Marius Victorinus's translation and a more elaborate one based on his own — along with translations that formed the backbone of medieval logical instruction. His discussions of genus–species hierarchy established the visual and conceptual template for virtually all later Porphyrian trees.</p>
+          <h3>Structure of this tree</h3>
+          <p>The Boethian tree descends from <em>substantia</em> as the summum genus, bifurcating through differentia into corporeal and incorporeal substance, then through successive oppositions to the lowest species, <em>homo</em>. Individuals (Socrates, Plato, Callias) appear below the species line, outside the hierarchy proper.</p>
+          <blockquote>
+            "Genus est quod praedicatur de pluribus differentibus specie in eo quod quid est."
+          </blockquote>
+          <h3>Predicables in use</h3>
+          <ul class="predicables-list">
+            <li><span class="pred-term">Genus</span> Substantia, Corpus, Animal</li>
+            <li><span class="pred-term">Species</span> Homo (infima species)</li>
+            <li><span class="pred-term">Differentia</span> corporalis/incorporalis, rationale/irrationale</li>
+            <li><span class="pred-term">Proprium</span> risibile (capacity to laugh)</li>
+            <li><span class="pred-term">Accidens</span> albedo, sessio</li>
+          </ul>
+          <h3>Transmission</h3>
+          <p>Boethius's commentary survived in numerous Carolingian and later copies and served as the standard school text on Porphyry. The tree structure he described was reproduced in manuscripts of the Bamberg, Monte Cassino, and Tours traditions.</p>
+          <div class="tag-row">
+            <span class="tag">Neoplatonic</span>
+            <span class="tag">Aristotelian logic</span>
+            <span class="tag">summum genus</span>
+            <span class="tag">infima species</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALCUIN -->
+    <div class="tree-view" id="tree-alcuin">
+      <h2 class="tree-heading">Alcuin — <em>Dialectica</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> Alcuin of York &nbsp;·&nbsp;
+        <strong>Date:</strong> c. 790 &nbsp;·&nbsp;
+        <strong>Context:</strong> Carolingian court school, Aachen
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="48" x2="160" y2="88" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="88" x2="90" y2="138" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="88" x2="230" y2="138" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="90" y1="155" x2="90" y2="195" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="230" y1="155" x2="230" y2="195" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="90" y1="212" x2="90" y2="258" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="90" y1="258" x2="50" y2="305" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="90" y1="258" x2="130" y2="305" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="90" y1="305" x2="90" y2="348" stroke="#3E6B5F" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+            <rect x="105" y="28" width="110" height="24" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1"/>
+            <text x="160" y="44" text-anchor="middle" font-size="11" fill="#1C1814" font-style="italic">Substantia</text>
+
+            <rect x="35" y="128" width="110" height="22" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="90" y="143" text-anchor="middle" font-size="9.5" fill="#7A2828">Corpus (vivum)</text>
+            <rect x="175" y="128" width="110" height="22" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="230" y="143" text-anchor="middle" font-size="9.5" fill="#7A2828">Incorporeum</text>
+
+            <rect x="35" y="185" width="110" height="22" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="90" y="200" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animatum</text>
+            <rect x="175" y="185" width="110" height="22" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="230" y="200" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Anima</text>
+
+            <rect x="35" y="247" width="110" height="22" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="90" y="262" text-anchor="middle" font-size="9.5" fill="#8B6914" font-style="italic">Animal</text>
+
+            <rect x="5" y="293" width="90" height="20" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="50" y="307" text-anchor="middle" font-size="9" fill="#7A2828">Rationale</text>
+            <rect x="85" y="293" width="90" height="20" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="130" y="307" text-anchor="middle" font-size="9" fill="#7A2828">Irrationale</text>
+
+            <rect x="35" y="338" width="110" height="24" fill="#3E6B5F"/>
+            <text x="90" y="354" text-anchor="middle" font-size="10" fill="#fff" font-style="italic">Homo</text>
+
+            <text x="160" y="388" text-anchor="middle" font-size="8" fill="#8B6914" font-style="italic">Carolus, Alcuinus, …</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Alcuin compiled his <em>Dialectica</em> as an instructional dialogue at Charlemagne's court. Presented as a conversation between teacher and pupil — or between Charlemagne and Alcuin — it is a simplified and Christianized adaptation of Boethian logic for courtly and monastic audiences with no prior philosophical training.</p>
+          <h3>Pedagogical adaptation</h3>
+          <p>Alcuin's tree is notably truncated: he compresses the Boethian hierarchy, removes the finer distinctions, and introduces a didactic framing that emphasizes the theological resonance of the summum genus. The tree becomes a mnemonic scaffold as much as a logical instrument.</p>
+          <blockquote>
+            "Genus summum est substantia, quae de omnibus praedicatur."
+          </blockquote>
+          <h3>Significance</h3>
+          <p>This treatise was widely copied in the ninth century and shaped how the Porphyrian tree was understood in Carolingian monasteries. It is an early example of the tree being adapted for non-specialist teaching, prioritizing clarity over completeness.</p>
+          <div class="tag-row">
+            <span class="tag">Carolingian</span>
+            <span class="tag">dialogue form</span>
+            <span class="tag">simplified hierarchy</span>
+            <span class="tag">court school</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ERIUGENA -->
+    <div class="tree-view" id="tree-eriugena">
+      <h2 class="tree-heading">Eriugena — <em>De Divisione Naturae</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> John Scottus Eriugena &nbsp;·&nbsp;
+        <strong>Date:</strong> c. 864–866 &nbsp;·&nbsp;
+        <strong>Language:</strong> Latin
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 460" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="45" x2="160" y2="88" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="88" x2="80" y2="138" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="88" x2="240" y2="138" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="155" x2="50" y2="205" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="155" x2="110" y2="205" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="240" y1="155" x2="210" y2="205" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="240" y1="155" x2="270" y2="205" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="222" x2="110" y2="268" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="268" x2="80" y2="318" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="268" x2="140" y2="318" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="335" x2="80" y2="385" stroke="#3E6B5F" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+            <rect x="80" y="20" width="160" height="28" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1"/>
+            <text x="160" y="38" text-anchor="middle" font-size="10" fill="#1C1814" font-style="italic">Natura (omne quod est et non est)</text>
+
+            <rect x="20" y="128" width="120" height="22" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="80" y="143" text-anchor="middle" font-size="9" fill="#7A2828">Creans, non creata</text>
+            <rect x="178" y="128" width="120" height="22" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="238" y="143" text-anchor="middle" font-size="9" fill="#7A2828">Non creans, non creata</text>
+
+            <rect x="5" y="193" width="90" height="22" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="50" y="208" text-anchor="middle" font-size="8.5" fill="#8B6914">Primordiales</text>
+            <rect x="60" y="193" width="100" height="22" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="110" y="208" text-anchor="middle" font-size="8.5" fill="#8B6914">causae</text>
+            <rect x="157" y="193" width="100" height="22" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="207" y="208" text-anchor="middle" font-size="8.5" fill="#8B6914">Creata, creans</text>
+            <rect x="222" y="193" width="90" height="22" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="267" y="208" text-anchor="middle" font-size="8.5" fill="#8B6914">Sensibilia</text>
+
+            <rect x="55" y="255" width="110" height="22" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="110" y="270" text-anchor="middle" font-size="9" fill="#4A4238" font-style="italic">Substantia</text>
+
+            <rect x="30" y="308" width="100" height="22" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="323" text-anchor="middle" font-size="9" fill="#4A4238" font-style="italic">Corpus</text>
+            <rect x="90" y="308" width="100" height="22" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="140" y="323" text-anchor="middle" font-size="9" fill="#4A4238" font-style="italic">Anima</text>
+
+            <rect x="25" y="375" width="110" height="24" fill="#3E6B5F"/>
+            <text x="80" y="391" text-anchor="middle" font-size="10" fill="#fff" font-style="italic">Homo</text>
+
+            <text x="160" y="440" text-anchor="middle" font-size="8" fill="#7A2828" font-style="italic">redit in Deum — returns to God</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Eriugena's monumental <em>Periphyseon</em> (On the Division of Nature) adapts the Porphyrian genus–species hierarchy to a Neoplatonic Christian cosmology. Rather than a straightforward classification of substances, his fourfold division of <em>natura</em> describes the procession of all things from God and their return to the divine principle.</p>
+          <h3>Theological inflection</h3>
+          <p>For Eriugena, the tree does not merely classify: it narrates a cosmic movement. The categories are dynamic — the summum genus is not substance but <em>natura</em> itself, divided by the presence or absence of the ability to create and to be created. The Porphyrian schema is absorbed into a scheme of emanation and return.</p>
+          <blockquote>
+            "Dividimus itaque Naturam in eam quae creat et non creatur, et in eam quae et creatur et creat…"
+          </blockquote>
+          <h3>Significance</h3>
+          <p>This represents the most radical reinterpretation of the Porphyrian tree in the medieval period — preserving the logical form while inverting its ontological orientation. The diagram here is a reconstruction based on the fourfold division described in Book I.</p>
+          <div class="tag-row">
+            <span class="tag">Neoplatonic cosmology</span>
+            <span class="tag">processio / reditus</span>
+            <span class="tag">Irish learning</span>
+            <span class="tag">pantheism controversy</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GARLANDUS -->
+    <div class="tree-view" id="tree-garlandus">
+      <h2 class="tree-heading">Garlandus Compotista — <em>Dialectica</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> Garlandus Compotista &nbsp;·&nbsp;
+        <strong>Date:</strong> early 11th century &nbsp;·&nbsp;
+        <strong>School:</strong> Cathedral school, probably Liège
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="50" x2="160" y2="92" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="92" x2="80" y2="142" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="92" x2="240" y2="142" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="160" x2="80" y2="210" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="210" x2="50" y2="260" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="210" x2="110" y2="260" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="278" x2="110" y2="328" stroke="#3E6B5F" stroke-width="1.5"/>
+
+            <rect x="105" y="28" width="110" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1.2"/>
+            <text x="160" y="45" text-anchor="middle" font-size="11.5" fill="#1C1814" font-style="italic">Substantia</text>
+
+            <rect x="25" y="130" width="110" height="24" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="80" y="146" text-anchor="middle" font-size="9.5" fill="#7A2828">Corporea</text>
+            <rect x="185" y="130" width="110" height="24" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="240" y="146" text-anchor="middle" font-size="9.5" fill="#7A2828">Incorporea</text>
+
+            <rect x="25" y="198" width="110" height="24" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="214" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animata</text>
+
+            <rect x="5" y="248" width="90" height="22" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="50" y="263" text-anchor="middle" font-size="9" fill="#8B6914">Sensitiva</text>
+            <rect x="65" y="248" width="90" height="22" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="110" y="263" text-anchor="middle" font-size="9" fill="#8B6914">Insensitiva</text>
+
+            <rect x="55" y="315" width="110" height="26" fill="#3E6B5F"/>
+            <text x="110" y="332" text-anchor="middle" font-size="10.5" fill="#fff" font-style="italic">Homo</text>
+
+            <!-- nominalism note -->
+            <text x="200" y="260" text-anchor="start" font-size="7.5" fill="#7A2828" font-style="italic">vox significativa</text>
+            <text x="200" y="272" text-anchor="start" font-size="7.5" fill="#7A2828" font-style="italic">non res</text>
+
+            <text x="160" y="400" text-anchor="middle" font-size="7.5" fill="#8B6914" font-style="italic">genera et species: voces tantum (not things)</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Garlandus represents an early and radical position in the universals controversy: genera and species are mere words (<em>voces</em>), not real things or concepts. His <em>Dialectica</em> is one of the earliest surviving texts of what scholars call nominalism, predating Abelard's more nuanced position.</p>
+          <h3>Nominalist modification</h3>
+          <p>For Garlandus, the tree is a linguistic structure, not a map of reality. The nodes represent significant vocal sounds grouped by predication rules, not ontological categories. This produces a superficially traditional tree whose philosophical underpinning is quite different from the Boethian original.</p>
+          <blockquote>
+            "Genus est vox de pluribus differentibus specie in eo quod quid est praedicabilis."
+          </blockquote>
+          <h3>Significance</h3>
+          <p>Garlandus's <em>Dialectica</em> was rediscovered in the twentieth century and has since been recognised as a pivotal document in early medieval logic. His tree shows that the same visual schema could carry radically different theoretical commitments.</p>
+          <div class="tag-row">
+            <span class="tag">nominalism</span>
+            <span class="tag">voces</span>
+            <span class="tag">universals controversy</span>
+            <span class="tag">cathedral school</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANSELM -->
+    <div class="tree-view" id="tree-anselm">
+      <h2 class="tree-heading">Anselm of Canterbury — <em>De grammatico</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> Anselm of Canterbury &nbsp;·&nbsp;
+        <strong>Date:</strong> c. 1080–1085 &nbsp;·&nbsp;
+        <strong>Language:</strong> Latin
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="48" x2="160" y2="92" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="92" x2="90" y2="145" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="92" x2="230" y2="145" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="90" y1="165" x2="90" y2="215" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="90" y1="215" x2="60" y2="265" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="90" y1="215" x2="120" y2="265" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="60" y1="285" x2="60" y2="335" stroke="#3E6B5F" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line x1="120" y1="285" x2="120" y2="335" stroke="#3E6B5F" stroke-width="1.5"/>
+
+            <!-- grammaticus note line -->
+            <line x1="230" y1="165" x2="230" y2="215" stroke="#7A2828" stroke-width="1" stroke-dasharray="5,3"/>
+            <line x1="230" y1="215" x2="160" y2="265" stroke="#7A2828" stroke-width="1" stroke-dasharray="5,3"/>
+
+            <rect x="105" y="25" width="110" height="28" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1.2"/>
+            <text x="160" y="44" text-anchor="middle" font-size="11" fill="#1C1814" font-style="italic">Substantia</text>
+
+            <rect x="30" y="133" width="120" height="24" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="90" y="149" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Corpus animatum</text>
+            <rect x="170" y="133" width="120" height="24" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="230" y="149" text-anchor="middle" font-size="9.5" fill="#7A2828" font-style="italic">Qualitas</text>
+
+            <rect x="30" y="203" width="120" height="24" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="90" y="219" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animal</text>
+            <rect x="170" y="203" width="120" height="24" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="230" y="219" text-anchor="middle" font-size="9.5" fill="#7A2828" font-style="italic">Litteratus</text>
+
+            <rect x="5" y="253" width="110" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="60" y="269" text-anchor="middle" font-size="9" fill="#8B6914">Rationale</text>
+            <rect x="65" y="253" width="110" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="120" y="269" text-anchor="middle" font-size="9" fill="#8B6914">Irrationale</text>
+
+            <!-- grammaticus crossing -->
+            <rect x="105" y="253" width="110" height="24" fill="none" stroke="#7A2828" stroke-width="0.8" stroke-dasharray="3,2"/>
+            <text x="160" y="269" text-anchor="middle" font-size="8" fill="#7A2828" font-style="italic">grammaticus?</text>
+
+            <rect x="65" y="323" width="110" height="26" fill="#3E6B5F"/>
+            <text x="120" y="340" text-anchor="middle" font-size="10" fill="#fff" font-style="italic">Homo</text>
+
+            <text x="160" y="385" text-anchor="middle" font-size="7.5" fill="#7A2828" font-style="italic">Problem: does 'grammaticus' name substance or quality?</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Anselm's <em>De grammatico</em> is not primarily a logical treatise but a philosophical dialogue using the problematic word <em>grammaticus</em> (one who is lettered) as a test case for understanding how paronyms — words derived from quality-terms — relate to the Porphyrian categories.</p>
+          <h3>The grammaticus problem</h3>
+          <p>The central puzzle: <em>grammaticus</em> appears to name a man (substance) but derives from <em>grammatica</em> (a quality, literacy). Where does it sit in the tree? Anselm's dialogue carefully distinguishes what a word signifies per se from what it signifies per aliud, with important consequences for how the tree is to be read.</p>
+          <blockquote>
+            "Grammaticus et per se significat qualitatem et per aliud substantiam."
+          </blockquote>
+          <h3>Significance</h3>
+          <p>Anselm's text was widely read in the twelfth century and influenced later discussions of signification and supposition theory. It shows the Porphyrian tree being used not just as a classificatory scheme but as a tool for probing the philosophy of language.</p>
+          <div class="tag-row">
+            <span class="tag">paronymy</span>
+            <span class="tag">signification</span>
+            <span class="tag">dialogue form</span>
+            <span class="tag">Bec school</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABELARD -->
+    <div class="tree-view" id="tree-abelard">
+      <h2 class="tree-heading">Peter Abelard — <em>Logica Ingredientibus</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> Peter Abelard &nbsp;·&nbsp;
+        <strong>Date:</strong> c. 1115–1120 &nbsp;·&nbsp;
+        <strong>Language:</strong> Latin
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 440" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="52" x2="160" y2="95" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="95" x2="80" y2="148" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="95" x2="240" y2="148" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="168" x2="80" y2="218" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="218" x2="45" y2="268" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="218" x2="115" y2="268" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="115" y1="288" x2="115" y2="338" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="115" y1="338" x2="85" y2="388" stroke="#3E6B5F" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line x1="115" y1="338" x2="145" y2="388" stroke="#3E6B5F" stroke-width="1.5"/>
+
+            <rect x="100" y="28" width="120" height="28" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1.2"/>
+            <text x="160" y="46" text-anchor="middle" font-size="11" fill="#1C1814" font-style="italic">Substantia</text>
+
+            <rect x="20" y="136" width="120" height="26" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="80" y="153" text-anchor="middle" font-size="9.5" fill="#7A2828">Corporalis</text>
+            <rect x="180" y="136" width="120" height="26" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="240" y="153" text-anchor="middle" font-size="9.5" fill="#7A2828">Incorporalis</text>
+
+            <rect x="20" y="205" width="120" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="222" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Corpus animatum</text>
+
+            <rect x="0" y="255" width="90" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="45" y="271" text-anchor="middle" font-size="9" fill="#8B6914">Sensitivum</text>
+            <rect x="65" y="255" width="100" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="115" y="271" text-anchor="middle" font-size="9" fill="#8B6914">Insensitivum</text>
+
+            <rect x="55" y="325" width="120" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="115" y="342" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animal</text>
+
+            <rect x="30" y="375" width="100" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="80" y="391" text-anchor="middle" font-size="9" fill="#8B6914">Mortale</text>
+            <rect x="95" y="375" width="100" height="24" fill="#3E6B5F"/>
+            <text x="145" y="391" text-anchor="middle" font-size="9.5" fill="#fff" font-style="italic">Homo</text>
+
+            <!-- conceptualism annotation -->
+            <text x="220" y="210" font-size="7.5" fill="#3E6B5F" font-style="italic">
+              <tspan x="210" dy="0">sermones:</tspan>
+              <tspan x="210" dy="12">intellect. communes</tspan>
+              <tspan x="210" dy="12">non voces tantum</tspan>
+            </text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Abelard's <em>Logica Ingredientibus</em> is his major commentary on the Porphyrian predicables and the central text of his position in the universals debate. Against both the extreme realism of William of Champeaux and the crude nominalism of Roscelin and Garlandus, Abelard developed what he called the theory of <em>sermones</em>.</p>
+          <h3>The theory of sermones</h3>
+          <p>For Abelard, universals are neither mere sounds (<em>voces</em>) nor real things (<em>res</em>) existing apart from individuals. They are <em>sermones</em> — meaningful linguistic acts that express a shared intellectual conception. The tree thus represents communal ways of understanding, grounded in resemblance among individuals.</p>
+          <blockquote>
+            "Genus vel species est sermo de pluribus differentibus specie praedicabilis non quasi vox sed quasi sermo, id est intellectus communis."
+          </blockquote>
+          <h3>Significance</h3>
+          <p>Abelard's position became enormously influential. His <em>Logica Ingredientibus</em>, though never formally adopted as a school text, circulated widely and shaped twelfth-century debates on signification and predication. His tree is conceptually richer than those of his predecessors.</p>
+          <div class="tag-row">
+            <span class="tag">conceptualism</span>
+            <span class="tag">sermones</span>
+            <span class="tag">universals debate</span>
+            <span class="tag">12th-century Paris</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GILBERT -->
+    <div class="tree-view" id="tree-gilbertus">
+      <h2 class="tree-heading">Gilbert of Poitiers — <em>Commentary on Boethius</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> Gilbert of Poitiers (Gilbertus Porretanus) &nbsp;·&nbsp;
+        <strong>Date:</strong> c. 1130–1148 &nbsp;·&nbsp;
+        <strong>Language:</strong> Latin
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="55" x2="160" y2="100" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="100" x2="80" y2="155" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="100" x2="240" y2="155" stroke="#3E6B5F" stroke-width="1.5"/>
+            <!-- subsistence / substance split -->
+            <line x1="80" y1="175" x2="50" y2="225" stroke="#3E6B5F" stroke-width="1.2" stroke-dasharray="6,3"/>
+            <line x1="80" y1="175" x2="110" y2="225" stroke="#3E6B5F" stroke-width="1.2"/>
+            <line x1="110" y1="245" x2="110" y2="298" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="298" x2="80" y2="348" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="298" x2="140" y2="348" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="368" x2="80" y2="400" stroke="#3E6B5F" stroke-width="1" stroke-dasharray="3,3"/>
+
+            <rect x="100" y="30" width="120" height="28" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1.2"/>
+            <text x="160" y="49" text-anchor="middle" font-size="11" fill="#1C1814" font-style="italic">Substantia</text>
+
+            <!-- subsistence vs substance -->
+            <rect x="18" y="143" width="124" height="26" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="80" y="160" text-anchor="middle" font-size="9" fill="#7A2828">Subsistentia (forma)</text>
+            <rect x="178" y="143" width="124" height="26" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="240" y="160" text-anchor="middle" font-size="9" fill="#7A2828">Id quod est (subst.)</text>
+
+            <rect x="5" y="213" width="90" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8" stroke-dasharray="4,2"/>
+            <text x="50" y="229" text-anchor="middle" font-size="8.5" fill="#8B6914" font-style="italic">Forma nativa</text>
+            <rect x="60" y="213" width="100" height="24" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="110" y="229" text-anchor="middle" font-size="8.5" fill="#4A4238">Corpus</text>
+
+            <rect x="55" y="285" width="110" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="110" y="302" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animal</text>
+
+            <rect x="22" y="335" width="100" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="72" y="351" text-anchor="middle" font-size="9" fill="#8B6914">Rationale</text>
+            <rect x="88" y="335" width="100" height="24" fill="#3E6B5F"/>
+            <text x="138" y="351" text-anchor="middle" font-size="10" fill="#fff" font-style="italic">Homo</text>
+
+            <text x="160" y="408" text-anchor="middle" font-size="7.5" fill="#8B6914" font-style="italic">forma nativa: the real ground of genera and species</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Gilbert of Poitiers, bishop and master of the cathedral school of Chartres, produced influential commentaries on Boethius's theological tractates. His distinctive ontological framework — the distinction between <em>id quod est</em> (that which is) and <em>quo est</em> or <em>forma nativa</em> (that by which it is) — represents a sophisticated realist position in the universals debate.</p>
+          <h3>Forma nativa</h3>
+          <p>For Gilbert, genera and species are not just words or mental concepts but are grounded in real <em>formae nativae</em> — native forms inhering in individuals that are structurally similar across them. This bridges the gap between Platonic realism and Abelard's conceptualism while maintaining the ontological grounding of the tree.</p>
+          <blockquote>
+            "Formae nativae sunt rerum proprietates quae de pluribus praedicantur."
+          </blockquote>
+          <h3>Significance</h3>
+          <p>Gilbert's commentary was condemned at the Council of Reims (1148), in part because his ontological distinctions were suspected of dividing the divine attributes. His school influenced twelfth-century realism at Paris and was studied by John of Salisbury, who left important descriptions of his teaching.</p>
+          <div class="tag-row">
+            <span class="tag">forma nativa</span>
+            <span class="tag">realism</span>
+            <span class="tag">Chartres school</span>
+            <span class="tag">Boethian commentary</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JOHN OF SALISBURY -->
+    <div class="tree-view" id="tree-john">
+      <h2 class="tree-heading">John of Salisbury — <em>Metalogicon</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> John of Salisbury &nbsp;·&nbsp;
+        <strong>Date:</strong> 1159 &nbsp;·&nbsp;
+        <strong>Context:</strong> Dedicated to Thomas Becket
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 400" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="52" x2="160" y2="98" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="98" x2="80" y2="150" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="98" x2="240" y2="150" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="170" x2="80" y2="220" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="220" x2="50" y2="270" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="220" x2="110" y2="270" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="290" x2="110" y2="340" stroke="#3E6B5F" stroke-width="1.5"/>
+
+            <rect x="100" y="28" width="120" height="28" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1.2"/>
+            <text x="160" y="48" text-anchor="middle" font-size="11" fill="#1C1814" font-style="italic">Substantia</text>
+
+            <rect x="20" y="138" width="120" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="155" text-anchor="middle" font-size="9.5" fill="#4A4238">Corporalis</text>
+            <rect x="180" y="138" width="120" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="240" y="155" text-anchor="middle" font-size="9.5" fill="#4A4238">Incorporalis</text>
+
+            <rect x="20" y="208" width="120" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="225" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animatum</text>
+
+            <rect x="0" y="258" width="100" height="24" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="50" y="274" text-anchor="middle" font-size="9" fill="#7A2828">Sensitivum</text>
+            <rect x="60" y="258" width="100" height="24" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="110" y="274" text-anchor="middle" font-size="9" fill="#7A2828">Insensitivum</text>
+
+            <rect x="50" y="328" width="120" height="28" fill="#3E6B5F"/>
+            <text x="110" y="347" text-anchor="middle" font-size="10.5" fill="#fff" font-style="italic">Homo</text>
+
+            <!-- annotation on schools -->
+            <text x="190" y="220" font-size="7.5" fill="#7A2828" font-style="italic">
+              <tspan x="185" dy="0">"monstrum quoddam</tspan>
+              <tspan x="185" dy="11">in rerum natura"</tspan>
+              <tspan x="185" dy="11">[of abstract genus]</tspan>
+            </text>
+
+            <text x="160" y="390" text-anchor="middle" font-size="8" fill="#8B6914" font-style="italic">A survey, not a committed doctrine</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>John of Salisbury's <em>Metalogicon</em> is the most important twelfth-century account of the Porphyrian tree in its pedagogical and philosophical contexts. John studied under Abelard, Thierry of Chartres, Gilbert of Poitiers, and others, and his work provides a unique comparative survey of the approaches to universals he encountered.</p>
+          <h3>Moderate realism</h3>
+          <p>John himself favoured a moderate position — following his teacher Bernard of Chartres — that genera and species are concepts (intelligentiae) abstracted from individual things. The tree is a teaching device whose ontological commitments should not be pressed too hard. He famously called the extreme realist view a "monster in the nature of things."</p>
+          <blockquote>
+            "Siquidem universalia nusquam sunt nisi in singularibus, et ex singularibus trahuntur."
+          </blockquote>
+          <h3>Historical value</h3>
+          <p>The <em>Metalogicon</em> preserves descriptions of lost works and teaching styles from the cathedral schools of the early twelfth century, making it essential for the history of medieval logic and philosophy. Book II contains the most sustained engagement with the Porphyrian predicables.</p>
+          <div class="tag-row">
+            <span class="tag">moderate realism</span>
+            <span class="tag">historical survey</span>
+            <span class="tag">Bernard of Chartres</span>
+            <span class="tag">intelligentiae</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AQUINAS -->
+    <div class="tree-view" id="tree-aquinas">
+      <h2 class="tree-heading">Thomas Aquinas — <em>In Librum Boethii de Trinitate / In Porphyrium</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> Thomas Aquinas &nbsp;·&nbsp;
+        <strong>Date:</strong> c. 1268–1272 &nbsp;·&nbsp;
+        <strong>Language:</strong> Latin
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 450" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="52" x2="160" y2="98" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="98" x2="80" y2="155" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="98" x2="240" y2="155" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="175" x2="80" y2="228" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="228" x2="50" y2="280" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="228" x2="110" y2="280" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="300" x2="110" y2="355" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="355" x2="80" y2="400" stroke="#3E6B5F" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line x1="110" y1="355" x2="140" y2="400" stroke="#3E6B5F" stroke-width="1.5"/>
+
+            <rect x="100" y="28" width="120" height="28" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1.2"/>
+            <text x="160" y="48" text-anchor="middle" font-size="11.5" fill="#1C1814" font-style="italic">Substantia</text>
+
+            <rect x="20" y="143" width="120" height="26" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="80" y="160" text-anchor="middle" font-size="9.5" fill="#7A2828">Corporalis</text>
+            <rect x="180" y="143" width="120" height="26" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="240" y="160" text-anchor="middle" font-size="9.5" fill="#7A2828">Incorporalis</text>
+
+            <rect x="20" y="215" width="120" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="232" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Corpus animatum</text>
+
+            <rect x="2" y="268" width="96" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="50" y="284" text-anchor="middle" font-size="9" fill="#8B6914">Sensitivum</text>
+            <rect x="62" y="268" width="96" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="110" y="284" text-anchor="middle" font-size="9" fill="#8B6914">Vegetativum</text>
+
+            <rect x="55" y="342" width="110" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="110" y="359" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animal</text>
+
+            <rect x="28" y="388" width="100" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="78" y="404" text-anchor="middle" font-size="9" fill="#8B6914">Mortale</text>
+            <rect x="88" y="388" width="100" height="24" fill="#3E6B5F"/>
+            <text x="138" y="404" text-anchor="middle" font-size="10" fill="#fff" font-style="italic">Homo</text>
+
+            <!-- esse/essentia note -->
+            <text x="195" y="235" font-size="7.5" fill="#3E6B5F" font-style="italic">
+              <tspan x="190" dy="0">esse ≠ essentia</tspan>
+              <tspan x="190" dy="12">in creaturis</tspan>
+            </text>
+
+            <text x="160" y="440" text-anchor="middle" font-size="7.5" fill="#8B6914" font-style="italic">univocal predication grounded in common nature</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Aquinas engaged with Porphyrian logic throughout his philosophical and theological works, but most directly in his <em>In Porphyrium</em> and in discussions of being, essence, and predication in works like <em>De Ente et Essentia</em>. His treatment integrates Aristotelian logic with a robust metaphysics of essence and existence.</p>
+          <h3>Metaphysical grounding</h3>
+          <p>For Aquinas, the tree is grounded in real <em>naturae communes</em> — common natures that are in themselves neither universal nor particular but become universal when abstracted by intellect. This moderate realism, drawing on Avicenna's insight about the indifference of the nature, allows univocal predication across individuals.</p>
+          <blockquote>
+            "Natura communis secundum se considerata abstrahit ab omni esse, tam particulari quam universali."
+          </blockquote>
+          <h3>Significance</h3>
+          <p>Aquinas's treatment became the standard position in Thomist schools and, via them, in much later scholastic education. His commentary on the <em>Isagoge</em> served as the basis for countless later academic treatments of the predicables.</p>
+          <div class="tag-row">
+            <span class="tag">Thomism</span>
+            <span class="tag">natura communis</span>
+            <span class="tag">esse / essentia</span>
+            <span class="tag">Avicenna</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LULL -->
+    <div class="tree-view" id="tree-lull">
+      <h2 class="tree-heading">Ramon Lull — <em>Arbor Scientiae</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> Ramon Lull &nbsp;·&nbsp;
+        <strong>Date:</strong> 1295, Rome &nbsp;·&nbsp;
+        <strong>Language:</strong> Latin and Catalan versions
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 460" xmlns="http://www.w3.org/2000/svg">
+            <!-- Trunk -->
+            <rect x="148" y="370" width="24" height="50" fill="#3E6B5F"/>
+            <!-- Main branches up from trunk -->
+            <line x1="160" y1="370" x2="160" y2="300" stroke="#3E6B5F" stroke-width="2"/>
+            <line x1="160" y1="330" x2="80" y2="265" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="330" x2="240" y2="265" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="300" x2="100" y2="230" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="300" x2="220" y2="230" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="300" x2="160" y2="220" stroke="#3E6B5F" stroke-width="1.8"/>
+
+            <!-- Upper branches -->
+            <line x1="160" y1="220" x2="100" y2="160" stroke="#3E6B5F" stroke-width="1.3"/>
+            <line x1="160" y1="220" x2="160" y2="155" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="220" x2="220" y2="160" stroke="#3E6B5F" stroke-width="1.3"/>
+
+            <!-- Roots below trunk -->
+            <line x1="160" y1="420" x2="100" y2="450" stroke="#8B6914" stroke-width="1.3"/>
+            <line x1="160" y1="420" x2="160" y2="455" stroke="#8B6914" stroke-width="1.3"/>
+            <line x1="160" y1="420" x2="220" y2="450" stroke="#8B6914" stroke-width="1.3"/>
+
+            <!-- Node labels — upper -->
+            <ellipse cx="160" cy="140" rx="55" ry="15" fill="#F2EDE0" stroke="#7A2828" stroke-width="0.8"/>
+            <text x="160" y="145" text-anchor="middle" font-size="9.5" fill="#7A2828" font-style="italic">Deus</text>
+
+            <ellipse cx="100" cy="148" rx="45" ry="12" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="100" y="153" text-anchor="middle" font-size="8.5" fill="#4A4238">Angelus</text>
+            <ellipse cx="220" cy="148" rx="45" ry="12" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="220" y="153" text-anchor="middle" font-size="8.5" fill="#4A4238">Caelum</text>
+
+            <!-- Middle circle: Homo -->
+            <circle cx="160" cy="218" r="22" fill="#3E6B5F"/>
+            <text x="160" y="222" text-anchor="middle" font-size="10" fill="#fff" font-style="italic">Homo</text>
+
+            <!-- Lower branches -->
+            <ellipse cx="100" cy="235" rx="38" ry="12" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="100" y="240" text-anchor="middle" font-size="8" fill="#8B6914">Arbor vegetal</text>
+            <ellipse cx="220" cy="235" rx="38" ry="12" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="220" y="240" text-anchor="middle" font-size="8" fill="#8B6914">Arbor sensual</text>
+
+            <ellipse cx="80" cy="263" rx="36" ry="12" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="268" text-anchor="middle" font-size="8" fill="#4A4238">Arbor imagin.</text>
+            <ellipse cx="240" cy="263" rx="36" ry="12" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="240" y="268" text-anchor="middle" font-size="8" fill="#4A4238">Arbor moral.</text>
+
+            <!-- Roots -->
+            <text x="90" y="455" text-anchor="middle" font-size="8" fill="#8B6914" font-style="italic">Radices</text>
+            <text x="230" y="455" text-anchor="middle" font-size="8" fill="#8B6914" font-style="italic">Principia</text>
+
+            <text x="160" y="14" text-anchor="middle" font-size="8.5" fill="#7A2828" font-style="italic">Sixteen trees — one encyclopaedic forest</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Ramon Lull's <em>Arbor Scientiae</em> (Tree of Knowledge) is a monumental encyclopaedia organized entirely through the metaphor of trees. Rather than one Porphyrian tree, Lull constructs sixteen trees — the elemental tree, the vegetative tree, the human tree, the moral tree, the apostolic tree, and more — each representing a domain of knowledge with roots, trunk, branches, leaves, flowers, and fruit.</p>
+          <h3>The Lullian transformation</h3>
+          <p>Lull radically transforms the Porphyrian schema: instead of descending from summum genus to individuals, his trees ascend through ontological and moral levels, connecting the created order to God. The tree metaphor becomes both a mnemonic system and a missionary tool — Lull designed it partly to demonstrate the truths of Christianity to Muslims and Jews through universally accessible rational structure.</p>
+          <blockquote>
+            "Sicut arbor habet radices, truncum, ramos, folia, flores et fructus, ita haec scientia…"
+          </blockquote>
+          <h3>Significance</h3>
+          <p>The <em>Arbor Scientiae</em> had enormous influence, was translated into Catalan and French, and spawned a tradition of arboreal encyclopaedism that continued into the Renaissance. It represents the most ambitious extension of the Porphyrian tree metaphor in the medieval period.</p>
+          <div class="tag-row">
+            <span class="tag">encyclopaedism</span>
+            <span class="tag">Lullian art</span>
+            <span class="tag">missionary logic</span>
+            <span class="tag">sixteen trees</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OCKHAM -->
+    <div class="tree-view" id="tree-ockham">
+      <h2 class="tree-heading">William of Ockham — <em>Summa Logicae</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> William of Ockham &nbsp;·&nbsp;
+        <strong>Date:</strong> c. 1323 &nbsp;·&nbsp;
+        <strong>Language:</strong> Latin
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 420" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="52" x2="160" y2="100" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="100" x2="80" y2="155" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="100" x2="240" y2="155" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="175" x2="80" y2="228" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="228" x2="50" y2="278" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="228" x2="110" y2="278" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="110" y1="298" x2="110" y2="348" stroke="#3E6B5F" stroke-width="1.5"/>
+
+            <!-- X marks for real universals -->
+            <line x1="18" y1="143" x2="140" y2="143" stroke="#7A2828" stroke-width="0.5" stroke-dasharray="2,3"/>
+            <text x="155" y="150" font-size="8" fill="#7A2828">✗ not res</text>
+
+            <rect x="100" y="28" width="120" height="28" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1.2"/>
+            <text x="160" y="48" text-anchor="middle" font-size="11" fill="#1C1814" font-style="italic">Substantia</text>
+            <text x="160" y="22" text-anchor="middle" font-size="7.5" fill="#3E6B5F">[nomen commune]</text>
+
+            <rect x="18" y="143" width="124" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="160" text-anchor="middle" font-size="9.5" fill="#4A4238">Corporalis</text>
+            <text x="80" y="175" text-anchor="middle" font-size="7.5" fill="#3E6B5F">[terminus mentalis]</text>
+            <rect x="178" y="143" width="124" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="240" y="160" text-anchor="middle" font-size="9.5" fill="#4A4238">Incorporalis</text>
+
+            <rect x="18" y="215" width="124" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="232" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animal</text>
+
+            <rect x="0" y="265" width="100" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="50" y="281" text-anchor="middle" font-size="9" fill="#8B6914">Rationale</text>
+            <rect x="58" y="265" width="100" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="108" y="281" text-anchor="middle" font-size="9" fill="#8B6914">Irrationale</text>
+
+            <rect x="50" y="335" width="120" height="28" fill="#3E6B5F"/>
+            <text x="110" y="354" text-anchor="middle" font-size="10.5" fill="#fff" font-style="italic">Homo</text>
+
+            <text x="160" y="400" text-anchor="middle" font-size="8" fill="#7A2828" font-style="italic">Socrates, Plato: only these are real. The tree: mental signs.</text>
+            <text x="160" y="412" text-anchor="middle" font-size="7.5" fill="#8B6914" font-style="italic">Pluralitas non est ponenda sine necessitate</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Ockham's <em>Summa Logicae</em> is the most systematic presentation of nominalism in the medieval period. In Part I, he treats the Porphyrian predicables in detail, arguing that universals are mental signs (<em>termini mentales</em>) or conventional spoken or written signs — not things existing in the world outside the mind.</p>
+          <h3>The razor and the tree</h3>
+          <p>For Ockham, there are no real genera or species: only individual substances and qualities exist. The Porphyrian tree is a system of mental and linguistic signs that track objective similarities among individuals, but it does not reflect any real universal nature. The razor — do not multiply entities beyond necessity — cuts away the ontological commitments of earlier realists.</p>
+          <blockquote>
+            "Universale non est aliquid existens extra animam realiter in individuis nec in aliqua re."
+          </blockquote>
+          <h3>Significance</h3>
+          <p>Ockham's <em>via moderna</em> became enormously influential in fourteenth- and fifteenth-century universities, particularly at Paris and Oxford. His treatment of the Porphyrian predicables shaped later nominalist and conceptualist positions, and his work was on the curriculum at many institutions well into the sixteenth century.</p>
+          <div class="tag-row">
+            <span class="tag">nominalism via moderna</span>
+            <span class="tag">termini mentales</span>
+            <span class="tag">Ockham's razor</span>
+            <span class="tag">Franciscan tradition</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BURIDAN -->
+    <div class="tree-view" id="tree-buridan">
+      <h2 class="tree-heading">Jean Buridan — <em>Summulae de Dialectica</em></h2>
+      <p class="tree-meta">
+        <strong>Author:</strong> Jean Buridan &nbsp;·&nbsp;
+        <strong>Date:</strong> c. 1335 &nbsp;·&nbsp;
+        <strong>Language:</strong> Latin &nbsp;·&nbsp;
+        <strong>Context:</strong> University of Paris
+      </p>
+      <div class="tree-body">
+        <div>
+          <svg class="tree-diagram" viewBox="0 0 320 440" xmlns="http://www.w3.org/2000/svg">
+            <line x1="160" y1="52" x2="160" y2="100" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="100" x2="80" y2="158" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="160" y1="100" x2="240" y2="158" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="178" x2="80" y2="235" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="235" x2="40" y2="288" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="80" y1="235" x2="120" y2="288" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="120" y1="310" x2="120" y2="360" stroke="#3E6B5F" stroke-width="1.5"/>
+            <line x1="120" y1="360" x2="90" y2="405" stroke="#3E6B5F" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <line x1="120" y1="360" x2="150" y2="405" stroke="#3E6B5F" stroke-width="1.5"/>
+
+            <rect x="100" y="28" width="120" height="28" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="1.2"/>
+            <text x="160" y="48" text-anchor="middle" font-size="11" fill="#1C1814" font-style="italic">Substantia</text>
+
+            <rect x="18" y="146" width="124" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="163" text-anchor="middle" font-size="9.5" fill="#4A4238">Corporalis</text>
+            <rect x="178" y="146" width="124" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="240" y="163" text-anchor="middle" font-size="9.5" fill="#4A4238">Incorporalis</text>
+
+            <rect x="18" y="222" width="124" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="80" y="239" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animatum</text>
+
+            <rect x="0" y="275" width="80" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="40" y="291" text-anchor="middle" font-size="9" fill="#8B6914">Sensit.</text>
+            <rect x="78" y="275" width="84" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="120" y="291" text-anchor="middle" font-size="9" fill="#8B6914">Insensit.</text>
+
+            <rect x="65" y="348" width="110" height="26" fill="#F2EDE0" stroke="#3E6B5F" stroke-width="0.8"/>
+            <text x="120" y="365" text-anchor="middle" font-size="9.5" fill="#4A4238" font-style="italic">Animal</text>
+
+            <rect x="38" y="392" width="100" height="24" fill="#F2EDE0" stroke="#8B6914" stroke-width="0.8"/>
+            <text x="88" y="408" text-anchor="middle" font-size="9" fill="#8B6914">Mortale</text>
+            <rect x="100" y="392" width="100" height="24" fill="#3E6B5F"/>
+            <text x="150" y="408" text-anchor="middle" font-size="10" fill="#fff" font-style="italic">Homo</text>
+
+            <!-- supposition theory note -->
+            <text x="215" y="250" font-size="7.5" fill="#3E6B5F" font-style="italic">
+              <tspan x="210" dy="0">suppositio</tspan>
+              <tspan x="210" dy="12">personalis /</tspan>
+              <tspan x="210" dy="12">simplex /</tspan>
+              <tspan x="210" dy="12">materialis</tspan>
+            </text>
+
+            <text x="160" y="430" text-anchor="middle" font-size="7.5" fill="#8B6914" font-style="italic">supposition theory applied to tree terms</text>
+          </svg>
+        </div>
+        <div class="tree-info">
+          <h3>Context</h3>
+          <p>Buridan's <em>Summulae de Dialectica</em> is a comprehensive revision of Peter of Spain's thirteenth-century logic textbook, updated to reflect fourteenth-century developments in supposition theory and inference. Buridan was rector of the University of Paris and one of the most influential logicians of the late medieval period.</p>
+          <h3>Supposition theory and the tree</h3>
+          <p>Buridan brings the highly developed theory of supposition (the capacity of a term to stand for something in a sentence) to bear on the Porphyrian predicables. The question of what term like "animal" or "homo" stands for in different propositional contexts — whether for individual animals, for the species, or for the spoken word itself — is carefully distinguished.</p>
+          <blockquote>
+            "Terminus potest supponere personaliter, simpliciter vel materialiter, et secundum hoc variantur praedicationes in arbore."
+          </blockquote>
+          <h3>Significance</h3>
+          <p>Buridan's logic text was one of the most widely adopted in the later fourteenth and fifteenth centuries, rivalling Peter of Spain's <em>Tractatus</em>. His treatment of the predicables became standard in many central European universities. His famous thought experiment of the ass — uncertain between two equidistant bales of hay — is unrelated to the Porphyrian tree but shares the same systematic clarity of mind.</p>
+          <div class="tag-row">
+            <span class="tag">supposition theory</span>
+            <span class="tag">via moderna</span>
+            <span class="tag">University of Paris</span>
+            <span class="tag">Peter of Spain revised</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function showTree(id) {
+    document.querySelectorAll('.tree-view').forEach(el => el.classList.remove('visible'));
+    document.querySelectorAll('.tree-nav button').forEach(el => el.classList.remove('active'));
+    const target = document.getElementById('tree-' + id);
+    const btn = document.getElementById('btn-' + id);
+    if (target) target.classList.add('visible');
+    if (btn) btn.classList.add('active');
+    document.getElementById('mainContent').scrollTop = 0;
+  }
+</script>
+</body>
+</html>
