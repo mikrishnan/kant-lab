@@ -1,0 +1,594 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Arbor Porphyriana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Alfa+Slab+One&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: working canvas on the left (the engraved tree), apparatus on the right; stacks on phones. */
+:root{
+  --paper:#F7F8FB; --panel:#FFFFFF; --ink:#18203F; --muted:#5A6080; --rule:#D3D6E4;
+  --red:#B22234; --blue:#3C3B6E; --canton:#3C3B6E; --gold:#D8A02A; --eagle:#4A2C16; --white:#FFFFFF;
+  --wolff:#3C3B6E; --leib:#B22234; --warn:#C2410C; --ok:#2C6646;
+  --accent:var(--wolff); --tint:rgba(60,59,110,.10);
+  --f-display:"IM Fell English", "Iowan Old Style", Georgia, serif;
+  --f-poster:"Alfa Slab One", "Rockwell", Georgia, serif;
+  --f-ui:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0D1130; --panel:#151A40; --ink:#F0F1F7; --muted:#A6AAC8; --rule:#2B3166;
+  --red:#E0505D; --blue:#9097E4; --canton:#2C3283; --gold:#E9B444; --eagle:#7A4E2B; --white:#FFFFFF;
+  --wolff:#9097E4; --leib:#E8636F; --warn:#F08A5D; --ok:#7DC59B; --tint:rgba(144,151,228,.16); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#0D1130; --panel:#151A40; --ink:#F0F1F7; --muted:#A6AAC8; --rule:#2B3166;
+  --red:#E0505D; --blue:#9097E4; --canton:#2C3283; --gold:#E9B444; --eagle:#7A4E2B; --white:#FFFFFF;
+  --wolff:#9097E4; --leib:#E8636F; --warn:#F08A5D; --ok:#7DC59B; --tint:rgba(144,151,228,.16); color-scheme:dark }
+body.leibniz{ --accent:var(--leib); --tint:rgba(178,34,52,.10) }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) body.leibniz{ --tint:rgba(232,99,111,.16) } }
+:root[data-theme="dark"] body.leibniz{ --tint:rgba(232,99,111,.16) }
+
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font:14px/1.5 var(--f-ui);}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:0;height:100%;}
+@media (max-width:900px){ .app{grid-template-columns:minmax(0,1fr);height:auto} .stage{height:70vh} }
+.stage{display:flex;flex-direction:column;min-width:0;border-right:1px solid var(--rule);}
+header{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:18px 20px 12px;border-bottom:1px solid var(--rule)}
+h1{font:400 30px/1.05 var(--f-poster);margin:0;letter-spacing:.02em;text-wrap:balance;color:var(--blue)}
+h1 .stars{color:var(--red);letter-spacing:.3em;font-size:14px;vertical-align:middle}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand svg{flex:none}
+.bunting{height:30px;background:
+  radial-gradient(circle at 50% -6px, var(--canton) 0 13px, transparent 13.5px) 0 0/56px 30px repeat-x,
+  radial-gradient(circle at 50% -6px, var(--white) 0 19px, transparent 19.5px) 0 0/56px 30px repeat-x,
+  radial-gradient(circle at 50% -6px, var(--red) 0 25px, transparent 25.5px) 0 0/56px 30px repeat-x;}
+.stripe-top{height:8px;background:repeating-linear-gradient(90deg,var(--red) 0 28px,var(--white) 28px 56px)}
+h1 small{display:block;font:500 11px/1.4 var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:999px;padding:3px;background:var(--panel)}
+.seg button{border:0;background:transparent;color:var(--muted);font:500 13px var(--f-ui);padding:6px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--white)}
+.seg button[aria-pressed="true"]::before{content:"\2605 "}
+.seg button:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.modeline{font-size:12.5px;color:var(--muted);max-width:52ch;margin:0}
+.canvas{position:relative;flex:1;overflow:auto;min-height:320px;background-color:var(--paper);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44'%3E%3Cpath d='M22 15l1.8 5.3h5.6l-4.5 3.3 1.7 5.3-4.6-3.3-4.6 3.3 1.7-5.3-4.5-3.3h5.6z' fill='%238C90B0' fill-opacity='.18'/%3E%3C/svg%3E");background-size:44px 44px;}
+.watermark{position:sticky;top:30%;left:0;height:0;overflow:visible;pointer-events:none;display:flex;justify-content:center;z-index:0}
+.watermark svg{opacity:.07;transform:translateY(-50%)}
+svg#tree{position:relative;z-index:1}
+.zoom{position:sticky;top:10px;left:10px;z-index:2;display:inline-flex;gap:4px;margin:10px}
+.zoom button{width:30px;height:30px;border:1px solid var(--canton);background:var(--canton);color:var(--white);border-radius:6px;cursor:pointer;font:500 15px var(--f-ui)}
+svg#tree{display:block;margin:0 auto 24px}
+svg text{font-family:var(--f-display)}
+.n rect.box{cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;padding:8px 20px;border-top:1px solid var(--rule);font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:0;border-top:1.5px solid var(--ink);vertical-align:middle;margin-right:6px}
+.legend i.d{border-top-style:dashed;border-color:var(--leib)}
+.legend i.h{height:10px;border:0;background:var(--tint);outline:1px solid var(--accent)}
+
+aside{overflow:auto;background:var(--panel);min-width:0}
+section.p{padding:16px 18px 18px;display:grid;gap:10px;background:
+  linear-gradient(var(--red),var(--red)) bottom/100% 2px no-repeat,
+  linear-gradient(var(--white),var(--white)) bottom 2px left 0/100% 2px no-repeat,
+  linear-gradient(var(--canton),var(--canton)) bottom 4px left 0/100% 2px no-repeat;}
+.p h2::before{content:"\2605  ";color:var(--red)}
+aside .flaghead{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--canton);color:var(--white);font:400 15px var(--f-poster);letter-spacing:.04em}
+.p h2{margin:0;font:600 11px/1.3 var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.p h3{margin:0;font:400 22px/1.1 var(--f-display)}
+label.f{display:grid;gap:3px;font-size:12px;color:var(--muted)}
+input[type=text],input[type=number],select,textarea{font:14px var(--f-ui);color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:7px 9px;width:100%;box-sizing:border-box}
+textarea{font:12px/1.4 var(--f-mono);min-height:90px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row > *{min-width:0}
+.btn{border:1px solid var(--rule);background:var(--paper);color:var(--ink);font:500 13px var(--f-ui);padding:6px 11px;border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--red);border-color:var(--red);color:var(--white)}
+.btn.pri::before{content:"\2605 "}
+.btn.danger{color:var(--warn)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chip{display:inline-block;font:500 11px var(--f-ui);letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--accent);color:var(--accent)}
+.marks{display:flex;flex-wrap:wrap;gap:5px}
+.mk{font:italic 15px var(--f-display);padding:1px 8px;border-radius:4px;background:var(--paper);border:1px solid var(--rule);cursor:pointer;color:var(--ink)}
+.mk[aria-pressed="true"]{border-color:var(--accent);background:var(--tint)}
+.mk sub{font:500 10px var(--f-mono);color:var(--leib);margin-left:3px}
+.num{font:500 13px var(--f-mono);color:var(--leib);word-break:break-all}
+.verdict{border-left:3px solid var(--rule);padding:6px 10px;background:var(--paper);border-radius:0 6px 6px 0;font-size:13.5px}
+.verdict.yes{border-color:var(--ok)} .verdict.no{border-color:var(--warn)} .verdict.mid{border-color:var(--leib)}
+.verdict b{font-weight:600}
+.warn{font-size:12.5px;color:var(--warn)}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+details summary{cursor:pointer;font:600 11px var(--f-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+details p{font-size:13px;margin:.6em 0;max-width:62ch}
+ul.plain{margin:0;padding-left:18px;font-size:13px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;min-width:0}
+@media (prefers-reduced-motion:no-preference){ .n{transition:opacity .15s} }
+</style>
+
+<svg id="sprite" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="star" viewBox="0 0 24 24"><path d="M12 1.5l3.1 7.6 8.2.6-6.3 5.3 2 8-7-4.3-7 4.3 2-8L.7 9.7l8.2-.6z" fill="var(--white)"/></symbol>
+<symbol id="flag" viewBox="0 0 190 100"><rect width="190" height="100" fill="var(--white)"/><rect y="0.000" width="190" height="7.742" fill="var(--red)"/><rect y="15.385" width="190" height="7.742" fill="var(--red)"/><rect y="30.769" width="190" height="7.742" fill="var(--red)"/><rect y="46.154" width="190" height="7.742" fill="var(--red)"/><rect y="61.538" width="190" height="7.742" fill="var(--red)"/><rect y="76.923" width="190" height="7.742" fill="var(--red)"/><rect y="92.308" width="190" height="7.742" fill="var(--red)"/><rect width="76" height="53.85" fill="var(--canton)"/><use href="#star" x="3.90" y="3.00" width="4.8" height="4.8"/><use href="#star" x="16.50" y="3.00" width="4.8" height="4.8"/><use href="#star" x="29.10" y="3.00" width="4.8" height="4.8"/><use href="#star" x="41.70" y="3.00" width="4.8" height="4.8"/><use href="#star" x="54.30" y="3.00" width="4.8" height="4.8"/><use href="#star" x="66.90" y="3.00" width="4.8" height="4.8"/><use href="#star" x="10.20" y="8.40" width="4.8" height="4.8"/><use href="#star" x="22.80" y="8.40" width="4.8" height="4.8"/><use href="#star" x="35.40" y="8.40" width="4.8" height="4.8"/><use href="#star" x="48.00" y="8.40" width="4.8" height="4.8"/><use href="#star" x="60.60" y="8.40" width="4.8" height="4.8"/><use href="#star" x="3.90" y="13.80" width="4.8" height="4.8"/><use href="#star" x="16.50" y="13.80" width="4.8" height="4.8"/><use href="#star" x="29.10" y="13.80" width="4.8" height="4.8"/><use href="#star" x="41.70" y="13.80" width="4.8" height="4.8"/><use href="#star" x="54.30" y="13.80" width="4.8" height="4.8"/><use href="#star" x="66.90" y="13.80" width="4.8" height="4.8"/><use href="#star" x="10.20" y="19.20" width="4.8" height="4.8"/><use href="#star" x="22.80" y="19.20" width="4.8" height="4.8"/><use href="#star" x="35.40" y="19.20" width="4.8" height="4.8"/><use href="#star" x="48.00" y="19.20" width="4.8" height="4.8"/><use href="#star" x="60.60" y="19.20" width="4.8" height="4.8"/><use href="#star" x="3.90" y="24.60" width="4.8" height="4.8"/><use href="#star" x="16.50" y="24.60" width="4.8" height="4.8"/><use href="#star" x="29.10" y="24.60" width="4.8" height="4.8"/><use href="#star" x="41.70" y="24.60" width="4.8" height="4.8"/><use href="#star" x="54.30" y="24.60" width="4.8" height="4.8"/><use href="#star" x="66.90" y="24.60" width="4.8" height="4.8"/><use href="#star" x="10.20" y="30.00" width="4.8" height="4.8"/><use href="#star" x="22.80" y="30.00" width="4.8" height="4.8"/><use href="#star" x="35.40" y="30.00" width="4.8" height="4.8"/><use href="#star" x="48.00" y="30.00" width="4.8" height="4.8"/><use href="#star" x="60.60" y="30.00" width="4.8" height="4.8"/><use href="#star" x="3.90" y="35.40" width="4.8" height="4.8"/><use href="#star" x="16.50" y="35.40" width="4.8" height="4.8"/><use href="#star" x="29.10" y="35.40" width="4.8" height="4.8"/><use href="#star" x="41.70" y="35.40" width="4.8" height="4.8"/><use href="#star" x="54.30" y="35.40" width="4.8" height="4.8"/><use href="#star" x="66.90" y="35.40" width="4.8" height="4.8"/><use href="#star" x="10.20" y="40.80" width="4.8" height="4.8"/><use href="#star" x="22.80" y="40.80" width="4.8" height="4.8"/><use href="#star" x="35.40" y="40.80" width="4.8" height="4.8"/><use href="#star" x="48.00" y="40.80" width="4.8" height="4.8"/><use href="#star" x="60.60" y="40.80" width="4.8" height="4.8"/><use href="#star" x="3.90" y="46.20" width="4.8" height="4.8"/><use href="#star" x="16.50" y="46.20" width="4.8" height="4.8"/><use href="#star" x="29.10" y="46.20" width="4.8" height="4.8"/><use href="#star" x="41.70" y="46.20" width="4.8" height="4.8"/><use href="#star" x="54.30" y="46.20" width="4.8" height="4.8"/><use href="#star" x="66.90" y="46.20" width="4.8" height="4.8"/></symbol>
+<symbol id="wing" viewBox="0 0 200 170"><path d="M96 78 C 78 44, 44 22, 2 16 C 18 26, 14 30, 4 36 C 22 42, 16 48, 8 54 C 28 58, 22 64, 14 70 C 34 74, 30 80, 24 86 C 44 88, 66 92, 92 104 Z" fill="var(--eagle)"/><path d="M96 78 C 82 54, 60 38, 30 28 M92 92 C 70 80, 48 72, 24 66" stroke="var(--gold)" stroke-opacity=".35" stroke-width="1.5" fill="none"/></symbol>
+<symbol id="eagle" viewBox="0 0 200 170">
+ <use href="#wing" width="200" height="170"/>
+ <use href="#wing" width="200" height="170" transform="translate(200,0) scale(-1,1)"/>
+ <path d="M90 132 L84 160 L94 152 L100 164 L106 152 L116 160 L110 132 Z" fill="var(--white)" stroke="var(--eagle)" stroke-width="1.5"/>
+ <ellipse cx="100" cy="102" rx="19" ry="34" fill="var(--eagle)"/>
+ <path d="M86 132 l-8 12 M90 134 l-4 13 M110 134 l4 13 M114 132 l8 12" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+ <path d="M88 84 h24 v16 q0 14 -12 19 q-12 -5 -12 -19 z" fill="var(--white)" stroke="var(--gold)" stroke-width="1.5"/>
+ <path d="M88 84 h24 v7 h-24 z" fill="var(--canton)"/>
+ <path d="M92 91 v24 M100 91 v28 M108 91 v24" stroke="var(--red)" stroke-width="3"/>
+ <path d="M86 70 C 84 52, 94 40, 104 42 C 114 44, 118 52, 116 62 C 112 72, 100 76, 86 70 Z" fill="var(--white)" stroke="var(--eagle)" stroke-width="1.2"/>
+ <path d="M112 50 C 122 50, 128 54, 128 60 C 124 58, 120 58, 114 60 Z" fill="var(--gold)" stroke="var(--eagle)" stroke-width="1"/>
+ <circle cx="108" cy="52" r="2.2" fill="var(--eagle)"/>
+ <path d="M103 48 l9 -1" stroke="var(--eagle)" stroke-width="1.6" stroke-linecap="round"/>
+</symbol></defs></svg>
+<div class="app">
+  <div class="stage">
+    <div class="stripe-top"></div>
+    <header>
+      <div class="brand"><svg width="78" height="66" viewBox="0 0 200 170" aria-hidden="true"><use href="#eagle"/></svg>
+      <h1>Arbor Porphyriana <span class="stars">★★★</span><small>Division of concepts · after Anderson, <i>The Poverty of Conceptual Truth</i> (2015)</small></h1></div>
+      <div style="display:grid;gap:6px;justify-items:end">
+        <div class="seg" role="group" aria-label="Logic of containment">
+          <button id="mWolff" aria-pressed="true">Wolffian</button>
+          <button id="mLeib" aria-pressed="false">Leibnizian</button>
+        </div>
+      </div>
+      <p class="modeline" id="modeline"></p>
+    </header>
+    <div class="bunting" aria-hidden="true"></div>
+    <div class="canvas" id="canvas">
+      <div class="watermark" aria-hidden="true"><svg width="520" height="442" viewBox="0 0 200 170"><use href="#eagle"/></svg></div>
+      <div class="zoom"><button id="zIn" aria-label="Zoom in">+</button><button id="zOut" aria-label="Zoom out">−</button><button id="zFit" aria-label="Fit" style="width:auto;padding:0 8px;font-size:12px">Fit</button></div>
+      <svg id="tree" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <aside>
+    <div class="flaghead"><svg width="38" height="20" viewBox="0 0 190 100" aria-hidden="true"><use href="#flag"/></svg>Concepts, by the People<svg width="38" height="20" viewBox="0 0 190 100" aria-hidden="true"><use href="#flag"/></svg></div>
+    <section class="p" id="editor"></section>
+    <section class="p" id="readout"></section>
+    <section class="p" id="judge"></section>
+    <section class="p" id="markpanel"></section>
+    <section class="p" id="warnings"></section>
+    <section class="p">
+      <h2>Trees</h2>
+      <div class="row">
+        <select id="sample" aria-label="Load a sample tree" style="flex:1">
+          <option value="porphyry">Porphyry: Substance to Socrates</option>
+          <option value="triangle">Triangles: angles, then sides</option>
+          <option value="polygon">Polygons: a polytomy</option>
+          <option value="blank">Blank: one summum genus</option>
+        </select>
+        <button class="btn" id="loadSample">Load</button>
+      </div>
+      <div class="row"><button class="btn" id="copyJson">Copy tree as JSON</button><button class="btn" id="copySvg">Copy drawing as SVG</button></div>
+      <label class="f">Paste JSON to restore a tree<textarea id="jsonIn" spellcheck="false" placeholder='{"root":"n1","nodes":{...}}'></textarea></label>
+      <div class="row"><button class="btn" id="loadJson">Restore from JSON</button><span class="note" id="dataMsg"></span></div>
+    </section>
+    <section class="p">
+      <details>
+        <summary>How the two modes are modelled</summary>
+        <p><b>Wolffian.</b> Concepts form a strict hierarchy built by logical division. Each species has one proximate genus; its content is the genus's content plus its differentia. Coordinate species under one division exclude each other. Containment <i>in</i> (content) and containment <i>under</i> (extension) are read off the same tree and are reciprocal. A predicate is analytic of a subject when it is a higher concept on the subject's line. Because division supplies opposition, "No S is P" is analytic when S and P sit on coordinate branches.</p>
+        <p><b>Leibnizian.</b> Concepts are combinations of marks, coded in the manner of Leibniz's characteristic numbers of 1679: each distinct mark gets a prime, a concept's number is the product of its marks' primes, and P is contained in S when N(P) divides N(S). The same mark recurring on several branches is one mark, so classification can cross the tree, and any two concepts can be combined. The drawing puts every differentia in the top row as a singleton set and places each concept in the row for its number of marks; a line joins two sets when one includes the other with no displayed set between them. Concepts with the same mark set appear as one node. The calculus has no built-in exclusion between marks, so it treats every combination as a possible concept.</p>
+        <p>This is a reconstruction for teaching and exploration. Check it against Anderson's Part I before relying on the details.</p>
+        <p><b>Division types.</b> Two members: dichotomy; three: trichotomy; four or more: polytomy. A dichotomy by contradictory marks (A / non-A) is exhaustive on logical grounds alone. For other divisions exhaustiveness rests on the basis of division (Kant, <i>Jäsche Logik</i> §113, ties polytomy to empirical cognition).</p>
+      </details>
+    </section>
+  </aside>
+</div>
+
+<script>
+(function(){
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let S, zoom = 1, markSel = null, uid = 1;
+
+/* ---------- samples ---------- */
+function build(spec){
+  const nodes = {}; uid = 1;
+  function rec(t, parent){
+    const id = 'n' + (uid++);
+    nodes[id] = {id, name:t[0], diff:t[1], basis:t[2]||'', parent, kids:[]};
+    (t[3]||[]).forEach(k => nodes[id].kids.push(rec(k, id)));
+    return id;
+  }
+  const root = rec(spec, null);
+  return {root, nodes, comps:[], sel:root, mode: S ? S.mode : 'wolff', next:uid};
+}
+const SAMPLES = {
+  porphyry: ['Substance','substance','corporeality',[
+    ['Body','corporeal','animation',[
+      ['Living body','animate','sensation',[
+        ['Animal','sensitive','reason',[
+          ['Human','rational','number',[
+            ['Socrates','son of Sophroniscus'],['Plato','son of Ariston']]],
+          ['Brute','non-rational']]],
+        ['Plant','non-sensitive']]],
+      ['Mineral','inanimate']]],
+    ['Spirit','incorporeal']]],
+  triangle: ['Triangle','three-sided plane figure','angles',[
+    ['Acute triangle','all angles acute','sides',[
+      ['Equilateral triangle','equilateral'],['Acute isosceles','isosceles'],['Acute scalene','scalene']]],
+    ['Right triangle','one right angle','sides',[
+      ['Right isosceles','isosceles'],['Right scalene','scalene']]],
+    ['Obtuse triangle','one obtuse angle','sides',[
+      ['Obtuse isosceles','isosceles'],['Obtuse scalene','scalene']]]]],
+  polygon: ['Polygon','closed rectilinear figure','number of sides',[
+    ['Triangle','three sides'],['Quadrilateral','four sides'],['Pentagon','five sides'],['Hexagon','six sides'],['Heptagon','seven sides']]],
+  blank: ['Ens','being']
+};
+function loadSample(k){
+  S = build(SAMPLES[k]);
+  if(k==='triangle'){ // a composite that shows the difference between the modes
+    const f = n => Object.values(S.nodes).find(x=>x.name===n).id;
+    S.comps.push({id:'c'+(S.next++), name:'Right obtuse triangle', a:f('Right triangle'), b:f('Obtuse triangle')});
+  }
+  if(k==='porphyry'){
+    const f = n => Object.values(S.nodes).find(x=>x.name===n).id;
+    S.comps.push({id:'c'+(S.next++), name:'Rational plant', a:f('Human'), b:f('Plant')});
+  }
+  markSel = null;
+}
+
+/* ---------- logic ---------- */
+const N = () => S.nodes;
+const isC = id => id && id[0]==='c';
+const comp = id => S.comps.find(c=>c.id===id);
+const nameOf = id => isC(id) ? comp(id).name : N()[id].name;
+const key = m => m.trim().toLowerCase();
+function path(id){ const p=[]; while(id){ p.unshift(id); id=N()[id].parent; } return p; }
+function depth(id){ return path(id).length-1; }
+function marksOf(id){
+  if(isC(id)){ const c=comp(id); const seen=new Set(), out=[]; [...marksOf(c.a),...marksOf(c.b)].forEach(m=>{if(!seen.has(key(m))){seen.add(key(m));out.push(m)}}); return out; }
+  const seen=new Set(), out=[]; path(id).forEach(i=>{const m=N()[i].diff||N()[i].name; if(!seen.has(key(m))){seen.add(key(m));out.push(m)}}); return out;
+}
+function primeList(n){ const p=[]; let k=2; while(p.length<n){ if(p.every(q=>k%q)) p.push(k); k++; } return p; }
+function primeTable(){
+  const order=[], seen=new Set();
+  const bfs=[S.root];
+  while(bfs.length){ const id=bfs.shift(); const m=N()[id].diff||N()[id].name; if(!seen.has(key(m))){seen.add(key(m));order.push(m)} bfs.push(...N()[id].kids); }
+  const ps=primeList(order.length); const t=new Map(); order.forEach((m,i)=>t.set(key(m),{mark:m,p:ps[i]})); return t;
+}
+let PT;
+function num(id){ return marksOf(id).reduce((a,m)=>a*BigInt(PT.get(key(m)).p),1n); }
+function allIds(){ const out=[]; (function r(i){out.push(i);N()[i].kids.forEach(r)})(S.root); return out; }
+function lca(a,b){ const pa=path(a), pb=path(b); let i=0; while(i<pa.length&&i<pb.length&&pa[i]===pb[i]) i++; return {g:pa[i-1], ca:pa[i], cb:pb[i]}; }
+function wolffComp(c){
+  if(path(c.b).includes(c.a)) return {ok:true, eq:c.b};
+  if(path(c.a).includes(c.b)) return {ok:true, eq:c.a};
+  return {ok:false, ...lca(c.a,c.b)};
+}
+// resolve an id to a tree concept under Wolff (composites collapse or fail)
+function wres(id){ if(!isC(id)) return id; const r=wolffComp(comp(id)); return r.ok? r.eq : null; }
+// S contained under P ?  (P in content of S)
+function under(s,p){
+  if(S.mode==='leibniz') return num(s) % num(p) === 0n;
+  const a=wres(s), b=wres(p); if(!a||!b) return null; return path(a).includes(b);
+}
+function divType(n){ return n===2?'Dichotomy':n===3?'Trichotomy':'Polytomy'; }
+function contradictory(kids){
+  if(kids.length!==2) return false;
+  const [a,b]=kids.map(k=>key(N()[k].diff||''));
+  const neg=x=>x.replace(/^(non-|not |non |un-)/,'');
+  return (a!==b) && (neg(a)===b || neg(b)===a);
+}
+
+/* ---------- persistence (per-viewer convenience) ---------- */
+function save(){ try{ localStorage.setItem('porphyry-state', JSON.stringify(S)); }catch(e){} }
+function load(){ try{ const s=JSON.parse(localStorage.getItem('porphyry-state')); if(s&&s.root&&s.nodes) return s; }catch(e){} return null; }
+
+/* ---------- drawing ---------- */
+const H=120, GAP=26;
+const ctx=document.createElement('canvas').getContext('2d');
+function tw(t,size,italic){ ctx.font=(italic?'italic ':'')+size+'px "IM Fell English", Georgia, serif'; return ctx.measureText(t).width; }
+function layout(){
+  const pos={}; let cur=0, maxD=0;
+  const bw=id=>Math.max(86, tw(N()[id].name,17)+54);
+  (function rec(id,d){
+    maxD=Math.max(maxD,d); const n=N()[id];
+    if(!n.kids.length){ const w=Math.max(bw(id), tw(n.diff||'',14,true)+18); pos[id]={x:cur+w/2,y:d*H,w:bw(id)}; cur+=w+GAP; return; }
+    n.kids.forEach(k=>rec(k,d+1));
+    const xs=n.kids.map(k=>pos[k].x); pos[id]={x:(Math.min(...xs)+Math.max(...xs))/2,y:d*H,w:bw(id)};
+  })(S.root,0);
+  // composites row
+  const cy=(maxD+1)*H+30;
+  const cs=S.comps.map(c=>({id:c.id,w:Math.max(80,tw(c.name,17)+30),x:((pos[c.a]||{x:0}).x+(pos[c.b]||{x:0}).x)/2})).sort((a,b)=>a.x-b.x);
+  let right=-Infinity; cs.forEach(c=>{ const minX=right+GAP+c.w/2; if(c.x<minX) c.x=minX; right=c.x+c.w/2; pos[c.id]={x:c.x,y:cy,w:c.w}; });
+  return {pos, maxD, width:Math.max(cur, right), height: cy + (S.comps.length? 60: -H+60)};
+}
+
+function render(){
+  PT = primeTable();
+  document.body.classList.toggle('leibniz', S.mode==='leibniz');
+  $('#mWolff').setAttribute('aria-pressed', S.mode==='wolff');
+  $('#mLeib').setAttribute('aria-pressed', S.mode==='leibniz');
+  $('#modeline').textContent = S.mode==='wolff'
+    ? 'Strict hierarchy by division. One proximate genus per species; coordinate species exclude each other.'
+    : 'Every differentia sits in the top row as a singleton set. Each concept is placed by how many marks it combines; lines show immediate inclusion.';
+  drawTree(); renderEditor(); renderReadout(); renderJudge(); renderMarks(); renderWarnings(); renderLegend(); save();
+}
+
+function drawLattice(){
+  const svg=$('#tree');
+  const dfs=[]; (function r(i){dfs.push(i);N()[i].kids.forEach(r)})(S.root);
+  const items=[], byKey=new Map();
+  const sk=ms=>ms.map(key).sort().join('|');
+  // top layer: every mark as a singleton set
+  dfs.forEach(id=>{ const m=N()[id].diff||N()[id].name, k=key(m);
+    if(!byKey.has(k)){ const it={id:'m:'+k, mk:k, marks:[m], sk:k, ids:[], names:[]}; byKey.set(k,it); items.push(it); } });
+  // concepts and combinations, merged when they have the same mark set
+  dfs.concat(S.comps.map(c=>c.id)).forEach(id=>{ const ms=marksOf(id), s=sk(ms);
+    let it=items.find(x=>x.sk===s); if(!it){ it={id, marks:ms, sk:s, ids:[], names:[]}; items.push(it); }
+    it.ids.push(id); it.names.push(nameOf(id)); });
+  items.forEach(it=>{ it.set=new Set(it.marks.map(key)); it.rank=it.set.size; });
+  const sub=(a,b)=>a.size<b.size && [...a].every(x=>b.has(x));
+  items.forEach(x=>{ const below=items.filter(y=>sub(y.set,x.set));
+    x.up=below.filter(y=>!below.some(z=>z!==y && sub(y.set,z.set))); });
+  // rows by number of marks
+  const ranks=[...new Set(items.map(i=>i.rank))].sort((a,b)=>a-b);
+  const RH=118, G=22;
+  const label=it=> it.names.length? it.names.join(' = ') : '{'+it.marks[0]+'}';
+  const wOf=it=>Math.max(90, tw(label(it),it.names.length?17:15,!it.names.length)+54);
+  let width=0;
+  ranks.forEach((r,ri)=>{
+    const row=items.filter(i=>i.rank===r);
+    if(ri>0) row.forEach(it=>{ it.want=it.up.reduce((a,y)=>a+y.x,0)/Math.max(1,it.up.length); });
+    if(ri>0) row.sort((a,b)=>a.want-b.want);
+    let cur=0;
+    row.forEach(it=>{ it.w=wOf(it); const minX=cur+it.w/2; it.x = ri===0? minX : Math.max(minX, it.want); cur=it.x+it.w/2+G; it.y=ri*RH; });
+    width=Math.max(width,cur);
+  });
+  const pad=50, minX=-pad-70, minY=-150, w=width+pad*2+70, h=(ranks.length-1)*RH+210;
+  svg.setAttribute('viewBox',`${minX} ${minY} ${w} ${h}`);
+  svg.setAttribute('width', w*zoom); svg.setAttribute('height', h*zoom);
+  const selItem=items.find(i=>i.ids.includes(S.sel));
+  const hi=it=> markSel ? it.set.has(markSel) && !(it.rank===1) : (selItem && sub(selItem.set,it.set));
+  const isSel=it=> markSel ? (it.rank===1 && it.set.has(markSel)) : it===selItem;
+  let g=`<use href="#eagle" x="${width/2-60}" y="-146" width="120" height="102"/><use href="#flag" x="${width/2-150}" y="-110" width="70" height="37"/><use href="#flag" x="${width/2+80}" y="-110" width="70" height="37"/>`;
+  ranks.forEach((r,ri)=>{ g+=`<text x="${minX+14}" y="${ri*RH+4}" font-family="IBM Plex Sans, sans-serif" font-size="10.5" letter-spacing="1" fill="var(--muted)">${r} MARK${r>1?'S':''}</text>`; });
+  items.forEach(x=>x.up.forEach(y=>{
+    const toSingle=!y.names.length || y.rank===1;
+    g+=`<line x1="${y.x}" y1="${y.y+18}" x2="${x.x}" y2="${x.y-18}" stroke="${toSingle?'var(--red)':'var(--blue)'}" stroke-width="${toSingle?1:1.3}" opacity="${toSingle?.55:1}"/>`;
+  }));
+  items.forEach(it=>{
+    const single=!it.names.length, comb=it.ids.length && it.ids.every(isC);
+    const x=it.x-it.w/2, y=it.y-17, s=isSel(it), h2=hi(it);
+    g+=`<g class="n" data-id="${it.ids[0]||''}" data-mk="${single?esc(it.mk):''}"><title>{${esc(it.marks.join(', '))}}</title>`;
+    g+=`<rect class="box" x="${x}" y="${y}" width="${it.w}" height="34" rx="${single||comb?17:3}" fill="${s||h2?'var(--tint)':'var(--panel)'}" stroke="${s?'var(--accent)':(single||comb?'var(--leib)':'var(--ink)')}" stroke-width="${s?2.4:1.2}" stroke-dasharray="${comb?'5 3':'0'}"/>`;
+    g+= single
+      ? `<circle cx="${x+15}" cy="${it.y}" r="10" fill="var(--red)" pointer-events="none"/><use href="#star" x="${x+8}" y="${it.y-7}" width="14" height="14" pointer-events="none"/>`
+      : `<path d="M${x} ${y+3} q0 -3 3 -3 h19 v34 h-19 q-3 0 -3 -3 z" fill="var(--canton)" pointer-events="none"/><use href="#star" x="${x+4}" y="${it.y-7}" width="14" height="14" pointer-events="none"/>`;
+    g+=`<text x="${it.x+11}" y="${it.y+5.5}" text-anchor="middle" font-size="${single?15:17}" ${single?'font-style="italic"':''} fill="var(--ink)" pointer-events="none">${esc(label(it))}</text>`;
+    const cap = it.rank===1 ? 'p = '+PT.get([...it.set][0]).p : 'N = '+it.marks.reduce((a,m)=>a*BigInt(PT.get(key(m)).p),1n);
+    g+=`<text x="${it.x}" y="${it.y+31}" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--leib)" pointer-events="none">${cap}</text></g>`;
+  });
+  svg.innerHTML=g;
+  svg.querySelectorAll('.n').forEach(el=>el.addEventListener('click',()=>{
+    if(el.dataset.id){ S.sel=el.dataset.id; markSel=null; render(); }
+    else { markSel = markSel===el.dataset.mk? null : el.dataset.mk; drawTree(); renderMarks(); } }));
+  svg._w=w;
+}
+
+function drawTree(){
+  if(S.mode==='leibniz'){ drawLattice(); return; }
+  const L=layout(), pos=L.pos, svg=$('#tree');
+  const pad=50, minX=-pad, minY=-150, w=L.width+pad*2, h=L.height+200;
+  svg.setAttribute('viewBox',`${minX} ${minY} ${w} ${h}`);
+  svg.setAttribute('width', w*zoom); svg.setAttribute('height', h*zoom);
+  const sel=S.sel;
+  const hiMark = markSel;
+  const inExt = id => {
+    if(hiMark) return marksOf(id).some(m=>key(m)===hiMark);
+    if(id===sel) return false; const r=under(id, sel); return r===true;
+  };
+  let g='';
+  // edges
+  allIds().forEach(id=>{
+    const n=N()[id]; if(!n.kids.length) return; const p=pos[id];
+    const k=n.kids.length; const label=(divType(k)+(n.basis?' · '+n.basis:'')).toLowerCase();
+    g+=`<text x="${p.x}" y="${p.y+33}" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="10.5" letter-spacing="1" fill="var(--muted)">${esc(label.toUpperCase())}</text>`;
+    n.kids.forEach(c=>{
+      const q=pos[c]; const x1=p.x,y1=p.y+42,x2=q.x,y2=q.y-18;
+      g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--blue)" stroke-width="1.6"/>`;
+      const t=.58, lx=x1+(x2-x1)*t, ly=y1+(y2-y1)*t;
+      g+=`<text x="${lx}" y="${ly+4}" text-anchor="middle" font-size="14" font-style="italic" fill="var(--red)" stroke="var(--paper)" stroke-width="5" paint-order="stroke" stroke-linejoin="round">${esc(c? N()[c].diff:'')}</text>`;
+    });
+  });
+  // composites
+  S.comps.forEach(c=>{
+    const q=pos[c.id]; const wc=S.mode==='wolff'? wolffComp(c):null;
+    [c.a,c.b].forEach(src=>{ const p=pos[src];
+      g+=`<path d="M${p.x} ${p.y+18} C ${p.x} ${(p.y+q.y)/2+40}, ${q.x} ${(p.y+q.y)/2}, ${q.x} ${q.y-18}" fill="none" stroke="${S.mode==='leibniz'?'var(--leib)':'var(--warn)'}" stroke-width="1.3" stroke-dasharray="5 4" opacity="${S.mode==='leibniz'?1:.7}"/>`; });
+    const blocked = wc && !wc.ok;
+    const fill = (c.id===sel)? 'var(--tint)' : inExt(c.id)? 'var(--tint)':'var(--panel)';
+    g+=`<g class="n" data-id="${c.id}"><rect class="box" x="${q.x-q.w/2}" y="${q.y-17}" width="${q.w}" height="34" rx="17" fill="${fill}" stroke="${c.id===sel?'var(--accent)':(blocked?'var(--warn)':'var(--leib)')}" stroke-width="${c.id===sel?2.4:1.3}" stroke-dasharray="${blocked?'4 3':'0'}"/>`;
+    g+=`<text x="${q.x}" y="${q.y+5}" text-anchor="middle" font-size="17" fill="var(--ink)" pointer-events="none" ${blocked?'text-decoration="line-through"':''}>${esc(c.name)}</text>`;
+    const cap = S.mode==='leibniz' ? 'N = '+num(c.id).toString() : (blocked? 'not placeable: excluded at '+N()[wc.g].name : 'same as '+N()[wc.eq].name);
+    g+=`<text x="${q.x}" y="${q.y+34}" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="${S.mode==='leibniz'?'var(--leib)':(blocked?'var(--warn)':'var(--muted)')}">${esc(cap)}</text></g>`;
+  });
+  // nodes
+  allIds().forEach(id=>{
+    const n=N()[id], p=pos[id]; const isSel=id===sel, ext=inExt(id);
+    const x=p.x-p.w/2, y=p.y-17;
+    g+=`<g class="n" data-id="${id}">`;
+    g+=`<rect class="box" x="${x}" y="${y}" width="${p.w}" height="34" rx="3" fill="${isSel||ext?'var(--tint)':'var(--panel)'}" stroke="${isSel?'var(--accent)':'var(--ink)'}" stroke-width="${isSel?2.4:1.2}"/>`;
+    g+=`<rect x="${x+3}" y="${y+3}" width="${p.w-6}" height="28" rx="1.5" fill="none" stroke="${ext?'var(--accent)':'var(--rule)'}" stroke-width=".8" pointer-events="none"/>`;
+    g+=`<path d="M${x} ${y+3} q0 -3 3 -3 h19 v34 h-19 q-3 0 -3 -3 z" fill="var(--canton)" pointer-events="none"/><use href="#star" x="${x+4}" y="${p.y-7}" width="14" height="14" pointer-events="none"/>`;
+    g+=`<text x="${p.x+11}" y="${p.y+5.5}" text-anchor="middle" font-size="17" fill="var(--ink)" pointer-events="none">${esc(n.name)}</text>`;
+    if(!n.kids.length) g+=`<line x1="${x+p.w-8}" y1="${y}" x2="${x+p.w-8}" y2="${y-30}" stroke="var(--gold)" stroke-width="2" pointer-events="none"/><circle cx="${x+p.w-8}" cy="${y-31}" r="2.4" fill="var(--gold)"/><use href="#flag" x="${x+p.w-7}" y="${y-30}" width="30" height="16" pointer-events="none"/>`;
+    if(S.mode==='leibniz') g+=`<text x="${p.x+p.w/2+5}" y="${p.y-10}" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--leib)" pointer-events="none">${num(id).toString()}</text>`;
+    if(id===S.root) g+=`<use href="#eagle" x="${p.x-60}" y="${p.y-146}" width="120" height="102"/><text x="${p.x}" y="${p.y-27}" text-anchor="middle" font-size="10.5" letter-spacing="1.5" font-family="IBM Plex Sans, sans-serif" fill="var(--muted)">★ SUMMUM GENUS ★</text>`;
+    g+='</g>';
+  });
+  svg.innerHTML=g;
+  svg.querySelectorAll('.n').forEach(el=>el.addEventListener('click',()=>{ S.sel=el.dataset.id; markSel=null; render(); }));
+}
+
+function renderLegend(){
+  $('#legend').innerHTML = `<svg width="30" height="16" viewBox="0 0 190 100" aria-hidden="true"><use href="#flag"/></svg>` + (S.mode==='wolff'
+    ? `<span><i></i>division line, differentia in italics</span><span><i class="h"></i>concepts contained under the selection</span><span><i class="d" style="border-color:var(--warn)"></i>attempted combination, refused by the tree</span>`
+    : `<span><i style="border-color:var(--leib);opacity:.6"></i>from a singleton mark</span><span><i></i>from a concept it contains</span><span><i class="h"></i>concepts containing the selection</span><span><i class="d"></i>combination you made</span><span>Click a singleton to trace that mark</span>`);
+}
+
+/* ---------- editor ---------- */
+function renderEditor(){
+  const el=$('#editor'), id=S.sel;
+  if(isC(id)){
+    const c=comp(id);
+    el.innerHTML=`<h2>Selected combination</h2>
+      <label class="f">Name<input type="text" id="eName" value="${esc(c.name)}"></label>
+      <p class="note">Combines <b>${esc(nameOf(c.a))}</b> and <b>${esc(nameOf(c.b))}</b>.</p>
+      <div class="row"><button class="btn danger" id="eDel">Remove combination</button></div>`;
+    $('#eName').addEventListener('input',e=>{c.name=e.target.value; drawTree(); renderJudgeSoft(); save();});
+    $('#eDel').addEventListener('click',()=>{S.comps=S.comps.filter(x=>x!==c); S.sel=S.root; render();});
+    return;
+  }
+  const n=N()[id], k=n.kids.length;
+  const others=allIds().filter(x=>x!==id).concat(S.comps.map(c=>c.id));
+  el.innerHTML=`<h2>Selected concept</h2>
+    <div class="row" style="justify-content:space-between"><h3>${esc(n.name)}</h3>${k?`<span class="chip">${divType(k)}</span>`:''}</div>
+    <label class="f">Name<input type="text" id="eName" value="${esc(n.name)}"></label>
+    <label class="f">${id===S.root?'Defining mark':'Differentia (specific difference)'}<input type="text" id="eDiff" value="${esc(n.diff||'')}"></label>
+    ${k?`<label class="f">Basis of division (fundamentum divisionis)<input type="text" id="eBasis" value="${esc(n.basis||'')}"></label>`:''}
+    <div class="row">
+      <span class="note" style="width:100%">${k?'Add a member to this division, or divide anew':'Divide this concept into'}</span>
+      ${k?`<button class="btn" id="eAdd">Add member</button>`:`<button class="btn pri" data-div="2">2 species</button><button class="btn pri" data-div="3">3 species</button><button class="btn" id="eN">n species</button><input type="number" id="eNn" min="2" max="12" value="4" style="width:64px" aria-label="Number of species">`}
+    </div>
+    <div class="row">
+      ${k?`<button class="btn danger" id="eUndiv">Remove this division</button>`:''}
+      ${id!==S.root?`<button class="btn danger" id="eDel">Delete concept</button>`:''}
+    </div>
+    <div class="row">
+      <select id="eWith" aria-label="Combine with" style="flex:1">${others.map(o=>`<option value="${o}">${esc(nameOf(o))}</option>`).join('')}</select>
+      <button class="btn" id="eComb">Combine</button>
+    </div>
+    <p class="note">${S.mode==='wolff'?'Combining is allowed for comparison; the Wolffian tree places a combination only when one concept lies on the other’s line.':'Combination takes the union of marks; its number is the least common multiple.'}</p>`;
+  $('#eName').addEventListener('input',e=>{n.name=e.target.value; drawTree(); renderJudgeSoft(); save();});
+  $('#eDiff').addEventListener('input',e=>{n.diff=e.target.value; PT=primeTable(); drawTree(); renderReadout(); renderMarks(); renderWarnings(); renderJudgeSoft(); save();});
+  const b=$('#eBasis'); if(b) b.addEventListener('input',e=>{n.basis=e.target.value; drawTree(); save();});
+  el.querySelectorAll('[data-div]').forEach(x=>x.addEventListener('click',()=>divide(id,+x.dataset.div)));
+  const eN=$('#eN'); if(eN) eN.addEventListener('click',()=>divide(id, Math.max(2,Math.min(12, +$('#eNn').value||4))));
+  const eA=$('#eAdd'); if(eA) eA.addEventListener('click',()=>{ addKid(id); render(); });
+  const eU=$('#eUndiv'); if(eU) eU.addEventListener('click',()=>{ [...n.kids].forEach(remove); n.kids=[]; render(); });
+  const eD=$('#eDel'); if(eD) eD.addEventListener('click',()=>{ const p=n.parent; remove(id); N()[p].kids=N()[p].kids.filter(x=>x!==id); S.sel=p; render(); });
+  $('#eComb').addEventListener('click',()=>{ const o=$('#eWith').value; if(!o) return;
+    S.comps.push({id:'c'+(S.next++), name: nameOf(id)+' + '+nameOf(o), a:id, b:o}); S.sel=S.comps[S.comps.length-1].id; render(); });
+}
+function addKid(pid){ const id='n'+(S.next++); const p=N()[pid]; const i=p.kids.length+1;
+  N()[id]={id,name:`${p.name} ${String.fromCharCode(64+i)}`,diff:`differentia ${String.fromCharCode(64+i)}`,basis:'',parent:pid,kids:[]}; p.kids.push(id); return id; }
+function divide(pid,k){ const p=N()[pid]; if(!p.basis) p.basis='';
+  for(let i=0;i<k;i++) addKid(pid);
+  if(k===2){ const [a,b]=p.kids; N()[a].diff='A'; N()[b].diff='non-A'; }
+  render(); }
+function remove(id){ N()[id].kids.forEach(remove); delete N()[id];
+  const ok=x=> isC(x) ? !!comp(x) : !!N()[x];
+  let before; do{ before=S.comps.length; S.comps=S.comps.filter(c=>ok(c.a)&&ok(c.b)); }while(S.comps.length!==before); }
+
+/* ---------- readout ---------- */
+function renderReadout(){
+  const id=S.sel, el=$('#readout');
+  const content=marksOf(id);
+  const ext=allIds().concat(S.comps.map(c=>c.id)).filter(x=>x!==id && under(x,id)===true).map(nameOf);
+  let html=`<h2>Content and extension</h2><dl class="kv">
+    <dt>Content</dt><dd><div class="marks">${content.map(m=>`<span class="mk">${esc(m)}${S.mode==='leibniz'?`<sub>${PT.get(key(m)).p}</sub>`:''}</span>`).join('')}</div></dd>
+    <dt>Extension</dt><dd>${ext.length?esc(ext.join(', ')):'<span class="note">no lower concepts</span>'}</dd>`;
+  if(S.mode==='leibniz') html+=`<dt>Number</dt><dd class="num">${content.map(m=>PT.get(key(m)).p).join(' × ')} = ${num(id).toString()}</dd>`;
+  else if(!isC(id)) html+=`<dt>Line</dt><dd>${path(id).map(i=>esc(N()[i].name)).join(' › ')}</dd>`;
+  else { const r=wolffComp(comp(id)); html+=`<dt>Status</dt><dd>${r.ok?`Collapses into <b>${esc(N()[r.eq].name)}</b>, the lower of the two.`:`<span class="warn">No place in the tree. ${esc(N()[r.ca].name)} and ${esc(N()[r.cb].name)} are coordinate under ${esc(N()[r.g].name)}, so the division excludes their union.</span>`}</dd>`; }
+  el.innerHTML=html+'</dl>';
+}
+
+/* ---------- judgment test ---------- */
+let jS=null, jP=null;
+function renderJudge(){
+  const ids=allIds().concat(S.comps.map(c=>c.id));
+  if(!jS||!(N()[jS]||comp(jS))) jS = ids.find(i=>!N()[i]||!N()[i].kids.length) || S.root;
+  if(!jP||!(N()[jP]||comp(jP))) jP = S.root;
+  const opt=v=>ids.map(i=>`<option value="${i}" ${i===v?'selected':''}>${esc(nameOf(i))}</option>`).join('');
+  $('#judge').innerHTML=`<h2>Test a judgment</h2>
+    <div class="row" style="flex-wrap:nowrap"><select id="jS" aria-label="Subject" style="flex:1">${opt(jS)}</select><span style="font:italic 17px var(--f-display)">is</span><select id="jP" aria-label="Predicate" style="flex:1">${opt(jP)}</select></div>
+    <div id="jOut" style="display:grid;gap:8px"></div>`;
+  $('#jS').addEventListener('change',e=>{jS=e.target.value; judge();});
+  $('#jP').addEventListener('change',e=>{jP=e.target.value; judge();});
+  judge();
+}
+function renderJudgeSoft(){ renderJudge(); }
+function judge(){
+  const s=jS,p=jP, sn=esc(nameOf(s)), pn=esc(nameOf(p)); let a='',b='';
+  if(S.mode==='leibniz'){
+    const ns=num(s), np=num(p);
+    if(ns%np===0n) a=`<div class="verdict yes"><b>Analytic.</b> N(${pn}) = ${np} divides N(${sn}) = ${ns}. Every mark of ${pn} is a mark of ${sn}.</div>`;
+    else { const miss=marksOf(p).filter(m=>!marksOf(s).some(x=>key(x)===key(m)));
+      a=`<div class="verdict no"><b>Not analytic.</b> ${np} does not divide ${ns}. ${sn} lacks: <i>${esc(miss.join(', '))}</i>.</div>`; }
+    const g=(x,y)=>y===0n?x:g(y,x%y); const l=ns*np/g(ns,np);
+    b=`<div class="verdict mid"><b>Combinable.</b> ${sn} and ${pn} combine to a concept with N = ${l}. No mark in the calculus excludes another, so "No ${sn} is ${pn}" has no ground in containment.</div>`;
+  } else {
+    const rs=wres(s), rp=wres(p);
+    if(!rs||!rp){ a=`<div class="verdict no"><b>No verdict.</b> ${!rs?sn:pn} has no place in the tree.</div>`; }
+    else if(path(rs).includes(rp)) a=`<div class="verdict yes"><b>Analytic.</b> ${pn} stands on the line from ${esc(N()[S.root].name)} to ${sn}: it is contained in ${sn}, and ${sn} is contained under it.</div>`;
+    else if(path(rp).includes(rs)) a=`<div class="verdict no"><b>Not analytic.</b> ${pn} is lower than ${sn}. Only "Some ${sn} is ${pn}" follows: ${pn} is one species under it.</div>`;
+    else { const L=lca(rs,rp); a=`<div class="verdict no"><b>Not analytic.</b> Neither concept is higher than the other.</div>`;
+      b=`<div class="verdict yes"><b>"No ${sn} is ${pn}" is analytic.</b> They fall under coordinate species ${esc(N()[L.ca].name)} and ${esc(N()[L.cb].name)} in the division of ${esc(N()[L.g].name)}, and coordinate species exclude each other.</div>`; }
+  }
+  $('#jOut').innerHTML=a+b;
+}
+
+/* ---------- marks ---------- */
+function renderMarks(){
+  const occ=new Map(); allIds().forEach(id=>{ const m=N()[id].diff||N()[id].name; const k=key(m); if(!occ.has(k)) occ.set(k,[]); occ.get(k).push(id); });
+  const items=[...PT.values()];
+  $('#markpanel').innerHTML=`<h2>Marks</h2>
+    <p class="note">${S.mode==='leibniz'?'Each distinct mark is one primitive with one prime. Select a mark to see every concept containing it, across branches.':'Each differentia is introduced at one point of division. A label that recurs on two branches names two different occurrences.'}</p>
+    <div class="marks">${items.map(t=>`<button class="mk" data-k="${esc(key(t.mark))}" aria-pressed="${markSel===key(t.mark)}">${esc(t.mark)}${S.mode==='leibniz'?`<sub>${t.p}</sub>`:(occ.get(key(t.mark)).length>1?`<sub style="color:var(--warn)">×${occ.get(key(t.mark)).length}</sub>`:'')}</button>`).join('')}</div>`;
+  $('#markpanel').querySelectorAll('.mk').forEach(b=>b.addEventListener('click',()=>{ markSel = markSel===b.dataset.k? null : b.dataset.k; drawTree(); renderMarks(); }));
+}
+
+/* ---------- warnings ---------- */
+function renderWarnings(){
+  const w=[];
+  allIds().forEach(id=>{ const n=N()[id], k=n.kids.length; if(!k) return;
+    if(k===1) w.push(`<b>${esc(n.name)}</b>: a division needs at least two members.`);
+    const labels=n.kids.map(c=>key(N()[c].diff||'')); if(new Set(labels).size<labels.length) w.push(`<b>${esc(n.name)}</b>: two members share a differentia, so they do not differ.`);
+    if(k===2 && contradictory(n.kids)) return;
+    if(k>=2 && !n.basis) w.push(`<b>${esc(n.name)}</b>: ${divType(k).toLowerCase()} without a stated basis of division.`);
+  });
+  if(S.mode==='wolff'){
+    const occ=new Map(); allIds().forEach(id=>{const k=key(N()[id].diff||''); if(!k) return; occ.set(k,(occ.get(k)||[]).concat(id));});
+    occ.forEach((ids,k)=>{ if(ids.length>1) w.push(`Differentia <i>${esc(N()[ids[0]].diff)}</i> recurs on ${ids.length} branches. The tree treats each as its own species; the Leibnizian mode treats it as one mark.`); });
+    S.comps.forEach(c=>{ const r=wolffComp(c); if(!r.ok) w.push(`<b>${esc(c.name)}</b> unites coordinate species of ${esc(N()[r.g].name)} and has no place in the tree.`); });
+  } else {
+    S.comps.forEach(c=>{ const r=wolffComp(c); if(!r.ok) w.push(`<b>${esc(c.name)}</b> passes as a possible concept (N = ${num(c.id)}), though its components are coordinate species of ${esc(N()[r.g].name)}.`); });
+  }
+  const dich=allIds().filter(id=>N()[id].kids.length===2 && contradictory(N()[id].kids)).map(id=>N()[id].name);
+  $('#warnings').innerHTML=`<h2>Checks</h2>${w.length?`<ul class="plain">${w.map(x=>`<li class="warn" style="color:var(--ink)">${x}</li>`).join('')}</ul>`:'<p class="note">No problems with the divisions.</p>'}
+    ${dich.length?`<p class="note">Exhaustive by contradiction (A / non-A): ${esc(dich.join(', '))}.</p>`:''}`;
+}
+
+/* ---------- controls ---------- */
+$('#mWolff').addEventListener('click',()=>{S.mode='wolff'; render(); fit();});
+$('#mLeib').addEventListener('click',()=>{S.mode='leibniz'; render(); fit();});
+$('#zIn').addEventListener('click',()=>{zoom=Math.min(2.5,zoom*1.2); drawTree();});
+$('#zOut').addEventListener('click',()=>{zoom=Math.max(.3,zoom/1.2); drawTree();});
+$('#zFit').addEventListener('click',fit);
+function fit(){ let W; if(S.mode==='leibniz'){ zoom=1; drawTree(); W=$('#tree')._w; } else W=layout().width+100; const cw=$('#canvas').clientWidth-20; zoom=Math.max(.3,Math.min(1.4, cw/W)); drawTree(); }
+$('#loadSample').addEventListener('click',()=>{ const m=S.mode; loadSample($('#sample').value); S.mode=m; jS=jP=null; render(); fit(); });
+function copy(text,msg){ const done=()=>{$('#dataMsg').textContent=msg;};
+  if(navigator.clipboard) navigator.clipboard.writeText(text).then(done,()=>{ $('#jsonIn').value=text; $('#jsonIn').select(); $('#dataMsg').textContent='Copy blocked: text placed in the box, selected.'; });
+  else { $('#jsonIn').value=text; $('#jsonIn').select(); $('#dataMsg').textContent='Text placed in the box, selected.'; } }
+$('#copyJson').addEventListener('click',()=>copy(JSON.stringify(S,null,1),'Tree copied as JSON.'));
+$('#copySvg').addEventListener('click',()=>{
+  const cs=getComputedStyle(document.body); let s=$('#tree').outerHTML.replace('>', '>'+$('#sprite').innerHTML);
+  s=s.replace(/var\(--([a-z]+)\)/g,(m,v)=>cs.getPropertyValue('--'+v).trim()||'#000');
+  s=s.replace('<svg','<svg font-family="IM Fell English, Georgia, serif"');
+  copy(s,'Drawing copied as SVG.'); });
+$('#loadJson').addEventListener('click',()=>{
+  try{ const s=JSON.parse($('#jsonIn').value); if(!s.root||!s.nodes||!s.nodes[s.root]) throw 0; s.comps=s.comps||[]; s.next=s.next||999; S=s; jS=jP=null; markSel=null; render(); fit(); $('#dataMsg').textContent='Tree restored.'; }
+  catch(e){ $('#dataMsg').textContent='That text is not a tree from this page. Copy one with "Copy tree as JSON".'; } });
+
+S = load(); if(!S){ S=null; loadSample('porphyry'); }
+render(); requestAnimationFrame(fit);
+if(document.fonts) document.fonts.ready.then(()=>{ render(); fit(); });
+})();
+</script>
+
+</body></html>
