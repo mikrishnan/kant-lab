@@ -10,9 +10,9 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | Path | What it is |
 | --- | --- |
 | [index.html](index.html) | GitHub Pages landing page linking to the three SPAs |
-| [Baumgarten reader/](Baumgarten%20reader/) | Single-file SPA: Latin reading guide for Baumgarten's *Metaphysica* with inline German glosses |
-| [Meier reader/](Meier%20reader/) | Single-file SPA: German reading guide for Meier's *Auszug*, with a side panel of parallel passages from the tradition |
-| [Porphyrian tree/](Porphyrian%20tree/) | Single-file SPA: a configurator for building genus–species trees under user-chosen division rules |
+| [baumgarten-reader/](baumgarten-reader/) | Single-file SPA: Latin reading guide for Baumgarten's *Metaphysica* with inline German glosses |
+| [meier-reader/](meier-reader/) | Single-file SPA: German reading guide for Meier's *Auszug*, with a side panel of parallel passages from the tradition |
+| [porphyrian-tree/](porphyrian-tree/) | Single-file SPA: a configurator for building genus–species trees under user-chosen division rules |
 | [data/](data/) | Generated `.js` data files shared by the readers (Adickes' phase chronology, the Reflexionen) |
 | [scripts/](scripts/) | One-off Python extractors that produce `data/` from `Textfiles/` |
 | [Textfiles/](Textfiles/) | RTF source transcriptions the SPAs' embedded data was extracted from |
@@ -49,7 +49,7 @@ see `REFL_ENTRIES`, `MET_PARAGRAPHS` and `phaseInfo` without any module wiring.
 To run an app, open the file in a browser:
 
 ```sh
-open "Meier reader/meier-reading-guide.html"
+open meier-reader/meier-reading-guide.html
 ```
 
 There are no tests and no linter. Verification is visual: open the file, click through

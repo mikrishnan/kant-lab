@@ -50,4 +50,4 @@ paragraphs are annotated so far (§§ 1, 10, 14, 15, 115, 155, 292, 353, 362, 41
 other paragraphs show a placeholder in the right-hand panel. Annotation is ongoing.
 
 Baumgarten's *Metaphysica* has its own reader in
-[../Baumgarten reader/](../Baumgarten%20reader/).
+[../baumgarten-reader/](../baumgarten-reader/).

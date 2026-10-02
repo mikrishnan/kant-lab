@@ -193,7 +193,7 @@ Both searches are reset by `switchWork()`.
 ## Gotchas
 
 - **This reader is Meier's only.** Baumgarten's *Metaphysica* has its own app in
-  [../Baumgarten reader/](../Baumgarten%20reader/), and both `TRADITION` and the
+  [../baumgarten-reader/](../baumgarten-reader/), and both `TRADITION` and the
   Reflexionen here are indexed to Meier's §§ — they say nothing about Baumgarten's.
   A Baumgarten tab was tried here and removed; do not reintroduce one.
 - The § range is no longer hard-coded: `WORK.min`/`WORK.max` drive `jumpToSection()`
