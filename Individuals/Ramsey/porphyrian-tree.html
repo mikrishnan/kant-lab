@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbor Porphyriana</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --vellum: #F5EDD4;
+  --vellum2: #EDE0C0;
+  --ink: #1A1208;
+  --faded: #5C4A2A;
+  --red: #7A1515;
+  --ochre: #A67820;
+}
+html, body {
+  min-height: 100vh;
+  background: var(--vellum);
+  color: var(--ink);
+  font-family: 'IM Fell English', Georgia, serif;
+}
+body {
+  background-image:
+    repeating-linear-gradient(92deg, transparent, transparent 60px, rgba(164,130,60,0.035) 61px, rgba(164,130,60,0.035) 62px),
+    repeating-linear-gradient(180deg, transparent, transparent 28px, rgba(164,130,60,0.045) 29px, rgba(164,130,60,0.045) 30px);
+}
+header {
+  text-align: center;
+  padding: 2.4rem 1rem 0.5rem;
+  border-bottom: 1.5px solid var(--ochre);
+  max-width: 980px;
+  margin: 0 auto;
+}
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1.4rem, 3.2vw, 2.3rem);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+header p { margin-top: 0.4rem; font-style: italic; font-size: 0.9rem; color: var(--faded); }
+
+.legend {
+  display: flex; justify-content: center; gap: 1.4rem; flex-wrap: wrap;
+  max-width: 980px; margin: 0.7rem auto 0;
+  font-size: 0.79rem; color: var(--faded); padding-bottom: 0.9rem;
+}
+.legend-item { display: flex; align-items: center; gap: 0.35rem; }
+
+main { max-width: 980px; margin: 0 auto; padding: 0 0.6rem 1rem; }
+.tree-wrap { overflow-x: auto; }
+svg#tree { display: block; margin: 0 auto; width: 100%; min-width: 620px; max-width: 960px; }
+
+/* ── Schema section below the tree ── */
+.schema { max-width: 980px; margin: 2.2rem auto 0; padding: 0 1rem; }
+.schema > h2 {
+  font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 400;
+  color: var(--ochre); letter-spacing: 0.04em; padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--ochre);
+}
+.diff-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 0;
+}
+.diff {
+  padding: 1rem 1.2rem 1.1rem 0;
+  border-bottom: 1px solid rgba(166,120,32,0.3);
+  display: grid; grid-template-columns: 2.1rem 1fr; column-gap: 0.7rem;
+}
+.diff .tier {
+  font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--ochre);
+  padding-top: 0.08rem;
+}
+.diff h3 {
+  font-size: 1.02rem; font-weight: 400; color: var(--ink);
+}
+.diff .parallel {
+  font-size: 0.72rem; font-style: italic; color: var(--ochre);
+  display: block; margin-top: 0.1rem;
+}
+.diff p {
+  margin-top: 0.3rem; font-size: 0.86rem; line-height: 1.5; color: var(--faded);
+  max-width: 44ch;
+}
+.diff em { font-style: italic; }
+
+.definitions {
+  margin: 1.8rem auto 0; max-width: 980px; padding: 1rem 1.2rem;
+  background: var(--vellum2); border: 1px solid var(--ochre);
+}
+.definitions dl { display: grid; grid-template-columns: auto 1fr; gap: 0.45rem 1rem; }
+.definitions dt { font-style: italic; color: var(--faded); font-size: 0.86rem; white-space: nowrap; }
+.definitions dd { font-size: 0.95rem; }
+
+footer {
+  text-align: center; font-style: italic; font-size: 0.79rem; color: var(--faded);
+  padding: 1.6rem 1rem 2.4rem; max-width: 760px; margin: 1.6rem auto 0;
+  border-top: 1px solid var(--vellum2); line-height: 1.6;
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Arbor Porphyriana</h1>
+  <p>The Tree of Predicables — after Porphyry of Tyre, <em>Isagoge</em> (c. 268 AD)</p>
+</header>
+
+<div class="legend">
+  <span class="legend-item">
+    <svg width="34" height="14"><rect x="1" y="3" width="32" height="8" rx="2" fill="#EDE0C0" stroke="#1A1208" stroke-width="1.3"/></svg>
+    Subaltern genus (divides further)
+  </span>
+  <span class="legend-item">
+    <svg width="34" height="14"><rect x="1" y="3" width="32" height="8" rx="2" fill="#EDE0C0" stroke="#A67820" stroke-width="1.7"/></svg>
+    Infima species
+  </span>
+  <span class="legend-item">
+    <svg width="34" height="14"><rect x="1" y="3" width="32" height="8" rx="2" fill="#F5EDD4" stroke="#5C4A2A" stroke-width="1" stroke-dasharray="3 2"/></svg>
+    Non-descended species
+  </span>
+  <span class="legend-item">
+    <svg width="34" height="14"><text x="0" y="11" fill="#7A1515" font-style="italic" font-size="11" font-family="serif">differentia</text></svg>
+    Differentia
+  </span>
+</div>
+
+<main>
+<div class="tree-wrap">
+<!--
+LAYOUT PLAN  viewBox 0 0 860 815
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Left margin  : 0..95   (descent arrow + tier numerals)
+Tree area    : 100..845
+Node rows (center-y): 55 | 200 | 345 | 490 | 635 | 777
+Crossbar y   : 127 | 272 | 417 | 562 | 706
+Pills: y = crossbarY - 9, h = 17, text baseline = crossbarY
+       left pill's RIGHT edge abuts the left drop line
+       right pill's LEFT edge abuts the right drop line
+
+Node center-x and extents (verified non-overlapping):
+ L0  Substance        cx 530  455..605
+ L1  Body             cx 360  285..435     Incorporeal   cx 700  625..775
+ L2  Living Thing     cx 290  215..365     Inanimate     cx 460  385..535
+     God              cx 630  577..683     Spirit        cx 770  717..823
+ L3  Animal           cx 240  165..315     Plant         cx 400  325..475
+ L4  Rational Animal  cx 200  130..270     Irrational A. cx 354  277..432
+ L5  Human            cx 160  105..215     Celestial B.  cx 300  230..370
+
+God now descends from INCORPOREAL, not from Body.
+The immortal rational *animal* slot is filled by the celestial being.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-->
+<svg id="tree" viewBox="0 0 860 815" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Porphyrian tree descending from Substance through five levels of differentia to Human, with God placed on the incorporeal branch">
+<defs>
+  <marker id="arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+    <path d="M0,0 L0,7 L7,3.5 z" fill="#A67820" opacity="0.75"/>
+  </marker>
+</defs>
+
+<!-- ── Descent arrow (left margin) ── -->
+<line x1="30" y1="55" x2="30" y2="795" stroke="#A67820" stroke-width="1.1" marker-end="url(#arr)"/>
+<text transform="rotate(-90,16,425)" x="16" y="425" text-anchor="middle"
+  font-family="'IM Fell English',serif" font-size="10" font-style="italic" fill="#A67820">five levels of differentia</text>
+
+<!-- ── Row guide lines ── -->
+<line x1="100" y1="55"  x2="845" y2="55"  stroke="#C4B07A" stroke-width="0.6" stroke-dasharray="3 5" opacity="0.55"/>
+<line x1="100" y1="200" x2="845" y2="200" stroke="#C4B07A" stroke-width="0.6" stroke-dasharray="3 5" opacity="0.55"/>
+<line x1="100" y1="345" x2="845" y2="345" stroke="#C4B07A" stroke-width="0.6" stroke-dasharray="3 5" opacity="0.55"/>
+<line x1="100" y1="490" x2="845" y2="490" stroke="#C4B07A" stroke-width="0.6" stroke-dasharray="3 5" opacity="0.55"/>
+<line x1="100" y1="635" x2="845" y2="635" stroke="#C4B07A" stroke-width="0.6" stroke-dasharray="3 5" opacity="0.55"/>
+<line x1="100" y1="777" x2="845" y2="777" stroke="#C4B07A" stroke-width="0.6" stroke-dasharray="3 5" opacity="0.55"/>
+
+<!-- ── Tier numerals ── -->
+<text x="92" y="204" text-anchor="end" font-family="'Cinzel',serif" font-size="11" fill="#A67820">I</text>
+<text x="92" y="349" text-anchor="end" font-family="'Cinzel',serif" font-size="11" fill="#A67820">II</text>
+<text x="92" y="494" text-anchor="end" font-family="'Cinzel',serif" font-size="11" fill="#A67820">III</text>
+<text x="92" y="639" text-anchor="end" font-family="'Cinzel',serif" font-size="11" fill="#A67820">IV</text>
+<text x="92" y="781" text-anchor="end" font-family="'Cinzel',serif" font-size="11" fill="#A67820">V</text>
+
+<!-- ════════════ L0 · SUBSTANCE ════════════ -->
+<rect x="455" y="37" width="150" height="36" rx="3" fill="#EDE0C0" stroke="#7A1515" stroke-width="2"/>
+<text x="530" y="55" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="14" fill="#7A1515">SUBSTANCE</text>
+
+<line x1="530" y1="73"  x2="530" y2="127" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="360" y1="127" x2="700" y2="127" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="360" y1="127" x2="360" y2="182" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="700" y1="127" x2="700" y2="182" stroke="#1A1208" stroke-width="1.5"/>
+
+<rect x="293" y="118" width="66" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="326" y="127" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">corporeal</text>
+<rect x="701" y="118" width="78" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="740" y="127" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">incorporeal</text>
+
+<!-- ════════════ L1 · BODY | INCORPOREAL ════════════ -->
+<rect x="285" y="182" width="150" height="36" rx="3" fill="#EDE0C0" stroke="#1A1208" stroke-width="1.4"/>
+<text x="360" y="200" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="13" fill="#1A1208">Body</text>
+
+<rect x="625" y="182" width="150" height="36" rx="3" fill="#EDE0C0" stroke="#1A1208" stroke-width="1.4"/>
+<text x="700" y="200" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="13" fill="#1A1208">Incorporeal</text>
+
+<!-- Body divides -->
+<line x1="360" y1="218" x2="360" y2="272" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="290" y1="272" x2="460" y2="272" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="290" y1="272" x2="290" y2="327" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="460" y1="272" x2="460" y2="327" stroke="#1A1208" stroke-width="1.5"/>
+
+<rect x="232" y="263" width="57" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="260" y="272" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">animate</text>
+<rect x="461" y="263" width="68" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="495" y="272" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">inanimate</text>
+
+<!-- Incorporeal divides -->
+<line x1="700" y1="218" x2="700" y2="272" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="630" y1="272" x2="770" y2="272" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="630" y1="272" x2="630" y2="327" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="770" y1="272" x2="770" y2="327" stroke="#1A1208" stroke-width="1.5"/>
+
+<rect x="561" y="263" width="68" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="595" y="272" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">uncreated</text>
+<rect x="771" y="263" width="54" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="798" y="272" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">created</text>
+
+<!-- ════════════ L2 · LIVING THING | INANIMATE | GOD | SPIRIT ════════════ -->
+<rect x="215" y="327" width="150" height="36" rx="3" fill="#EDE0C0" stroke="#1A1208" stroke-width="1.4"/>
+<text x="290" y="345" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="13" fill="#1A1208">Living Thing</text>
+
+<rect x="385" y="327" width="150" height="36" rx="3" fill="#F5EDD4" stroke="#5C4A2A" stroke-width="1.1" stroke-dasharray="4 3"/>
+<text x="460" y="345" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="13" font-style="italic" fill="#5C4A2A">Inanimate</text>
+
+<rect x="577" y="327" width="106" height="36" rx="3" fill="#EDE0C0" stroke="#A67820" stroke-width="1.9"/>
+<text x="630" y="345" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="13" fill="#1A1208">God</text>
+
+<rect x="717" y="327" width="106" height="36" rx="3" fill="#EDE0C0" stroke="#A67820" stroke-width="1.9"/>
+<text x="770" y="345" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="13" fill="#1A1208">Spirit</text>
+
+<!-- Living Thing divides -->
+<line x1="290" y1="363" x2="290" y2="417" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="240" y1="417" x2="400" y2="417" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="240" y1="417" x2="240" y2="472" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="400" y1="417" x2="400" y2="472" stroke="#1A1208" stroke-width="1.5"/>
+
+<rect x="185" y="408" width="54" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="212" y="417" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">sentient</text>
+<rect x="401" y="408" width="68" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="435" y="417" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">insensible</text>
+
+<!-- ════════════ L3 · ANIMAL | PLANT ════════════ -->
+<rect x="165" y="472" width="150" height="36" rx="3" fill="#EDE0C0" stroke="#1A1208" stroke-width="1.4"/>
+<text x="240" y="490" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="13" fill="#1A1208">Animal</text>
+
+<rect x="325" y="472" width="150" height="36" rx="3" fill="#F5EDD4" stroke="#5C4A2A" stroke-width="1.1" stroke-dasharray="4 3"/>
+<text x="400" y="490" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="13" font-style="italic" fill="#5C4A2A">Plant</text>
+
+<!-- Animal divides -->
+<line x1="240" y1="508" x2="240" y2="562" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="200" y1="562" x2="354" y2="562" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="200" y1="562" x2="200" y2="617" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="354" y1="562" x2="354" y2="617" stroke="#1A1208" stroke-width="1.5"/>
+
+<rect x="147" y="553" width="52" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="173" y="562" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">rational</text>
+<rect x="355" y="553" width="65" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="387" y="562" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">irrational</text>
+
+<!-- ════════════ L4 · RATIONAL ANIMAL | IRRATIONAL ANIMAL ════════════ -->
+<rect x="130" y="617" width="140" height="36" rx="3" fill="#EDE0C0" stroke="#1A1208" stroke-width="1.4"/>
+<text x="200" y="629" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="12" fill="#1A1208">Rational</text>
+<text x="200" y="645" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="12" fill="#1A1208">Animal</text>
+
+<rect x="277" y="617" width="155" height="36" rx="3" fill="#F5EDD4" stroke="#5C4A2A" stroke-width="1.1" stroke-dasharray="4 3"/>
+<text x="354" y="629" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="12" font-style="italic" fill="#5C4A2A">Irrational</text>
+<text x="354" y="645" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="12" font-style="italic" fill="#5C4A2A">Animal</text>
+
+<!-- Rational Animal divides -->
+<line x1="200" y1="653" x2="200" y2="706" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="160" y1="706" x2="300" y2="706" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="160" y1="706" x2="160" y2="759" stroke="#1A1208" stroke-width="1.5"/>
+<line x1="300" y1="706" x2="300" y2="759" stroke="#1A1208" stroke-width="1.5"/>
+
+<rect x="114" y="697" width="45" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="136" y="706" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">mortal</text>
+<rect x="301" y="697" width="54" height="17" rx="3" fill="#F5EDD4" stroke="#7A1515" stroke-width="0.9"/>
+<text x="328" y="706" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="11" font-style="italic" fill="#7A1515">immortal</text>
+
+<!-- ════════════ L5 · HUMAN | CELESTIAL BEING ════════════ -->
+<rect x="105" y="759" width="110" height="36" rx="3" fill="#EDE0C0" stroke="#A67820" stroke-width="1.9"/>
+<text x="160" y="777" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="13" fill="#1A1208">Human</text>
+
+<rect x="230" y="759" width="140" height="36" rx="3" fill="#EDE0C0" stroke="#A67820" stroke-width="1.9"/>
+<text x="300" y="771" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="12" fill="#1A1208">Celestial</text>
+<text x="300" y="787" text-anchor="middle" dominant-baseline="middle"
+  font-family="'IM Fell English',serif" font-size="12" fill="#1A1208">Being</text>
+
+</svg>
+</div>
+</main>
+
+<section class="schema">
+  <h2>Schema of Differentiation</h2>
+  <div class="diff-grid">
+
+    <div class="diff">
+      <span class="tier">I</span>
+      <div>
+        <h3>corporeal &nbsp;↔&nbsp; incorporeal</h3>
+        <p>Whether substance has magnitude and occupies a determinate place. This is the cut that keeps God clear of every bodily predicate below it.</p>
+      </div>
+    </div>
+
+    <div class="diff">
+      <span class="tier">II</span>
+      <div>
+        <h3>animate &nbsp;↔&nbsp; inanimate</h3>
+        <p>Whether a body possesses an inner principle of self-movement and growth.</p>
+      </div>
+    </div>
+
+    <div class="diff">
+      <span class="tier">II</span>
+      <div>
+        <h3>uncreated &nbsp;↔&nbsp; created
+          <span class="parallel">parallel division, on the incorporeal genus</span>
+        </h3>
+        <p>Whether an incorporeal substance exists of itself or derives its being from another. God is the uncreated incorporeal; a spirit — angel or separated intellect — is the created one.</p>
+      </div>
+    </div>
+
+    <div class="diff">
+      <span class="tier">III</span>
+      <div>
+        <h3>sentient &nbsp;↔&nbsp; insensible</h3>
+        <p>Whether a living thing can perceive and respond to its surroundings.</p>
+      </div>
+    </div>
+
+    <div class="diff">
+      <span class="tier">IV</span>
+      <div>
+        <h3>rational &nbsp;↔&nbsp; irrational</h3>
+        <p>Whether an animal possesses <em>logos</em>, the faculty of discursive reason.</p>
+      </div>
+    </div>
+
+    <div class="diff">
+      <span class="tier">V</span>
+      <div>
+        <h3>mortal &nbsp;↔&nbsp; immortal</h3>
+        <p>Whether the rational animal is subject to natural dissolution. Porphyry put the gods in the immortal slot; since that slot is corporeal, it is filled here by the celestial being — the heavens held to be living, rational and everlasting bodies (Plato, <em>Timaeus</em> 40a–b).</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="definitions">
+  <dl>
+    <dt>Human</dt>
+    <dd>mortal · rational · sentient · animate · corporeal · substance</dd>
+    <dt>Celestial Being</dt>
+    <dd>immortal · rational · sentient · animate · corporeal · substance</dd>
+    <dt>God</dt>
+    <dd>uncreated · incorporeal · substance</dd>
+    <dt>Spirit</dt>
+    <dd>created · incorporeal · substance</dd>
+  </dl>
+</div>
+
+<footer>
+  <p>Each genus divides by a differentia and its logical negation into exactly two species. Dashed nodes are
+  non-descended species, terminal in this diagram though divisible in principle. Reading downward traces the
+  succession of ever more specific predicates; reading upward from any terminal node reconstructs its full definition.</p>
+</footer>
+</body>
+</html>
