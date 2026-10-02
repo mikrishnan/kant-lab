@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arbor Porphyriana: trees in early modern logic textbooks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EEF1F2; --sheet:#FFFFFF; --ink:#1A232D; --muted:#5B6874;
+  --rule:#CDD5DB; --accent:#21456B; --rubric:#9A2B1F; --hi:#E3EAF1;
+  --serif:"EB Garamond",Garamond,"Iowan Old Style",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--sans)}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{background:var(--sheet);border-bottom:1px solid var(--rule);padding:14px 20px 0}
+.brand{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
+h1{font:600 30px/1.1 var(--serif);margin:0;letter-spacing:.01em}
+.sub{margin:0;color:var(--muted);font:italic 17px var(--serif)}
+#saveState{margin-left:auto;color:var(--muted);font-size:12px}
+nav{display:flex;gap:2px;margin-top:12px}
+nav button{border:1px solid transparent;border-bottom:none;background:none;padding:7px 14px;font:inherit;color:var(--muted);cursor:pointer;border-radius:3px 3px 0 0}
+nav button[aria-selected=true]{background:var(--paper);border-color:var(--rule);color:var(--ink);font-weight:600;margin-bottom:-1px}
+main{padding:16px 20px 40px;max-width:1600px}
+.bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-bottom:12px}
+.bar label{display:flex;align-items:center;gap:4px;color:var(--muted)}
+input,select,textarea,button{font:inherit;color:inherit}
+input[type=search],input[type=text],input[type=number],input[type=url],select,textarea{border:1px solid var(--rule);background:var(--sheet);padding:5px 7px;border-radius:3px}
+input[type=search]{width:260px}
+input.yr{width:72px}
+.btn{border:1px solid var(--accent);background:var(--sheet);color:var(--accent);padding:5px 11px;border-radius:3px;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff}
+.btn[aria-pressed=true]{background:var(--hi);color:var(--ink);border-color:var(--ink)}
+.btn.danger{border-color:var(--rubric);color:var(--rubric)}
+.btn.danger.armed{background:var(--rubric);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.hint{color:var(--muted);font-size:12px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px;align-items:start}
+.tablewrap{background:var(--sheet);border:1px solid var(--rule);overflow:auto;max-height:calc(100vh - 210px)}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:6px 9px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{position:sticky;top:0;background:var(--sheet);font-weight:600;cursor:pointer;white-space:nowrap;user-select:none;box-shadow:0 1px 0 var(--rule)}
+th .dir{color:var(--muted);font-weight:400}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:#F6F8F9}
+tbody tr[aria-selected=true]{background:var(--hi)}
+td.t{font:16px/1.3 var(--serif)}
+td.y{font-variant-numeric:tabular-nums;white-space:nowrap}
+.lang{display:inline-block;border:1px solid var(--rule);border-radius:2px;padding:0 4px;font-size:12px;color:var(--muted)}
+.st{font-size:12px}
+.st-verified{color:#24603A}.st-reported{color:var(--accent)}.st-to-verify{color:#8A5A00}.st-candidate{color:var(--muted)}.st-demo{color:var(--rubric)}
+#count{margin:6px 2px;color:var(--muted);font-size:12px}
+aside#detail{background:var(--sheet);border:1px solid var(--rule);padding:16px 18px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+.empty{color:var(--muted);font-style:italic}
+.rtitle{font:600 23px/1.2 var(--serif);margin:0 0 4px}
+.rauth{font:17px/1.3 var(--serif);margin:0 0 12px;color:var(--muted)}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;margin:0 0 14px}
+dt{color:var(--muted)}dd{margin:0;overflow-wrap:anywhere}
+h3{font:600 15px var(--sans);margin:18px 0 6px}
+.cite{font:16px/1.4 var(--serif);background:#F7F9FA;border-left:3px solid var(--accent);padding:8px 10px}
+pre{white-space:pre-wrap;font-size:12px;background:#F7F9FA;padding:8px;margin:6px 0;overflow:auto}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tree{border:1px solid var(--rule);background:#FCFCFB;padding:6px;margin-top:6px}
+.tree svg{width:100%;height:auto;display:block;max-height:70vh}
+.legend{font-size:12px;color:var(--muted);margin-top:4px}
+.legend b{color:var(--rubric);font-weight:600}
+form.ed{display:grid;grid-template-columns:max-content 1fr;gap:6px 10px;align-items:center}
+form.ed label{color:var(--muted)}
+form.ed .full{grid-column:1/-1}
+form.ed textarea{width:100%;min-height:70px}
+form.ed textarea.treesrc{min-height:150px;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace}
+form.ed input,form.ed select{width:100%}
+.panel{background:var(--sheet);border:1px solid var(--rule);padding:16px 18px;margin-bottom:16px;max-width:900px}
+.panel p,.panel li{max-width:72ch}
+.terms td.term{font:16px var(--serif)}
+.terms .recs a{margin-right:8px;white-space:nowrap}
+code{background:#F1F3F5;padding:0 3px}
+#ov{position:fixed;inset:0;background:rgba(26,35,45,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+#ov .box{background:var(--sheet);width:min(1200px,100%);max-height:100%;overflow:auto;padding:14px 18px;border-radius:4px}
+#ov .box svg{width:100%;height:auto;max-height:80vh;display:block}
+@media (max-width:900px){
+  .split{grid-template-columns:1fr}
+  aside#detail{position:static;max-height:none}
+  .tablewrap{max-height:55vh}
+  input[type=search]{width:100%}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <h1>Arbor Porphyriana</h1>
+    <p class="sub">Porphyrian trees in early modern logic textbooks: Latin, German and French</p>
+    <span id="saveState" role="status"></span>
+  </div>
+  <nav role="tablist">
+    <button role="tab" data-view="catalogue" aria-selected="true">Catalogue</button>
+    <button role="tab" data-view="terms" aria-selected="false">Term index</button>
+    <button role="tab" data-view="data" aria-selected="false">Data and help</button>
+  </nav>
+</header>
+
+<main>
+<section id="view-catalogue">
+  <div class="bar">
+    <input type="search" id="q" placeholder="Search authors, titles, terms, notes" aria-label="Search">
+    <label><input type="checkbox" class="f-lang" value="la" checked> Latin</label>
+    <label><input type="checkbox" class="f-lang" value="de" checked> German</label>
+    <label><input type="checkbox" class="f-lang" value="fr" checked> French</label>
+    <label>Status <select id="f-status"><option value="">Any</option></select></label>
+    <label>Form <select id="f-form"><option value="">Any</option></select></label>
+    <label>Years <input type="number" id="y1" class="yr" placeholder="from"> to <input type="number" id="y2" class="yr" placeholder="to"></label>
+    <button class="btn primary" id="addBtn">Add record</button>
+  </div>
+  <p class="hint" style="margin:-4px 0 10px">Search ignores accents and treats ſ/s, u/v, i/j, æ/ae and œ/oe as equal.</p>
+  <div class="split">
+    <div>
+      <div class="tablewrap"><table id="tbl"><thead></thead><tbody><tr><td class="empty">Loading records…</td></tr></tbody></table></div>
+      <p id="count"></p>
+    </div>
+    <aside id="detail" aria-live="polite"><p class="empty">Select a record to see its citation and tree.</p></aside>
+  </div>
+</section>
+
+<section id="view-terms" hidden>
+  <div class="bar">
+    <input type="search" id="tq" placeholder="Filter terms" aria-label="Filter terms">
+    <label>Role <select id="trole"><option value="">Any</option><option value="node">Genus / species</option><option value="pos">Differentia (retained)</option><option value="neg">Differentia (opposed)</option><option value="ind">Individual</option></select></label>
+    <label>Language <select id="tlang"><option value="">Any</option><option value="la">Latin</option><option value="de">German</option><option value="fr">French</option></select></label>
+  </div>
+  <p class="hint" style="margin:-4px 0 10px">Built from every transcribed tree; unread placeholders are left out. Spellings are grouped when they match after normalisation.</p>
+  <div class="tablewrap"><table class="terms" id="ttbl"></table></div>
+</section>
+
+<section id="view-data" hidden>
+  <div class="panel">
+    <h3 style="margin-top:0">What the records contain</h3>
+    <p>Records come in four kinds, shown in the Status column:</p>
+    <ul>
+      <li><strong>Reported in the literature</strong>: a published source (scholarship, a library or museum image, a bibliographic description) places a tree in a specific edition, often with a page. The Evidence field names that source. Check it against a copy before relying on it.</li>
+      <li><strong>Locus unchecked</strong>: the work is known to set out the arbor, but the edition and page still need checking.</li>
+      <li><strong>Candidate</strong>: a major textbook worth examining; nothing is yet known about a tree in it.</li>
+      <li><strong>Verified against copy</strong>: you have checked it yourself. No starter record has this status.</li>
+    </ul>
+    <p>Tree transcriptions are only entered where a source gives the terms. Square brackets mark readings that are supplied or uncertain, and <code>[?]</code> marks a position not yet read. The demo record is a standard Latin skeleton, not taken from any book.</p>
+  </div>
+  <div class="panel">
+    <h3 style="margin-top:0">Writing a tree</h3>
+    <p>One line per level, from the most general genus downward: the term, the retained differentia, the opposed differentia, and optionally the species the opposed branch names, separated by <code>|</code>. A line with no <code>|</code> is a term with no division at that level. A line starting with <code>=</code> lists individuals, separated by commas. Lines starting with <code>#</code> are comments. Keep the book's own spelling, abbreviations and case.</p>
+<pre>Substantia | corporea | incorporea | Spiritus
+Corpus | animatum | inanimatum
+Corpus animatum | sensibile | insensibile
+Animal | rationale | irrationale
+Homo
+= Socrates, Plato</pre>
+  </div>
+  <div class="panel">
+    <h3 style="margin-top:0">Secondary literature used</h3>
+    <ul>
+      <li>Paul Richard Blum, "Dio e gli individui: L'Arbor Porphyriana nei secoli XVII e XVIII", <i>Rivista di filosofia neo-scolastica</i> 91 (1999), 18–49. The main survey for the 17th and 18th centuries; discusses Pourchot.</li>
+      <li>Sylvain Auroux, "Dossier 5. Port-Royal et l'arbre de Porphyre", <i>Archives et documents de la SHESL</i>, 2nd ser., 6 (1992), 109–122. A dossier of texts.</li>
+      <li>Ludger Jansen, "Die Ontologie des Geschlechts" (Ruhr-Universität Bochum), which reproduces and describes Pourchot's tree.</li>
+      <li>Wilhelm Risse, <i>Die Logik der Neuzeit</i>, vol. II, 1640–1780 (Stuttgart-Bad Cannstatt, 1970). Cited by Auroux; a good finding aid for textbooks.</li>
+    </ul>
+  </div>
+  <div class="panel">
+    <h3 style="margin-top:0">Export and import</h3>
+    <p>Your changes are saved in this app's storage for your account. Export regularly to keep your own copy; JSON keeps everything and can be imported again, CSV opens in a spreadsheet.</p>
+    <div class="row">
+      <button class="btn" id="expJson">Export JSON</button>
+      <button class="btn" id="expCsv">Export CSV</button>
+      <button class="btn" id="expBib">Export BibTeX</button>
+    </div>
+    <p class="hint">If the download does not start, the exported text appears below for copying.</p>
+    <textarea id="exportOut" hidden style="width:100%;min-height:140px;font:12px ui-monospace,monospace"></textarea>
+    <h3>Import JSON</h3>
+    <div class="row">
+      <input type="file" id="impFile" accept=".json,application/json">
+      <button class="btn" id="impMerge" disabled>Import and merge</button>
+      <button class="btn danger" id="impReplace" disabled>Import and replace all</button>
+    </div>
+    <p class="hint" id="impMsg">Merging keeps existing records and overwrites any with the same ID.</p>
+    <h3>Reset</h3>
+    <div class="row"><button class="btn danger" id="resetBtn">Reset to starter list</button><span class="hint">Deletes all your edits.</span></div>
+  </div>
+</section>
+</main>
+
+<div id="ov" hidden role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="box">
+    <div class="row" style="justify-content:space-between;margin-bottom:6px">
+      <strong id="ovTitle" style="font:600 19px var(--serif)"></strong>
+      <button class="btn" id="ovClose">Close</button>
+    </div>
+    <div id="ovBody"></div>
+  </div>
+</div>
+
+<script>
+const KEY = 'porphyry-db-v2', OLDKEY = 'porphyry-db-v1';
+const V1_SEED_IDS = ['demo','ph','reisch','mel','tol','fons','keck','eust','timp','burg','alst','jung','claub','wolffL','thom','wolffD','gott','meier','reim','ramus','dupl','lescl','pr','crou'];
+const LANGS = {la:'Latin', de:'German', fr:'French'};
+const STATUS = {
+  'verified':'Verified against copy',
+  'reported':'Reported in the literature',
+  'to-verify':'Locus unchecked',
+  'candidate':'Candidate, not yet examined',
+  'demo':'Demo record (not a source)'
+};
+const FORMS = {diagram:'Diagram', textual:'Described in text', both:'Diagram and text', unknown:'Not yet known'};
+const COLS = [['year','Year'],['author','Author'],['shortTitle','Title'],['lang','Lang.'],['page','Page'],['form','Tree'],['status','Status']];
+const FIELD_ORDER = ['id','author','title','shortTitle','lang','year','edition','place','printer','catalogId','copy','url','locus','page','form','status','source','tree','notes'];
+
+let db = [], sel = null, sortKey = 'year', sortDir = 1, mode = 'view', pendingImport = null, treeMode = 'branch';
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const norm = s => String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/ſ/g,'s').replace(/æ/g,'ae').replace(/œ/g,'oe').replace(/v/g,'u').replace(/j/g,'i').replace(/\s+/g,' ').trim();
+
+/* ---------- starter data ---------- */
+function seed(){
+  const base = {edition:'', printer:'', catalogId:'', copy:'', url:'', locus:'', page:'', form:'unknown', status:'candidate', tree:'', source:''};
+  const gen = 'Candidate textbook: examine the treatment of the predicables (genus, species, differentia) for a tree. Title as commonly cited; transcribe the exact title page of the edition you consult.';
+  const R = (id, author, title, shortTitle, lang, year, place, extra={}) =>
+    Object.assign({}, base, {id, author, title, shortTitle, lang, year, place, notes:gen}, extra);
+  return [
+    R('demo','—','Demonstration record: standard Latin skeleton','Demo skeleton','la',null,'',{status:'demo',form:'diagram',
+      notes:'Not taken from any book. Shows how a transcribed tree displays. Delete when no longer needed.',
+      tree:'# Skeleton for demonstration only\nSubstantia | corporea | incorporea\nCorpus | animatum | inanimatum\nCorpus animatum | sensibile | insensibile\nAnimal | rationale | irrationale\nHomo\n= Socrates, Plato'}),
+
+    /* ---- reported occurrences ---- */
+    R('pacius','Aristoteles; Iulius Pacius (ed. and tr.)',
+      '[Ὄργανον.] Aristotelis Stagiritae Peripateticorum principis Organum, hoc est libri omnes ad logicam pertinentes, Graecè & Latinè. Iul. Pacius recensuit…',
+      'Organum (ed. Pacius)','la',1584,'Morges [Morgiis]',{
+      printer:'Guillaume Laimarie [Guillelmus Laimarius]', edition:'First edition', catalogId:'Adams A 1866', page:'p. 9',
+      locus:'Porphyry, Isagoge (prefixed to the Organon)', form:'diagram', status:'reported',
+      source:'Herman H. J. Lynge & Søn (Copenhagen), dealer description of a copy of the 1584 first edition: places the tree on p. 9 and calls this rendering the standard one, reused with small changes after 1584.',
+      url:'https://www.lynge.com/en/philosophy/50934-organon-greek-principis-organum-hoc-est-libri-omnes-ad-logicam-pertinentes-graece-latine-iul-pacius-recensuit-e-graeca-in-latinam-linguam-co/',
+      notes:'Greek–Latin parallel text. Pacius\'s Organon ran through many editions (some sources say at least 11 before 1624), so later editions are worth adding as separate records. Locus inferred from p. 9; tree not yet transcribed.'}),
+    R('pourchot','Edmond Pourchot (Purchotius)','Institutiones philosophicae','Institutiones philosophicae I','la',1730,'Venice',{
+      edition:'Venice edition, vol. I (first edition Paris, 1695: to check)', copy:'Staatsbibliothek zu Berlin (image via bpk, per Jansen)',
+      form:'diagram', status:'reported',
+      source:'L. Jansen, "Die Ontologie des Geschlechts" (Ruhr-Universität Bochum), Abb. 1 and its description; the same plate is on Wikimedia Commons as "Arbor porphyrii (from Purchotius\' Institutiones philosophicae I, 1730)". Discussed in Blum 1999.',
+      url:'https://commons.wikimedia.org/wiki/Category:Porphyrian_tree',
+      notes:'Partial transcription from Jansen\'s description: the trunk runs ens, substantia, corpus, vivens, animal, animal rationale, homo, with the differentiae in the left column. He quotes "animatum" as the differentia producing vivens, and notes the relation labels "constituit" and "repugnat" on the plate. Other differentiae and any individuals still need reading from the image; they are marked [?]. Page not yet identified.',
+      tree:'# Partial: trunk after Jansen; [?] = not yet read from the plate\nEns\nSubstantia | [?] | [?]\nCorpus | animatum | [?]\nVivens | [?] | [?]\nAnimal | [?] | [?]\nAnimal rationale | [?] | [?]\nHomo'}),
+    R('llull','Ramon Llull (Raimundus Lullus)','Liber de logica nova','Logica nova','la',1512,'Valencia',{
+      printer:'[Alonso de Proaza]', locus:'Woodcut "Arbor naturalis et logicalis"', form:'diagram', status:'reported',
+      source:'Wikimedia Commons, Category: Porphyrian tree (file "L\'arbre des relations logiques, selon une édition de 1512 de la Logica nova"); reproduced in scholarship as Alonso de Proaza\'s illustration in the Valencia edition. Commons notes that the exact copy behind the image is unidentified.',
+      url:'https://commons.wikimedia.org/wiki/Category:Porphyrian_tree',
+      notes:'Text composed c. 1303. A Porphyrian tree sits at the centre of a larger tree of logical relations. A later Palma edition advertises itself as reprinting the Valencia 1512 text. Tree not yet transcribed.'}),
+
+    /* ---- locus unchecked ---- */
+    R('ph','Petrus Hispanus','Summulae logicales [Tractatus]','Summulae logicales','la',null,'',{
+      status:'to-verify', form:'textual', locus:'Tract. II (De praedicabilibus)', edition:'Choose a specific early modern edition',
+      source:'J. Franklin, "Aristotle on Species Variation", Philosophy 61 (1986), 251–2, citing the Bocheński edition (Turin, 1947), pp. 17–18, for the name arbor Porphyrii.',
+      notes:'13th-century text, very widely printed with commentaries into the 16th century; the source of the name "arbor Porphyriana". Record the early modern edition you consult and whether it adds a diagram.'}),
+    R('pr','Antoine Arnauld and Pierre Nicole','La Logique ou l\'art de penser','Logique de Port-Royal','fr',1662,'Paris',{
+      status:'to-verify', form:'textual', locus:'Part I, ch. 6 (comprehension and extension); see also II.17',
+      source:'S. Auroux, "Port-Royal et l\'arbre de Porphyre", Archives et documents de la SHESL 2nd ser. 6 (1992), 109–122, a dossier of texts; he cites I.6 and II.17 (1970 edition, pp. 87–88 and 220).',
+      notes:'Port-Royal reworks the arbor through the new pair compréhension / étendue. Check whether any edition prints a figure.'}),
+
+    /* ---- candidates ---- */
+    R('reisch','Gregor Reisch','Margarita philosophica','Margarita philosophica','la',1503,'Freiburg im Breisgau',{printer:'Johann Schott',locus:'Book II (logic)',notes:'Illustrated encyclopaedic textbook; check the logic book and its woodcuts. Many later editions (Strasbourg, Basel, Venice), with recut illustrations.'}),
+    R('mel','Philipp Melanchthon','Erotemata dialectices','Erotemata dialectices','la',1547,'Wittenberg'),
+    R('tol','Franciscus Toletus','Introductio in dialecticam Aristotelis','Introductio in dialecticam','la',1561,'Rome'),
+    R('fons','Pedro da Fonseca','Institutionum dialecticarum libri octo','Institutiones dialecticae','la',1564,'Lisbon',{notes:gen+' Widely reprinted in German and French centres.'}),
+    R('keck','Bartholomäus Keckermann','Systema logicae','Systema logicae','la',1600,'Hanau'),
+    R('eust','Eustachius a Sancto Paulo','Summa philosophiae quadripartita','Summa philosophiae','la',1609,'Paris'),
+    R('timp','Clemens Timpler','Logicae systema methodicum','Logicae systema','la',1612,'Hanau'),
+    R('burg','Franco Burgersdijk','Institutionum logicarum libri duo','Institutiones logicae','la',1626,'Leiden'),
+    R('alst','Johann Heinrich Alsted','Encyclopaedia septem tomis distincta','Encyclopaedia','la',1630,'Herborn',{notes:gen+' Heavily tabular; check the logic volume.'}),
+    R('jung','Joachim Jungius','Logica Hamburgensis','Logica Hamburgensis','la',1638,'Hamburg'),
+    R('claub','Johannes Clauberg','Logica vetus et nova','Logica vetus et nova','la',1654,'Amsterdam'),
+    R('wolffL','Christian Wolff','Philosophia rationalis sive logica','Philosophia rationalis','la',1728,'Frankfurt and Leipzig'),
+    R('thom','Christian Thomasius','Einleitung zu der Vernunfft-Lehre','Einleitung zu der Vernunfft-Lehre','de',1691,'Halle'),
+    R('wolffD','Christian Wolff','Vernünfftige Gedancken von den Kräfften des menschlichen Verstandes','Deutsche Logik','de',1713,'Halle'),
+    R('gott','Johann Christoph Gottsched','Erste Gründe der gesammten Weltweisheit','Erste Gründe','de',1733,'Leipzig'),
+    R('meier','Georg Friedrich Meier','Auszug aus der Vernunftlehre','Auszug aus der Vernunftlehre','de',1752,'Halle'),
+    R('reim','Hermann Samuel Reimarus','Die Vernunftlehre','Die Vernunftlehre','de',1756,'Hamburg'),
+    R('ramus','Pierre de La Ramée','Dialectique','Dialectique','fr',1555,'Paris',{notes:'Ramist dialectic built on dichotomies; a Porphyrian tree may be absent. Useful as a contrast case.'}),
+    R('dupl','Scipion Dupleix','La logique ou art de discourir et raisonner','La logique','fr',1603,'Paris',{notes:gen+' First-edition date to check; the Corpus des œuvres de philosophie en langue française edition (Fayard, 1984) follows the 1607 text.'}),
+    R('lescl','Louis de Lesclache','Première partie de la philosophie, ou la logique, divisée en quatre parties','La logique','fr',1646,'Paris',{printer:'L\'autheur et Rondelet',
+      source:'Bibliographic details from the bibliography of the Classiques Garnier edition of the Grammaire générale et raisonnée.',
+      notes:gen+' Lesclache also published his philosophy in tabular form, a likely place for a tree.'}),
+    R('crou','Jean-Pierre de Crousaz','La logique, ou systême de réflexions','La logique','fr',1712,'Amsterdam')
+  ];
+}
+
+/* ---------- storage ---------- */
+function setState(msg){ $('#saveState').textContent = msg; }
+async function sget(k){ try{ const r = await window.storage.get(k, false); return r && r.value ? JSON.parse(r.value) : null; }catch(e){ return null; } }
+async function load(){
+  const cur = await sget(KEY);
+  if(cur){ db = cur; setState('Loaded your saved records'); return; }
+  const old = await sget(OLDKEY);
+  db = seed();
+  if(old){
+    const added = old.filter(r => !V1_SEED_IDS.includes(r.id));
+    db = db.concat(added.map(r => Object.assign({source:''}, r)));
+    setState(`Updated the starter list${added.length ? `; kept ${added.length} record(s) you added` : ''}`);
+    save();
+  } else setState('Showing the starter list');
+}
+async function save(){
+  try{
+    const r = await window.storage.set(KEY, JSON.stringify(db), false);
+    setState(r ? 'Saved ' + new Date().toLocaleTimeString() : 'Not saved: storage refused the write. Export JSON to keep your work.');
+  }catch(e){ setState('Not saved: storage unavailable here. Export JSON to keep your work.'); }
+}
+
+/* ---------- tree parsing ---------- */
+function parseTree(src){
+  const levels = []; let individuals = [];
+  (src||'').split('\n').forEach(raw => {
+    const line = raw.trim();
+    if(!line || line.startsWith('#')) return;
+    if(line.startsWith('=')){ individuals = line.slice(1).split(',').map(s=>s.trim()).filter(Boolean); return; }
+    const p = line.split('|').map(s=>s.trim());
+    levels.push({term:p[0]||'', pos:p[1]||'', neg:p[2]||'', negSp:p[3]||'', div: p.length > 1});
+  });
+  return {levels, individuals};
+}
+const isPartial = src => /\[/.test(src||'');
+
+/* ---------- tree drawing ---------- */
+const CW = 8.4;
+const shown = t => t === '[?]' ? '?' : t;
+const tw = t => shown(t).length * CW;
+const unc = t => /^\[.*\]$/.test(t);
+function svgWrap(nodes, ext, H){
+  const minX = Math.min(...ext) - 24, maxX = Math.max(...ext) + 24;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${minX} 0 ${maxX-minX} ${H}" role="img" aria-label="Porphyrian tree">
+<style>
+path,line{fill:none;stroke-width:1.4}
+.ep{stroke:#9A2B1F}.en{stroke:#9AA5AF;stroke-dasharray:4 3}.ei{stroke:#1A232D}
+.trunk{stroke:#DCE3E1;stroke-width:16;stroke-linecap:round}
+.nb{fill:#fff;stroke:#1A232D;stroke-width:1.3}.nb.u{stroke-dasharray:3 2}
+text{font-family:'EB Garamond',Garamond,Georgia,serif;text-anchor:middle;font-size:17px;fill:#1A232D}
+.nt{font-weight:600}.dp{fill:#9A2B1F;font-style:italic}.dn{fill:#5F6B76;font-style:italic}.sp{fill:#5F6B76;font-size:15px}.iv{font-style:italic}
+.u{fill:#8B96A0}.hb{fill:#FCFCFB;stroke:#FCFCFB;stroke-width:7px;stroke-linejoin:round}
+</style>${nodes.join('')}</svg>`;
+}
+function T(x, y, t, cls){
+  if(!t) return '';
+  const c = cls.replace(' halo','') + (unc(t) ? ' u' : '');
+  const body = esc(shown(t));
+  const halo = / halo/.test(cls) ? `<text x="${x}" y="${y}" class="${c} hb">${body}</text>` : '';
+  return halo + `<text x="${x}" y="${y}" class="${c}">${body}</text>`;
+}
+function Box(x, y, t, ext){
+  const w = Math.max(64, tw(t) + 24); ext.push(x - w/2, x + w/2);
+  return `<rect x="${x-w/2}" y="${y-15}" width="${w}" height="30" rx="3" class="nb${unc(t)?' u':''}"/>` + T(x, y+5, t, 'nt');
+}
+const curve = (x1,y1,x2,y2,cls) => { const m = (y2-y1)*0.55; return `<path d="M${x1},${y1} C${x1},${y1+m} ${x2},${y2-m} ${x2},${y2}" class="${cls}"/>`; };
+
+/* Branching: each division forks; the trunk zigzags and the opposed branches spread outward on alternate sides */
+function svgBranch(levels, inds){
+  const a = 105, b = 185, rowH = 88, top = 28;
+  const E = [], N = [], L = [], ext = [0];
+  let x = 0, k = 0, y = top;
+  levels.forEach((lv, i) => {
+    y = top + i*rowH;
+    const next = levels[i+1];
+    let nx = x;
+    if(lv.div){
+      const d = k % 2 === 0 ? 1 : -1; k++;
+      const yl = y + rowH;
+      const lx = x - d*b;
+      E.push(curve(x, y+15, lx, yl-12, 'en'));
+      L.push(T(lx, yl+5, lv.neg || '[?]', 'dn halo'));
+      if(lv.negSp) L.push(T(lx, yl+24, lv.negSp, 'sp halo'));
+      ext.push(lx - Math.max(tw(lv.neg), tw(lv.negSp))/2);
+      ext.push(lx + Math.max(tw(lv.neg), tw(lv.negSp))/2);
+      if(next){
+        nx = d*a;
+        E.push(curve(x, y+15, nx, yl-15, 'ep'));
+        const mx = (x+nx)/2 + d*10;
+        L.push(T(mx, y + rowH/2 + 6, lv.pos, 'dp halo'));
+        ext.push(mx - tw(lv.pos)/2, mx + tw(lv.pos)/2);
+      } else {
+        const ex = x + d*b;
+        E.push(curve(x, y+15, ex, yl-12, 'ep'));
+        L.push(T(ex, yl+5, lv.pos, 'dp halo'));
+        ext.push(ex - tw(lv.pos)/2, ex + tw(lv.pos)/2);
+      }
+    } else if(next){
+      E.push(`<line x1="${x}" y1="${y+15}" x2="${x}" y2="${y+rowH-15}" class="ep"/>`);
+    }
+    N.push(Box(x, y, lv.term, ext));
+    x = nx;
+  });
+  let H = y + 40;
+  const last = levels[levels.length-1];
+  if(inds.length){
+    const yi = y + rowH * (last.div ? 1.9 : 1);
+    const span = Math.min(520, (inds.length-1) * 130);
+    inds.forEach((name, j) => {
+      const ix = inds.length === 1 ? x : x - span/2 + j*span/(inds.length-1);
+      E.push(curve(x, y+15, ix, yi-12, 'ei'));
+      L.push(T(ix, yi+5, name, 'iv halo'));
+      ext.push(ix - tw(name)/2, ix + tw(name)/2);
+    });
+    H = yi + 28;
+  } else if(last.div) H = y + rowH + 40;
+  return svgWrap([...E, ...N, ...L], ext, H);
+}
+
+/* Classic trunk: genera stacked on a trunk, differentiae on boughs to either side */
+function svgTrunk(levels, inds){
+  const dx = 215, rowH = 70, top = 28;
+  const E = [], N = [], L = [], ext = [0];
+  let y = top;
+  const lastY = top + (levels.length-1)*rowH;
+  E.push(`<line x1="0" y1="${top}" x2="0" y2="${lastY + (inds.length ? rowH*0.6 : 0)}" class="trunk"/>`);
+  levels.forEach((lv, i) => {
+    y = top + i*rowH;
+    if(lv.div){
+      const yd = y + rowH/2;
+      E.push(`<path d="M0,${y+12} C${-dx*0.35},${y+12} ${-dx*0.75},${yd-14} ${-dx},${yd-10}" class="ep"/>`);
+      E.push(`<path d="M0,${y+12} C${dx*0.35},${y+12} ${dx*0.75},${yd-14} ${dx},${yd-10}" class="en"/>`);
+      L.push(T(-dx, yd+4, lv.pos || '[?]', 'dp halo'));
+      L.push(T(dx, yd+4, lv.neg || '[?]', 'dn halo'));
+      if(lv.negSp) L.push(T(dx, yd+22, lv.negSp, 'sp halo'));
+      if(levels[i+1]) E.push(`<path d="M${-dx},${yd+10} C${-dx*0.75},${yd+16} ${-dx*0.3},${y+rowH-14} 0,${y+rowH-15}" class="ep"/>`);
+      ext.push(-dx - tw(lv.pos)/2, dx + Math.max(tw(lv.neg), tw(lv.negSp))/2);
+    }
+    N.push(Box(0, y, lv.term, ext));
+  });
+  let H = y + (levels[levels.length-1].div ? rowH : 0) + 40;
+  if(inds.length){
+    const yi = y + rowH * 1.1;
+    const span = Math.min(2*dx, (inds.length-1) * 140);
+    inds.forEach((name, j) => {
+      const ix = inds.length === 1 ? 0 : -span/2 + j*span/(inds.length-1);
+      E.push(curve(0, y+15, ix, yi-12, 'ei'));
+      L.push(T(ix, yi+5, name, 'iv halo'));
+      ext.push(ix - tw(name)/2, ix + tw(name)/2);
+    });
+    H = Math.max(H, yi + 28);
+  }
+  return svgWrap([...E, ...N, ...L], ext, H);
+}
+function treeSVG(src, m = treeMode){
+  const {levels, individuals} = parseTree(src);
+  if(!levels.length) return '';
+  return m === 'trunk' ? svgTrunk(levels, individuals) : svgBranch(levels, individuals);
+}
+const LEGEND = '<p class="legend"><b>Red</b>: retained differentia, leading to the next genus. Grey dashed: opposed differentia. Grey or bracketed text: supplied or not yet read.</p>';
+const modeButtons = () => `<button class="btn" data-mode="branch" aria-pressed="${treeMode==='branch'}">Branching</button><button class="btn" data-mode="trunk" aria-pressed="${treeMode==='trunk'}">Classic trunk</button>`;
+
+/* ---------- citations ---------- */
+function imprint(r){ const a = [r.place, r.printer].filter(Boolean).join(': '); return [a, r.year].filter(x => x !== '' && x != null).join(', '); }
+function citeParts(r, italic){
+  let s = `${r.author}, ${italic ? '<i>'+esc(r.title)+'</i>' : r.title}`;
+  const imp = imprint(r); if(imp) s += ` (${imp})`;
+  ['edition','locus','page'].forEach(k => { if(r[k]) s += `, ${r[k]}`; });
+  return s + '.';
+}
+const citePlain = r => citeParts(r, false);
+const citeHTML = r => { const t = citeParts(Object.assign({}, r, {author:esc(r.author), place:esc(r.place), printer:esc(r.printer), edition:esc(r.edition), locus:esc(r.locus), page:esc(r.page)}), true); return t; };
+function bibtex(r){
+  const last = norm((r.author||'anon').split(/\s+and\s+|[,;(]/)[0].trim().split(' ').pop()).replace(/[^a-z]/g,'') || 'anon';
+  const key = last + (r.year||'nd') + r.id.slice(-3);
+  const note = [r.locus, r.page, r.catalogId && ('Cat.: ' + r.catalogId), r.copy && ('Copy: ' + r.copy)].filter(Boolean).join('; ');
+  const f = (k,v) => v ? `  ${k} = {${String(v).replace(/[{}]/g,'')}},\n` : '';
+  return `@book{${key},\n` + f('author',r.author) + f('title',r.title) + f('address',r.place) + f('publisher',r.printer) +
+    f('year',r.year) + f('edition',r.edition) + f('language',LANGS[r.lang]) + f('note',note) + f('url',r.url) + '}';
+}
+function findLinks(r){
+  const q = encodeURIComponent([(r.author||'').split(/[;(]/)[0].trim().split(' ').pop(), r.shortTitle || r.title].join(' '));
+  const qt = encodeURIComponent(r.title.replace(/\[.*?\]/g,'').replace(/…/g,'').trim());
+  return [
+    ['Internet Archive', `https://archive.org/search?query=${q}`],
+    ['Google Books', `https://www.google.com/search?tbm=bks&q=${qt}`],
+    ['MDZ (Munich)', `https://www.digitale-sammlungen.de/en/search?query=${q}`],
+    ['Gallica', `https://gallica.bnf.fr/services/engine/search/sru?operation=searchRetrieve&version=1.2&query=${encodeURIComponent('(gallica all "'+(r.shortTitle||r.title)+'")')}`]
+  ].map(([n,u]) => `<a href="${u}" target="_blank" rel="noopener">${n}</a>`).join(' · ');
+}
+
+/* ---------- catalogue ---------- */
+function filtered(){
+  const q = norm($('#q').value);
+  const langs = $$('.f-lang:checked').map(x=>x.value);
+  const st = $('#f-status').value, fm = $('#f-form').value;
+  const y1 = $('#y1').value === '' ? -Infinity : +$('#y1').value;
+  const y2 = $('#y2').value === '' ? Infinity : +$('#y2').value;
+  return db.filter(r => {
+    if(!langs.includes(r.lang)) return false;
+    if(st && r.status !== st) return false;
+    if(fm && r.form !== fm) return false;
+    if(r.year != null && r.year !== '' && (r.year < y1 || r.year > y2)) return false;
+    if(q){
+      const hay = norm([r.author,r.title,r.shortTitle,r.place,r.printer,r.edition,r.notes,r.source,r.tree,r.locus,r.page,r.catalogId,r.copy].join(' '));
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b) => {
+    let x = a[sortKey], y = b[sortKey];
+    if(sortKey === 'year'){ x = x ?? 99999; y = y ?? 99999; return (x - y) * sortDir; }
+    if(sortKey === 'status'){ const o = Object.keys(STATUS); return (o.indexOf(x) - o.indexOf(y)) * sortDir; }
+    return String(x??'').localeCompare(String(y??''), undefined, {sensitivity:'base'}) * sortDir;
+  });
+}
+function treeCell(r){
+  const has = parseTree(r.tree).levels.length > 0;
+  return esc(FORMS[r.form]||'') + (has ? (isPartial(r.tree) ? ' · partly transcribed' : ' · transcribed') : '');
+}
+function renderTable(){
+  $('#tbl thead').innerHTML = '<tr>' + COLS.map(([k,l]) =>
+    `<th data-k="${k}" tabindex="0" aria-sort="${sortKey===k?(sortDir>0?'ascending':'descending'):'none'}">${l} <span class="dir">${sortKey===k?(sortDir>0?'▲':'▼'):''}</span></th>`).join('') + '</tr>';
+  const rows = filtered();
+  $('#tbl tbody').innerHTML = rows.length ? rows.map(r => `<tr data-id="${esc(r.id)}" tabindex="0" aria-selected="${r.id===sel}">
+      <td class="y">${esc(r.year ?? '—')}</td>
+      <td>${esc(r.author)}</td>
+      <td class="t">${esc(r.shortTitle || r.title)}</td>
+      <td><span class="lang" title="${LANGS[r.lang]||''}">${esc(r.lang)}</span></td>
+      <td>${esc(r.page || '—')}</td>
+      <td>${treeCell(r)}</td>
+      <td class="st st-${esc(r.status)}">${esc(STATUS[r.status]||r.status)}</td></tr>`).join('')
+    : `<tr><td colspan="7" class="empty">No records match these filters. Clear the search or widen the year range.</td></tr>`;
+  const c = s => db.filter(r => r.status === s).length;
+  $('#count').textContent = `${rows.length} of ${db.length} records shown · ${c('reported')} reported in the literature · ${c('verified')} verified`;
+}
+function bindModes(scope, rerender){
+  scope.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => { treeMode = b.dataset.mode; rerender(); });
+}
+function openOverlay(r){
+  $('#ovTitle').textContent = `${r.shortTitle || r.title}${r.year ? ', ' + r.year : ''}`;
+  const draw = () => {
+    $('#ovBody').innerHTML = `<div class="row">${modeButtons()}</div><div class="tree">${treeSVG(r.tree)}</div>${LEGEND}`;
+    bindModes($('#ovBody'), () => { draw(); if(mode === 'view') renderDetail(); });
+  };
+  draw();
+  $('#ov').hidden = false; $('#ovClose').focus();
+}
+function closeOverlay(){ $('#ov').hidden = true; }
+function renderDetail(){
+  const box = $('#detail');
+  const r = db.find(x => x.id === sel);
+  if(!r){ box.innerHTML = '<p class="empty">Select a record to see its citation and tree.</p>'; return; }
+  if(mode === 'edit'){ renderEditor(r); return; }
+  const svg = treeSVG(r.tree);
+  const dd = (k,v) => v ? `<dt>${k}</dt><dd>${v}</dd>` : '';
+  box.innerHTML = `
+    <h2 class="rtitle">${esc(r.title)}</h2>
+    <p class="rauth">${esc(r.author)}</p>
+    <h3 style="margin-top:4px">Tree</h3>
+    ${svg ? `<div class="row">${modeButtons()}<button class="btn" id="bigBtn">Enlarge</button><button class="btn" id="svgBtn">Download SVG</button></div>
+      <div class="tree">${svg}</div>${LEGEND}`
+      : `<p class="empty">No tree transcribed yet. ${r.status === 'reported' ? 'The evidence below says where to find it; once you have read it from a copy, choose Edit and enter it in the Tree field.' : 'Choose Edit and enter it in the Tree field, keeping the book\'s spelling.'}</p>`}
+    <h3>Record</h3>
+    <dl>
+      ${dd('Status', `<span class="st st-${esc(r.status)}">${esc(STATUS[r.status])}</span>`)}
+      ${dd('Evidence', esc(r.source))}
+      ${dd('Language', esc(LANGS[r.lang]))}
+      ${dd('Imprint', esc(imprint(r)))}
+      ${dd('Edition', esc(r.edition))}
+      ${dd('Catalogue', esc(r.catalogId))}
+      ${dd('Copy seen', esc(r.copy))}
+      ${dd('Locus', esc(r.locus))}
+      ${dd('Page / folio', esc(r.page))}
+      ${dd('Tree', esc(FORMS[r.form]))}
+      ${dd('Link', r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url.length > 70 ? r.url.slice(0,70)+'…' : r.url)}</a>` : '')}
+      ${dd('Notes', esc(r.notes))}
+    </dl>
+    <div class="row"><button class="btn primary" id="edBtn">Edit</button><button class="btn" id="dupBtn">Duplicate as another edition</button><button class="btn danger" id="delBtn">Delete</button></div>
+    <h3>Citation</h3>
+    <div class="cite">${citeHTML(r)}</div>
+    <div class="row" style="margin-top:6px"><button class="btn" id="cpCite">Copy citation</button><button class="btn" id="cpBib">Copy BibTeX</button><span class="hint" id="cpMsg"></span></div>
+    <h3>Find copies</h3>
+    <p>${findLinks(r)}</p>`;
+  bindModes(box, renderDetail);
+  $('#edBtn').onclick = () => { mode = 'edit'; renderDetail(); };
+  $('#dupBtn').onclick = () => {
+    const c = Object.assign({}, r, {id:uid(), edition:'', printer:'', catalogId:'', copy:'', url:'', page:'', status: r.status==='demo'?'demo':'to-verify'});
+    db.push(c); sel = c.id; mode = 'edit'; save(); renderTable(); renderDetail();
+  };
+  armDelete($('#delBtn'), () => { db = db.filter(x => x.id !== r.id); sel = null; save(); renderTable(); renderDetail(); });
+  $('#cpCite').onclick = () => copy(citePlain(r));
+  $('#cpBib').onclick = () => copy(bibtex(r));
+  if(svg){
+    $('#bigBtn').onclick = () => openOverlay(r);
+    $('#svgBtn').onclick = () => download(`${(r.shortTitle||'tree').replace(/[^\w]+/g,'_')}_${r.year||''}_${treeMode}.svg`, treeSVG(r.tree), 'image/svg+xml');
+  }
+}
+function armDelete(btn, fn){
+  let armed = false; const label = btn.textContent;
+  const disarm = () => { armed = false; btn.classList.remove('armed'); btn.textContent = label; };
+  btn.onclick = () => {
+    if(armed){ disarm(); fn(); return; }
+    armed = true; btn.classList.add('armed'); btn.textContent = 'Click again to confirm';
+    setTimeout(() => { if(btn.isConnected && armed) disarm(); }, 4000);
+  };
+}
+
+/* ---------- editor ---------- */
+function renderEditor(r){
+  const opt = (obj, v) => Object.entries(obj).map(([k,l]) => `<option value="${k}" ${k===v?'selected':''}>${l}</option>`).join('');
+  const inp = (k, label, type='text', ph='') => `<label for="e-${k}">${label}</label><input id="e-${k}" name="${k}" type="${type}" value="${esc(r[k] ?? '')}" placeholder="${esc(ph)}">`;
+  $('#detail').innerHTML = `
+    <h2 class="rtitle" style="font-size:20px">Edit record</h2>
+    <form class="ed" id="edForm">
+      ${inp('author','Author')}
+      ${inp('title','Title','text','As on the title page')}
+      ${inp('shortTitle','Short title')}
+      <label for="e-lang">Language</label><select id="e-lang" name="lang">${opt(LANGS, r.lang)}</select>
+      ${inp('year','Year','number')}
+      ${inp('edition','Edition','text','e.g. 3rd ed., or "editio nova"')}
+      ${inp('place','Place')}
+      ${inp('printer','Printer')}
+      ${inp('catalogId','Catalogue no.','text','VD16 / VD17 / VD18 / USTC / BnF / Adams')}
+      ${inp('copy','Copy seen','text','Library, shelfmark')}
+      ${inp('url','Link','url','https://')}
+      ${inp('locus','Locus','text','e.g. lib. I, cap. 5')}
+      ${inp('page','Page / folio','text','e.g. p. 34, or fol. 12v')}
+      <label for="e-form">Tree</label><select id="e-form" name="form">${opt(FORMS, r.form)}</select>
+      <label for="e-status">Status</label><select id="e-status" name="status">${opt(STATUS, r.status)}</select>
+      <label class="full" for="e-source">Evidence <span class="hint">(where this occurrence is documented)</span></label>
+      <textarea class="full" id="e-source" name="source">${esc(r.source)}</textarea>
+      <label class="full" for="e-tree">Tree transcription <span class="hint">(term | retained | opposed | opposed species; <code>=</code> individuals; <code>[ ]</code> supplied)</span></label>
+      <textarea class="full treesrc" id="e-tree" name="tree" spellcheck="false">${esc(r.tree)}</textarea>
+      <div class="full row"><button type="button" class="btn" id="skel">Insert Latin skeleton</button>${modeButtons()}</div>
+      <div class="full tree" id="prev"></div>
+      <label class="full" for="e-notes">Notes</label>
+      <textarea class="full" id="e-notes" name="notes">${esc(r.notes)}</textarea>
+      <div class="full row"><button class="btn primary" type="submit">Save changes</button><button type="button" class="btn" id="cancel">Cancel</button></div>
+    </form>`;
+  const prev = () => { const s = treeSVG($('#e-tree').value); $('#prev').innerHTML = s || '<p class="empty" style="margin:4px">Preview appears here as you type.</p>'; };
+  prev();
+  $('#e-tree').oninput = prev;
+  $('#detail').querySelectorAll('[data-mode]').forEach(b => b.onclick = () => {
+    treeMode = b.dataset.mode;
+    $('#detail').querySelectorAll('[data-mode]').forEach(x => x.setAttribute('aria-pressed', x.dataset.mode === treeMode));
+    prev();
+  });
+  $('#skel').onclick = () => {
+    const t = $('#e-tree');
+    if(!t.value.trim()) t.value = 'Substantia | [corporea] | [incorporea]\nCorpus | [animatum] | [inanimatum]\nCorpus animatum | [sensibile] | [insensibile]\nAnimal | [rationale] | [irrationale]\nHomo\n= [Socrates], [Plato]';
+    prev(); t.focus();
+  };
+  $('#cancel').onclick = () => {
+    if(!r.author && !r.title){ db = db.filter(x => x.id !== r.id); sel = null; }
+    mode = 'view'; renderTable(); renderDetail();
+  };
+  $('#edForm').onsubmit = e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    for(const [k,v] of fd.entries()) r[k] = typeof v === 'string' ? v.trim() : v;
+    r.tree = fd.get('tree');
+    r.year = r.year === '' ? null : parseInt(r.year, 10);
+    if(!r.shortTitle) r.shortTitle = r.title;
+    mode = 'view'; save(); renderTable(); renderDetail();
+  };
+  $('#e-author').focus();
+}
+
+/* ---------- term index ---------- */
+function renderTerms(){
+  const tq = norm($('#tq').value), role = $('#trole').value, lang = $('#tlang').value;
+  const map = new Map();
+  const add = (term, rl, r) => {
+    if(!term || term === '[?]') return;
+    const k = norm(term.replace(/^\[|\]$/g,'')) + '|' + rl;
+    if(!map.has(k)) map.set(k, {term, role:rl, forms:new Set(), recs:new Map(), langs:new Set()});
+    const e = map.get(k); e.forms.add(term); e.recs.set(r.id, r); e.langs.add(r.lang);
+  };
+  db.forEach(r => {
+    if(lang && r.lang !== lang) return;
+    const t = parseTree(r.tree);
+    t.levels.forEach(l => { add(l.term,'node',r); add(l.pos,'pos',r); add(l.neg,'neg',r); add(l.negSp,'node',r); });
+    t.individuals.forEach(i => add(i,'ind',r));
+  });
+  const RL = {node:'Genus / species', pos:'Differentia (retained)', neg:'Differentia (opposed)', ind:'Individual'};
+  const list = [...map.values()].filter(e => (!role || e.role === role) && (!tq || norm(e.term).includes(tq)))
+    .sort((a,b) => b.recs.size - a.recs.size || a.term.localeCompare(b.term));
+  $('#ttbl').innerHTML = `<thead><tr><th>Term</th><th>Forms as printed</th><th>Role</th><th>Lang.</th><th>Records</th></tr></thead><tbody>` +
+    (list.length ? list.map(e => `<tr><td class="term">${esc(e.term)}</td><td>${[...e.forms].map(esc).join(', ')}</td><td>${RL[e.role]}</td>
+      <td>${[...e.langs].map(l=>`<span class="lang">${l}</span>`).join(' ')}</td>
+      <td class="recs">${[...e.recs.values()].map(r => `<a href="#" data-go="${esc(r.id)}">${esc(r.shortTitle||r.title)} ${esc(r.year??'')}</a>`).join('')}</td></tr>`).join('')
+    : `<tr><td colspan="5" class="empty">No terms yet. Transcribe a tree in any record and its terms appear here.</td></tr>`) + '</tbody>';
+}
+
+/* ---------- export / import ---------- */
+function download(name, text, type){
+  try{
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], {type}));
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  }catch(e){}
+  const out = $('#exportOut'); out.hidden = false; out.value = text;
+}
+async function copy(text){
+  const msg = $('#cpMsg');
+  try{ await navigator.clipboard.writeText(text); if(msg) msg.textContent = 'Copied'; }
+  catch(e){
+    const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select();
+    let ok = false; try{ ok = document.execCommand('copy'); }catch(_){}
+    t.remove(); if(msg) msg.textContent = ok ? 'Copied' : 'Copy blocked; select the citation text manually';
+  }
+}
+function toCSV(){
+  const q = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+  return [FIELD_ORDER.join(','), ...db.map(r => FIELD_ORDER.map(k => q(r[k])).join(','))].join('\n');
+}
+function validRecords(arr){
+  if(!Array.isArray(arr)) return null;
+  return arr.filter(r => r && typeof r === 'object').map(r => {
+    const o = {}; FIELD_ORDER.forEach(k => o[k] = r[k] ?? (k==='year'?null:''));
+    o.id = o.id || uid(); if(!LANGS[o.lang]) o.lang = 'la';
+    if(!STATUS[o.status]) o.status = 'candidate'; if(!FORMS[o.form]) o.form = 'unknown';
+    o.year = o.year === '' || o.year == null ? null : parseInt(o.year,10);
+    return o;
+  });
+}
+
+/* ---------- wiring ---------- */
+function showView(v){
+  $$('nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.view === v));
+  ['catalogue','terms','data'].forEach(x => $('#view-'+x).hidden = x !== v);
+  if(v === 'terms') renderTerms();
+}
+function init(){
+  $('#f-status').innerHTML += Object.entries(STATUS).map(([k,l]) => `<option value="${k}">${l}</option>`).join('');
+  $('#f-form').innerHTML += Object.entries(FORMS).map(([k,l]) => `<option value="${k}">${l}</option>`).join('');
+  $$('nav button').forEach(b => b.onclick = () => showView(b.dataset.view));
+  ['#q','#f-status','#f-form','#y1','#y2'].forEach(s => $(s).addEventListener('input', renderTable));
+  $$('.f-lang').forEach(c => c.addEventListener('change', renderTable));
+  ['#tq','#trole','#tlang'].forEach(s => $(s).addEventListener('input', renderTerms));
+  const sortBy = th => { const k = th.dataset.k; if(sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = 1; } renderTable(); };
+  $('#tbl thead').addEventListener('click', e => { const th = e.target.closest('th'); if(th) sortBy(th); });
+  $('#tbl thead').addEventListener('keydown', e => { const th = e.target.closest('th'); if(th && (e.key==='Enter'||e.key===' ')){ e.preventDefault(); sortBy(th); } });
+  const pick = tr => { sel = tr.dataset.id; mode = 'view'; renderTable(); renderDetail(); };
+  $('#tbl tbody').addEventListener('click', e => { const tr = e.target.closest('tr[data-id]'); if(tr) pick(tr); });
+  $('#tbl tbody').addEventListener('keydown', e => { const tr = e.target.closest('tr[data-id]'); if(tr && e.key === 'Enter') pick(tr); });
+  $('#ttbl').addEventListener('click', e => { const a = e.target.closest('a[data-go]'); if(a){ e.preventDefault(); sel = a.dataset.go; mode='view'; showView('catalogue'); renderTable(); renderDetail(); } });
+  $('#ovClose').onclick = closeOverlay;
+  $('#ov').addEventListener('click', e => { if(e.target.id === 'ov') closeOverlay(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#ov').hidden) closeOverlay(); });
+  $('#addBtn').onclick = () => {
+    const r = {id:uid(), author:'', title:'', shortTitle:'', lang:'la', year:null, edition:'', place:'', printer:'', catalogId:'', copy:'', url:'', locus:'', page:'', form:'unknown', status:'to-verify', source:'', tree:'', notes:''};
+    db.push(r); sel = r.id; mode = 'edit'; renderTable(); renderDetail();
+  };
+  $('#expJson').onclick = () => download('porphyrian-trees.json', JSON.stringify(db, null, 2), 'application/json');
+  $('#expCsv').onclick = () => download('porphyrian-trees.csv', toCSV(), 'text/csv');
+  $('#expBib').onclick = () => download('porphyrian-trees.bib', db.filter(r=>r.status!=='demo').map(bibtex).join('\n\n'), 'text/plain');
+  $('#impFile').onchange = e => {
+    const f = e.target.files[0]; if(!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      try{ pendingImport = validRecords(JSON.parse(rd.result)); }catch(_){ pendingImport = null; }
+      const ok = pendingImport && pendingImport.length;
+      $('#impMerge').disabled = $('#impReplace').disabled = !ok;
+      $('#impMsg').textContent = ok ? `${pendingImport.length} records ready to import.` : 'This file is not a JSON list of records. Export from this app to see the expected format.';
+    };
+    rd.readAsText(f);
+  };
+  $('#impMerge').onclick = () => {
+    const ids = new Map(db.map((r,i) => [r.id,i]));
+    pendingImport.forEach(r => ids.has(r.id) ? db[ids.get(r.id)] = r : db.push(r));
+    save(); renderTable(); $('#impMsg').textContent = `Merged ${pendingImport.length} records.`;
+  };
+  armDelete($('#impReplace'), () => { db = pendingImport; sel = null; save(); renderTable(); renderDetail(); $('#impMsg').textContent = `Replaced all records with ${db.length} imported records.`; });
+  armDelete($('#resetBtn'), async () => { db = seed(); sel = null; mode = 'view'; await save(); renderTable(); renderDetail(); setState('Reset to the starter list'); });
+}
+(async () => {
+  init(); await load();
+  sel = db.find(r => r.id === 'demo') ? 'demo' : (db[0] && db[0].id);
+  renderTable(); renderDetail();
+})();
+</script>
+</body>
+</html>
