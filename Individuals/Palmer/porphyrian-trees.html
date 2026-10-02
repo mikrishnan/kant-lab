@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbor Porphyriana — A Catalogue of the Tree of Porphyry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #1A1614;
+    --vellum:    #EDE5D0;
+    --parchment: #F7F2E7;
+    --ochre:     #9A7B2F;
+    --rust:      #7A3B1E;
+    --slate:     #5C5648;
+    --faint:     #D6CCB4;
+    --line:      #C4B89A;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--vellum);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: var(--parchment);
+    text-align: center;
+    padding: 4rem 2rem 3.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 28px,
+        rgba(255,255,255,0.025) 28px,
+        rgba(255,255,255,0.025) 29px
+      );
+    pointer-events: none;
+  }
+
+  .latin-label {
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.78rem;
+    font-weight: 300;
+    letter-spacing: 0.18em;
+    color: var(--ochre);
+    text-transform: uppercase;
+    margin-bottom: 1.1rem;
+    opacity: 0.9;
+  }
+
+  header h1 {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--parchment);
+    max-width: 720px;
+    margin: 0 auto 1rem;
+  }
+
+  header h1 em {
+    font-style: italic;
+    color: #D4B97A;
+  }
+
+  .header-desc {
+    font-family: 'Source Serif 4', serif;
+    font-size: 1rem;
+    font-weight: 300;
+    font-style: italic;
+    color: #A09278;
+    max-width: 580px;
+    margin: 0 auto 2.2rem;
+    line-height: 1.6;
+  }
+
+  .header-rule {
+    width: 80px;
+    height: 1px;
+    background: var(--ochre);
+    margin: 0 auto;
+    opacity: 0.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--parchment);
+    border-bottom: 1px solid var(--line);
+    padding: 0.8rem 2rem;
+    display: flex;
+    gap: 0.5rem 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  nav a {
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.82rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--slate);
+    text-decoration: none;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+
+  nav a:hover {
+    color: var(--rust);
+    border-bottom-color: var(--rust);
+  }
+
+  /* ── INTRO ── */
+  .intro {
+    max-width: 680px;
+    margin: 3.5rem auto 0;
+    padding: 0 2rem 3rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .intro p {
+    font-size: 1rem;
+    color: var(--slate);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+
+  .intro p + p { margin-top: 0; }
+
+  /* ── SECTION HEADERS ── */
+  .era-header {
+    max-width: 860px;
+    margin: 3.5rem auto 0;
+    padding: 0 2rem 1rem;
+    border-bottom: 1px solid var(--faint);
+  }
+
+  .era-header h2 {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ochre);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── CARDS ── */
+  .catalog {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 4rem;
+    display: grid;
+    gap: 2px;
+  }
+
+  .entry {
+    background: var(--parchment);
+    border: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    overflow: hidden;
+  }
+
+  .entry:first-child { border-radius: 4px 4px 0 0; }
+  .entry:last-child  { border-radius: 0 0 4px 4px; }
+
+  .entry-diagram {
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.4rem;
+    position: relative;
+  }
+
+  .entry-diagram svg {
+    width: 100%;
+    max-width: 160px;
+    height: auto;
+  }
+
+  .entry-body {
+    padding: 1.4rem 1.6rem 1.4rem 1.8rem;
+    border-left: 3px solid var(--faint);
+  }
+
+  .entry-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+  }
+
+  .entry-author {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .entry-date {
+    font-size: 0.8rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--ochre);
+    white-space: nowrap;
+  }
+
+  .entry-work {
+    font-size: 0.88rem;
+    font-style: italic;
+    color: var(--rust);
+    margin-bottom: 0.55rem;
+    font-weight: 400;
+  }
+
+  .entry-desc {
+    font-size: 0.88rem;
+    color: var(--slate);
+    line-height: 1.65;
+    max-width: 56ch;
+  }
+
+  .entry-tags {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    font-family: 'Source Serif 4', serif;
+    letter-spacing: 0.06em;
+    color: var(--slate);
+    background: var(--faint);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+    opacity: 0.85;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--ink);
+    color: #6B6055;
+    text-align: center;
+    padding: 2.5rem 2rem;
+    font-size: 0.8rem;
+    font-style: italic;
+    line-height: 1.7;
+  }
+
+  footer strong {
+    color: var(--ochre);
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .entry {
+      grid-template-columns: 1fr;
+    }
+    .entry-diagram {
+      padding: 1.2rem;
+      min-height: 120px;
+    }
+    .entry-diagram svg { max-width: 120px; }
+    .entry-body { border-left: none; border-top: 3px solid var(--faint); }
+    header { padding: 3rem 1.5rem 2.5rem; }
+    .catalog { padding: 1rem 1rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="latin-label">Arbor Porphyriana · A Scholarly Catalogue</p>
+  <h1>The Tree of <em>Porphyry</em></h1>
+  <p class="header-desc">A hierarchical diagram of genus, species, and differentia — from Neoplatonism through the Scholastics to the modern logicians</p>
+  <div class="header-rule"></div>
+</header>
+
+<nav aria-label="Era navigation">
+  <a href="#late-antique">Late Antique</a>
+  <a href="#early-medieval">Early Medieval</a>
+  <a href="#high-medieval">High Medieval</a>
+  <a href="#late-medieval">Late Medieval</a>
+  <a href="#renaissance">Renaissance</a>
+  <a href="#early-modern">Early Modern</a>
+  <a href="#modern">Modern</a>
+</nav>
+
+<section class="intro" aria-label="Introduction">
+  <p>The Arbor Porphyriana — the Tree of Porphyry — is a logical diagram first articulated in the <em>Isagoge</em> (c. 268 AD), the Neoplatonist philosopher's introduction to Aristotle's <em>Categories</em>. It arranges the five predicables (genus, species, differentia, proprium, accidens) into a branching hierarchy descending from the most universal substance to the individual.</p>
+  <p>Transmitted through Boethius's Latin translation and commentary, the tree became the central schema of scholastic logic. What follows is a catalogue of its principal treatments, arranged chronologically.</p>
+</section>
+
+<!-- LATE ANTIQUE -->
+<div class="era-header" id="late-antique">
+  <h2>Late Antique &amp; Patristic Period, 3rd – 6th century</h2>
+</div>
+<div class="catalog">
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="18" x2="70" y2="142" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="50" x2="30" y2="80" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="50" x2="110" y2="80" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="90" x2="40" y2="120" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="90" x2="100" y2="120" stroke="#9A7B2F" stroke-width="1"/>
+        <circle cx="70" cy="18" r="4" fill="#D4B97A"/>
+        <circle cx="70" cy="50" r="3.5" fill="#9A7B2F"/>
+        <circle cx="30" cy="80" r="3" fill="#5C5648"/>
+        <circle cx="110" cy="80" r="3" fill="#5C5648"/>
+        <circle cx="70" cy="90" r="3.5" fill="#9A7B2F"/>
+        <circle cx="40" cy="120" r="3" fill="#5C5648"/>
+        <circle cx="100" cy="120" r="3" fill="#5C5648"/>
+        <circle cx="70" cy="142" r="3" fill="#7A3B1E"/>
+        <text x="70" y="10" fill="#EDE5D0" font-size="7" text-anchor="middle" font-family="serif">Substantia</text>
+        <text x="70" y="148" fill="#A09278" font-size="6.5" text-anchor="middle" font-family="serif">individuum</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Porphyry of Tyre</span>
+        <span class="entry-date">c. 234 – c. 305 AD</span>
+      </div>
+      <p class="entry-work">Isagoge (Introduction to Aristotle's Categories)</p>
+      <p class="entry-desc">The founding text. Porphyry introduces the five predicables and sketches the vertical hierarchy from Substance down through corporeal body, animate body, animal, rational animal, and finally the individual — Socrates, Plato. The tree is described in prose; it is later readers who render it as a diagram.</p>
+      <div class="entry-tags">
+        <span class="tag">Neoplatonism</span>
+        <span class="tag">Greek</span>
+        <span class="tag">Founding text</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="18" x2="70" y2="142" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="45" x2="25" y2="75" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="45" x2="115" y2="75" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="88" x2="35" y2="118" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="88" x2="105" y2="118" stroke="#9A7B2F" stroke-width="1"/>
+        <rect x="57" y="10" width="26" height="14" rx="1" fill="none" stroke="#D4B97A" stroke-width="1"/>
+        <rect x="57" y="37" width="26" height="14" rx="1" fill="none" stroke="#9A7B2F" stroke-width="1"/>
+        <rect x="57" y="81" width="26" height="14" rx="1" fill="none" stroke="#9A7B2F" stroke-width="1"/>
+        <rect x="57" y="134" width="26" height="14" rx="1" fill="none" stroke="#7A3B1E" stroke-width="1"/>
+        <text x="70" y="20" fill="#EDE5D0" font-size="6.5" text-anchor="middle" font-family="serif">Genus</text>
+        <text x="70" y="47" fill="#D4B97A" font-size="6" text-anchor="middle" font-family="serif">summum</text>
+        <text x="70" y="90" fill="#D4B97A" font-size="6" text-anchor="middle" font-family="serif">medium</text>
+        <text x="70" y="143" fill="#A09278" font-size="6" text-anchor="middle" font-family="serif">Species</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Boethius</span>
+        <span class="entry-date">c. 477 – 524 AD</span>
+      </div>
+      <p class="entry-work">In Isagogen Porphyrii Commentaria (1st and 2nd Commentaries); In Categorias Aristotelis</p>
+      <p class="entry-desc">The crucial Latin transmission. Boethius translated the <em>Isagoge</em> twice and wrote two commentaries. His rendering of Porphyry's hierarchy into Latin — <em>genus summum, genus subalternum, species specialissima</em> — established the vocabulary that all medieval Latins would use. His prose describes what subsequent scribes would draw as the tree diagram.</p>
+      <div class="entry-tags">
+        <span class="tag">Latin transmission</span>
+        <span class="tag">Commentary</span>
+        <span class="tag">Foundational vocabulary</span>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<!-- EARLY MEDIEVAL -->
+<div class="era-header" id="early-medieval">
+  <h2>Early Medieval Period, 8th – 10th century</h2>
+</div>
+<div class="catalog">
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="15" x2="70" y2="145" stroke="#9A7B2F" stroke-width="1.5" stroke-dasharray="2,2"/>
+        <line x1="70" y1="40" x2="20" y2="70" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="40" x2="120" y2="70" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="80" x2="30" y2="110" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="80" x2="110" y2="110" stroke="#9A7B2F" stroke-width="1"/>
+        <polygon points="70,8 77,20 63,20" fill="#D4B97A"/>
+        <circle cx="70" cy="40" r="4" fill="#9A7B2F"/>
+        <circle cx="20" cy="70" r="3" fill="#5C5648"/>
+        <circle cx="120" cy="70" r="3" fill="#5C5648"/>
+        <circle cx="70" cy="80" r="4" fill="#9A7B2F"/>
+        <circle cx="30" cy="110" r="3" fill="#5C5648"/>
+        <circle cx="110" cy="110" r="3" fill="#5C5648"/>
+        <circle cx="70" cy="145" r="3" fill="#7A3B1E"/>
+        <text x="70" y="150" fill="#A09278" font-size="6" text-anchor="middle" font-family="serif">Individuum</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Alcuin of York</span>
+        <span class="entry-date">c. 735 – 804</span>
+      </div>
+      <p class="entry-work">Dialectica (dedicated to Charlemagne)</p>
+      <p class="entry-desc">Written as a pedagogical dialogue for the Carolingian court school, Alcuin's <em>Dialectica</em> includes an exposition of the predicables drawn from Boethius. His treatment adapts the hierarchy for encyclopaedic instruction, making the tree schema accessible to students with no knowledge of Greek. An important conduit for the Porphyrian framework in the early medieval curriculum.</p>
+      <div class="entry-tags">
+        <span class="tag">Carolingian</span>
+        <span class="tag">Pedagogical</span>
+        <span class="tag">Dialogue form</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="18" x2="70" y2="85" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="85" x2="25" y2="130" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="85" x2="115" y2="130" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="50" x2="40" y2="70" stroke="#9A7B2F" stroke-width="0.8" stroke-dasharray="3,2"/>
+        <line x1="70" y1="50" x2="100" y2="70" stroke="#9A7B2F" stroke-width="0.8" stroke-dasharray="3,2"/>
+        <circle cx="70" cy="18" r="5" fill="#D4B97A"/>
+        <circle cx="70" cy="50" r="3.5" fill="#9A7B2F"/>
+        <circle cx="40" cy="70" r="2.5" fill="#5C5648"/>
+        <circle cx="100" cy="70" r="2.5" fill="#5C5648"/>
+        <circle cx="70" cy="85" r="4" fill="#9A7B2F"/>
+        <circle cx="25" cy="130" r="3" fill="#7A3B1E"/>
+        <circle cx="115" cy="130" r="3" fill="#7A3B1E"/>
+        <text x="70" y="11" fill="#EDE5D0" font-size="7" text-anchor="middle" font-family="serif">Deus</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">John Scottus Eriugena</span>
+        <span class="entry-date">c. 815 – c. 877</span>
+      </div>
+      <p class="entry-work">Periphyseon (De Divisione Naturae)</p>
+      <p class="entry-desc">Eriugena's encyclopaedic work fuses Neoplatonic hierarchy with Christian theology, deploying a grand division of Nature that mirrors and extends the Porphyrian schema. His fourfold division — Nature that creates and is not created; that is created and creates; that is created and does not create; that neither creates nor is created — represents the most ambitious theological transformation of the tree structure in the early medieval period.</p>
+      <div class="entry-tags">
+        <span class="tag">Neoplatonism</span>
+        <span class="tag">Theology</span>
+        <span class="tag">Irish</span>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<!-- HIGH MEDIEVAL -->
+<div class="era-header" id="high-medieval">
+  <h2>High Scholastic Period, 11th – 13th century</h2>
+</div>
+<div class="catalog">
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="14" x2="70" y2="148" stroke="#9A7B2F" stroke-width="1.4"/>
+        <line x1="70" y1="40" x2="22" y2="72" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="40" x2="118" y2="72" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="95" x2="35" y2="125" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="95" x2="105" y2="125" stroke="#9A7B2F" stroke-width="1"/>
+        <circle cx="70" cy="14" r="5" fill="#D4B97A"/>
+        <circle cx="70" cy="40" r="4" fill="#9A7B2F"/>
+        <circle cx="22" cy="72" r="3.5" fill="#5C5648"/>
+        <circle cx="118" cy="72" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="95" r="4" fill="#9A7B2F"/>
+        <circle cx="35" cy="125" r="3.5" fill="#5C5648"/>
+        <circle cx="105" cy="125" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="148" r="3.5" fill="#7A3B1E"/>
+        <text x="70" y="7" fill="#EDE5D0" font-size="7.5" text-anchor="middle" font-family="serif" font-style="italic">univ.</text>
+        <text x="70" y="153" fill="#A09278" font-size="6.5" text-anchor="middle" font-family="serif">part.</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Peter Abelard</span>
+        <span class="entry-date">1079 – 1142</span>
+      </div>
+      <p class="entry-work">Logica 'Ingredientibus'; Dialectica; Glosses on Porphyry</p>
+      <p class="entry-desc">Abelard's commentary on the <em>Isagoge</em> is among the most incisive logical analyses of the tree in medieval thought. In his glosses he argues the famous nominalist position: universals such as "animal" or "body" are not things (<em>res</em>) but spoken words (<em>voces</em>) or mental concepts (<em>sermones</em>). His treatment of the tree thus becomes the central locus for the problem of universals in the 12th century.</p>
+      <div class="entry-tags">
+        <span class="tag">Nominalism</span>
+        <span class="tag">Universals debate</span>
+        <span class="tag">Paris schools</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="16" x2="70" y2="148" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="42" x2="20" y2="75" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="42" x2="120" y2="75" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="93" x2="30" y2="123" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="93" x2="110" y2="123" stroke="#9A7B2F" stroke-width="1"/>
+        <rect x="62" y="10" width="16" height="12" fill="#1A1614" stroke="#D4B97A" stroke-width="1.2"/>
+        <circle cx="70" cy="42" r="4" fill="#9A7B2F"/>
+        <circle cx="20" cy="75" r="3" fill="#5C5648"/>
+        <circle cx="120" cy="75" r="3" fill="#5C5648"/>
+        <circle cx="70" cy="93" r="4" fill="#9A7B2F"/>
+        <circle cx="30" cy="123" r="3" fill="#5C5648"/>
+        <circle cx="110" cy="123" r="3" fill="#5C5648"/>
+        <circle cx="70" cy="148" r="3" fill="#7A3B1E"/>
+        <text x="70" y="19" fill="#D4B97A" font-size="6" text-anchor="middle" font-family="serif">ens</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Albert the Great (Albertus Magnus)</span>
+        <span class="entry-date">c. 1200 – 1280</span>
+      </div>
+      <p class="entry-work">Liber de Praedicabilibus; Commentary on Porphyry's Isagoge</p>
+      <p class="entry-desc">Albert's commentary on the <em>Isagoge</em> forms the opening part of his vast logical paraphrase of Aristotle. He expounds the tree with Aristotelian realism, arguing that universals have a foundation in real things (<em>fundamentum in re</em>). His treatment synthesises Avicenna's interpretation with the Aristotelian tradition, giving the tree a metaphysical grounding compatible with Dominican theology.</p>
+      <div class="entry-tags">
+        <span class="tag">Dominican</span>
+        <span class="tag">Aristotelianism</span>
+        <span class="tag">Avicennan influence</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="14" x2="70" y2="148" stroke="#9A7B2F" stroke-width="1.5"/>
+        <line x1="70" y1="38" x2="18" y2="68" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="38" x2="122" y2="68" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="88" x2="30" y2="118" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="88" x2="110" y2="118" stroke="#9A7B2F" stroke-width="1.2"/>
+        <circle cx="70" cy="14" r="5.5" fill="#D4B97A"/>
+        <circle cx="70" cy="38" r="4.5" fill="#9A7B2F"/>
+        <circle cx="18" cy="68" r="3.5" fill="#5C5648"/>
+        <circle cx="122" cy="68" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="88" r="4.5" fill="#9A7B2F"/>
+        <circle cx="30" cy="118" r="3.5" fill="#5C5648"/>
+        <circle cx="110" cy="118" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="148" r="3.5" fill="#7A3B1E"/>
+        <text x="70" y="8" fill="#EDE5D0" font-size="7" text-anchor="middle" font-family="serif">S.</text>
+        <text x="70" y="155" fill="#A09278" font-size="6.5" text-anchor="middle" font-family="serif">Socr.</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Thomas Aquinas</span>
+        <span class="entry-date">1225 – 1274</span>
+      </div>
+      <p class="entry-work">In Librum Boethii De Trinitate; Commentarium in Porphyrii Isagogen (attributed)</p>
+      <p class="entry-desc">Aquinas engages the tree principally through his metaphysics of essence and existence. In his commentary on Boethius's <em>De Trinitate</em> and in the <em>Summa Theologiae</em>, he deploys the genus-species hierarchy to distinguish modes of predication in theology. His moderate realism — universals exist formally in the intellect but have a foundation in the real nature of things — represents the canonical scholastic settlement of the problem the tree poses.</p>
+      <div class="entry-tags">
+        <span class="tag">Thomism</span>
+        <span class="tag">Moderate realism</span>
+        <span class="tag">Dominican</span>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<!-- LATE MEDIEVAL -->
+<div class="era-header" id="late-medieval">
+  <h2>Late Medieval Period, 13th – 15th century</h2>
+</div>
+<div class="catalog">
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="16" x2="70" y2="148" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="45" x2="18" y2="75" stroke="#9A7B2F" stroke-width="1" stroke-dasharray="4,2"/>
+        <line x1="70" y1="45" x2="122" y2="75" stroke="#9A7B2F" stroke-width="1" stroke-dasharray="4,2"/>
+        <line x1="70" y1="92" x2="32" y2="122" stroke="#9A7B2F" stroke-width="1" stroke-dasharray="4,2"/>
+        <line x1="70" y1="92" x2="108" y2="122" stroke="#9A7B2F" stroke-width="1" stroke-dasharray="4,2"/>
+        <circle cx="70" cy="16" r="4" fill="#9A7B2F" stroke="#D4B97A" stroke-width="1.5"/>
+        <circle cx="70" cy="45" r="3.5" fill="#5C5648"/>
+        <circle cx="18" cy="75" r="3" fill="#5C5648"/>
+        <circle cx="122" cy="75" r="3" fill="#5C5648"/>
+        <circle cx="70" cy="92" r="3.5" fill="#5C5648"/>
+        <circle cx="32" cy="122" r="3" fill="#5C5648"/>
+        <circle cx="108" cy="122" r="3" fill="#5C5648"/>
+        <circle cx="70" cy="148" r="3.5" fill="#7A3B1E" stroke="#9A7B2F" stroke-width="1"/>
+        <text x="70" y="10" fill="#EDE5D0" font-size="7" text-anchor="middle" font-family="serif" letter-spacing="1">?</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">William of Ockham</span>
+        <span class="entry-date">c. 1287 – 1347</span>
+      </div>
+      <p class="entry-work">Expositio in Librum Porphyrii; Summa Logicae, Part I</p>
+      <p class="entry-work" style="margin-top:-0.3rem; color: var(--slate); font-size:0.82rem; font-style: italic;">also: Ordinatio (Commentary on the Sentences)</p>
+      <p class="entry-desc">Ockham's engagement with the tree is radically deflationary. His nominalism holds that only individual things exist; genus and species are mental concepts (<em>conceptus mentis</em>), not entities in the world. The Porphyrian hierarchy therefore does not map a real ontological structure. In the <em>Summa Logicae</em> he subjects each predicable to detailed logical analysis while systematically dismantling their claim to extramental reality — the most sustained and influential critique of the tree's metaphysical ambitions.</p>
+      <div class="entry-tags">
+        <span class="tag">Nominalism</span>
+        <span class="tag">Via moderna</span>
+        <span class="tag">Franciscan</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="14" x2="70" y2="146" stroke="#9A7B2F" stroke-width="1.3"/>
+        <line x1="70" y1="38" x2="20" y2="68" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="38" x2="120" y2="68" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="85" x2="32" y2="115" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="85" x2="108" y2="115" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="20" y1="68" x2="10" y2="90" stroke="#9A7B2F" stroke-width="0.8"/>
+        <line x1="20" y1="68" x2="30" y2="90" stroke="#9A7B2F" stroke-width="0.8"/>
+        <circle cx="70" cy="14" r="5" fill="#D4B97A"/>
+        <circle cx="70" cy="38" r="4" fill="#9A7B2F"/>
+        <circle cx="20" cy="68" r="3.5" fill="#9A7B2F"/>
+        <circle cx="120" cy="68" r="3.5" fill="#5C5648"/>
+        <circle cx="10" cy="90" r="2.5" fill="#5C5648"/>
+        <circle cx="30" cy="90" r="2.5" fill="#5C5648"/>
+        <circle cx="70" cy="85" r="4" fill="#9A7B2F"/>
+        <circle cx="32" cy="115" r="3" fill="#5C5648"/>
+        <circle cx="108" cy="115" r="3" fill="#5C5648"/>
+        <circle cx="70" cy="146" r="3" fill="#7A3B1E"/>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Peter of Spain (Pope John XXI)</span>
+        <span class="entry-date">c. 1215 – 1277</span>
+      </div>
+      <p class="entry-work">Summulae Logicales (Tractatus)</p>
+      <p class="entry-desc">The most widely used logic textbook of the late medieval period, reprinted in hundreds of editions through the 16th century. Peter's <em>Summulae</em> opens with a treatment of the Porphyrian predicables before proceeding to the properties of terms. Its clear, schematic exposition of genus, species, and differentia became the standard pedagogical presentation across university faculties in Europe, carrying the tree into countless classrooms.</p>
+      <div class="entry-tags">
+        <span class="tag">Textbook</span>
+        <span class="tag">University curriculum</span>
+        <span class="tag">Widely printed</span>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<!-- RENAISSANCE -->
+<div class="era-header" id="renaissance">
+  <h2>Renaissance &amp; Humanist Period, 15th – 16th century</h2>
+</div>
+<div class="catalog">
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="15" x2="70" y2="148" stroke="#9A7B2F" stroke-width="1.3"/>
+        <line x1="70" y1="40" x2="15" y2="72" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="40" x2="125" y2="72" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="90" x2="28" y2="120" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="90" x2="112" y2="120" stroke="#9A7B2F" stroke-width="1"/>
+        <circle cx="70" cy="15" r="5" fill="#D4B97A"/>
+        <circle cx="70" cy="40" r="4" fill="#9A7B2F"/>
+        <circle cx="15" cy="72" r="3.5" fill="#5C5648"/>
+        <circle cx="125" cy="72" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="90" r="4" fill="#9A7B2F"/>
+        <circle cx="28" cy="120" r="3.5" fill="#5C5648"/>
+        <circle cx="112" cy="120" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="148" r="3.5" fill="#7A3B1E"/>
+        <line x1="15" y1="72" x2="125" y2="72" stroke="#9A7B2F" stroke-width="0.5" stroke-dasharray="2,3" opacity="0.4"/>
+        <line x1="28" y1="120" x2="112" y2="120" stroke="#9A7B2F" stroke-width="0.5" stroke-dasharray="2,3" opacity="0.4"/>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Rudolf Agricola</span>
+        <span class="entry-date">1444 – 1485</span>
+      </div>
+      <p class="entry-work">De Inventione Dialectica</p>
+      <p class="entry-desc">Agricola's influential humanist reformulation of dialectic reorients logic toward rhetoric and invention. He engages the Porphyrian framework critically, arguing that the scholastic preoccupation with the tree's metaphysical status distracts from logic's practical purpose — finding arguments. His work marks the beginning of the humanist re-evaluation of the tree as a tool for <em>inventio</em> rather than a map of being, influencing Ramus and the whole tradition of topical logic.</p>
+      <div class="entry-tags">
+        <span class="tag">Humanism</span>
+        <span class="tag">Dialectic</span>
+        <span class="tag">Dutch</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="14" x2="70" y2="148" stroke="#D4B97A" stroke-width="1.5"/>
+        <line x1="70" y1="40" x2="18" y2="72" stroke="#D4B97A" stroke-width="1.2"/>
+        <line x1="70" y1="40" x2="122" y2="72" stroke="#D4B97A" stroke-width="1.2"/>
+        <line x1="70" y1="88" x2="28" y2="118" stroke="#D4B97A" stroke-width="1.2"/>
+        <line x1="70" y1="88" x2="112" y2="118" stroke="#D4B97A" stroke-width="1.2"/>
+        <rect x="62" y="8" width="16" height="12" fill="none" stroke="#D4B97A" stroke-width="1.5"/>
+        <rect x="62" y="34" width="16" height="12" fill="none" stroke="#9A7B2F" stroke-width="1"/>
+        <rect x="62" y="82" width="16" height="12" fill="none" stroke="#9A7B2F" stroke-width="1"/>
+        <rect x="62" y="142" width="16" height="12" fill="none" stroke="#7A3B1E" stroke-width="1"/>
+        <text x="70" y="17.5" fill="#EDE5D0" font-size="6" text-anchor="middle" font-family="serif">Genus</text>
+        <text x="70" y="43" fill="#D4B97A" font-size="5.5" text-anchor="middle" font-family="serif">subaltern</text>
+        <text x="70" y="91" fill="#D4B97A" font-size="5.5" text-anchor="middle" font-family="serif">Species</text>
+        <text x="70" y="151" fill="#A09278" font-size="5.5" text-anchor="middle" font-family="serif">Individ.</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Petrus Ramus (Pierre de la Ramée)</span>
+        <span class="entry-date">1515 – 1572</span>
+      </div>
+      <p class="entry-work">Dialecticae Institutiones; Aristotelicae Animadversiones; Dialectique (1555)</p>
+      <p class="entry-desc">Ramus transformed the Porphyrian framework into a visual technology for organising all knowledge. His method of dichotomous division — splitting every topic into paired branches — extended and radicalised the tree into the famous "Ramist charts": tabular diagrams printed as double-page spreads in Renaissance textbooks. Though departing from Porphyry's specific hierarchy, Ramism is the most historically consequential transformation of the tree's visual and epistemological logic.</p>
+      <div class="entry-tags">
+        <span class="tag">Ramism</span>
+        <span class="tag">Dichotomy</span>
+        <span class="tag">Print culture</span>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<!-- EARLY MODERN -->
+<div class="era-header" id="early-modern">
+  <h2>Early Modern Period, 17th – 18th century</h2>
+</div>
+<div class="catalog">
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="70" cy="18" r="6" fill="none" stroke="#D4B97A" stroke-width="1.5"/>
+        <circle cx="70" cy="18" r="2" fill="#D4B97A"/>
+        <line x1="70" y1="24" x2="70" y2="148" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="50" x2="22" y2="80" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="50" x2="118" y2="80" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="95" x2="35" y2="125" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="95" x2="105" y2="125" stroke="#9A7B2F" stroke-width="1"/>
+        <circle cx="70" cy="50" r="4" fill="#9A7B2F"/>
+        <circle cx="22" cy="80" r="3.5" fill="#5C5648"/>
+        <circle cx="118" cy="80" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="95" r="4" fill="#9A7B2F"/>
+        <circle cx="35" cy="125" r="3.5" fill="#5C5648"/>
+        <circle cx="105" cy="125" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="148" r="3.5" fill="#7A3B1E"/>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Gottfried Wilhelm Leibniz</span>
+        <span class="entry-date">1646 – 1716</span>
+      </div>
+      <p class="entry-work">Dissertatio de Arte Combinatoria (1666); Nouveaux Essais; Correspondence with Arnauld</p>
+      <p class="entry-desc">Leibniz saw in the Porphyrian hierarchy the seed of a universal calculus of concepts (<em>characteristica universalis</em>). In the early <em>Dissertatio</em> he applies combinatorial mathematics to the predicables, treating genera and species as composites of simpler conceptual atoms. His ambitious project anticipates both Boolean algebra and the semantics of natural kinds. The tree, for Leibniz, was not a scholastic relic but a formal structure awaiting algebraic treatment.</p>
+      <div class="entry-tags">
+        <span class="tag">Combinatorics</span>
+        <span class="tag">Universal language</span>
+        <span class="tag">German rationalism</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="14" x2="70" y2="148" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="40" x2="20" y2="70" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="40" x2="120" y2="70" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="88" x2="30" y2="118" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="88" x2="110" y2="118" stroke="#9A7B2F" stroke-width="1"/>
+        <circle cx="70" cy="14" r="5" fill="#D4B97A"/>
+        <circle cx="70" cy="40" r="4" fill="#9A7B2F"/>
+        <circle cx="20" cy="70" r="3.5" fill="#5C5648"/>
+        <circle cx="120" cy="70" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="88" r="4" fill="#9A7B2F"/>
+        <circle cx="30" cy="118" r="3.5" fill="#5C5648"/>
+        <circle cx="110" cy="118" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="148" r="3.5" fill="#7A3B1E"/>
+        <line x1="20" y1="70" x2="120" y2="70" stroke="#9A7B2F" stroke-width="0.6" stroke-dasharray="3,3" opacity="0.35"/>
+        <text x="70" y="9" fill="#EDE5D0" font-size="7" text-anchor="middle" font-family="serif" font-style="italic">Porf.</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">Antoine Arnauld &amp; Pierre Nicole</span>
+        <span class="entry-date">1612–1694 &amp; 1625–1695</span>
+      </div>
+      <p class="entry-work">La Logique, ou l'Art de penser (Port-Royal Logic, 1662)</p>
+      <p class="entry-desc">The most influential logic textbook of the 17th century, written at Port-Royal and reprinted for two centuries. The <em>Port-Royal Logic</em> includes a clear and critical discussion of the Porphyrian tree in Part I, treating genus and species within a Cartesian framework that subordinates scholastic logic to the clarity of ideas. The authors retain the tree's pedagogical value while stripping it of metaphysical ambition — a distinctly modern, pragmatic appropriation.</p>
+      <div class="entry-tags">
+        <span class="tag">Cartesianism</span>
+        <span class="tag">Port-Royal</span>
+        <span class="tag">French</span>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<!-- MODERN -->
+<div class="era-header" id="modern">
+  <h2>Modern &amp; Contemporary Period, 19th – 21st century</h2>
+</div>
+<div class="catalog">
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="14" x2="70" y2="148" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="36" x2="18" y2="66" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="36" x2="122" y2="66" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="85" x2="28" y2="115" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="85" x2="112" y2="115" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="18" y1="66" x2="8" y2="90" stroke="#9A7B2F" stroke-width="0.8"/>
+        <line x1="18" y1="66" x2="28" y2="90" stroke="#9A7B2F" stroke-width="0.8"/>
+        <line x1="122" y1="66" x2="112" y2="90" stroke="#9A7B2F" stroke-width="0.8"/>
+        <line x1="122" y1="66" x2="132" y2="90" stroke="#9A7B2F" stroke-width="0.8"/>
+        <circle cx="70" cy="14" r="5" fill="#D4B97A"/>
+        <circle cx="70" cy="36" r="4" fill="#9A7B2F"/>
+        <circle cx="18" cy="66" r="3.5" fill="#9A7B2F"/>
+        <circle cx="122" cy="66" r="3.5" fill="#9A7B2F"/>
+        <circle cx="8" cy="90" r="2.5" fill="#5C5648"/>
+        <circle cx="28" cy="90" r="2.5" fill="#5C5648"/>
+        <circle cx="112" cy="90" r="2.5" fill="#5C5648"/>
+        <circle cx="132" cy="90" r="2.5" fill="#5C5648"/>
+        <circle cx="70" cy="85" r="4" fill="#9A7B2F"/>
+        <circle cx="28" cy="115" r="3.5" fill="#5C5648"/>
+        <circle cx="112" cy="115" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="148" r="3.5" fill="#7A3B1E"/>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">W. V. O. Quine</span>
+        <span class="entry-date">1908 – 2000</span>
+      </div>
+      <p class="entry-work">"Natural Kinds" (1969); Word and Object (1960); From a Logical Point of View (1953)</p>
+      <p class="entry-desc">Quine's analytic philosophy engages the Porphyrian problematic directly in "Natural Kinds," asking what grounds the projectible predicates that form natural groupings. His critique of Aristotelian essentialism and his eventual pragmatic vindication of natural kind terms via reflective equilibrium represents the sharpest 20th-century confrontation with the metaphysical questions the tree raises, shorn of scholastic vocabulary but philosophically continuous with it.</p>
+      <div class="entry-tags">
+        <span class="tag">Analytic philosophy</span>
+        <span class="tag">Natural kinds</span>
+        <span class="tag">Nominalism</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="entry">
+    <div class="entry-diagram" aria-hidden="true">
+      <svg viewBox="0 0 140 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="70" y1="14" x2="70" y2="148" stroke="#9A7B2F" stroke-width="1.2"/>
+        <line x1="70" y1="38" x2="18" y2="70" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="38" x2="122" y2="70" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="92" x2="30" y2="122" stroke="#9A7B2F" stroke-width="1"/>
+        <line x1="70" y1="92" x2="110" y2="122" stroke="#9A7B2F" stroke-width="1"/>
+        <circle cx="70" cy="14" r="5" fill="#D4B97A"/>
+        <circle cx="70" cy="38" r="4" fill="#9A7B2F"/>
+        <circle cx="18" cy="70" r="3.5" fill="#5C5648"/>
+        <circle cx="122" cy="70" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="92" r="4" fill="#9A7B2F"/>
+        <circle cx="30" cy="122" r="3.5" fill="#5C5648"/>
+        <circle cx="110" cy="122" r="3.5" fill="#5C5648"/>
+        <circle cx="70" cy="148" r="3.5" fill="#7A3B1E"/>
+        <circle cx="70" cy="14" r="8" fill="none" stroke="#D4B97A" stroke-width="0.8" opacity="0.5"/>
+        <text x="70" y="9" fill="#EDE5D0" font-size="6.5" text-anchor="middle" font-family="serif">OWL</text>
+      </svg>
+    </div>
+    <div class="entry-body">
+      <div class="entry-meta">
+        <span class="entry-author">OWL / Description Logics community</span>
+        <span class="entry-date">1990s – present</span>
+      </div>
+      <p class="entry-work">Web Ontology Language (OWL); Description Logic (ALC and extensions); W3C standards</p>
+      <p class="entry-desc">The Porphyrian tree has a direct descendant in the class hierarchies of modern ontology languages. OWL's <code>subClassOf</code> relation formalises the species-genus link; the distinction between defined and primitive classes echoes differentia. The description logic tradition — Baader, Calvanese, McGuinness, Nardi, Patel-Schneider — has given the tree its most rigorous formal treatment, making it computable and embedding it in the infrastructure of the semantic web.</p>
+      <div class="entry-tags">
+        <span class="tag">Formal ontology</span>
+        <span class="tag">Semantic web</span>
+        <span class="tag">Description logic</span>
+      </div>
+    </div>
+  </article>
+
+</div>
+
+<footer>
+  <p><strong>Arbor Porphyriana</strong> — a catalogue compiled from primary sources and the history of logic</p>
+  <p style="margin-top:0.5rem;">The tree spans from Porphyry's <em>Isagoge</em> (c. 268 AD) to the ontology languages of the present day.</p>
+  <p style="margin-top:0.3rem; font-size:0.72rem; opacity:0.6;">References: Boethius, <em>In Isag.</em> · Peter of Spain, <em>Summulae</em> · Ockham, <em>Summa Log.</em> · Arnauld &amp; Nicole, <em>La Logique</em> · Stanford Encyclopedia of Philosophy</p>
+</footer>
+
+</body>
+</html>
