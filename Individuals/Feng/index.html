@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arbor Porphyriana — Porphyrian Tree Generator</title>
+<style>
+  :root {
+    --paper: #f6efe0;
+    --paper-2: #efe5cf;
+    --ink: #2b2118;
+    --muted: #7d6d58;
+    --rubric: #a8322a;
+    --gold: #b8862b;
+    --line: #5a4a38;
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    background-image: radial-gradient(ellipse at top, #fbf6ea 0%, var(--paper) 60%, var(--paper-2) 100%);
+    color: var(--ink);
+    font-family: var(--serif);
+    min-height: 100vh;
+  }
+  header { text-align: center; padding: 36px 20px 8px; position: relative; }
+  h1 { font-size: 2.4rem; margin: 0; letter-spacing: .04em; font-weight: normal; }
+  h1 .initial { color: var(--rubric); font-size: 1.25em; }
+  .subtitle { color: var(--muted); font-style: italic; margin: 6px 0 0; }
+  main { max-width: 1180px; margin: 0 auto; padding: 0 20px 60px; }
+  form { display: flex; gap: 10px; justify-content: center; margin: 22px auto 10px; max-width: 640px; }
+  #q {
+    flex: 1; font: inherit; font-size: 1.15rem; padding: 12px 16px;
+    border: 1px solid var(--line); background: #fffaf0; color: var(--ink); border-radius: 6px;
+  }
+  #q:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+  button.primary {
+    font: inherit; font-size: 1.05rem; padding: 0 22px; border-radius: 6px; cursor: pointer;
+    background: var(--rubric); color: #fff8ee; border: none;
+  }
+  button.primary:hover { background: #8e2922; }
+  .examples { text-align: center; color: var(--muted); font-size: .95rem; }
+  .examples button {
+    font: inherit; font-size: .9rem; background: none; border: none; color: var(--ink);
+    text-decoration: underline dotted var(--muted); text-underline-offset: 3px; cursor: pointer; padding: 2px 5px;
+  }
+  .examples button:hover { color: var(--rubric); }
+  #status { text-align: center; min-height: 1.6em; margin: 14px 0 4px; font-style: italic; color: var(--muted); }
+  #status.error { color: var(--rubric); font-style: normal; }
+  #result { display: none; gap: 26px; align-items: flex-start; margin-top: 10px; }
+  #result.show { display: flex; }
+  #tree-wrap {
+    flex: 1 1 auto; min-width: 0; background: #fffaf0; border: 1px solid #d9cbb0; border-radius: 8px;
+    box-shadow: 0 1px 0 #e7dcc4, 0 8px 24px -16px rgba(60,40,10,.35); padding: 10px;
+  }
+  #tree-wrap svg { width: 100%; height: auto; display: block; }
+  .tree-tools { display: flex; justify-content: space-between; align-items: center; padding: 2px 6px 6px; font-size: .85rem; color: var(--muted); }
+  .tree-tools button { font: inherit; font-size: .85rem; background: none; border: 1px solid #cdbd9f; border-radius: 4px; padding: 3px 10px; cursor: pointer; color: var(--ink); }
+  .tree-tools button:hover { border-color: var(--ink); }
+  aside { flex: 0 0 300px; }
+  .card { background: #fffaf0; border: 1px solid #d9cbb0; border-radius: 8px; padding: 18px 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 1.05rem; font-weight: normal; letter-spacing: .12em; text-transform: uppercase; color: var(--rubric); margin: 0 0 12px; }
+  .card p { margin: 0 0 10px; line-height: 1.45; }
+  dl { margin: 0; }
+  dt { font-variant: small-caps; letter-spacing: .05em; color: var(--muted); font-size: .95rem; margin-top: 10px; }
+  dt:first-child { margin-top: 0; }
+  dd { margin: 2px 0 0; line-height: 1.4; }
+  .chain { font-size: .95rem; line-height: 1.7; }
+  .chain .d { color: var(--rubric); font-style: italic; }
+  footer { text-align: center; color: var(--muted); font-size: .85rem; font-style: italic; padding: 10px 20px 30px; }
+  @media (max-width: 900px) {
+    #result.show { flex-direction: column; }
+    aside { flex-basis: auto; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="initial">A</span>rbor Porphyriana</h1>
+  <p class="subtitle">Enter a thing. See it divided from its highest genus down to its species and individuals.</p>
+</header>
+
+<main>
+  <form id="form" autocomplete="off">
+    <input id="q" type="text" list="terms" placeholder="e.g. dog, Socrates, justice…" aria-label="Thing to classify">
+    <datalist id="terms"></datalist>
+    <button class="primary" id="go" type="submit">Divide</button>
+  </form>
+  <div class="examples" id="examples">Try:</div>
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <section id="result">
+    <div id="tree-wrap">
+      <div class="tree-tools">
+        <span id="tree-caption"></span>
+        <button type="button" id="dl">Download SVG</button>
+      </div>
+      <div id="tree"></div>
+    </div>
+    <aside>
+      <div class="card">
+        <h2>The Five Predicables</h2>
+        <dl id="predicables"></dl>
+      </div>
+      <div class="card">
+        <h2>Line of Descent</h2>
+        <div class="chain" id="chain"></div>
+      </div>
+      <div class="card" id="commentary-card">
+        <h2>Commentary</h2>
+        <p id="commentary"></p>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<footer>After Porphyry’s <i>Isagoge</i> (c. 270 AD) and Aristotle’s <i>Categories</i>. Each genus is split by a pair of contrary differentiae; the trunk follows one, the other yields the opposite species.</footer>
+
+
+<script type="module">
+// ---------- Built-in knowledge base ----------
+const KB = {};
+const ALIAS = new Map();
+const INDIV = new Map();
+
+function N(id, name, parent, d, od, os, aliases = [], extra = {}) {
+  KB[id] = { id, name, parent, d, od, os, aliases, children: [], ...extra };
+}
+
+// Substance — the classical tree
+N('substance', 'Substance', null, '', '', '', ['substances', 'being', 'thing', 'things', 'entity'], { prop: '—', note: 'Substance is a summum genus: it has no genus above it, so it cannot be defined by genus and differentia.' });
+N('body', 'Body', 'substance', 'corporeal', 'incorporeal', 'Spirit', ['bodies', 'matter', 'physical object', 'corporeal substance', 'object']);
+N('living', 'Living Body', 'body', 'animate', 'inanimate', 'Inanimate Body', ['living thing', 'living things', 'organism', 'organisms', 'life', 'living being', 'animate body']);
+N('animal', 'Animal', 'living', 'sensitive', 'insensitive', 'Plant', ['animals', 'creature', 'creatures', 'sensitive body']);
+N('man', 'Man (Human)', 'animal', 'rational', 'irrational', 'Brute', ['man', 'human', 'humans', 'human being', 'human beings', 'person', 'persons', 'people', 'men', 'woman', 'women', 'rational animal', 'mankind', 'humanity', 'homo'], {
+  ind: ['Socrates', 'Plato', 'Aristotle'], def: 'Man is a rational animal (animal rationale).', prop: 'capable of laughter (risibile)', acc: ['being white or dark', 'being seated', 'being a philosopher'],
+  note: 'This is the canonical example from the Isagoge: Substance → Body → Living Body → Animal → Man → Socrates, Plato.' });
+N('brute', 'Brute', 'animal', 'irrational', 'rational', 'Man (Human)', ['brutes', 'irrational animal', 'beast', 'beasts']);
+N('blooded', 'Blooded Animal', 'brute', 'blooded', 'bloodless', 'Bloodless Animal', ['vertebrate', 'vertebrates', 'enaima']);
+N('vivi', 'Viviparous Quadruped', 'blooded', 'viviparous', 'oviparous', 'Oviparous Animal', ['mammal', 'mammals', 'quadruped', 'quadrupeds']);
+N('dog', 'Dog', 'vivi', 'barking', 'mewing', 'Cat', ['dogs', 'puppy', 'puppies', 'hound', 'canine'], { ind: ['Argos', 'Lassie', 'this dog'], prop: 'capable of barking', acc: ['being black', 'being asleep', 'belonging to Odysseus'] });
+N('cat', 'Cat', 'vivi', 'mewing', 'barking', 'Dog', ['cats', 'kitten', 'kittens', 'feline'], { ind: ['this cat', 'that cat'], prop: 'capable of purring', acc: ['being tabby', 'being on the roof'] });
+N('horse', 'Horse', 'vivi', 'solid-hoofed', 'cloven-hoofed', 'Ox', ['horses', 'stallion', 'mare', 'pony', 'equine'], { ind: ['Bucephalus', 'Incitatus', 'this horse'], prop: 'capable of neighing', acc: ['being chestnut', 'galloping'] });
+N('ox', 'Ox', 'vivi', 'cloven-hoofed', 'solid-hoofed', 'Horse', ['oxen', 'cow', 'cows', 'cattle', 'bull', 'bulls', 'bovine'], { ind: ['this ox'], prop: 'chewing the cud', acc: ['being yoked', 'being brown'] });
+N('ovi', 'Oviparous Animal', 'blooded', 'oviparous', 'viviparous', 'Viviparous Quadruped', ['egg-laying animal']);
+N('bird', 'Bird', 'ovi', 'winged', 'finned', 'Fish', ['birds', 'fowl'], { ind: ['this bird'], prop: 'feathered', acc: ['singing', 'perched on a branch'] });
+N('fish', 'Fish', 'ovi', 'finned', 'winged', 'Bird', ['fishes'], { ind: ['this fish'], prop: 'breathing through gills', acc: ['being silver', 'swimming upstream'] });
+N('bloodless', 'Bloodless Animal', 'brute', 'bloodless', 'blooded', 'Blooded Animal', ['invertebrate', 'invertebrates', 'anaima']);
+N('insect', 'Insect', 'bloodless', 'segmented', 'shelled', 'Testacean', ['insects', 'bug', 'bugs'], { ind: ['this ant', 'this bee'], prop: 'six-legged' });
+N('testacean', 'Testacean', 'bloodless', 'shelled', 'segmented', 'Insect', ['shellfish', 'mollusc', 'molluscs', 'mollusk', 'mollusks']);
+N('plant', 'Plant', 'living', 'insensitive', 'sensitive', 'Animal', ['plants', 'vegetable', 'vegetables', 'vegetation', 'flora']);
+N('tree', 'Tree', 'plant', 'woody-stemmed', 'soft-stemmed', 'Herb', ['trees']);
+N('oak', 'Oak', 'tree', 'acorn-bearing', 'olive-bearing', 'Olive', ['oaks', 'oak tree', 'oak trees'], { ind: ['the oak of Dodona', 'this oak'], prop: 'bearing acorns', acc: ['being tall', 'losing its leaves'] });
+N('olive', 'Olive', 'tree', 'olive-bearing', 'acorn-bearing', 'Oak', ['olive tree', 'olive trees', 'olives'], { ind: ['the olive of Athena', 'this olive tree'] });
+N('herb', 'Herb', 'plant', 'soft-stemmed', 'woody-stemmed', 'Tree', ['herbs', 'grass', 'grasses']);
+N('inanimate', 'Inanimate Body', 'body', 'inanimate', 'animate', 'Living Body', ['inanimate object', 'inanimate objects', 'non-living thing', 'nonliving thing']);
+N('element', 'Element', 'inanimate', 'simple', 'mixed', 'Mixed Body', ['elements', 'four elements', 'simple body']);
+N('earth', 'Earth', 'element', 'cold and dry', 'hot and wet', 'Air', ['soil', 'dirt'], { ind: ['this clod of earth'], prop: 'naturally moving downward' });
+N('water', 'Water', 'element', 'cold and wet', 'hot and dry', 'Fire', [], { ind: ['this cup of water', 'the Aegean'], prop: 'naturally resting above earth' });
+N('air', 'Air', 'element', 'hot and wet', 'cold and dry', 'Earth', [], { ind: ['this breath of air'] });
+N('fire', 'Fire', 'element', 'hot and dry', 'cold and wet', 'Water', ['flame', 'flames'], { ind: ['this flame'], prop: 'naturally moving upward' });
+N('mixed', 'Mixed Body', 'inanimate', 'mixed', 'simple', 'Element', ['compound', 'compounds', 'mixture', 'mineral', 'minerals']);
+N('metal', 'Metal', 'mixed', 'fusible', 'non-fusible', 'Stone', ['metals']);
+N('gold', 'Gold', 'metal', 'noble', 'base', 'Iron', [], { ind: ['this gold ring', 'this nugget'], prop: 'not rusting', acc: ['being coined', 'being buried'] });
+N('iron', 'Iron', 'metal', 'base', 'noble', 'Gold', [], { ind: ['this iron nail'], prop: 'rusting' });
+N('stone', 'Stone', 'mixed', 'non-fusible', 'fusible', 'Metal', ['stones', 'rock', 'rocks', 'marble'], { ind: ['this stone', 'the Rosetta Stone'] });
+N('spirit', 'Spirit', 'substance', 'incorporeal', 'corporeal', 'Body', ['spirits', 'incorporeal substance', 'immaterial substance']);
+N('angel', 'Angel', 'spirit', 'created', 'uncreated', 'God', ['angels'], { ind: ['Michael', 'Gabriel', 'Raphael'], note: 'Scholastic writers placed angels under incorporeal substance; Aquinas held that each angel is its own species.' });
+N('god', 'God', 'spirit', 'uncreated', 'created', 'Angel', ['deity', 'the divine'], { note: 'In scholastic theology God is, strictly, in no genus at all; this branch only shows the traditional dichotomy.' });
+
+// Quantity
+N('quantity', 'Quantity', null, '', '', '', ['quantities', 'amount', 'size', 'magnitude in general']);
+N('continuous', 'Continuous Quantity', 'quantity', 'continuous', 'discrete', 'Number', ['magnitude', 'extension']);
+N('line', 'Line', 'continuous', 'one-dimensional', 'two-dimensional', 'Surface', ['lines', 'length']);
+N('surface', 'Surface', 'continuous', 'two-dimensional', 'three-dimensional', 'Solid', ['surfaces', 'plane', 'area']);
+N('solid', 'Solid', 'continuous', 'three-dimensional', 'two-dimensional', 'Surface', ['solids', 'volume']);
+N('number', 'Number', 'quantity', 'discrete', 'continuous', 'Continuous Quantity', ['numbers', 'discrete quantity'], { note: 'For the Greeks “number” begins at two; the unit (one) is the principle of number, not itself a number.' });
+N('even', 'Even Number', 'number', 'divisible into equal halves', 'not divisible into equal halves', 'Odd Number', ['even', 'even numbers'], { ind: ['two', 'four', 'six'] });
+N('odd', 'Odd Number', 'number', 'not divisible into equal halves', 'divisible into equal halves', 'Even Number', ['odd', 'odd numbers'], { ind: ['three', 'five', 'seven'] });
+
+// Quality
+N('quality', 'Quality', null, '', '', '', ['qualities', 'attribute', 'attributes']);
+N('habit', 'Habit', 'quality', 'stable', 'transient', 'Disposition', ['habits', 'hexis', 'state of character']);
+N('virtue', 'Virtue', 'habit', 'good', 'bad', 'Vice', ['virtues', 'excellence', 'arete']);
+N('courage', 'Courage', 'virtue', 'concerning fear', 'concerning pleasure', 'Temperance', ['bravery', 'fortitude', 'andreia'], { ind: ['the courage of Achilles', 'this act of bravery'], def: 'Courage is a virtue concerning fear and confidence (Nicomachean Ethics III).' });
+N('temperance', 'Temperance', 'virtue', 'concerning pleasure', 'concerning fear', 'Courage', ['moderation', 'self-control', 'sophrosyne']);
+N('justice', 'Justice', 'virtue', 'concerning what is due to others', 'concerning one’s own passions', 'Temperance', ['fairness', 'dikaiosyne']);
+N('vice', 'Vice', 'habit', 'bad', 'good', 'Virtue', ['vices']);
+N('cowardice', 'Cowardice', 'vice', 'deficient in confidence', 'excessive in confidence', 'Rashness', ['cowardliness']);
+N('disposition', 'Disposition', 'quality', 'transient', 'stable', 'Habit', ['dispositions', 'diathesis']);
+N('affective', 'Affective Quality', 'quality', 'perceptible', 'figural', 'Shape', ['sensible quality', 'sensible qualities']);
+N('color', 'Color', 'affective', 'visible', 'audible', 'Sound', ['colour', 'colors', 'colours']);
+N('white', 'White', 'color', 'dilating sight', 'contracting sight', 'Black', ['whiteness'], { ind: ['the whiteness of this snow'] });
+N('black', 'Black', 'color', 'contracting sight', 'dilating sight', 'White', ['blackness'], { ind: ['the blackness of this ink'] });
+N('red', 'Red', 'color', 'intermediate, near white', 'intermediate, near black', 'Purple', ['redness', 'crimson', 'scarlet'], { ind: ['the red of this rose', 'the red of this apple'], note: 'In De Sensu, Aristotle derives the intermediate colors such as red and purple from mixtures of white and black.' });
+N('sound', 'Sound', 'affective', 'audible', 'visible', 'Color', ['sounds', 'noise']);
+N('shape', 'Shape', 'quality', 'figural', 'perceptible', 'Affective Quality', ['shapes', 'figure', 'figures']);
+N('circle', 'Circle', 'shape', 'curvilinear', 'rectilinear', 'Polygon', ['circles'], { ind: ['this circle drawn in the sand'], def: 'A circle is a plane figure bounded by one line, all points equidistant from the center.' });
+N('polygon', 'Polygon', 'shape', 'rectilinear', 'curvilinear', 'Circle', ['polygons']);
+N('triangle', 'Triangle', 'polygon', 'three-sided', 'four-sided', 'Quadrilateral', ['triangles'], { ind: ['this triangle on the board'], prop: 'having angles equal to two right angles' });
+N('square', 'Square', 'polygon', 'four-sided', 'three-sided', 'Triangle', ['squares', 'quadrilateral']);
+
+// Relation
+N('relation', 'Relation', null, '', '', '', ['relations', 'relative', 'relatives', 'relationship']);
+N('double', 'Double', 'relation', 'exceeding', 'exceeded', 'Half', ['twice', 'twofold']);
+N('half', 'Half', 'relation', 'exceeded', 'exceeding', 'Double', ['halves']);
+N('father', 'Father', 'relation', 'begetting', 'begotten', 'Son', ['fathers', 'parent', 'parents'], { note: 'As a relative, “father” is the paternity of a man, not the man himself; the man is a substance.' });
+N('son', 'Son', 'relation', 'begotten', 'begetting', 'Father', ['sons', 'child', 'offspring']);
+
+// Place, Time, Position, State, Action, Passion
+N('place', 'Place', null, '', '', '', ['places', 'location', 'where']);
+N('above', 'Above', 'place', 'toward the periphery', 'toward the center', 'Below', ['up', 'upward', 'aloft'], { note: 'Aristotle’s natural places: fire moves up toward the periphery, earth down toward the center.' });
+N('below', 'Below', 'place', 'toward the center', 'toward the periphery', 'Above', ['down', 'downward', 'beneath']);
+N('time', 'Time', null, '', '', '', ['times', 'when']);
+N('past', 'Past', 'time', 'before the now', 'after the now', 'Future', ['the past'], { ind: ['yesterday', 'last year'] });
+N('future', 'Future', 'time', 'after the now', 'before the now', 'Past', ['the future'], { ind: ['tomorrow', 'next year'] });
+N('position', 'Position', null, '', '', '', ['posture', 'postures', 'situation']);
+N('sitting', 'Sitting', 'position', 'bent', 'extended', 'Lying', ['seated', 'sit'], { ind: ['Socrates’ sitting now'] });
+N('lying', 'Lying', 'position', 'extended', 'bent', 'Sitting', ['lying down', 'reclining']);
+N('state', 'State', null, '', '', '', ['having', 'possession', 'habitus'], { note: 'Also called “Having” (echein): the category of being shod, armed, clothed.' });
+N('shod', 'Shod', 'state', 'on the feet', 'on the body', 'Armed', ['wearing shoes']);
+N('armed', 'Armed', 'state', 'on the body', 'on the feet', 'Shod', ['wearing armor', 'armored', 'armoured']);
+N('action', 'Action', null, '', '', '', ['actions', 'act', 'acting', 'doing', 'activity']);
+N('cutting', 'Cutting', 'action', 'dividing', 'heating', 'Burning', ['cut', 'to cut']);
+N('burning', 'Burning', 'action', 'heating', 'dividing', 'Cutting', ['burn', 'to burn', 'heating']);
+N('passion', 'Passion', null, '', '', '', ['being affected', 'undergoing', 'affection'], { note: 'Here “passion” (paschein) means being acted upon, not emotion.' });
+N('beingcut', 'Being Cut', 'passion', 'divided', 'heated', 'Being Burned', ['being cut']);
+N('beingburned', 'Being Burned', 'passion', 'heated', 'divided', 'Being Cut', ['being burned', 'being burnt']);
+
+for (const n of Object.values(KB)) {
+  if (n.parent) KB[n.parent].children.push(n.id);
+  for (const a of [n.id, n.name, ...n.aliases]) ALIAS.set(a.toLowerCase(), n.id);
+  for (const i of n.ind || []) INDIV.set(i.toLowerCase(), [n.id, i]);
+}
+for (const [k, id] of [['porphyry', 'man'], ['aristotle', 'man'], ['callias', 'man'], ['coriscus', 'man'], ['bucephalus', 'horse'], ['argos', 'dog'], ['lassie', 'dog'], ['michael', 'angel'], ['gabriel', 'angel'], ['raphael', 'angel'],
+  ['2', 'even'], ['4', 'even'], ['6', 'even'], ['8', 'even'], ['eight', 'even'], ['10', 'even'], ['ten', 'even'], ['3', 'odd'], ['5', 'odd'], ['7', 'odd'], ['9', 'odd'], ['nine', 'odd'], ['seven', 'odd']]) {
+  if (!INDIV.has(k)) INDIV.set(k, [id, k.charAt(0).toUpperCase() + k.slice(1)]);
+}
+
+function normalize(s) {
+  return s.toLowerCase().trim().replace(/[.!?]+$/, '').replace(/^(a|an|the|some|this|that)\s+/, '').replace(/\s+/g, ' ');
+}
+
+function offlineLookup(raw) {
+  const q = normalize(raw);
+  const candidates = [raw.toLowerCase().trim(), q, q.replace(/s$/, ''), q.replace(/es$/, ''), q.replace(/ies$/, 'y')];
+  let nodeId = null, individual = null;
+  for (const c of candidates) {
+    if (INDIV.has(c)) { [nodeId, individual] = INDIV.get(c); break; }
+    if (ALIAS.has(c)) { nodeId = ALIAS.get(c); break; }
+  }
+  if (!nodeId) return null;
+
+  const node = KB[nodeId];
+  const path = [];
+  for (let n = node; n; n = n.parent ? KB[n.parent] : null) path.unshift(n);
+  const inputLevel = individual ? -1 : path.length - 1;
+  if (!individual) {
+    let n = node;
+    while (n.children.length) { n = KB[n.children[0]]; path.push(n); }
+  }
+  const leaf = path[path.length - 1];
+  let individuals = leaf.ind ? [...leaf.ind] : [`this ${leaf.name.toLowerCase()}`, `that ${leaf.name.toLowerCase()}`];
+  if (individual) individuals = [individual, ...individuals.filter(i => i.toLowerCase() !== individual.toLowerCase())].slice(0, 4);
+
+  const focus = individual ? leaf : node;
+  const parent = focus.parent ? KB[focus.parent] : null;
+  const definition = focus.def || (parent
+    ? `${focus.name} is ${article(parent.name)} ${parent.name.toLowerCase()} that is ${focus.d}.`
+    : `${focus.name} is a summum genus. Nothing is above it, so it cannot be defined by genus and differentia.`);
+
+  return {
+    query: raw,
+    interpretation: individual ? `${individual}, an individual ${leaf.name.toLowerCase()}` : node.name,
+    category: path[0].name,
+    trunk: path.map(n => ({ name: n.name, differentia: n.d, opposite_differentia: n.od, opposite_species: n.os })),
+    input_level: inputLevel,
+    individuals,
+    definition: individual ? `${individual} is not defined; an individual is known by its species: ${definition}` : definition,
+    proprium: focus.prop || '—',
+    accidents: focus.acc || [],
+    commentary: focus.note || (individual
+      ? `${individual} is an individual (atomon). Individuals are the bottom of the tree: they are predicated of nothing, and their species is predicated of them.`
+      : `${focus.name} falls under the category of ${path[0].name}.`),
+  };
+}
+
+function article(word) { return /^[aeiou]/i.test(word) ? 'an' : 'a'; }
+
+// ---------- SVG rendering ----------
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function wrap(text, max) {
+  const words = String(text).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let cur = '';
+  for (const w of words) {
+    if (cur && (cur + ' ' + w).length > max) { lines.push(cur); cur = w; }
+    else cur = cur ? cur + ' ' + w : w;
+  }
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [''];
+}
+
+const CHAR_W = 8.1, LINE_H = 18;
+
+function textBlock(x, y, lines, cls) {
+  const y0 = y - ((lines.length - 1) * LINE_H) / 2;
+  return `<text class="${cls}" x="${x}" y="${y0}" text-anchor="middle" dominant-baseline="middle">` +
+    lines.map((l, i) => `<tspan x="${x}" dy="${i ? LINE_H : 0}">${esc(l)}</tspan>`).join('') + '</text>';
+}
+
+function box(x, y, label, kind, maxChars = 22) {
+  const lines = wrap(label, maxChars);
+  const w = Math.max(96, Math.max(...lines.map(l => l.length)) * CHAR_W + 34);
+  const h = lines.length * LINE_H + 18;
+  const r = kind === 'ind' ? h / 2 : 5;
+  let s = '';
+  if (kind === 'focus') s += `<rect class="halo" x="${x - w / 2 - 5}" y="${y - h / 2 - 5}" width="${w + 10}" height="${h + 10}" rx="${r + 4}"/>`;
+  s += `<rect class="box ${kind}" x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="${r}"/>`;
+  s += textBlock(x, y, lines, `t-${kind}`);
+  return { svg: s, w, h };
+}
+
+function diffLabel(x, y, text, cls) {
+  const lines = wrap(text, 18);
+  const w = Math.max(...lines.map(l => l.length)) * 7.4 + 14;
+  const h = lines.length * LINE_H + 6;
+  return `<rect class="mask" x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="3"/>` + textBlock(x, y, lines, cls);
+}
+
+function renderTree(data) {
+  const trunk = data.trunk;
+  const n = trunk.length;
+  const inds = (data.individuals || []).slice(0, 4);
+  const W = 790, cx = 345, ROW = 120, TOP = 50;
+  const LX = cx - 150, RX = cx + 150, OX = cx + 300;
+  const yOf = i => TOP + i * ROW;
+  const H = yOf(n - 1) + (inds.length ? ROW : 0) + 60;
+
+  const edges = [], labels = [], nodes = [];
+  const sizes = trunk.map((t, i) => box(cx, yOf(i), t.name, i === data.input_level ? 'focus' : 'trunk'));
+
+  sizes.forEach((b, i) => {
+    nodes.push(b.svg);
+    const role = i === 0 ? 'summum genus' : i === n - 1 ? 'infima species' : 'subaltern genus';
+    labels.push(`<text class="role" x="${cx - b.w / 2 - 16}" y="${yOf(i)}" text-anchor="end" dominant-baseline="middle">${role}</text>`);
+  });
+
+  for (let i = 1; i < n; i++) {
+    const t = trunk[i];
+    const yA = yOf(i - 1) + sizes[i - 1].h / 2;
+    const yB = yOf(i) - sizes[i].h / 2;
+    const mid = (yOf(i - 1) + yOf(i)) / 2;
+    edges.push(`<polyline class="edge" points="${cx},${yA} ${LX},${mid} ${cx},${yB}"/>`);
+    labels.push(diffLabel(LX, mid, t.differentia || '—', 'diff'));
+    if (t.opposite_species || t.opposite_differentia) {
+      const ob = box(OX, yOf(i), t.opposite_species || '…', 'opp', 20);
+      edges.push(`<polyline class="edge opp-edge" points="${cx},${yA} ${RX},${mid} ${OX},${yOf(i) - ob.h / 2}"/>`);
+      labels.push(diffLabel(RX, mid, t.opposite_differentia || '—', 'diff opp-diff'));
+      nodes.push(ob.svg);
+    }
+  }
+
+  if (inds.length) {
+    const y = yOf(n);
+    const yA = yOf(n - 1) + sizes[n - 1].h / 2;
+    const span = Math.min(170, 640 / inds.length);
+    labels.push(`<text class="role" x="16" y="${y - 34}" dominant-baseline="middle">individuals</text>`);
+    inds.forEach((name, k) => {
+      const x = cx + (k - (inds.length - 1) / 2) * span;
+      const b = box(x, y, name, data.input_level === -1 && k === 0 ? 'focus ind' : 'ind', 16);
+      edges.push(`<line class="edge ind-edge" x1="${cx}" y1="${yA}" x2="${x}" y2="${y - b.h / 2}"/>`);
+      nodes.push(b.svg);
+    });
+  }
+
+  const style = `
+    text { font-family: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif; }
+    .edge { fill: none; stroke: #5a4a38; stroke-width: 1.6; stroke-linejoin: round; }
+    .opp-edge { stroke: #b3a48c; stroke-dasharray: 5 4; }
+    .ind-edge { stroke: #8a7a66; }
+    .box.trunk, .box.focus { fill: #fffaf0; stroke: #2b2118; stroke-width: 1.6; }
+    .box.focus { stroke: #b8862b; stroke-width: 2.4; fill: #fff3d6; }
+    .halo { fill: none; stroke: #b8862b; stroke-width: 1; stroke-opacity: .55; }
+    .box.opp { fill: #f6efe0; stroke: #c4b598; stroke-width: 1.2; }
+    .box.ind { fill: #fffaf0; stroke: #8a7a66; stroke-width: 1.2; }
+    .t-trunk, .t-focus { font-size: 15.5px; fill: #2b2118; }
+    .t-focus { font-weight: bold; }
+    .t-opp { font-size: 14px; fill: #8a7a66; }
+    .t-ind, .t-focus.ind { font-size: 14px; font-style: italic; fill: #2b2118; }
+    .diff { font-size: 14px; font-style: italic; fill: #a8322a; }
+    .opp-diff { fill: #c27a72; }
+    .mask { fill: #fffaf0; }
+    .role { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; fill: #a0907a; }
+  `;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Porphyrian tree for ${esc(data.query)}">
+    <style>${style}</style>
+    <rect width="${W}" height="${H}" fill="#fffaf0"/>
+    ${edges.join('')}${labels.join('')}${nodes.join('')}
+  </svg>`;
+}
+
+// ---------- UI ----------
+const $ = id => document.getElementById(id);
+const statusEl = $('status');
+let current = null;
+
+function setStatus(html, isError = false) {
+  statusEl.innerHTML = html;
+  statusEl.classList.toggle('error', isError);
+}
+
+function show(data) {
+  current = data;
+  $('tree').innerHTML = renderTree(data);
+  $('tree-caption').textContent = `${data.interpretation} · category: ${data.category}`;
+
+  const t = data.trunk;
+  const li = data.input_level;
+  const focusIdx = li === -1 ? t.length - 1 : li;
+  const genus = focusIdx > 0 ? t[focusIdx - 1].name : '— (a summum genus has no genus)';
+  const diff = focusIdx > 0 ? t[focusIdx].differentia : '—';
+  const rows = [
+    ['Genus', genus],
+    ['Species', li === -1 ? `${t[t.length - 1].name}, of which ${data.individuals[0]} is an individual` : t[focusIdx].name],
+    ['Differentia', diff],
+    ['Proprium', data.proprium || '—'],
+    ['Accidents', (data.accidents || []).join('; ') || '—'],
+    ['Definition', data.definition],
+  ];
+  $('predicables').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('');
+
+  let chain = esc(t[0].name);
+  for (let i = 1; i < t.length; i++) chain += ` → <span class="d">${esc(t[i].differentia)}</span> → ${esc(t[i].name)}`;
+  if (li === -1) chain += ` → <b>${esc(data.individuals[0])}</b>`;
+  $('chain').innerHTML = chain;
+
+  $('commentary').textContent = data.commentary || '';
+  $('result').classList.add('show');
+}
+
+function run(term) {
+  term = term.trim();
+  if (!term) return;
+  $('q').value = term;
+  history.replaceState(null, '', '#q=' + encodeURIComponent(term));
+  const data = offlineLookup(term);
+  if (data) { setStatus(''); show(data); return; }
+  setStatus(`“${esc(term)}” isn’t in the built-in list yet. Start typing to see the terms it knows.`, true);
+}
+
+$('form').addEventListener('submit', e => { e.preventDefault(); run($('q').value); });
+
+const EXAMPLES = ['man', 'Socrates', 'dog', 'horse', 'oak', 'gold', 'fire', 'red', 'courage', 'seven', 'angel', 'sitting', 'yesterday'];
+for (const ex of EXAMPLES) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = ex;
+  b.onclick = () => run(ex);
+  $('examples').appendChild(b);
+}
+
+const terms = new Set([...Object.values(KB).map(n => n.name), ...[...INDIV.values()].map(([, name]) => name)]);
+$('terms').innerHTML = [...terms].sort((a, b) => a.localeCompare(b)).map(t => `<option value="${esc(t)}">`).join('');
+
+$('dl').onclick = () => {
+  if (!current) return;
+  const blob = new Blob([renderTree(current)], { type: 'image/svg+xml' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `porphyrian-tree-${normalize(current.query).replace(/[^a-z0-9]+/g, '-') || 'tree'}.svg`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+const initial = new URLSearchParams(location.hash.slice(1)).get('q');
+run(initial || 'man');
+</script>
+</body>
+</html>

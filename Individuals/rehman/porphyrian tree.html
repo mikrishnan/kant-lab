@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Porphyrian Tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a1a;
+    --parchment: #f9f6ef;
+    --vellum: #ede8dc;
+    --ruled: #d6cebb;
+    --accent: #3a5a8c;
+    --accent-light: #e8eef6;
+    --muted: #7a7060;
+    --red: #8c3a3a;
+  }
+
+  body {
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 2.5rem 3rem 1.5rem;
+    border-bottom: 1px solid var(--ruled);
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  header h1 {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+  }
+
+  header p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'IM Fell English', serif;
+  }
+
+  .input-area {
+    padding: 2rem 3rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    border-bottom: 1px solid var(--ruled);
+  }
+
+  .input-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 420px;
+  }
+
+  .input-wrap label {
+    position: absolute;
+    top: -1.3rem;
+    left: 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--ruled);
+    background: white;
+    font-family: 'IM Fell English', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    border-radius: 2px;
+  }
+
+  input[type="text"]:focus {
+    border-color: var(--accent);
+  }
+
+  button.generate {
+    padding: 0.65rem 1.4rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s;
+  }
+
+  button.generate:hover { background: #2d4a78; }
+  button.generate:disabled { background: var(--ruled); color: var(--muted); cursor: not-allowed; }
+
+  .main {
+    flex: 1;
+    padding: 2.5rem 3rem;
+    overflow-x: auto;
+  }
+
+  /* ── Tree ── */
+  .tree-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    min-width: 900px;
+  }
+
+  .tree-level {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .level-label {
+    font-size: 0.67rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+    align-self: flex-start;
+    padding-left: 0.25rem;
+  }
+
+  .node-row {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    position: relative;
+    width: 100%;
+  }
+
+  .node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .node-box {
+    background: white;
+    border: 1px solid var(--ruled);
+    padding: 0.5rem 1.2rem;
+    text-align: center;
+    position: relative;
+    min-width: 130px;
+    max-width: 200px;
+  }
+
+  .node-box.focus-node {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .node-box.genus {
+    border-color: var(--ruled);
+  }
+
+  .node-name {
+    font-family: 'IM Fell English', serif;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .node-type {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-top: 0.15rem;
+  }
+
+  /* differentia badge */
+  .differentia-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .diff-connector {
+    width: 1px;
+    background: var(--ruled);
+    flex-shrink: 0;
+  }
+
+  .diff-badge {
+    border: 1px solid var(--ruled);
+    background: var(--parchment);
+    padding: 0.2rem 0.6rem;
+    font-size: 0.7rem;
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: var(--muted);
+    text-align: center;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* SVG connector lines between levels */
+  .connector-svg {
+    width: 100%;
+    overflow: visible;
+  }
+
+  /* species row */
+  .species-section {
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .species-label {
+    font-size: 0.67rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    padding-left: 0.25rem;
+  }
+
+  .species-row {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .species-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .species-box {
+    background: white;
+    border: 1px solid var(--ruled);
+    padding: 0.45rem 1rem;
+    text-align: center;
+    min-width: 110px;
+  }
+
+  .species-name {
+    font-family: 'IM Fell English', serif;
+    font-size: 0.95rem;
+  }
+
+  .species-type {
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 0.1rem;
+  }
+
+  /* accident row */
+  .accidents-section {
+    margin-top: 2.5rem;
+    border-top: 1px solid var(--vellum);
+    padding-top: 1.5rem;
+    width: 100%;
+  }
+
+  .accidents-title {
+    font-family: 'IM Fell English', serif;
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 0.75rem;
+    text-align: center;
+  }
+
+  .accidents-row {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .accident-chip {
+    background: var(--vellum);
+    border: 1px solid var(--ruled);
+    padding: 0.3rem 0.75rem;
+    font-size: 0.78rem;
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  /* skeleton / states */
+  .state-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 5rem 2rem;
+    color: var(--muted);
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .state-empty svg {
+    opacity: 0.2;
+  }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    padding: 4rem 0;
+    justify-content: center;
+  }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--ruled);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error {
+    color: var(--red);
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    padding: 2rem 0;
+    text-align: center;
+  }
+
+  /* vertical connector between rows */
+  .v-line {
+    width: 1px;
+    background: var(--ruled);
+    margin: 0 auto;
+  }
+
+  /* horizontal bracket for genus */
+  .h-bracket {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* tree drawing area using flexbox */
+  .tree-drawing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 0;
+  }
+
+  .row-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Porphyrian Tree</h1>
+  <p>Enter any term to generate its genus–species hierarchy</p>
+</header>
+
+<div class="input-area">
+  <div class="input-wrap">
+    <label>Subject term</label>
+    <input type="text" id="termInput" placeholder="e.g. human, justice, triangle…" autocomplete="off" />
+  </div>
+  <button class="generate" id="genBtn" onclick="generateTree()">Build tree</button>
+</div>
+
+<div class="main" id="main">
+  <div class="state-empty">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="18" y="2" width="12" height="8" rx="1" stroke="#1a1a1a" stroke-width="1.5"/>
+      <line x1="24" y1="10" x2="24" y2="18" stroke="#1a1a1a" stroke-width="1.5"/>
+      <rect x="4" y="18" width="12" height="8" rx="1" stroke="#1a1a1a" stroke-width="1.5"/>
+      <rect x="18" y="18" width="12" height="8" rx="1" stroke="#1a1a1a" stroke-width="1.5"/>
+      <rect x="32" y="18" width="12" height="8" rx="1" stroke="#1a1a1a" stroke-width="1.5"/>
+      <line x1="10" y1="18" x2="24" y2="10" stroke="#1a1a1a" stroke-width="1.5"/>
+      <line x1="24" y1="10" x2="38" y2="18" stroke="#1a1a1a" stroke-width="1.5"/>
+    </svg>
+    Enter a term above to build its Porphyrian tree
+  </div>
+</div>
+
+<script>
+const input = document.getElementById('termInput');
+const btn = document.getElementById('genBtn');
+const main = document.getElementById('main');
+
+input.addEventListener('keydown', e => { if (e.key === 'Enter') generateTree(); });
+
+async function generateTree() {
+  const term = input.value.trim();
+  if (!term) return;
+
+  btn.disabled = true;
+  main.innerHTML = `<div class="loading"><div class="spinner"></div> Constructing the tree for "${term}"…</div>`;
+
+  const prompt = `You are a classical logician and philosopher specializing in Aristotelian–Porphyrian logic. 
+Generate a Porphyrian tree (arbor porphyriana) for the term: "${term}".
+
+The Porphyrian tree traces the ontological ladder from the most general genus (summum genus) down through intermediate genera and their differentiae, to the species, and lists the individual accidents.
+
+Respond ONLY with a JSON object in this exact shape (no markdown, no extra text):
+{
+  "subject": "the input term exactly",
+  "summmumGenus": "the highest, most universal genus (e.g. Substance, Quality, Quantity)",
+  "hierarchy": [
+    {
+      "genus": "genus name",
+      "differentia": "the differentia that specifies this level downward",
+      "note": "one brief clarifying phrase (max 6 words)"
+    }
+  ],
+  "species": [
+    {
+      "name": "species name",
+      "differentia": "distinguishing differentia from its genus",
+      "isSubjectSpecies": true or false
+    }
+  ],
+  "accidents": ["accident1", "accident2", "accident3", "accident4", "accident5"]
+}
+
+Rules:
+- hierarchy should have 3–5 levels, descending from summumGenus toward the subject
+- species should list 3–5 coordinate species at the same level as the subject's proximate genus
+- isSubjectSpecies=true for the species that IS the subject term (or its containing species)
+- accidents are non-essential properties that happen to belong to the subject
+- Keep all names concise (1–4 words)
+- Be philosophically accurate for well-known terms; be creative but coherent for unusual ones`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
+    const tree = JSON.parse(text);
+    renderTree(tree);
+  } catch(e) {
+    main.innerHTML = `<div class="error">Could not build the tree. Please try again.<br><small>${e.message}</small></div>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderTree(tree) {
+  const container = document.createElement('div');
+  container.className = 'tree-container';
+
+  // ── summum genus node ──
+  container.appendChild(makeRow([
+    makeNodeBox(tree.summmumGenus || tree.summumGenus, 'Summum Genus', false)
+  ], 'Highest genus'));
+
+  // ── intermediate hierarchy ──
+  for (let i = 0; i < tree.hierarchy.length; i++) {
+    const h = tree.hierarchy[i];
+    container.appendChild(vLine(28));
+    container.appendChild(diffBadge(h.differentia));
+    container.appendChild(vLine(8));
+    container.appendChild(makeRow([
+      makeNodeBox(h.genus, h.note || 'Genus', false)
+    ], null));
+  }
+
+  // ── connector to species row ──
+  container.appendChild(vLine(28));
+
+  // ── species row ──
+  const speciesRow = document.createElement('div');
+  speciesRow.style.cssText = 'width:100%';
+
+  const specLabel = document.createElement('div');
+  specLabel.className = 'level-label';
+  specLabel.textContent = 'Coordinate species';
+  speciesRow.appendChild(specLabel);
+
+  const sRow = document.createElement('div');
+  sRow.className = 'species-row';
+  tree.species.forEach(sp => {
+    const sNode = document.createElement('div');
+    sNode.className = 'species-node';
+
+    const top = document.createElement('div');
+    top.style.cssText = 'width:1px;height:20px;background:var(--ruled);margin:0 auto;';
+    sNode.appendChild(top);
+
+    const box = document.createElement('div');
+    box.className = 'species-box' + (sp.isSubjectSpecies ? ' focus-node' : '');
+    box.innerHTML = `<div class="species-name">${esc(sp.name)}</div><div class="species-type">${sp.isSubjectSpecies ? 'subject' : 'species'}</div>`;
+    sNode.appendChild(box);
+
+    if (sp.differentia) {
+      const dl = document.createElement('div');
+      dl.style.cssText = 'width:1px;height:12px;background:var(--ruled);margin:0 auto;';
+      sNode.appendChild(dl);
+      const db = document.createElement('div');
+      db.style.cssText = 'font-size:0.65rem;font-style:italic;color:var(--muted);font-family:"IM Fell English",serif;text-align:center;max-width:130px;';
+      db.textContent = sp.differentia;
+      sNode.appendChild(db);
+    }
+    sRow.appendChild(sNode);
+  });
+  speciesRow.appendChild(sRow);
+  container.appendChild(speciesRow);
+
+  // ── accidents ──
+  if (tree.accidents && tree.accidents.length) {
+    const acc = document.createElement('div');
+    acc.className = 'accidents-section';
+    acc.innerHTML = `<div class="accidents-title">Accidents of ${esc(tree.subject)}</div>`;
+    const ar = document.createElement('div');
+    ar.className = 'accidents-row';
+    tree.accidents.forEach(a => {
+      const chip = document.createElement('div');
+      chip.className = 'accident-chip';
+      chip.textContent = a;
+      ar.appendChild(chip);
+    });
+    acc.appendChild(ar);
+    container.appendChild(acc);
+  }
+
+  main.innerHTML = '';
+  main.appendChild(container);
+}
+
+function makeNodeBox(name, type, isFocus) {
+  const box = document.createElement('div');
+  box.className = 'node-box' + (isFocus ? ' focus-node' : '');
+  box.innerHTML = `<div class="node-name">${esc(name)}</div><div class="node-type">${esc(type)}</div>`;
+  return box;
+}
+
+function makeRow(nodes, label) {
+  const wrap = document.createElement('div');
+  wrap.className = 'row-wrap';
+  if (label) {
+    const lbl = document.createElement('div');
+    lbl.className = 'level-label';
+    lbl.textContent = label;
+    wrap.appendChild(lbl);
+  }
+  const row = document.createElement('div');
+  row.className = 'node-row';
+  nodes.forEach(n => {
+    const node = document.createElement('div');
+    node.className = 'node';
+    node.appendChild(n);
+    row.appendChild(node);
+  });
+  wrap.appendChild(row);
+  return wrap;
+}
+
+function vLine(h) {
+  const d = document.createElement('div');
+  d.className = 'v-line';
+  d.style.height = h + 'px';
+  return d;
+}
+
+function diffBadge(text) {
+  const b = document.createElement('div');
+  b.className = 'diff-badge';
+  b.textContent = text;
+  return b;
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

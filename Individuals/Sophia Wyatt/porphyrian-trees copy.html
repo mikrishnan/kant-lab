@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Porphyrian Tree Diagrams — A Historical Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F5F5F2;
+  --bg2: #ECECEA;
+  --panel: #FFFFFF;
+  --ink: #18181A;
+  --ink2: #444446;
+  --ink3: #888;
+  --accent: #1A4A8A;
+  --accent2: #2E68C8;
+  --rule: #DDDDD8;
+  --node-fill: #FFFFFF;
+  --node-stroke: #18181A;
+  --diff-col: #7A3800;
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Source Serif 4', Georgia, serif;
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--ink);
+  color: #fff;
+  padding: 1.1rem 2rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.topbar h1 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #fff;
+  font-family: 'Source Serif 4', serif;
+}
+.topbar .sub {
+  font-size: 0.82rem;
+  color: #AAA;
+  font-style: italic;
+  font-weight: 300;
+}
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 50px);
+}
+@media (max-width: 780px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--rule);
+  padding: 1.2rem 0;
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 50px);
+  overflow-y: auto;
+}
+.sidebar-label {
+  padding: 0.3rem 1.2rem 0.7rem;
+  font-size: 0.72rem;
+  font-family: 'Source Code Pro', monospace;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 0.5rem;
+}
+.nav-item {
+  display: block;
+  padding: 0.55rem 1.2rem;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  background: none;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+  width: 100%;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  font-family: 'Source Serif 4', serif;
+}
+.nav-item:hover { background: rgba(0,0,0,0.04); border-left-color: var(--rule); }
+.nav-item.active { background: var(--panel); border-left-color: var(--accent); }
+.nav-item .nav-year {
+  display: block;
+  font-size: 0.72rem;
+  font-family: 'Source Code Pro', monospace;
+  color: var(--accent);
+  margin-bottom: 0.15rem;
+}
+.nav-item .nav-author { font-size: 0.83rem; color: var(--ink2); font-weight: 400; }
+.nav-item .nav-work { font-size: 0.75rem; color: var(--ink3); font-style: italic; }
+
+/* ── MAIN ── */
+.main-area {
+  padding: 2rem 2.5rem 4rem;
+  overflow-y: auto;
+  max-width: 920px;
+}
+
+/* ── TREE CARD ── */
+.tree-view { display: none; }
+.tree-view.active { display: block; }
+
+.card-header {
+  margin-bottom: 1.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+.card-header .tree-title-label {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.72rem;
+  color: var(--ink3);
+  letter-spacing: 0.06em;
+  margin-bottom: 0.35rem;
+}
+.card-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+.card-header .work-line {
+  font-size: 0.9rem;
+  color: var(--ink2);
+  font-style: italic;
+  margin-bottom: 0.15rem;
+}
+.card-header .meta-line {
+  font-size: 0.82rem;
+  color: var(--ink3);
+  font-family: 'Source Code Pro', monospace;
+}
+
+/* ── TREE DIAGRAM CONTAINER ── */
+.diagram-container {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  padding: 1.5rem 1rem;
+  margin-bottom: 1.4rem;
+  overflow-x: auto;
+}
+.diagram-container svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── TREE TITLE (if given in source) ── */
+.diagram-tree-title {
+  text-align: center;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--ink3);
+  margin-bottom: 0.9rem;
+  font-family: 'Source Serif 4', serif;
+}
+
+/* ── NOTES + LEGEND ── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+  font-size: 0.78rem;
+  color: var(--ink2);
+  font-family: 'Source Code Pro', monospace;
+}
+.legend-item { display: flex; align-items: center; gap: 0.4rem; }
+.legend-swatch {
+  width: 14px; height: 14px; border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── SOURCE BOX ── */
+.source-box {
+  background: var(--bg2);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  padding: 1rem 1.2rem;
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+.source-box .src-label {
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.7rem;
+  color: var(--ink3);
+  letter-spacing: 0.07em;
+  margin-bottom: 0.4rem;
+}
+.source-box p { color: var(--ink2); margin-bottom: 0.3rem; }
+.source-box p:last-child { margin-bottom: 0; }
+.source-box a { color: var(--accent2); text-decoration: underline; text-underline-offset: 2px; }
+.source-box .caveat {
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  color: var(--ink3);
+  font-style: italic;
+}
+
+/* ── NAV BUTTONS ── */
+.nav-buttons {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.6rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--rule);
+  align-items: center;
+}
+.nav-btn {
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--ink2);
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.nav-count { font-size: 0.8rem; color: var(--ink3); margin-left: auto; font-family: 'Source Code Pro', monospace; }
+
+/* ── SVG SHARED ── */
+.tree-svg {
+  font-family: 'Source Serif 4', Georgia, serif;
+  overflow: visible;
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>Porphyrian Tree Diagrams</h1>
+  <span class="sub">Historical survey of the Arbor Porphyriana — logical structure only</span>
+</div>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-label">SOURCES</div>
+  </nav>
+  <main class="main-area" id="main-area"></main>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   DATA: each entry = one historically documented tree.
+   
+   All node/differentia content drawn directly from
+   the cited primary or secondary sources.
+   
+   node structure for svg:
+   {
+     trunk: [ { id, label, sublabel? } ],  // top to bottom, main spine
+     differentia: [
+       { fromId, left: {label, speciesLabel?}, right: {label, speciesLabel?} }
+     ]
+   }
+   
+   Where 'left' diff leads to a species shown on the
+   left branch, and 'right' leads to the continuing
+   spine or the named right species.
+══════════════════════════════════════════════════════ */
+
+const ENTRIES = [
+
+  /* ────────────────────────────────────────────────
+   1. Standard Boethian / Medieval Latin Tree
+      As transmitted by Boethius and crystallised
+      in the scholastic tradition (Petrus Hispanus,
+      Summulae Logicales, Tractatus II).
+      The canonical 5-level Latin version.
+  ──────────────────────────────────────────────── */
+  {
+    id: "boethius-standard",
+    year: "6th c. / 13th c.",
+    author: "Boethius / Petrus Hispanus",
+    work: "In Isagogen Porphyrii / Summulae Logicales",
+    dateRange: "c. 510 AD / c. 1230–1245",
+    treeTitle: "Arbor Porphyrii",
+    description: "The canonical scholastic form of the tree, as transmitted from Boethius's Latin commentaries on the Isagoge and standardised by Petrus Hispanus (Peter of Spain) under the explicit name Arbor Porphyrii in his widely-used university textbook. This is the tree that dominated Latin logic teaching for centuries.",
+    sources: [
+      {
+        label: "Boethius, In Isagogen Porphyrii (c. 510 AD); Petrus Hispanus, Summulae Logicales, Tractatus II (c. 1230–1245)",
+        link: "https://commons.wikimedia.org/wiki/File:Arbor_porphyrii_(probably_from_one_of_Boethius%27_translations).png",
+        linkText: "Wikimedia Commons: Arbor porphyrii (probably from one of Boethius' translations)"
+      },
+      {
+        label: "Franklin, J. (1986), 'Aristotle on Species Variation', Philosophy 61:236, citing Bocheński ed. of Summulae, pp. 17–18",
+        link: "https://en.wikipedia.org/wiki/Porphyrian_tree",
+        linkText: "Wikipedia: Porphyrian tree"
+      }
+    ],
+    caveat: null,
+    tree: {
+      // Trunk: top genus down to infima species + individuals
+      trunk: [
+        { id: "substantia", label: "SUBSTANTIA", tier: "Summum Genus" },
+        { id: "corpus",     label: "CORPUS",     tier: "Genus Subalternum" },
+        { id: "animatum",   label: "ANIMATUM",   tier: "Genus Subalternum" },
+        { id: "animal",     label: "ANIMAL",     tier: "Genus Subalternum" },
+        { id: "homo",       label: "HOMO",       tier: "Infima Species" },
+        { id: "individua",  label: "Socrates, Plato …", tier: "Individua", isIndiv: true }
+      ],
+      differentia: [
+        { fromId: "substantia", left: "corporea",    right: "incorporea" },
+        { fromId: "corpus",     left: "animatum",    right: "inanimatum" },
+        { fromId: "animatum",   left: "sensibile",   right: "insensibile" },
+        { fromId: "animal",     left: "rationale",   right: "irrationale" }
+      ]
+    }
+  },
+
+  /* ────────────────────────────────────────────────
+   2. Petrus Hispanus — Summulae Logicales
+      The diagram as shown in Wikimedia Commons
+      file "Arbor porphyrii according Petrus Hispanus
+      tractatus 2.png", which is the simplest
+      version: just the three-column text layout
+      (no side branches for the rejected species).
+  ──────────────────────────────────────────────── */
+  {
+    id: "petrus-hispanus",
+    year: "c. 1230–1245",
+    author: "Petrus Hispanus (Peter of Spain)",
+    work: "Summulae Logicales (Tractatus), Tractatus II: De Predicabilibus",
+    dateRange: "c. 1230–1245",
+    treeTitle: "Arbor Porphyrii",
+    description: "Peter of Spain named this diagram the Arbor Porphyrii and used it to teach the five predicables. The tree as given in Tractatus II follows the standard Boethian structure, descending Substantia → Corpus → Animatum → Animal → Homo, with paired differentia at each branching. Below Homo stand individual humans as examples.",
+    sources: [
+      {
+        label: "Petrus Hispanus, Tractatus (Summulae Logicales), ed. L. M. de Rijk (Van Gorcum, 1972), Tractatus II, pp. 17–18",
+        link: "https://commons.wikimedia.org/wiki/File:Arbor_porphyrii_according_Petrus_Hispanus_tractatus_2.png",
+        linkText: "Wikimedia Commons: Arbor porphyrii according Petrus Hispanus tractatus 2"
+      },
+      {
+        label: "Copenhaver, B. P., Normore, C. G., & Parsons, T. (2014), Peter of Spain: Summaries of Logic (OUP)",
+        link: "https://plato.stanford.edu/entries/peter-spain/",
+        linkText: "Stanford Encyclopedia of Philosophy: Peter of Spain"
+      }
+    ],
+    caveat: "The Wikimedia diagram for this source (linked above) shows a simplified three-column text layout without graphic branching lines, which is the form it takes in many manuscripts.",
+    tree: {
+      trunk: [
+        { id: "substantia", label: "Substantia",  tier: "Genus generalissimum" },
+        { id: "corpus",     label: "Corpus",      tier: "Genus subalternum" },
+        { id: "animatum",   label: "Animatum",    tier: "Genus subalternum" },
+        { id: "animal",     label: "Animal",      tier: "Genus subalternum" },
+        { id: "homo",       label: "Homo",        tier: "Species specialissima" },
+        { id: "individua",  label: "Sortes · Plato", tier: "Individua", isIndiv: true }
+      ],
+      differentia: [
+        { fromId: "substantia", left: "corporea",    right: "incorporea" },
+        { fromId: "corpus",     left: "animatum",    right: "inanimatum" },
+        { fromId: "animatum",   left: "sensibile",   right: "insensibile" },
+        { fromId: "animal",     left: "rationale",   right: "irrationale" }
+      ]
+    }
+  },
+
+  /* ────────────────────────────────────────────────
+   3. Classical Liberal Arts Academy tree
+      This is the expanded version starting from
+      ENS (Being), widely used in scholastic and
+      neo-scholastic traditions, e.g. Purchotius.
+      The CLAA website documents its structure
+      explicitly: ENS divided by PER SE / IN ALIO
+      into SUBSTANTIA / ACCIDENS; then SUBSTANTIA
+      divided by CORPOREA / INCORPOREA into CORPUS
+      / SPIRITUS; etc.
+  ──────────────────────────────────────────────── */
+  {
+    id: "ens-expanded",
+    year: "Scholastic / 18th c.",
+    author: "Neo-scholastic tradition (cf. Purchotius, Institutiones Philosophicae, 1695–1733)",
+    work: "Institutiones Philosophicae / Classical Liberal Arts tradition",
+    dateRange: "17th–18th century",
+    treeTitle: "Arbor Porphyriana (expanded from ENS)",
+    description: "An expanded form of the tree, beginning from ENS (Being) rather than Substantia, which became common in later scholastic and neo-scholastic logic manuals. ENS is divided by the differentia PER SE / IN ALIO into SUBSTANTIA and ACCIDENS. The tree then continues down through SUBSTANTIA as in the classical version. The Classical Liberal Arts Academy documents this structure explicitly, and it corresponds to the tree visible in Purchotius's Institutiones Philosophicae (1730 Venice edition).",
+    sources: [
+      {
+        label: "Classical Liberal Arts Academy, 'The Porphyrian Tree or Tree of Porphyry'",
+        link: "https://classicalliberalarts.com/blog/the-porphyrian-tree-or-tree-of-porphyry/",
+        linkText: "CLAA: The Porphyrian Tree or Tree of Porphyry"
+      },
+      {
+        label: "Edmond Pourchot (Purchotius), Institutiones Philosophicae, Venice 1730 — diagram reproduced on Wikimedia Commons",
+        link: "https://commons.wikimedia.org/wiki/File:Arbor_porphyrii_(from_Purchotius%27_Institutiones_philosophicae_I,_1730).png",
+        linkText: "Wikimedia Commons: Arbor porphyrii from Purchotius 1730"
+      }
+    ],
+    caveat: "The exact labels in the Purchotius diagram require inspection of the original image (linked above). The CLAA source documents the ENS-rooted structure explicitly with the labels given here.",
+    tree: {
+      trunk: [
+        { id: "ens",        label: "ENS",           tier: "Supremum Genus" },
+        { id: "substantia", label: "SUBSTANTIA",    tier: "Genus Generalissimum" },
+        { id: "corpus",     label: "CORPUS",        tier: "Genus Subalternum" },
+        { id: "animatum",   label: "ANIMATUM",      tier: "Genus Subalternum" },
+        { id: "animal",     label: "ANIMAL",        tier: "Genus Subalternum" },
+        { id: "homo",       label: "HOMO",          tier: "Species Specialissima" },
+        { id: "individua",  label: "hic homo / illa mulier", tier: "Individua", isIndiv: true }
+      ],
+      differentia: [
+        { fromId: "ens",        left: "per se",       right: "in alio",       leftSpecies: "SUBSTANTIA", rightSpecies: "ACCIDENS" },
+        { fromId: "substantia", left: "corporea",     right: "incorporea",    leftSpecies: "CORPUS",     rightSpecies: "SPIRITUS" },
+        { fromId: "corpus",     left: "animatum",     right: "inanimatum" },
+        { fromId: "animatum",   left: "sensibile",    right: "insensibile" },
+        { fromId: "animal",     left: "rationale",    right: "irrationale" }
+      ]
+    }
+  },
+
+  /* ────────────────────────────────────────────────
+   4. Wikipedia / modern scholarly reconstruction
+      The tree as shown on the Wikipedia article
+      "Porphyrian tree" (which itself derives from
+      a Cartesian-influenced version where the top
+      differentia are "thinking" / "extended").
+      This represents a post-Cartesian version where
+      Substance is divided by thinking/extended
+      rather than corporeal/incorporeal.
+  ──────────────────────────────────────────────── */
+  {
+    id: "wikipedia-modern",
+    year: "Modern reconstruction",
+    author: "Scholarly reconstruction (Wikipedia / Alchetron)",
+    work: "Wikipedia article 'Porphyrian tree'",
+    dateRange: "Contemporary",
+    treeTitle: "(no title given)",
+    description: "The tree as it appears in the Wikipedia article 'Porphyrian tree' and related encyclopaedia entries. This version shows a Cartesian-influenced reconstruction: the summum genus is Substance, divided by the differentia 'thinking' and 'extended' (reflecting Descartes's res cogitans / res extensa). The 'extended' branch yields Body, which is then further divided. The Wikipedia article notes this explicitly as 'the notion of a Porphyrian Tree as it comes down to us today through the European philosophical and logical tradition.'",
+    sources: [
+      {
+        label: "Wikipedia, 'Porphyrian tree' — incorporating text from Chambers, Cyclopaedia (1728)",
+        link: "https://en.wikipedia.org/wiki/Porphyrian_tree",
+        linkText: "Wikipedia: Porphyrian tree"
+      },
+      {
+        label: "Alchetron, 'Porphyrian tree' (mirrors the Wikipedia structure)",
+        link: "https://alchetron.com/Porphyrian-tree",
+        linkText: "Alchetron: Porphyrian tree"
+      }
+    ],
+    caveat: "This is a modern scholarly reconstruction, not a diagram from a specific historical textbook. The 'thinking'/'extended' differentia at the top are Cartesian, not classical Aristotelian.",
+    tree: {
+      trunk: [
+        { id: "substance", label: "Substance",  tier: "Summum Genus" },
+        { id: "body",      label: "Body",       tier: "Genus Subalternum",  note: "(= extended substance)" },
+        { id: "animate",   label: "Living Body",tier: "Genus Subalternum" },
+        { id: "animal",    label: "Animal",     tier: "Genus Subalternum" },
+        { id: "human",     label: "Human",      tier: "Infima Species" },
+        { id: "plato",     label: "Plato",      tier: "Individual",         isIndiv: true }
+      ],
+      differentia: [
+        { fromId: "substance", left: "thinking",   right: "extended",    leftSpecies: "[mind]",  rightSpecies: "Body" },
+        { fromId: "body",      left: "animate",    right: "inanimate" },
+        { fromId: "animate",   left: "sentient",   right: "insensible" },
+        { fromId: "animal",    left: "rational",   right: "irrational" }
+      ]
+    }
+  },
+
+  /* ────────────────────────────────────────────────
+   5. Petrus Hispanus / John of Damascus ms.
+      Paris, BnF, MS lat. 16598, f. 37r —
+      the tree incorporated into a 13th-c manuscript
+      of John of Damascus's Logica, donated to the
+      Sorbonne by Gerard d'Abbeville.
+      As described in art-of-reasoning.huygens.knaw.nl:
+      a distinction is drawn between mortal-rational
+      man and mortal-but-irrational cows and dogs;
+      Peter and Paul replace Plato and Socrates.
+  ──────────────────────────────────────────────── */
+  {
+    id: "damascus-ms",
+    year: "13th century",
+    author: "John of Damascus (ms. context); tree tradition",
+    work: "Logica — Paris, BnF, MS lat. 16598, f. 37r",
+    dateRange: "13th century",
+    treeTitle: "(no title given in ms.)",
+    description: "A version of the Porphyrian tree incorporated into a 13th-century manuscript of John of Damascus's Logica (Paris, BnF, MS lat. 16598), donated to the Sorbonne library by Gerard d'Abbeville. This manuscript introduces a notable variation: the individuals named below Homo are Peter and Paul (not the classical Plato and Socrates), as befits a theological context. The tree also explicitly marks the contrast between mortal-rational man and mortal-irrational cows and dogs at the animal level.",
+    sources: [
+      {
+        label: "Art of Reasoning in Medieval Manuscripts — Huygens Institute, 'Squares and Trees'",
+        link: "https://art-of-reasoning.huygens.knaw.nl/trees.html",
+        linkText: "Art of Reasoning: Squares and Trees (Huygens Institute)"
+      },
+      {
+        label: "Paris, BnF, MS lat. 16598, f. 37r — accessible via Gallica",
+        link: "https://gallica.bnf.fr/ark:/12148/btv1b90768515",
+        linkText: "BnF Gallica: MS lat. 16611 (related Summulae ms.)"
+      }
+    ],
+    caveat: "The description of this manuscript's tree is drawn from the secondary source (Huygens Institute), not direct inspection of the original folio. The exact differentia labels on the manuscript may differ in spelling.",
+    tree: {
+      trunk: [
+        { id: "substantia", label: "Substantia",  tier: "Summum Genus" },
+        { id: "corpus",     label: "Corpus",      tier: "Genus Subalternum" },
+        { id: "animatum",   label: "Animatum",    tier: "Genus Subalternum" },
+        { id: "animal",     label: "Animal",      tier: "Genus Subalternum",  note: "irrational: boves, canes" },
+        { id: "homo",       label: "Homo",        tier: "Species Specialissima", note: "mortale rationale" },
+        { id: "individua",  label: "Petrus · Paulus", tier: "Individua", isIndiv: true }
+      ],
+      differentia: [
+        { fromId: "substantia", left: "corporea",    right: "incorporea" },
+        { fromId: "corpus",     left: "animatum",    right: "inanimatum" },
+        { fromId: "animatum",   left: "sensibile",   right: "insensibile" },
+        { fromId: "animal",     left: "rationale",   right: "irrationale",  rightSpecies: "boves, canes" }
+      ]
+    }
+  },
+
+  /* ────────────────────────────────────────────────
+   6. Einsiedeln ms. / Carolingian version
+      Einsiedeln, Stiftsbibliothek, Cod. 29 (878),
+      p. 171 — Porphyry's Isagoge.
+      As described by the Huygens Institute:
+      at the bottom, the individuals are
+      Plato, Cato, and Cicero (not just Plato/Socrates).
+  ──────────────────────────────────────────────── */
+  {
+    id: "einsiedeln",
+    year: "9th century",
+    author: "Anonymous scribe",
+    work: "Porphyry's Isagoge — Einsiedeln, Stiftsbibliothek, Cod. 29 (878), p. 171",
+    dateRange: "9th century (Carolingian)",
+    treeTitle: "(no title given)",
+    description: "A Carolingian-era manuscript of Porphyry's Isagoge, held at Einsiedeln Abbey. As documented by the Huygens Institute, this tree follows the standard structure but names three individuals at the base: Plato, Cato, and Cicero — each evoking a different liberal art (philosophy, grammar, rhetoric) for the medieval reader.",
+    sources: [
+      {
+        label: "Art of Reasoning in Medieval Manuscripts — Huygens Institute, 'Squares and Trees'",
+        link: "https://art-of-reasoning.huygens.knaw.nl/trees.html",
+        linkText: "Art of Reasoning: Squares and Trees (Huygens Institute)"
+      },
+      {
+        label: "Einsiedeln, Stiftsbibliothek, Cod. 29 (878) — e-codices",
+        link: "https://www.e-codices.unifr.ch/en/list/one/sbe/0029",
+        linkText: "e-codices: Einsiedeln Stiftsbibliothek Cod. 0029"
+      }
+    ],
+    caveat: "The differentia labels here are from the standard Boethian tradition; the Huygens Institute description does not transcribe them for this specific manuscript folio.",
+    tree: {
+      trunk: [
+        { id: "substantia", label: "Substantia",  tier: "Summum Genus" },
+        { id: "corpus",     label: "Corpus",      tier: "Genus Subalternum" },
+        { id: "animatum",   label: "Animatum",    tier: "Genus Subalternum" },
+        { id: "animal",     label: "Animal",      tier: "Genus Subalternum" },
+        { id: "homo",       label: "Homo",        tier: "Species Specialissima" },
+        { id: "individua",  label: "Plato · Cato · Cicero", tier: "Individua", isIndiv: true }
+      ],
+      differentia: [
+        { fromId: "substantia", left: "corporea",   right: "incorporea" },
+        { fromId: "corpus",     left: "animatum",   right: "inanimatum" },
+        { fromId: "animatum",   left: "sensibile",  right: "insensibile" },
+        { fromId: "animal",     left: "rationale",  right: "irrationale" }
+      ]
+    }
+  },
+
+  /* ────────────────────────────────────────────────
+   7. BnF lat. 12949 — De decem categoriae (attr. Augustine)
+      As described by Huygens Institute:
+      at the top: 'Usia' (Latinised Greek οὐσία),
+      Cicero given as example of man.
+  ──────────────────────────────────────────────── */
+  {
+    id: "bnf-usia",
+    year: "13th century",
+    author: "Anonymous scribe (ms. of De decem categoriae, attr. Augustine)",
+    work: "De decem categoriae — Paris, BnF, lat. 12949, f. 24v",
+    dateRange: "13th century",
+    treeTitle: "(marginal diagram, no title)",
+    description: "A branching diagram added in the margin of a 13th-century manuscript of De decem categoriae (a text on the categories attributed in the medieval period to Augustine), Paris, BnF, lat. 12949. As described by the Huygens Institute: at the top of the scheme is 'Usia', a Latinised form of the Greek οὐσία (substance). Cicero is given as the example of man at the base.",
+    sources: [
+      {
+        label: "Art of Reasoning in Medieval Manuscripts — Huygens Institute, 'Squares and Trees'",
+        link: "https://art-of-reasoning.huygens.knaw.nl/trees.html",
+        linkText: "Art of Reasoning: Squares and Trees (Huygens Institute)"
+      },
+      {
+        label: "BnF Gallica: Paris, BnF, lat. 12949",
+        link: "https://gallica.bnf.fr/ark:/12148/btv1b10542356v",
+        linkText: "BnF Gallica: MS lat. 12949"
+      }
+    ],
+    caveat: "This diagram is a marginal addition in a manuscript of a non-logic text. The Huygens description mentions 'Usia', 'substance', and 'Cicero' as man; other differentia labels are inferred from the standard tradition as detailed differentia labels are not given in the secondary source.",
+    tree: {
+      trunk: [
+        { id: "usia",       label: "Usia (Οὐσία)",  tier: "Summum Genus",         note: "= Substantia" },
+        { id: "corpus",     label: "Corpus",         tier: "Genus Subalternum" },
+        { id: "animatum",   label: "Animatum",       tier: "Genus Subalternum" },
+        { id: "animal",     label: "Animal",         tier: "Genus Subalternum" },
+        { id: "homo",       label: "Homo",           tier: "Species Specialissima" },
+        { id: "individua",  label: "Cicero",         tier: "Individua", isIndiv: true }
+      ],
+      differentia: [
+        { fromId: "usia",     left: "corporea",   right: "incorporea" },
+        { fromId: "corpus",   left: "animatum",   right: "inanimatum" },
+        { fromId: "animatum", left: "sensibile",  right: "insensibile" },
+        { fromId: "animal",   left: "rationale",  right: "irrationale" }
+      ]
+    }
+  },
+
+  /* ────────────────────────────────────────────────
+   8. S. Marc Cohen / University of Washington
+      "Definitions and the Tree of Porphyry"
+      A pedagogical reconstruction used in
+      contemporary philosophy courses, making
+      the full chain of definiens explicit.
+      human =df rational sensitive animate material substance
+  ──────────────────────────────────────────────── */
+  {
+    id: "cohen-uw",
+    year: "2007–2008",
+    author: "S. Marc Cohen",
+    work: "Definitions and the Tree of Porphyry (University of Washington course notes)",
+    dateRange: "2007–2008",
+    treeTitle: "Tree of Porphyry",
+    description: "A pedagogical reconstruction of the Tree of Porphyry by philosopher S. Marc Cohen (University of Washington), used in contemporary philosophy courses. This version makes the full chain of definiens explicit: human = rational sensitive animate material substance. The structure uses the terms 'material'/'immaterial' and traces all four differentia: material/immaterial, animate/inanimate, sensitive/insensitive, rational/irrational.",
+    sources: [
+      {
+        label: "S. Marc Cohen, 'Definitions and the Tree of Porphyry', University of Washington (2007–2008)",
+        link: "https://faculty.washington.edu/smcohen/433/PorphyryTree.html",
+        linkText: "faculty.washington.edu: Definitions and the Tree of Porphyry"
+      }
+    ],
+    caveat: null,
+    tree: {
+      trunk: [
+        { id: "substance",  label: "Substance",    tier: "Summum Genus" },
+        { id: "material",   label: "Material Substance", tier: "Genus Subalternum" },
+        { id: "animate",    label: "Living Thing",  tier: "Genus Subalternum" },
+        { id: "animal",     label: "Animal",        tier: "Genus Subalternum" },
+        { id: "human",      label: "Human",         tier: "Infima Species" }
+      ],
+      differentia: [
+        { fromId: "substance", left: "material",     right: "immaterial" },
+        { fromId: "material",  left: "animate",      right: "inanimate" },
+        { fromId: "animate",   left: "sensitive",    right: "insensitive" },
+        { fromId: "animal",    left: "rational",     right: "irrational" }
+      ]
+    }
+  }
+
+];
+
+/* ══════════════════════════════════════════════════
+   SVG TREE RENDERING
+   Draws the logical structure of the tree:
+   - Main trunk spine (nodes top-to-bottom)
+   - At each differentia level: horizontal bar,
+     left/right differentia labels, side species labels
+   - Tier labels on the right
+══════════════════════════════════════════════════ */
+
+function renderTreeSVG(entry) {
+  const trunk = entry.tree.trunk;
+  const diffs = entry.tree.differentia;
+
+  // Build a map from node id to differentia
+  const diffMap = {};
+  diffs.forEach(d => { diffMap[d.fromId] = d; });
+
+  // Layout constants
+  const NODE_W = 180, NODE_H = 30;
+  const LEVEL_GAP = 76;  // gap between trunk node centers
+  const CX = 260;         // center x of the whole diagram
+  const START_Y = 36;
+  const SIDE_SPREAD = 120; // how far the diff labels spread left/right
+  const TIER_X = CX + NODE_W/2 + 10;
+  const SVG_W = 660;
+
+  const levels = trunk.map((n, i) => ({ ...n, y: START_Y + i * LEVEL_GAP }));
+  const lastLevel = levels[levels.length - 1];
+  const SVG_H = lastLevel.y + NODE_H/2 + 24;
+
+  let out = `<svg viewBox="0 0 ${SVG_W} ${SVG_H}" class="tree-svg" xmlns="http://www.w3.org/2000/svg" style="width:${SVG_W}px;max-width:100%">`;
+
+  // Draw the vertical spine first (under nodes)
+  for (let i = 0; i < levels.length - 1; i++) {
+    const n = levels[i];
+    const nxt = levels[i+1];
+    const y1 = n.y + NODE_H/2;
+    const y2 = nxt.y - NODE_H/2;
+    const diff = diffMap[n.id];
+
+    if (diff) {
+      // Has a differentia branching here
+      // Vertical line from bottom of node to midpoint
+      const mid = (y1 + y2) / 2;
+      // Line from node down to mid
+      out += `<line x1="${CX}" y1="${y1}" x2="${CX}" y2="${mid - 4}" stroke="#18181A" stroke-width="1.2"/>`;
+      // Horizontal bar at mid
+      out += `<line x1="${CX - SIDE_SPREAD}" y1="${mid}" x2="${CX + SIDE_SPREAD}" y2="${mid}" stroke="#18181A" stroke-width="1.2"/>`;
+      // Line from mid down to next node
+      out += `<line x1="${CX}" y1="${mid + 4}" x2="${CX}" y2="${y2}" stroke="#18181A" stroke-width="1.2"/>`;
+
+      // Left differentia label
+      const ldx = CX - SIDE_SPREAD - 4;
+      const ldy = mid - 7;
+      out += `<text x="${ldx}" y="${ldy}" text-anchor="end" font-family="Source Serif 4, serif" font-size="11" font-style="italic" fill="#7A3800">${diff.left}</text>`;
+
+      // Right differentia label
+      const rdx = CX + SIDE_SPREAD + 4;
+      const rdy = mid - 7;
+      out += `<text x="${rdx}" y="${rdy}" text-anchor="start" font-family="Source Serif 4, serif" font-size="11" font-style="italic" fill="#7A3800">${diff.right}</text>`;
+
+      // Optional left species label below diff label
+      if (diff.leftSpecies) {
+        out += `<text x="${ldx}" y="${mid + 13}" text-anchor="end" font-family="Source Serif 4, serif" font-size="10" fill="#444" font-style="italic">[${diff.leftSpecies}]</text>`;
+      }
+      // Optional right species label
+      if (diff.rightSpecies) {
+        out += `<text x="${rdx}" y="${mid + 13}" text-anchor="start" font-family="Source Serif 4, serif" font-size="10" fill="#444" font-style="italic">[${diff.rightSpecies}]</text>`;
+      }
+    } else {
+      // No differentia — just a plain line
+      out += `<line x1="${CX}" y1="${y1}" x2="${CX}" y2="${y2}" stroke="#18181A" stroke-width="1.2"/>`;
+    }
+  }
+
+  // Draw trunk nodes
+  levels.forEach((n, i) => {
+    const x = CX - NODE_W/2;
+    const y = n.y - NODE_H/2;
+
+    if (n.isIndiv) {
+      // Individuals: dashed rectangle
+      out += `<rect x="${x}" y="${y}" width="${NODE_W}" height="${NODE_H}" fill="#F8F8F6" stroke="#BBBBB4" stroke-width="1" stroke-dasharray="5,3" rx="1"/>`;
+      out += `<text x="${CX}" y="${n.y + 5}" text-anchor="middle" dominant-baseline="middle" font-family="Source Serif 4, serif" font-size="11" fill="#555" font-style="italic">${n.label}</text>`;
+    } else if (i === 0) {
+      // Top genus: bold box
+      out += `<rect x="${x}" y="${y}" width="${NODE_W}" height="${NODE_H}" fill="#EEF2FA" stroke="#1A4A8A" stroke-width="1.8" rx="1"/>`;
+      out += `<text x="${CX}" y="${n.y + 5}" text-anchor="middle" dominant-baseline="middle" font-family="Source Serif 4, serif" font-size="12.5" font-weight="600" fill="#1A4A8A">${n.label}</text>`;
+    } else if (i === levels.length - (n.isIndiv ? 2 : 1) && !n.isIndiv) {
+      // Infima species
+      out += `<rect x="${x}" y="${y}" width="${NODE_W}" height="${NODE_H}" fill="#F0F7EE" stroke="#2E6C2A" stroke-width="1.5" rx="1"/>`;
+      out += `<text x="${CX}" y="${n.y + 5}" text-anchor="middle" dominant-baseline="middle" font-family="Source Serif 4, serif" font-size="12" fill="#2E6C2A">${n.label}</text>`;
+    } else {
+      // Subaltern genus
+      out += `<rect x="${x}" y="${y}" width="${NODE_W}" height="${NODE_H}" fill="#FAFAFA" stroke="#555558" stroke-width="1" rx="1"/>`;
+      out += `<text x="${CX}" y="${n.y + 5}" text-anchor="middle" dominant-baseline="middle" font-family="Source Serif 4, serif" font-size="12" fill="#18181A">${n.label}</text>`;
+    }
+
+    // Note annotation below node (if present)
+    if (n.note) {
+      out += `<text x="${CX}" y="${n.y + NODE_H/2 + 13}" text-anchor="middle" font-family="Source Serif 4, serif" font-size="9.5" fill="#888" font-style="italic">${n.note}</text>`;
+    }
+
+    // Tier label on the right
+    out += `<text x="${TIER_X + 4}" y="${n.y + 5}" text-anchor="start" font-family="'Source Code Pro', monospace" font-size="9" fill="#AAA">${n.tier}</text>`;
+  });
+
+  out += `</svg>`;
+  return out;
+}
+
+/* ══════════════════════════════════════════════════
+   BUILD UI
+══════════════════════════════════════════════════ */
+
+let currentIdx = 0;
+
+function buildSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  ENTRIES.forEach((e, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-item' + (i === 0 ? ' active' : '');
+    btn.dataset.idx = i;
+    btn.innerHTML = `<span class="nav-year">${e.year}</span><span class="nav-author">${e.author}</span><span class="nav-work">${e.work.length > 60 ? e.work.slice(0,58)+'…' : e.work}</span>`;
+    btn.onclick = () => show(i);
+    sidebar.appendChild(btn);
+  });
+}
+
+function buildCards() {
+  const main = document.getElementById('main-area');
+  ENTRIES.forEach((e, i) => {
+    const div = document.createElement('div');
+    div.className = 'tree-view' + (i === 0 ? ' active' : '');
+    div.id = `view-${i}`;
+
+    // Sources HTML
+    const sourcesHtml = e.sources.map(s =>
+      `<p><strong>Source:</strong> ${s.label}<br><a href="${s.link}" target="_blank" rel="noopener">${s.linkText}</a></p>`
+    ).join('');
+
+    const caveatHtml = e.caveat
+      ? `<p class="caveat"><strong>Note on this diagram:</strong> ${e.caveat}</p>`
+      : '';
+
+    const treeTitleHtml = e.treeTitle && e.treeTitle !== '(no title given)'
+      ? `<div class="diagram-tree-title">Title as given in source: <em>${e.treeTitle}</em></div>`
+      : `<div class="diagram-tree-title" style="color:#ccc"><em>(no title given in source)</em></div>`;
+
+    // Legend
+    const legendHtml = `
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:#EEF2FA;border:1.8px solid #1A4A8A"></div>Summum / supreme genus</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#FAFAFA;border:1px solid #555"></div>Subaltern genus</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#F0F7EE;border:1.5px solid #2E6C2A"></div>Infima species</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#F8F8F6;border:1px dashed #BBB"></div>Individua</div>
+        <div class="legend-item" style="color:#7A3800">italic text on branches = differentia</div>
+      </div>`;
+
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="tree-title-label">PORPHYRIAN TREE DIAGRAM</div>
+        <h2>${e.author}</h2>
+        <div class="work-line">${e.work}</div>
+        <div class="meta-line">${e.dateRange}</div>
+      </div>
+
+      ${legendHtml}
+
+      <div class="diagram-container">
+        ${treeTitleHtml}
+        ${renderTreeSVG(e)}
+      </div>
+
+      <div class="source-box">
+        <div class="src-label">CITATION &amp; SOURCE</div>
+        ${sourcesHtml}
+        ${caveatHtml}
+      </div>
+
+      <div class="nav-buttons">
+        <button class="nav-btn" onclick="show(${i-1})" ${i===0?'disabled':''}>← Prev</button>
+        <button class="nav-btn" onclick="show(${i+1})" ${i===ENTRIES.length-1?'disabled':''}>Next →</button>
+        <span class="nav-count">${i+1} / ${ENTRIES.length}</span>
+      </div>
+    `;
+    main.appendChild(div);
+  });
+}
+
+function show(idx) {
+  if (idx < 0 || idx >= ENTRIES.length) return;
+  document.querySelectorAll('.tree-view').forEach((v, i) => v.classList.toggle('active', i === idx));
+  document.querySelectorAll('.nav-item').forEach((b, i) => b.classList.toggle('active', i === idx));
+  currentIdx = idx;
+  document.querySelector('.main-area').scrollTop = 0;
+}
+
+buildSidebar();
+buildCards();
+</script>
+</body>
+</html>

@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arbor Kantiana: a Porphyrian tree reader for Kant</title>
+<meta name="description" content="Read Kant through his own divisions. Interactive Porphyrian trees for the Critique of Pure Reason, the Groundwork, and the Critique of the Power of Judgment.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lapis:#1c2b52;        /* the night sky of the canvas */
+  --lapis-deep:#15213f;
+  --gilt:#d2ad4c;         /* lines and differentiae on the canvas */
+  --gilt-ink:#80620f;     /* gilt, darkened for text on paper */
+  --paper:#f1f0ea;        /* reading panel */
+  --paper-2:#e6e4da;      /* sidebar */
+  --card:#f6f4ec;
+  --ink:#1f2635;
+  --ink-2:#4f5668;
+  --ink-3:#7a8091;
+  --rule:#cfccbf;
+  --link:#2b4486;
+  --text:"Libre Caslon Text", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --display:"Libre Caslon Display", "Libre Caslon Text", Georgia, serif;
+  --fraktur:"UnifrakturMaguntia", "Libre Caslon Display", Georgia, serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:var(--text);font-size:16px;line-height:1.55;color:var(--ink);background:var(--paper-2);
+  display:grid;grid-template-rows:auto 1fr;overflow:hidden;
+  font-variant-numeric:oldstyle-nums;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+
+/* ---------- header ---------- */
+.top{
+  display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;
+  padding:.55rem 1.1rem;background:var(--paper);border-bottom:1px solid var(--rule);
+}
+.mark{display:flex;align-items:baseline;gap:.7rem;margin-right:auto;min-width:0}
+.mark h1{font-family:var(--fraktur);font-weight:400;font-size:2rem;line-height:1;margin:0;letter-spacing:.01em}
+.mark p{margin:0;font-style:italic;color:var(--ink-2);font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tools{display:flex;gap:.3rem;flex-wrap:wrap;align-items:center}
+.tool{
+  background:none;border:1px solid transparent;border-radius:3px;padding:.25rem .55rem;cursor:pointer;
+  font-size:.92rem;color:var(--ink-2)
+}
+.tool:hover{border-color:var(--rule);color:var(--ink)}
+.tool[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.sep{width:1px;height:1.2rem;background:var(--rule);margin:0 .25rem}
+details.menu{position:relative}
+details.menu summary{list-style:none}
+details.menu summary::-webkit-details-marker{display:none}
+details.menu .pop{
+  position:absolute;right:0;top:calc(100% + 4px);z-index:30;background:var(--paper);
+  border:1px solid var(--rule);border-radius:3px;padding:.3rem;min-width:13rem;
+  box-shadow:0 8px 24px -12px rgba(21,33,63,.45)
+}
+details.menu .pop button{display:block;width:100%;text-align:left;background:none;border:0;padding:.4rem .6rem;cursor:pointer;border-radius:2px}
+details.menu .pop button:hover{background:var(--paper-2)}
+details.menu .pop small{display:block;color:var(--ink-3);font-size:.8rem}
+.only-narrow{display:none}
+
+/* ---------- main grid ---------- */
+main{display:grid;grid-template-columns:17.5rem minmax(0,1fr) 25rem;min-height:0}
+
+/* sidebar */
+.side{background:var(--paper-2);border-right:1px solid var(--rule);display:flex;flex-direction:column;min-height:0}
+.search{padding:.8rem .9rem .5rem}
+.search input{
+  width:100%;font:inherit;font-size:.95rem;padding:.4rem .6rem;border:1px solid var(--rule);
+  border-radius:3px;background:var(--paper);color:var(--ink)
+}
+.side-scroll{overflow:auto;padding:0 .9rem 1.5rem;flex:1}
+.side h2{font-family:var(--display);font-weight:400;font-size:1.05rem;margin:1rem 0 .35rem;color:var(--ink-2);font-style:italic}
+.trees{list-style:none;margin:0;padding:0}
+.trees button{
+  display:block;width:100%;text-align:left;background:none;border:0;border-left:2px solid transparent;
+  padding:.35rem .55rem;cursor:pointer;line-height:1.3;border-radius:0 3px 3px 0
+}
+.trees button:hover{background:rgba(255,255,255,.45)}
+.trees button.on{border-left-color:var(--gilt-ink);background:var(--paper)}
+.trees small{display:block;color:var(--ink-3);font-size:.8rem;font-style:italic}
+.outline,.outline ul{list-style:none;margin:0;padding:0}
+.outline ul{padding-left:.85rem;border-left:1px solid var(--rule);margin-left:.45rem}
+.outline button{
+  display:flex;gap:.4rem;align-items:baseline;width:100%;text-align:left;background:none;border:0;
+  padding:.16rem .35rem;cursor:pointer;font-size:.9rem;line-height:1.3;border-radius:2px;color:var(--ink-2)
+}
+.outline button:hover{color:var(--ink);background:rgba(255,255,255,.45)}
+.outline button.on{color:var(--ink);background:var(--paper);font-weight:700}
+.outline button.empty{color:var(--ink-3);font-style:italic}
+.dot{display:inline-block;width:.42rem;height:.42rem;border-radius:50%;background:var(--gilt-ink);flex:none;transform:translateY(-.1rem)}
+.results{list-style:none;margin:0;padding:0}
+.results button{display:block;width:100%;text-align:left;background:none;border:0;padding:.45rem .4rem;cursor:pointer;border-bottom:1px solid var(--rule);line-height:1.35}
+.results button:hover{background:rgba(255,255,255,.45)}
+.results b{font-weight:700}
+.results span{display:block;font-size:.8rem;color:var(--ink-3);font-style:italic}
+.results em{display:block;font-size:.85rem;color:var(--ink-2);font-style:normal}
+.empty-msg{color:var(--ink-3);font-style:italic;font-size:.9rem}
+
+/* canvas */
+.stage{position:relative;min-height:0;overflow:hidden;background:var(--lapis)}
+.stage::before{
+  /* the starry heavens above: a fixed, quiet field of points */
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;
+  background-image:
+    radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 33% 72%, #fff 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 58% 26%, #f3e3b0 50%, transparent 51%),
+    radial-gradient(1px 1px at 81% 61%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 70% 88%, #fff 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 22% 46%, #dfe6ff 50%, transparent 51%),
+    radial-gradient(1px 1px at 91% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 46% 54%, #fff 50%, transparent 51%);
+  background-size:420px 380px;
+}
+.stage::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.07), transparent 60%),
+             linear-gradient(to bottom, transparent 70%, rgba(10,16,32,.35));
+}
+#svg{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:none;z-index:1}
+#svg.dragging{cursor:grabbing}
+#vp{transform-origin:0 0}
+.edge{fill:none;stroke:rgba(206,214,235,.38);stroke-width:1.4}
+.edge.on{stroke:var(--gilt);stroke-width:2.4}
+.edge.dash{stroke-dasharray:5 5}
+.card{cursor:pointer}
+.card rect.face{fill:var(--card);stroke:#b9bfd0;stroke-width:1}
+.card rect.inner{fill:none;stroke:rgba(31,38,53,.12);stroke-width:1}
+.card:hover rect.face{stroke:var(--gilt)}
+.card.path rect.face{stroke:var(--gilt);stroke-width:1.6}
+.card.sel rect.face{fill:#fffdf4;stroke:var(--gilt);stroke-width:3}
+.card.root rect.face{fill:#fbf8ec}
+.card.empty rect.face{fill:rgba(246,244,236,.18);stroke:rgba(246,244,236,.55);stroke-dasharray:4 4}
+.card.empty text{fill:#e9ecf5}
+.card.formula rect.face{stroke-dasharray:6 3}
+.card.hidden rect.face{fill:#2a3b68;stroke:rgba(210,173,76,.55)}
+.card.hidden text{fill:#e9ecf5}
+.card:focus-visible{outline:none}
+.card:focus-visible rect.face{stroke:#fff;stroke-width:3}
+.t-diff{font-family:var(--text);font-style:italic;font-size:12px;fill:var(--gilt-ink)}
+.t-label{font-family:var(--display);font-size:17.5px;fill:var(--ink)}
+.t-de{font-family:var(--text);font-style:italic;font-size:11.5px;fill:var(--ink-3)}
+.t-q{font-family:var(--display);font-size:26px;fill:var(--gilt)}
+.tog circle{fill:var(--lapis-deep);stroke:var(--gilt);stroke-width:1.2}
+.tog text{font-family:var(--text);font-size:11px;fill:var(--gilt);font-variant-numeric:lining-nums}
+.tog{cursor:pointer}
+.tog:hover circle{fill:var(--gilt)}
+.tog:hover text{fill:var(--lapis-deep)}
+.notedot{fill:var(--gilt-ink)}
+
+.stage-ui{position:absolute;z-index:2;display:flex;gap:.3rem}
+.zoom{right:.8rem;bottom:.8rem;flex-direction:column}
+.zoom button{
+  width:2rem;height:2rem;border-radius:3px;border:1px solid rgba(210,173,76,.6);background:rgba(21,33,63,.85);
+  color:var(--gilt);cursor:pointer;font-size:1.05rem;line-height:1
+}
+.zoom button:hover{background:var(--gilt);color:var(--lapis-deep)}
+.legend{
+  left:.8rem;bottom:.8rem;color:#c9cfe0;font-size:.82rem;font-style:italic;gap:1rem;flex-wrap:wrap;
+  max-width:calc(100% - 4rem);pointer-events:none
+}
+.legend span{display:flex;align-items:center;gap:.35rem}
+.legend i{display:inline-block;width:1.4rem;border-top:2px solid var(--gilt)}
+.legend i.d{border-top-style:dashed;border-top-color:#c9cfe0}
+.stage-title{
+  left:1rem;top:.8rem;right:1rem;color:#e9ecf5;pointer-events:none;display:block
+}
+.stage-title b{font-family:var(--display);font-weight:400;font-size:1.35rem;display:block;line-height:1.2}
+.stage-title span{font-style:italic;color:#aeb6cc;font-size:.88rem}
+
+/* reading panel */
+.panel{background:var(--paper);border-left:1px solid var(--rule);overflow:auto;min-height:0}
+.panel-in{padding:1.1rem 1.4rem 2.5rem;max-width:36rem}
+.crumbs{display:flex;flex-wrap:wrap;gap:.15rem .3rem;font-size:.82rem;color:var(--ink-3);margin-bottom:.8rem}
+.crumbs button{background:none;border:0;padding:0;cursor:pointer;color:var(--link);font-size:inherit}
+.crumbs button:hover{text-decoration:underline}
+.kind{font-style:italic;color:var(--ink-2);font-size:.92rem;margin:0}
+.panel h2{font-family:var(--display);font-weight:400;font-size:2rem;line-height:1.12;margin:.1rem 0 .3rem}
+.de{font-style:italic;color:var(--ink-2);margin:0}
+.ref{margin:.15rem 0 0;color:var(--ink-3);font-size:.9rem;font-variant-numeric:lining-nums}
+.badge{display:inline-block;margin-top:.5rem;font-size:.8rem;font-style:italic;border:1px dashed var(--ink-3);padding:.05rem .45rem;border-radius:2px;color:var(--ink-2)}
+.panel section{margin-top:1.35rem}
+.panel h3{font-family:var(--display);font-weight:400;font-size:1.12rem;margin:0 0 .45rem;color:var(--ink)}
+.panel p{margin:0 0 .6rem}
+.intro{border-left:2px solid var(--gilt-ink);padding-left:.9rem;color:var(--ink-2)}
+.defn{background:#fff;border:1px solid var(--rule);border-radius:3px;padding:.75rem .9rem}
+.defn dl{display:grid;grid-template-columns:auto 1fr;gap:.25rem .9rem;margin:0}
+.defn dt{color:var(--ink-3);font-style:italic;font-size:.88rem;padding-top:.08rem}
+.defn dd{margin:0}
+.defn .diffword{color:var(--gilt-ink);font-style:italic}
+.defn .formula{margin:.6rem 0 0;padding-top:.55rem;border-top:1px solid var(--rule);font-size:.95rem}
+.trunk{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;font-size:.86rem;row-gap:0}
+.trunk .g{
+  grid-column:2;justify-self:center;text-align:center;border:1px solid var(--rule);background:#fff;padding:.18rem .6rem;border-radius:2px;
+  max-width:11rem;line-height:1.25;cursor:pointer
+}
+.trunk .g.here{border-color:var(--gilt-ink);border-width:2px;font-weight:700;cursor:default}
+.trunk .stem{grid-column:2;justify-self:center;width:1px;height:1.6rem;background:var(--ink-3)}
+.trunk .l{grid-column:1;text-align:right;padding-right:.7rem;color:var(--gilt-ink);font-style:italic;line-height:1.25}
+.trunk .r{grid-column:3;padding-left:.7rem;line-height:1.25}
+.trunk .r button{display:block;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--ink-3);text-decoration:line-through;text-decoration-color:rgba(122,128,145,.5);font-style:italic;font-size:inherit}
+.trunk .r button:hover{color:var(--link);text-decoration:none}
+.trunk .r button + button{margin-top:.3rem}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:.25rem .9rem;margin:0;font-size:.95rem}
+.facts dt{color:var(--ink-3);font-style:italic}
+.facts dd{margin:0}
+.note-box{background:#fff;border-left:2px solid var(--link);padding:.6rem .85rem;border-radius:0 3px 3px 0}
+.q{font-family:var(--display);font-size:1.15rem;line-height:1.35;color:var(--ink);margin:0}
+.species,.xrefs{list-style:none;margin:0;padding:0}
+.species li,.xrefs li{border-top:1px solid var(--rule)}
+.species li:last-child,.xrefs li:last-child{border-bottom:1px solid var(--rule)}
+.species button,.xrefs button{display:block;width:100%;text-align:left;background:none;border:0;padding:.42rem .2rem;cursor:pointer;line-height:1.3}
+.species button:hover,.xrefs button:hover{background:#fff}
+.species b,.xrefs b{font-weight:400;color:var(--link)}
+.species span,.xrefs span{display:block;font-size:.85rem;font-style:italic;color:var(--ink-3)}
+.species .diffword{color:var(--gilt-ink)}
+textarea#note{
+  width:100%;min-height:7rem;font:inherit;font-size:.95rem;line-height:1.5;padding:.6rem .7rem;border:1px solid var(--rule);
+  border-radius:3px;background:#fff;color:var(--ink);resize:vertical
+}
+.hint{font-size:.8rem;color:var(--ink-3);font-style:italic;margin:.3rem 0 0}
+.walk{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:1.6rem;padding-top:.9rem;border-top:1px solid var(--rule)}
+.walk button{background:none;border:1px solid var(--rule);border-radius:3px;padding:.35rem .7rem;cursor:pointer;max-width:45%;line-height:1.25;font-size:.9rem;text-align:left}
+.walk button:last-child{text-align:right}
+.walk button:hover:not(:disabled){border-color:var(--ink)}
+.walk button:disabled{opacity:.35;cursor:default}
+.walk small{display:block;color:var(--ink-3);font-size:.75rem;font-style:italic}
+.walk .pos{font-size:.8rem;color:var(--ink-3);font-variant-numeric:lining-nums;white-space:nowrap}
+
+/* dialog + toast */
+dialog{border:1px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink);max-width:40rem;width:calc(100% - 2rem);padding:0}
+dialog::backdrop{background:rgba(21,33,63,.55)}
+.dlg{padding:1.4rem 1.7rem 1.6rem;max-height:80vh;overflow:auto}
+.dlg h2{font-family:var(--display);font-weight:400;font-size:1.7rem;margin:0 0 .6rem}
+.dlg h3{font-family:var(--display);font-weight:400;font-size:1.15rem;margin:1.2rem 0 .3rem}
+.dlg p,.dlg li{max-width:34rem}
+.dlg kbd{font-family:var(--text);font-size:.85rem;border:1px solid var(--rule);border-bottom-width:2px;border-radius:3px;padding:0 .35rem;background:#fff;font-variant-numeric:lining-nums}
+.dlg table{border-collapse:collapse;font-size:.95rem}
+.dlg td{padding:.18rem .9rem .18rem 0;vertical-align:top}
+.dlg .close{float:right;background:none;border:1px solid var(--rule);border-radius:3px;padding:.2rem .6rem;cursor:pointer}
+.toast{
+  position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%) translateY(.6rem);z-index:50;
+  background:var(--ink);color:var(--paper);padding:.5rem 1rem;border-radius:3px;font-size:.92rem;
+  opacity:0;visibility:hidden;transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s;max-width:calc(100% - 2rem)
+}
+.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);transition:opacity .2s ease,transform .2s ease}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  main{grid-template-columns:15rem minmax(0,1fr) 21rem}
+  .mark p{display:none}
+}
+@media (max-width:900px){
+  body{overflow:auto;height:auto}
+  html,body{height:auto}
+  main{grid-template-columns:1fr;grid-template-rows:auto 62vh auto}
+  .side{grid-row:1}
+  .stage{grid-row:2;height:62vh}
+  .panel{grid-row:3}
+  .side{border-right:0;border-bottom:1px solid var(--rule);display:none;max-height:60vh}
+  body.side-open .side{display:flex}
+  .only-narrow{display:inline-block}
+  .panel{border-left:0;border-top:1px solid var(--rule);overflow:visible}
+  .panel-in{max-width:none}
+  .legend{display:none}
+  .stage-title b{font-size:1.05rem}
+  .stage-title span{font-size:.78rem}
+}
+@media (prefers-reduced-motion:reduce){
+  #vp{transition:none!important}
+  .toast{transition:none}
+}
+@media print{
+  .top,.side,.stage{display:none}
+  main{display:block}
+  .panel{border:0}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="mark">
+    <h1>Arbor Kantiana</h1>
+    <p>Read Kant through his own divisions, from genus to species.</p>
+  </div>
+  <nav class="tools" aria-label="Tree tools">
+    <button class="tool only-narrow" id="btnSide" aria-expanded="false">Trees</button>
+    <button class="tool" id="btnOrient" title="Switch between a top-down tree and a left-to-right outline (O)">Turn sideways</button>
+    <button class="tool" id="btnFit" title="Fit the tree to the window (F)">Fit</button>
+    <button class="tool" id="btnExpand" title="Open every branch">Open all</button>
+    <button class="tool" id="btnCollapse" title="Close every branch below the first division">Close all</button>
+    <button class="tool" id="btnRecall" aria-pressed="false" title="Hide species names so you can recall them, then click to check (R)">Recall</button>
+    <span class="sep" aria-hidden="true"></span>
+    <details class="menu" id="menuFile">
+      <summary class="tool">Save &amp; load</summary>
+      <div class="pop" role="menu">
+        <button id="btnExportNotes" role="menuitem">Save notes<small>As a JSON file you can load again</small></button>
+        <button id="btnExportMd" role="menuitem">Save notes as Markdown<small>For a commonplace book or a paper draft</small></button>
+        <button id="btnExportTree" role="menuitem">Save this tree<small>JSON, a template for building your own</small></button>
+        <button id="btnImport" role="menuitem">Load a file<small>Notes or tree JSON</small></button>
+      </div>
+    </details>
+    <button class="tool" id="btnHelp" title="How to use the reader (?)">Guide</button>
+    <input type="file" id="file" accept="application/json,.json" hidden>
+  </nav>
+</header>
+
+<main>
+  <aside class="side" aria-label="Trees and outline">
+    <div class="search">
+      <label for="q" class="sr" style="position:absolute;left:-9999px">Search all trees</label>
+      <input id="q" type="search" placeholder="Search terms, German, A/B pages" autocomplete="off">
+    </div>
+    <div class="side-scroll">
+      <div id="searchOut" hidden></div>
+      <div id="browse">
+        <h2>Divisions</h2>
+        <ul class="trees" id="treeList"></ul>
+        <h2>Outline of this tree</h2>
+        <ul class="outline" id="outline"></ul>
+      </div>
+    </div>
+  </aside>
+
+  <section class="stage" aria-label="Tree diagram">
+    <div class="stage-ui stage-title" id="stageTitle"></div>
+    <svg id="svg" role="img" aria-label="Porphyrian tree diagram"><g id="vp"></g></svg>
+    <div class="stage-ui legend" aria-hidden="true">
+      <span><i></i> path from the highest genus</span>
+      <span><i class="d"></i> formulation or empty class</span>
+      <span>Drag to move, scroll to zoom</span>
+    </div>
+    <div class="stage-ui zoom">
+      <button id="zIn" aria-label="Zoom in">+</button>
+      <button id="zOut" aria-label="Zoom out">−</button>
+    </div>
+  </section>
+
+  <article class="panel" aria-live="polite"><div class="panel-in" id="panel"></div></article>
+</main>
+
+<dialog id="help">
+  <div class="dlg">
+    <button class="close" id="helpClose">Close</button>
+    <h2>Reading with a Porphyrian tree</h2>
+    <p>In his <em>Isagoge</em> (3rd century), Porphyry showed how a highest genus, substance, divides by opposed differences (corporeal or incorporeal, animate or inanimate, rational or irrational) until it reaches a species like human being. Every species is then defined by its <em>proximate genus</em> plus its <em>specific difference</em>.</p>
+    <p>Kant thinks this way constantly. He builds his books as divisions, and in places he draws the ladder himself: the division of representations at A320/B376 is a textbook Porphyrian tree. Each diagram here maps one such division. Pick a node and the panel shows its genus and difference, the branches it rules out, Kant’s location in the text, a gloss, a question to keep in mind while reading, and links to the same idea in other trees.</p>
+    <p>Where Kant’s text resists the form, the tree says so. Dashed nodes are either empty classes (like the analytic a posteriori) or formulations that are aspects of one principle rather than species of a genus. Noticing where a division breaks down is part of reading Kant well.</p>
+
+    <h3>Keys</h3>
+    <table>
+      <tr><td><kbd>→</kbd> <kbd>←</kbd></td><td>Next or previous node in reading order</td></tr>
+      <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Up to the genus, down to the first species</td></tr>
+      <tr><td><kbd>/</kbd></td><td>Search every tree</td></tr>
+      <tr><td><kbd>F</kbd></td><td>Fit the tree to the window</td></tr>
+      <tr><td><kbd>O</kbd></td><td>Turn the tree sideways or back</td></tr>
+      <tr><td><kbd>R</kbd></td><td>Recall mode: names are hidden until you click</td></tr>
+      <tr><td><kbd>?</kbd></td><td>This guide</td></tr>
+    </table>
+
+    <h3>Citations</h3>
+    <p>The <em>Critique of Pure Reason</em> is cited by the pages of the first (A, 1781) and second (B, 1787) editions; other works by volume and page of the Academy edition, so 4:421 is volume 4, page 421. These margins appear in most modern translations. Page references mark where a section begins or where a point is made, and are worth checking against your own edition.</p>
+
+    <h3>Your notes</h3>
+    <p>Notes stay in this browser tab while it is open. Use <em>Save &amp; load</em> to save them as a file and load them in a later session. You can also save a tree as JSON, edit it, and load it back to build trees for other works.</p>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* =====================================================================
+   DATA
+   Each tree: { id, title, work, source, intro, orient?, openDepth?, root }
+   Each node: { id, label, de?, ref?, diff?, kind?, empty?, gloss?, note?, q?,
+                facts?: [[term, value]...], links?: ["treeId:nodeId"...], children? }
+   diff is the specific difference that separates a node from its siblings.
+   kind: "formulation" marks a node that is an aspect, not a species.
+   ===================================================================== */
+const N = (o, ...children) => ({ ...o, children });
+
+const TREES = [
+
+/* ---------- 1. The ladder of representations ---------- */
+{
+  id: "representations",
+  title: "The ladder of representations",
+  work: "Critique of Pure Reason",
+  source: "A320/B376–377, Transcendental Dialectic, Book I, §1",
+  intro: "In the middle of the Dialectic Kant stops to fix his vocabulary, complaining that the word ‘idea’ is being used for every sort of representation. His remedy is a strict ladder (Stufenleiter) that descends from the widest genus to the idea proper. It is the closest thing in the Critique to a textbook Porphyrian tree, and the best single key to his technical terms.",
+  root: N({ id: "representation", label: "Representation", de: "Vorstellung (repraesentatio)", ref: "A320/B376",
+    gloss: "The highest genus of the ladder. Kant does not define it, since any definition would itself be made of representations, so it serves as the widest class under which every mental content falls.",
+    note: "Some translators render Vorstellung as ‘presentation’. Whatever word your edition uses, everything Kant later calls a concept, an intuition or an idea is first of all a kind of representation.",
+    q: "Why might the highest genus of a system built by genus and difference have to stay undefined?" },
+    N({ id: "perception", label: "Perception", de: "perceptio (Vorstellung mit Bewusstsein)", ref: "A320/B376",
+      diff: "accompanied by consciousness",
+      gloss: "A representation of which one is conscious. In this passage ‘perceptio’ is a broad technical term, wider than the empirical perception (Wahrnehmung) of the Analytic.",
+      note: "The ladder never names the opposite branch, representations without consciousness, but the division implies it. Kant allows elsewhere, for instance in the Anthropology, that we have many ‘obscure’ representations.",
+      q: "What would it mean to have a representation without being conscious of it?",
+      facts: [["Implied opposite", "representation without consciousness"]] },
+      N({ id: "sensation", label: "Sensation", de: "Empfindung (sensatio)", ref: "A320/B376",
+        diff: "relating only to the subject, as a change in its state",
+        gloss: "A perception that refers only to the subject. It registers how the subject is affected, not what object is there, which is why sensation supplies the matter of appearance in the Aesthetic while the form comes from elsewhere.",
+        q: "If sensation reports only our own state, how can it contribute to the cognition of an object at all?",
+        links: ["contents:aesthetic", "categories:reality"] }),
+      N({ id: "cognition", label: "Cognition", de: "Erkenntnis (cognitio)", ref: "A320/B376",
+        diff: "objective",
+        gloss: "A perception that refers to an object. ‘Cognition’ is not yet knowledge in the modern sense of justified true belief; it simply names a representation with objective reference.",
+        note: "Older translations render Erkenntnis as ‘knowledge’. When you meet ‘knowledge’ in Kemp Smith, ask whether ‘cognition’ fits the sentence better.",
+        q: "Can a cognition, in this sense, be false?" },
+        N({ id: "intuition", label: "Intuition", de: "Anschauung (intuitus)", ref: "A320/B377; cf. A19/B33",
+          diff: "immediate and singular",
+          gloss: "A cognition that relates directly to its object and is of an individual. For human beings intuition is always sensible: objects are given to us only insofar as we are affected by them.",
+          q: "Why does Kant insist that only intuition, never thought, can give us an object?",
+          links: ["contents:aesthetic", "contents:space", "contents:time"] }),
+        N({ id: "concept", label: "Concept", de: "Begriff (conceptus)", ref: "A320/B377",
+          diff: "mediate, through a mark common to several things",
+          gloss: "A cognition that relates to its object only indirectly, through a feature (Merkmal) that many things can share. Concepts are general where intuitions are singular.",
+          note: "Keep this pair in view through the whole Analytic. A51/B75: thoughts without content are empty, intuitions without concepts are blind.",
+          q: "What does a concept need from intuition in order to have an object?" },
+          N({ id: "empirical-concept", label: "Empirical concept", de: "empirischer Begriff", ref: "A320/B377",
+            diff: "drawn from experience",
+            gloss: "A concept whose content is abstracted from what experience has given, such as gold or dog." }),
+          N({ id: "notion", label: "Pure concept, or notion", de: "reiner Begriff (notio)", ref: "A320/B377",
+            diff: "originating in the understanding alone",
+            gloss: "A pure concept that arises in the understanding alone and not in a pure image of sensibility. The categories belong here. The qualification excludes the figures of geometry, which are pure but rest on construction in intuition.",
+            q: "Why are geometrical figures pure but not notions?",
+            links: ["categories:categories"] },
+            N({ id: "idea", label: "Idea", de: "Idee (Vernunftbegriff)", ref: "A320/B377",
+              diff: "made from notions, exceeding all possible experience",
+              gloss: "A concept of reason: a concept built from notions that goes beyond anything experience could supply. The soul, the world as a whole, and God are the ideas the Dialectic examines. Kant remarks that anyone who has grasped the ladder will find it intolerable to hear the representation of red called an idea.",
+              q: "If no experience can ever match an idea, what legitimate use could ideas have? Look ahead to the Appendix at A642/B670.",
+              links: ["contents:ideas", "contents:paralogisms", "contents:antinomy", "contents:ideal", "contents:regulative"] })
+          )
+        )
+      )
+    )
+  )
+},
+
+/* ---------- 2. Kinds of judgment ---------- */
+{
+  id: "judgments",
+  title: "Kinds of judgment",
+  work: "Critique of Pure Reason",
+  source: "Introduction, A6–10 / B1–24",
+  intro: "The Introduction sorts judgments by two different questions: does the predicate belong to the subject concept, and does justification depend on experience? Forcing these two cuts into one Porphyrian tree shows where Kant’s central problem lives, on the branch of synthetic judgments known a priori, and it exposes one branch that must stay empty.",
+  root: N({ id: "judgment", label: "Judgment", de: "Urteil", ref: "A6/B10",
+    gloss: "Kant considers affirmative judgments relating a subject to a predicate, adding that the application to negative ones is easy. Either the predicate belongs to the subject as something already contained in it, or it lies wholly outside the subject while still being connected with it.",
+    note: "Two divisions cross here: analytic or synthetic (how predicate relates to subject) and a priori or a posteriori (the source of justification, B1–3). A tree must nest one under the other. Watch which branch turns out empty.",
+    q: "Is the analytic/synthetic distinction a fact about sentences, about concepts, or about our acts of judging?" },
+    N({ id: "analytic", label: "Analytic judgment", de: "analytisches Urteil (Erläuterungsurteil)", ref: "A7/B11",
+      diff: "predicate already contained in the subject concept",
+      gloss: "Explicative: it adds nothing to the subject concept but takes it apart into the partial concepts already thought in it, if only confusedly. Kant’s example: all bodies are extended.",
+      facts: [["Also called", "judgment of clarification"], ["Highest principle", "the principle of contradiction (A151/B190)"]],
+      q: "Does an analytic judgment teach us anything? In what sense?" },
+      N({ id: "analytic-apriori", label: "Analytic a priori", ref: "B11–12",
+        diff: "known independently of experience",
+        gloss: "Every analytic judgment is a priori. To know that body includes extension I only need to analyze my concept; I never have to go beyond it to experience." }),
+      N({ id: "analytic-aposteriori", label: "Analytic a posteriori", ref: "B11–12", empty: true,
+        diff: "grounded in experience",
+        gloss: "An empty class. It would be absurd to ground an analytic judgment on experience, since I need not leave my concept to form it. A Porphyrian tree makes such empty cells visible; Kant’s prose simply passes over them.",
+        q: "Later philosophers, notably Kripke, argued for necessary truths known a posteriori. Does that challenge this empty cell, or a different one?" })
+    ),
+    N({ id: "synthetic", label: "Synthetic judgment", de: "synthetisches Urteil (Erweiterungsurteil)", ref: "A7/B11",
+      diff: "predicate lying outside the subject concept",
+      gloss: "Ampliative: it adds to the subject concept a predicate that was not thought in it at all. Kant’s example: all bodies are heavy. Something beyond the concept must ground the connection.",
+      q: "In a synthetic judgment, what is the unknown X on which the understanding relies (A9/B13)?" },
+      N({ id: "synthetic-aposteriori", label: "Synthetic a posteriori", de: "Erfahrungsurteil", ref: "B11–12",
+        diff: "grounded in experience",
+        gloss: "Judgments of experience are all synthetic. Here experience is the X that joins predicate to subject: I learn that bodies are heavy by finding weight always combined with the other marks of body." }),
+      N({ id: "synthetic-apriori", label: "Synthetic a priori", ref: "B14–19",
+        diff: "necessary and strictly universal, yet ampliative",
+        gloss: "Judgments that extend our cognition yet carry necessity and strict universality, which experience can never supply (B3–4). How they are possible is the general problem of pure reason (B19).",
+        note: "B19 states what Kant calls the real problem of pure reason. The Critique answers it in turn for mathematics, for natural science, and, negatively, for metaphysics (B20–22).",
+        facts: [["Marks of the a priori", "necessity and strict universality (B3–4)"]],
+        q: "How are synthetic judgments a priori possible?" },
+        N({ id: "mathematical", label: "Mathematical judgments", ref: "B14–17",
+          diff: "in mathematics",
+          gloss: "Kant argues that even 7 + 5 = 12 is synthetic: the concept of the sum contains only the union of the two numbers, not the single number that results, so we must go outside the concept to intuition, counting on fingers or points. Likewise ‘a straight line is the shortest between two points’, since ‘straight’ contains nothing about quantity.",
+          links: ["contents:aesthetic", "contents:axioms"] }),
+        N({ id: "natural-science", label: "Principles of pure natural science", ref: "B17–18",
+          diff: "in natural science",
+          gloss: "Examples: in all changes of the corporeal world the quantity of matter stays the same; in all communication of motion, action and reaction are equal. They are necessary, hence a priori, and they extend the concept of matter, hence synthetic.",
+          links: ["contents:analogies"] }),
+        N({ id: "metaphysical", label: "Metaphysical judgments", ref: "B18",
+          diff: "in metaphysics, at least by aim",
+          gloss: "Metaphysics means to extend our cognition a priori, for instance by proving that the world must have a first beginning. Whether it can succeed is exactly what the Critique puts on trial.",
+          links: ["contents:antinomy", "architectonic:metaphysics"] })
+      )
+    )
+  )
+},
+
+/* ---------- 3. Table of categories ---------- */
+{
+  id: "categories",
+  title: "Table of categories",
+  work: "Critique of Pure Reason",
+  source: "A70/B95 (forms of judgment), A80/B106 (categories), B110–113",
+  intro: "The metaphysical deduction claims that the same function which unifies representations in a judgment also unifies the manifold of an intuition. From the table of the logical forms of judgment Kant therefore derives a table of pure concepts. In the second edition (B110) he adds a further cut between mathematical and dynamical categories, which turns the table into a proper Porphyrian tree.",
+  root: N({ id: "categories", label: "Pure concepts of the understanding", de: "Kategorien (reine Verstandesbegriffe)", ref: "A79/B104–105",
+    gloss: "The categories are concepts of an object in general, through which the intuition of an object counts as determined with respect to one of the logical functions of judging (B128). Kant claims the list is complete because it is generated from a single principle, the faculty of judging.",
+    note: "Kant takes the word from Aristotle but criticizes him for collecting categories as he happened upon them, without a principle (A81/B107).",
+    q: "Does deriving the categories from the forms of judgment show that they apply to objects? That is the question of the Transcendental Deduction.",
+    links: ["contents:clue", "contents:deduction", "contents:schematism"] },
+    N({ id: "mathematical", label: "Mathematical categories", de: "mathematische Kategorien", ref: "B110",
+      diff: "directed at objects of intuition",
+      gloss: "Quantity and quality concern objects of intuition, pure as well as empirical. Unlike the dynamical categories, they have no correlates.",
+      facts: [["Their principles", "constitutive of intuition, intuitively certain (A160–162/B199–201)"]] },
+      N({ id: "quantity", label: "Quantity", de: "Quantität", ref: "A70/B95; A80/B106",
+        diff: "how much falls under the judgment",
+        gloss: "Judgments are universal, particular or singular; the categories of quantity are unity, plurality and totality.",
+        note: "Kant lists the judgments as universal, particular, singular and the categories as unity, plurality, totality. Whether unity really answers to the universal judgment or to the singular has been argued since the eighteenth century. Look at both tables side by side and decide.",
+        facts: [["Principle", "Axioms of Intuition"]],
+        links: ["contents:axioms", "thirdcritique:m2"] },
+        N({ id: "unity", label: "Unity", de: "Einheit", ref: "A80/B106",
+          diff: "one",
+          gloss: "The category of the one: an object counted as a single unit.",
+          facts: [["Form of judgment", "universal: all A are B"]] }),
+        N({ id: "plurality", label: "Plurality", de: "Vielheit", ref: "A80/B106",
+          diff: "many",
+          gloss: "The category of the many: a multitude of units.",
+          facts: [["Form of judgment", "particular: some A are B"]] }),
+        N({ id: "totality", label: "Totality", de: "Allheit", ref: "A80/B106; B111",
+          diff: "plurality regarded as unity",
+          gloss: "Kant observes that in each class the third category arises from combining the first two (B111). Totality is plurality considered as a unity, yet it takes a distinct act of understanding to form it.",
+          facts: [["Form of judgment", "singular: this A is B"]] })
+      ),
+      N({ id: "quality", label: "Quality", de: "Qualität", ref: "A70/B95; A80/B106",
+        diff: "whether the predicate is affirmed or denied",
+        gloss: "Judgments are affirmative, negative or infinite; the categories of quality are reality, negation and limitation.",
+        facts: [["Principle", "Anticipations of Perception"]],
+        links: ["contents:anticipations", "thirdcritique:m1"] },
+        N({ id: "reality", label: "Reality", de: "Realität", ref: "A80/B106",
+          diff: "being affirmed",
+          gloss: "That whose concept signifies a being in time; in experience, what corresponds to sensation.",
+          facts: [["Form of judgment", "affirmative: A is B"]],
+          links: ["representations:sensation"] }),
+        N({ id: "negation", label: "Negation", de: "Negation", ref: "A80/B106",
+          diff: "being denied",
+          gloss: "That whose concept represents a not-being in time.",
+          facts: [["Form of judgment", "negative: A is not B"]] }),
+        N({ id: "limitation", label: "Limitation", de: "Limitation", ref: "A80/B106; A72/B97",
+          diff: "reality combined with negation",
+          gloss: "The infinite judgment affirms a negative predicate. ‘The soul is non-mortal’ (A72/B97) places the soul in the unbounded sphere left over once mortal beings are excluded. General logic counts it as affirmative; transcendental logic keeps it apart.",
+          facts: [["Form of judgment", "infinite: A is non-B"]] })
+      )
+    ),
+    N({ id: "dynamical", label: "Dynamical categories", de: "dynamische Kategorien", ref: "B110",
+      diff: "directed at the existence of objects",
+      gloss: "Relation and modality concern the existence of objects, either in relation to one another or in relation to the understanding. Their categories come in correlated pairs.",
+      facts: [["Their principles", "regulative of intuition, constitutive of experience (A179–180/B222–223)"]] },
+      N({ id: "relation", label: "Relation", de: "Relation", ref: "A70/B95; A80/B106",
+        diff: "how thoughts are related within the judgment",
+        gloss: "Judgments relate predicate to subject, ground to consequence, or the members of a divided concept to one another; hence categorical, hypothetical and disjunctive judgments.",
+        facts: [["Principle", "Analogies of Experience"]],
+        links: ["contents:analogies", "thirdcritique:m3"] },
+        N({ id: "substance", label: "Inherence and subsistence", de: "substantia et accidens", ref: "A80/B106",
+          diff: "subject and its determinations",
+          gloss: "Substance and accident. Schematized, substance is the persistence of the real in time (A144/B183).",
+          facts: [["Form of judgment", "categorical: A is B"], ["Analogy", "First: persistence of substance (B224)"]] }),
+        N({ id: "causality", label: "Causality and dependence", de: "Ursache und Wirkung", ref: "A80/B106",
+          diff: "ground and consequence",
+          gloss: "Cause and effect. Schematized, causality is succession according to a rule (A144/B183).",
+          facts: [["Form of judgment", "hypothetical: if A, then B"], ["Analogy", "Second: succession by causal law (B232)"]],
+          links: ["contents:antinomy"] }),
+        N({ id: "community", label: "Community", de: "Gemeinschaft (Wechselwirkung)", ref: "A80/B106; B111–113",
+          diff: "reciprocal causality among parts of a whole",
+          gloss: "Reciprocity between agent and patient. Kant concedes that the match with the disjunctive judgment is the least obvious and argues for it at B112: the members of a disjunction exclude one another yet together make up one whole, just as substances in a world mutually determine each other.",
+          facts: [["Form of judgment", "disjunctive: A is either B or C"], ["Analogy", "Third: simultaneity by the law of community (B256)"]] })
+      ),
+      N({ id: "modality", label: "Modality", de: "Modalität", ref: "A74/B99–100; A80/B106",
+        diff: "the bearing of the judgment on thinking as such",
+        gloss: "Modality adds nothing to the content of a judgment. It concerns only the value of the copula in relation to thinking in general: whether what is judged is held as possible, actual or necessary.",
+        facts: [["Principle", "Postulates of Empirical Thinking"]],
+        links: ["contents:postulates", "thirdcritique:m4"] },
+        N({ id: "possibility", label: "Possibility and impossibility", de: "Möglichkeit, Unmöglichkeit", ref: "A80/B106",
+          diff: "thought as possible",
+          gloss: "What agrees with the formal conditions of experience is possible (A218/B265).",
+          facts: [["Form of judgment", "problematic: A may be B"]] }),
+        N({ id: "existence", label: "Existence and non-existence", de: "Dasein, Nichtsein", ref: "A80/B106",
+          diff: "thought as actual",
+          gloss: "What is connected with the material conditions of experience, with sensation, is actual (A218/B266).",
+          facts: [["Form of judgment", "assertoric: A is B"]] }),
+        N({ id: "necessity", label: "Necessity and contingency", de: "Notwendigkeit, Zufälligkeit", ref: "A80/B106; B111",
+          diff: "existence given through possibility itself",
+          gloss: "Necessity is existence that is given by possibility itself (B111). In experience, that whose connection with the actual is determined by universal conditions of experience is necessary (A218/B266).",
+          facts: [["Form of judgment", "apodictic: A must be B"]] })
+      )
+    )
+  )
+},
+
+/* ---------- 4. Plan of the first Critique ---------- */
+{
+  id: "contents",
+  title: "Plan of the first Critique",
+  work: "Critique of Pure Reason",
+  source: "Table of contents, A and B editions",
+  orient: "h",
+  openDepth: 3,
+  intro: "The Critique is itself a division, and following it as a tree keeps you oriented in a long book. Each part is distinguished from its siblings by what it concerns. Open a branch with the small circle, or step through the whole book in order with the arrow keys.",
+  root: N({ id: "cpr", label: "Critique of Pure Reason", de: "Kritik der reinen Vernunft", ref: "A 1781, B 1787",
+    gloss: "The Critique asks what reason can cognize when all experience is set aside. Its two great parts follow the image of a building: the Doctrine of Elements surveys the materials, the Doctrine of Method draws up the plan (A707/B735).",
+    note: "Cite by A/B pagination. Many sections exist in both editions; some in only one. The Refutation of Idealism is B only, and the Transcendental Deduction was completely rewritten for B.",
+    q: "Why must a critique of reason come before any metaphysics?" },
+    N({ id: "elements", label: "Transcendental Doctrine of Elements", de: "Transzendentale Elementarlehre", ref: "A19/B33",
+      diff: "surveys the materials of pure cognition",
+      gloss: "Divided according to the two stems of human cognition: sensibility, through which objects are given, and understanding, through which they are thought (A15/B29)." },
+      N({ id: "aesthetic", label: "Transcendental Aesthetic", de: "Transzendentale Ästhetik", ref: "A19/B33",
+        diff: "the a priori principles of sensibility",
+        gloss: "The science of all principles of a priori sensibility. Kant isolates sensibility from the understanding, then separates out sensation, leaving the pure forms of intuition: space and time.",
+        note: "‘Aesthetic’ here means the theory of sensibility, from the Greek aisthēsis, not the theory of taste. Kant distances himself from Baumgarten’s usage in a note at A21/B35.",
+        q: "If space and time are forms of our intuition, what follows about things as they are in themselves?",
+        links: ["representations:intuition", "judgments:mathematical"] },
+        N({ id: "space", label: "Space", de: "Raum", ref: "A22/B37",
+          diff: "the form of outer sense",
+          gloss: "The metaphysical exposition argues that space is not an empirical concept but a necessary a priori representation, given as an infinite magnitude. The transcendental exposition (B40) shows how it makes geometry possible as synthetic a priori cognition." }),
+        N({ id: "time", label: "Time", de: "Zeit", ref: "A30/B46",
+          diff: "the form of inner sense",
+          gloss: "Time is the form of inner sense, of our intuition of ourselves and our inner state, and therefore the formal condition a priori of all appearances whatever (A34/B50). Kant defends its empirical reality together with its transcendental ideality (A35–36/B52)." })
+      ),
+      N({ id: "logic", label: "Transcendental Logic", de: "Transzendentale Logik", ref: "A50/B74",
+        diff: "the a priori principles of pure thinking",
+        gloss: "General logic abstracts from all content. Transcendental logic considers only the rules for thinking an object a priori, and asks about the origin, scope and objective validity of such cognition (A55–57/B79–82).",
+        note: "A51/B75 holds one of Kant’s most quoted claims: thoughts without content are empty, intuitions without concepts are blind." },
+        N({ id: "analytic", label: "Transcendental Analytic", de: "Transzendentale Analytik", ref: "A64/B89",
+          diff: "the logic of truth",
+          gloss: "Takes apart the whole of our a priori cognition into the elements of the understanding’s pure cognition: the concepts and principles without which no object can be thought." },
+          N({ id: "concepts-analytic", label: "Analytic of Concepts", de: "Analytik der Begriffe", ref: "A65/B90",
+            diff: "finds and justifies the pure concepts",
+            gloss: "Not the analysis of particular concepts but of the faculty of understanding itself, to discover the pure concepts and establish their right." },
+            N({ id: "clue", label: "Clue to the discovery of the categories", de: "Leitfaden der Entdeckung aller reinen Verstandesbegriffe", ref: "A66/B91",
+              diff: "finds them: the metaphysical deduction",
+              gloss: "Kant derives the table of categories (A80/B106) from the table of logical functions of judgment (A70/B95). At B159 he names this the metaphysical deduction.",
+              links: ["categories:categories"] }),
+            N({ id: "deduction", label: "Transcendental Deduction", de: "Transzendentale Deduktion", ref: "A84/B116; A95ff; B129ff",
+              diff: "justifies them: the right to apply to objects",
+              gloss: "A deduction in the lawyer’s sense: a proof of right (quid juris) rather than of fact. Kant argues that the categories are conditions of the possibility of experience and therefore necessarily apply to all its objects.",
+              note: "Read the A and B versions separately. The B version turns on the ‘I think’ that must be able to accompany all my representations (§16, B131–132).",
+              q: "What exactly would go wrong in experience if the categories did not apply to it?",
+              links: ["categories:categories"] })
+          ),
+          N({ id: "principles-analytic", label: "Analytic of Principles", de: "Analytik der Grundsätze", ref: "A130/B169",
+            diff: "teaches judgment to apply the concepts",
+            gloss: "A canon for the power of judgment, showing how the categories are applied to appearances." },
+            N({ id: "schematism", label: "Schematism", de: "Von dem Schematismus der reinen Verstandesbegriffe", ref: "A137/B176",
+              diff: "the sensible conditions of applying them",
+              gloss: "Categories and intuitions are heterogeneous, so something must mediate: a transcendental determination of time, the schema. The schema of substance is the persistence of the real in time; of cause, succession according to a rule.",
+              note: "Kant himself calls schematism an art concealed in the depths of the human soul (A141/B180–181). Read it with the table of categories open beside you.",
+              links: ["categories:categories"] }),
+            N({ id: "system", label: "System of all principles", de: "System aller Grundsätze des reinen Verstandes", ref: "A148/B187",
+              diff: "the synthetic a priori judgments that result",
+              gloss: "The highest principle of analytic judgments is the principle of contradiction (A150/B189). The highest principle of synthetic judgments is that every object stands under the conditions of the synthetic unity of the manifold of intuition in a possible experience (A158/B197). The principles then follow the four titles of the categories." },
+              N({ id: "axioms", label: "Axioms of Intuition", de: "Axiome der Anschauung", ref: "A162/B202",
+                diff: "from the categories of quantity",
+                gloss: "All intuitions are extensive magnitudes. This grounds the application of mathematics to appearances.",
+                links: ["categories:quantity", "judgments:mathematical"] }),
+              N({ id: "anticipations", label: "Anticipations of Perception", de: "Antizipationen der Wahrnehmung", ref: "A166/B207",
+                diff: "from the categories of quality",
+                gloss: "In all appearances the real that is an object of sensation has intensive magnitude, a degree. We can anticipate a priori that every sensation has some degree, though not which.",
+                links: ["categories:quality"] }),
+              N({ id: "analogies", label: "Analogies of Experience", de: "Analogien der Erfahrung", ref: "A176/B218",
+                diff: "from the categories of relation",
+                gloss: "Experience is possible only through the representation of a necessary connection of perceptions. The three analogies concern the persistence of substance (B224), succession by the law of causality (B232), and simultaneity by the law of community (B256).",
+                note: "The Second Analogy is Kant’s answer to Hume on causation. The contrast between seeing a house and watching a ship drift downstream (A190–192/B235–237) is a good place to start.",
+                links: ["categories:relation", "judgments:natural-science"] }),
+              N({ id: "postulates", label: "Postulates of Empirical Thinking", de: "Postulate des empirischen Denkens überhaupt", ref: "A218/B265",
+                diff: "from the categories of modality",
+                gloss: "They define the possible (agreement with the formal conditions of experience), the actual (connection with its material conditions, sensation) and the necessary (connection with the actual determined by universal conditions of experience).",
+                links: ["categories:modality"] },
+                N({ id: "refutation", label: "Refutation of Idealism", de: "Widerlegung des Idealismus", ref: "B274",
+                  diff: "added in B: inner experience depends on outer",
+                  gloss: "Inserted into the Postulates in the second edition. Its thesis: the mere but empirically determined consciousness of my own existence proves the existence of objects in space outside me.",
+                  note: "B only. Compare the Fourth Paralogism of the first edition (A366ff), which treats the same problem quite differently." })
+              )
+            ),
+            N({ id: "phenomena", label: "Phenomena and Noumena", de: "Phaenomena und Noumena", ref: "A235/B294",
+              diff: "draws the boundary of the understanding",
+              gloss: "Kant pictures the land of the understanding as an island of truth surrounded by a stormy ocean of illusion. The categories have only empirical use; the noumenon in the negative sense is a boundary concept that limits the pretensions of sensibility." }),
+            N({ id: "amphiboly", label: "Amphiboly of the Concepts of Reflection", de: "Amphibolie der Reflexionsbegriffe", ref: "A260/B316",
+              diff: "appendix: confusing understanding with sensibility",
+              gloss: "The concepts of reflection (identity and difference, agreement and opposition, inner and outer, matter and form) mislead when we do not ask which faculty a representation belongs to. Kant charges Leibniz with treating appearances as things of the understanding, and Locke with the reverse (A271/B327)." })
+          )
+        ),
+        N({ id: "dialectic", label: "Transcendental Dialectic", de: "Transzendentale Dialektik", ref: "A293/B349",
+          diff: "the logic of illusion",
+          gloss: "Exposes transcendental illusion: reason’s natural and unavoidable tendency to take subjective principles for objective ones in its search for the unconditioned. The illusion can be exposed but not removed, as the moon still looks larger at the horizon after the astronomer explains why (A297/B354).",
+          q: "If the illusion cannot be dispelled, what does exposing it accomplish?" },
+          N({ id: "ideas", label: "Concepts of pure reason", de: "Von den Begriffen der reinen Vernunft", ref: "A310/B366",
+            diff: "the transcendental ideas themselves",
+            gloss: "Reason seeks the unconditioned for every conditioned. Following the three forms of syllogism, Kant derives three classes of ideas: the absolute unity of the thinking subject, of the series of conditions of appearance, and of the condition of all objects of thought in general (A334/B391).",
+            links: ["representations:idea"] }),
+          N({ id: "inferences", label: "Dialectical inferences of pure reason", de: "Von den dialektischen Schlüssen der reinen Vernunft", ref: "A338/B396",
+            diff: "the inferences reason draws from them",
+            gloss: "Three kinds of sophistical inference, one for each idea, generate the three pretended sciences of special metaphysics." },
+            N({ id: "paralogisms", label: "Paralogisms", de: "Paralogismen der reinen Vernunft", ref: "A341/B399",
+              diff: "about the thinking subject",
+              gloss: "Rational psychology tries to infer the soul’s substantiality, simplicity, personality and relation to objects in space from the bare ‘I think’. Kant diagnoses each as a fallacy with an ambiguous middle term. The chapter was substantially rewritten for B.",
+              links: ["architectonic:rational-psychology", "representations:idea"] }),
+            N({ id: "antinomy", label: "Antinomy of Pure Reason", de: "Antinomie der reinen Vernunft", ref: "A405/B432",
+              diff: "about the world as a whole",
+              gloss: "Four pairs of thesis and antithesis, on the world’s beginning and limits, on simple parts, on freedom, and on a necessary being, each apparently provable. Kant resolves them through transcendental idealism: in the first two both sides are false; in the last two both may be true in different respects.",
+              note: "The Third Antinomy (A444/B472), on freedom and natural causality, is the bridge to Kant’s moral philosophy.",
+              links: ["architectonic:rational-cosmology", "judgments:metaphysical", "imperatives:autonomy"] }),
+            N({ id: "ideal", label: "Ideal of Pure Reason", de: "Das Ideal der reinen Vernunft", ref: "A567/B595",
+              diff: "about the being of all beings",
+              gloss: "Reason forms the ideal of a most real being and tries to prove that it exists. Kant argues that only three proofs are possible, the ontological, cosmological and physico-theological, that the last two depend on the first, and that the first fails because being is not a real predicate (A598/B626).",
+              links: ["architectonic:rational-theology"] })
+          ),
+          N({ id: "regulative", label: "Appendix: the regulative use of the ideas", de: "Anhang zur transzendentalen Dialektik", ref: "A642/B670",
+            diff: "their legitimate use",
+            gloss: "The ideas are not constitutive of objects but regulative. They direct the understanding toward systematic unity, like an imaginary focus from which lines seem to come though none really do (A644/B672).",
+            links: ["representations:idea", "thirdcritique:reflecting"] })
+        )
+      )
+    ),
+    N({ id: "method", label: "Transcendental Doctrine of Method", de: "Transzendentale Methodenlehre", ref: "A707/B735",
+      diff: "draws up the plan of a complete system",
+      gloss: "Where the Elements counted the building materials, the Method sets out the formal conditions of a complete system of pure reason: the plan for a modest dwelling suited to our needs, rather than a tower meant to reach the heavens (A707/B735)." },
+      N({ id: "discipline", label: "Discipline of Pure Reason", de: "Die Disziplin der reinen Vernunft", ref: "A708/B736",
+        diff: "negative: restrains reason from overreaching",
+        gloss: "Warns against borrowing the method of mathematics for philosophy, and treats reason’s polemical use, hypotheses and proofs." }),
+      N({ id: "canon", label: "Canon of Pure Reason", de: "Der Kanon der reinen Vernunft", ref: "A795/B823",
+        diff: "positive: the correct use of reason, which is practical",
+        gloss: "Here Kant asks his three questions: What can I know? What ought I to do? What may I hope? (A805/B833). The canon concerns the practical use of reason and a moral faith in God and immortality.",
+        links: ["imperatives:imperative"] }),
+      N({ id: "architectonic-ch", label: "Architectonic of Pure Reason", de: "Die Architektonik der reinen Vernunft", ref: "A832/B860",
+        diff: "the art of systems",
+        gloss: "A system is the unity of manifold cognitions under one idea. This chapter maps the whole of philosophy; it has its own tree here.",
+        links: ["architectonic:cognition"] }),
+      N({ id: "history", label: "History of Pure Reason", de: "Die Geschichte der reinen Vernunft", ref: "A852/B880",
+        diff: "a sketch of past systems",
+        gloss: "A few pages sorting earlier philosophers by object (sensualists and intellectualists), by origin of cognition (empiricists and noologists), and by method (naturalistic or scientific, the latter dogmatic or skeptical). Only the critical path, Kant concludes, is still open." })
+    )
+  )
+},
+
+/* ---------- 5. Architectonic ---------- */
+{
+  id: "architectonic",
+  title: "The architectonic of philosophy",
+  work: "Critique of Pure Reason",
+  source: "Doctrine of Method, ch. 3, A832/B860–A851/B879",
+  intro: "Near the end of the Critique Kant maps all of philosophy as a system grown from a single idea, like an organism rather than an aggregate. The chapter is a cascade of divisions, and it shows where each of the Dialectic’s targets sat in the old metaphysics.",
+  root: N({ id: "cognition", label: "Cognition", de: "Erkenntnis", ref: "A835/B863",
+    gloss: "Considered subjectively, by how a person possesses it, all cognition is either historical or rational.",
+    q: "Why does Kant start the map of philosophy with a division of how we hold cognitions rather than of what they are about?" },
+    N({ id: "historical", label: "Historical cognition", de: "cognitio ex datis", ref: "A836/B864",
+      diff: "from what is given",
+      gloss: "Cognition received from outside. Someone who has memorized Wolff’s system down to its definitions has only historical cognition of it, even though the system is objectively rational: take away a definition and they cannot produce another." }),
+    N({ id: "rational", label: "Rational cognition", de: "cognitio ex principiis", ref: "A836/B864",
+      diff: "from principles",
+      gloss: "Cognition drawn from the universal sources of reason, from which even critique and rejection of what has been learned can spring." },
+      N({ id: "math-cognition", label: "Mathematical cognition", ref: "A837/B865",
+        diff: "from the construction of concepts",
+        gloss: "Rational cognition from presenting concepts in intuition. That is why mathematics, unlike philosophy, can be learned as rational cognition.",
+        links: ["judgments:mathematical"] }),
+      N({ id: "philosophy", label: "Philosophical cognition", ref: "A837/B865",
+        diff: "from concepts",
+        gloss: "Rational cognition from concepts alone. Kant’s famous corollary: one cannot learn philosophy, only learn to philosophize.",
+        q: "What would it mean to learn to philosophize while reading Kant, rather than learning Kant’s philosophy?" },
+        N({ id: "empirical-phil", label: "Empirical philosophy", ref: "A840/B868",
+          diff: "from empirical principles",
+          gloss: "Philosophy that draws on experience, for example empirical psychology, which Kant says has been lodged in metaphysics only until it can find a home of its own in anthropology (A848–849/B876–877)." }),
+        N({ id: "pure-phil", label: "Pure philosophy", ref: "A840/B868",
+          diff: "from pure principles",
+          gloss: "Philosophy from a priori principles alone." },
+          N({ id: "critique", label: "Critique", de: "Propädeutik", ref: "A841/B869",
+            diff: "preparatory: examines reason’s capacity",
+            gloss: "The propaedeutic that investigates the faculty of reason with respect to all pure a priori cognition. The Critique of Pure Reason itself sits here.",
+            links: ["contents:cpr"] }),
+          N({ id: "metaphysics", label: "Metaphysics", de: "Metaphysik", ref: "A841/B869",
+            diff: "the system of pure reason itself",
+            gloss: "The whole philosophical cognition from pure reason, true and apparent, in systematic connection. Kant sometimes includes critique under the name as well.",
+            links: ["judgments:metaphysical"] },
+            N({ id: "morals", label: "Metaphysics of morals", de: "Metaphysik der Sitten", ref: "A841/B869",
+              diff: "of reason’s practical use",
+              gloss: "Contains the principles that determine doing and refraining a priori and make them necessary. Kant’s later Groundwork (1785) and Metaphysics of Morals (1797) build this part.",
+              links: ["imperatives:imperative", "duties:duty"] }),
+            N({ id: "nature", label: "Metaphysics of nature", de: "Metaphysik der Natur", ref: "A841/B869",
+              diff: "of reason’s speculative use",
+              gloss: "Contains the pure principles of reason from mere concepts for the theoretical cognition of all things. This is metaphysics in the narrower sense." },
+              N({ id: "transcendental-phil", label: "Transcendental philosophy, or ontology", ref: "A845/B873",
+                diff: "objects in general, none being given",
+                gloss: "Considers only understanding and reason in a system of concepts and principles relating to objects in general, without assuming any objects that are given.",
+                links: ["contents:analytic"] }),
+              N({ id: "physiology", label: "Rational physiology", ref: "A845/B873",
+                diff: "nature, the sum of given objects",
+                gloss: "Considers nature: the sum of objects given to the senses or to some other kind of intuition. ‘Physiology’ is meant in its old sense, the rational study of nature." },
+                N({ id: "immanent", label: "Immanent physiology", ref: "A845–846/B873–874",
+                  diff: "within the limits of possible experience",
+                  gloss: "Concerns nature insofar as its cognition can be applied in experience." },
+                  N({ id: "rational-physics", label: "Rational physics", ref: "A846/B874",
+                    diff: "objects of outer sense: corporeal nature",
+                    gloss: "The metaphysics of body. Kant’s Metaphysical Foundations of Natural Science (1786) works it out.",
+                    links: ["judgments:natural-science"] }),
+                  N({ id: "rational-psychology", label: "Rational psychology", ref: "A846/B874",
+                    diff: "the object of inner sense: thinking nature",
+                    gloss: "The metaphysics of the soul, limited here to the immanent: what can be said of the thinking subject as an object of inner sense.",
+                    note: "Compare the Paralogisms. There rational psychology claims more than this and fails; here only a modest, immanent version is kept.",
+                    links: ["contents:paralogisms"] })
+                ),
+                N({ id: "transcendent", label: "Transcendent physiology", ref: "A846/B874",
+                  diff: "beyond all possible experience",
+                  gloss: "Concerns a connection of objects of experience that surpasses all experience." },
+                  N({ id: "rational-cosmology", label: "Rational cosmology", ref: "A846/B874",
+                    diff: "the inner connection: nature as a whole",
+                    gloss: "Cognition of the world as a whole, the target of the Antinomy.",
+                    links: ["contents:antinomy"] }),
+                  N({ id: "rational-theology", label: "Rational theology", ref: "A846/B874",
+                    diff: "the outer connection: a being above nature",
+                    gloss: "Cognition of God, the being beyond the world, the target of the Ideal of Pure Reason.",
+                    links: ["contents:ideal"] })
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+},
+
+/* ---------- 6. Imperatives ---------- */
+{
+  id: "imperatives",
+  title: "Imperatives",
+  work: "Groundwork of the Metaphysics of Morals (1785)",
+  source: "Section II, 4:412–440 (Academy edition)",
+  intro: "Section II of the Groundwork divides imperatives by how they command, then gives several formulas of the one categorical imperative. The division is a clean Porphyrian tree; the formulas are not. Kant says they are only different ways of representing the very same law, so they are drawn here with dashed lines, as aspects of one principle rather than species of a genus.",
+  root: N({ id: "imperative", label: "Imperative", de: "Imperativ", ref: "4:413",
+    gloss: "The representation of an objective principle insofar as it necessitates a will is a command, and its formula is an imperative. Imperatives are expressed by an ‘ought’. A perfectly good, holy will would need none, since it would act on the law without constraint (4:414).",
+    q: "Why does the existence of imperatives tell us something about what kind of beings we are?",
+    links: ["contents:canon", "architectonic:morals"] },
+    N({ id: "hypothetical", label: "Hypothetical imperative", de: "hypothetischer Imperativ", ref: "4:414",
+      diff: "commands an action as a means to some other end",
+      gloss: "Represents the practical necessity of an action as a means to something else that one wills, or might will." },
+      N({ id: "problematic", label: "Rules of skill", de: "technisch (problematisch)", ref: "4:415",
+        diff: "the end is merely possible",
+        gloss: "Problematic imperatives of skill. Whether the end is reasonable or good is not the question, only what must be done to reach it. A physician’s prescriptions for curing a patient and a poisoner’s for killing one are, as such, equally imperatives of skill.",
+        facts: [["Modal form", "problematic"], ["Kind", "technical"]] }),
+      N({ id: "assertoric", label: "Counsels of prudence", de: "pragmatisch (assertorisch)", ref: "4:415–419",
+        diff: "the end is actual: happiness",
+        gloss: "Since every rational being with needs can be presupposed to aim at happiness, the imperative of prudence is assertoric. But happiness is so indeterminate a concept that these imperatives are counsels rather than commands (4:418); happiness, Kant says, is an ideal of imagination rather than of reason.",
+        facts: [["Modal form", "assertoric"], ["Kind", "pragmatic"]],
+        q: "Is prudence really a separate kind of imperative, or only skill applied to an unusually vague end?" })
+    ),
+    N({ id: "categorical", label: "Categorical imperative", de: "kategorischer Imperativ", ref: "4:414–416",
+      diff: "commands an action as necessary in itself",
+      gloss: "Commands a way of acting immediately, without presupposing any further end. It concerns not the matter of the action and its result but its form and the principle from which it follows (4:416). Kant argues there is only one categorical imperative, then states it in several formulas.",
+      facts: [["Modal form", "apodictic"], ["Kind", "moral: laws, or commands, of morality"]],
+      q: "How is a categorical imperative possible at all? Kant poses the question at 4:420 and answers it only in Section III.",
+      links: ["duties:duty", "contents:antinomy"] },
+      N({ id: "fu", label: "Formula of Universal Law", ref: "4:421", kind: "formulation",
+        diff: "aspect of form: universality",
+        gloss: "Act only on a maxim through which you can at the same time will that it become a universal law.",
+        note: "Most of the argument of Section II is an attempt to show that this formula follows from the mere concept of a categorical imperative.",
+        links: ["duties:duty"] },
+        N({ id: "fln", label: "Formula of the Law of Nature", ref: "4:421", kind: "formulation",
+          diff: "universality pictured as a law of nature",
+          gloss: "Act as if the maxim of your action were to become, through your will, a universal law of nature. This is the version Kant applies to his four examples of duty.",
+          links: ["duties:perfect", "duties:imperfect"] })
+      ),
+      N({ id: "fh", label: "Formula of Humanity", ref: "4:429", kind: "formulation",
+        diff: "aspect of matter: the end",
+        gloss: "So act that you use humanity, in your own person and in every other, always at the same time as an end and never merely as a means. Rational nature exists as an end in itself.",
+        q: "What does the word ‘merely’ allow?" }),
+      N({ id: "autonomy", label: "Formula of Autonomy", ref: "4:431–432", kind: "formulation",
+        diff: "the will as itself giving universal law",
+        gloss: "The idea of the will of every rational being as a will that gives universal law. The will is not merely subject to the law but subject to it as its own author.",
+        links: ["contents:antinomy"] }),
+      N({ id: "fke", label: "Formula of the Kingdom of Ends", ref: "4:433–439", kind: "formulation",
+        diff: "aspect of complete determination: a systematic whole",
+        gloss: "A rational being belongs to a kingdom of ends as a member when it gives universal laws in it and is also subject to them. In that kingdom everything has either a price or a dignity (4:434).",
+        note: "At 4:436 Kant lines the formulas up with form, matter and complete determination, following the categories of unity, plurality and totality. Compare the table of categories.",
+        links: ["categories:quantity"] })
+    )
+  )
+},
+
+/* ---------- 7. Duties ---------- */
+{
+  id: "duties",
+  title: "Four examples of duty",
+  work: "Groundwork of the Metaphysics of Morals (1785)",
+  source: "Section II, 4:421–424",
+  intro: "To test the Formula of the Law of Nature, Kant takes one example from each cell of a twofold division of duties. He warns in a footnote (4:421) that he is reserving the proper division for a future Metaphysics of Morals and uses this one only to arrange his examples.",
+  root: N({ id: "duty", label: "Duty", de: "Pflicht", ref: "4:400; 4:421n",
+    gloss: "Duty is the necessity of an action from respect for the law (4:400). Kant sorts duties by two crossing divisions, perfect or imperfect and to oneself or to others, and gives one example of each.",
+    note: "Because the two divisions cross, either can be placed first. Kant’s examples run: perfect to self, perfect to others, imperfect to self, imperfect to others, which suggests he treats perfect and imperfect as the higher cut. Try reading the examples with the other cut first.",
+    q: "Is the perfect/imperfect distinction about the content of a duty or about how much latitude it leaves us?",
+    links: ["imperatives:fln", "architectonic:morals"] },
+    N({ id: "perfect", label: "Perfect duty", de: "vollkommene Pflicht", ref: "4:421n; 4:424",
+      diff: "permits no exception in favour of inclination",
+      gloss: "Strict or narrow duty. Violating it involves a maxim that cannot even be thought as a universal law of nature without contradiction.",
+      facts: [["Test", "contradiction in conception (4:424)"], ["Also called", "strict, narrow, owed"]],
+      links: ["imperatives:fu"] },
+      N({ id: "perfect-self", label: "Perfect duty to oneself", ref: "4:421–422",
+        diff: "to oneself",
+        gloss: "Kant’s example concerns suicide. Someone weary of life asks whether ending it out of self-love could be a universal law of nature. He argues that a nature whose law was to destroy life by the very feeling meant to promote it would contradict itself.",
+        q: "Does the argument depend on a claim about the natural purpose of self-love? Is that claim available to Kant?" }),
+      N({ id: "perfect-other", label: "Perfect duty to others", ref: "4:422",
+        diff: "to others",
+        gloss: "The lying promise: borrowing money with a promise one does not intend to keep. Universalized, the maxim would make promising itself impossible, since no one would believe any promise." })
+    ),
+    N({ id: "imperfect", label: "Imperfect duty", de: "unvollkommene Pflicht", ref: "4:424",
+      diff: "wide: leaves latitude for how and how much",
+      gloss: "Wide or meritorious duty. The maxim can be thought as a universal law, but it cannot be willed as one without the will contradicting itself.",
+      facts: [["Test", "contradiction in the will (4:424)"], ["Also called", "wide, meritorious"]],
+      links: ["imperatives:fu"] },
+      N({ id: "imperfect-self", label: "Imperfect duty to oneself", ref: "4:422–423",
+        diff: "to oneself",
+        gloss: "Cultivating one’s talents. A comfortable person lets them rust. A world of such people could exist, Kant concedes, but a rational being cannot will it, since talents serve all kinds of possible purposes." }),
+      N({ id: "imperfect-other", label: "Imperfect duty to others", ref: "4:423",
+        diff: "to others",
+        gloss: "Beneficence. A prosperous person declines to help others in hardship. Such a world could subsist, but no one could will it, for the will would rob itself of help it may one day need.",
+        q: "Is ‘I may one day need help’ a moral reason or a prudential one? Does it matter for Kant’s argument?" })
+    )
+  )
+},
+
+/* ---------- 8. Third Critique ---------- */
+{
+  id: "thirdcritique",
+  title: "The power of judgment",
+  work: "Critique of the Power of Judgment (1790)",
+  source: "Introduction IV (5:179); §§1–29; §§61–66 (Academy vol. 5)",
+  intro: "The third Critique begins from one division, between determining and reflecting judgment, and develops the reflecting side into two critiques, of aesthetic and of teleological judgment. Its Analytic of the Beautiful even borrows its four moments from the table of judgments, so this tree links back into the first Critique at several points.",
+  root: N({ id: "judgment-power", label: "Power of judgment", de: "Urteilskraft", ref: "5:179",
+    gloss: "The faculty of thinking the particular as contained under the universal. The third Critique asks whether this faculty has an a priori principle of its own, one that could connect the domains of nature and freedom.",
+    note: "Read the published Introduction, especially sections IV to IX, before the body of the work. The longer ‘First Introduction’ was set aside by Kant and is printed separately in most editions.",
+    q: "Why would judgment need a principle of its own, rather than borrowing the understanding’s?" },
+    N({ id: "determining", label: "Determining judgment", de: "bestimmende Urteilskraft", ref: "5:179",
+      diff: "the universal is given; the particular is subsumed",
+      gloss: "The kind of judgment at work in the first Critique: the understanding supplies the law and judgment applies it. It needs no principle of its own.",
+      links: ["contents:principles-analytic"] }),
+    N({ id: "reflecting", label: "Reflecting judgment", de: "reflektierende Urteilskraft", ref: "5:179–181",
+      diff: "only the particular is given; the universal must be found",
+      gloss: "Faced with the endless variety of empirical laws, judgment needs a principle it gives to itself: that nature is purposive for our cognitive faculties, as if an understanding had ordered it for our comprehension.",
+      links: ["contents:regulative"] },
+      N({ id: "aesthetic-j", label: "Aesthetic judgment", de: "ästhetische Urteilskraft", ref: "5:189–192",
+        diff: "judges purposiveness by feeling",
+        gloss: "Judges a purposiveness that is subjective and formal, felt as pleasure or displeasure rather than cognized through a concept." },
+        N({ id: "beautiful", label: "Judgment of the beautiful", de: "das Schöne", ref: "§§1–22, 5:203–240",
+          diff: "free play of imagination and understanding in a form",
+          gloss: "Kant analyzes the judgment of taste in four moments, taken from the four titles of the table of judgments.",
+          note: "He begins with quality rather than quantity, explaining in a note (5:203) that the aesthetic judgment on the beautiful looks first to quality.",
+          links: ["categories:categories"] },
+          N({ id: "m1", label: "First moment: quality", ref: "§§1–5, 5:203–211",
+            diff: "satisfaction without any interest",
+            gloss: "The beautiful pleases without interest, that is, without concern for the real existence of the object. This sets it apart from the agreeable and from the good, which both involve interest.",
+            links: ["categories:quality"] }),
+          N({ id: "m2", label: "Second moment: quantity", ref: "§§6–9, 5:211–219",
+            diff: "pleases universally without a concept",
+            gloss: "A judgment of taste claims everyone’s agreement yet rests on no concept. Kant calls the question of §9, whether the pleasure precedes the judging or the judging the pleasure, the key to the critique of taste.",
+            links: ["categories:quantity"] }),
+          N({ id: "m3", label: "Third moment: relation", ref: "§§10–17, 5:219–236",
+            diff: "the form of purposiveness without a purpose",
+            gloss: "Beauty is the form of an object’s purposiveness, perceived without the representation of any purpose. Kant distinguishes free beauty (flowers, many birds) from dependent beauty, which presupposes a concept of what the thing should be.",
+            links: ["categories:relation"] }),
+          N({ id: "m4", label: "Fourth moment: modality", ref: "§§18–22, 5:236–240",
+            diff: "a necessary satisfaction, grounded in common sense",
+            gloss: "The judgment of taste claims an exemplary necessity: everyone’s assent to a judgment taken as an example of a rule that cannot be stated. It presupposes a common sense (sensus communis).",
+            links: ["categories:modality"] })
+        ),
+        N({ id: "sublime", label: "Judgment of the sublime", de: "das Erhabene", ref: "§§23–29, 5:244–278",
+          diff: "reason’s superiority, roused by formlessness or might",
+          gloss: "Concerns objects without form or bounds, and its pleasure comes only by way of displeasure. True sublimity, Kant argues, lies not in nature but in our own minds (5:264).",
+          q: "If sublimity is in the mind, what does nature contribute to the experience?" },
+          N({ id: "math-sublime", label: "Mathematically sublime", ref: "§§25–27, 5:248–260",
+            diff: "absolutely great: magnitude",
+            gloss: "What is great beyond all comparison. Imagination fails to take it in as a single whole, and reason’s idea of totality is felt as superior to every standard of sense.",
+            links: ["categories:mathematical"] }),
+          N({ id: "dyn-sublime", label: "Dynamically sublime", ref: "§28, 5:260–264",
+            diff: "a might that has no dominion over us",
+            gloss: "Nature as power, such as storms, volcanoes and the open ocean, seen from a place of safety. Its fearfulness reveals in us a capacity to resist of an entirely different kind.",
+            links: ["categories:dynamical"] })
+        )
+      ),
+      N({ id: "teleological", label: "Teleological judgment", de: "teleologische Urteilskraft", ref: "§61, 5:359",
+        diff: "judges objective purposiveness through understanding and reason",
+        gloss: "Judges certain products of nature as if they were purposes. Its principle is regulative, a guide for investigating nature, not a constitutive claim about it.",
+        links: ["contents:regulative"] },
+        N({ id: "formal-purp", label: "Formal objective purposiveness", ref: "§62, 5:362",
+          diff: "formal: the fitness of geometrical figures",
+          gloss: "A figure like the circle is fit for solving countless problems. Kant calls this purposiveness intellectual: it requires no purpose outside us and is not a real purposiveness of nature." }),
+        N({ id: "material-purp", label: "Material objective purposiveness", ref: "§63, 5:366",
+          diff: "material: concerning existing things",
+          gloss: "Purposiveness found in real things of nature rather than in figures." },
+          N({ id: "relative", label: "Relative purposiveness", de: "äußere Zweckmäßigkeit", ref: "§63, 5:366–369",
+            diff: "external: one thing useful for another",
+            gloss: "One thing’s usefulness for another, as when sandy soil left by the retreating sea suits spruce forests. Such judgments are only relative and never justify calling the thing itself a natural end." }),
+          N({ id: "internal", label: "Natural ends", de: "innere Zweckmäßigkeit (Naturzweck)", ref: "§§64–66, 5:369–377",
+            diff: "internal: a thing that is cause and effect of itself",
+            gloss: "An organized being produces itself as a species, as an individual through growth, and in its parts, which produce one another. In it everything is end and also means (§66). Kant’s example is a tree.",
+            q: "Why can such beings not be explained by mechanical causes alone, at least by minds like ours? See §§70–78." })
+        )
+      )
+    )
+  )
+}
+];
+
+/* =====================================================================
+   REGISTRY
+   ===================================================================== */
+const REG = new Map();            // treeId -> { tree, map, order }
+const FIELDS = ["id","label","de","ref","diff","kind","empty","gloss","note","q","facts","links"];
+const slug = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "node";
+
+function prepTree(t, isImport){
+  if(!t || typeof t !== "object" || !t.root) throw new Error("A tree needs a “root” node.");
+  t.id = slug(t.id || t.title || "tree");
+  if(isImport){ let base = t.id, i = 2; while(REG.has(t.id)) t.id = base + "-" + (i++); }
+  t.title = t.title || t.id;
+  const seen = new Set();
+  (function fix(n){
+    if(!n || typeof n !== "object" || !n.label) throw new Error("Every node needs a “label”.");
+    n.id = slug(n.id || n.label);
+    let b = n.id, i = 2; while(seen.has(n.id)) n.id = b + "-" + (i++);
+    seen.add(n.id);
+    n.children = Array.isArray(n.children) ? n.children : [];
+    if(n.facts && !Array.isArray(n.facts)) n.facts = Object.entries(n.facts);
+    if(n.links && !Array.isArray(n.links)) n.links = [];
+    n.children.forEach(fix);
+  })(t.root);
+  return t;
+}
+function registerTree(t){
+  const map = new Map(), order = [];
+  (function walk(n, parent, depth){
+    n.parent = parent; n.depth = depth; n.tree = t.id; n.idx = order.length;
+    map.set(n.id, n); order.push(n);
+    n.children.forEach(c => walk(c, n, depth + 1));
+  })(t.root, null, 0);
+  REG.set(t.id, { tree: t, map, order });
+}
+TREES.forEach(t => registerTree(prepTree(t, false)));
+
+const getNode = (tid, nid) => REG.get(tid)?.map.get(nid);
+const resolve = link => { const [t, n] = String(link).split(":"); return getNode(t, n); };
+const keyOf = n => n.tree + ":" + n.id;
+const ancestors = n => { const a = []; for(let p = n; p; p = p.parent) a.unshift(p); return a; };
+const countDesc = n => n.children.reduce((s, c) => s + 1 + countDesc(c), 0);
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const S = {
+  treeId: TREES[0].id, nodeId: TREES[0].root.id,
+  orient: "v",
+  collapsed: new Map(),           // treeId -> Set(nodeId)
+  recall: false, revealed: new Set(),
+  notes: {}, dirty: false,
+  view: { k: 1, x: 0, y: 0 },
+  laid: []
+};
+const tree = () => REG.get(S.treeId).tree;
+const cur = () => getNode(S.treeId, S.nodeId) || tree().root;
+
+function collapsedSet(tid = S.treeId){
+  if(!S.collapsed.has(tid)){
+    const t = REG.get(tid).tree, set = new Set();
+    if(t.openDepth != null) REG.get(tid).order.forEach(n => { if(n.depth >= t.openDepth && n.children.length) set.add(n.id); });
+    S.collapsed.set(tid, set);
+  }
+  return S.collapsed.get(tid);
+}
+const isHidden = n => S.recall && n.parent && !S.revealed.has(keyOf(n));
+const disp = n => isHidden(n) ? "?" : n.label;
+const dispDiff = n => isHidden(n) ? "?" : (n.diff || "");
+
+/* =====================================================================
+   HELPERS
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const norm = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function trunc(s, max){ s = String(s || ""); return s.length > max ? s.slice(0, max - 1).trimEnd() + "…" : s; }
+function wrap(s, max, lines){
+  const words = String(s).split(/\s+/), out = []; let line = "";
+  for(const w of words){
+    if(line && (line + " " + w).length > max){ out.push(line); line = w; } else line = line ? line + " " + w : w;
+  }
+  if(line) out.push(line);
+  if(out.length > lines){ const rest = out.slice(lines - 1).join(" "); out.length = lines - 1; out.push(trunc(rest, max)); }
+  return out;
+}
+let toastT;
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2600); }
+function download(name, text, type = "application/json"){
+  const blob = new Blob([text], { type }), a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+
+/* =====================================================================
+   LAYOUT + SVG
+   ===================================================================== */
+const NW = 200, NH = 84;
+const GAP = { v: { x: 24, y: 64 }, h: { x: 78, y: 18 } };
+const svg = $("#svg"), vp = $("#vp");
+
+function layout(){
+  const col = collapsedSet(), out = []; let slot = 0;
+  (function place(n){
+    const kids = col.has(n.id) ? [] : n.children;
+    if(!kids.length) n._slot = slot++;
+    else { const s = kids.map(place); n._slot = (s[0] + s[s.length - 1]) / 2; }
+    out.push(n); return n._slot;
+  })(tree().root);
+  const g = GAP[S.orient];
+  out.forEach(n => {
+    if(S.orient === "v"){ n._x = n._slot * (NW + g.x); n._y = n.depth * (NH + g.y); }
+    else { n._x = n.depth * (NW + g.x); n._y = n._slot * (NH + g.y); }
+  });
+  return S.laid = out;
+}
+function edgePath(p, c){
+  if(S.orient === "v"){
+    const x1 = p._x, y1 = p._y + NH / 2, x2 = c._x, y2 = c._y - NH / 2, m = (y1 + y2) / 2;
+    return `M${x1},${y1} C${x1},${m} ${x2},${m} ${x2},${y2}`;
+  }
+  const x1 = p._x + NW / 2, y1 = p._y, x2 = c._x - NW / 2, y2 = c._y, m = (x1 + x2) / 2;
+  return `M${x1},${y1} C${m},${y1} ${m},${y2} ${x2},${y2}`;
+}
+function cardSVG(n, onPath, col){
+  const hidden = isHidden(n), cls = ["card"];
+  if(n.id === S.nodeId) cls.push("sel");
+  if(onPath.has(n.id)) cls.push("path");
+  if(!n.parent) cls.push("root");
+  if(n.empty) cls.push("empty");
+  if(n.kind === "formulation") cls.push("formula");
+  if(hidden) cls.push("hidden");
+  const x = n._x - NW / 2, y = n._y - NH / 2;
+  let body = `<rect class="face" width="${NW}" height="${NH}" rx="3"/><rect class="inner" x="3.5" y="3.5" width="${NW-7}" height="${NH-7}" rx="1.5"/>`;
+  if(hidden){
+    body += `<text class="t-q" x="${NW/2}" y="${NH/2 + 9}" text-anchor="middle">?</text>`;
+  } else {
+    const top = n.parent ? trunc(n.diff || "", 32) : "summum genus of this tree";
+    body += `<text class="t-diff" x="${NW/2}" y="19" text-anchor="middle">${esc(top)}</text>`;
+    const lines = wrap(n.label, 21, 2);
+    const ly = lines.length === 1 ? [49] : [41, 60];
+    lines.forEach((l, i) => body += `<text class="t-label" x="${NW/2}" y="${ly[i]}" text-anchor="middle">${esc(l)}</text>`);
+    if(n.de) body += `<text class="t-de" x="${NW/2}" y="${NH - 9}" text-anchor="middle">${esc(trunc(n.de, 34))}</text>`;
+  }
+  if(S.notes[keyOf(n)]) body += `<circle class="notedot" cx="${NW - 10}" cy="10" r="3.5"/>`;
+  if(n.children.length){
+    const closed = col.has(n.id);
+    const tx = S.orient === "v" ? NW / 2 : NW + 13, ty = S.orient === "v" ? NH + 13 : NH / 2;
+    body += `<g class="tog" data-toggle="${esc(n.id)}" transform="translate(${tx},${ty})" role="button" aria-label="${closed ? "Open" : "Close"} branch"><circle r="10"/><text y="3.8" text-anchor="middle">${closed ? "+" + countDesc(n) : "−"}</text></g>`;
+  }
+  const tip = hidden ? "Click to reveal" : `${n.label}${n.ref ? " (" + n.ref + ")" : ""}${n.diff ? "\n" + n.diff : ""}`;
+  return `<g class="${cls.join(" ")}" data-id="${esc(n.id)}" transform="translate(${x},${y})" tabindex="0" role="button" aria-label="${esc(hidden ? "Hidden species" : n.label)}"><title>${esc(tip)}</title>${body}</g>`;
+}
+function renderTree(){
+  const nodes = layout(), col = collapsedSet();
+  const onPath = new Set(ancestors(cur()).map(n => n.id));
+  let e = "", g = "";
+  for(const n of nodes){
+    if(n.parent){
+      const cls = ["edge"];
+      if(onPath.has(n.id)) cls.push("on");
+      if(n.kind === "formulation" || n.empty) cls.push("dash");
+      e += `<path class="${cls.join(" ")}" d="${edgePath(n.parent, n)}"/>`;
+    }
+  }
+  for(const n of nodes) g += cardSVG(n, onPath, col);
+  vp.innerHTML = `<g>${e}</g><g>${g}</g>`;
+  fitText();
+  const t = tree();
+  $("#stageTitle").innerHTML = `<b>${esc(t.title)}</b><span>${esc(t.work)}${t.source ? ", " + esc(t.source) : ""}</span>`;
+  $("#btnOrient").textContent = S.orient === "v" ? "Turn sideways" : "Turn upright";
+}
+
+/* shrink any line that is wider than its card, whatever font loaded */
+function fitText(){
+  const max = NW - 18;
+  vp.querySelectorAll(".t-label, .t-diff, .t-de").forEach(t => {
+    let w; try{ w = t.getComputedTextLength(); }catch(e){ return; }
+    if(w > max){
+      const fs = parseFloat(getComputedStyle(t).fontSize);
+      t.style.fontSize = Math.max(fs * max / w, fs * .72) + "px";
+      if(t.getComputedTextLength() > max){ t.setAttribute("textLength", max); t.setAttribute("lengthAdjust", "spacingAndGlyphs"); }
+    }
+  });
+}
+/* pick the orientation that shows the tree at the larger scale */
+function orientFor(tid){
+  const t = REG.get(tid).tree;
+  if(t.orient) return t.orient;
+  const r = svg.getBoundingClientRect(), keep = [S.treeId, S.orient], score = {};
+  S.treeId = tid;
+  for(const o of ["v", "h"]){ S.orient = o; layout(); const B = bounds(); score[o] = Math.min((r.width - 80) / B.w, (r.height - 128) / B.h); }
+  [S.treeId, S.orient] = keep;
+  return score.h > score.v * 1.15 ? "h" : "v";
+}
+
+/* view: pan + zoom */
+function applyView(anim){
+  vp.style.transition = anim && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "transform .45s ease" : "none";
+  vp.style.transform = `translate(${S.view.x}px,${S.view.y}px) scale(${S.view.k})`;
+}
+function bounds(){
+  let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity;
+  for(const n of S.laid){ a = Math.min(a, n._x - NW/2); b = Math.min(b, n._y - NH/2); c = Math.max(c, n._x + NW/2); d = Math.max(d, n._y + NH/2 + 12); }
+  return { x: a, y: b, w: c - a, h: d - b };
+}
+function fit(anim = true){
+  const r = svg.getBoundingClientRect(), B = bounds(), padX = 40, padTop = 78, padBot = 50;
+  const W = r.width - padX * 2, H = r.height - padTop - padBot;
+  let k = clamp(Math.min(W / B.w, H / B.h), .5, 1);
+  if(B.w * k <= W && B.h * k <= H){
+    S.view = { k, x: padX + (W - B.w * k) / 2 - B.x * k, y: padTop + (H - B.h * k) / 2 - B.y * k };
+  } else if(S.orient === "v"){
+    const n = cur(); S.view = { k, x: r.width / 2 - n._x * k, y: padTop - B.y * k };
+  } else {
+    const n = cur(); S.view = { k, x: padX - B.x * k, y: clamp(r.height / 2 - n._y * k, r.height - padBot - (B.y + B.h) * k, padTop - B.y * k) };
+  }
+  applyView(anim);
+}
+function centerOn(n, anim = true){
+  const r = svg.getBoundingClientRect();
+  S.view.x = r.width / 2 - n._x * S.view.k;
+  S.view.y = r.height / 2 - n._y * S.view.k;
+  applyView(anim);
+}
+function ensureVisible(n){
+  const r = svg.getBoundingClientRect(), k = S.view.k;
+  const sx = n._x * k + S.view.x, sy = n._y * k + S.view.y, mx = NW * k / 2 + 20, my = NH * k / 2 + 60;
+  if(sx < mx || sx > r.width - mx || sy < my || sy > r.height - my) centerOn(n);
+}
+function zoomAt(f, px, py){
+  const k2 = clamp(S.view.k * f, .25, 2.2), s = k2 / S.view.k;
+  S.view.x = px - (px - S.view.x) * s; S.view.y = py - (py - S.view.y) * s; S.view.k = k2;
+  applyView(false);
+}
+
+/* =====================================================================
+   PANEL
+   ===================================================================== */
+function renderPanel(){
+  const n = cur(), t = tree(), r = REG.get(t.id), path = ancestors(n);
+  let h = `<nav class="crumbs" aria-label="Genus path">` +
+    path.map((p, i) => i === path.length - 1 ? `<span>${esc(disp(p))}</span>` : `<button data-go="${esc(keyOf(p))}">${esc(disp(p))}</button><span aria-hidden="true">›</span>`).join("") + `</nav>`;
+
+  const kind = !n.parent ? "Highest genus of this tree"
+    : n.kind === "formulation" ? `A formulation of ${esc(disp(n.parent))}`
+    : n.empty ? `An empty species of ${esc(disp(n.parent))}`
+    : n.children.length ? `A species of ${esc(disp(n.parent))}, and a genus in turn`
+    : `A lowest species of ${esc(disp(n.parent))}`;
+  h += `<p class="kind">${kind}</p><h2>${esc(n.label)}</h2>`;
+  if(n.de) h += `<p class="de">${esc(n.de)}</p>`;
+  if(n.ref) h += `<p class="ref">${esc(t.work)}, ${esc(n.ref)}</p>`;
+  if(n.empty) h += `<span class="badge">No judgments or things fall under this class</span>`;
+
+  if(!n.parent && t.intro) h += `<section><p class="intro">${esc(t.intro)}</p></section>`;
+
+  if(n.parent){
+    const isF = n.kind === "formulation";
+    h += `<section class="defn"><dl>
+      <dt>${isF ? "Principle" : "Proximate genus"}</dt><dd>${esc(n.parent.label)}</dd>
+      <dt>${isF ? "Aspect" : "Specific difference"}</dt><dd class="diffword">${esc(n.diff || "not stated")}</dd></dl>
+      <p class="formula">${isF
+        ? `This is not a species. Kant treats it as one way of representing ${esc(n.parent.label.toLowerCase())}.`
+        : `<b>${esc(n.label)}</b> is ${/^[aeiou]/i.test(n.parent.label) ? "an" : "a"} ${esc(n.parent.label.toLowerCase())}, <span class="diffword">${esc(n.diff || "")}</span>.`}</p></section>`;
+
+    h += `<section><h3>The trunk so far</h3><div class="trunk">`;
+    path.forEach((p, i) => {
+      if(i > 0){
+        const sibs = p.parent.children.filter(c => c !== p);
+        h += `<div class="l">${esc(dispDiff(p) || p.label)}</div><div class="stem"></div><div class="r">${
+          sibs.map(s => `<button data-go="${esc(keyOf(s))}" title="${esc(disp(s))}">${esc(dispDiff(s) || disp(s))}</button>`).join("")}</div>`;
+      }
+      h += `<div class="g ${i === path.length - 1 ? "here" : ""}" ${i < path.length - 1 ? `data-go="${esc(keyOf(p))}" role="button" tabindex="0"` : ""}>${esc(disp(p))}</div>`;
+    });
+    h += `</div><p class="hint">Gold, left: the difference taken at each step. Struck through, right: the opposed branches it rules out.</p></section>`;
+  }
+
+  if(n.gloss) h += `<section><h3>Gloss</h3><p>${esc(n.gloss)}</p></section>`;
+  if(n.facts?.length) h += `<section><dl class="facts">${n.facts.map(([a, b]) => `<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join("")}</dl></section>`;
+  if(n.note) h += `<section><h3>While reading</h3><div class="note-box"><p style="margin:0">${esc(n.note)}</p></div></section>`;
+  if(n.q) h += `<section><h3>Keep this question open</h3><p class="q">${esc(n.q)}</p></section>`;
+
+  if(n.children.length){
+    const allF = n.children.every(c => c.kind === "formulation");
+    h += `<section><h3>${allF ? "Formulations" : "Divided into"}</h3><ul class="species">${
+      n.children.map(c => `<li><button data-go="${esc(keyOf(c))}"><b>${esc(disp(c))}</b><span class="diffword">${esc(dispDiff(c))}</span></button></li>`).join("")}</ul></section>`;
+  }
+  const links = (n.links || []).map(resolve).filter(Boolean);
+  if(links.length){
+    h += `<section><h3>Elsewhere in Kant</h3><ul class="xrefs">${
+      links.map(l => `<li><button data-go="${esc(keyOf(l))}"><b>${esc(l.label)}</b><span>${esc(REG.get(l.tree).tree.title)}${l.ref ? ", " + esc(l.ref) : ""}</span></button></li>`).join("")}</ul></section>`;
+  }
+
+  h += `<section><h3><label for="note">Your notes</label></h3>
+    <textarea id="note" placeholder="Page numbers in your edition, objections, connections…">${esc(S.notes[keyOf(n)] || "")}</textarea>
+    <p class="hint">Kept while this tab is open. Save them from “Save &amp; load”.</p></section>`;
+
+  const prev = r.order[n.idx - 1], next = r.order[n.idx + 1];
+  h += `<div class="walk">
+    <button data-go="${prev ? esc(keyOf(prev)) : ""}" ${prev ? "" : "disabled"}><small>Previous</small>${prev ? esc(disp(prev)) : "Start"}</button>
+    <span class="pos">${n.idx + 1} of ${r.order.length}</span>
+    <button data-go="${next ? esc(keyOf(next)) : ""}" ${next ? "" : "disabled"}><small>Next</small>${next ? esc(disp(next)) : "End"}</button></div>`;
+
+  $("#panel").innerHTML = h;
+}
+
+/* =====================================================================
+   SIDEBAR
+   ===================================================================== */
+function renderTreeList(){
+  $("#treeList").innerHTML = [...REG.values()].map(({ tree: t }) =>
+    `<li><button class="${t.id === S.treeId ? "on" : ""}" data-tree="${esc(t.id)}">${esc(t.title)}<small>${esc(t.work)}</small></button></li>`).join("");
+}
+function renderOutline(){
+  const li = n => `<li><button class="${n.id === S.nodeId ? "on" : ""} ${n.empty ? "empty" : ""}" data-go="${esc(keyOf(n))}"><span>${esc(disp(n))}</span>${S.notes[keyOf(n)] ? '<i class="dot" aria-label="has a note"></i>' : ""}</button>${
+    n.children.length ? `<ul>${n.children.map(li).join("")}</ul>` : ""}</li>`;
+  $("#outline").innerHTML = li(tree().root);
+  $("#outline .on")?.scrollIntoView({ block: "nearest" });
+}
+function renderSearch(q){
+  const out = $("#searchOut"), browse = $("#browse");
+  q = norm(q).trim();
+  if(!q){ out.hidden = true; browse.hidden = false; return; }
+  const hits = [];
+  for(const { tree: t, order } of REG.values()) for(const n of order){
+    const hay = [n.label, n.de, n.ref, n.diff, n.gloss, n.note].map(norm);
+    const score = hay[0].includes(q) ? 3 : (hay[1].includes(q) || hay[2].includes(q)) ? 2 : hay.some(x => x.includes(q)) ? 1 : 0;
+    if(score) hits.push({ n, t, score });
+  }
+  hits.sort((a, b) => b.score - a.score);
+  out.hidden = false; browse.hidden = true;
+  out.innerHTML = hits.length
+    ? `<h2>${hits.length} found</h2><ul class="results">${hits.slice(0, 60).map(({ n, t }) =>
+        `<li><button data-go="${esc(keyOf(n))}"><b>${esc(n.label)}</b><span>${esc(t.title)}${n.ref ? ", " + esc(n.ref) : ""}</span>${n.diff ? `<em>${esc(n.diff)}</em>` : ""}</button></li>`).join("")}</ul>`
+    : `<h2>Nothing found</h2><p class="empty-msg">Try an English or German term, or a page such as B106 or 4:421.</p>`;
+}
+
+/* =====================================================================
+   NAVIGATION
+   ===================================================================== */
+function renderAll(){ renderTree(); renderPanel(); renderOutline(); renderTreeList(); }
+
+function switchTree(tid){
+  S.orient = orientFor(tid); S.treeId = tid;
+  S.nodeId = REG.get(tid).tree.root.id;
+  renderAll(); fit(false); updateHash();
+}
+function select(tid, nid, opts = {}){
+  const n = getNode(tid, nid); if(!n) return;
+  if(tid !== S.treeId){ S.orient = orientFor(tid); S.treeId = tid; opts.fit = true; }
+  const col = collapsedSet(tid);
+  for(let p = n.parent; p; p = p.parent) col.delete(p.id);
+  if(S.recall) S.revealed.add(keyOf(n));
+  S.nodeId = nid;
+  renderAll();
+  if(opts.fit){ fit(false); ensureVisible(n); }
+  else if(opts.center) ensureVisible(n);
+  updateHash();
+  if(innerWidth <= 900 && opts.scrollPanel) document.querySelector(".panel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+function go(key, opts = { center: true }){ const [t, n] = String(key).split(":"); if(t && n) select(t, n, opts); }
+function toggleCollapse(id){
+  const col = collapsedSet(), n = getNode(S.treeId, id), bx = n._x, by = n._y;
+  col.has(id) ? col.delete(id) : col.add(id);
+  const c = cur();
+  if(col.has(id) && c !== n && ancestors(c).includes(n)) S.nodeId = n.id;
+  renderAll();
+  S.view.x += (bx - n._x) * S.view.k; S.view.y += (by - n._y) * S.view.k; applyView(false);
+}
+function updateHash(){
+  try{ history.replaceState(null, "", `#/${encodeURIComponent(S.treeId)}/${encodeURIComponent(S.nodeId)}`); }catch(e){}
+}
+function readHash(){
+  const m = location.hash.match(/^#\/([^/]+)\/([^/]+)/);
+  if(!m) return false;
+  const t = decodeURIComponent(m[1]), n = decodeURIComponent(m[2]);
+  if(!getNode(t, n)) return false;
+  select(t, n, { fit: true }); return true;
+}
+
+/* =====================================================================
+   FILES
+   ===================================================================== */
+function cleanNode(n){
+  const o = {};
+  for(const k of FIELDS) if(n[k] != null && n[k] !== "" && !(Array.isArray(n[k]) && !n[k].length)) o[k] = n[k];
+  if(n.children.length) o.children = n.children.map(cleanNode);
+  return o;
+}
+function exportTree(){
+  const t = tree();
+  const o = { id: t.id, title: t.title, work: t.work, source: t.source, intro: t.intro };
+  if(t.orient) o.orient = t.orient; if(t.openDepth != null) o.openDepth = t.openDepth;
+  o.root = cleanNode(t.root);
+  download(`${t.id}.tree.json`, JSON.stringify(o, null, 2));
+  toast(`Saved ${t.id}.tree.json`);
+}
+function exportNotes(){
+  if(!Object.keys(S.notes).length){ toast("No notes yet. Write one in the panel first."); return; }
+  download("arbor-kantiana-notes.json", JSON.stringify({ app: "arbor-kantiana", version: 1, saved: new Date().toISOString(), notes: S.notes }, null, 2));
+  S.dirty = false; toast("Notes saved");
+}
+function exportMd(){
+  const keys = Object.keys(S.notes);
+  if(!keys.length){ toast("No notes yet. Write one in the panel first."); return; }
+  let md = `# Reading notes on Kant\n\n_Saved from Arbor Kantiana on ${new Date().toLocaleDateString()}_\n`;
+  for(const { tree: t, order } of REG.values()){
+    const ns = order.filter(n => S.notes[keyOf(n)]);
+    if(!ns.length) continue;
+    md += `\n## ${t.title}\n_${t.work}${t.source ? ", " + t.source : ""}_\n`;
+    for(const n of ns){
+      md += `\n### ${n.label}${n.ref ? ` (${n.ref})` : ""}\n`;
+      md += `${ancestors(n).map(p => p.label).join(" › ")}\n\n${S.notes[keyOf(n)].trim()}\n`;
+    }
+  }
+  download("arbor-kantiana-notes.md", md, "text/markdown");
+  S.dirty = false; toast("Notes saved as Markdown");
+}
+function importText(text){
+  let data;
+  try{ data = JSON.parse(text); }catch(e){ toast("That file is not valid JSON."); return; }
+  if(data && data.notes && typeof data.notes === "object"){
+    let c = 0; for(const [k, v] of Object.entries(data.notes)) if(typeof v === "string"){ S.notes[k] = v; c++; }
+    renderAll(); toast(`Loaded ${c} note${c === 1 ? "" : "s"}`); return;
+  }
+  const list = Array.isArray(data) ? data : [data];
+  try{
+    const added = list.map(t => { prepTree(t, true); registerTree(t); return t; });
+    switchTree(added[0].id);
+    toast(`Loaded ${added.length === 1 ? "“" + added[0].title + "”" : added.length + " trees"}. It lasts for this session.`);
+  }catch(e){ toast(e.message + " Check the tree format in the README."); }
+}
+
+/* =====================================================================
+   EVENTS
+   ===================================================================== */
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-go]");
+  if(g && g.dataset.go){ go(g.dataset.go, { center: true, scrollPanel: !!g.closest(".side") }); if(g.closest(".side") && innerWidth <= 900) setSide(false); return; }
+  const tb = e.target.closest("[data-tree]");
+  if(tb){ $("#q").value = ""; renderSearch(""); switchTree(tb.dataset.tree); if(innerWidth <= 900) setSide(false); return; }
+  if(!e.target.closest("details.menu")) $("#menuFile").open = false;
+});
+document.addEventListener("keydown", e => {
+  if(e.key === "Enter" && e.target.matches?.("[data-go][role=button]")){ go(e.target.dataset.go); return; }
+});
+
+svg.addEventListener("click", e => {
+  const t = e.target.closest("[data-toggle]");
+  if(t){ e.stopPropagation(); toggleCollapse(t.dataset.toggle); return; }
+  const c = e.target.closest("[data-id]");
+  if(c) select(S.treeId, c.dataset.id, { scrollPanel: true });
+});
+svg.addEventListener("dblclick", e => {
+  const c = e.target.closest("[data-id]");
+  if(c && getNode(S.treeId, c.dataset.id).children.length) toggleCollapse(c.dataset.id);
+});
+svg.addEventListener("keydown", e => {
+  const c = e.target.closest?.("[data-id]");
+  if(c && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); select(S.treeId, c.dataset.id); svg.querySelector(`[data-id="${CSS.escape(c.dataset.id)}"]`)?.focus(); }
+});
+
+let drag = null;
+svg.addEventListener("pointerdown", e => {
+  if(e.target.closest("[data-id],[data-toggle]")) return;
+  drag = { x: e.clientX, y: e.clientY, vx: S.view.x, vy: S.view.y };
+  svg.setPointerCapture(e.pointerId); svg.classList.add("dragging");
+});
+svg.addEventListener("pointermove", e => {
+  if(!drag) return;
+  S.view.x = drag.vx + e.clientX - drag.x; S.view.y = drag.vy + e.clientY - drag.y; applyView(false);
+});
+const endDrag = () => { drag = null; svg.classList.remove("dragging"); };
+svg.addEventListener("pointerup", endDrag); svg.addEventListener("pointercancel", endDrag);
+svg.addEventListener("wheel", e => {
+  e.preventDefault();
+  const r = svg.getBoundingClientRect();
+  zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .0016)), e.clientX - r.left, e.clientY - r.top);
+}, { passive: false });
+const zoomCenter = f => { const r = svg.getBoundingClientRect(); zoomAt(f, r.width / 2, r.height / 2); };
+$("#zIn").onclick = () => zoomCenter(1.2);
+$("#zOut").onclick = () => zoomCenter(1 / 1.2);
+
+$("#btnOrient").onclick = () => { S.orient = S.orient === "v" ? "h" : "v"; renderTree(); fit(); };
+$("#btnFit").onclick = () => fit();
+$("#btnExpand").onclick = () => { collapsedSet().clear(); renderAll(); fit(); };
+$("#btnCollapse").onclick = () => {
+  const col = collapsedSet(); col.clear();
+  REG.get(S.treeId).order.forEach(n => { if(n.depth >= 1 && n.children.length) col.add(n.id); });
+  if(cur().depth > 1) S.nodeId = ancestors(cur())[1].id;
+  renderAll(); fit();
+};
+function setRecall(on){
+  S.recall = on;
+  $("#btnRecall").setAttribute("aria-pressed", String(on));
+  S.revealed = new Set(on ? ancestors(cur()).map(keyOf) : []);
+  renderAll();
+  toast(on ? "Recall on. Names below the highest genus are hidden; click one to check yourself." : "Recall off");
+}
+$("#btnRecall").onclick = () => setRecall(!S.recall);
+$("#btnExportNotes").onclick = () => { $("#menuFile").open = false; exportNotes(); };
+$("#btnExportMd").onclick = () => { $("#menuFile").open = false; exportMd(); };
+$("#btnExportTree").onclick = () => { $("#menuFile").open = false; exportTree(); };
+$("#btnImport").onclick = () => { $("#menuFile").open = false; $("#file").click(); };
+$("#file").onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader(); rd.onload = () => importText(rd.result); rd.readAsText(f); e.target.value = "";
+};
+const help = $("#help");
+$("#btnHelp").onclick = () => help.showModal();
+$("#helpClose").onclick = () => help.close();
+help.addEventListener("click", e => { if(e.target === help) help.close(); });
+
+function setSide(open){ document.body.classList.toggle("side-open", open); $("#btnSide").setAttribute("aria-expanded", String(open)); }
+$("#btnSide").onclick = () => setSide(!document.body.classList.contains("side-open"));
+
+$("#q").addEventListener("input", e => renderSearch(e.target.value));
+$("#q").addEventListener("keydown", e => {
+  if(e.key === "Enter"){ const b = $("#searchOut button"); if(b) b.click(); }
+  if(e.key === "Escape"){ e.target.value = ""; renderSearch(""); e.target.blur(); }
+});
+
+document.addEventListener("input", e => {
+  if(e.target.id !== "note") return;
+  const k = keyOf(cur()), v = e.target.value;
+  if(v.trim()) S.notes[k] = v; else delete S.notes[k];
+  S.dirty = true;
+});
+document.addEventListener("change", e => { if(e.target.id === "note"){ renderTree(); renderOutline(); } });
+
+document.addEventListener("keydown", e => {
+  if(e.target.matches("input, textarea, select") || e.metaKey || e.ctrlKey || e.altKey || help.open) return;
+  const n = cur(), r = REG.get(S.treeId);
+  const keys = {
+    ArrowRight: () => r.order[n.idx + 1] && select(S.treeId, r.order[n.idx + 1].id, { center: true }),
+    ArrowLeft:  () => r.order[n.idx - 1] && select(S.treeId, r.order[n.idx - 1].id, { center: true }),
+    ArrowUp:    () => n.parent && select(S.treeId, n.parent.id, { center: true }),
+    ArrowDown:  () => n.children[0] && select(S.treeId, n.children[0].id, { center: true }),
+    "/": () => $("#q").focus(),
+    f: () => fit(), o: () => $("#btnOrient").click(), r: () => setRecall(!S.recall),
+    "?": () => help.showModal()
+  };
+  const fn = keys[e.key] || keys[e.key.toLowerCase?.()];
+  if(fn){ e.preventDefault(); fn(); }
+});
+addEventListener("hashchange", () => readHash());
+addEventListener("beforeunload", e => { if(S.dirty && Object.keys(S.notes).length){ e.preventDefault(); e.returnValue = ""; } });
+let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => ensureVisible(cur()), 150); });
+
+/* boot */
+if(!readHash()){ S.orient = orientFor(S.treeId); renderAll(); fit(false); }
+document.fonts?.ready.then(() => { renderTree(); applyView(false); });
+</script>
+</body>
+</html>
