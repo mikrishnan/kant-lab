@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arbor Porphyriana · An Interactive Atlas of Porphyrian Trees</title>
+<style>
+:root{
+  --bg:#f5efe3; --panel:#fffcf6; --ink:#2b2420; --muted:#7a6f66; --line:#d6cab8; --edge:#b9ab96; --accent:#8c2f1b;
+  --genus:#8c2f1b; --diff:#2f6b4f; --rej:#9a8f85; --species:#1f4e79; --indiv:#6b4c8a; --cls:#6b5440; --cat:#a0522d;
+  --nodebg:#fffcf6; --hl:#e0a100;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#1a1714; --panel:#231f1b; --ink:#ece4d8; --muted:#a39889; --line:#3b342d; --edge:#5a5046; --accent:#e07a5f;
+    --genus:#e07a5f; --diff:#6fbf94; --rej:#7d746b; --species:#7fb2e5; --indiv:#b99be0; --cls:#c9b79f; --cat:#e09a5f;
+    --nodebg:#2a2521; --hl:#f2c14e; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:15px/1.55 Georgia,"Times New Roman",serif}
+button,input{font:inherit;color:inherit}
+#app{display:grid;grid-template-columns:300px 1fr 350px;height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--line);overflow:auto;display:flex;flex-direction:column}
+#info{background:var(--panel);border-left:1px solid var(--line);overflow:auto;padding:20px 22px 40px}
+.brand{padding:20px 18px 8px}
+.brand h1{font-size:21px;margin:0;font-weight:600;letter-spacing:.01em}
+.brand h1 span{color:var(--accent)}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.search{margin:10px 16px 6px;position:relative}
+.search input{width:100%;padding:8px 10px 8px 30px;border:1px solid var(--line);border-radius:8px;background:var(--bg);outline:none}
+.search input:focus{border-color:var(--accent)}
+.search svg{position:absolute;left:9px;top:10px;width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2}
+.eras{display:flex;gap:4px;flex-wrap:wrap;padding:4px 16px 8px}
+.eras button{border:1px solid var(--line);background:none;border-radius:20px;padding:2px 10px;font-size:12px;cursor:pointer;color:var(--muted)}
+.eras button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+#list{list-style:none;margin:0;padding:4px 8px 12px;flex:1}
+#list li{padding:10px 12px;border-radius:9px;cursor:pointer;border:1px solid transparent;margin-bottom:2px}
+#list li:hover{background:color-mix(in srgb,var(--accent) 6%,transparent)}
+#list li.on{background:color-mix(in srgb,var(--accent) 11%,transparent);border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+#list li.empty{color:var(--muted);cursor:default}
+#list .t{font-weight:600;line-height:1.3}
+#list .m{font-size:12px;color:var(--muted);margin-top:2px}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.chips span{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.about{margin:0 16px 18px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:13px;color:var(--muted)}
+.about summary{cursor:pointer;color:var(--ink);font-weight:600}
+.about p{margin:8px 0 0}
+main{position:relative;overflow:hidden;min-height:420px}
+.toolbar{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;z-index:2;pointer-events:none}
+.toolbar>*{pointer-events:auto}
+.seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.seg button{border:0;background:none;padding:6px 11px;font-size:13px;cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent);color:#fff}
+.seg button:hover:not(.on){background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.depth{display:inline-flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:13px}
+.depth input{width:110px;accent-color:var(--accent)}
+.hidden{display:none!important}
+#canvas{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+#canvas.drag{cursor:grabbing}
+#vp{transform-origin:0 0}
+#vp.smooth{transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.node{--c:var(--cls);cursor:pointer}
+.node rect{fill:var(--nodebg);stroke:var(--c);stroke-width:1.5;transition:fill .2s}
+.node .lbl{fill:var(--ink);font-size:14px;text-anchor:middle;pointer-events:none}
+.node:hover rect{fill:color-mix(in srgb,var(--c) 12%,var(--nodebg))}
+.k-sg{--c:var(--genus)} .k-sg rect{stroke-width:2.6}
+.k-g{--c:var(--genus)} .k-s{--c:var(--species)} .k-d{--c:var(--diff)} .k-x{--c:var(--rej)} .k-i{--c:var(--indiv)} .k-cat{--c:var(--cat)}
+.k-x rect{stroke-dasharray:4 3}
+.k-x .lbl{fill:var(--muted)}
+.k-d .lbl,.k-x .lbl{font-style:italic;font-size:13.5px}
+.k-sg .lbl,.k-g .lbl,.k-s .lbl{font-weight:600}
+.k-i .lbl{font-style:italic}
+.node.path rect{fill:color-mix(in srgb,var(--c) 15%,var(--nodebg))}
+.node.sel rect{stroke-width:3;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--c) 55%,transparent))}
+.node.match rect{stroke:var(--hl);stroke-width:3}
+.node.new{animation:fade .45s ease both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.rank{font-size:9.5px;fill:var(--muted);text-anchor:middle;letter-spacing:.1em;text-transform:uppercase;pointer-events:none}
+.tog circle{fill:var(--c)}
+.tog text{fill:#fff;font:700 12px system-ui,sans-serif;text-anchor:middle;pointer-events:none}
+.tog:hover circle{filter:brightness(1.15)}
+.edge{fill:none;stroke:var(--edge);stroke-width:1.6}
+.edge.rej{stroke-dasharray:4 4}
+.edge.path{stroke:var(--accent);stroke-width:2.6}
+.legend{position:absolute;left:12px;bottom:12px;background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12px;display:flex;flex-wrap:wrap;gap:4px 14px;max-width:calc(100% - 24px);backdrop-filter:blur(4px)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;border:2px solid var(--c);vertical-align:-2px;margin-right:5px;background:var(--nodebg)}
+.legend .keys{color:var(--muted);width:100%}
+.legend kbd,#info kbd{font:11px ui-monospace,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--bg)}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+#info h2{font-size:22px;margin:4px 0 10px;line-height:1.25}
+#info h3{font-size:19px;margin:6px 0 6px}
+#info p{margin:0 0 10px}
+#info .src{font-size:13px;color:var(--muted)}
+#ninfo{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.kind{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--c);border:1px solid var(--c);border-radius:5px;padding:1px 7px}
+.langs{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:14px;margin:6px 0 12px}
+.langs dt{color:var(--muted);font-size:12px;padding-top:2px}
+.langs dd{margin:0}
+.def{background:color-mix(in srgb,var(--accent) 7%,transparent);border-left:3px solid var(--accent);padding:10px 12px;border-radius:0 8px 8px 0;margin:12px 0;font-size:14px}
+.def b{font-weight:600}
+.crumbs{font-size:13px;color:var(--muted);margin-top:12px}
+.crumbs a{color:var(--accent);cursor:pointer;text-decoration:none}
+.crumbs a:hover{text-decoration:underline}
+.kidlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.kidlist a{font-size:13px;border:1px solid var(--line);border-radius:14px;padding:1px 9px;cursor:pointer}
+.kidlist a:hover{border-color:var(--accent);color:var(--accent)}
+.muted{color:var(--muted);font-size:13px}
+@media (max-width:1050px){
+  #app{grid-template-columns:1fr;grid-template-rows:auto 70vh auto;height:auto}
+  aside{max-height:42vh;border-right:0;border-bottom:1px solid var(--line)}
+  #info{border-left:0;border-top:1px solid var(--line)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside>
+    <div class="brand">
+      <h1>Arbor <span>Porphyriana</span></h1>
+      <p>An interactive atlas of the Porphyrian trees and the division diagrams that descend from them.</p>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="q" type="search" placeholder="Search trees and terms (e.g. animal, homo)" autocomplete="off">
+    </div>
+    <div class="eras" id="eras">
+      <button data-era="all" class="on">All</button>
+      <button data-era="ancient">Antiquity</button>
+      <button data-era="medieval">1200–1800</button>
+      <button data-era="modern">Modern</button>
+    </div>
+    <ul id="list"></ul>
+    <details class="about">
+      <summary>What is a Porphyrian tree?</summary>
+      <p>In his <em>Isagoge</em> (c. 270 CE), the Neoplatonist Porphyry explained how a highest genus is divided by pairs of opposed <em>differentiae</em> into ever narrower species, down to individuals.</p>
+      <p>Each step yields a definition by <em>genus proximum</em> plus <em>differentia specifica</em>. Human, for example, is defined as a mortal rational animal.</p>
+      <p>The "tree" picture came later, through Boethius and medieval logic textbooks. The same idea lives on in biological taxonomy, library classification, and computer ontologies.</p>
+    </details>
+  </aside>
+
+  <main>
+    <div class="toolbar">
+      <div class="seg" id="layoutSeg">
+        <button data-layout="trunk">Classic trunk</button>
+        <button data-layout="tree">Hierarchy</button>
+      </div>
+      <div class="seg" id="langSeg"></div>
+      <div class="depth" title="Show the tree down to this level">
+        <span>Depth</span><input id="depth" type="range" min="0" max="1" value="1"><span id="depthVal"></span>
+      </div>
+      <div class="seg">
+        <button id="play" title="Unfold the division one step at a time">▶ Unfold</button>
+        <button id="expand" title="Expand all">Expand all</button>
+        <button id="collapse" title="Collapse all">Collapse</button>
+        <button id="fit" title="Fit to screen (F)">Fit</button>
+      </div>
+    </div>
+    <svg id="canvas" aria-label="Tree diagram">
+      <g id="vp"><g id="edges"></g><g id="nodes"></g></g>
+    </svg>
+    <div class="legend" id="legend"></div>
+  </main>
+
+  <section id="info">
+    <div id="tinfo"></div>
+    <div id="ninfo"></div>
+  </section>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ *
+ *  DATA
+ *  Node kinds:
+ *   sg supreme genus · g subaltern genus · d differentia (followed)
+ *   x opposite / rejected branch · s infima species · i individual
+ *   c class or taxon · cat Aristotelian category
+ * ------------------------------------------------------------------ */
+const N = (k, l, n = '', c = [], extra = {}) => Object.assign({ k, l, n, c }, extra);
+const L3 = (en, la, gr) => ({ en, la, gr });
+const L2 = (en, la) => ({ en, la });
+
+function porphyry(expanded) {
+  const side = (l, note, child) => N('x', l, note, expanded && child ? [child] : []);
+  return N('sg', L3('Substance', 'Substantia', 'οὐσία'),
+    'The <em>genus generalissimum</em>, or most general genus. It is predicated of everything beneath it but is itself a species of nothing. Porphyry uses the category of substance to show how genera and species nest inside one another.', [
+    N('d', L3('corporeal', 'corporea', 'σωματική'), 'A differentia. It <em>divides</em> Substance and, added to it, <em>constitutes</em> Body.', [
+      N('g', L3('Body', 'Corpus', 'σῶμα'), 'A subaltern genus. It is a species relative to Substance and a genus relative to Living body.', [
+        N('d', L3('animate', 'animatum', 'ἔμψυχον'), 'Having soul, the principle of life.', [
+          N('g', L3('Living body', 'Corpus animatum', 'σῶμα ἔμψυχον'), 'A subaltern genus: an animate body. Medieval diagrams usually label it <em>corpus animatum</em>.', [
+            N('d', L3('sensitive', 'sensibile', 'αἰσθητικόν'), 'Capable of sensation.', [
+              N('g', L3('Animal', 'Animal', 'ζῷον'), 'A subaltern genus: an animate, sensitive body.', [
+                N('d', L3('rational', 'rationale', 'λογικόν'), 'Possessing reason (<em>logos</em>).', [
+                  N('g', L3('Rational animal', 'Animal rationale', 'ζῷον λογικόν'), 'The lowest subaltern genus. In Porphyry it contains both humans, who are mortal, and gods, who are immortal.', [
+                    N('d', L3('mortal', 'mortale', 'θνητόν'), 'The specific difference that constitutes the species Human.', [
+                      N('s', L3('Human', 'Homo', 'ἄνθρωπος'), 'The <em>species specialissima</em>, or most specific species. It is predicated only of individuals, never of further species. Its classic definition is <em>animal rationale mortale</em>.', [
+                        N('i', L3('Socrates', 'Socrates', 'Σωκράτης'), 'An individual. Porphyry says individuals are so called because each is made up of a collection of features that would never be found together in anything else.'),
+                        N('i', L3('Plato', 'Plato', 'Πλάτων'), 'An individual falling under the species Human.'),
+                        ...(expanded ? [N('i', L3('Aristotle', 'Aristoteles', 'Ἀριστοτέλης'), 'An individual falling under the species Human.')] : [])
+                      ])
+                    ]),
+                    side(L3('immortal', 'immortale', 'ἀθάνατον'), 'The opposite differentia. Porphyry’s example of an immortal rational animal is a god. Many later diagrams leave this branch empty.',
+                      N('s', L3('Gods / daemons', 'Dii', 'θεοί'), 'Porphyry’s own example of the immortal rational animal. The pagan gods were understood as living, rational, deathless beings.'))
+                  ])
+                ]),
+                side(L3('irrational', 'irrationale', 'ἄλογον'), 'Lacking reason.',
+                  N('s', L3('Brute animal', 'Brutum', 'ἄλογον ζῷον'), 'Irrational animals such as the horse or the dog. Scholastics called them <em>bruta</em>.'))
+              ])
+            ]),
+            side(L3('insensitive', 'insensibile', 'ἀναίσθητον'), 'Alive but without sensation.',
+              N('s', L3('Plant', 'Planta', 'φυτόν'), 'A living body without sensation, having only the nutritive soul.'))
+          ])
+        ]),
+        side(L3('inanimate', 'inanimatum', 'ἄψυχον'), 'Without soul, and therefore without life.',
+          N('s', L3('Mineral', 'Minerale', 'λίθος'), 'Inanimate bodies such as stones and metals.'))
+      ])
+    ]),
+    side(L3('incorporeal', 'incorporea', 'ἀσώματος'), 'The opposite branch: substance without body. The classic tree does not pursue it.',
+      N('s', L3('Spirit', 'Spiritus', 'πνεῦμα'), 'Incorporeal substance. Scholastic manuals place souls and angels here.'))
+  ]);
+}
+
+// Build a Plato-style division from a top class and an ordered list of [chosen, rejected] pairs.
+function division(top, topNote, pairs, finalNote) {
+  const root = N('c', top, topNote);
+  let cur = root;
+  pairs.forEach(([ch, rj, chn, rjn], i) => {
+    const isLast = i === pairs.length - 1;
+    const chosen = N(isLast ? 's' : 'c', ch, isLast ? (finalNote || chn || '') : (chn || ''));
+    const rejected = N('x', rj, rjn || 'Set aside. The division continues on the other side.');
+    cur.c = [chosen, rejected];
+    cur = chosen;
+  });
+  return root;
+}
+
+const TREES = [
+  {
+    id: 'porphyry', title: 'The Classic Tree of Porphyry', who: 'Porphyry · Boethius · Peter of Spain', when: 'c. 270 CE / 6th c. / 13th c.',
+    era: 'ancient', tags: ['logic', 'predicables', 'canonical'], kind: 'porphyrian', trunk: true, langs: ['en', 'la', 'gr'],
+    desc: `<p>The canonical diagram. Porphyry’s <em>Isagoge</em>, an introduction to Aristotle’s <em>Categories</em>, walks down the category of substance to illustrate genus, species and difference. Porphyry himself drew no picture.</p>
+           <p>Boethius translated the <em>Isagoge</em> into Latin and wrote commentaries on it. Peter of Spain’s <em>Summulae logicales</em>, the most widely used logic textbook of the later Middle Ages, fixed the familiar image: a central trunk of genera, with the chosen differentia on one side and its opposite on the other.</p>
+           <p>Switch the language buttons to see the Greek and Latin terms.</p>`,
+    src: 'Porphyry, <em>Isagoge</em>, ch. 2 “On species”; Boethius, <em>In Isagogen Porphyrii commenta</em>; Peter of Spain, <em>Tractatus</em>, tr. II.',
+    root: porphyry(false)
+  },
+  {
+    id: 'scholastic', title: 'Expanded Scholastic Tree', who: 'Later logic manuals', when: '13th–20th c.',
+    era: 'medieval', tags: ['logic', 'great chain of being'], kind: 'porphyrian', trunk: true, langs: ['en', 'la', 'gr'],
+    desc: `<p>Later manuals and modern textbooks often fill in the empty right-hand branches. The tree then sorts all substances: spirits, minerals, plants, brute animals and humans.</p>
+           <p>Read this way, the diagram doubles as a picture of the “great chain of being”, with each rung adding one perfection to the one above it.</p>`,
+    src: 'A common textbook elaboration of the arbor porphyriana. Branch labels vary between authors.',
+    root: porphyry(true)
+  },
+  {
+    id: 'categories', title: 'Aristotle’s Ten Categories', who: 'Aristotle', when: '4th c. BCE',
+    era: 'ancient', tags: ['ontology', 'source of Porphyry'], kind: 'hierarchy', trunk: false, langs: ['en', 'gr', 'la'],
+    desc: `<p>The background of every Porphyrian tree. The <em>Categories</em> lists ten highest kinds of predication. Porphyry’s <em>Isagoge</em> was written as an introduction to this work, and his tree unfolds only the first category, Substance.</p>
+           <p>Aristotle denied that “being” is itself a genus, so the root here is a convenience, not a genus.</p>`,
+    src: 'Aristotle, <em>Categories</em> 4, 1b25–2a4; chs. 5–9 for the subdivisions.',
+    root: N('c', L3('Being', 'Ens', 'τὸ ὄν'), 'Not a genus for Aristotle. Being is said “in many ways”, and the categories are its primary senses.', [
+      N('cat', L3('Substance', 'Substantia', 'οὐσία'), 'What something is. Examples: man, horse.', [
+        N('i', L3('Primary substance', 'Substantia prima', 'πρώτη οὐσία'), 'The individual, such as <em>this</em> man or <em>this</em> horse. It is neither said of nor present in a subject.'),
+        N('c', L3('Secondary substance', 'Substantia secunda', 'δευτέρα οὐσία'), 'The species and genera of primary substances, such as man and animal. These are what Porphyry’s tree arranges.')
+      ]),
+      N('cat', L3('Quantity', 'Quantitas', 'ποσόν'), 'How much. Example: two cubits long.', [
+        N('c', L3('Discrete', 'Discreta', 'διωρισμένον'), 'Number and speech.'),
+        N('c', L3('Continuous', 'Continua', 'συνεχές'), 'Line, surface, body, time and place.')
+      ]),
+      N('cat', L3('Quality', 'Qualitas', 'ποιόν'), 'What sort. Examples: white, grammatical.', [
+        N('c', L3('States & dispositions', 'Habitus et dispositio', 'ἕξις καὶ διάθεσις'), 'Such as knowledge or virtue.'),
+        N('c', L3('Natural capacities', 'Potentia naturalis', 'δύναμις φυσική'), 'Such as being a good boxer or runner.'),
+        N('c', L3('Affective qualities', 'Passibiles qualitates', 'παθητικαὶ ποιότητες'), 'Such as sweetness, heat or colour.'),
+        N('c', L3('Shape & form', 'Forma et figura', 'σχῆμα καὶ μορφή'), 'Such as being triangular or straight.')
+      ]),
+      N('cat', L3('Relation', 'Ad aliquid', 'πρός τι'), 'In relation to something. Examples: double, half, larger.'),
+      N('cat', L3('Place', 'Ubi', 'ποῦ'), 'Where. Example: in the Lyceum.'),
+      N('cat', L3('Time', 'Quando', 'ποτέ'), 'When. Example: yesterday.'),
+      N('cat', L3('Position', 'Situs', 'κεῖσθαι'), 'Being in a posture. Examples: lying, sitting.'),
+      N('cat', L3('Having', 'Habitus', 'ἔχειν'), 'Having on. Examples: shod, armed.'),
+      N('cat', L3('Action', 'Actio', 'ποιεῖν'), 'Doing. Examples: cutting, burning.'),
+      N('cat', L3('Affection', 'Passio', 'πάσχειν'), 'Undergoing. Examples: being cut, being burned.')
+    ])
+  },
+  {
+    id: 'angler', title: 'Plato’s Division of the Angler', who: 'Plato, Sophist', when: 'c. 360 BCE',
+    era: 'ancient', tags: ['diairesis', 'dichotomy', 'precursor'], kind: 'division', trunk: true, langs: ['en'],
+    desc: `<p>The ancestor of the Porphyrian method. In the <em>Sophist</em>, the Eleatic Stranger practises <em>diairesis</em> (division) on a humble example before hunting the sophist.</p>
+           <p>Each class is cut in two, one half is set aside, and the other is divided again. The definition of angling gathers every branch taken on the way down.</p>`,
+    src: 'Plato, <em>Sophist</em> 218e–221c.',
+    root: division('Art (technē)', 'The starting genus: all skill or craft.', [
+      ['Acquisitive (ktētikē)', 'Productive (poiētikē)', 'Arts that gain what already exists, rather than making something new.', 'Farming, crafts, imitation: arts that bring something into being.'],
+      ['Conquest (cheirōtikē)', 'Exchange (metablētikē)', 'Acquisition by force or capture.', 'Voluntary acquisition through gifts, wages or trade.'],
+      ['Hunting (thēreutikē)', 'Contest (agōnistikē)', 'Capture done in secret.', 'Open fighting.'],
+      ['Hunting living things', 'Hunting lifeless things', '', ''],
+      ['Hunting swimming animals', 'Hunting land animals', '', ''],
+      ['Fishing (halieutikē)', 'Fowling', 'Hunting animals that live in water.', 'Hunting winged swimmers, the birds.'],
+      ['Fishing by striking', 'Fishing by enclosure', '', 'Nets, weirs and baskets.'],
+      ['Striking by day (hooks)', 'Striking by night (fire)', 'Barbed fishing by daylight.', 'Fire-fishing by torchlight.'],
+      ['Striking upward', 'Striking downward', '', 'Spearing with tridents from above.']
+    ], 'The definition reached: <b>angling</b> (<em>aspalieutikē</em>) is acquisitive, coercive, hunting of living swimming animals in water, by day, with a hook, striking from below upward.')
+  },
+  {
+    id: 'statesman', title: 'Plato’s Division of the Statesman', who: 'Plato, Statesman', when: 'c. 360 BCE',
+    era: 'ancient', tags: ['diairesis', 'dichotomy', 'precursor'], kind: 'division', trunk: true, langs: ['en'],
+    desc: `<p>A longer dichotomous division that ends with the famous joke that humans are “featherless bipeds”.</p>
+           <p>Plato then has the Stranger reject the result as too broad. Farmers and doctors also “tend” humans, so the dialogue turns to a myth and a new model, weaving. It is an early warning about how division can go wrong.</p>`,
+    src: 'Plato, <em>Statesman</em> 258b–267c. Simplified.',
+    root: division('Knowledge (epistēmē)', 'The starting genus.', [
+      ['Theoretical (gnōstikē)', 'Practical (praktikē)', 'Knowledge without manual labour.', 'Crafts such as carpentry.'],
+      ['Directive (epitaktikē)', 'Critical (kritikē)', 'Knowledge that issues commands.', 'Knowledge that only judges, like calculation.'],
+      ['Self-directing', 'Relaying others’ orders', 'Giving commands of one’s own.', 'Heralds and interpreters.'],
+      ['Concerning living things', 'Concerning lifeless things', '', ''],
+      ['Herd-rearing', 'Rearing single animals', '', ''],
+      ['Land herds', 'Water herds', '', ''],
+      ['Walking herds', 'Winged herds', '', ''],
+      ['Hornless', 'Horned', '', ''],
+      ['Non-interbreeding', 'Interbreeding', '', 'Such as horses and donkeys.'],
+      ['Two-footed', 'Four-footed', '', ''],
+      ['Featherless', 'Feathered', '', 'Birds.']
+    ], 'The result: statesmanship is the herding of <b>featherless bipeds</b>. The Stranger immediately finds this definition inadequate.')
+  },
+  {
+    id: 'ramus', title: 'Ramist Dichotomy of Dialectic', who: 'Petrus Ramus', when: '1556 / 1572',
+    era: 'medieval', tags: ['method', 'pedagogy', 'branching chart'], kind: 'hierarchy', trunk: false, langs: ['en', 'la'],
+    desc: `<p>Peter Ramus turned Porphyrian division into a general teaching method. Every subject was laid out as a bracketed chart of nested divisions, ideally into two.</p>
+           <p>Ramist charts filled textbooks across Protestant Europe and New England for over a century. Milton wrote a Ramist logic.</p>`,
+    src: 'Petrus Ramus, <em>Dialecticae libri duo</em> (1556; rev. 1572); cf. John Milton, <em>Artis logicae plenior institutio</em> (1672). Simplified.',
+    root: N('c', L2('Dialectic', 'Dialectica'), 'Defined by Ramus as “the art of discoursing well” (<em>ars bene disserendi</em>).', [
+      N('c', L2('Invention', 'Inventio'), 'The finding of arguments.', [
+        N('c', L2('Artificial arguments', 'Argumenta artificialia'), 'Arguments that arise from the thing itself.', [
+          N('c', L2('First', 'Prima'), 'Arguments not derived from others.', [
+            N('c', L2('Simple', 'Simplicia'), '', [
+              N('c', L2('Agreeing', 'Consentanea'), '', [
+                N('c', L2('Causes', 'Causae'), 'Efficient, material, formal and final.'),
+                N('c', L2('Effects', 'Effecta')),
+                N('c', L2('Subjects', 'Subiecta')),
+                N('c', L2('Adjuncts', 'Adiuncta'))
+              ]),
+              N('c', L2('Disagreeing', 'Dissentanea'), '', [
+                N('c', L2('Diverse', 'Diversa')),
+                N('c', L2('Opposites', 'Opposita'), 'Disparates and contraries.')
+              ])
+            ]),
+            N('c', L2('Compared', 'Comparata'), 'Comparisons of quantity (equal, greater, lesser) and quality (like, unlike).')
+          ]),
+          N('c', L2('Derived from first', 'Orta a primis'), '', [
+            N('c', L2('Notation', 'Notatio'), 'Arguments from the meaning of a name.'),
+            N('c', L2('Conjugates', 'Coniugata')),
+            N('c', L2('Distribution', 'Distributio'), 'Division of a whole into its parts.'),
+            N('c', L2('Definition', 'Definitio'))
+          ])
+        ]),
+        N('c', L2('Inartificial arguments', 'Argumenta inartificialia'), 'Testimony, divine or human.')
+      ]),
+      N('c', L2('Judgment', 'Iudicium'), 'The arrangement of arguments.', [
+        N('c', L2('Axiom', 'Axioma'), 'A single proposition.'),
+        N('c', L2('Syllogism', 'Syllogismus')),
+        N('c', L2('Method', 'Methodus'), 'Ordering from the most general to the most specific, which is the Porphyrian descent made into a rule.')
+      ])
+    ])
+  },
+  {
+    id: 'linnaeus', title: 'Linnaeus’s Systema Naturae', who: 'Carl Linnaeus', when: '1758 (10th ed.)',
+    era: 'medieval', tags: ['taxonomy', 'ranks', 'binomial'], kind: 'hierarchy', trunk: false, langs: ['en', 'la'], ranks: true,
+    desc: `<p>Linnaeus turned the Porphyrian ladder into a system of fixed ranks: kingdom, class, order, genus and species. Every organism got a two-part name.</p>
+           <p>The 10th edition is the formal starting point of zoological nomenclature. Its primates include bats, and its plant classes follow the “sexual system” of stamen counts.</p>`,
+    src: 'Carl Linnaeus, <em>Systema Naturae</em>, 10th ed. (Stockholm, 1758).',
+    root: N('c', L2('Nature', 'Imperium Naturae'), 'The three kingdoms of nature.', [
+      N('c', L2('Animal kingdom', 'Regnum Animale'), '', [
+        N('c', L2('Mammals', 'Mammalia'), '', [
+          N('c', L2('Primates', 'Primates'), '', [
+            N('c', L2('Humans', 'Homo'), '', [
+              N('s', L2('Homo sapiens', 'Homo sapiens'), 'Instead of a description, Linnaeus gave the diagnosis <em>Nosce te ipsum</em>, “know thyself”.', [], { r: 'Species' }),
+              N('s', L2('Homo troglodytes', 'Homo troglodytes'), 'A doubtful “cave man” species, based on travellers’ reports.', [], { r: 'Species' })
+            ], { r: 'Genus' }),
+            N('c', L2('Apes & monkeys', 'Simia'), '', [], { r: 'Genus' }),
+            N('c', L2('Lemurs', 'Lemur'), '', [], { r: 'Genus' }),
+            N('c', L2('Bats', 'Vespertilio'), 'Linnaeus placed bats among the primates.', [], { r: 'Genus' })
+          ], { r: 'Order' }),
+          ...['Bruta', 'Ferae', 'Glires', 'Pecora', 'Belluae', 'Cete'].map(o => N('c', L2(o, o), '', [], { r: 'Order' }))
+        ], { r: 'Class' }),
+        ...[['Birds', 'Aves'], ['Amphibians & reptiles', 'Amphibia'], ['Fishes', 'Pisces'], ['Insects', 'Insecta'], ['Worms', 'Vermes']]
+          .map(([e, l]) => N('c', L2(e, l), '', [], { r: 'Class' }))
+      ], { r: 'Kingdom' }),
+      N('c', L2('Plant kingdom', 'Regnum Vegetabile'), 'Twenty-four classes defined by the number and arrangement of stamens.',
+        ['Monandria', 'Diandria', 'Triandria', 'Tetrandria', 'Pentandria', 'Hexandria', 'Heptandria', 'Octandria', 'Enneandria', 'Decandria', 'Dodecandria', 'Icosandria',
+         'Polyandria', 'Didynamia', 'Tetradynamia', 'Monadelphia', 'Diadelphia', 'Polyadelphia', 'Syngenesia', 'Gynandria', 'Monoecia', 'Dioecia', 'Polygamia', 'Cryptogamia']
+          .map(c => N('c', L2(c, c), '', [], { r: 'Class' })), { r: 'Kingdom', collapsed: true }),
+      N('c', L2('Mineral kingdom', 'Regnum Lapideum'), '', [
+        N('c', L2('Rocks', 'Petrae'), '', [], { r: 'Class' }),
+        N('c', L2('Minerals', 'Minerae'), '', [], { r: 'Class' }),
+        N('c', L2('Fossils', 'Fossilia'), '', [], { r: 'Class' })
+      ], { r: 'Kingdom' })
+    ])
+  },
+  {
+    id: 'taxonomy', title: 'Modern Biological Classification', who: 'Linnaean ranks, modern taxa', when: '20th–21st c.',
+    era: 'modern', tags: ['biology', 'ranks', 'phylogeny'], kind: 'hierarchy', trunk: false, langs: ['en'], ranks: true,
+    desc: `<p>The most widely used Porphyrian tree today is the biology classroom’s ladder of ranks, “Domain, Kingdom, Phylum, Class, Order, Family, Genus, Species”.</p>
+           <p>Modern systematics groups organisms by common descent rather than by essential differentiae. Some traditional groups, such as “Reptilia” without birds, are not natural clades.</p>`,
+    src: 'Standard ranks as used in textbooks and in databases such as ITIS and NCBI Taxonomy. Selected taxa only.',
+    root: N('c', 'Life', 'All living organisms.', [
+      N('c', 'Bacteria', '', [], { r: 'Domain' }),
+      N('c', 'Archaea', '', [], { r: 'Domain' }),
+      N('c', 'Eukarya', 'Organisms whose cells have a nucleus.', [
+        N('c', 'Animalia', '', [
+          N('c', 'Chordata', '', [
+            N('c', 'Mammalia', '', [
+              N('c', 'Primates', '', [
+                N('c', 'Hominidae', 'The great apes.', [
+                  N('c', 'Homo', '', [
+                    N('s', 'Homo sapiens', 'Modern humans.', [], { r: 'Species' }),
+                    N('s', 'H. neanderthalensis †', 'Extinct.', [], { r: 'Species' }),
+                    N('s', 'H. erectus †', 'Extinct.', [], { r: 'Species' })
+                  ], { r: 'Genus' }),
+                  N('c', 'Pan', 'Chimpanzees and bonobos.', [], { r: 'Genus' }),
+                  N('c', 'Gorilla', '', [], { r: 'Genus' }),
+                  N('c', 'Pongo', 'Orangutans.', [], { r: 'Genus' })
+                ], { r: 'Family' }),
+                N('c', 'Cercopithecidae', 'Old World monkeys.', [], { r: 'Family' }),
+                N('c', 'Lemuridae', '', [], { r: 'Family' })
+              ], { r: 'Order' }),
+              N('c', 'Carnivora', '', [], { r: 'Order' }),
+              N('c', 'Rodentia', '', [], { r: 'Order' })
+            ], { r: 'Class' }),
+            N('c', 'Aves', '', [], { r: 'Class' }),
+            N('c', 'Reptilia', 'Traditional sense. Not a clade unless birds are included.', [], { r: 'Class' }),
+            N('c', 'Amphibia', '', [], { r: 'Class' })
+          ], { r: 'Phylum' }),
+          N('c', 'Arthropoda', '', [], { r: 'Phylum' }),
+          N('c', 'Mollusca', '', [], { r: 'Phylum' })
+        ], { r: 'Kingdom' }),
+        N('c', 'Plantae', '', [], { r: 'Kingdom' }),
+        N('c', 'Fungi', '', [], { r: 'Kingdom' })
+      ], { r: 'Domain' })
+    ])
+  },
+  {
+    id: 'wordnet', title: 'WordNet Noun Hierarchy', who: 'Princeton WordNet', when: '1985– (v3.0, 2006)',
+    era: 'modern', tags: ['lexicon', 'ontology', 'AI'], kind: 'hierarchy', trunk: false, langs: ['en'],
+    desc: `<p>Computer ontologies and semantic networks are direct heirs of the Porphyrian tree. The knowledge-representation researcher John Sowa called Porphyry’s tree the oldest known semantic network.</p>
+           <p>WordNet links English nouns by <em>hypernymy</em> (“is a kind of”). Unlike Porphyry’s strict tree, a word can have two parents. Here <em>person</em> sits under both <em>organism</em> and <em>causal agent</em>.</p>`,
+    src: 'Princeton WordNet 3.0, hypernym paths for the synset person.n.01. Selected branches only.',
+    root: N('c', 'entity', 'The single unique beginner for all WordNet nouns.', [
+      N('c', 'physical entity', '', [
+        N('c', 'object', '', [
+          N('c', 'whole', '', [
+            N('c', 'living thing', '', [
+              N('c', 'organism', '', [
+                N('s', 'person', 'Person also appears under <em>causal agent</em>. This multiple inheritance is something a Porphyrian tree does not allow.'),
+                N('c', 'animal'),
+                N('c', 'plant')
+              ])
+            ]),
+            N('c', 'artifact')
+          ])
+        ]),
+        N('c', 'causal agent', '', [
+          N('s', 'person', 'The same synset as person under organism.')
+        ]),
+        N('c', 'matter')
+      ]),
+      N('c', 'abstraction', '', [
+        N('c', 'attribute'),
+        N('c', 'relation'),
+        N('c', 'measure'),
+        N('c', 'communication')
+      ]),
+      N('c', 'thing')
+    ])
+  }
+];
+
+const KIND = {
+  sg: 'Supreme genus · genus generalissimum', g: 'Subaltern genus', d: 'Differentia', x: 'Opposite branch',
+  s: 'Infima species · species specialissima', i: 'Individual', c: 'Class / taxon', cat: 'Category'
+};
+const KIND_SHORT = { sg: 'Supreme genus', g: 'Genus', d: 'Differentia (taken)', x: 'Opposite / set aside', s: 'Species', i: 'Individual', c: 'Class', cat: 'Category' };
+const KIND_VAR = { sg: 'genus', g: 'genus', d: 'diff', x: 'rej', s: 'species', i: 'indiv', c: 'cls', cat: 'cat' };
+const LANG_NAME = { en: 'English', la: 'Latin', gr: 'Greek' };
+
+/* ------------------------------------------------------------------ *
+ *  PREP
+ * ------------------------------------------------------------------ */
+const INDEX = new Map();
+for (const t of TREES) {
+  let i = 0, count = 0; const words = [t.title, t.who, t.desc];
+  (function walk(n, p, d) {
+    n.id = t.id + '-' + (i++); n.p = p; n.d = d; n.c = n.c || []; INDEX.set(n.id, n); count++;
+    words.push(typeof n.l === 'string' ? n.l : Object.values(n.l).join(' '));
+    n.c.forEach(ch => walk(ch, n, d + 1));
+    n.h = 1 + Math.max(0, ...n.c.map(ch => ch.h));
+  })(t.root, null, 0);
+  t.count = count; t._text = words.join(' ').replace(/<[^>]+>/g, '').toLowerCase();
+}
+
+/* ------------------------------------------------------------------ *
+ *  STATE
+ * ------------------------------------------------------------------ */
+const $ = s => document.querySelector(s);
+const svg = $('#canvas'), vp = $('#vp'), edgesL = $('#edges'), nodesL = $('#nodes');
+const state = { tree: null, sel: null, lang: 'en', layout: 'trunk', reveal: Infinity, collapsed: new Set(), q: '', era: 'all', pos: null };
+const view = { x: 0, y: 0, k: 1 };
+let prev = new Map(), anim = 0, playing = 0;
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const label = (n, lang = state.lang) => typeof n.l === 'string' ? n.l : (n.l[lang] || n.l.en);
+const kids = n => (state.collapsed.has(n.id) || n.d >= state.reveal) ? [] : n.c;
+const isTrunk = () => state.layout === 'trunk' && state.tree.trunk;
+
+const ctx = document.createElement('canvas').getContext('2d');
+const fontFor = n => ({ sg: '600 14px Georgia', g: '600 14px Georgia', s: '600 14px Georgia', i: 'italic 14px Georgia', d: 'italic 13.5px Georgia', x: 'italic 13.5px Georgia' }[n.k] || '14px Georgia');
+const wCache = new Map();
+function nodeW(n) {
+  const key = n.id + '|' + state.lang;
+  if (!wCache.has(key)) { ctx.font = fontFor(n); wCache.set(key, Math.ceil(ctx.measureText(label(n)).width) + 28 + (n.c.length ? 18 : 0)); }
+  return wCache.get(key);
+}
+const NH = 30;
+
+/* ------------------------------------------------------------------ *
+ *  LAYOUTS
+ * ------------------------------------------------------------------ */
+function visibleNodes(root) { const out = []; (function w(n) { out.push(n); kids(n).forEach(w); })(root); return out; }
+
+function mainChild(ks) { return ks.slice().sort((a, b) => (b.h - a.h) || ((a.k === 'x') - (b.k === 'x')))[0]; }
+
+// Classic medieval look: genera on a central trunk, the chosen differentia
+// to the left, its opposite to the right, individuals spread at the foot.
+function layoutTrunk(root) {
+  const pos = new Map();
+  const maxW = Math.max(...visibleNodes(root).map(nodeW));
+  const DX = Math.max(160, maxW + 34), DY = 68;
+  (function place(n, x, row, mode) {
+    pos.set(n, { x, y: row * DY });
+    const ks = kids(n); if (!ks.length) return;
+    if (ks.every(k => k.k === 'i')) {
+      const sp = Math.max(...ks.map(nodeW)) + 26;
+      ks.forEach((k, i) => place(k, x + (i - (ks.length - 1) / 2) * sp, row + 1, 'side'));
+      return;
+    }
+    if (mode === 'side') { ks.forEach((k, i) => place(k, x + i * (maxW + 20), row + 1, 'side')); return; }
+    const m = mainChild(ks);
+    if (mode === 'trunk') place(m, m.k === 'd' ? -DX : 0, row + 1, m.k === 'd' ? 'left' : 'trunk');
+    else place(m, 0, row + 1, 'trunk');
+    ks.filter(k => k !== m).forEach((k, j) => place(k, mode === 'left' ? -DX * (j + 2) : DX * (j + 1), row + 1, 'side'));
+  })(root, 0, 0, 'trunk');
+  return pos;
+}
+
+// Left-to-right tidy tree.
+function layoutTree(root) {
+  const pos = new Map(), colW = [];
+  visibleNodes(root).forEach(n => colW[n.d] = Math.max(colW[n.d] || 0, nodeW(n)));
+  const colL = [0]; for (let i = 1; i < colW.length; i++) colL[i] = colL[i - 1] + colW[i - 1] + 56;
+  const ROW = state.tree.ranks ? 54 : 42; let leaf = 0;
+  (function place(n) {
+    const ks = kids(n); let y;
+    if (!ks.length) y = leaf++ * ROW;
+    else { ks.forEach(place); y = (pos.get(ks[0]).y + pos.get(ks[ks.length - 1]).y) / 2; }
+    pos.set(n, { x: colL[n.d] + nodeW(n) / 2, y });
+  })(root);
+  return pos;
+}
+
+const computeLayout = () => isTrunk() ? layoutTrunk(state.tree.root) : layoutTree(state.tree.root);
+
+/* ------------------------------------------------------------------ *
+ *  RENDER
+ * ------------------------------------------------------------------ */
+function pathSet() { const s = new Set(); for (let a = state.sel; a; a = a.p) s.add(a.id); return s; }
+
+function nodeSVG(n, onPath, isNew) {
+  const w = nodeW(n), has = n.c.length, col = state.collapsed.has(n.id) || (has && n.d >= state.reveal);
+  const q = state.q.trim().toLowerCase();
+  const match = q && (typeof n.l === 'string' ? n.l : Object.values(n.l).join(' ')).toLowerCase().includes(q);
+  const cls = ['node', 'k-' + n.k, onPath.has(n.id) ? 'path' : '', state.sel === n ? 'sel' : '', match ? 'match' : '', isNew ? 'new' : ''].join(' ');
+  return `<g class="${cls}" data-id="${n.id}">
+    ${n.r ? `<text class="rank" y="-20">${esc(n.r)}</text>` : ''}
+    <rect x="${-w / 2}" y="${-NH / 2}" width="${w}" height="${NH}" rx="${n.k === 'd' || n.k === 'x' ? 15 : 6}"/>
+    <text class="lbl" x="${has ? -9 : 0}" dy="0.35em">${esc(label(n))}</text>
+    ${has ? `<g class="tog" data-tog="${n.id}" transform="translate(${w / 2 - 14},0)"><circle r="8"/><text dy="0.36em">${col ? '+' : '−'}</text></g>` : ''}
+  </g>`;
+}
+
+function edgesSVG(pos, cur, onPath) {
+  const trunk = isTrunk(); let s = '';
+  for (const n of pos.keys()) {
+    if (!n.p || !pos.has(n.p)) continue;
+    const a = cur.get(n.p.id), b = cur.get(n.id);
+    const cls = 'edge' + (n.k === 'x' ? ' rej' : '') + (onPath.has(n.id) ? ' path' : '');
+    if (trunk) s += `<path class="${cls}" d="M${a.x},${a.y + NH / 2}L${b.x},${b.y - NH / 2}"/>`;
+    else {
+      const x1 = a.x + nodeW(n.p) / 2, x2 = b.x - nodeW(n) / 2, mx = (x1 + x2) / 2;
+      s += `<path class="${cls}" d="M${x1},${a.y}C${mx},${a.y} ${mx},${b.y} ${x2},${b.y}"/>`;
+    }
+  }
+  return s;
+}
+
+function render(animate = true) {
+  const pos = computeLayout(); state.pos = pos;
+  while (state.sel && !pos.has(state.sel)) state.sel = state.sel.p;   // keep selection visible
+  const onPath = pathSet();
+  const from = new Map();
+  for (const [n, p] of pos) from.set(n, prev.get(n.id) || (n.p && prev.get(n.p.id)) || p);
+  nodesL.innerHTML = [...pos.keys()].map(n => nodeSVG(n, onPath, prev.size && !prev.has(n.id))).join('');
+  const els = new Map([...nodesL.children].map(el => [el.dataset.id, el]));
+  const cur = new Map();
+  const frame = t => {
+    for (const [n, p] of pos) {
+      const a = from.get(n), x = a.x + (p.x - a.x) * t, y = a.y + (p.y - a.y) * t;
+      cur.set(n.id, { x, y }); els.get(n.id).setAttribute('transform', `translate(${x},${y})`);
+    }
+    edgesL.innerHTML = edgesSVG(pos, cur, onPath);
+  };
+  cancelAnimationFrame(anim);
+  if (!animate) frame(1);
+  else {
+    const t0 = performance.now();
+    const step = now => { const r = Math.min(1, (now - t0) / 450), e = 1 - Math.pow(1 - r, 3); frame(e); if (r < 1) anim = requestAnimationFrame(step); };
+    frame(0); anim = requestAnimationFrame(step);
+  }
+  prev = new Map([...pos].map(([n, p]) => [n.id, p]));
+  renderNodeInfo(); syncControls();
+}
+
+/* ------------------------------------------------------------------ *
+ *  VIEW: pan / zoom / fit
+ * ------------------------------------------------------------------ */
+function applyView(smooth) {
+  vp.classList.toggle('smooth', !!smooth);
+  vp.style.transform = `translate(${view.x}px,${view.y}px) scale(${view.k})`;
+}
+function fit(pos = state.pos, smooth = true) {
+  if (!pos || !pos.size) return;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [n, p] of pos) { const w = nodeW(n) / 2; x0 = Math.min(x0, p.x - w); x1 = Math.max(x1, p.x + w); y0 = Math.min(y0, p.y - NH / 2 - (n.r ? 22 : 0)); y1 = Math.max(y1, p.y + NH / 2); }
+  const r = svg.getBoundingClientRect();
+  const top = $('.toolbar').offsetHeight + 28, bottom = $('#legend').offsetHeight + 24;
+  const k = Math.min((r.width - 60) / (x1 - x0), (r.height - top - bottom) / (y1 - y0), 1.35);
+  view.k = Math.max(.15, k);
+  view.x = r.width / 2 - view.k * (x0 + x1) / 2;
+  view.y = top + (r.height - top - bottom) / 2 - view.k * (y0 + y1) / 2;
+  applyView(smooth);
+}
+function fitFull(smooth = true) {
+  const keep = state.reveal; state.reveal = Infinity;
+  const pos = computeLayout(); state.reveal = keep; fit(pos, smooth);
+}
+function centerOn(n) {
+  const p = state.pos && state.pos.get(n); if (!p) return;
+  const r = svg.getBoundingClientRect();
+  const sx = view.x + p.x * view.k, sy = view.y + p.y * view.k;
+  if (sx < 40 || sx > r.width - 40 || sy < 70 || sy > r.height - 70) { view.x = r.width / 2 - p.x * view.k; view.y = r.height / 2 - p.y * view.k; applyView(true); }
+}
+
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = svg.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  const k = Math.min(4, Math.max(.15, view.k * Math.exp(-e.deltaY * 0.0015)));
+  view.x = mx - (mx - view.x) * k / view.k; view.y = my - (my - view.y) * k / view.k; view.k = k; applyView(false);
+}, { passive: false });
+
+let drag = null;
+svg.addEventListener('pointerdown', e => {
+  if (e.target.closest('.node')) return;
+  drag = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y }; svg.setPointerCapture(e.pointerId); svg.classList.add('drag');
+});
+svg.addEventListener('pointermove', e => { if (!drag) return; view.x = drag.vx + e.clientX - drag.x; view.y = drag.vy + e.clientY - drag.y; applyView(false); });
+const endDrag = () => { drag = null; svg.classList.remove('drag'); };
+svg.addEventListener('pointerup', endDrag); svg.addEventListener('pointercancel', endDrag);
+
+svg.addEventListener('click', e => {
+  const tog = e.target.closest('.tog');
+  if (tog) { toggle(INDEX.get(tog.dataset.tog)); return; }
+  const g = e.target.closest('.node');
+  if (g) select(INDEX.get(g.dataset.id));
+});
+svg.addEventListener('dblclick', e => { const g = e.target.closest('.node'); if (g && !e.target.closest('.tog')) toggle(INDEX.get(g.dataset.id)); });
+
+/* ------------------------------------------------------------------ *
+ *  ACTIONS
+ * ------------------------------------------------------------------ */
+function select(n, center = false) { if (!n) return; state.sel = n; render(false); if (center) centerOn(n); }
+function toggle(n) {
+  if (!n || !n.c.length) return;
+  if (n.d >= state.reveal) { state.reveal = n.d + 1; state.collapsed.delete(n.id); }
+  else if (state.collapsed.has(n.id)) state.collapsed.delete(n.id); else state.collapsed.add(n.id);
+  state.sel = n; render(true);
+}
+function loadTree(t, push = true) {
+  stopPlay();
+  state.tree = t; state.sel = t.root; state.reveal = Infinity; state.collapsed = new Set();
+  (function w(n) { if (n.collapsed) state.collapsed.add(n.id); n.c.forEach(w); })(t.root);
+  if (!t.langs.includes(state.lang)) state.lang = 'en';
+  state.layout = t.trunk ? 'trunk' : 'tree';
+  prev = new Map();
+  if (push) history.replaceState(null, '', '#' + t.id);
+  renderList(); renderTreeInfo(); render(false); fit(state.pos, false);
+}
+function stopPlay() { clearInterval(playing); playing = 0; $('#play').textContent = '▶ Unfold'; }
+function play() {
+  if (playing) { stopPlay(); return; }
+  state.collapsed = new Set(); state.reveal = 0; state.sel = state.tree.root; render(true); fitFull(true);
+  $('#play').textContent = '❚❚ Pause';
+  playing = setInterval(() => {
+    const max = state.tree.root.h - 1;
+    if (state.reveal >= max) { stopPlay(); state.reveal = Infinity; render(false); return; }
+    state.reveal++;
+    // follow the main line so the info panel narrates the descent
+    let n = state.tree.root; while (n.d < state.reveal && n.c.length) n = mainChild(n.c);
+    state.sel = n; render(true);
+  }, 900);
+}
+
+/* ------------------------------------------------------------------ *
+ *  PANELS
+ * ------------------------------------------------------------------ */
+function visibleList() { const q = state.q.trim().toLowerCase(); return TREES.filter(t => (state.era === 'all' || t.era === state.era) && (!q || t._text.includes(q))); }
+
+function renderList() {
+  $('#list').innerHTML = visibleList().map(t => `<li data-id="${t.id}" class="${t === state.tree ? 'on' : ''}">
+      <div class="t">${t.title}</div><div class="m">${t.who} · ${t.when}</div>
+      <div class="chips">${t.tags.map(x => `<span>${x}</span>`).join('')}<span>${t.count} nodes</span></div></li>`).join('')
+    || '<li class="empty">No trees match your search.</li>';
+}
+$('#list').addEventListener('click', e => { const li = e.target.closest('li[data-id]'); if (li) loadTree(TREES.find(t => t.id === li.dataset.id)); });
+
+function renderTreeInfo() {
+  const t = state.tree;
+  $('#tinfo').innerHTML = `<div class="eyebrow">${t.who} · ${t.when}</div><h2>${t.title}</h2>${t.desc}<p class="src"><b>Source.</b> ${t.src}</p>`;
+  const kinds = new Set(); (function w(n) { kinds.add(n.k); n.c.forEach(w); })(t.root);
+  $('#legend').innerHTML = [...kinds].map(k => `<span style="--c:var(--${KIND_VAR[k]})"><i></i>${KIND_SHORT[k]}</span>`).join('')
+    + `<span class="keys">Click a node to inspect it. Double-click or press <kbd>Space</kbd> to fold. <kbd>←↑↓→</kbd> move · <kbd>[</kbd> <kbd>]</kbd> switch tree · <kbd>F</kbd> fit · <kbd>/</kbd> search · drag to pan, scroll to zoom.</span>`;
+}
+
+function definition(n, path) {
+  const t = state.tree, L = x => esc(label(x));
+  if (t.kind === 'porphyrian') {
+    if (n.k === 'sg') return `<b>No definition possible.</b> A supreme genus has nothing above it, so it cannot be defined by genus and difference.`;
+    if (n.k === 'g' || n.k === 's') {
+      const diff = n.p, genus = n.p.p;
+      const diffs = path.slice(0, -1).filter(a => a.k === 'd' || a.k === 'x').reverse().map(L);
+      return `<b>Definition.</b> ${L(n)} = <em>${L(diff)}</em> ${L(genus).toLowerCase()}<br><span class="muted">That is, the proximate genus <b>${L(genus)}</b> plus the specific difference <b>${L(diff)}</b>.</span>
+              <br><br><b>Fully unfolded.</b> ${diffs.join(', ')} ${L(path[0]).toLowerCase()}.`;
+    }
+    if (n.k === 'd') return `<b>Divisive</b> of ${L(n.p)}, and <b>constitutive</b> of ${n.c[0] ? L(n.c[0]) : 'a new species'}. The same difference both splits the higher genus and helps define the lower species.`;
+    if (n.k === 'x') return `<b>The opposite difference.</b> ${L(n.p)} that is <em>${L(n)}</em>${n.c[0] ? `, which yields ${L(n.c[0])}.` : '.'} ${n.c[0] ? '' : 'The classic tree does not pursue this branch.'}`;
+    if (n.k === 'i') return `<b>Below the lowest species.</b> ${L(n)} falls under ${L(n.p)}. Individuals are not divided by further differences. They are distinguished by their accidents.`;
+  }
+  if (t.kind === 'division') {
+    if (n.k === 'x') return `<b>Set aside.</b> Plato drops this half and keeps dividing <em>${L(n.p.c[0])}</em>.`;
+    if (n === path[0]) return `<b>Starting genus.</b> Each step cuts the current class in two and keeps one half.`;
+    return `<b>Definition by collection.</b> ${path.map(L).join(' → ')}`;
+  }
+  if (path.length > 1) return `<b>Classification.</b><br>` + path.map(a => `${a.r ? `<span class="muted">${esc(a.r)}:</span> ` : ''}${L(a)}`).join('<br>');
+  return '';
+}
+
+function renderNodeInfo() {
+  const n = state.sel; if (!n) { $('#ninfo').innerHTML = ''; return; }
+  const path = []; for (let a = n; a; a = a.p) path.unshift(a);
+  let h = `<span class="kind" style="--c:var(--${KIND_VAR[n.k]})">${n.r ? esc(n.r) : KIND[n.k]}</span><h3>${esc(label(n))}</h3>`;
+  if (typeof n.l === 'object') {
+    const rows = state.tree.langs.filter(l => n.l[l]).map(l => `<dt>${LANG_NAME[l]}</dt><dd>${l === 'en' ? esc(n.l[l]) : '<em>' + esc(n.l[l]) + '</em>'}</dd>`);
+    if (rows.length > 1) h += `<dl class="langs">${rows.join('')}</dl>`;
+  }
+  if (n.n) h += `<p>${n.n}</p>`;
+  const def = definition(n, path); if (def) h += `<div class="def">${def}</div>`;
+  if (n.c.length) h += `<div class="muted">Divides into</div><div class="kidlist">${n.c.map(c => `<a data-go="${c.id}">${esc(label(c))}</a>`).join('')}</div>`;
+  h += `<div class="crumbs">Path: ${path.map(a => `<a data-go="${a.id}">${esc(label(a))}</a>`).join(' › ')}</div>`;
+  $('#ninfo').innerHTML = h;
+}
+$('#ninfo').addEventListener('click', e => {
+  const a = e.target.closest('[data-go]'); if (!a) return;
+  const n = INDEX.get(a.dataset.go);
+  for (let p = n.p; p; p = p.p) state.collapsed.delete(p.id);
+  if (n.d > state.reveal) state.reveal = n.d;
+  state.sel = n; render(true); setTimeout(() => centerOn(n), 470);
+});
+
+function syncControls() {
+  const t = state.tree;
+  $('#layoutSeg').classList.toggle('hidden', !t.trunk);
+  $('#layoutSeg').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.layout === (isTrunk() ? 'trunk' : 'tree')));
+  const ls = $('#langSeg'); ls.classList.toggle('hidden', t.langs.length < 2);
+  ls.innerHTML = t.langs.map(l => `<button data-lang="${l}" class="${l === state.lang ? 'on' : ''}">${LANG_NAME[l]}</button>`).join('');
+  const max = t.root.h - 1, d = $('#depth');
+  d.max = max; d.value = Math.min(state.reveal, max);
+  $('#depthVal').textContent = `${Math.min(state.reveal, max)} / ${max}`;
+}
+
+/* ------------------------------------------------------------------ *
+ *  CONTROLS
+ * ------------------------------------------------------------------ */
+$('#layoutSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.layout = b.dataset.layout; prev = new Map(); render(false); fit(); });
+$('#langSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.lang = b.dataset.lang; render(true); });
+$('#depth').addEventListener('input', e => { stopPlay(); const v = +e.target.value; state.reveal = v >= state.tree.root.h - 1 ? Infinity : v; render(true); });
+$('#play').addEventListener('click', play);
+$('#expand').addEventListener('click', () => { stopPlay(); state.collapsed = new Set(); state.reveal = Infinity; render(true); setTimeout(() => fit(), 460); });
+$('#collapse').addEventListener('click', () => {
+  stopPlay(); state.reveal = Infinity; state.collapsed = new Set();
+  (function w(n) { if (n.c.length && n.d >= 1) state.collapsed.add(n.id); n.c.forEach(w); })(state.tree.root);
+  state.sel = state.tree.root; render(true); setTimeout(() => fit(), 460);
+});
+$('#fit').addEventListener('click', () => fit());
+$('#q').addEventListener('input', e => {
+  state.q = e.target.value; renderList();
+  const q = state.q.trim().toLowerCase(), list = visibleList();
+  if (q && list.length && !list.includes(state.tree)) loadTree(list[0]);
+  else render(false);
+});
+$('#eras').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  state.era = b.dataset.era; $('#eras').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); renderList();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input')) { if (e.key === 'Escape') e.target.blur(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const n = state.sel, trunk = isTrunk();
+  const vis = x => x && state.pos.has(x);
+  const sibling = dir => { if (!n || !n.p) return null; const s = kids(n.p); return s[s.indexOf(n) + dir]; };
+  const child = () => n && kids(n).length ? (trunk ? mainChild(kids(n)) : kids(n)[0]) : null;
+  let go = null;
+  switch (e.key) {
+    case '/': e.preventDefault(); $('#q').focus(); return;
+    case 'f': case 'F': fit(); return;
+    case ' ': case 'Enter': e.preventDefault(); toggle(n); return;
+    case '[': case ']': {
+      const l = visibleList(); if (!l.length) return; const i = l.indexOf(state.tree);
+      loadTree(l[(i + (e.key === ']' ? 1 : -1) + l.length) % l.length]); return;
+    }
+    case 'ArrowUp': go = trunk ? n && n.p : sibling(-1); break;
+    case 'ArrowDown': go = trunk ? child() : sibling(1); break;
+    case 'ArrowLeft': go = trunk ? sibling(-1) : n && n.p; break;
+    case 'ArrowRight': go = trunk ? sibling(1) : child(); break;
+    default: return;
+  }
+  e.preventDefault();
+  if (vis(go)) select(go, true);
+});
+window.addEventListener('hashchange', () => { const t = TREES.find(t => '#' + t.id === location.hash); if (t && t !== state.tree) loadTree(t, false); });
+window.addEventListener('resize', () => fit(state.pos, false));
+
+/* ------------------------------------------------------------------ */
+renderList();
+loadTree(TREES.find(t => '#' + t.id === location.hash) || TREES[0], false);
+</script>
+</body>
+</html>
