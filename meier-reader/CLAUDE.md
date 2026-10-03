@@ -1,6 +1,6 @@
 # Meier reader
 
-Single-file SPA: [meier-reading-guide.html](meier-reading-guide.html) (~1130 lines, but
+Single-file SPA: [meier-reading-guide.html](meier-reading-guide.html) (~2520 lines, but
 three of those lines are enormous data blobs).
 Reads G. F. Meier's *Auszug aus der Vernunftlehre* (1752 = AA XVI) in German, with a
 resizable side panel that has two tabs: parallel passages from the tradition, and Kant's

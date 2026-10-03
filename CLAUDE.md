@@ -16,6 +16,7 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | [data/](data/) | Generated `.js` data files shared by the readers (Adickes' phase chronology, the Reflexionen) |
 | [scripts/](scripts/) | One-off Python extractors that produce `data/` from `Textfiles/` |
 | [Textfiles/](Textfiles/) | RTF source transcriptions the SPAs' embedded data was extracted from |
+| [Individuals/](Individuals/) | Participants' own projects, one folder each. Everything else here is team work; nothing in `Individuals/` is loaded by the three apps |
 
 Each SPA directory has its own `CLAUDE.md` with the data shapes and function map for
 that app, and a `README.md` aimed at a human opening it for the first time.
@@ -232,8 +233,10 @@ Editing guidance:
   Filling them in would mean transcribing AA XV, which is not in `Textfiles/`.
   Baumgarten's three prefaces are also not shown, the reader being keyed to § numbers.
 - The Reflexionen on Baumgarten now have a side panel in the **Baumgarten reader**
-  itself, tracking the § in view. 708 of the 2967 belong to no numbered § — the front
-  matter, loose sheets, and Kant's copy of Eberhard — and are reachable only through
+  itself, tracking the § in view. 708 of the 2967 belong to no numbered § — 459 the
+  Roman-numbered front matter, 91 loose sheets, 107 another handbook (104 of those
+  Kant's copy of Eberhard), and 51 that fall into none of the three and are tagged
+  only "no § stated" — and are reachable only through
   that panel's "belong to no §" view, not by clicking a §. The AA also files notes
   against §§ 655–662, which AA XVII does not print; every one of those is filed
   against a printed § as well, so none is stranded.

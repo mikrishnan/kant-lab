@@ -69,10 +69,13 @@ Each note is shown with:
   (`interpolated §`, also marked by a dashed border). What the edition says and
   what the tool inferred are never allowed to look alike.
 
-**708 of the notes belong to no numbered §** — Kant writing on the Roman-numbered
-front matter, on loose sheets, and in his copy of Eberhard's *Vorbereitung zur
-natürlichen Theologie*. None of them has been filed against a § it says nothing
-about; a button at the foot of the panel opens them on their own.
+**708 of the notes belong to no numbered §** — 459 of them Kant writing on the
+Roman-numbered front matter, 91 on loose sheets, and 107 in another handbook, 104 of
+those his copy of Eberhard's *Vorbereitung zur natürlichen Theologie*. The remaining
+51 are none of these: the Academy Edition places them on a letter, on a library
+shelfmark, or nowhere it states at all, and the panel says so rather than guessing.
+None of the 708 has been filed against a § it says nothing about; a button at the
+foot of the panel opens them on their own.
 
 ## Coverage
 

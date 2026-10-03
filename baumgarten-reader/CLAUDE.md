@@ -135,8 +135,12 @@ before the text, flat and in reading order:
   `interp` (23) marks a § this tool interpolated from the surrounding entries.
 - `paras` is absent or empty on **708** entries. They are not filed against any §
   and must never be: `front` (459) is the Roman-numbered front matter, `blatt` (91)
-  a *loses Blatt*, and `other` (107) names another handbook — chiefly Kant's copy of
-  Eberhard's *Vorbereitung*. `REFL_OFFPARA` collects them for the panel's no-§ view.
+  a *loses Blatt*, and `other` (107) names another handbook — 104 of those Kant's
+  copy of Eberhard's *Vorbereitung*. The three flags do **not** account for all 708:
+  51 entries carry none of them, 27 of those having no siglum at all and the rest
+  sitting on a letter or a library shelfmark. They are why `provenance()` must stay
+  exhaustive — an entry with `src: 'none'` and no flag still gets the "no § stated"
+  tag. `REFL_OFFPARA` collects all 708 for the panel's no-§ view.
 - `phRaw` is Adickes' dating **verbatim**; `ph` is the parse. The card prints `phRaw`
   whenever it says more than the symbols do, because the query marks and parentheses
   are Adickes' own uncertainty. Same for `loc.raw` against the rest of `loc`.
