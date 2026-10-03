@@ -1,0 +1,100 @@
+# Work in progress
+
+Handoff notes, written 3 October 2026. Everything described here is committed and
+pushed; `main` is level with `origin/main` at `bf2cb4c`. Read this alongside the root
+[CLAUDE.md](CLAUDE.md), which is the standing description of the repository — this file
+is only the state of play.
+
+## What happened in the last session
+
+Six commits, oldest first:
+
+| | |
+| --- | --- |
+| `a8141d3` | Moved the *Metaphysica* and its Reflexionen out of the Meier reader. The "Baumgarten · Metaphysica" tab is gone; the Baumgarten reader gained the whole Reflexionen panel, including lemma highlighting that jumps from a card to the annotated words in the Latin. |
+| `f1ae462` | Renamed the three app directories to drop their spaces: `baumgarten-reader/`, `meier-reader/`, `porphyrian-tree/`. |
+| `1ccadd9` | Added `Individuals/.gitkeep` (later removed — see below). |
+| `02f43c0` | Added the Jäsche *Logik* (AA IX:3–150) to `Textfiles/` as `Vol9Logic.rtfd`. |
+| `47130d7` | Rewrote `Textfiles/CLAUDE.md`, which had listed two of the then seven transcriptions and was wrong about how the Baumgarten data is produced. |
+| `bf2cb4c` | Documented `Individuals/`, and corrected the "708 Reflexionen" breakdown in three docs. |
+
+## Open items, most important first
+
+### 1. The Baumgarten reader has never been opened
+
+This is the real gap. Roughly 969 lines of new Reflexionen-panel UI went from working
+tree to commit to the live Pages site without anyone looking at it in a browser. The
+repository's own verification method is visual — open the file, click the affected UI,
+watch the console — and that step was skipped.
+
+The inline scripts of all three apps do parse (see the syntax-check note below), but
+that only rules out typos.
+
+What wants clicking, in the Baumgarten reader:
+
+- the panel tracking the § as the text scrolls;
+- a **phase chip** (e.g. `κ−σ`), which should open Adickes' note on that phase;
+- a **lemma chip**, which should scroll to those exact words in the Latin and highlight
+  them — newest code, likeliest to misbehave;
+- the drag-resizer, the `×` close and the `Reflexionen` button that reopens the panel;
+- the "belong to no §" view, from the button at the foot of the panel.
+
+Open it with `open baumgarten-reader/baumgartenreading-guide.html`, or at
+<https://mikrishnan.github.io/kant-lab/baumgarten-reader/baumgartenreading-guide.html>.
+
+### 2. Spaces remain inside `Individuals/`
+
+The three shared app directories were renamed to kill the `%20` in their Pages URLs.
+Five participant folders still have spaces — `Harper Sun`, `Kavya Vaidyanathan`,
+`Nik Land`, `Sophia Wyatt`, `eric wang` — as do about a dozen files inside them.
+
+**These were deliberately left alone.** They are other people's work, and a rename
+breaks whatever link the owner has already shared. `Individuals/README.md` explains the
+tradeoff and leaves the decision to each owner. Do not rename them on your own
+initiative; the repository owner may decide otherwise, in which case it is their call.
+
+### 3. Small, cosmetic
+
+- `baumgartenreading-guide.html` lacks the hyphen its siblings have
+  (`meier-reading-guide.html`). Renaming it would change that URL a second time.
+- The line-range map in `baumgarten-reader/CLAUDE.md` ends its last row at 1960; the
+  file now runs to 1984. The other anchors in that map were checked and are right.
+
+## Things that will save a fresh session time
+
+**Fetch before you believe the working tree.** Participants push to `Individuals/`
+through the GitHub web UI, often many commits at a time. A clone can be dozens of
+commits behind, and `Individuals/` looked *empty* for most of the last session because
+of exactly that. It holds sixteen participant folders.
+
+**There is no `node`.** Use `osascript -l JavaScript`, as the root CLAUDE.md describes.
+Two traps, both hit last session:
+
+- `eval` there does not leak `const`/`let` to the enclosing scope. Rewrite `^const ` to
+  `var ` first — `sed 's/^const /var /' data/foo.js > /tmp/foo.js` — then `eval` the
+  rewritten file and the values are visible.
+- When pulling the inline `<script>` out of an app to syntax-check it, **strip HTML
+  comments first**. Several `<script src>` tags sit inside explanatory `<!-- -->`
+  blocks, and a naive regex captures comment prose as JavaScript, producing two
+  convincing but entirely fake `SyntaxError`s.
+
+**These numbers were verified against the data, not the docs.** No need to recount:
+2967 Reflexionen; `REFLM_BY_PARA` has 726 keys, of which 655–662 are §§ AA XVII does
+not print; 718 printed §§ carry at least one note; 708 entries have no § at all,
+breaking down as 459 front matter / 91 *loses Blatt* / 107 another handbook (104 of
+them Eberhard) / 51 with no category flag whatsoever. `MET_PARAGRAPHS` has 804 entries,
+`aa` populated on 801 (§§ 1–3 stand before the first `― 24 ―` marker) and `ed`, the
+1757 pagination, on all 804; 710 glosses across 307 §§. `MEIER.paras` is complete at
+563 of 563, none empty.
+
+**The `MEIER` blob cannot be regenerated.** Every other data file has an extractor in
+`scripts/`; that one does not, so it cannot be rebuilt from `Textfiles/Meier.rtf`. Edit
+it programmatically or with a targeted replacement, and never pretty-print it.
+
+## The obvious next piece of work
+
+`Textfiles/Vol9Logic.rtfd` — the Jäsche *Logik* — is in the repository and nothing
+consumes it. It is the natural next thing to build on: the *Logik* is Kant's own
+lectures on the very Meier *Auszug* the Meier reader already carries, Jäsche's Vorrede
+saying outright that Kant had used Meier's compendium without interruption since 1765.
+Nothing has been designed or decided about what to do with it.
