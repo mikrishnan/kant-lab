@@ -20,24 +20,51 @@ Six commits, oldest first:
 
 ## Open items, most important first
 
-### 1. The Baumgarten reader has never been opened
+### 1. Scroll problems in the Baumgarten reader
 
-This is the real gap. Roughly 969 lines of new Reflexionen-panel UI went from working
-tree to commit to the live Pages site without anyone looking at it in a browser. The
-repository's own verification method is visual — open the file, click the affected UI,
-watch the console — and that step was skipped.
+**Reported from the live site on 3 October 2026, and not yet diagnosed.** The symptom
+has not been characterised beyond "scroll problems" — before changing anything, find
+out which scroll is meant, since the app has several that could be at fault
+independently:
 
+- the main text column (`#text-canvas` / `#text-inner`);
+- the Reflexionen panel's own scroller (`#refl-scroll`), which is a separate
+  scrolling region beside it;
+- the TOC sidebar (`#toc-scroll`);
+- the *programmatic* scrolling, which is a different thing again — `scrollToPara()`
+  is the single navigation entry point, and `watchParasInView()` is what moves the
+  panel and the TOC highlight as the text scrolls. A jump that overshoots, a panel
+  that rebuilds underneath you, or a § that will not stay put are all this code
+  rather than CSS.
+
+A likely place to look first is the interaction between those last two: arriving at a
+§ *from* a card calls `scrollToPara(num, false)` precisely so the panel is not rebuilt
+under the reader, and `watchParasInView()` firing during that programmatic scroll
+would defeat it.
+
+This is the first real bug found in the new panel and should come before anything
+cosmetic.
+
+### 1b. The rest of that panel is still unverified
+
+Roughly 969 lines of new Reflexionen-panel UI went live without a visual check; the
+3 October look at the live site surfaced the scrolling but did not clear the rest.
 The inline scripts of all three apps do parse (see the syntax-check note below), but
-that only rules out typos.
+that only rules out typos. Still unconfirmed, and all of it in the Baumgarten reader:
 
-What wants clicking, in the Baumgarten reader:
-
-- the panel tracking the § as the text scrolls;
+- **the lemma chip — explicitly not checked yet.** Where the AA names the exact Latin
+  words a note attaches to, the card shows them as a small clickable pill in
+  guillemets (`»quicquid est, illud«`); clicking it should scroll to those words and
+  tint them. This is the newest and likeliest-to-misbehave code, and it is **rare** —
+  only 82 of the 2967 notes carry a lemma, so most cards have no pill at all. To find
+  one, go to **§ 11** (Refl. 3489, `»quicquid est, illud«`) or **§ 12**, which has
+  three including `»Posito — quod«` — that one is the better test, being an
+  abbreviated lemma where the AA gives only the first and last words and the code has
+  to find the span between them;
 - a **phase chip** (e.g. `κ−σ`), which should open Adickes' note on that phase;
-- a **lemma chip**, which should scroll to those exact words in the Latin and highlight
-  them — newest code, likeliest to misbehave;
 - the drag-resizer, the `×` close and the `Reflexionen` button that reopens the panel;
-- the "belong to no §" view, from the button at the foot of the panel.
+- the "belong to no §" view, from the button at the foot of the panel;
+- whether the browser console is clean.
 
 Open it with `open baumgarten-reader/baumgartenreading-guide.html`, or at
 <https://mikrishnan.github.io/kant-lab/baumgarten-reader/baumgartenreading-guide.html>.
