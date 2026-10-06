@@ -1,14 +1,14 @@
 # Outside-the-repo tasks for the working-group rollout
 
 The settings, decisions and conversations that a pull request cannot do. The in-repo
-half is [todo-in-repo.md](todo-in-repo.md); IDs (`O…`, `R…`) are cross-referenced
-between the two files. Unless noted otherwise, each task needs the repository owner
+half of the rollout is done, except for R9 in [todo-in-repo.md](todo-in-repo.md),
+which waits on O12 below. Unless noted otherwise, each task needs the repository owner
 (**@mikrishnan**), because only the owner can change the settings.
 
 ## Decisions — before anything else
 
 - [ ] **O1. Maintainers.** Decide who besides @mikrishnan approves changes to the tools
-  and `data/`. Their usernames go on the `*` line of `CODEOWNERS` (R3) and in the
+  and `data/`. Their usernames go on the `*` line of `.github/CODEOWNERS` and in the
   ruleset's bypass list (O7), and they need Write access at least — Admin if they are
   to change settings.
 - [ ] **O2. Published PDFs.** The site currently serves
@@ -41,14 +41,14 @@ between the two files. Unless noted otherwise, each task needs the repository ow
   Note three things:
   - the exact buttons and wording;
   - whose name the pull request shows as author;
-  - whether the cloud session has `node` (R7's syntax-check instructions assume it
-    probably does).
+  - whether the cloud session has `node`, which the root `CLAUDE.md`'s syntax-check advice
+    lists first.
 
   If the wording differs from the README's step 3, fix the README.
 
-## GitHub settings — after the R1–R8 pull request is merged
+## GitHub settings — after the rollout branch is merged
 
-The ruleset depends on `CODEOWNERS` being on `main` (R3). Without it, "require review
+The ruleset depends on `.github/CODEOWNERS` being on `main`. Without it, "require review
 from Code Owners" has nothing to enforce.
 
 - [ ] **O7. A ruleset on `main`.** Go to Settings → Rules → Rulesets → New ruleset →
@@ -68,7 +68,7 @@ from Code Owners" has nothing to enforce.
   - In Settings → Collaborators, confirm every participant has **Write**. All of them
     pushed in session 1, so they should.
 - [ ] **O9. Labels.** In Issues → Labels, create `proposal`, `bug`, `text-error` and
-  `new-group`. The issue forms (R4) apply these, and do nothing if the labels are
+  `new-group`. The issue forms in `.github/ISSUE_TEMPLATE/` apply these, and do nothing if the labels are
   missing. `group:<name>` labels are added as groups form.
 - [ ] **O10. Test the protections** with throwaway pull requests from a non-admin
   account, then close them:
@@ -97,7 +97,8 @@ from Code Owners" has nothing to enforce.
   *pages build and deployment* is green):
   - the landing page shows *Tools* and *Works in progress*;
   - the three tools still open;
-  - the Meier reader's tradition panel still shows entries for § 1 (R8);
+  - the Meier reader's tradition panel still shows entries for § 1, now that they come from
+    `data/tradition-meier.js`;
   - `https://mikrishnan.github.io/kant-lab/groups/_template/` returns 404, as it
     should, because Jekyll skips `_` folders.
 
@@ -154,7 +155,8 @@ from Code Owners" has nothing to enforce.
   - the 11 or more independent Porphyrian trees in `Individuals/`, consolidated into
     one spec;
   - the Jäsche *Logik* as a dataset;
-  - annotating the Meier reader's `TRADITION` map, which needs R8 first.
+  - annotating the Meier reader's `TRADITION` map, which is now in
+    `data/tradition-meier.js`, so passages can be added without touching the reader.
 - [ ] **O16. Each group's first pull request is its `SPEC.md`,** reviewed within the
   group before anyone asks Claude for code.
 

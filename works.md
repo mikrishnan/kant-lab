@@ -1,11 +1,47 @@
 # Work in progress
 
-Handoff notes, written 3 October 2026. Everything described here is committed and
-pushed; `main` is level with `origin/main` at `bf2cb4c`. Read this alongside the root
-[CLAUDE.md](CLAUDE.md), which is the standing description of the repository — this file
-is only the state of play.
+Handoff notes, written 3 October 2026 and updated 6 October 2026. Read this alongside
+the root [CLAUDE.md](CLAUDE.md), which is the standing description of the repository —
+this file is only the state of play.
 
-## What happened in the last session
+How the repository is now run — working groups, specs, pull requests, review — is in
+[README.md](README.md); keeping it in order is in
+[docs/maintaining.md](docs/maintaining.md). What is left of that rollout is in
+[docs/todo-in-repo.md](docs/todo-in-repo.md) and
+[docs/todo-outside-repo.md](docs/todo-outside-repo.md).
+
+## 6 October 2026: the working-group rollout
+
+Made on the `jweirich/spike/revamp-layout` branch, for review before it reaches `main`.
+
+- **The workflow, written down.** A root [README.md](README.md) for participants;
+  [docs/maintaining.md](docs/maintaining.md) for the professor; the two todo files.
+- **Two tiers on the site.** [index.html](index.html) now lists *Tools*, then *Works in
+  progress* (dashed, and empty until the first group exists).
+- **[groups/](groups/)**, with [groups/_template/](groups/_template/): a `README.md`, a
+  `SPEC.md` skeleton, a `CLAUDE.md` of rules for sessions in a group folder, and a
+  starter `index.html` in the house style.
+- **[.github/](.github/)**: `CODEOWNERS` (professor by default, `Individuals/` unowned,
+  a line per group), four issue forms (Proposal, Bug, Text error, New working group),
+  and a pull request template.
+- **[data/README.md](data/README.md)**: every data file's globals, how it is produced,
+  and who reads it, with the rules for changing shared data.
+- **`TRADITION` moved out of the Meier reader** into
+  [data/tradition-meier.js](data/tradition-meier.js), so that passages can be added
+  without touching app code. The moved block is identical to the original apart from
+  eleven added trailing commas. The Tradition tab was exercised in headless Chrome: all
+  ten §§ show the same entry counts as before, § 2 shows the placeholder, the strata
+  filters and the annotation search work, and the console is clean. It was **not**
+  clicked through by hand.
+- **The root `CLAUDE.md` no longer assumes one Mac.** Its syntax-check advice covers
+  `node`, `osascript` and `gjs`, and it documents the Jekyll pitfalls of the Pages
+  build. `meier-reader/CLAUDE.md`'s line map, which had drifted by more than a hundred
+  lines, was redone.
+
+**Nothing enforces any of this yet.** `CODEOWNERS` does nothing until the ruleset in
+O7 of the outside-repo list exists, and every participant can still push to `main`.
+
+## 3 October 2026
 
 Six commits, oldest first:
 
@@ -92,12 +128,14 @@ initiative; the repository owner may decide otherwise, in which case it is their
 **Fetch before you believe the working tree.** Participants push to `Individuals/`
 through the GitHub web UI, often many commits at a time. A clone can be dozens of
 commits behind, and `Individuals/` looked *empty* for most of the last session because
-of exactly that. It holds sixteen participant folders.
+of exactly that. It held 14 participant folders on 6 October 2026.
 
-**There is no `node`.** Use `osascript -l JavaScript`, as the root CLAUDE.md describes.
-Two traps, both hit last session:
+**Check which JavaScript engine you have.** The machines differ: the Mac these notes
+were first written on has no `node`, the Linux machine of 6 October has `gjs` and
+Chrome but no `node`, and cloud sessions are Linux. The root CLAUDE.md lists the options. Two traps, both hit
+on 3 October:
 
-- `eval` there does not leak `const`/`let` to the enclosing scope. Rewrite `^const ` to
+- With `osascript`, `eval` does not leak `const`/`let` to the enclosing scope. Rewrite `^const ` to
   `var ` first — `sed 's/^const /var /' data/foo.js > /tmp/foo.js` — then `eval` the
   rewritten file and the values are visible.
 - When pulling the inline `<script>` out of an app to syntax-check it, **strip HTML
@@ -124,4 +162,6 @@ it programmatically or with a targeted replacement, and never pretty-print it.
 consumes it. It is the natural next thing to build on: the *Logik* is Kant's own
 lectures on the very Meier *Auszug* the Meier reader already carries, Jäsche's Vorrede
 saying outright that Kant had used Meier's compendium without interruption since 1765.
-Nothing has been designed or decided about what to do with it.
+Nothing has been designed or decided about what to do with it. It is also the natural
+first dataset for a working group to build — see "Working groups" in the
+[README](README.md).

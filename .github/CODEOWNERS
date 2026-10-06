@@ -1,0 +1,12 @@
+# Who must approve a pull request, by path. The LAST matching line wins.
+# Everyone listed must have Write access to the repository, or the line is ignored.
+
+# Default: the professor reviews everything not matched below.
+*                @mikrishnan
+
+# Personal sandboxes: no owner, so the author merges their own pull request.
+/Individuals/
+
+# Working groups: one line per group, added when the group is created.
+# Always include @mikrishnan, so that a stuck group can be unblocked.
+# /groups/<group>/  @mikrishnan @member1 @member2

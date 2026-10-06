@@ -18,6 +18,18 @@ Most of what is here so far is Porphyrian tree attempts, alongside some seminar
 readings and demo files. Nothing in this directory is loaded by the three shared
 apps, and nothing here is expected to look like them.
 
+## How changes arrive now
+
+Every change to the repository, this folder included, now goes through a pull request.
+When you upload or edit a file on github.com, the only option offered is **Create a new
+branch for this commit and start a pull request**. Take it, and on the pull request's
+page press **Squash and merge** — nobody else needs to approve a change that touches
+only your own folder. The root [README](../README.md) explains why, and how the shared
+tools and the working groups are run.
+
+The site publishes this folder along with everything else, so **published readings,
+books and other PDFs do not belong here.** Course readings belong on the course site.
+
 ## Conventions
 
 **Your folder is yours.** Nobody else reorganises, renames or tidies it, this README

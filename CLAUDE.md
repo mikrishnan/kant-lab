@@ -9,14 +9,18 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 
 | Path | What it is |
 | --- | --- |
-| [index.html](index.html) | GitHub Pages landing page linking to the three SPAs |
+| [README.md](README.md) | The contributor workflow — issue → spec → pull request → review → merge — written for participants |
+| [index.html](index.html) | GitHub Pages landing page: the approved tools, then the working groups' works in progress |
 | [baumgarten-reader/](baumgarten-reader/) | Single-file SPA: Latin reading guide for Baumgarten's *Metaphysica* with inline German glosses |
 | [meier-reader/](meier-reader/) | Single-file SPA: German reading guide for Meier's *Auszug*, with a side panel of parallel passages from the tradition |
 | [porphyrian-tree/](porphyrian-tree/) | Single-file SPA: a configurator for building genus–species trees under user-chosen division rules |
-| [data/](data/) | Generated `.js` data files shared by the readers (Adickes' phase chronology, the Reflexionen) |
+| [data/](data/) | Shared `.js` data files the tools read — the *Metaphysica*, the Reflexionen, Adickes' phase chronology, the Meier tradition passages. [data/README.md](data/README.md) lists their globals and who reads them |
 | [scripts/](scripts/) | One-off Python extractors that produce `data/` from `Textfiles/` |
 | [Textfiles/](Textfiles/) | RTF source transcriptions the SPAs' embedded data was extracted from |
-| [Individuals/](Individuals/) | Participants' own projects, one folder each. Everything else here is team work; nothing in `Individuals/` is loaded by the three apps |
+| [groups/](groups/) | Working groups' playgrounds, one folder per group, each with a `SPEC.md` as its source of truth. Team work, at the works-in-progress tier; the rules for a group folder are in [groups/_template/CLAUDE.md](groups/_template/CLAUDE.md) |
+| [Individuals/](Individuals/) | Participants' own projects, one folder each and belonging to its owner. Nothing in `Individuals/` is loaded by the shared tools |
+| [docs/](docs/) | Notes for maintainers: [docs/maintaining.md](docs/maintaining.md) |
+| [.github/](.github/) | `CODEOWNERS` (who approves what), the issue forms, the pull request template |
 
 Each SPA directory has its own `CLAUDE.md` with the data shapes and function map for
 that app, and a `README.md` aimed at a human opening it for the first time.
@@ -33,7 +37,8 @@ with its own text data hard-coded as top-level `const`s. There is:
 
 The one exception to self-containment is [data/](data/). Kant's *Reflexionen* are far
 too large to inline (a megabyte per volume), so they live in generated `.js` files that
-the readers pull in with plain `<script src>` tags:
+the readers pull in with plain `<script src>` tags. So does anything more than one tool
+might read, or that participants should be able to extend without touching app code:
 
 | File | Contents |
 | --- | --- |
@@ -41,37 +46,61 @@ the readers pull in with plain `<script src>` tags:
 | [data/reflexionen-16-meier.js](data/reflexionen-16-meier.js) | The Reflexionen on Meier's *Auszug* (AA XVI). **Generated** — see below. |
 | [data/metaphysica-17.js](data/metaphysica-17.js) | Baumgarten's *Metaphysica* itself (AA XVII): 804 §§ and the work's outline. **Generated** — see below. |
 | [data/reflexionen-17-18-baumgarten.js](data/reflexionen-17-18-baumgarten.js) | The Reflexionen on Baumgarten's *Metaphysica* (AA XVII–XVIII), 2967 of them. **Generated** — see below. |
+| [data/tradition-meier.js](data/tradition-meier.js) | `TRADITION`, the Meier reader's parallel passages from Wolff, the Scholastics and Aristotle, keyed to Meier's §§. **Hand-curated** — edit it directly; its header says how. |
 
 They are `<script src>` includes rather than `fetch()` on purpose: a classic script tag
 works from a `file://` URL, so the apps still open by double-clicking. Top-level `const`s
 in a classic script are visible to later scripts on the page, which is why the readers can
 see `REFL_ENTRIES`, `MET_PARAGRAPHS` and `phaseInfo` without any module wiring.
 
-To run an app, open the file in a browser:
+To run an app, open the file in a browser — double-click it, or:
 
 ```sh
-open meier-reader/meier-reading-guide.html
+open meier-reader/meier-reading-guide.html       # macOS
+xdg-open meier-reader/meier-reading-guide.html   # Linux
 ```
 
 There are no tests and no linter. Verification is visual: open the file, click through
-the affected UI, and check the browser console for errors. Two cheap checks are worth
-running first, since no runtime is installed to catch a typo:
+the affected UI, and check the browser console for errors.
 
-```sh
-# syntax-check a script without a browser (macOS ships JavaScriptCore via osascript)
-osascript -l JavaScript -e 'ObjC.import("Foundation");
-  new Function($.NSString.stringWithContentsOfFileEncodingError("data/reflexionen-16-meier.js",4,null).js); "OK"'
-```
+**A syntax check is worth running first**, since nothing else catches a typo. Which
+JavaScript engine exists depends on the machine — the maintainers' machines differ, and
+Claude Code cloud sessions are Linux — so check rather than assume:
 
-Note there is **no `node` on this machine.** Use `osascript -l JavaScript` for anything
-that needs to evaluate JS outside a browser. Beware that `eval` there does not leak
-`const`/`let` to the enclosing scope — rewrite `^const ` to `var ` first if you need the
-values.
+- **`node`**, where installed: `node --check data/reflexionen-16-meier.js`.
+- **macOS without `node`**: JavaScriptCore, through `osascript`:
+
+  ```sh
+  osascript -l JavaScript -e 'ObjC.import("Foundation");
+    new Function($.NSString.stringWithContentsOfFileEncodingError("data/reflexionen-16-meier.js",4,null).js); "OK"'
+  ```
+
+  Beware that `eval` there does not leak `const`/`let` to the enclosing scope — rewrite
+  `^const ` to `var ` first if you need the values.
+- **Linux without `node`**: `gjs`, GNOME's SpiderMonkey shell, is often present. Compile
+  the file's text with `new Function(src)` and catch the `SyntaxError`.
+
+To check an app's inline `<script>`, extract it to a `.js` file first, and **strip HTML
+comments before you do**: several `<script src>` tags sit inside explanatory `<!-- -->`
+blocks, and a naive regex captures the comment prose as JavaScript, producing convincing
+but entirely fake `SyntaxError`s. Where no engine is available at all, say so in the pull
+request rather than skipping the check silently.
+
+**Headless Chrome**, where installed, goes further without a display:
+`google-chrome --headless=new --virtual-time-budget=5000 --screenshot=out.png file:///abs/path.html`
+renders the page after its scripts have run, and `--dump-dom` instead prints the
+resulting DOM. That is a cheap check that a page renders. It does not replace clicking
+through the UI, and a pull request should say which of the two was done.
 
 ## Regenerating the generated data
 
-Everything in `data/` except `phases-adickes.js` is machine-extracted and **must not be
-hand-edited**; corrections belong in the extractor so they survive the next run.
+Everything in `data/` except `phases-adickes.js` and `tradition-meier.js` is
+machine-extracted and **must not be hand-edited**; corrections belong in the extractor so
+they survive the next run.
+
+`textutil` is macOS-only, so as things stand **regenerating needs a Mac**. Committing its
+`.txt` output, so that the Python steps run anywhere, is the open task in
+[docs/todo-in-repo.md](docs/todo-in-repo.md).
 
 ### The Reflexionen on Meier
 
@@ -193,6 +222,15 @@ tracks the active paragraph. If you touch rendering, preserve the `para-N` id sc
 the Reflexionen on each are in those same volumes, Adickes' chronology of Kant's hand is
 AA XIV, and the Jäsche *Logik* is AA IX.
 
+**Working groups.** Work in progress lives in `groups/<group>/`, one folder per group:
+a `SPEC.md` that is the source of truth for what the tool does, a `CLAUDE.md` of rules
+for sessions in that folder, and the tool itself as a single `index.html`. A group's
+tool loads shared data from `../../data/` and never copies it, and changes nothing
+outside its own folder. The full rules are in
+[groups/_template/CLAUDE.md](groups/_template/CLAUDE.md), which every group's
+`CLAUDE.md` starts from. A finished tool is promoted to the top level, beside the three
+existing ones — [docs/maintaining.md](docs/maintaining.md) describes how.
+
 **Attested vs. inferred.** This is a hard rule, not a preference. Anything the tool
 worked out for itself must be visibly marked as such, and anything the Academy Edition
 says must survive into the display rather than being normalised away. Concretely, in the
@@ -247,17 +285,39 @@ Editing guidance:
   reintroduce a second work into either app.
 - The Meier reader's `TRADITION` map (parallel passages from Wolff, the Scholastics,
   and Aristotle) is annotated for 10 paragraphs out of 563; the rest show a
-  "no entries yet" placeholder. This is by design — annotation is ongoing work.
+  "no entries yet" placeholder. This is by design — annotation is ongoing work. It
+  lives in [data/tradition-meier.js](data/tradition-meier.js), so that participants
+  can add passages by pull request without touching the reader's code.
 
 ## Deployment
 
-The three apps are served as-is via GitHub Pages from the `main` branch root (repo
+Everything is served as-is via GitHub Pages from the `main` branch root (repo
 Settings → Pages → Source: Deploy from a branch → `main` / `/`). [index.html](index.html)
-is the landing page; it just links to the three `.html` files by their existing paths.
-Because there's no build step, "deploying" a content or code change is nothing more
-than pushing to `main` — Pages picks it up automatically.
+is the landing page; it links to each tool by its existing path, so **renaming a tool's
+file or folder breaks links people have shared** — when a move is unavoidable, leave a
+redirect page at the old path, as [docs/maintaining.md](docs/maintaining.md) shows.
+Because there's no build step, deploying a change is nothing more than merging it into
+`main`; Pages picks it up within a few minutes.
+
+Pages runs **Jekyll** over the branch, since there is no `.nojekyll` file. That has two
+consequences worth knowing:
+
+- Jekyll does not publish directories whose names begin with `_`. That is why the group
+  template is `groups/_template/`: it is in the repository but not on the site.
+- Jekyll renders `.md` files through Liquid. **No Markdown file may contain a double
+  opening curly brace, or an opening curly brace followed by a percent sign**, even
+  inside backticks: an unterminated Liquid tag fails the Pages build, and the site
+  silently stops updating.
 
 ## Git
 
-Single `main` branch, no CI. Commit messages so far are short and descriptive of the
-scholarly content rather than the code.
+`main` is protected: every change arrives by pull request, and `.github/CODEOWNERS`
+decides who must approve it. In short, the professor approves anything outside
+`groups/` and `Individuals/`; another member of the group approves changes to a group's
+folder; and `Individuals/` changes need no approval. Pull requests are squash-merged,
+so a pull request's title becomes its commit message. Keep titles short and
+descriptive of the scholarly content rather than the code, as the history so far is.
+There is no CI.
+
+Participants push through the GitHub web UI, often many commits at a time, so **fetch
+before you believe the working tree.**

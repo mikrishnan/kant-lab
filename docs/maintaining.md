@@ -47,16 +47,21 @@ When a **New working group** issue arrives:
    since it becomes part of a URL.
 2. Check that the group has at least two members. A one-person group cannot approve its
    own pull requests, and would wait on you for every change.
-3. Start a Claude Code session on the repository and ask:
+3. Start a Claude Code session on the repository and ask, filling in the capitals:
 
-   > Create a new working group from groups/_template/ at groups/<name>/. Fill in
-   > README.md with these members: <names and GitHub usernames>. Fill in the title and
-   > the Question section of SPEC.md from issue #<n>. Add the line
-   > `/groups/<name>/  @mikrishnan @<user1> @<user2>` to the end of .github/CODEOWNERS.
-   > Add the group to the Works in progress list in index.html, replacing the "No working
-   > groups yet" placeholder if it is still there. Open a pull request that closes #<n>.
+   ```text
+   Set up the working group requested in issue #NUMBER. Copy groups/_template/ to
+   groups/GROUP-NAME/ and replace its GROUP NAME, GROUP-NAME and TOOL NAME
+   placeholders. In README.md, list these members: NAMES AND GITHUB USERNAMES. In
+   SPEC.md, fill in the Question section from the issue and leave the rest as the
+   template has it. Add the line
+       /groups/GROUP-NAME/  @mikrishnan @USER1 @USER2
+   to the end of .github/CODEOWNERS. Add the group to the Works in progress list in
+   index.html, linking to groups/GROUP-NAME/ and replacing the "No working groups yet"
+   placeholder if it is still there. Open a pull request that closes #NUMBER.
+   ```
 
-4. Review and merge it, then create the `group:<name>` label.
+4. Review and merge it, then create the `group:GROUP-NAME` label.
 
 Keep `@mikrishnan` on every group's line, so that you can approve when the group is stuck.
 
