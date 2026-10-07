@@ -1,0 +1,41 @@
+name: Bug
+description: Something in a tool does not work
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Which tool?
+      options:
+        - Baumgarten reader
+        - Meier reader
+        - Porphyrian tree
+        - A working group's tool
+        - A new tool
+        - Shared data
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link to the page
+      placeholder: https://mikrishnan.github.io/kant-lab/...
+  - type: textarea
+    id: steps
+    attributes:
+      label: What did you do?
+      description: Step by step, so someone else can make it happen again.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: console
+    attributes:
+      label: Browser and any red console errors
+      description: "To open the console in Chrome: ⌥⌘J on a Mac, Ctrl+Shift+J on Windows. Paste anything red."

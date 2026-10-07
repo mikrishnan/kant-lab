@@ -46,7 +46,24 @@
     font-size: 1.05rem;
   }
 
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    font-size: 1.15rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+
+  h2 + p.note {
+    color: var(--faded);
+    font-style: italic;
+    margin: -0.6rem 0 1rem;
+  }
+
   ul.apps { list-style: none; }
+
+  ul.apps + h2 { margin-top: 2.5rem; }
 
   ul.apps li {
     border: 1px solid var(--accent-light);
@@ -74,6 +91,19 @@
     line-height: 1.4;
   }
 
+  /* Works in progress: dashed, the suite's mark for what is not yet settled */
+  ul.apps.wip li { border-style: dashed; }
+
+  ul.apps.wip li.empty { color: var(--faded); font-style: italic; }
+
+  ul.apps.wip li.empty a {
+    font-family: inherit;
+    font-weight: normal;
+    font-size: inherit;
+    letter-spacing: normal;
+    text-decoration: underline;
+  }
+
   footer {
     margin-top: 2.5rem;
     color: var(--faded);
@@ -88,6 +118,7 @@
   <h1>Kant Lab</h1>
   <p class="tagline">Digital-humanities tools for reading the pre-Kantian German school philosophy that Kant lectured from.</p>
 
+  <h2>Tools</h2>
   <ul class="apps">
     <li>
       <a href="baumgarten-reader/baumgartenreading-guide.html">Baumgarten Reader</a>
@@ -103,7 +134,13 @@
     </li>
   </ul>
 
-  <footer>Source on <a href="https://github.com/mikrishnan/kant-lab">GitHub</a>.</footer>
+  <h2>Works in progress</h2>
+  <p class="note">Tools the working groups are building. Expect rough edges.</p>
+  <ul class="apps wip">
+    <li class="empty">No working groups yet &mdash; see <a href="https://github.com/mikrishnan/kant-lab#working-groups">how to start one</a>.</li>
+  </ul>
+
+  <footer>Source on <a href="https://github.com/mikrishnan/kant-lab">GitHub</a> &middot; <a href="https://github.com/mikrishnan/kant-lab#how-work-happens">How to contribute</a>.</footer>
 </main>
 </body>
 </html>

@@ -1,0 +1,39 @@
+name: Proposal
+description: A feature for one of the tools, or a new tool
+title: "Proposal: "
+labels: ["proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Say what you want and why. A proposal is where a spec begins, so the more concrete the better.
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Which tool?
+      options:
+        - Baumgarten reader
+        - Meier reader
+        - Porphyrian tree
+        - A working group's tool
+        - A new tool
+        - Shared data
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What should it do?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why — what would it help you read or see?
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: Draft spec items
+      description: Optional. Numbered, each one checkable by clicking — e.g. "1. Clicking a § number scrolls the text to that §."

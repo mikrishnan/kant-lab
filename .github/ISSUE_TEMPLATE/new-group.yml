@@ -1,0 +1,35 @@
+name: New working group
+description: Start a working group to build a tool together
+title: "New working group: "
+labels: ["new-group"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The professor creates the group's folder from this issue. See "Working groups" in the README for how groups work.
+  - type: input
+    id: name
+    attributes:
+      label: Group name
+      description: lowercase-with-hyphens; it becomes part of a URL
+      placeholder: jaesche-logik
+    validations:
+      required: true
+  - type: textarea
+    id: members
+    attributes:
+      label: Members
+      description: "One per line: name — @github-username. At least two, so that members can review each other's work."
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What will you build, and what question does it help with?
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: Which data will it use?
+      description: Files in data/, texts in Textfiles/, or material you will compile yourselves

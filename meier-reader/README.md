@@ -48,6 +48,9 @@ connection is used only to fetch the display fonts; it works offline with fallba
 The primary text is complete. The tradition annotations are not — ten pivotal
 paragraphs are annotated so far (§§ 1, 10, 14, 15, 115, 155, 292, 353, 362, 414);
 other paragraphs show a placeholder in the right-hand panel. Annotation is ongoing.
+The entries live in [../data/tradition-meier.js](../data/tradition-meier.js), whose
+header explains how to add one; propose additions by pull request, as the
+[root README](../README.md) describes.
 
 Baumgarten's *Metaphysica* has its own reader in
 [../baumgarten-reader/](../baumgarten-reader/).

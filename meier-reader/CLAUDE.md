@@ -1,6 +1,6 @@
 # Meier reader
 
-Single-file SPA: [meier-reading-guide.html](meier-reading-guide.html) (~2520 lines, but
+Single-file SPA: [meier-reading-guide.html](meier-reading-guide.html) (~2450 lines, but
 three of those lines are enormous data blobs).
 Reads G. F. Meier's *Auszug aus der Vernunftlehre* (1752 = AA XVI) in German, with a
 resizable side panel that has two tabs: parallel passages from the tradition, and Kant's
@@ -9,12 +9,18 @@ own handschriftliche Bemerkungen on the § in view.
 See the [root CLAUDE.md](../CLAUDE.md) for conventions shared across the suite, including
 how to regenerate the Reflexionen data and the attested-vs-inferred rule.
 
-It loads two generated/shared data files before its own `<script>`:
+It loads three shared data files before its own `<script>`:
 
 ```html
 <script src="../data/phases-adickes.js"></script>
 <script src="../data/reflexionen-16-meier.js"></script>
+<script src="../data/tradition-meier.js"></script>
 ```
+
+The first two are Adickes' phases (hand-written) and the AA XVI Reflexionen
+(generated). The third is the Tradition tab's content, `TRADITION`, which is
+hand-curated and lives outside the app so that passages can be added without touching
+app code.
 
 so the file is no longer strictly self-contained. It still opens straight from disk —
 classic `<script src>` works over `file://` — but the `../data/` paths mean the app
@@ -24,18 +30,20 @@ cannot be moved out of its directory on its own.
 
 | Lines | Contents |
 | --- | --- |
-| 1–854 | `<head>`, fonts, `:root` palette, all CSS |
-| 856–935 | Markup: header, `#sidebar`, `#primaryPanel`, `#resizer`, `#traditionPanel`, `#adickesVeil` |
-| 937–938 | `<script src>` for `../data/phases-adickes.js` and `../data/reflexionen-16-meier.js` |
-| 942 | `MEIER` — the full text (~288 KB, **one line**) |
-| 943 | `HIERARCHY` — the outline (~2.7 KB, one line) |
-| 945 | `CITATIONS` — § → AA reference (~12 KB, one line) |
-| 951–1022 | `TRADITION` — hand-written parallel passages |
-| 1024–1464 | State, builders, tradition rendering, event wiring |
-| 1466–2049 | The Reflexionen panel: kind/era tables, filter, cards, windowing, Adickes overlay, text highlighting |
-| 2050–end | Init |
+| 1–978 | `<head>`, fonts, `:root` palette, all CSS |
+| 980–1065 | Markup: header, `#sidebar`, `#primaryPanel`, `#resizer`, `#traditionPanel`, `#adickesVeil` |
+| 1072–1074 | `<script src>` for `../data/phases-adickes.js`, `../data/reflexionen-16-meier.js` and `../data/tradition-meier.js` |
+| 1078 | `MEIER` — the full text (~288 KB, **one line**) |
+| 1079 | `HIERARCHY` — the outline (~2.7 KB, one line) |
+| 1081 | `CITATIONS` — § → AA reference (~12 KB, one line) |
+| 1083–1720 | State, builders, tradition rendering, event wiring |
+| 1722–2437 | The Reflexionen panel: kind/era tables, filter, cards, windowing, Adickes overlay, text highlighting |
+| 2438–end | Init |
 
-**Do not reformat lines 942, 943, or 945.** They are machine-generated JSON dumps.
+`TRADITION`, the hand-written parallel passages, is no longer in this file: it is
+[../data/tradition-meier.js](../data/tradition-meier.js).
+
+**Do not reformat lines 1078, 1079, or 1081.** They are machine-generated JSON dumps.
 Pretty-printing them turns any subsequent one-word correction into a 20,000-line diff.
 Make targeted string replacements, or regenerate the whole line from a script.
 
@@ -78,7 +86,8 @@ Part IV on the scholar's character), which the renderer handles as a single bloc
 `CITATIONS` maps `"§ number"` → `"AA 16:76–77"`; rendered as a small tag at the end of
 each paragraph.
 
-`TRADITION` maps `paraNum` → array of entries:
+`TRADITION`, from [../data/tradition-meier.js](../data/tradition-meier.js), maps
+`paraNum` → array of entries:
 
 ```js
 { strata: 'wolff' | 'scholastic' | 'aristotle',
@@ -92,7 +101,9 @@ each paragraph.
 `data-strata`. `relation` is title-cased into the tag at the bottom of each entry.
 Only 10 paragraphs are annotated (§§ 1, 10, 14, 15, 115, 155, 292, 353, 362, 414);
 everything else falls through to a placeholder. Extending this map is the app's main
-intended growth path — no code change is needed to add entries.
+intended growth path — no code change is needed to add entries, and the data file's
+header says how. Every entry and every key's closing `]` carries a trailing comma, so
+that an addition never edits an existing line; keep it that way.
 
 ## The Reflexionen panel
 

@@ -1,0 +1,59 @@
+name: Text error
+description: A word, §, Reflexion or citation is wrong
+title: "Text error: "
+labels: ["text-error"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You are the experts on the texts, and these reports are among the most valuable things anyone can file. Please give your source, so the correction can be checked.
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Which tool?
+      options:
+        - Baumgarten reader
+        - Meier reader
+        - Porphyrian tree
+        - A working group's tool
+        - A new tool
+        - Shared data
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: § number, Refl. number, or both
+    validations:
+      required: true
+  - type: textarea
+    id: shows
+    attributes:
+      label: What the tool shows
+    validations:
+      required: true
+  - type: textarea
+    id: should
+    attributes:
+      label: What it should show
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Your source
+      description: AA volume:page, or another edition with its page
+      placeholder: AA 17:24
+    validations:
+      required: true
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: How sure are you?
+      options:
+        - Certain — checked against the AA
+        - Probable
+        - A question
+    validations:
+      required: true
