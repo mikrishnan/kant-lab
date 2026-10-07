@@ -7,15 +7,11 @@ which waits on O12 below. Unless noted otherwise, each task needs the repository
 
 ## Decisions — before anything else
 
-- [ ] **O1. Maintainers.** Decide who besides @mikrishnan approves changes to the tools
-  and `data/`. Their usernames go on the `*` line of `.github/CODEOWNERS` and in the
-  ruleset's bypass list (O7), and they need Write access at least — Admin if they are
-  to change settings.
-- [ ] **O2. Published PDFs.** The site currently serves
-  `Individuals/Ramsey/Andre Laks, Glenn Most_ Parmenides Poem.pdf`, a published book,
-  and `Individuals/Feng/Week 2 lecture note passages.pdf`. Talk to their owners; their
-  folders are theirs, so they should remove the files, or agree to their removal. Then
-  decide whether to purge them from history as well. Purging means rewriting history:
+- [ ] **O2. Published PDFs.** `Individuals/Ramsey/Andre Laks, Glenn Most_ Parmenides
+  Poem.pdf`, a published book, and `Individuals/Feng/Week 2 lecture note passages.pdf`
+  were removed in #3 and are gone from the site, but they are still in the history
+  (commits `1238671` and `e64b874`), so github.com still serves them at old-commit URLs.
+  Decide whether to purge them from history as well. Purging means rewriting history:
   `git filter-repo` and a force-push, after which every local clone must be re-cloned.
   GitHub may go on showing cached views until GitHub Support clears them.
 - [ ] **O3. Names in public.** Every participant's name and work is on a public site.
@@ -35,12 +31,9 @@ which waits on O12 below. Unless noted otherwise, each task needs the repository
   personal plan.
 - [ ] **O5. Install the Claude GitHub app on the repository.** As the owner, open
   claude.ai/code, connect GitHub, and install the app on **mikrishnan/kant-lab only**.
-- [ ] **O6. Dry run, from a non-owner account** (a maintainer or a willing student).
-  Start a session on the repository, ask for a trivial change in your own
-  `Individuals/<name>/`, and confirm that it pushes a branch and opens a pull request.
-  Note three things:
+- [ ] **O6. Dry run, from a non-owner account.** Done as #2: a session pushed a branch
+  and opened a pull request, which shows the human account as author. Still to note:
   - the exact buttons and wording;
-  - whose name the pull request shows as author;
   - whether the cloud session has `node`, which the root `CLAUDE.md`'s syntax-check advice
     lists first.
 
@@ -54,7 +47,7 @@ from Code Owners" has nothing to enforce.
 - [ ] **O7. A ruleset on `main`.** Go to Settings → Rules → Rulesets → New ruleset →
   New branch ruleset, and set:
   - Name `main`, Enforcement status **Active**, target: **Default branch**;
-  - Bypass list: **Repository admin**, and the maintainers from O1;
+  - Bypass list: **Repository admin**, and the maintainers on the `*` line of `.github/CODEOWNERS`;
   - ☑ Restrict deletions;
   - ☑ Require a pull request before merging, with:
     - Required approvals **0**;
@@ -67,9 +60,6 @@ from Code Owners" has nothing to enforce.
   - Turn on **Automatically delete head branches**.
   - In Settings → Collaborators, confirm every participant has **Write**. All of them
     pushed in session 1, so they should.
-- [ ] **O9. Labels.** In Issues → Labels, create `proposal`, `bug`, `text-error` and
-  `new-group`. The issue forms in `.github/ISSUE_TEMPLATE/` apply these, and do nothing if the labels are
-  missing. `group:<name>` labels are added as groups form.
 - [ ] **O10. Test the protections** with throwaway pull requests from a non-admin
   account, then close them:
   - [ ] a pull request touching only `Individuals/<name>/` can be merged by its author
@@ -79,28 +69,11 @@ from Code Owners" has nothing to enforce.
     first;
   - [ ] a pull request touching `data/` or `index.html` is blocked until a maintainer
     approves it;
-  - [ ] a direct push to `main` from a non-admin is rejected;
-  - [ ] **the preview link works**: on one of these pull requests, open
-    `https://raw.githack.com/mikrishnan/kant-lab/<commit-id>/baumgarten-reader/baumgartenreading-guide.html`,
-    and check that it renders with its Reflexionen panel populated, which proves that
-    the relative `../data/` includes resolve.
+  - [ ] a direct push to `main` from a non-admin is rejected.
 
   **If "0 approvals + code owners" does not behave as above,** set required approvals to
   1. That costs `Individuals/` its self-merge, since any collaborator's approval is then
   needed. Update the README's table to match.
-
-  **If githack does not work,** the fallback is a pull-request preview Action that
-  deploys each pull request to a subfolder of the site. It needs more setup: the Pages
-  source has to change from "Deploy from a branch" to a `gh-pages` branch or Actions.
-  Decide whether that is worth it before the first group needs to review something.
-- [ ] **O11. Check the live site** after the rollout pull request deploys (Actions tab →
-  *pages build and deployment* is green):
-  - the landing page shows *Tools* and *Works in progress*;
-  - the three tools still open;
-  - the Meier reader's tradition panel still shows entries for § 1, now that they come from
-    `data/tradition-meier.js`;
-  - `https://mikrishnan.github.io/kant-lab/groups/_template/` returns 404, as it
-    should, because Jekyll skips `_` folders.
 
 ## On a Mac — anyone who has one
 

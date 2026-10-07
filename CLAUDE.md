@@ -21,6 +21,7 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | [Individuals/](Individuals/) | Participants' own projects, one folder each and belonging to its owner. Nothing in `Individuals/` is loaded by the shared tools |
 | [docs/](docs/) | Notes for maintainers: [docs/maintaining.md](docs/maintaining.md) |
 | [.github/](.github/) | `CODEOWNERS` (who approves what), the issue forms, the pull request template |
+| [.claude/launch.json](.claude/launch.json) | The preview server for the Claude desktop app's Browser pane: `python3 -m http.server` at the repository root |
 
 Each SPA directory has its own `CLAUDE.md` with the data shapes and function map for
 that app, and a `README.md` aimed at a human opening it for the first time.
@@ -321,3 +322,19 @@ There is no CI.
 
 Participants push through the GitHub web UI, often many commits at a time, so **fetch
 before you believe the working tree.**
+
+**Show each change as you go.** In a claude.ai/code cloud session there is no browser
+to show the participant the page in. So after each change they ask for, commit it, push
+the branch, and end your reply with the preview link for that commit, using the full ID
+from `git rev-parse HEAD`:
+
+```
+https://raw.githack.com/mikrishnan/kant-lab/<commit-id>/<path-to-the-page>
+```
+
+Do this before any pull request exists. Open the pull request once, when they say the
+work is ready or their request asks for it. In a local session with the Browser pane —
+the Claude desktop app, which serves the pages through
+[.claude/launch.json](.claude/launch.json) — show the page there instead, and do not
+commit or push unless asked: participants working locally commit through GitHub
+Desktop, and expect to find your changes there uncommitted.
