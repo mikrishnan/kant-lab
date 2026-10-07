@@ -1,1 +1,5 @@
 .DS_Store
+
+# Claude desktop app: per-session worktrees and personal permission settings
+.claude/worktrees/
+.claude/settings.local.json

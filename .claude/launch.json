@@ -1,0 +1,16 @@
+{
+  // The preview server for the Claude desktop app's Browser pane. It serves the
+  // repository root, so that the pages' ../data/ and ../../data/ includes resolve.
+  // The pane opens on the landing page; ask Claude to open the page being worked on.
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kant-lab",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8000", "--bind", "127.0.0.1"],
+      "port": 8000,
+      "autoPort": false,
+      "url": "http://127.0.0.1:8000"
+    }
+  ]
+}

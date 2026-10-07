@@ -7,7 +7,8 @@ by the participants of the Kant Lab and published at
 
 This page explains how the repository is organised and how to work in it. **You do not
 need to install anything.** Everything below happens in a browser, on github.com and at
-[claude.ai/code](https://claude.ai/code).
+[claude.ai/code](https://claude.ai/code). If you would rather see each change the moment
+Claude makes it, you can also work [on your own computer](#working-on-your-own-computer).
 
 ## What lives where
 
@@ -64,7 +65,9 @@ repository, and ask for one thing at a time:
 > pull request that says which Behaviour items it implements.
 
 Claude works on a branch of its own, so nothing in the session touches the live site.
-Every session reads the repository's `CLAUDE.md` files automatically, so the house
+After each change it pushes the branch and replies with a **preview link** to the page as
+it now stands: open it, look, and ask for the next change. When the change is right, ask
+Claude to open the pull request. Every session reads the repository's `CLAUDE.md` files automatically, so the house
 conventions apply without your repeating them. Keep each request small — one spec item,
 one bug — so the pull request is small enough to review.
 
@@ -160,6 +163,61 @@ then on, because other tools rely on its shape.
 shared tool loads it. Changes to it now go through a pull request like everything else,
 but you merge your own without waiting for anyone. See
 [Individuals/README.md](Individuals/README.md).
+
+## Working on your own computer
+
+This is optional. It is for when you want to see each change the moment Claude makes it,
+rather than following a preview link after every push. You run Claude in the **Claude
+desktop app**, on the copy of the repository you downloaded with GitHub Desktop, and the
+app shows the page in a **Browser** pane beside the chat. Claude also looks at the page
+itself after each edit, and checks it for errors. Only step 3 above changes: the pull
+request, the review and the merge are the same.
+
+**Setting up, once.**
+
+1. Install the Claude desktop app from [claude.com/download](https://claude.com/download),
+   sign in with your university account, and open its **Code** tab.
+2. The Browser pane needs Python to serve the pages. On a Mac, open Terminal and run
+   `python3 --version`. If it prints a version number, you are set. If macOS offers to
+   install the command line developer tools instead, accept, and run it again. This has
+   not been tried on Windows yet; ask a maintainer first.
+
+**Each piece of work.**
+
+1. **In GitHub Desktop, start from the current `main`.** Choose **Current branch → main**,
+   press **Fetch origin**, then **Pull origin**. Other people push all the time, so do
+   this every time.
+2. **Make a branch** with **Branch → New branch**, named for the change
+   (`porphyry-item-4`). `main` does not accept changes directly.
+3. **Start a session in the Code tab.** Choose **Local** as the environment and your
+   `kant-lab` folder as the project folder. GitHub Desktop's **Repository → Show in
+   Finder** (**Show in Explorer** on Windows) tells you where it is. Leave the
+   **worktree** option off, so that Claude's changes show up in GitHub Desktop.
+4. **Ask for one thing at a time,** as in step 3 but without the pushing:
+
+   > Read groups/porphyry/SPEC.md and groups/porphyry/CLAUDE.md. Implement Behaviour
+   > item 4, changing only files in groups/porphyry/, and show me
+   > groups/porphyry/index.html in the preview.
+
+   Look at the page, click through it, and ask for the next change. Nothing is on GitHub
+   yet.
+5. **Commit and open the pull request in GitHub Desktop.** The **Changes** list should
+   hold only the files you meant to change; if anything else is there, ask Claude why
+   before going on. Write a one-line summary, press **Commit to** your branch, then
+   **Publish branch**, then **Branch → Create Pull Request**, which opens github.com.
+   Ask Claude to write the pull request's description, and paste it in. From here on it
+   is steps 4 and 5 above.
+6. **After it is merged,** switch GitHub Desktop back to `main` and **Pull origin**
+   before you start anything new.
+
+**If you have installed GitHub's [`gh`](https://cli.github.com/) tool** and signed in
+with it, Claude can commit, push and open the pull request itself, as in a cloud session.
+Ask it to.
+
+**Bringing a cloud session's work here.** After **Fetch origin**, the branch Claude was
+working on (its name starts `claude/`) is in GitHub Desktop's branch list. Switch to it
+and start a local session in the folder. The new session has not seen the cloud
+conversation, so tell it what you were doing.
 
 ## For maintainers
 
