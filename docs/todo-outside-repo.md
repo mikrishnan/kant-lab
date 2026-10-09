@@ -131,7 +131,9 @@ from Code Owners" has nothing to enforce.
   - annotating the Meier reader's `TRADITION` map, which is now in
     `data/tradition-meier.js`, so passages can be added without touching the reader.
 - [ ] **O16. Each group's first pull request is its `SPEC.md`,** reviewed within the
-  group before anyone asks Claude for code.
+  group before anyone asks Claude for code. A group starting from a prototype in
+  `Individuals/` instead brings it in and drafts the spec from it in that first pull
+  request.
 
 ## After that
 

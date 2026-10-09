@@ -63,6 +63,11 @@ When a **New working group** issue arrives:
 
 4. Review and merge it, then create the `group:GROUP-NAME` label.
 
+If the issue gives a prototype under **Starting from**, set the group up exactly as
+above, from the template. Bringing the prototype in is the group's first pull request,
+reviewed within the group; the README's *Starting from something in `Individuals/`*
+gives the request.
+
 Keep `@mikrishnan` on every group's line, so that you can approve when the group is stuck.
 
 ## Reviewing a pull request
