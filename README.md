@@ -142,6 +142,19 @@ groups/<group-name>/
 usernames, and a paragraph on the idea. The professor creates the folder. The tool is
 listed under *Works in progress* on the site from then on.
 
+**Starting from something in `Individuals/`.** If one of you has already built a version
+of the tool in your own folder, give its path in the issue's **Starting from** field.
+The professor still creates the folder from the template. The group's first pull request
+then brings the prototype in and drafts the spec from it, both in one request:
+
+> Read groups/porphyry/CLAUDE.md. Bring in Individuals/your-name/porphyrian-tree.html
+> as groups/porphyry/index.html, and draft SPEC.md from what the page does now. Only
+> change files in groups/porphyry/.
+
+Whoever reviews that pull request checks each drafted Behaviour item against the page,
+so it is the first review of the spec as well. The original stays in your
+`Individuals/` folder, yours to keep or delete.
+
 **Building on an existing tool.** A small fix to one of the approved tools goes straight
 to it, as a pull request the professor reviews. A larger rework starts as a copy in a
 group folder and replaces the original once it is ready.

@@ -24,3 +24,11 @@ Instructions for every Claude session working in this folder. The root
 6. **File names use hyphens, not spaces.** Do not add PDFs or other binaries.
 7. **The pull request description** names the issue it closes, lists the Behaviour items
    it implements, and says plainly what was not checked in a browser.
+8. **Bringing in a prototype from `Individuals/`** is a copy, never a move: leave the
+   original exactly as it is. Copy it to `index.html` as it stands, without restyling
+   or fixing it in the same pull request; the one exception is rule 4, so anything it
+   has pasted in from `data/` becomes a `<script src>` include. Then draft `SPEC.md` from
+   what the page actually does: its Sources, its Attested vs. inferred section, and one
+   Behaviour item for each thing a reviewer can check by clicking. Anything the page
+   infers without marking it as an inference, and anything you are unsure the author
+   intended, goes under Open questions rather than being fixed.

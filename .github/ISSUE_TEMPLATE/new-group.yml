@@ -28,6 +28,12 @@ body:
       label: What will you build, and what question does it help with?
     validations:
       required: true
+  - type: input
+    id: prototype
+    attributes:
+      label: Starting from
+      description: Optional. If one of you has already built a version in your Individuals/ folder, give its path. The group's first pull request brings it in.
+      placeholder: Individuals/your-name/porphyrian-tree.html
   - type: textarea
     id: data
     attributes:
