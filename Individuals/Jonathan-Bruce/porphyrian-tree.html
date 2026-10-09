@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Porphyrian Trees, Marks and Kant's General Logic</title>
+<style>
+:root{
+  --parchment:#f4ecd8; --parchment-2:#ebe0c3; --card:#fbf6e8; --ink:#2a2118; --ink-soft:#5b4c3a;
+  --accent:#5c3d1e; --accent-2:#8a5a2b; --rule:#c9b78f; --trad:#3d5a3a; --constructed:#8a3b2a; --kant:#2f4a6b;
+  --body:'EB Garamond',Garamond,'Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+  --display:'Cinzel','Trajan Pro',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--parchment);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.5}
+header{padding:22px 28px 10px;border-bottom:1px solid var(--rule)}
+h1{font-family:var(--display);font-weight:600;font-size:1.5rem;letter-spacing:.06em;margin:0;color:var(--accent)}
+.sub{margin:4px 0 0;color:var(--ink-soft);font-style:italic}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0}
+.tab{background:var(--parchment-2);border:1px solid var(--rule);border-radius:3px;padding:6px 12px;font-family:var(--display);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--parchment);border-color:var(--accent)}
+main{padding:18px 28px 40px;max-width:1400px;margin:0 auto}
+.intro{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:12px 16px;margin-bottom:16px}
+.intro h2{margin:0 0 4px;font-size:1.15rem;font-family:var(--display);letter-spacing:.04em;font-weight:600}
+.intro p{margin:.3em 0}
+.badge{display:inline-block;font-family:var(--display);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:2px;color:#fff;margin-right:8px;vertical-align:middle}
+.badge.traditional{background:var(--trad)} .badge.constructed{background:var(--constructed)} .badge.kantian{background:var(--kant)}
+.caveat{font-size:.92rem;color:var(--ink-soft);border-left:3px solid var(--rule);padding-left:10px;margin-top:8px}
+.grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,1fr);gap:18px;align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:14px 16px}
+.panel h3{font-family:var(--display);font-size:.8rem;letter-spacing:.09em;text-transform:uppercase;margin:0 0 8px;color:var(--accent)}
+.toolbar{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.btn{background:var(--parchment-2);border:1px solid var(--rule);border-radius:3px;padding:3px 10px;font-size:.9rem}
+.btn:hover{background:var(--rule)}
+.tree ul{list-style:none;margin:0;padding:0 0 0 26px;border-left:1px dotted var(--rule);margin-left:11px}
+.tree>ul{border-left:none;margin-left:0;padding-left:0}
+.tree li{margin:6px 0}
+.row{display:flex;align-items:flex-start;gap:6px}
+.tog{flex:none;width:24px;height:24px;margin-top:6px;border:1px solid var(--rule);background:var(--parchment-2);border-radius:50%;padding:0;line-height:1;font-size:.95rem}
+.tog.leaf{visibility:hidden}
+.node{background:var(--parchment);border:1px solid var(--rule);border-radius:4px;padding:5px 10px;text-align:left;min-width:150px}
+.node:hover{border-color:var(--accent-2)}
+.node.sel{background:var(--accent);color:var(--parchment);border-color:var(--accent)}
+.node .dif{display:block;font-size:.78rem;font-style:italic;color:var(--accent-2)}
+.node.sel .dif{color:#e8d6ae}
+.node .nm{display:block;font-weight:600}
+.node .rl{display:block;font-size:.72rem;font-family:var(--display);letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.node.ind{border-style:dashed;background:transparent}
+.node.open{border-style:dotted}
+.insp dl{margin:0}
+.insp dt{font-family:var(--display);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-2);margin-top:10px}
+.insp dd{margin:2px 0 0}
+.insp ul{margin:2px 0 0;padding-left:20px}
+.insp .lnk{background:none;border:none;padding:0;color:var(--accent);text-decoration:underline}
+.tag{font-size:.68rem;font-family:var(--display);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--rule);border-radius:2px;padding:0 5px;margin-left:6px;color:var(--ink-soft)}
+.tag.src{border-color:var(--trad);color:var(--trad)} .tag.gloss{border-color:var(--kant);color:var(--kant)} .tag.mine{border-color:var(--constructed);color:var(--constructed)}
+.hint{color:var(--ink-soft);font-style:italic}
+.notes{margin-top:22px}
+.notebody{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:6px 20px 14px;margin-top:6px}
+.notebody h4{font-family:var(--display);letter-spacing:.05em;font-size:.95rem;color:var(--accent);margin:16px 0 4px}
+.notebody p,.notebody li{margin:.4em 0}
+.notebody code{font-family:inherit;font-style:italic}
+footer{padding:16px 28px 30px;color:var(--ink-soft);font-size:.88rem;text-align:center;border-top:1px solid var(--rule)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Porphyrian Trees</h1>
+  <p class="sub">Genus, species, differentia and marks (Merkmale) — and what Kant's general logic does with them</p>
+  <div class="tabs" role="tablist" id="treeTabs" aria-label="Example trees"></div>
+</header>
+
+<main>
+  <section class="intro" id="intro"></section>
+
+  <div class="grid">
+    <section class="panel">
+      <h3>Tree</h3>
+      <div class="toolbar">
+        <button class="btn" id="expAll">Expand all</button>
+        <button class="btn" id="colAll">Collapse all</button>
+        <span class="hint">Click ▸ to open a branch; click a concept to examine it.</span>
+      </div>
+      <div class="tree" id="tree"></div>
+    </section>
+    <aside class="panel insp" id="inspector" aria-live="polite"></aside>
+  </div>
+
+  <section class="notes">
+    <div class="tabs" role="tablist" id="noteTabs" aria-label="Explanatory notes"></div>
+    <div class="notebody" id="noteBody"></div>
+  </section>
+</main>
+
+<footer>
+  Self-contained study aid. Entries are tagged <span class="tag src">source</span> (what a text says),
+  <span class="tag gloss">textbook gloss</span> (standard summary) or <span class="tag mine">my suggestion</span> (interpretive, open to dispute).
+</footer>
+
+<script>
+/* ---------- DATA ---------- */
+/* node: {n:name, d:differentia (vs. sibling), k:'ind'|'open' (optional), note, kids:[]} */
+const TREES = [
+{
+  id:'porphyry', short:'Porphyry’s tree', kind:'traditional', badge:'Traditional',
+  title:'The Porphyrian tree (Isagoge, as received in the Latin tradition)',
+  blurb:'Porphyry’s <em>Isagoge</em> (an introduction to Aristotle’s <em>Categories</em>) sets out the five predicables — genus, species, differentia, proprium, accident — and describes a chain from the highest genus, substance, down to the individual, each step made by a differentia. The branching diagram usually called the “Porphyrian tree” was drawn later, in the commentary tradition (Boethius onward) and in medieval textbooks.',
+  caveat:'The schematic below is the standard medieval rendering. Porphyry himself gives the chain in prose; the side branches (spirit, mineral, plant, brute) are the textbook completion of the dichotomies, not a transcription of one particular manuscript diagram.',
+  divByDiff:true,
+  root:{n:'Substance', note:'Genus summum: the highest genus, with no genus above it. In the tradition, “under it there is no further genus”.',
+    kids:[
+    {n:'Body', d:'corporeal', note:'Substance that is extended and material.', kids:[
+      {n:'Living body', d:'animate', kids:[
+        {n:'Animal', d:'sensitive', kids:[
+          {n:'Human', d:'rational (and mortal)', note:'Species infima in this tree. Traditional definition: rational (mortal) animal, i.e. genus + differentia.', kids:[
+            {n:'Socrates', k:'ind'},{n:'Plato', k:'ind'},{n:'… and further individual humans', k:'ind'}]},
+          {n:'Brute animal', d:'irrational'}]},
+        {n:'Plant', d:'insensible'}]},
+      {n:'Mineral body', d:'inanimate'}]},
+    {n:'Spirit', d:'incorporeal', note:'Substance without body.'}
+  ]}
+},
+{
+  id:'categories', short:'Aristotle’s categories', kind:'traditional', badge:'Traditional (schematic)',
+  title:'Being and the ten categories (Aristotelian)',
+  blurb:'Aristotle’s <em>Categories</em> (ch. 4) lists ten kinds of things said without combination. The tree below is a later schematic arrangement for comparison with Porphyry, with Aristotle’s own examples at the leaves.',
+  caveat:'This is deliberately <strong>not</strong> a Porphyrian tree. For Aristotle, being is not a genus (see <em>Metaphysics</em> B 3), so the ten categories are not species obtained from “being” by differentiae. The root node is a heading, not a genus, and no differentiae are shown. Putting the categories under a single genus is exactly what the Aristotelian argument forbids; the diagram is useful only as a contrast.',
+  divByDiff:false,
+  noDiffText:'The categories are not got by dividing a genus with differentiae, so there is no differentia to display here.',
+  root:{n:'Being (ens) — heading, not a genus', note:'In Aristotle, “being is said in many ways”; it is not a genus.',
+    kids:[
+    {n:'Substance (ousia)', note:'Within the category, Aristotle distinguishes primary substances (individuals) from secondary substances (species and genera), which is where the Porphyrian chain operates.', kids:[{n:'man, horse', k:'ind'}]},
+    {n:'Quantity', kids:[{n:'two-cubit, three-cubit', k:'ind'}]},
+    {n:'Quality', kids:[{n:'white, grammatical', k:'ind'}]},
+    {n:'Relation', kids:[{n:'double, half, greater', k:'ind'}]},
+    {n:'Where', kids:[{n:'in the Lyceum, in the market-place', k:'ind'}]},
+    {n:'When', kids:[{n:'yesterday, last year', k:'ind'}]},
+    {n:'Position', kids:[{n:'is lying, is sitting', k:'ind'}]},
+    {n:'State (having)', kids:[{n:'is shod, is armed', k:'ind'}]},
+    {n:'Action', kids:[{n:'cutting, burning', k:'ind'}]},
+    {n:'Affection (passion)', kids:[{n:'being cut, being burned', k:'ind'}]}
+  ]}
+},
+{
+  id:'stufenleiter', short:'Kant’s Stufenleiter', kind:'kantian', badge:'Kant’s own division',
+  title:'Kant’s “stepladder” of kinds of representation',
+  blurb:'In the <em>Critique of Pure Reason</em> (A320/B376–377) Kant gives a graded division of the genus <em>representation in general</em> (<em>repraesentatio</em>) down to <em>concept</em> and <em>idea</em>. It is a genus-and-species ladder in Kant’s own hand, but it is not a Porphyrian tree in the strict sense.',
+  caveat:'The names of the stages follow Kant’s passage as I recall it; the differentia labels are my paraphrase, not quotations, and the passage should be checked in your edition before anything here is cited.',
+  divByDiff:true,
+  root:{n:'Representation in general (repraesentatio)', note:'The genus at the head of Kant’s ladder.',
+    kids:[
+    {n:'Representation without consciousness', d:'unconscious', note:'Mentioned in the tradition (Leibniz’s obscure representations); not developed in Kant’s ladder.', k:'open'},
+    {n:'Representation with consciousness (perceptio)', d:'with consciousness', kids:[
+      {n:'Sensation (sensatio)', d:'refers to the subject only', note:'A modification of the subject’s state.'},
+      {n:'Cognition (cognitio)', d:'refers to an object', kids:[
+        {n:'Intuition (Anschauung)', d:'immediate and singular', kids:[
+          {n:'Empirical intuition', d:'a posteriori'},{n:'Pure intuition (space, time)', d:'a priori'}]},
+        {n:'Concept (Begriff)', d:'mediate and general', kids:[
+          {n:'Empirical concept', d:'drawn from experience'},
+          {n:'Pure concept (notio)', d:'originates in the understanding alone', kids:[
+            {n:'Idea (Vernunftbegriff)', d:'a notion exceeding the possibility of experience', note:'In Kant, the idea is a species of notion that passes beyond experience.'}]}]}]}]}
+  ]}
+},
+{
+  id:'figure', short:'Plane figures (illustrative)', kind:'constructed', badge:'Constructed · illustrative',
+  title:'Plane figures — a constructed example of cumulative marks',
+  blurb:'Built by me to make the accumulation of marks easy to see: each step down adds one mark to everything inherited from above. It is <strong>not</strong> a historical tree.',
+  caveat:'Illustrative. Note also that a triangle in geometry is a case where Kant would speak of construction in pure intuition rather than of mere conceptual division; the tree displays only the logical subordination of concepts.',
+  divByDiff:true,
+  root:{n:'Plane figure', note:'Taken as the highest genus for this tree only; relative to a wider concept (“figure”) it would be a species.',
+    kids:[
+    {n:'Polygon', d:'bounded by straight lines', kids:[
+      {n:'Triangle', d:'three sides', kids:[
+        {n:'Equilateral triangle', d:'all sides equal', kids:[{n:'This triangle drawn on the board', k:'ind'}]},
+        {n:'Scalene triangle', d:'no two sides equal'}]},
+      {n:'Quadrilateral', d:'four sides'}]},
+    {n:'Curvilinear figure', d:'bounded by a curve', kids:[
+      {n:'Circle', d:'all boundary points equidistant from one point'}]}
+  ]}
+},
+{
+  id:'colour', short:'Colour (illustrative)', kind:'constructed', badge:'Constructed · illustrative',
+  title:'Colour — a constructed example of a division with no lowest species',
+  blurb:'Built by me to contrast with the Porphyrian chain, which ends in a species infima. Here every species can in principle be divided further (finer shades), so there is no stopping point except where we choose to stop.',
+  caveat:'Illustrative. It models the thought that a logical division need not terminate in a lowest species; the connection to Kant is discussed in the notes and is an interpretation, not a claim about what Kant says of colour.',
+  divByDiff:true,
+  root:{n:'Colour', note:'A genus for this example only.',
+    kids:[
+    {n:'Chromatic colour', d:'has hue', kids:[
+      {n:'Red', d:'hue in the red range', kids:[
+        {n:'Crimson', d:'bluish red', kids:[{n:'… finer shades, without a last one', k:'open'}]},
+        {n:'Scarlet', d:'yellowish red', kids:[{n:'… finer shades, without a last one', k:'open'}]}]},
+      {n:'Blue', d:'hue in the blue range', kids:[{n:'… finer shades, without a last one', k:'open'}]}]},
+    {n:'Achromatic colour', d:'lacks hue', kids:[
+      {n:'White', d:'highest lightness'},{n:'Grey', d:'intermediate lightness'},{n:'Black', d:'lowest lightness'}]}
+  ]}
+}
+];
+
+/* ---------- NOTES ---------- */
+const T = {src:'<span class="tag src">source</span>', gloss:'<span class="tag gloss">textbook gloss</span>', mine:'<span class="tag mine">my suggestion</span>'};
+const NOTES = [
+ {id:'read', label:'Reading a tree', html:`
+  <h4>Subordination</h4>
+  <p>Each concept stands under the one above it: <em>Human</em> is subordinate to <em>Animal</em>, which is subordinate to <em>Living body</em>, and so on up to the highest genus. Subordination is transitive: whatever is true of a genus in virtue of the concept is true of every species beneath it. ${T.gloss}</p>
+  <h4>Genus, species, differentia</h4>
+  <p>A <strong>genus</strong> is divided into <strong>species</strong> by <strong>differentiae</strong>. A concept in the middle of the tree is a species relative to what is above it and a genus relative to what is below, so “genus” and “species” name positions, not fixed kinds of thing. In the Porphyrian tradition only the top (genus summum) and bottom (species infima) are absolute. ${T.src} (Porphyry, <em>Isagoge</em>)</p>
+  <h4>Definition</h4>
+  <p>The classical definition is <em>per genus et differentiam</em>: species = genus + differentia (Human = Animal + rational). The inspector shows this for each node. ${T.gloss}</p>
+  <h4>Individuals</h4>
+  <p>Individuals (dashed boxes) fall under the lowest species but are not themselves divided by further differentiae. In the traditional tree they are not concepts to be defined. The tree shows <em>instantiation</em> at its foot, not another step of division. ${T.gloss}</p>
+  <h4>Classification vs. division</h4>
+  <p>Division starts from a genus and splits it; classification starts from particulars and groups them. A tree can be read in either direction, but the Porphyrian procedure is presented as division. ${T.gloss}</p>`},
+ {id:'marks', label:'Marks and concepts', html:`
+  <h4>What a mark is</h4>
+  <p>In the language of Kant’s logic lectures a <em>Merkmal</em> (mark) is a partial representation that belongs to a concept: a part of what is thought in it, and a ground by which a thing is recognised. ${T.src} (Jäsche <em>Logik</em>, the section on concepts; cf. the first <em>Critique</em>, A6–7/B10 on containment.)</p>
+  <h4>How the tree displays marks</h4>
+  <p>Going down a Porphyrian tree, a species contains the marks of its genus and adds a differentia. Human contains <em>substance, corporeal, animate, sensitive</em> and adds <em>rational</em>. So the marks listed in the inspector are inherited from above and added at the node. ${T.gloss}</p>
+  <h4>Content and extent</h4>
+  <p>The further down, the <strong>richer</strong> a concept’s content (more marks) and the <strong>narrower</strong> its extent (fewer things fall under it). Kant states this inverse relation of content (<em>Inhalt</em>) and extent (<em>Umfang</em>) in the Jäsche <em>Logik</em>. ${T.src} The inspector gives a count for each, restricted to what the displayed tree contains.</p>
+  <h4>Differentia vs. mark</h4>
+  <p>The differentia is a mark, but a special one: the mark that, added to the genus, picks out this species among its sisters. Not every mark of a concept is its differentia (some are inherited, some are proprium or accident). ${T.gloss}</p>`},
+ {id:'three', label:'Porphyry, Aristotle, Kant', html:`
+  <p>These three are related but should not be run together.</p>
+  <h4>Aristotle</h4>
+  <p>Aristotle supplies the <em>categories</em> and the notions of genus, species and differentia in the <em>Categories</em>, <em>Topics</em> and <em>Metaphysics</em>, and he discusses division and definition (e.g. in the <em>Posterior Analytics</em>). He does not draw the branching tree. And he denies that being is a genus, so there is no single tree running from “being” through the ten categories. ${T.src}</p>
+  <h4>Porphyry</h4>
+  <p>Porphyry’s <em>Isagoge</em> is an introduction to the <em>Categories</em>. It organises the vocabulary into the five predicables and describes the chain of genera and species within the category of substance, from the genus summum to the species infima. The tree diagram is a medieval aid built on it. ${T.src} for the predicables, ${T.gloss} for the diagram.</p>
+  <h4>Kant</h4>
+  <p>Kant does not adopt a metaphysical tree of substance. His <em>general logic</em> abstracts from the content of cognition and treats the form of concepts: content, extent, higher and lower concepts, genus and species, and logical division. So he keeps the logical machinery of genus and species while detaching it from the ontological chain. ${T.gloss} Whether and how far Kant is “responding to Porphyry” is a matter for historians; this page does not claim a direct line of reception.</p>
+  <h4>Summary of the contrast</h4>
+  <ul>
+   <li><strong>Aristotle:</strong> kinds of being and of predication; being is not a genus.</li>
+   <li><strong>Porphyry:</strong> a chain of genera and species inside substance, from top to bottom.</li>
+   <li><strong>Kant’s general logic:</strong> the form of any concept’s subordination, whatever its content; the ladder in the first <em>Critique</em> (A320/B376–377) is a use of it, not a Porphyrian tree.</li>
+  </ul>`},
+ {id:'kant', label:'Kant’s general logic', html:`
+  <h4>Where to look</h4>
+  <ul>
+   <li><strong>Jäsche <em>Logik</em></strong> (AA 9), the chapter on concepts in the “Allgemeine Elementarlehre”: content and extent, higher and lower concepts, genus and species, and the treatment of division. I give no section or page numbers here because I cannot verify them reliably; please look them up in your edition. ${T.src}</li>
+   <li><strong><em>Critique of Pure Reason</em></strong>, Appendix to the Transcendental Dialectic, A642–668/B670–696: the regulative principles of <em>homogeneity</em> (seek the higher genus), <em>specification</em> (seek the lower species) and <em>continuity</em> of forms. ${T.src}</li>
+   <li><strong><em>Critique</em></strong> A320/B376–377: the ladder of representations (the tree on the third tab). ${T.src}</li>
+  </ul>
+  <h4>Questions the tree helps to pose</h4>
+  <p><strong>1. Is there a lowest species?</strong> In the Porphyrian tree there is a species infima. Kant’s logic and the Appendix suggest that, as far as concepts alone go, no lowest species and no highest genus can be fixed absolutely; every concept can be seen as a genus with respect to a finer one. The <em>Colour</em> example is built to display this. ${T.gloss} Reading the Appendix’s <em>specification</em> principle as a claim about the same issue is ${T.mine} — the Appendix speaks of a regulative demand of reason, not just of logical form.</p>
+  <p><strong>2. What gives the division its form?</strong> A tree like Porphyry’s uses dichotomy at each step. Kant’s logic discusses division by dichotomy and by polytomy; how much weight he puts on dichotomy needs to be checked in the <em>Logik</em> itself. I do not assert it here.</p>
+  <p><strong>3. Analytic judgment.</strong> If Animal is a mark of Human, then “Human is an animal” can be got by analysing the subject concept. Kant’s definition of analytic judgments (A6–7/B10) uses the containment of the predicate in the subject. Connecting this to the tree is ${T.mine}; it is a natural bridge, not something Kant says about Porphyry.</p>
+  <p><strong>4. Logical vs. real.</strong> A logical tree orders concepts by marks; it does not tell us that things in the world are really so divided, or that the concepts are non-empty. In Kant’s terms, the tree belongs to general logic, which abstracts from objects. ${T.gloss}</p>
+  <h4>Limits of this page</h4>
+  <p>I have not tried to settle disputes about Kant’s sources (e.g. Meier’s <em>Auszug</em>, Wolff, Baumgarten) or about how much of the Jäsche <em>Logik</em> reflects Kant’s own words rather than the editor’s arrangement; those are questions for the lab’s texts.</p>`},
+ {id:'status', label:'Sources and status', html:`
+  <h4>Which tree is which</h4>
+  <ul>
+   <li><span class="badge traditional">Traditional</span> <em>Porphyry’s tree</em> and <em>Aristotle’s categories</em>: drawn from the tradition. The tree layout is a later schematic form; the categories diagram is a comparison aid, not Aristotle’s own claim.</li>
+   <li><span class="badge kantian">Kant’s own</span> <em>Stufenleiter</em>: follows Kant’s passage, with my paraphrased differentiae.</li>
+   <li><span class="badge constructed">Constructed</span> <em>Plane figures</em> and <em>Colour</em>: my own illustrations, not historical. They were built to show cumulative marks and the open-ended division respectively.</li>
+  </ul>
+  <h4>What is not verified</h4>
+  <p>No page numbers from the Akademie edition are given. The citations that appear are to <em>Critique</em> A/B pagination and to named works and sections. Check any wording against your edition before relying on it.</p>
+  <h4>Technical</h4>
+  <p>One file, no network access, no stored state: reloading resets the page.</p>`}
+];
+
+/* ---------- STATE ---------- */
+let cur = TREES[0];
+let sel = null;
+let open = new Set();
+let nodeById = {};
+
+/* ---------- HELPERS ---------- */
+function annotate(node, parent, id, depth){
+  node.parent = parent; node.id = id; node.depth = depth;
+  nodeById[id] = node;
+  (node.kids || []).forEach((k,i) => annotate(k, node, id + '.' + i, depth + 1));
+}
+function leaves(node){
+  const ks = node.kids || [];
+  if(!ks.length) return node.k === 'ind' ? 1 : 0;
+  return ks.reduce((s,k) => s + leaves(k), 0);
+}
+function terminals(node){
+  const ks = node.kids || [];
+  if(!ks.length) return 1;
+  return ks.reduce((s,k) => s + terminals(k), 0);
+}
+function role(n){
+  if(n.k === 'ind') return 'Individual / example';
+  if(n.k === 'open') return 'Open: division continues';
+  const ks = n.kids || [];
+  if(!n.parent) return ks.length ? 'Highest concept in this tree' : 'Root';
+  if(ks.length && ks.every(k => k.k === 'ind')) return 'Lowest species in this tree';
+  if(ks.length && ks.some(k => k.k === 'open')) return 'Species and genus (further division open)';
+  if(ks.length) return 'Species and genus';
+  return 'Terminal in this display';
+}
+function marksOf(n){
+  const chain = [];
+  for(let p = n; p; p = p.parent) chain.unshift(p);
+  const out = [];
+  chain.forEach((p,i) => {
+    if(i === 0) out.push({t:p.n.replace(/ \(.*$/,''), own:n === p});
+    else if(p.d && p.k !== 'ind') out.push({t:p.d, own:p === n});
+  });
+  return out;
+}
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text != null) e.textContent = text;
+  return e;
+}
+
+/* ---------- RENDER ---------- */
+function renderTabs(){
+  const box = document.getElementById('treeTabs');
+  box.innerHTML = '';
+  TREES.forEach(t => {
+    const b = el('button','tab',t.short);
+    b.setAttribute('role','tab');
+    b.setAttribute('aria-selected', t === cur ? 'true' : 'false');
+    b.addEventListener('click', () => setTree(t));
+    box.appendChild(b);
+  });
+}
+function renderIntro(){
+  const box = document.getElementById('intro');
+  box.innerHTML = '';
+  const h = el('h2');
+  const bd = el('span','badge ' + cur.kind, cur.badge);
+  h.appendChild(bd); h.appendChild(document.createTextNode(cur.title));
+  box.appendChild(h);
+  const p = el('p'); p.innerHTML = cur.blurb; box.appendChild(p);
+  const c = el('p','caveat'); c.innerHTML = cur.caveat; box.appendChild(c);
+}
+function renderTree(){
+  const box = document.getElementById('tree');
+  box.innerHTML = '';
+  const ul = el('ul');
+  ul.appendChild(buildLi(cur.root));
+  box.appendChild(ul);
+}
+function buildLi(n){
+  const li = el('li');
+  const row = el('div','row');
+  const hasKids = (n.kids || []).length > 0;
+  const tg = el('button','tog' + (hasKids ? '' : ' leaf'), open.has(n.id) ? '▾' : '▸');
+  if(hasKids){
+    tg.setAttribute('aria-expanded', open.has(n.id) ? 'true' : 'false');
+    tg.setAttribute('aria-label', 'Toggle branch ' + n.n);
+    tg.addEventListener('click', () => { toggle(n.id); });
+  } else tg.disabled = true;
+  row.appendChild(tg);
+  const card = el('button','node' + (n.k === 'ind' ? ' ind' : '') + (n.k === 'open' ? ' open' : '') + (sel === n ? ' sel' : ''));
+  if(n.d && cur.divByDiff && n.k !== 'ind') card.appendChild(el('span','dif','differentia: ' + n.d));
+  card.appendChild(el('span','nm',n.n));
+  card.appendChild(el('span','rl',role(n)));
+  card.addEventListener('click', () => select(n));
+  row.appendChild(card);
+  li.appendChild(row);
+  if(hasKids && open.has(n.id)){
+    const ul = el('ul');
+    n.kids.forEach(k => ul.appendChild(buildLi(k)));
+    li.appendChild(ul);
+  }
+  return li;
+}
+function renderInspector(){
+  const box = document.getElementById('inspector');
+  box.innerHTML = '';
+  box.appendChild(el('h3',null,'Inspector'));
+  if(!sel){ box.appendChild(el('p','hint','Select a concept in the tree to see its genus, species, differentia and marks.')); return; }
+  const n = sel;
+  const dl = el('dl');
+  const add = (label, node) => { dl.appendChild(el('dt',null,label)); const dd = el('dd'); dd.appendChild(node); dl.appendChild(dd); };
+  const txt = s => document.createTextNode(s);
+  const link = m => { const b = el('button','lnk',m.n); b.addEventListener('click', () => select(m, true)); return b; };
+
+  const head = el('div'); const strong = el('strong',null,n.n); head.appendChild(strong);
+  head.appendChild(el('span','tag',role(n)));
+  add('Concept', head);
+  if(n.note) add('Note', txt(n.note));
+
+  add('Genus (the concept above)', n.parent ? link(n.parent) : txt('None in this tree.'));
+
+  const kids = n.kids || [];
+  if(kids.length){
+    const w = el('span');
+    kids.forEach((k,i) => { if(i) w.appendChild(txt(', ')); w.appendChild(link(k)); });
+    add(n.k === 'ind' ? 'Below' : 'Species / members below', w);
+  } else add('Species below', txt(n.k === 'ind' ? 'None: an individual is not divided further by differentiae.' : 'None displayed.'));
+
+  if(n.parent){
+    const sibs = n.parent.kids.filter(k => k !== n);
+    if(sibs.length){
+      const w = el('span');
+      sibs.forEach((k,i) => { if(i) w.appendChild(txt(', ')); w.appendChild(link(k)); });
+      add('Sister concepts', w);
+    }
+  }
+
+  if(n.parent && n.k !== 'ind'){
+    if(cur.divByDiff && n.d){
+      add('Differentia', txt('“' + n.d + '” — the mark that, added to ' + n.parent.n.replace(/ \(.*$/,'') + ', distinguishes ' + n.n + ' from its sisters.'));
+      add('Definition (genus + differentia)', txt(n.n + ' = ' + n.parent.n.replace(/ \(.*$/,'') + ' + ' + n.d));
+    } else if(!cur.divByDiff){
+      add('Differentia', txt(cur.noDiffText));
+    }
+  }
+
+  if(n.k === 'ind'){
+    add('Marks', txt('An individual falls under its species and so under all that species’ marks; what distinguishes it from other individuals (accidents, matter, place) is not a differentia of a concept.'));
+  } else if(cur.divByDiff){
+    const ul = el('ul');
+    marksOf(n).forEach(m => {
+      const li = el('li', null, m.t);
+      li.appendChild(el('span','tag', m.own ? 'added here' : 'inherited'));
+      ul.appendChild(li);
+    });
+    add('Marks (cumulative)', ul);
+    add('Content and extent in this tree', txt('Content: ' + marksOf(n).length + ' mark(s). Extent: ' + terminals(n) + ' terminal concept(s) or example(s) below. Going down, content grows and extent shrinks.'));
+  } else {
+    add('Marks', txt('No cumulative marks are displayed: the categories are not a chain of genus-and-differentia steps.'));
+  }
+  box.appendChild(dl);
+}
+function renderNotes(activeId){
+  const tabs = document.getElementById('noteTabs');
+  tabs.innerHTML = '';
+  NOTES.forEach(nt => {
+    const b = el('button','tab',nt.label);
+    b.setAttribute('role','tab');
+    b.setAttribute('aria-selected', nt.id === activeId ? 'true' : 'false');
+    b.addEventListener('click', () => renderNotes(nt.id));
+    tabs.appendChild(b);
+  });
+  document.getElementById('noteBody').innerHTML = NOTES.find(x => x.id === activeId).html;
+}
+
+/* ---------- ACTIONS ---------- */
+function redraw(){ renderTree(); renderInspector(); }
+function toggle(id){ open.has(id) ? open.delete(id) : open.add(id); redraw(); }
+function select(n, reveal){
+  sel = n;
+  if(reveal){ for(let p = n.parent; p; p = p.parent) open.add(p.id); }
+  redraw();
+}
+function setTree(t){
+  cur = t; nodeById = {}; annotate(cur.root, null, 'r', 0);
+  open = new Set();
+  Object.values(nodeById).forEach(n => { if(n.depth < 2 && (n.kids || []).length) open.add(n.id); });
+  sel = cur.root;
+  renderTabs(); renderIntro(); redraw();
+}
+document.getElementById('expAll').addEventListener('click', () => {
+  Object.values(nodeById).forEach(n => { if((n.kids || []).length) open.add(n.id); }); redraw();
+});
+document.getElementById('colAll').addEventListener('click', () => {
+  open = new Set(); redraw();
+});
+
+/* ---------- INIT ---------- */
+TREES.forEach(t => { nodeById = {}; annotate(t.root, null, 'r', 0); });
+renderNotes('read');
+setTree(TREES[0]);
+</script>
+</body>
+</html>
