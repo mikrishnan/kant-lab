@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to contribute · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', serif;
+    font-size: 1.08rem;
+    line-height: 1.5;
+  }
+
+  a { color: var(--accent); }
+
+  code {
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 0.82em;
+    background: var(--parchment-dark);
+    padding: 0.05em 0.3em;
+    border-radius: 3px;
+  }
+
+  header {
+    border-bottom: 1px solid var(--accent-light);
+    background: var(--parchment-dark);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1.25rem;
+  }
+
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    font-size: 1.3rem;
+    color: var(--accent);
+  }
+
+  header a { color: var(--faded); font-size: 0.9rem; }
+
+  main { max-width: 780px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+
+  p.lede { font-size: 1.15rem; margin-bottom: 1.75rem; }
+
+  h2, h3 {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+
+  h2 { font-size: 1.2rem; margin-bottom: 0.75rem; }
+  h3 { font-size: 0.95rem; margin: 1.5rem 0 0.5rem; }
+
+  /* ── The path: three steps, plus "other ways", doubling as navigation ── */
+
+  nav.path {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items: stretch;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+  }
+
+  nav.path .arrow {
+    align-self: center;
+    color: var(--accent-light);
+    font-size: 1.3rem;
+  }
+
+  nav.others {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+  }
+
+  button.step {
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    background: var(--parchment-dark);
+    color: var(--ink);
+    border: 1px solid var(--accent-light);
+    border-radius: 6px;
+    padding: 0.7rem 0.9rem;
+  }
+
+  button.step .num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--faded);
+    display: block;
+  }
+
+  button.step .label {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    color: var(--accent);
+    display: block;
+  }
+
+  button.step .where { font-size: 0.88rem; color: var(--faded); }
+
+  nav.others button.step { flex: 1; padding: 0.5rem 0.9rem; }
+
+  button.step:hover { border-color: var(--accent); }
+
+  button.step.active {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  button.step.active .num,
+  button.step.active .label,
+  button.step.active .where { color: var(--parchment); }
+
+  /* ── Panels ── */
+
+  section.panel { display: none; }
+  section.panel.active { display: block; }
+
+  ol.short, ul.short { margin: 0 0 1rem 1.4rem; }
+  ol.short li, ul.short li { margin-bottom: 0.35rem; }
+
+  p { margin-bottom: 0.8rem; }
+
+  .who {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--faded);
+    border: 1px solid var(--faded);
+    border-radius: 3px;
+    padding: 0 0.4em;
+    margin-left: 0.3em;
+    vertical-align: 0.15em;
+  }
+
+  details {
+    border: 1px solid var(--accent-light);
+    border-radius: 6px;
+    background: var(--parchment-dark);
+    padding: 0.6rem 0.9rem;
+    margin: 0.9rem 0;
+  }
+
+  details summary {
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.03em;
+    color: var(--accent);
+  }
+
+  details[open] summary { margin-bottom: 0.6rem; }
+
+  details.aside { border-style: dashed; background: transparent; }
+
+  /* ── Prompt builder ── */
+
+  .builder label {
+    display: block;
+    font-size: 0.92rem;
+    color: var(--faded);
+    margin: 0.5rem 0 0.15rem;
+  }
+
+  .builder input[type=text], .builder textarea {
+    font: inherit;
+    width: 100%;
+    padding: 0.3rem 0.5rem;
+    border: 1px solid var(--accent-light);
+    border-radius: 4px;
+    background: var(--parchment);
+    color: var(--ink);
+  }
+
+  .builder textarea { min-height: 3.2rem; resize: vertical; }
+
+  .builder .checks { display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; }
+  .builder .checks label { display: inline; margin: 0; color: var(--ink); }
+
+  .prompt {
+    position: relative;
+    margin: 0.8rem 0;
+    border-left: 3px solid var(--accent);
+    background: var(--parchment);
+    padding: 0.7rem 0.9rem;
+    padding-right: 4.5rem;
+    white-space: pre-wrap;
+    font-style: italic;
+  }
+
+  .prompt button.copy {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    border: 1px solid var(--accent-light);
+    border-radius: 4px;
+    background: var(--parchment-dark);
+    color: var(--accent);
+    padding: 0.15rem 0.5rem;
+  }
+
+  .prompt button.copy:hover { border-color: var(--accent); }
+
+  /* ── Other ways to help: cards ── */
+
+  ul.ways { list-style: none; }
+
+  ul.ways li {
+    border: 1px solid var(--accent-light);
+    background: var(--parchment-dark);
+    border-radius: 6px;
+    margin-bottom: 0.8rem;
+    padding: 0.8rem 1rem;
+  }
+
+  ul.ways li strong {
+    font-family: 'Cinzel', serif;
+    color: var(--accent);
+    font-size: 0.95rem;
+  }
+
+  ul.ways li p { margin: 0.3rem 0 0; }
+
+  /* ── Data demo ── */
+
+  .demo {
+    border: 1px dashed var(--accent-light);
+    border-radius: 6px;
+    padding: 0.8rem 1rem;
+    margin: 0.8rem 0;
+  }
+
+  .demo select { font: inherit; padding: 0.1rem 0.3rem; background: var(--parchment); }
+
+  .demo .sym { font-size: 1.6rem; color: var(--accent); margin-right: 0.4rem; }
+  .demo .years { font-weight: 600; }
+  .demo .undated { font-style: italic; color: var(--faded); }
+  .demo blockquote {
+    margin: 0.5rem 0;
+    padding-left: 0.8rem;
+    border-left: 2px solid var(--faded);
+  }
+  .demo .cite { font-size: 0.9rem; color: var(--faded); }
+  .demo .editorial {
+    font-size: 0.92rem;
+    border: 1px dashed var(--faded);
+    border-radius: 4px;
+    padding: 0.3rem 0.5rem;
+    margin-top: 0.4rem;
+  }
+  .demo .tag {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: var(--faded);
+    margin-right: 0.3em;
+  }
+  .demo.failed { border-color: #8b2e1e; color: #8b2e1e; }
+
+  table { border-collapse: collapse; margin: 0.4rem 0 1rem; width: 100%; }
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 0.3rem 0.6rem 0.3rem 0;
+    border-bottom: 1px solid var(--parchment-dark);
+  }
+  th { font-family: 'Cinzel', serif; font-size: 0.82rem; color: var(--faded); font-weight: 400; }
+
+  dl.words dt { font-weight: 600; margin-top: 0.5rem; }
+  dl.words dd { margin-left: 1.2rem; }
+
+  footer {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--parchment-dark);
+    color: var(--faded);
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 620px) {
+    nav.path { grid-template-columns: 1fr; }
+    nav.path .arrow { display: none; }
+    nav.others { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>How to Contribute</h1>
+  <a href="../../">Kant Lab</a>
+</header>
+
+<main>
+
+<p class="lede">You don't need to install anything or read code. You need a browser, a
+GitHub account, and an idea. Every tool on the site travels the same road:</p>
+
+<nav class="path" aria-label="The path from idea to tool">
+  <button class="step" data-panel="individual">
+    <span class="num">Step 1</span>
+    <span class="label">Try an idea</span>
+    <span class="where">in your own folder</span>
+  </button>
+  <span class="arrow" aria-hidden="true">→</span>
+  <button class="step" data-panel="group">
+    <span class="num">Step 2</span>
+    <span class="label">Build it together</span>
+    <span class="where">in a working group</span>
+  </button>
+  <span class="arrow" aria-hidden="true">→</span>
+  <button class="step" data-panel="tool">
+    <span class="num">Step 3</span>
+    <span class="label">Make it a tool</span>
+    <span class="where">on the front page</span>
+  </button>
+</nav>
+
+<nav class="others" aria-label="More">
+  <button class="step" data-panel="help"><span class="label">Other ways to help</span></button>
+  <button class="step" data-panel="rules"><span class="label">House rules</span></button>
+</nav>
+
+<!-- ───────────────────────────── Step 1 ───────────────────────────── -->
+<section class="panel" id="panel-individual">
+  <h2>Step 1 · Try an idea in your own folder</h2>
+  <p><code>Individuals/your-name/</code> is your sandbox. Nobody reviews it, and nothing
+  you do there can break anyone else's work.</p>
+
+  <ol class="short">
+    <li>Open <a href="https://claude.ai/code" target="_blank" rel="noopener">claude.ai/code</a>
+      and pick the <strong>mikrishnan/kant-lab</strong> repository.</li>
+    <li>Paste the request below. Claude builds the page and replies with a
+      <strong>preview link</strong>.</li>
+    <li>Open the link, look, and ask for the next change. Repeat.</li>
+    <li>When you like it, say <em>“Open a pull request.”</em> On GitHub, press
+      <strong>Squash and merge</strong> <span class="who">no approval needed</span>.</li>
+  </ol>
+
+  <details class="builder" open>
+    <summary>Your first request</summary>
+    <label for="b-name">Your name (becomes your folder)</label>
+    <input type="text" id="b-name" placeholder="e.g. Jane Doe" autocomplete="off">
+    <label for="b-tool">A short name for the tool</label>
+    <input type="text" id="b-tool" placeholder="e.g. phase timeline" autocomplete="off">
+    <label for="b-idea">What should it do? A sentence or two is plenty.</label>
+    <textarea id="b-idea" placeholder="e.g. Draw Adickes' phases on a timeline, and let me click one to read his note."></textarea>
+    <label>Texts it should use (optional)</label>
+    <div class="checks" id="b-data"></div>
+    <div class="prompt" id="b-prompt"></div>
+  </details>
+
+  <details>
+    <summary>Requests that come in handy later</summary>
+    <div class="prompt">The page has a problem: WHAT YOU SEE. Fix it, and tell me what was wrong.</div>
+    <div class="prompt">Check the browser console for errors on my page and fix any you find.</div>
+    <div class="prompt">I'm starting a new session. Read Individuals/YOUR-FOLDER/ and tell me what my page does now, so we can pick up where I left off.</div>
+    <p>Keep each request to one change. Small steps are easier to check, and easier to undo.</p>
+  </details>
+
+  <details>
+    <summary>Without Claude</summary>
+    <p>On github.com, open <code>Individuals/</code>, press <strong>Add file → Upload
+    files</strong> (or open a file and click the pencil), and choose <strong>Create a new
+    branch for this commit and start a pull request</strong>. Then press <strong>Squash
+    and merge</strong> on the pull request's page. Name new folders and files with
+    hyphens, not spaces, so links survive being pasted into an email.</p>
+  </details>
+
+  <details>
+    <summary>Using Kant's texts in your page</summary>
+    <p>The texts live once, in <code>data/</code>, and pages <em>include</em> them rather
+    than copying them. This page does exactly that. Its HTML has one line,</p>
+    <p><code>&lt;script src="../../data/phases-adickes.js"&gt;&lt;/script&gt;</code></p>
+    <p>and the box below is filled from that file, not from this page:</p>
+    <div class="demo" id="demo"></div>
+    <p>The AA's own words, such as Adickes' notes above, are shown as the AA prints them.
+    Anything a page works out for itself must say so, the way this box flags a phase Adickes
+    gives no date for. That is the project's one hard rule, <em>attested vs.
+    inferred</em>. <a href="https://github.com/mikrishnan/kant-lab/blob/main/data/README.md"
+    target="_blank" rel="noopener">data/README.md</a> lists every file you can include.</p>
+  </details>
+</section>
+
+<!-- ───────────────────────────── Step 2 ───────────────────────────── -->
+<section class="panel" id="panel-group">
+  <h2>Step 2 · Build it together in a working group</h2>
+  <p>When an idea deserves more hands, a few of you form a group. The group gets a
+  folder, <code>groups/group-name/</code>, and its tool appears on the site under
+  <em>Works in progress</em>.</p>
+
+  <ol class="short">
+    <li>Find at least one partner, so that you can review each other's work.</li>
+    <li>File a <a href="https://github.com/mikrishnan/kant-lab/issues/new?template=new-group.yml"
+      target="_blank" rel="noopener">New working group</a> issue. The professor creates your folder.</li>
+    <li>Together, write <code>SPEC.md</code>: what question the tool answers, and a numbered
+      list of things it does that anyone can check by clicking.</li>
+    <li>One person asks Claude to build one spec item at a time, and opens a pull request.</li>
+    <li>Another member checks it with the preview link and approves it
+      <span class="who">another group member approves</span>.</li>
+  </ol>
+
+  <details class="builder">
+    <summary>Requests for your group</summary>
+    <label for="g-name">Group name (lowercase, with hyphens)</label>
+    <input type="text" id="g-name" placeholder="e.g. phase-timeline" autocomplete="off">
+    <label>Building one spec item:</label>
+    <div class="prompt" id="g-prompt-item"></div>
+    <label>Reviewing a teammate's pull request, if you'd like help:</label>
+    <div class="prompt" id="g-prompt-review"></div>
+  </details>
+
+  <details class="builder aside">
+    <summary>Aside: starting from something in your own folder</summary>
+    <p>If you already built a version in <code>Individuals/</code>, put its path in the
+    issue's <strong>Starting from</strong> field. Once the group's folder exists, its first
+    pull request copies your page in and drafts the spec from what the page does:</p>
+    <label for="g-proto">Path to your page</label>
+    <input type="text" id="g-proto" placeholder="e.g. Individuals/jane-doe/phase-timeline.html" autocomplete="off">
+    <div class="prompt" id="g-prompt-proto"></div>
+    <p>Your original stays where it was, yours to keep. Whoever reviews this pull request
+    checks each drafted spec item against the page, so it is the spec's first review too.</p>
+  </details>
+
+  <details>
+    <summary>What a spec looks like</summary>
+    <p><strong>Question</strong> · the scholarly question the tool helps with.<br>
+    <strong>Sources</strong> · which texts, and which files in <code>data/</code>.<br>
+    <strong>Attested vs. inferred</strong> · what the tool works out for itself, and how it shows that.<br>
+    <strong>Behaviour</strong> · numbered statements, each true or false of the page, e.g.
+    <em>“4. Clicking a § number scrolls the text to that §.”</em><br>
+    <strong>Out of scope</strong> · what it deliberately doesn't do.</p>
+    <p>The spec is the part you own and argue about. Claude writes the code; the spec is
+    how you tell it what to build, and how your teammates check that it did.</p>
+  </details>
+</section>
+
+<!-- ───────────────────────────── Step 3 ───────────────────────────── -->
+<section class="panel" id="panel-tool">
+  <h2>Step 3 · Make it a tool</h2>
+  <p>When your group thinks the tool is polished and does everything its spec says, file
+  a <a href="https://github.com/mikrishnan/kant-lab/issues/new?template=proposal.yml"
+  target="_blank" rel="noopener">Proposal</a> issue asking for it to be promoted.
+  With the professor's approval it moves to the top of the site, beside the Baumgarten
+  Reader, the Meier Reader and the Porphyrian Tree <span class="who">professor approves</span>.</p>
+  <p>The exact steps are still being worked out. Two things are settled: links people
+  have already shared keep working, and from then on improvements to the tool arrive as
+  pull requests the professor reviews, like those to the other tools.</p>
+</section>
+
+<!-- ───────────────────────────── Other ways ───────────────────────────── -->
+<section class="panel" id="panel-help">
+  <h2>Other ways to help</h2>
+  <p>Not every contribution is a new tool. Most of these take ten minutes.</p>
+
+  <ul class="ways">
+    <li>
+      <strong>Report a text error</strong>
+      <p>A wrong word, §, Reflexion or citation in any tool. You are the experts on the
+      texts, and these reports are among the most valuable things anyone files. Give the
+      AA reference. <a href="https://github.com/mikrishnan/kant-lab/issues/new?template=text-error.yml"
+      target="_blank" rel="noopener">Text error form →</a></p>
+    </li>
+    <li>
+      <strong>Report a bug, or propose a feature</strong>
+      <p>Something doesn't work, or you wish a tool did something. Say what you did and
+      what you expected.
+      <a href="https://github.com/mikrishnan/kant-lab/issues/new?template=bug.yml" target="_blank" rel="noopener">Bug form →</a>
+      · <a href="https://github.com/mikrishnan/kant-lab/issues/new?template=proposal.yml" target="_blank" rel="noopener">Proposal form →</a></p>
+    </li>
+    <li>
+      <strong>Join the conversation</strong>
+      <p>Comment on other people's <a href="https://github.com/mikrishnan/kant-lab/issues"
+      target="_blank" rel="noopener">issues</a>, and help a group argue out its spec.
+      Ideas get better when someone else pushes on them.</p>
+    </li>
+    <li>
+      <strong>Review a pull request</strong>
+      <p>You review by using, not by reading code: open the pull request's preview link,
+      check each spec item it claims, and look at the browser console (Ctrl+Shift+J, or
+      ⌥⌘J on a Mac) for red errors. Then approve, or comment saying which item failed.</p>
+    </li>
+    <li>
+      <strong>Provide translations</strong>
+      <p>Much of what the tools show is untranslated: Baumgarten's Latin, Meier's German,
+      Adickes' notes like the one in Step 1. A translation is a new layer <em>beside</em> the
+      original, never a replacement for it, and it says who translated it, since it is
+      not what the AA prints. Start with a
+      <a href="https://github.com/mikrishnan/kant-lab/issues/new?template=proposal.yml"
+      target="_blank" rel="noopener">Proposal</a> saying which text, then build it as a
+      dataset in your own folder or a group's, keyed to the §, Reflexion or phase it
+      translates.</p>
+    </li>
+    <li>
+      <strong>Add a parallel passage to the Meier Reader</strong>
+      <p>The reader's Tradition panel sets passages from Wolff, the Scholastics and
+      Aristotle beside Meier's §§, and only 10 of his 563 §§ have any yet. They live in
+      <a href="https://github.com/mikrishnan/kant-lab/blob/main/data/tradition-meier.js"
+      target="_blank" rel="noopener">data/tradition-meier.js</a>, whose first lines explain
+      how to add one; no code involved <span class="who">professor approves</span>.</p>
+    </li>
+    <li>
+      <strong>Build a dataset</strong>
+      <p>Tools are only as good as their data. The Jäsche <em>Logik</em>, Kant's own
+      lectures on Meier's <em>Auszug</em>, is already transcribed in the repository and
+      nothing uses it yet. A group can turn it into data other tools read.</p>
+    </li>
+  </ul>
+</section>
+
+<!-- ───────────────────────────── House rules ───────────────────────────── -->
+<section class="panel" id="panel-rules">
+  <h2>House rules</h2>
+  <ul class="short">
+    <li><strong>Stay in your folder.</strong> A change that reaches outside it needs the professor.</li>
+    <li><strong>Include shared data; never copy it.</strong> A copy goes stale.</li>
+    <li><strong>Attested vs. inferred.</strong> Show what the AA says as it says it, query
+      marks and all, and visibly mark anything the tool works out for itself.</li>
+    <li><strong>No readings, books or PDFs.</strong> The repository and the site are public.</li>
+    <li><strong>One driver per tool at a time.</strong> Two people changing one file at once is how conflicts happen.</li>
+    <li><strong>If a pull request has conflicts,</strong> close it and ask for the same change again. Redoing is quicker than untangling.</li>
+    <li><strong>If a merged change breaks something,</strong> press <strong>Revert</strong> on its pull request first, and ask questions afterwards.</li>
+  </ul>
+
+  <h3>Who approves what</h3>
+  <table>
+    <tr><th>Your change touches</th><th>Who approves</th></tr>
+    <tr><td><code>Individuals/your-name/</code></td><td>nobody: you merge it yourself</td></tr>
+    <tr><td><code>groups/your-group/</code></td><td>another member of your group</td></tr>
+    <tr><td>a tool, <code>data/</code>, anything else</td><td>the professor</td></tr>
+  </table>
+
+  <details>
+    <summary>Words you'll meet</summary>
+    <dl class="words">
+      <dt>Repository</dt><dd>The project's files on GitHub, with every change ever made to them.</dd>
+      <dt>Issue</dt><dd>A numbered discussion thread: an idea, a bug, a question.</dd>
+      <dt>Branch</dt><dd>A private copy of the files where a change is made, so the live site isn't touched until it's ready.</dd>
+      <dt>Pull request</dt><dd>A request to bring a branch's changes into the live site, with a place to discuss and approve them.</dd>
+      <dt>Preview link</dt><dd>A raw.githack.com address showing a page as it stands on a branch, before it's merged.</dd>
+      <dt>Squash and merge</dt><dd>The button that accepts a pull request. The site updates a few minutes later.</dd>
+      <dt>Spec</dt><dd>A group's <code>SPEC.md</code>: what its tool is for, and what it does, item by item.</dd>
+    </dl>
+  </details>
+
+  <p>The full version of all this is the repository's
+  <a href="https://github.com/mikrishnan/kant-lab#readme" target="_blank" rel="noopener">README</a>.</p>
+</section>
+
+<footer>This page is a demonstration of the workflow it describes: it lives in
+<code>Individuals/jweirich/</code> and arrived by pull request, like everything else.</footer>
+
+</main>
+
+<!-- Shared data, included rather than copied. Defines PHASES, phaseInfo() and the
+     rest; see data/README.md. -->
+<script src="../../data/phases-adickes.js"></script>
+
+<script>
+// ── Data ──
+
+const REPO = 'mikrishnan/kant-lab';
+
+const PANELS = ['individual', 'group', 'tool', 'help', 'rules'];
+
+// The data files a first request can name. Kept to the ones a newcomer would want.
+const DATASETS = [
+  { file: 'metaphysica-17.js',               label: "Baumgarten's Metaphysica" },
+  { file: 'reflexionen-17-18-baumgarten.js', label: 'Reflexionen on Baumgarten' },
+  { file: 'reflexionen-16-meier.js',         label: 'Reflexionen on Meier' },
+  { file: 'phases-adickes.js',               label: "Adickes' phases" },
+  { file: 'tradition-meier.js',              label: 'Tradition passages (Meier)' },
+];
+
+// The phase the data demo opens on: Adickes' "Wendung zur kritischen Philosophie".
+const DEMO_START = 'κ';
+
+// ── State ──
+
+let activePanel = 'individual';
+
+// ── Render ──
+
+// "Jane Doe" → "jane-doe": the README asks for hyphens, not spaces, in new names.
+function slug(s, fallback) {
+  const out = String(s).trim().toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  return out || fallback;
+}
+
+function showPanel(name) {
+  if (!PANELS.includes(name)) name = 'individual';
+  activePanel = name;
+  document.querySelectorAll('section.panel').forEach(s =>
+    s.classList.toggle('active', s.id === 'panel-' + name));
+  document.querySelectorAll('button.step').forEach(b =>
+    b.classList.toggle('active', b.dataset.panel === name));
+}
+
+function renderDatasetChecks() {
+  const box = document.getElementById('b-data');
+  DATASETS.forEach(d => {
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = d.file;
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(' ' + d.label));
+    box.appendChild(label);
+  });
+}
+
+function renderIndividualPrompt() {
+  const name = slug(document.getElementById('b-name').value, 'your-name');
+  const tool = slug(document.getElementById('b-tool').value, 'my-tool');
+  const idea = document.getElementById('b-idea').value.trim() || 'DESCRIBE YOUR IDEA HERE.';
+  const files = [...document.querySelectorAll('#b-data input:checked')].map(cb => cb.value);
+  const path = `Individuals/${name}/${tool}.html`;
+
+  let text = `Make me a single-page tool at ${path}, starting from groups/_template/index.html so that it has the house style. Only change files in Individuals/${name}/. If I already have a folder in Individuals/ under another spelling of my name, use that folder instead.\n\nThe idea: ${idea}`;
+  if (files.length) {
+    text += `\n\nIt should read ${files.map(f => 'data/' + f).join(', ')}, included with <script src="../../data/…"> rather than copied. data/README.md says what each file contains.`;
+  }
+  text += '\n\nWhen you are done, push your branch and give me the preview link.';
+  setPrompt('b-prompt', text);
+}
+
+function renderGroupPrompts() {
+  const group = slug(document.getElementById('g-name').value, 'your-group');
+  const proto = document.getElementById('g-proto').value.trim() || 'Individuals/your-name/your-page.html';
+
+  setPrompt('g-prompt-item',
+    `Read groups/${group}/SPEC.md and groups/${group}/CLAUDE.md. Implement Behaviour item NUMBER. Only change files in groups/${group}/. When you are done, push your branch and open a pull request that says which Behaviour items it implements.`);
+  setPrompt('g-prompt-review',
+    `Read pull request NUMBER and groups/${group}/SPEC.md. Give me a checklist of what to click in the preview to check each Behaviour item the pull request claims, and point out any changed files outside groups/${group}/.`);
+  setPrompt('g-prompt-proto',
+    `Read groups/${group}/CLAUDE.md. Bring in ${proto} as groups/${group}/index.html, and draft SPEC.md from what the page does now. Only change files in groups/${group}/.`);
+}
+
+function setPrompt(id, text) {
+  const box = document.getElementById(id);
+  box.textContent = text;
+  addCopyButton(box);
+}
+
+function addCopyButton(box) {
+  const btn = document.createElement('button');
+  btn.className = 'copy';
+  btn.type = 'button';
+  btn.textContent = 'Copy';
+  box.appendChild(btn);
+}
+
+function renderDemo() {
+  const box = document.getElementById('demo');
+  if (typeof PHASES === 'undefined' || typeof phaseInfo !== 'function') {
+    box.classList.add('failed');
+    box.textContent = 'The include did not load: ../../data/phases-adickes.js was not found. ' +
+      'If you are seeing this, the path in the <script src> tag is wrong.';
+    return;
+  }
+
+  const row = document.createElement('p');
+  row.appendChild(document.createTextNode(`Pick one of the ${PHASES.length} entries in PHASES: `));
+  const select = document.createElement('select');
+  select.id = 'demo-phase';
+  select.setAttribute('aria-label', 'Phase of Kant\'s handwriting');
+  PHASES.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.key;
+    opt.textContent = p.sym;
+    if (p.key === DEMO_START) opt.selected = true;
+    select.appendChild(opt);
+  });
+  row.appendChild(select);
+  box.appendChild(row);
+
+  const out = document.createElement('div');
+  out.id = 'demo-out';
+  box.appendChild(out);
+  renderPhase(DEMO_START);
+}
+
+function renderPhase(key) {
+  const p = phaseInfo(key);
+  const out = document.getElementById('demo-out');
+  out.innerHTML = '';
+
+  const head = document.createElement('p');
+  const sym = document.createElement('span');
+  sym.className = 'sym';
+  sym.textContent = p.sym;
+  head.appendChild(sym);
+  const when = document.createElement('span');
+  if (p.years) {
+    when.className = 'years';
+    when.textContent = p.years;
+  } else {
+    // Adickes gives no absolute date: say so rather than invent one.
+    when.className = 'undated';
+    when.textContent = p.relative
+      ? `no absolute date in Adickes, only a relative one: ${p.relative}`
+      : 'no date given (see the editorial note below)';
+  }
+  head.appendChild(when);
+  if (p.significance) {
+    head.appendChild(document.createTextNode(` · ${p.significance}`));
+  }
+  out.appendChild(head);
+
+  if (p.note) {
+    const q = document.createElement('blockquote');
+    q.textContent = p.note;
+    out.appendChild(q);
+    const cite = document.createElement('p');
+    cite.className = 'cite';
+    cite.textContent = `Adickes, verbatim · ${p.aa}`;
+    out.appendChild(cite);
+  }
+
+  if (p.editorial) {
+    const ed = document.createElement('div');
+    ed.className = 'editorial';
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = p.notInAdickesTable ? 'Not in Adickes’ table · editorial' : 'Editorial';
+    ed.appendChild(tag);
+    ed.appendChild(document.createTextNode(p.editorial));
+    out.appendChild(ed);
+  }
+}
+
+// ── Events ──
+
+function wireEvents() {
+  document.querySelectorAll('button.step').forEach(b =>
+    b.addEventListener('click', () => { location.hash = b.dataset.panel; }));
+  window.addEventListener('hashchange', () => showPanel(location.hash.slice(1)));
+
+  ['b-name', 'b-tool', 'b-idea'].forEach(id =>
+    document.getElementById(id).addEventListener('input', renderIndividualPrompt));
+  document.getElementById('b-data').addEventListener('change', renderIndividualPrompt);
+  ['g-name', 'g-proto'].forEach(id =>
+    document.getElementById(id).addEventListener('input', renderGroupPrompts));
+
+  // One delegated listener for every Copy button, static or generated.
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('button.copy');
+    if (!btn) return;
+    const text = [...btn.parentNode.childNodes]
+      .filter(n => n !== btn).map(n => n.textContent).join('').trim();
+    const done = () => {
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, () => selectText(btn.parentNode));
+    } else {
+      selectText(btn.parentNode);
+    }
+  });
+
+  const demoSelect = document.getElementById('demo-phase');
+  if (demoSelect) demoSelect.addEventListener('change', () => renderPhase(demoSelect.value));
+}
+
+// Where the clipboard is unavailable (e.g. opened from file://), select the text instead.
+function selectText(node) {
+  const range = document.createRange();
+  range.selectNodeContents(node.firstChild);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+// ── Init ──
+
+document.querySelectorAll('.prompt').forEach(box => {
+  if (box.textContent.trim()) addCopyButton(box);
+});
+renderDatasetChecks();
+renderIndividualPrompt();
+renderGroupPrompts();
+renderDemo();
+wireEvents();
+showPanel(location.hash.slice(1));
+</script>
+</body>
+</html>
