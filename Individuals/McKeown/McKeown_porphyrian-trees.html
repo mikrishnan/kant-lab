@@ -105,6 +105,10 @@
     list-style: none;
   }
 
+  .home-nav {
+    margin-bottom: 1.25rem;
+  }
+
   .tree-nav li {
     margin-bottom: 0.1rem;
   }
@@ -311,6 +315,11 @@
 
 <div class="container">
   <aside>
+    <ul class="tree-nav home-nav">
+      <li>
+        <button onclick="showTree('intro')" id="btn-intro" class="active">Home</button>
+      </li>
+    </ul>
     <div class="sidebar-label">Select a Tree</div>
     <ul class="tree-nav" id="treeNav">
       <li>
