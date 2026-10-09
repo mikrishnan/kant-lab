@@ -5,6 +5,8 @@ lectured from — Baumgarten's *Metaphysica*, Meier's *Auszug aus der Vernunftle
 by the participants of the Kant Lab and published at
 <https://mikrishnan.github.io/kant-lab/>.
 
+A quick explainer is [here!](https://mikrishnan.github.io/kant-lab/Individuals/jweirich/how-to-contribute.html#individual)
+
 This page explains how the repository is organised and how to work in it. **You do not
 need to install anything.** Everything below happens in a browser, on github.com and at
 [claude.ai/code](https://claude.ai/code). If you would rather see each change the moment
