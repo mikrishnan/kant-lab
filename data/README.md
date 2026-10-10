@@ -43,7 +43,8 @@ data" in the root [CLAUDE.md](../CLAUDE.md). Each extractor prints a report; rea
 4. **Keep *Read by* true.** A pull request that makes a tool read one of these files
    adds the tool to that file's *Read by* cell. A working group's tool counts.
 
-Changes to anything in this folder are reviewed by the professor, whoever makes them,
-because other tools depend on them. A working group building a dataset keeps it in its
-own folder until it is ready to be shared; [docs/maintaining.md](../docs/maintaining.md)
-describes the move.
+This folder, and `scripts/` and `Textfiles/` with it, belongs to the owners of the
+Baumgarten and Meier readers: Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel).
+One of them reviews every change to it, whoever makes it, because other tools depend on
+it. A working group building a dataset keeps it in its own folder until it is ready to
+be shared; [docs/maintaining.md](../docs/maintaining.md) describes the move.

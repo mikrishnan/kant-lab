@@ -26,6 +26,30 @@ so the file is no longer strictly self-contained. It still opens straight from d
 classic `<script src>` works over `file://` — but the `../data/` paths mean the app
 cannot be moved out of its directory on its own.
 
+## Owners
+
+This tool belongs to Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), who
+approve each other's pull requests. They also own the [Baumgarten
+reader](../baumgarten-reader/), and `data/`, `scripts/` and `Textfiles/`, so a change
+may reach into any of those five folders and still need only one of them to approve it.
+A change anywhere else — a root file, `index.html`, another tool, a group's folder —
+needs the professor as well. Do not make one unless the request asks for it; say what
+would be needed in the pull request description instead.
+
+## SPEC.md
+
+[SPEC.md](SPEC.md) is the source of truth for what this tool does, as a group's spec is
+for its tool.
+
+- Implement what the request names and nothing more. If the request contradicts
+  `SPEC.md`, say so rather than guessing which one is right.
+- If the tool's behaviour changes, update `SPEC.md` in the same pull request. Never
+  renumber Behaviour items; strike a dropped one through instead.
+- A pull request that makes an item marked **Fails at present** pass removes the mark.
+  One that settles an Open question moves it into Behaviour or Out of scope.
+- The pull request description lists the Behaviour items it implements or changes, and
+  says plainly what was not checked in a browser.
+
 ## File shape
 
 | Lines | Contents |
@@ -55,7 +79,7 @@ Make targeted string replacements, or regenerate the whole line from a script.
   sec_title_de, sec_title_en, paras: [1, 2, 3, …] }`. Currently **unused by the
   renderer**; `HIERARCHY` drives the UI. Kept as the fuller structural record.
 - `MEIER.paras` — `{ "1": "Die Vernunftlehre oder die Vernunftkunst …", … }`, string
-  keys. 562 of the work's 563 §§ are present.
+  keys. All 563 of the work's §§ are present, none empty.
 
 ## The work model
 
@@ -158,8 +182,7 @@ scholar searching `uber` should not be handed `über`.
 scans `WORK.paras`, then re-renders only the paragraphs that gained or lost hits —
 `was ∪ now` — by calling `fillParaText(el, n, term)`. Matches are wrapped as
 `.search-hit` by the `push()` helper inside `renderParaText`, which handles the plain
-runs *between* the cross-reference and gloss spans, so highlighting never disturbs
-either. `stepTextHit(±1)` walks the hits in document order, moving a `.current` class;
+runs *between* the cross-reference spans, so highlighting never disturbs them. `stepTextHit(±1)` walks the hits in document order, moving a `.current` class;
 Enter and Shift-Enter in the box do the same, Escape clears. Minimum two characters,
 180 ms debounce.
 
@@ -174,7 +197,6 @@ Hits go in `#annotResults`, shown in place of both panel bodies; clicking one cl
 search and jumps to its §. `switchPanel()` re-runs an active search against the newly
 selected layer, so the same term can be carried across in one click without retyping.
 
-Both searches are reset by `switchWork()`.
 
 ## Function map
 
@@ -186,15 +208,14 @@ Both searches are reset by `switchWork()`.
   *Abschnitt*, then one `.para-block#para-N` per § in its range.
 - `fillParaText(textDiv, n, term)` — fills one `.para-text`: the text, then the AA
   citation tag. Search re-renders through it, so a highlighted § keeps its tag.
-- `renderParaText(text, paraNum, term)` — tokenises cross-references and Baumgarten's
-  `@@N@@` gloss markers in one pass. Handles the compound forms Meier uses
-  (`§.15. 16.`, `§.116-121.`) and Baumgarten's spaced `§. 640`. The pattern
-  deliberately does **not** take a trailing dot: in Meier the dot of `§.14.` belongs to
-  the citation, but in Baumgarten's `interne, §. 126. Ergo sum` it ends the sentence, and
-  pulling it into the link drops it from the text. A reference to a § the loaded work
-  does not have gets `.xref-absent` and no click target — Baumgarten's `§. 505-699`
-  point into the volume's gap. Returns a `DocumentFragment`; unlike the Baumgarten
-  reader this path never touches `innerHTML`.
+- `renderParaText(text, paraNum, term)` — tokenises cross-references, including the
+  compound forms Meier uses (`§.15. 16.`, `§.116-121.`), and wraps search hits in the
+  plain runs between them. The pattern deliberately does **not** take a trailing dot:
+  the dot of `§.14.` can end the sentence as well as the citation, and pulling it into
+  the link would drop it from the text. A number outside `WORK.min`–`WORK.max` gets no
+  click target; none of Meier's do. Returns a `DocumentFragment`; unlike the Baumgarten
+  reader this path never touches `innerHTML`. The `WORK.marks` it reads first is left
+  over from the removed Baumgarten tab, and is always empty.
 - `focusParagraph(n)` — highlights, syncs the sidebar, and repopulates the tradition
   panel. `scrollToParaNum(n, andFocus)` is the navigation entry point.
 - `toggleFilter(btn)` — flips one stratum in `activeFilters` and re-renders the panel.
@@ -207,16 +228,15 @@ Both searches are reset by `switchWork()`.
   [../baumgarten-reader/](../baumgarten-reader/), and both `TRADITION` and the
   Reflexionen here are indexed to Meier's §§ — they say nothing about Baumgarten's.
   A Baumgarten tab was tried here and removed; do not reintroduce one.
-- The § range is no longer hard-coded: `WORK.min`/`WORK.max` drive `jumpToSection()`
-  and `renderParaText()`, and `switchWork()` resets the `#jumpInput` attributes. The
-  `min`/`max` in the markup are only the initial Meier values.
+- `WORK.min`/`WORK.max` drive `jumpToSection()` and `renderParaText()`. The
+  `min`/`max` on `#jumpInput` in the markup repeat them and must be kept in step.
 - `MEIER.nav` and `HIERARCHY` overlap. If you correct a section title or range, fix it
   in `HIERARCHY` (what renders) and consider whether `nav` should follow.
 - The scroll-sync handler on `#primaryPanel` no-ops whenever a paragraph is focused, and
   nothing ever clears `focusedPara` — so once you click a paragraph, sidebar tracking on
   scroll stops for the rest of the session. It contains a dead `if` block from an
   abandoned approach.
-- `switchWork`, `toggleFilter`, `jumpToSection`, `switchPanel`, `closeAdickes` are called
+- `toggleFilter`, `jumpToSection`, `switchPanel`, `closeAdickes` are called
   from inline `onclick` attributes and must stay global function declarations.
 - The Reflexionen cover **497 of the 563 §§**, but unevenly: they stop at § 542, and the
   distribution follows Kant's lecturing rather than the work's shape. A § with no notes

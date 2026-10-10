@@ -12,3 +12,13 @@
 # /groups/<group>/  @mikrishnan @member1 @member2
 /groups/kant-quest/  @mikrishnan @Benzenberg
 /groups/logiccorpus/  @mikrishnan @sophia-wyatt @qianxun-blip @jmbruceuchicago @mari637-pixel @jessiejin23 @kavyavaid
+
+# Top-level tools with student owners, who approve each other's changes. A tool's
+# owners also own the data it is built from: data/, the extractors in scripts/ that
+# produce it, and the transcriptions in Textfiles/ they read.
+# Always include @mikrishnan, as for groups.
+/baumgarten-reader/  @mikrishnan @sophia-wyatt @mari637-pixel
+/meier-reader/       @mikrishnan @sophia-wyatt @mari637-pixel
+/data/               @mikrishnan @sophia-wyatt @mari637-pixel
+/scripts/            @mikrishnan @sophia-wyatt @mari637-pixel
+/Textfiles/          @mikrishnan @sophia-wyatt @mari637-pixel

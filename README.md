@@ -16,11 +16,16 @@ Claude makes it, you can also work [on your own computer](#working-on-your-own-c
 
 | Path | What it is | Changes approved by |
 | --- | --- | --- |
-| `baumgarten-reader/`, `meier-reader/`, `porphyrian-tree/` | **Tools.** Finished and approved; listed first on the site | the professor |
+| `baumgarten-reader/`, `meier-reader/` | **Tools** with student owners. Finished and approved; listed first on the site | one of the tools' owners |
+| `porphyrian-tree/` | **Tool.** Finished and approved; listed first on the site | the professor |
 | `groups/<group>/` | **Works in progress.** One folder per working group, each the group's own playground | another member of that group |
-| `data/` | **Shared data.** The texts and Reflexionen that several tools read | the professor |
+| `data/`, `scripts/`, `Textfiles/` | **Shared data,** the texts and Reflexionen that several tools read; the extractors that produce it; the transcriptions they read | one of the readers' owners |
 | `Individuals/<you>/` | Your personal sandbox, as in the first session | you — no approval needed |
-| everything else | `Textfiles/` and `scripts/` (where `data/` comes from), `docs/`, `.github/`, this page | the professor |
+| everything else | `docs/`, `.github/`, this page | the professor |
+
+The Baumgarten and Meier readers, and the data they are built from, are owned by
+**Sophia Wyatt** (@sophia-wyatt) and **Maria** (@mari637-pixel). Either can approve
+the other's pull requests, and they decide how those tools and their data develop.
 
 The repository is public, and the site publishes all of it.
 
@@ -89,8 +94,10 @@ You do not need to read the code. A reviewer:
    item failed and how.
 
 For a group's folder, any member of the group other than the author can approve. For the
-tools, `data/`, and anything else outside `groups/` and `Individuals/`, the professor
-approves.
+Baumgarten and Meier readers, `data/`, `scripts/` and `Textfiles/`, the readers' owner who
+is not the author approves. For anything else outside `groups/` and `Individuals/`, the
+professor approves. A pull request that touches folders with different owners needs an
+approval from each.
 
 **The preview link.** The site shows only what has been merged. To see a pull request
 before that, copy the latest commit's ID from the pull request's **Commits** tab and open
@@ -115,7 +122,8 @@ Press it first and ask questions afterwards.
 - **If GitHub says a pull request has conflicts, do not try to resolve them.** Close it,
   and ask Claude for the same change again, starting from the current version. Redoing
   the change is quicker and safer than merging it.
-- **Stay in your folder.** A change that reaches outside it needs the professor.
+- **Stay in your folder.** A change that reaches outside it needs the approval of
+  whoever owns the rest; the table at the top says who.
 - **Read shared data; never copy it.** Load it the way the readers do —
   `<script src="../../data/metaphysica-17.js"></script>` from a group folder. A copy goes
   stale the next time the data is regenerated.
@@ -158,8 +166,12 @@ so it is the first review of the spec as well. The original stays in your
 `Individuals/` folder, yours to keep or delete.
 
 **Building on an existing tool.** A small fix to one of the approved tools goes straight
-to it, as a pull request the professor reviews. A larger rework starts as a copy in a
-group folder and replaces the original once it is ready.
+to it, as a pull request its owners review — the professor, for a tool with no student
+owners. A larger rework starts as a copy in a group folder and replaces the original
+once it is ready. The Baumgarten and Meier readers have specs of their own,
+[baumgarten-reader/SPEC.md](baumgarten-reader/SPEC.md) and
+[meier-reader/SPEC.md](meier-reader/SPEC.md). A pull request on either names the
+Behaviour items it implements, just as a group's does.
 
 **From work in progress to tool.** When a group thinks its tool is done, it files a
 **Proposal** issue asking for promotion. The professor checks the tool against its spec
@@ -169,8 +181,8 @@ keeps working.
 **Building data rather than an app.** A group can produce a dataset for other tools to
 use. The Jäsche *Logik* — Kant's own lectures on Meier's *Auszug* — is already in
 `Textfiles/`, and nothing uses it yet. A dataset starts in the group's folder. Once other
-tools depend on it, it moves to `data/`, and changes to it go through the professor from
-then on, because other tools rely on its shape.
+tools depend on it, it moves to `data/`, and changes to it go through the owners of
+`data/` from then on, because other tools rely on its shape.
 
 ## Individuals
 

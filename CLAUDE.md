@@ -24,7 +24,10 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | [.claude/launch.json](.claude/launch.json) | The preview server for the Claude desktop app's Browser pane: `python3 -m http.server` at the repository root |
 
 Each SPA directory has its own `CLAUDE.md` with the data shapes and function map for
-that app, and a `README.md` aimed at a human opening it for the first time.
+that app, and a `README.md` aimed at a human opening it for the first time. The two
+readers also have a `SPEC.md`, which is the source of truth for what each does, as a
+group's spec is for its tool. Each spec numbers the tool's behaviours, marks those that
+fail at present, and keeps a list of open questions.
 
 ## Architecture: one HTML file per app, plus shared generated data
 
@@ -98,6 +101,12 @@ through the UI, and a pull request should say which of the two was done.
 Everything in `data/` except `phases-adickes.js` and `tradition-meier.js` is
 machine-extracted and **must not be hand-edited**; corrections belong in the extractor so
 they survive the next run.
+
+These pipelines belong to the readers' owners, along with `data/`, `scripts/` and
+`Textfiles/` (see "Git" below). This section stays here, so that every session sees it.
+A pull request that changes a pipeline's commands or what an extractor knows updates
+this section in the same pull request. Since this file is outside the owners' folders,
+that also brings in the professor's approval.
 
 `textutil` is macOS-only, so as things stand **regenerating needs a Mac**. Committing its
 `.txt` output, so that the Python steps run anywhere, is the open task in
@@ -202,12 +211,15 @@ Things the extractor knows about the AA's conventions, which are easy to break:
 
 ## Shared conventions
 
-**Design language.** All three apps use the same palette and typography: a parchment
-background (`--parchment`, warm off-white), dark ink text, `EB Garamond` for body copy,
-`Cinzel` for small-caps display headings and labels, and a sienna/brown accent
-(`--accent`, `#5c3d1e` family). Colour and font choices live in a `:root` custom-property
-block at the top of each `<style>`. Keep new UI inside that vocabulary rather than
-introducing new hues — the parchment look is deliberate and consistent across the suite.
+**Design language.** The apps share one typography: `EB Garamond` for body copy and
+`Cinzel` for small-caps display headings and labels. The Baumgarten reader and the
+Porphyrian tree also share one palette: a parchment background (`--parchment`, warm
+off-white), dark ink text, and a sienna/brown accent (`--accent`, `#5c3d1e` family). The
+Meier reader is the exception, with a dark navy header and sidebar and a Prussian-blue
+accent; whether it should follow the others is Open question 7 in
+[meier-reader/SPEC.md](meier-reader/SPEC.md). Colour and font choices live in a `:root`
+custom-property block at the top of each `<style>`. Keep new UI inside its app's
+vocabulary rather than introducing new hues.
 
 **Data-first script layout.** Each `<script>` opens with the content data as `const`s,
 then state `let`s, then builder/render functions, then event wiring, then an init call
@@ -313,12 +325,21 @@ consequences worth knowing:
 ## Git
 
 `main` is protected: every change arrives by pull request, and `.github/CODEOWNERS`
-decides who must approve it. In short, the professor approves anything outside
-`groups/` and `Individuals/`; another member of the group approves changes to a group's
-folder; and `Individuals/` changes need no approval. Pull requests are squash-merged,
-so a pull request's title becomes its commit message. Keep titles short and
-descriptive of the scholarly content rather than the code, as the history so far is.
-There is no CI.
+decides who must approve it. In short:
+
+- the Baumgarten and Meier readers, and `data/`, `scripts/` and `Textfiles/`, belong to
+  their student owners, Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), either
+  of whom approves the other's changes;
+- another member of the group approves changes to a group's folder;
+- `Individuals/` changes need no approval;
+- the professor approves everything else.
+
+A pull request that touches folders with different owners needs an approval from each,
+so keep each one within a single owner's folders where you can.
+
+Pull requests are squash-merged, so a pull request's title becomes its commit message.
+Keep titles short and descriptive of the scholarly content rather than the code, as the
+history so far is. There is no CI.
 
 Participants push through the GitHub web UI, often many commits at a time, so **fetch
 before you believe the working tree.**

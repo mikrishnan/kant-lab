@@ -7,6 +7,30 @@ chips and Kant's Reflexionen on the § in view in a side panel.
 
 See the [root CLAUDE.md](../CLAUDE.md) for conventions shared across the suite.
 
+## Owners
+
+This tool belongs to Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), who
+approve each other's pull requests. They also own the [Meier reader](../meier-reader/),
+and `data/`, `scripts/` and `Textfiles/`, so a change may reach into any of those five
+folders and still need only one of them to approve it. A change anywhere else — a root
+file, `index.html`, another tool, a group's folder — needs the professor as well. Do not
+make one unless the request asks for it; say what would be needed in the pull request
+description instead.
+
+## SPEC.md
+
+[SPEC.md](SPEC.md) is the source of truth for what this tool does, as a group's spec is
+for its tool.
+
+- Implement what the request names and nothing more. If the request contradicts
+  `SPEC.md`, say so rather than guessing which one is right.
+- If the tool's behaviour changes, update `SPEC.md` in the same pull request. Never
+  renumber Behaviour items; strike a dropped one through instead.
+- A pull request that makes an item marked **Fails at present** pass removes the mark.
+  One that settles an Open question moves it into Behaviour or Out of scope.
+- The pull request description lists the Behaviour items it implements or changes, and
+  says plainly what was not checked in a browser.
+
 ## File shape
 
 | Lines | Contents |
