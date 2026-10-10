@@ -13,7 +13,8 @@ ruleset on `main` decide who has to approve what:
 | --- | --- | --- |
 | only `Individuals/<name>/` | nobody — the author merges | nothing |
 | only `groups/<group>/` | another member of that group | nothing, unless asked |
-| a top-level tool, `data/`, `scripts/`, `Textfiles/`, `.github/`, root files | you | review it (below) |
+| only a tool with student owners, or `data/`, `scripts/`, `Textfiles/` | one of the owners (below) | nothing, unless asked |
+| any other top-level tool, `.github/`, root files | you | review it (below) |
 | a new `groups/<group>/` folder | you | set the group up (below) |
 
 As a repository admin you can bypass the ruleset, which is what lets you merge your own
@@ -24,8 +25,10 @@ pull requests. Use the bypass for housekeeping, not for routine changes to the t
 1. **Pull requests waiting on you.** On the Pull requests tab, filter by
    `is:open review-requested:@me`.
 2. **Triage new issues.** Give each one a label (`proposal`, `bug`, `text-error`,
-   `new-group`, and a `group:<name>` label if it belongs to a group). Assign each issue
-   you want worked on to **one person** — that person is its driver.
+   `new-group`, and a `group:<name>` label if it belongs to a group, or a `tool:<name>`
+   label if it belongs to a tool with owners). Assign each issue you want worked on to
+   **one person** — that person is its driver. Leave issues on an owned tool, or on the
+   data, for its owners to assign.
 3. **Keep the landing page current.** Each group is listed under *Works in progress* in
    [index.html](../index.html) from the day its folder is created. Keep each entry's
    one-line description true to what the tool now does, and remove groups that have
@@ -69,6 +72,39 @@ reviewed within the group; the README's *Starting from something in `Individuals
 gives the request.
 
 Keep `@mikrishnan` on every group's line, so that you can approve when the group is stuck.
+
+## Tools with student owners
+
+A top-level tool can be handed to students, who then approve each other's changes to it
+as a group's members do. The Baumgarten and Meier readers belong to Sophia Wyatt
+(@sophia-wyatt) and Maria (@mari637-pixel), and so does everything those readers are
+built from — `data/`, `scripts/` and `Textfiles/` — since working out how to handle the
+data is part of the job.
+
+Nothing moves: a tool keeps its address, and ownership is only a line in
+`.github/CODEOWNERS`. To hand over another tool, check that each new owner has **Write**
+access (see *Adding a participant*), then ask a Claude session to:
+
+1. add `/<tool>/  @mikrishnan @USER1 @USER2` to `.github/CODEOWNERS`, below the group
+   lines, together with a line for any file outside the tool's folder that only it reads
+   and that should go with it;
+2. say who the owners are in the tool's `README.md` and `CLAUDE.md`, in the root
+   `README.md`'s *What lives where* table, and in the summary under "Git" in the root
+   `CLAUDE.md`;
+3. update the *What needs you* table above.
+
+Keep `@mikrishnan` on every line, as for groups. Create a `tool:<tool>` label for its
+issues. Taking a tool back is the same change in reverse: delete its lines, and it falls
+under the `*` line again.
+
+A tool handed over needs a `SPEC.md`, since the original tools predate the working
+groups. The two readers' specs were drafted on 10 October 2026 from what each page did
+then, with every item checked in headless Chrome. They follow the group template, with
+one addition: an item the page does not yet satisfy is marked **Fails at present** and
+points to the Open question that explains why. The owners' first job is to review their
+spec. They check each item against the page, and settle or reword the Open questions.
+For any other tool, drafting its spec from the page is the first pull request, as a group
+does when it brings in a prototype.
 
 ## Reviewing a pull request
 
@@ -122,11 +158,12 @@ To promote `groups/<name>/` to a top-level `<name>/`, ask a Claude session to:
    ```
 
 4. move the tool from *Works in progress* to the tools list in `index.html`;
-5. remove the group's line from `.github/CODEOWNERS`. The new top-level folder falls
-   under the `*` line, and so under your review.
+5. either remove the group's line from `.github/CODEOWNERS`, so that the new top-level
+   folder falls under the `*` line and your review, or change its path to `/<name>/`,
+   so that the group goes on owning its tool (see *Tools with student owners* above).
 
 From then on, the group improves its tool the way anyone improves the other tools: by
-pull requests that you review.
+pull requests that its owners review.
 
 ## Changing shared data
 
@@ -145,7 +182,9 @@ defines, how it is produced, and which tools read it. Three rules:
 
 When a group's dataset is ready for other tools, move it from the group's folder into
 `data/`, add its row to `data/README.md`, and update its first consumer's `<script src>`
-in the same pull request.
+in the same pull request. From then on the owners of `data/` approve changes to it. If
+the group should keep it, give the file its own line in `.github/CODEOWNERS`, below the
+`/data/` line.
 
 ## When something goes wrong
 
