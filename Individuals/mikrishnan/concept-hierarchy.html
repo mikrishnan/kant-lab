@@ -144,8 +144,11 @@
             <input type="text" id="childNames" maxlength="400" placeholder="e.g. Animate Substance" autocomplete="off">
             <button id="addBtn">Add beneath it</button>
             <button id="besideBtn" class="quiet">Add at the same level</button>
+            <button id="insertBtn" class="quiet">Insert between it and what lies beneath</button>
           </div>
           <p class="hint">Separate several with commas. Enter adds beneath; Shift+Enter adds at the same level.
+            Inserting puts the new concept directly beneath the selected one, with everything that lay beneath the
+            selected concept now in the new concept&rsquo;s extension; several names make a chain, the first highest.
             Each concept may appear only once in the hierarchy.</p>
         </div>
         <div class="block">
@@ -432,6 +435,9 @@ function renderBuild() {
                                                : 'Add concepts beneath \u201C' + name + '\u201D, or beside it';
   $('besideBtn').disabled = isRoot;
   $('besideBtn').title = isRoot ? 'Nothing stands beside the concept of an object in general' : '';
+  const hasKids = nodes.get(selected).kids.length > 0;
+  $('insertBtn').disabled = !hasKids;
+  $('insertBtn').title = hasKids ? '' : 'Nothing lies beneath this concept yet, so there is nothing to insert between';
   $('renameName').disabled = $('renameBtn').disabled = $('delBtn').disabled = isRoot;
   $('renameLabel').textContent = isRoot ? 'The concept of an object in general is fixed' : 'Rename the selected concept';
   $('resetBtn').disabled = nodes.size === 1;
@@ -656,6 +662,30 @@ function addConcepts(beside) {
   render();
   $('childNames').focus();
 }
+function insertBetween() {
+  const kids = nodes.get(selected).kids;
+  if (!kids.length) return say('Nothing lies beneath \u201C' + nodes.get(selected).name + '\u201D yet, so there is nothing to insert between.');
+  const raws = $('childNames').value.split(',').map(norm).filter(Boolean);
+  if (!raws.length) return say('Type the name of the concept to insert.');
+  const seen = new Set();
+  for (const raw of raws) {
+    const r = checkName(raw);
+    if (r.err) return say(r.err);
+    if (seen.has(nameKey(r.name))) return say('\u201C' + r.name + '\u201D is named twice. Each concept appears once.');
+    seen.add(nameKey(r.name));
+  }
+  const upper = nodes.get(selected), lower = [...upper.kids];
+  upper.kids = [];
+  let p = selected;
+  for (const raw of raws) p = addNode(norm(raw), p);
+  nodes.get(p).kids = lower;
+  for (const k of lower) nodes.get(k).parent = p;
+  $('childNames').value = '';
+  say('Inserted ' + (raws.length === 1 ? '\u201C' + raws[0] + '\u201D' : raws.length + ' concepts') + ' between \u201C' + upper.name +
+      '\u201D and the ' + pl(lower.length, 'concept') + ' that lay directly beneath it.', true);
+  render();
+  $('childNames').focus();
+}
 function renameSelected() {
   if (selected === rootId) return;
   const r = checkName($('renameName').value, selected);
@@ -689,6 +719,7 @@ const onEnter = (id, fn) => $(id).addEventListener('keydown', e => { if (e.key =
 $('exampleBtn').addEventListener('click', loadExample);
 $('addBtn').addEventListener('click', () => addConcepts(false));
 $('besideBtn').addEventListener('click', () => addConcepts(true));
+$('insertBtn').addEventListener('click', insertBetween);
 $('renameBtn').addEventListener('click', renameSelected);
 $('delBtn').addEventListener('click', removeSelected);
 $('resetBtn').addEventListener('click', startOver);
