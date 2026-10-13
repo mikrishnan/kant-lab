@@ -63,6 +63,8 @@
     background: var(--accent); color: var(--parchment); border: 1px solid var(--accent); border-radius: 3px;
   }
   button:hover { background: var(--accent-light); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  input:disabled { opacity: .55; }
   button.quiet { background: transparent; color: var(--accent); border-color: var(--line); }
   button.quiet:hover { background: var(--parchment-deeper); }
   .sel { margin-bottom: .6rem; }
@@ -84,8 +86,14 @@
   svg .node.desc rect { stroke: var(--accent-light); stroke-dasharray: 4 3; }
   svg .node.sel rect { fill: var(--accent); stroke: var(--accent); }
   svg .node.sel text { fill: var(--parchment); }
+  svg .node.root text { font-style: italic; }
+  svg .node.root text.sub { font-size: 12.5px; letter-spacing: .04em; fill: var(--faded); }
+  svg .node.root.sel text.sub { fill: var(--parchment-deeper); }
+  svg .node.root rect.inner { fill: none; stroke: var(--accent); stroke-width: 1; pointer-events: none; }
+  svg .node.root.sel rect.inner { stroke: var(--parchment); }
   .legend { display: flex; flex-wrap: wrap; gap: 1.1rem; font-size: .92rem; color: var(--faded); margin-top: .6rem; }
   .legend i { display: inline-block; width: 1.6rem; height: .9rem; vertical-align: -.1rem; margin-right: .35rem; border: 1.4px solid transparent; border-radius: 2px; }
+  .legend .l-root { border: 3px double var(--accent); }
   .legend .l-sel { background: var(--accent); border-color: var(--accent); }
   .legend .l-anc { background: rgba(92, 61, 30, .16); border-color: var(--accent); }
   .legend .l-desc { border-color: var(--accent-light); border-style: dashed; }
@@ -119,7 +127,8 @@
 <body>
 <header>
   <h1>Concept Hierarchy Builder</h1>
-  <p>Name the highest concept, then add concepts beneath it, one by one. A concept is individuated by its
+  <p>At the top stands the concept of an object in general, the empty concept: it has no marks, and every other
+    concept lies beneath it. Add concepts beneath it, one by one. A concept is individuated by its
     <em>intension</em> &mdash; the higher concepts above it &mdash; and its <em>extension</em> is the concepts beneath it.
     Click any concept in the tree to read the truths that hold of it in virtue of how the tree was built.</p>
 </header>
@@ -127,33 +136,26 @@
 <main>
   <div class="left">
     <section class="card" id="build">
-      <div class="block" id="startBox">
-        <label for="rootName">The highest concept</label>
-        <div class="row">
-          <input type="text" id="rootName" maxlength="60" placeholder="e.g. Animate Substance" autocomplete="off">
-          <button id="startBtn">Begin the hierarchy</button>
-          <button id="exampleBtn" class="quiet">Load the example</button>
-        </div>
-        <p class="hint">The example is the tree from the figure: Animate Substance, down to Pecora.</p>
-      </div>
-
-      <div id="editBox" hidden>
+      <div id="editBox">
         <div class="block">
           <div class="sel">Selected concept: <b id="selName"></b> &mdash; click another concept in the tree to select it.</div>
-          <label for="childNames">Add a concept beneath it</label>
+          <label for="childNames" id="addLabel">Add a concept</label>
           <div class="row">
-            <input type="text" id="childNames" maxlength="400" placeholder="e.g. Quadruped, Bird, Fish" autocomplete="off">
-            <button id="addBtn">Add</button>
+            <input type="text" id="childNames" maxlength="400" placeholder="e.g. Animate Substance" autocomplete="off">
+            <button id="addBtn">Add beneath it</button>
+            <button id="besideBtn" class="quiet">Add at the same level</button>
           </div>
-          <p class="hint">Separate several with commas. Each concept may appear only once in the hierarchy.</p>
+          <p class="hint">Separate several with commas. Enter adds beneath; Shift+Enter adds at the same level.
+            Each concept may appear only once in the hierarchy.</p>
         </div>
         <div class="block">
-          <label for="renameName">Rename the selected concept</label>
+          <label for="renameName" id="renameLabel">Rename the selected concept</label>
           <div class="row">
             <input type="text" id="renameName" maxlength="60" autocomplete="off">
             <button id="renameBtn" class="quiet">Rename</button>
             <button id="delBtn" class="quiet">Remove it and everything beneath it</button>
-            <button id="resetBtn" class="quiet">Start over</button>
+            <button id="exampleBtn" class="quiet">Load the example</button>
+            <button id="resetBtn" class="quiet">Clear all concepts</button>
           </div>
         </div>
       </div>
@@ -163,6 +165,7 @@
     <section class="card">
       <div id="treeWrap"></div>
       <div class="legend" id="legend" hidden>
+        <span><i class="l-root"></i>the concept of an object in general (the empty concept)</span>
         <span><i class="l-sel"></i>selected concept</span>
         <span><i class="l-anc"></i>its marks (intension: the higher concepts)</span>
         <span><i class="l-desc"></i>its extension (the lower concepts)</span>
@@ -186,8 +189,10 @@ const EXAMPLE = ['Animate Substance', [
   ]]
 ]];
 
+const ROOT_NAME = 'Object in general';
+const ROOT_SUB = '\u2205 empty concept';
 let nodes = new Map();          // id -> { id, name, parent, kids: [id] }
-let rootId = null;
+let rootId = null;              // the concept of an object in general: fixed, never renamed or removed
 let nextId = 1;
 let selected = null;
 let tab = 'concept';            // 'concept' | 'whole'
@@ -257,9 +262,13 @@ function addNode(name, parent) {
 function removeNode(id) {
   const n = nodes.get(id);
   for (const k of [...n.kids]) removeNode(k);
-  if (n.parent == null) rootId = null;
-  else { const p = nodes.get(n.parent); p.kids = p.kids.filter(k => k !== id); }
+  if (n.parent != null) { const p = nodes.get(n.parent); p.kids = p.kids.filter(k => k !== id); }
   nodes.delete(id);
+}
+function resetHierarchy() {
+  nodes = new Map(); nextId = 1;
+  rootId = addNode(ROOT_NAME, null);
+  selected = rootId;
 }
 function buildFrom(spec, parent) {
   const id = addNode(spec[0], parent);
@@ -332,8 +341,9 @@ const KINDS = [
                g: [...pathPhrase(path), '.'] };
     } },
   { id: 'contra', title: 'Contraposition',
-    blurb: 'The same truths turned round: to lack a mark is to lack everything that carries it.',
-    all: upPairs, about: upPairsAbout,
+    blurb: 'The same truths turned round: to lack a mark is to lack everything that carries it. (Not stated for the concept of an object in general: nothing lacks it.)',
+    all: () => upPairs().filter(([, a]) => a !== rootId),
+    about: x => upPairsAbout(x).filter(([, a]) => a !== rootId),
     make([x, a]) {
       return { t: ['Whatever does not fall under ', c(a), ' does not fall under ', c(x), '.'],
                g: ['Contrapositive of: whatever falls under ', c(x), ' falls under ', c(a), '.'] };
@@ -390,7 +400,7 @@ function layout() {
   const span = new Map();
   const spanOf = id => {
     const n = nodes.get(id);
-    const own = textWidth(n.name) + GAP;
+    const own = Math.max(textWidth(n.name), id === rootId ? 112 : 0) + GAP;
     const kids = n.kids.reduce((s, k) => s + spanOf(k), 0);
     const s = Math.max(own, kids);
     span.set(id, s);
@@ -398,7 +408,7 @@ function layout() {
   };
   const place = (id, left, depth) => {
     const n = nodes.get(id), s = span.get(id);
-    pos.set(id, { x: left + s / 2, y: PAD + depth * ROW, w: textWidth(n.name) + 16 });
+    pos.set(id, { x: left + s / 2, y: PAD + depth * ROW, w: Math.max(textWidth(n.name), id === rootId ? 112 : 0) + 16 });
     const kidsW = n.kids.reduce((t, k) => t + span.get(k), 0);
     let x = left + (s - kidsW) / 2;
     for (const k of n.kids) { place(k, x, depth + 1); x += span.get(k); }
@@ -416,40 +426,47 @@ function layout() {
 function say(text, ok) { const m = $('msg'); m.textContent = text || ''; m.className = ok ? 'ok' : ''; }
 
 function renderBuild() {
-  const has = rootId != null;
-  $('startBox').hidden = has;
-  $('editBox').hidden = !has;
-  $('legend').hidden = !has;
-  if (has && selected != null) $('selName').textContent = nodes.get(selected).name;
+  const isRoot = selected === rootId, name = nodes.get(selected).name;
+  $('selName').textContent = name;
+  $('addLabel').textContent = nodes.size === 1 ? 'Add your first concept beneath \u201C' + name + '\u201D'
+                                               : 'Add concepts beneath \u201C' + name + '\u201D, or beside it';
+  $('besideBtn').disabled = isRoot;
+  $('besideBtn').title = isRoot ? 'Nothing stands beside the concept of an object in general' : '';
+  $('renameName').disabled = $('renameBtn').disabled = $('delBtn').disabled = isRoot;
+  $('renameLabel').textContent = isRoot ? 'The concept of an object in general is fixed' : 'Rename the selected concept';
+  $('resetBtn').disabled = nodes.size === 1;
 }
 
 function renderTree() {
   const wrap = $('treeWrap');
   wrap.replaceChildren();
-  if (rootId == null) {
-    wrap.append(el('p', { class: 'empty' }, 'The hierarchy is empty. Name the highest concept to begin.'));
-    return;
-  }
   const { pos, width, height } = layout();
   const svg = svgEl('svg', { width, height, viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': 'Concept hierarchy' });
-  const anc = new Set(selected != null ? ancestors(selected) : []);
-  const desc = new Set(selected != null ? descendants(selected) : []);
+  const anc = new Set(ancestors(selected));
+  const desc = new Set(descendants(selected));
 
   for (const id of nodes.keys()) {
     const n = nodes.get(id), p = pos.get(id);
     for (const k of n.kids) {
       const q = pos.get(k);
-      svg.append(svgEl('line', { class: 'edge', x1: p.x, y1: p.y + 11, x2: q.x, y2: q.y - 16 }));
+      svg.append(svgEl('line', { class: 'edge', x1: p.x, y1: p.y + (id === rootId ? 31 : 11), x2: q.x, y2: q.y - 16 }));
     }
   }
   for (const id of nodes.keys()) {
     const n = nodes.get(id), p = pos.get(id);
-    const cls = 'node' + (id === selected ? ' sel' : anc.has(id) ? ' anc' : desc.has(id) ? ' desc' : '');
+    const cls = 'node' + (id === rootId ? ' root' : '') + (id === selected ? ' sel' : anc.has(id) ? ' anc' : desc.has(id) ? ' desc' : '');
     const g = svgEl('g', { class: cls, 'data-id': id, tabindex: 0, role: 'button', 'aria-label': n.name });
-    g.append(svgEl('rect', { x: p.x - p.w / 2, y: p.y - 15, width: p.w, height: 30, rx: 3 }));
-    const t = svgEl('text', { x: p.x, y: p.y });
-    t.textContent = n.name;
-    g.append(t);
+    if (id === rootId) {
+      g.append(svgEl('rect', { x: p.x - p.w / 2, y: p.y - 15, width: p.w, height: 48, rx: 3 }));
+      g.append(svgEl('rect', { class: 'inner', x: p.x - p.w / 2 + 3, y: p.y - 12, width: p.w - 6, height: 42, rx: 2 }));
+      const t = svgEl('text', { x: p.x, y: p.y + 1 }); t.textContent = n.name; g.append(t);
+      const u = svgEl('text', { class: 'sub', x: p.x, y: p.y + 21 }); u.textContent = ROOT_SUB; g.append(u);
+    } else {
+      g.append(svgEl('rect', { x: p.x - p.w / 2, y: p.y - 15, width: p.w, height: 30, rx: 3 }));
+      const t = svgEl('text', { x: p.x, y: p.y });
+      t.textContent = n.name;
+      g.append(t);
+    }
     g.addEventListener('click', () => select(id));
     g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(id); } });
     svg.append(g);
@@ -502,7 +519,7 @@ function renderConcept(root) {
   root.append(el('h3', null, 'Intension — the marks above it'));
   const ib = el('div', { class: 'box' });
   if (!anc.length) {
-    ib.append(el('p', null, 'Nothing lies above ', frag([c(x)]), ' in this hierarchy, so it has no marks here: it is the highest concept (summum genus).'));
+    ib.append(el('p', null, frag([c(x)]), ' is the concept of an object in general. Its intension is empty: nothing lies above it, so it has no marks. It is the highest concept (summum genus).'));
   } else {
     ib.append(el('p', null, frag([c(x)]), ' has ', pl(anc.length, 'mark'), ' in this hierarchy. Its proximate genus is ', frag([c(anc[0])]), '.'));
     ib.append(chips(anc, id => id === anc[0] ? ' proximate' : ' remote'));
@@ -514,9 +531,12 @@ function renderConcept(root) {
   root.append(el('h3', null, 'Extension — the concepts beneath it'));
   const eb = el('div', { class: 'box' });
   if (!desc.length) {
-    eb.append(el('p', null, 'Nothing lies beneath ', frag([c(x)]), ' yet: it is a lowest concept (infima species) of this hierarchy.'));
+    eb.append(el('p', null, x === rootId
+      ? 'No concept has been added yet. Every concept you add will lie beneath it.'
+      : ['Nothing lies beneath ', frag([c(x)]), ' yet: it is a lowest concept (infima species) of this hierarchy.']));
   } else {
-    eb.append(el('p', null, frag([c(x)]), ' has ', pl(desc.length, 'concept'), ' beneath it, ', String(n.kids.length), ' of them its immediate species.'));
+    eb.append(el('p', null, frag([c(x)]), ' has ', pl(desc.length, 'concept'), ' beneath it, ', String(n.kids.length), ' of them its immediate species.',
+      x === rootId ? ' Every other concept in the hierarchy is in its extension.' : ''));
     eb.append(chips(desc, id => nodes.get(id).parent === x ? ' immediate' : ' remote'));
   }
   root.append(eb);
@@ -525,7 +545,7 @@ function renderConcept(root) {
   root.append(el('h3', null, 'What follows from how it was built'));
   for (const kind of KINDS) root.append(section(kind, kind.about(x)));
   root.append(el('p', { class: 'note' },
-    'Each truth rests only on the shape of the tree. Nothing is claimed about whether the species of a genus exhaust it.'));
+    'Each truth rests only on the shape of the tree. Concepts standing side by side under one genus, at the top level too, are read as co-ordinate species that exclude one another. Nothing is claimed about whether the species of a genus exhaust it.'));
 }
 function listChain(ids) {
   const out = [];
@@ -535,13 +555,15 @@ function listChain(ids) {
 
 function renderWhole(root) {
   const ids = preorder();
-  const leaves = ids.filter(id => !nodes.get(id).kids.length);
+  const leaves = ids.filter(id => id !== rootId && !nodes.get(id).kids.length);
   const depth = Math.max(...ids.map(id => ancestors(id).length)) + 1;
   root.append(el('h2', null, 'The whole hierarchy'));
   const sb = el('div', { class: 'box' });
-  sb.append(el('p', null, pl(ids.length, 'concept'), ' on ', pl(depth, 'level'), '.'));
-  sb.append(el('p', null, 'Highest concept (summum genus): ', frag([c(rootId)]), '.'));
-  sb.append(el('p', null, pl(leaves.length, 'lowest concept') + ' (infima species): ', frag(listParts(leaves, 'and')), '.'));
+  sb.append(el('p', null, pl(ids.length - 1, 'concept'), ' beneath the concept of an object in general, on ', pl(depth, 'level'), ' counting it.'));
+  sb.append(el('p', null, 'Highest concept (summum genus): ', frag([c(rootId)]), ', the empty concept.'));
+  sb.append(leaves.length
+    ? el('p', null, pl(leaves.length, 'lowest concept') + ' (infima species): ', frag(listParts(leaves, 'and')), '.')
+    : el('p', null, 'No lower concepts yet.'));
   root.append(sb);
 
   root.append(el('h3', null, 'Genus and species'));
@@ -580,11 +602,7 @@ function renderTruths() {
     el('button', { role: 'tab', 'aria-selected': String(tab === 'concept'), onclick: () => { tab = 'concept'; renderTruths(); } }, 'This concept'),
     el('button', { role: 'tab', 'aria-selected': String(tab === 'whole'), onclick: () => { tab = 'whole'; renderTruths(); } }, 'Whole hierarchy'));
   root.append(tabs);
-  if (rootId == null) {
-    root.append(el('p', { class: 'hint' }, 'Build a hierarchy and the truths that hold in it will appear here.'));
-    return;
-  }
-  if (tab === 'concept' && selected != null) renderConcept(root);
+  if (tab === 'concept') renderConcept(root);
   else renderWhole(root);
 }
 
@@ -611,40 +629,35 @@ function checkName(raw, except) {
   return { name };
 }
 
-function start() {
-  const r = checkName($('rootName').value);
-  if (r.err) return say(r.err);
-  const id = addNode(r.name, null);
-  $('rootName').value = '';
-  select(id);
-  $('childNames').focus();
-}
 function loadExample() {
-  if (rootId != null && !confirm('Replace the current hierarchy with the example?')) return;
-  nodes = new Map(); rootId = null; nextId = 1;
-  const id = buildFrom(EXAMPLE, null);
+  if (nodes.size > 1 && !confirm('Replace the current hierarchy with the example?')) return;
+  resetHierarchy();
+  buildFrom(EXAMPLE, rootId);
   tab = 'whole';
-  select(id, true);
+  select(rootId, true);
   say('Example loaded. Click any concept to see what holds of it.', true);
 }
-function addChildren() {
+function addConcepts(beside) {
+  const parent = beside ? nodes.get(selected).parent : selected;
+  if (parent == null) return say('Nothing stands beside the concept of an object in general. Add beneath it.');
   const names = $('childNames').value.split(',').map(norm).filter(Boolean);
   if (!names.length) return say('Type the name of a concept to add.');
   const added = [], problems = [];
   for (const raw of names) {
     const r = checkName(raw);
     if (r.err) { problems.push(r.err); continue; }
-    addNode(r.name, selected);
+    addNode(r.name, parent);
     added.push(r.name);
   }
   $('childNames').value = problems.length ? names.filter(nm => !added.includes(nm)).join(', ') : '';
   if (problems.length) say(problems[0] + (added.length ? ' The others were added.' : ''));
-  else say(added.length === 1 ? 'Added “' + added[0] + '” beneath “' + nodes.get(selected).name + '”.'
-                              : 'Added ' + added.length + ' concepts beneath “' + nodes.get(selected).name + '”.', true);
+  else say((added.length === 1 ? 'Added “' + added[0] + '”' : 'Added ' + added.length + ' concepts') +
+           ' beneath “' + nodes.get(parent).name + '”.', true);
   render();
   $('childNames').focus();
 }
 function renameSelected() {
+  if (selected === rootId) return;
   const r = checkName($('renameName').value, selected);
   if (r.err) return say(r.err);
   nodes.get(selected).name = r.name;
@@ -652,39 +665,39 @@ function renameSelected() {
   render();
 }
 function removeSelected() {
+  if (selected === rootId) return;
   const n = nodes.get(selected), below = descendants(selected).length;
   const what = below ? '“' + n.name + '” and the ' + pl(below, 'concept') + ' beneath it' : '“' + n.name + '”';
   if (!confirm('Remove ' + what + '?')) return;
   const parent = n.parent;
   removeNode(selected);
-  if (parent == null) { selected = null; render(); say('The hierarchy is empty.', true); $('rootName').focus(); return; }
   select(parent);
   say('Removed ' + what + '.', true);
 }
 function startOver() {
-  if (!confirm('Discard the whole hierarchy and start over?')) return;
-  nodes = new Map(); rootId = null; nextId = 1; selected = null;
-  render();
-  say('');
-  $('rootName').focus();
+  if (!confirm('Remove every concept and start again from the concept of an object in general?')) return;
+  resetHierarchy();
+  tab = 'concept';
+  select(rootId);
+  $('childNames').focus();
 }
 
 /* ============================================================
    Wiring
    ============================================================ */
 const onEnter = (id, fn) => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') fn(); });
-$('startBtn').addEventListener('click', start);
 $('exampleBtn').addEventListener('click', loadExample);
-$('addBtn').addEventListener('click', addChildren);
+$('addBtn').addEventListener('click', () => addConcepts(false));
+$('besideBtn').addEventListener('click', () => addConcepts(true));
 $('renameBtn').addEventListener('click', renameSelected);
 $('delBtn').addEventListener('click', removeSelected);
 $('resetBtn').addEventListener('click', startOver);
-onEnter('rootName', start);
-onEnter('childNames', addChildren);
+$('childNames').addEventListener('keydown', e => { if (e.key === 'Enter') addConcepts(e.shiftKey); });
 onEnter('renameName', renameSelected);
 
-render();
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (rootId != null) renderTree(); });
+resetHierarchy();
+select(rootId);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(renderTree);
 </script>
 </body>
 </html>
