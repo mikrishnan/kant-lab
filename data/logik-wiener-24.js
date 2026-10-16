@@ -19,7 +19,15 @@
 
    Section fields
      id         stable id, `s01`…; a block's id begins with it
-     title      the section's title as the table of contents gives it
+     title      the section's title as the transcription prints it before the
+                provenance line; where it prints none there, the manuscript's
+                own heading stands in. Never body text — see `titleSrc`
+     titleSrc   where `title` came from: `line` for its own line before the
+                provenance line, `heading` for the manuscript heading after it
+                standing in because there was no such line, `none` for a
+                section the transcription gives no title at all (the Titelei
+                of Busolt and the Wiener Logik). Attested either way; recorded
+                because the two are not the same evidence
      headings   the heading again as the manuscript sets it, every form of it
                 the transcription prints, in order. Kept rather than reconciled
                 with `title`: the two differ, and the difference is the AA's.
@@ -82,7 +90,8 @@ const LOGIK_WIENER = {
  "sections": [
   {
    "id": "s01",
-   "title": "― xxiv.785 ―",
+   "title": "",
+   "titleSrc": "none",
    "headings": [],
    "provenance": "[Wiener Logik] (1780ff. Ms.: Anonym-Wien. Nach dem Orig.)",
    "blocks": [
@@ -274,6 +283,7 @@ const LOGIK_WIENER = {
   {
    "id": "s02",
    "title": "Prolegomena",
+   "titleSrc": "line",
    "headings": [
     "Prolegomena."
    ],
@@ -588,6 +598,7 @@ const LOGIK_WIENER = {
   {
    "id": "s03",
    "title": "Geschichte der Logik",
+   "titleSrc": "line",
    "headings": [
     "Geschichte der Logik."
    ],
@@ -898,6 +909,7 @@ const LOGIK_WIENER = {
   {
    "id": "s04",
    "title": "Tractatio Logices",
+   "titleSrc": "line",
    "headings": [
     "Tractatio Logices",
     "Von der Erkenntniß",
@@ -2902,6 +2914,7 @@ const LOGIK_WIENER = {
   {
    "id": "s05",
    "title": "Vom Beyfall und Zurückhalten des Beyfalls",
+   "titleSrc": "line",
    "headings": [
     "Vom Beyfall und Zurückhalten des Beyfalls."
    ],
@@ -3604,6 +3617,7 @@ const LOGIK_WIENER = {
   {
    "id": "s06",
    "title": "Von der wahrscheinlichen Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Von der wahrscheinlichen Erkenntniß."
    ],
@@ -4388,6 +4402,7 @@ const LOGIK_WIENER = {
   {
    "id": "s07",
    "title": "Von den Begriffen",
+   "titleSrc": "line",
    "headings": [
     "Von den Begriffen."
    ],
@@ -4562,6 +4577,7 @@ const LOGIK_WIENER = {
   {
    "id": "s08",
    "title": "Kurze Wiederhohlung des Vorigen",
+   "titleSrc": "line",
    "headings": [
     "Kurze Wiederhohlung des Vorigen."
    ],
@@ -4742,6 +4758,7 @@ const LOGIK_WIENER = {
   {
    "id": "s09",
    "title": "Eintheilung aller definitionen",
+   "titleSrc": "line",
    "headings": [
     "Eintheilung aller definitionen."
    ],
@@ -5242,6 +5259,7 @@ const LOGIK_WIENER = {
   {
    "id": "s10",
    "title": "Von der logischen Eintheilung",
+   "titleSrc": "line",
    "headings": [
     "Von der logischen Eintheilung."
    ],
@@ -5382,6 +5400,7 @@ const LOGIK_WIENER = {
   {
    "id": "s11",
    "title": "Von den Urtheilen",
+   "titleSrc": "line",
    "headings": [
     "Von den Urtheilen."
    ],
@@ -5852,6 +5871,7 @@ const LOGIK_WIENER = {
   {
    "id": "s12",
    "title": "Von den Verstandes-Schlüssen",
+   "titleSrc": "line",
    "headings": [
     "Von den Verstandes-Schlüssen"
    ],
@@ -5898,6 +5918,7 @@ const LOGIK_WIENER = {
   {
    "id": "s13",
    "title": "Von den Vernunft-Schlüssen",
+   "titleSrc": "line",
    "headings": [
     "Von den Vernunft-Schlüssen"
    ],

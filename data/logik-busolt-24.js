@@ -19,7 +19,15 @@
 
    Section fields
      id         stable id, `s01`…; a block's id begins with it
-     title      the section's title as the table of contents gives it
+     title      the section's title as the transcription prints it before the
+                provenance line; where it prints none there, the manuscript's
+                own heading stands in. Never body text — see `titleSrc`
+     titleSrc   where `title` came from: `line` for its own line before the
+                provenance line, `heading` for the manuscript heading after it
+                standing in because there was no such line, `none` for a
+                section the transcription gives no title at all (the Titelei
+                of Busolt and the Wiener Logik). Attested either way; recorded
+                because the two are not the same evidence
      headings   the heading again as the manuscript sets it, every form of it
                 the transcription prints, in order. Kept rather than reconciled
                 with `title`: the two differ, and the difference is the AA's.
@@ -71,7 +79,7 @@ const LOGIK_BUSOLT = {
   ],
   "counts": {
    "sections": 33,
-   "blocks": 541,
+   "blocks": 542,
    "pages": 82,
    "joinedAtMark": 47,
    "joinedInferred": 2
@@ -82,7 +90,8 @@ const LOGIK_BUSOLT = {
  "sections": [
   {
    "id": "s01",
-   "title": "― xxiv.603 ―",
+   "title": "",
+   "titleSrc": "none",
    "headings": [],
    "provenance": "[Logik Busolt] (ca. 1789/90. Ms.: Berlin. Nach dem Orig.)",
    "blocks": [
@@ -532,12 +541,19 @@ const LOGIK_BUSOLT = {
      "kind": "text",
      "aa": 607,
      "text": "Prolegomena"
+    },
+    {
+     "id": "busolt-s01-075",
+     "kind": "rule",
+     "aa": 607,
+     "text": "__________"
     }
    ]
   },
   {
    "id": "s02",
-   "title": "__________",
+   "title": "Prolegomena",
+   "titleSrc": "heading",
    "headings": [
     "Prolegomena"
    ],
@@ -722,6 +738,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s03",
    "title": "Die Geschichte der Logic",
+   "titleSrc": "line",
    "headings": [
     "Die Geschichte der Logic."
    ],
@@ -738,6 +755,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s04",
    "title": "Nuzzen der Logic",
+   "titleSrc": "line",
    "headings": [
     "Nuzzen der Logic."
    ],
@@ -846,6 +864,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s05",
    "title": "Abhandlung der Logic",
+   "titleSrc": "line",
    "headings": [
     "Abhandlung der Logic."
    ],
@@ -1116,6 +1135,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s06",
    "title": "Von der Vollkommenheit der Erkenntniß überhaupt",
+   "titleSrc": "line",
    "headings": [
     "Von der Vollkommenheit der Erkenntniß überhaupt."
    ],
@@ -1262,6 +1282,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s07",
    "title": "Von den Mängeln der Erkenntniß ueberhaupt",
+   "titleSrc": "line",
    "headings": [
     "Von den Mängeln der Erkenntniß ueberhaupt."
    ],
@@ -1284,6 +1305,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s08",
    "title": "Vom Horizont der Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Vom Horizont der Erkenntniß"
    ],
@@ -1524,6 +1546,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s09",
    "title": "Vom Mißbrauch oder Mangel der Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Vom Mißbrauch oder Mangel der Erkenntniß."
    ],
@@ -1598,6 +1621,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s10",
    "title": "Eintheilung der Gelehrten",
+   "titleSrc": "line",
    "headings": [
     "Eintheilung der Gelehrten"
    ],
@@ -1626,6 +1650,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s11",
    "title": "Von der Wahrheit",
+   "titleSrc": "line",
    "headings": [
     "Von der Wahrheit"
    ],
@@ -1890,6 +1915,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s12",
    "title": "Von der Klarheit der Gelehrten Erkentniß",
+   "titleSrc": "line",
    "headings": [
     "Von der Klarheit der Gelehrten Erkentniß"
    ],
@@ -2068,6 +2094,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s13",
    "title": "Von der Größe der Gelehrten Erkentniß",
+   "titleSrc": "line",
    "headings": [
     "Von der Größe der Gelehrten Erkentniß"
    ],
@@ -2106,6 +2133,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s14",
    "title": "Von der Gewißheit der Gelehrten Erkentniße von den verschiednen Arten des fürwahrhaltens",
+   "titleSrc": "line",
    "headings": [
     "Von der Gewißheit der Gelehrten Erkentniße von den verschiednen Arten des fürwahrhaltens."
    ],
@@ -2601,6 +2629,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s15",
    "title": "Von den Hypothesen",
+   "titleSrc": "line",
    "headings": [
     "Von den Hypothesen."
    ],
@@ -2659,6 +2688,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s16",
    "title": "Von der Ueberredung",
+   "titleSrc": "line",
    "headings": [
     "Von der Ueberredung."
    ],
@@ -2735,6 +2765,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s17",
    "title": "Von der Mathematischen Gewißheit",
+   "titleSrc": "line",
    "headings": [
     "Von der Mathematischen Gewißheit"
    ],
@@ -2943,6 +2974,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s18",
    "title": "Von Praktischen Erkentnißen",
+   "titleSrc": "line",
    "headings": [
     "Von Praktischen Erkentnißen."
    ],
@@ -2965,6 +2997,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s19",
    "title": "Von den Begriffen",
+   "titleSrc": "line",
    "headings": [
     "Von den Begriffen."
    ],
@@ -3153,6 +3186,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s20",
    "title": "Von den Definizionen",
+   "titleSrc": "line",
    "headings": [
     "Von den Definizionen."
    ],
@@ -3263,6 +3297,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s21",
    "title": "Von der Philosophischen Definizion",
+   "titleSrc": "line",
    "headings": [
     "Von der Philosophischen Definizion"
    ],
@@ -3441,6 +3476,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s22",
    "title": "Die Logische Eintheilung eines Begriffs",
+   "titleSrc": "line",
    "headings": [
     "Die Logische Eintheilung eines Begriffs"
    ],
@@ -3481,6 +3517,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s23",
    "title": "Von den Urtheilen",
+   "titleSrc": "line",
    "headings": [
     "Von den Urtheilen"
    ],
@@ -3503,6 +3540,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s24",
    "title": "Die Eintheilung der Urtheile",
+   "titleSrc": "line",
    "headings": [
     "Die Eintheilung der Urtheile"
    ],
@@ -3697,6 +3735,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s25",
    "title": "Von den Kategorischen Urtheilen",
+   "titleSrc": "line",
    "headings": [
     "Von den Kategorischen Urtheilen."
    ],
@@ -3825,6 +3864,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s26",
    "title": "Von den Hypothetischen und Disiunktiven Urtheilen",
+   "titleSrc": "line",
    "headings": [
     "Von den Hypothetischen und Disiunktiven Urtheilen."
    ],
@@ -4309,6 +4349,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s27",
    "title": "Regeln der Vernunftschlüße",
+   "titleSrc": "line",
    "headings": [
     "Regeln der Vernunftschlüße"
    ],
@@ -4401,6 +4442,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s28",
    "title": "Die vier Vernunftschlüße nach ihren Figuren",
+   "titleSrc": "line",
    "headings": [
     "Die vier Vernunftschlüße nach ihren Figuren"
    ],
@@ -4435,6 +4477,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s29",
    "title": "Regeln der Vernunftschlüße. Fortsezzung",
+   "titleSrc": "line",
    "headings": [
     "Regeln der Vernunftschlüße. Fortsezzung."
    ],
@@ -4795,6 +4838,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s30",
    "title": "De locis topicis",
+   "titleSrc": "line",
    "headings": [
     "De locis topicis."
    ],
@@ -4811,6 +4855,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s31",
    "title": "Die Praktische Logic",
+   "titleSrc": "line",
    "headings": [
     "Die Praktische Logic."
    ],
@@ -4951,6 +4996,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s32",
    "title": "Anmerkung über das Meditiren",
+   "titleSrc": "line",
    "headings": [
     "Anmerkung über das Meditiren"
    ],
@@ -4985,6 +5031,7 @@ const LOGIK_BUSOLT = {
   {
    "id": "s33",
    "title": "Vom Gebrauch der Wörter",
+   "titleSrc": "line",
    "headings": [
     "Vom Gebrauch der Wörter"
    ],

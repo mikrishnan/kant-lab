@@ -224,7 +224,11 @@ put back exactly where it stood.
 and any gap in it, how many paragraph joins were attested and how many inferred,
 manuscript pages, and, for Blomberg, the Meier §§ it found. **Read it.** It ends in
 `clean` when every block **round-trips**: re-inserting the page markers it pulled out, at
-the offsets it recorded, reproduces the transcription's own text exactly.
+the offsets it recorded, reproduces the transcription's own text exactly. Know what that
+does **not** cover: it checks the blocks that were emitted, not that every line of the
+transcription became one. A line dropped before a block was ever built — as the title bug
+below dropped two paragraphs — passes `clean`. Check the block and word counts against
+the previous run too.
 
 All three report a gap over the first few pages — `7→9, 9→11` in Blomberg, and the same
 pattern in the other two. That is the volume's front matter standing on rectos with blank
@@ -246,9 +250,18 @@ What the extractor knows about these transcriptions, which is easy to break:
   offset it stood at, as the AA pages are. Every other bracket is editorial and stays:
   `[ Textlücke: AA: Die ]`, `[AA: judicium ]`, `[erg. nicht]`, `< bricht ab >`.
 - A section opens with its provenance line — `[Logik Busolt] (ca. 1789/90. Ms.: Berlin.
-  Nach dem Orig.)` — preceded by the section's title and followed by the title again,
-  sometimes twice and in a different form. All of them are kept: the one before as
-  `title`, the ones after as `headings`, unreconciled, because the difference is the AA's.
+  Nach dem Orig.)` — followed by the manuscript's own heading, sometimes twice and in a
+  different form, and *usually* preceded by the section's title as well. Those after are
+  kept as `headings`, unreconciled with `title`, because the difference is the AA's.
+- **The line before the provenance line is not always a title**, and taking it on trust
+  cost two paragraphs of Blomberg: where that printing is absent, the line before is the
+  previous section's last paragraph, which became the title and was cut from the text
+  with it. So it is taken as the title only when the transcription prints it after the
+  provenance line too — compared on letters alone, since the two printings differ in
+  punctuation and in where the `|` line breaks fall. Otherwise the manuscript's heading
+  stands in and the line stays where it belongs. `titleSrc` records which happened:
+  `line`, `heading`, or `none` for the Titelei of Busolt and the Wiener Logik, which the
+  transcription gives no title at all. The report counts the three.
 - Blomberg alone keys its lecture to Meier's §§, in headings that stand alone on their
   line: `§ 249`, `§: 92: et §: 93:`, `§ 66- 91`, `§phus 250`. The heading is kept
   verbatim with the numbers parsed out beside it, so a tool can line the lecture up

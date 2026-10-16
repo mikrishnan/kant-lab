@@ -19,7 +19,15 @@
 
    Section fields
      id         stable id, `s01`…; a block's id begins with it
-     title      the section's title as the table of contents gives it
+     title      the section's title as the transcription prints it before the
+                provenance line; where it prints none there, the manuscript's
+                own heading stands in. Never body text — see `titleSrc`
+     titleSrc   where `title` came from: `line` for its own line before the
+                provenance line, `heading` for the manuscript heading after it
+                standing in because there was no such line, `none` for a
+                section the transcription gives no title at all (the Titelei
+                of Busolt and the Wiener Logik). Attested either way; recorded
+                because the two are not the same evidence
      headings   the heading again as the manuscript sets it, every form of it
                 the transcription prints, in order. Kept rather than reconciled
                 with `title`: the two differ, and the difference is the AA's.
@@ -74,7 +82,7 @@ const LOGIK_BLOMBERG = {
   ],
   "counts": {
    "sections": 18,
-   "blocks": 1918,
+   "blocks": 1919,
    "pages": 293,
    "joinedAtMark": 154,
    "joinedInferred": 32
@@ -949,7 +957,8 @@ const LOGIK_BLOMBERG = {
  "sections": [
   {
    "id": "s01",
-   "title": "301",
+   "title": "Einleitung in die Vernunft-Lehre nach denen Gedancken des Herrn Profeß: Kant:",
+   "titleSrc": "heading",
    "headings": [
     "Einleitung in die Vernunft-Lehre nach denen Gedancken des Herrn Profeß: Kant:"
    ],
@@ -1571,6 +1580,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s02",
    "title": "Einleitung in die Vernunft-Lehre nach dem Autore",
+   "titleSrc": "line",
    "headings": [
     "Einleitung in die Vernunft-Lehre nach dem Autore"
    ],
@@ -2997,6 +3007,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s03",
    "title": "Die Vernunft-Lehre selbst der Erste Haupt-Theil von der Gelahrten Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Die Vernunft-Lehre selbst Der erste Haupt-Theil von der Gelahrten Erkenntniß",
     "Der erste Abschnitt. Von der Gelahrten Erkenntniß überhaupt allgemein"
@@ -5386,6 +5397,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s04",
    "title": "Der andere Abschnitt. Von der Weitläufigkeit der gelährten Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Der andere Abschnitt Von der Weitläufigkeit der gelährten Erkenntniß"
    ],
@@ -6551,6 +6563,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s05",
    "title": "Der Dritte Abschnitt. Von der Größe der Gelahrten Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Der Dritte Abschnitt Von der Größe der Gelahrten Erkenntniß"
    ],
@@ -7107,6 +7120,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s06",
    "title": "Der Vierte Abschnitt. Von der Wahrheit der Gelahrten Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Der Vierte Abschnitt Von der Wahrheit der Gelahrten Erkenntniß"
    ],
@@ -10863,6 +10877,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s07",
    "title": "Der fünfte Abschnitt. Von Der Klahrheit der Gelahrten Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Der fünfte Abschnitt Von Der Klahrheit der Gelahrten Erkenntniß"
    ],
@@ -16126,6 +16141,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s08",
    "title": "Der Sechste Abschnitt. Von der Gewißheit der Gelehrten Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Der Sechste Abschnitt Von der Gewißheit der Gelehrten Erkenntniß"
    ],
@@ -27408,7 +27424,7 @@ const LOGIK_BLOMBERG = {
      "id": "blomberg-s08-686",
      "kind": "text",
      "aa": 250,
-     "text": "Die Vereinbahrung aller dieser Dreyen Erkenntniß-Quellen beruhet darauf, daß sie nicht einen, sonderen viel beweise zum Grund haben. Der Glaube erforderet allemahl ein Connubium anderer Erkenntniß-Quellen, nemlich der Vernunft, und der Erfahrung, damit er Evident, und überzeugend werde. Wenn eine Erkenntniß-Quelle nicht im",
+     "text": "Die Vereinbahrung aller dieser Dreyen Erkenntniß-Quellen beruhet darauf, daß sie nicht einen, sonderen viel beweise zum Grund haben. Der Glaube erforderet allemahl ein Connubium anderer Erkenntniß-Quellen, nemlich der Vernunft, und der Erfahrung, damit er Evident, und überzeugend werde. Wenn eine Erkenntniß-Quelle nicht im Stande ist einen zureichenden beweis von der Wahrheit einer Sache zu geben, so muß man die übrigen Fontes Cognitionis zu hilfe nehmen, und daraus eine größere Evidenz hervor zu bringen suchen. Ist aber eine Erkenntniß-Quelle zulänglich einen completten Beweis von einer Sache zu geben, so bedarf man der anderen nicht. Kann etwas vollständig und Evident durch die Vernunft dargethan werden, so braucht man nicht die Erfahrung, um den Beweis noch vollständiger zu machen. Ist die Erfahrung hinreichend einen completten Beweis von einer Sache zu geben, so darf man die vernunft nicht consultiren.",
      "pages": [
       {
        "p": 250,
@@ -27416,6 +27432,12 @@ const LOGIK_BLOMBERG = {
       }
      ],
      "aaEnd": 250,
+     "ms": [
+      {
+       "p": 864,
+       "i": 408
+      }
+     ],
      "para": {
       "raw": "§ 215",
       "nums": [
@@ -27430,7 +27452,8 @@ const LOGIK_BLOMBERG = {
   },
   {
    "id": "s09",
-   "title": "Stande ist einen zureichenden beweis von der Wahrheit einer Sache zu geben, so muß [864] man die übrigen Fontes Cognitionis zu hilfe nehmen, und daraus eine größere Evidenz hervor zu bringen suchen. Ist aber eine Erkenntniß-Quelle zulänglich einen completten Beweis von einer Sache zu geben, so bedarf man der anderen nicht. Kann etwas vollständig und Evident durch die Vernunft dargethan werden, so braucht man nicht die Erfahrung, um den Beweis noch vollständiger zu machen. Ist die Erfahrung hinreichend einen completten Beweis von einer Sache zu geben, so darf man die vernunft nicht consultiren.",
+   "title": "Der Siebente Abschnitt von der practischen gelahrten Erkenntniß",
+   "titleSrc": "heading",
    "headings": [
     "Der Siebente Abschnitt von der practischen gelahrten Erkenntniß"
    ],
@@ -27512,6 +27535,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s10",
    "title": "Der Achte Abschnitt. Von den Gelahrten Begriffen",
+   "titleSrc": "line",
    "headings": [
     "Der Achte Abschnitt Von den Gelahrten Begriffen."
    ],
@@ -29052,6 +29076,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s11",
    "title": "Der 9 te Abschnitt. Von den gelährten Urtheilen",
+   "titleSrc": "line",
    "headings": [
     "Der 9 te Abschnitt Von den gelährten Urtheilen"
    ],
@@ -29613,6 +29638,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s12",
    "title": "Der 10 te Abschnitt. Von den gelahrten Vernunft Schlüßen",
+   "titleSrc": "line",
    "headings": [
     "Der 10 te Abschnitt Von den gelahrten Vernunft Schlüßen"
    ],
@@ -30140,6 +30166,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s13",
    "title": "Der andere Haupttheil. Von der Lehr-Art der gelahrten Erkenntniß",
+   "titleSrc": "line",
    "headings": [
     "Der andere Haupttheil Von der Lehr-Art der gelahrten Erkenntniß"
    ],
@@ -30685,6 +30712,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s14",
    "title": "Der Dritte Haupt Theil. Vom gelährten Vortrage",
+   "titleSrc": "line",
    "headings": [
     "Der erste Abschnitt. Vom Gebrauch der Worte",
     "Der Dritte Haupt Theil Vom gelährten Vortrage Der erste Abschnitt Vom Gebrauch der Worte"
@@ -30758,6 +30786,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s15",
    "title": "Der Andere Abschnitt. Von der Gelahrten Schreibarth",
+   "titleSrc": "line",
    "headings": [
     "Der Andere Abschnitt Von der Gelahrten Schreibarth"
    ],
@@ -30803,6 +30832,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s16",
    "title": "Der Dritte Abschnitt. Von einer gelährten Rede",
+   "titleSrc": "line",
    "headings": [
     "Der Dritte Abschnitt Von einer gelährten Rede"
    ],
@@ -30880,12 +30910,31 @@ const LOGIK_BLOMBERG = {
        512
       ]
      }
+    },
+    {
+     "id": "blomberg-s16-007",
+     "kind": "text",
+     "aa": 296,
+     "text": "Eine Formelle Disputation ist die Handelung, wo man in Gegenwart gelährter Leute einige Sätze preiß giebt sie wieder alle Einwendungen zu vertheidigen. Es könnte das Disputiren großen Nutzen schaffen, wenn es nicht ein Certamen Personarum wäre. und wenn man nicht durch Streit, sonderen durch Einigung die Wahrheit aufsuchen wolte.",
+     "ms": [
+      {
+       "p": 1014,
+       "i": 75
+      }
+     ],
+     "para": {
+      "raw": "§ 514",
+      "nums": [
+       514
+      ]
+     }
     }
    ]
   },
   {
    "id": "s17",
-   "title": "Eine Formelle Disputation ist die Handelung, wo man in Gegenwart gelährter [1014] Leute einige Sätze preiß giebt sie wieder alle Einwendungen zu vertheidigen. Es könnte das Disputiren großen Nutzen schaffen, wenn es nicht ein Certamen Personarum wäre. und wenn man nicht durch Streit, sonderen durch Einigung die Wahrheit aufsuchen wolte.",
+   "title": "Der 4te Abschnitt Von Gelahrten Schriften",
+   "titleSrc": "heading",
    "headings": [
     "Der 4te Abschnitt Von Gelahrten Schriften"
    ],
@@ -31010,6 +31059,7 @@ const LOGIK_BLOMBERG = {
   {
    "id": "s18",
    "title": "Der 4 te Haupttheil. Von dem Charackter eines Gelahrten",
+   "titleSrc": "line",
    "headings": [
     "Der 4 te Haupttheil Von dem Charackter eines Gelahrten"
    ],

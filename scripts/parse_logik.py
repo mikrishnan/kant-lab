@@ -170,6 +170,7 @@ class Section:
         self.title = title
         self.headings = headings
         self.provenance = provenance
+        self.title_src = "line"
         self.blocks = []
 
 
@@ -184,12 +185,35 @@ def split_sections(lines, tag):
     return starts
 
 
+def title_key(s):
+    """A section title reduced to letters, for comparing its two printings.
+
+    The pre- and post-provenance printings of one title differ in punctuation
+    and in where the manuscript's `|` line breaks fall — `Der andere
+    Abschnitt. Von der Weitläufigkeit` against `Der andere Abschnitt | Von der
+    Weitläufigkeit` — so neither survives a literal comparison.
+    """
+    s = s.replace("|", " ").lower()
+    s = re.sub(r"[^0-9a-zäöüß ]+", " ", s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
 def heading_block(lines, start):
-    """The title lines around a provenance line, and where the body begins."""
-    back = start - 1
-    while back >= 0 and not lines[back].strip():
-        back -= 1
-    title = lines[back].strip() if back >= 0 else ""
+    """The title lines around a provenance line, and where the body begins.
+
+    A section's title is printed after the provenance line, and *usually* once
+    before it as well. Taking the line before on trust is what this got wrong:
+    where that printing is absent the line before is the previous section's
+    last paragraph, which then became the title and — because the previous
+    section was cut off at it — was lost from the text. Three of Blomberg's 18
+    sections, two of Busolt's 33 and one of the Wiener Logik's 13 hit this, and
+    the round-trip check cannot see it, since it tests the blocks that were
+    emitted and not whether every line became one.
+
+    So the line before counts as the title only when the transcription prints
+    it after the provenance line too. Otherwise the title is the manuscript's
+    own heading and the line stays with the section it belongs to.
+    """
     # Anything between the provenance line and the first page marker is a
     # further form of the heading — the manuscript's own, usually.
     headings, i = [], start + 1
@@ -197,7 +221,18 @@ def heading_block(lines, start):
         if lines[i].strip() and not lines[i].strip().startswith("["):
             headings.append(lines[i].strip())
         i += 1
-    return title, headings, back, i
+
+    back = start - 1
+    while back >= 0 and not lines[back].strip():
+        back -= 1
+    cand = lines[back].strip() if back >= 0 else ""
+    key, keys = title_key(cand), [title_key(h) for h in headings]
+    if key and any(key in h or h in key for h in keys):
+        return cand, headings, "line", back, i
+    # Not a title. Leave the line to the section before — `back` becomes
+    # `start`, so nothing is cut off — and take the heading as the title.
+    return (headings[0] if headings else ""), headings, \
+        ("heading" if headings else "none"), start, i
 
 
 def resolve(raw):
@@ -284,7 +319,8 @@ def parse(path, key):
     raw = norm(open(path, encoding="utf-8").read())
     lines = raw.split("\n")
     starts = split_sections(lines, work["tag"])
-    report = {"blocks": 0, "roundtrip": [], "joins": Counter(), "pages": set()}
+    report = {"blocks": 0, "roundtrip": [], "joins": Counter(), "pages": set(),
+              "titles": Counter()}
 
     # Front matter: the title page and the Inhaltsverzeichnis, verbatim, minus
     # the InteLex chrome that is no part of the Academy Edition.
@@ -322,13 +358,16 @@ def parse(path, key):
     sections = []
     bounds = starts + [len(lines)]
     for n, start in enumerate(starts):
-        title, headings, title_at, body_at = heading_block(lines, start)
+        title, headings, title_src, title_at, body_at = heading_block(lines, start)
         sec = Section(n + 1, pipes(title), [pipes(h) for h in headings],
                       lines[start].strip())
-        # A section's title line belongs to it, not to the section before.
+        sec.title_src = title_src
+        report["titles"][title_src] += 1
+        # A section's title line belongs to it, not to the section before —
+        # but only when that line really is its title.
         end = bounds[n + 1]
         if n + 1 < len(starts):
-            _, _, nxt_title_at, _ = heading_block(lines, starts[n + 1])
+            nxt_title_at = heading_block(lines, starts[n + 1])[3]
             end = nxt_title_at
         emit_body(lines[body_at:end], sec, key, work, report)
         sections.append(sec)
@@ -433,7 +472,15 @@ HEADER = """/* ─────────────────────�
 
    Section fields
      id         stable id, `s01`…; a block's id begins with it
-     title      the section's title as the table of contents gives it
+     title      the section's title as the transcription prints it before the
+                provenance line; where it prints none there, the manuscript's
+                own heading stands in. Never body text — see `titleSrc`
+     titleSrc   where `title` came from: `line` for its own line before the
+                provenance line, `heading` for the manuscript heading after it
+                standing in because there was no such line, `none` for a
+                section the transcription gives no title at all (the Titelei
+                of Busolt and the Wiener Logik). Attested either way; recorded
+                because the two are not the same evidence
      headings   the heading again as the manuscript sets it, every form of it
                 the transcription prints, in order. Kept rather than reconciled
                 with `title`: the two differ, and the difference is the AA's.
@@ -512,6 +559,7 @@ def main():
             {
                 "id": s.id,
                 "title": s.title,
+                "titleSrc": s.title_src,
                 "headings": s.headings,
                 "provenance": s.provenance,
                 "blocks": s.blocks,
@@ -549,6 +597,9 @@ def main():
              data["meta"]["counts"]["joinedInferred"]))
     print("  manuscript pages recorded: %d"
           % sum(len(b.get("ms", [])) for b in blocks))
+    t = report["titles"]
+    print("  titles: %d on their own line, %d from the manuscript heading, %d none"
+          % (t["line"], t["heading"], t["none"]))
     if work["paras"]:
         withp = [b for b in blocks if b.get("para")]
         heads = {tuple(b["para"]["nums"]) for b in withp}
