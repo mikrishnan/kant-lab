@@ -234,6 +234,22 @@
   .flag b { font-family: 'Cinzel', Georgia, serif; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; margin-right: 6px; }
   #eempty { border: 1px dashed var(--rule); padding: 20px; color: var(--ink-soft); font-style: italic; max-width: 60em; }
 
+  /* ── Flagging miscategorised examples ─────────────────────────────────── */
+  .tools { margin: 8px 0 0; display: flex; justify-content: flex-end; }
+  .miscat {
+    font: inherit; font-size: 14px; padding: 2px 12px; cursor: pointer;
+    background: transparent; border: 1px solid var(--ink-soft); color: var(--ink-soft);
+  }
+  .miscat:hover:not(:disabled) { border-color: var(--warn); color: var(--warn); }
+  .miscat[aria-pressed="true"] { border-color: var(--warn); color: var(--warn); background: #f6e3dc; }
+  .miscat:disabled { opacity: .55; cursor: default; }
+  .card.flagged { border-left-color: var(--warn); }
+  #miscat-bar { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--ink-soft); }
+  #miscat-bar button { font: inherit; font-size: 15px; padding: 5px 14px; cursor: pointer; background: transparent; border: 1px solid var(--warn); color: var(--warn); }
+  #miscat-bar button:hover:not(:disabled) { background: #f6e3dc; }
+  #miscat-bar button:disabled { opacity: .5; cursor: default; }
+  #miscat-bar .dirty { font-style: italic; color: var(--warn); }
+
   @media (max-width: 960px) {
     body { display: block; height: auto; }
     .layout { grid-template-columns: 1fr; }
@@ -290,6 +306,7 @@
 <script src="../../data/reflexionen-16-meier.js"></script>
 <script src="../../data/phases-adickes.js"></script>
 <script src="immediate-inference-examples.js"></script>
+<script src="miscategorisations.js"></script>
 
 <script>
 /* ── Data ─────────────────────────────────────────────────────────────────── */
@@ -344,6 +361,36 @@ const FORMS = [
   { key: 'S', title: 'Singular' }
 ];
 
+// The comment that heads miscategorisations.js, written back unchanged each time
+// the file is saved. Keep it the same as the file's own.
+const FILE_HEADER = `/* ─────────────────────────────────────────────────────────────────────────────
+   Examples in immediate-inference-examples.js that a reader has flagged as
+   miscategorised. Written by immediate-inferences.html ("Save
+   miscategorisations.js"), which also reads this file back on load, so the
+   flags it holds show on the cards. It can be edited by hand.
+
+   An entry is a flag, and holds the categorisation as it stood when the flag
+   was set. It does not change the example: immediate-inference-examples.js is
+   untouched until someone applies a replacement there.
+
+   Fields of an entry
+     id           the example's id in immediate-inference-examples.js
+     src          blomberg | wiener | busolt | refl16, as on the example
+     block | r    where the example is, as on the example
+     flaggedOn    the date the flag was set, YYYY-MM-DD
+     old          the categorisation that was flagged, copied from the example:
+                    kinds       the kinds it was filed under
+                    named       whether the passage itself names the kind
+                    sub         the species, or absent
+                    judgements  the judgements, each with t, role, form,
+                                formStated and whatever else the example gave
+     replacement  the categorisation that should stand instead, in the same
+                  shape as \`old\`. Left empty for now: no replacement has been
+                  decided on, and the page does not fill it in.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+`;
+
 const ROLE_LABEL = {
   premise: 'Premise', conclusion: 'Conclusion', member: 'One of the pair',
   intermediate: 'Intermediate step', rejected: 'Rejected by the passage'
@@ -358,6 +405,8 @@ let withJudgements = false;
 let examples = [];           // IMMEDIATE_EXAMPLES, each resolved against its source
 let blocksByWork = {};       // work -> block id -> block, with its start pages worked out
 let reflByNumber = {};       // Reflexion number -> entry
+let flagged = new Map();     // example id -> its miscategorisations.js entry
+let unsaved = false;         // flags changed since the page loaded or was last saved
 
 /* ── Resolving an example against its source ──────────────────────────────── */
 
@@ -598,6 +647,13 @@ function buildCard(ex) {
   if (ex.counter) { const p = el('p', 'flag'); p.append(el('b', null, 'Not immediate'), ex.counter); card.append(p); }
   if (ex.invalid) { const p = el('p', 'flag'); p.append(el('b', null, 'Ruled out'), ex.invalid); card.append(p); }
   if (ex.note) card.append(el('p', 'note', ex.note));
+  const tools = el('div', 'tools');
+  const btn = el('button', 'miscat');
+  btn.type = 'button';
+  btn.addEventListener('click', () => toggleFlag(ex.id));
+  tools.append(btn);
+  card.append(tools);
+  paintFlag(card, ex.id);
   return card;
 }
 
@@ -720,6 +776,133 @@ function refreshCounts() {
   });
 }
 
+/* ── Flagging an example as miscategorised ────────────────────────────────── */
+
+// The categorisation as the example stands in immediate-inference-examples.js,
+// copied so that the flag keeps it even after the example is corrected there.
+function oldCategorisation(raw) {
+  const old = { kinds: raw.kinds.slice(), named: raw.named };
+  if (raw.sub) old.sub = raw.sub;
+  old.judgements = raw.judgements.map(j => Object.assign({}, j));
+  return old;
+}
+
+// `replacement` is left empty on purpose: no replacement has been decided on,
+// and nothing on this page fills it in.
+function emptyReplacement() {
+  return { kinds: [], named: null, sub: null, judgements: [] };
+}
+
+function hasReplacement(entry) {
+  const r = entry.replacement;
+  return !!r && (r.kinds.length > 0 || r.judgements.length > 0 || r.named != null || r.sub != null);
+}
+
+function makeFlag(raw) {
+  const entry = { id: raw.id, src: raw.src };
+  if (raw.block) entry.block = raw.block; else entry.r = raw.r;
+  entry.flaggedOn = new Date().toISOString().slice(0, 10);
+  entry.old = oldCategorisation(raw);
+  entry.replacement = emptyReplacement();
+  return entry;
+}
+
+function paintFlag(card, id) {
+  const on = flagged.has(id);
+  const btn = card.querySelector('.miscat');
+  card.classList.toggle('flagged', on);
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  const locked = on && hasReplacement(flagged.get(id));
+  btn.disabled = locked;
+  btn.textContent = locked ? 'Flagged · has a replacement' : on ? 'Flagged as miscategorised · undo' : 'Flag as miscategorised';
+  btn.title = on ? 'Remove the flag from miscategorisations.js' : 'Record this categorisation in miscategorisations.js as one to be corrected';
+}
+
+function toggleFlag(id) {
+  if (flagged.has(id)) {
+    if (hasReplacement(flagged.get(id))) return;
+    flagged.delete(id);
+  } else {
+    flagged.set(id, makeFlag(IMMEDIATE_EXAMPLES.filter(e => e.id === id)[0]));
+  }
+  unsaved = true;
+  const card = document.getElementById('ex-' + id);
+  if (card) paintFlag(card, id);
+  paintBar();
+}
+
+// The whole of miscategorisations.js as it should now read: the header the file
+// has, then every flag, in the order of the examples file.
+function miscategorisationsText() {
+  const head = FILE_HEADER;
+  const order = {};
+  IMMEDIATE_EXAMPLES.forEach((e, n) => { order[e.id] = n; });
+  const entries = Array.from(flagged.values()).sort((a, b) => (order[a.id] != null ? order[a.id] : 1e9) - (order[b.id] != null ? order[b.id] : 1e9));
+  const body = entries.map(e => '  ' + JSON.stringify(e, null, 2).replace(/\n/g, '\n  ')).join(',\n');
+  return head + 'const MISCATEGORISATIONS = [' + (body ? '\n' + body + '\n' : '\n') + '];\n';
+}
+
+// Saving goes through the File System Access API where the browser has it, so
+// the file can be chosen once and written in place. Elsewhere the file is
+// downloaded and has to be put back into this folder by hand.
+async function saveFlags() {
+  const text = miscategorisationsText();
+  const status = document.getElementById('miscat-status');
+  try {
+    if (window.showSaveFilePicker) {
+      const h = await window.showSaveFilePicker({
+        suggestedName: 'miscategorisations.js',
+        types: [{ description: 'JavaScript', accept: { 'text/javascript': ['.js'] } }]
+      });
+      const w = await h.createWritable();
+      await w.write(text);
+      await w.close();
+      status.textContent = 'Saved.';
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
+      a.download = 'miscategorisations.js';
+      document.body.append(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+      status.textContent = 'Downloaded. Replace the file in this folder with it.';
+    }
+    unsaved = false;
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;      // the picker was cancelled
+    status.textContent = 'Could not save: ' + err.message;
+  }
+  paintBar();
+}
+
+function paintBar() {
+  document.getElementById('miscat-count').textContent =
+    flagged.size + ' flagged as miscategorised';
+  const d = document.getElementById('miscat-status');
+  if (unsaved) { d.textContent = 'not saved'; d.className = 'dirty'; }
+  else if (d.className === 'dirty') { d.textContent = ''; d.className = ''; }
+  document.getElementById('miscat-save').disabled = !unsaved;
+}
+
+function buildBar() {
+  const bar = el('div');
+  bar.id = 'miscat-bar';
+  const count = el('span');
+  count.id = 'miscat-count';
+  const status = el('span');
+  status.id = 'miscat-status';
+  const save = el('button', null, 'Save miscategorisations.js');
+  save.id = 'miscat-save';
+  save.type = 'button';
+  save.addEventListener('click', saveFlags);
+  bar.append(count, status, save);
+  document.getElementById('kinds').append(bar);
+  // Flags already in the file show on their cards.
+  MISCATEGORISATIONS.forEach(e => flagged.set(e.id, e));
+  paintBar();
+}
+
 /* ── Jumping between the two lists ────────────────────────────────────────── */
 
 function goTo(id) {
@@ -798,8 +981,11 @@ window.addEventListener('hashchange', () => {
   if (KIND_BY_KEY[k] && k !== kind) setKind(k);
 });
 
+window.addEventListener('beforeunload', e => { if (unsaved) { e.preventDefault(); e.returnValue = ''; } });
+
 loadExamples();
 buildButtons();
+buildBar();
 buildFilters();
 setKind(KIND_BY_KEY[location.hash.slice(1)] ? location.hash.slice(1) : kind);
 </script>
