@@ -50,6 +50,9 @@ might read, or that participants should be able to extend without touching app c
 | [data/reflexionen-16-meier.js](data/reflexionen-16-meier.js) | The Reflexionen on Meier's *Auszug* (AA XVI). **Generated** — see below. |
 | [data/metaphysica-17.js](data/metaphysica-17.js) | Baumgarten's *Metaphysica* itself (AA XVII): 804 §§ and the work's outline. **Generated** — see below. |
 | [data/reflexionen-17-18-baumgarten.js](data/reflexionen-17-18-baumgarten.js) | The Reflexionen on Baumgarten's *Metaphysica* (AA XVII–XVIII), 2967 of them. **Generated** — see below. |
+| [data/logik-blomberg-24.js](data/logik-blomberg-24.js) | *Logik Blomberg*, Kant's logic lecture of ca. 1771 (AA 24:7–301), keyed to Meier's §§. **Generated** — see below. |
+| [data/logik-busolt-24.js](data/logik-busolt-24.js) | *Logik Busolt*, ca. 1789/90 (AA 24:603–686). **Generated** — see below. |
+| [data/logik-wiener-24.js](data/logik-wiener-24.js) | The *Wiener Logik*, 1780ff. (AA 24:785–940). **Generated** — see below. |
 | [data/tradition-meier.js](data/tradition-meier.js) | `TRADITION`, the Meier reader's parallel passages from Wolff, the Scholastics and Aristotle, keyed to Meier's §§. **Hand-curated** — edit it directly; its header says how. |
 
 They are `<script src>` includes rather than `fetch()` on purpose: a classic script tag
@@ -208,6 +211,78 @@ Things the extractor knows about the AA's conventions, which are easy to break:
   (`γ? η? κ? λ? ν−ξ?? L 3'.`), so the sigla has to be peeled back off.
 - A capital `Α` (U+0391) in the transcription is an OCR artefact of Latin `A` ("Αus"),
   not a phase.
+
+### The Logik transcripts of AA XXIV
+
+```sh
+textutil -convert txt -output /tmp/blomberg.txt Textfiles/Vol24logikBlomberg.rtfd/TXT.rtf
+textutil -convert txt -output /tmp/busolt.txt   Textfiles/Vol24logikBusolt.rtf
+textutil -convert txt -output /tmp/wiener.txt   Textfiles/Vol24logikWien.rtf
+python3 scripts/parse_logik.py blomberg /tmp/blomberg.txt data/logik-blomberg-24.js
+python3 scripts/parse_logik.py busolt   /tmp/busolt.txt   data/logik-busolt-24.js
+python3 scripts/parse_logik.py wiener   /tmp/wiener.txt   data/logik-wiener-24.js
+```
+
+These transcriptions set the text in short lines broken by the Academy Edition's page
+markers, so one paragraph of the lecture arrives in three or four pieces. The extractor
+joins them back into running prose and keeps every page the prose crossed as a character
+offset into it, so that any stretch can still be cited as `AA 24:N` and the pagination
+put back exactly where it stood.
+
+`parse_logik.py` prints a report per work — sections, blocks, words, the AA page range
+and any gap in it, how many paragraph joins were attested and how many inferred,
+manuscript pages, and, for Blomberg, the Meier §§ it found. **Read it.** It ends in
+`clean` when every block **round-trips**: re-inserting the page markers it pulled out, at
+the offsets it recorded, reproduces the transcription's own text exactly. Know what that
+does **not** cover: it checks the blocks that were emitted, not that every line of the
+transcription became one. A line dropped before a block was ever built — as the title bug
+below dropped two paragraphs — passes `clean`. Check the block and word counts against
+the previous run too.
+
+All three report a gap over the first few pages — `7→9, 9→11` in Blomberg, and the same
+pattern in the other two. That is the volume's front matter standing on rectos with blank
+versos between, not a dropped page. Leave it.
+
+What the extractor knows about these transcriptions, which is easy to break:
+
+- `― xxiv.162 ―` marks the *start* of AA XXIV page 162. The suffixed forms `613u` and
+  `613uu` are the transcription's way of marking a second and third anchor on one page,
+  not pages of their own; both are page 613, and the raw form is kept beside the number.
+- `|` marks a page break, and **at the end of a line, before a page marker, it is the
+  signal that the paragraph continues** — a page marker with no `|` before it falls
+  between two paragraphs. Getting this backwards either shatters the text into
+  page-sized fragments or runs unrelated paragraphs together. Tight against the
+  preceding character it rejoins a split word (`Gewiß|heit` → `Gewißheit`); with a space
+  before it, it fell between two whole words and becomes a space.
+- `||` is not that. In the Wiener Logik `|| V` marks 57 passages and is kept verbatim.
+- `[471]` is the manuscript's own pagination, lifted out of the text into `ms` with the
+  offset it stood at, as the AA pages are. Every other bracket is editorial and stays:
+  `[ Textlücke: AA: Die ]`, `[AA: judicium ]`, `[erg. nicht]`, `< bricht ab >`.
+- A section opens with its provenance line — `[Logik Busolt] (ca. 1789/90. Ms.: Berlin.
+  Nach dem Orig.)` — followed by the manuscript's own heading, sometimes twice and in a
+  different form, and *usually* preceded by the section's title as well. Those after are
+  kept as `headings`, unreconciled with `title`, because the difference is the AA's.
+- **The line before the provenance line is not always a title**, and taking it on trust
+  cost two paragraphs of Blomberg: where that printing is absent, the line before is the
+  previous section's last paragraph, which became the title and was cut from the text
+  with it. So it is taken as the title only when the transcription prints it after the
+  provenance line too — compared on letters alone, since the two printings differ in
+  punctuation and in where the `|` line breaks fall. Otherwise the manuscript's heading
+  stands in and the line stays where it belongs. `titleSrc` records which happened:
+  `line`, `heading`, or `none` for the Titelei of Busolt and the Wiener Logik, which the
+  transcription gives no title at all. The report counts the three.
+- Blomberg alone keys its lecture to Meier's §§, in headings that stand alone on their
+  line: `§ 249`, `§: 92: et §: 93:`, `§ 66- 91`, `§phus 250`. The heading is kept
+  verbatim with the numbers parsed out beside it, so a tool can line the lecture up
+  against the Meier reader. A § inside a sentence is a cross-reference and stays in the
+  text.
+- The InteLex navigation and copyright lines wrapping the transcription are not the AA,
+  and are dropped.
+
+Per "Attested vs. inferred" below: a paragraph joined on the transcription's own `|`
+carries `joined: ["mark"]`; one joined on the extractor's judgement — the line broke off
+without terminal punctuation and the next began in lower case — carries
+`joined: ["inferred"]`, so a reader can see the paragraph break was removed by inference.
 
 ## Shared conventions
 
