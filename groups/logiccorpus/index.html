@@ -11,41 +11,122 @@
     --ink: #1a1208;
     --parchment: #f5efe0;
     --parchment-dark: #e8dfc8;
+    --parchment-deeper: #d9cdb0;
     --accent: #5c3d1e;
     --accent-light: #8b5e3c;
     --faded: #7a6a52;
+    --line: #9e8d6f;
+    --hit: #f0d9a0;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
 
+  html, body { height: 100%; margin: 0; }
   body {
+    display: flex;
+    flex-direction: column;
     background: var(--parchment);
     color: var(--ink);
-    font-family: 'EB Garamond', serif;
+    font-family: 'EB Garamond', Garamond, serif;
     font-size: 1.05rem;
     line-height: 1.5;
   }
 
+  /* ── top bar ── */
   header {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem 1.1rem;
+    padding: .55rem 1.2rem;
     border-bottom: 1px solid var(--accent-light);
     background: var(--parchment-dark);
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: baseline;
-    gap: 1.25rem;
   }
-
-  header h1 {
-    font-family: 'Cinzel', serif;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    font-size: 1.3rem;
-    color: var(--accent);
+  header h1 { font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: .04em; font-size: 1.15rem; color: var(--accent); margin: 0; }
+  header a { color: var(--faded); font-size: .9rem; }
+  .works { display: flex; gap: .3rem; }
+  button, select, input[type=text] { font: inherit; }
+  button {
+    cursor: pointer; padding: .2rem .7rem;
+    background: transparent; color: var(--accent);
+    border: 1px solid var(--line); border-radius: 3px;
   }
+  button:hover { background: var(--parchment-deeper); }
+  button[aria-selected=true] { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  button:disabled { opacity: .4; cursor: default; background: transparent; }
+  select, input[type=text] {
+    padding: .2rem .4rem; color: var(--ink);
+    background: var(--parchment); border: 1px solid var(--line); border-radius: 3px;
+  }
+  input[type=text]:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 1px; }
+  .secnav { display: flex; gap: .3rem; align-items: center; min-width: 0; flex: 1 1 22rem; }
+  .secnav select { flex: 1 1 auto; min-width: 0; }
 
-  header a { color: var(--faded); font-size: 0.9rem; }
+  /* ── two columns ── */
+  main { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+  @media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); } }
+  #reader, #panel { min-height: 0; overflow-y: auto; }
+  #panel { border-left: 1px solid var(--parchment-deeper); background: var(--parchment-dark); padding: .8rem 1rem 2rem; }
 
-  main { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem; }
+  /* ── reader ── */
+  #readerInner { max-width: 50rem; margin: 0 auto; padding: 1.2rem 1.4rem 4rem; }
+  .worknote { font-size: .92rem; color: var(--faded); margin: 0 0 .9rem; }
+  .worknote .legend-dash { display: inline-block; width: .9rem; border-left: 2px dashed var(--accent-light); height: .9rem; vertical-align: -.15rem; margin: 0 .2rem 0 .1rem; }
+  #secTitle { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.2rem; letter-spacing: .03em; color: var(--accent); margin: 0 0 .15rem; }
+  .secmeta { color: var(--faded); font-size: .92rem; margin: 0 0 1.1rem; }
+  .secmeta i { display: block; }
+
+  .blk { position: relative; padding: .1rem 0 .1rem 5.3rem; margin: 0 0 .7rem; font-size: 1.14rem; line-height: 1.68; border-radius: 2px; }
+  .blk .gutter { position: absolute; left: 0; top: .22rem; width: 4.8rem; text-align: right; font-size: .78rem; line-height: 1.3; color: var(--faded); font-family: 'Cinzel', serif; letter-spacing: .02em; }
+  .blk .gutter .aa { display: block; }
+  .blk .gutter .para { display: block; color: var(--accent); margin-top: .1rem; }
+  .blk.inferred { border-left: 2px dashed var(--accent-light); margin-left: -.5rem; padding-left: 5.8rem; }
+  .blk.inferred .gutter { left: .5rem; }
+  .blk.note { font-style: italic; color: var(--faded); font-size: 1rem; }
+  .blk.rule hr { border: 0; border-top: 1px solid var(--line); margin: .8rem 0; }
+  .blk.flash { animation: flash 1.6s ease-out; }
+  @keyframes flash { from { background: var(--hit); } to { background: transparent; } }
+  .pg { font-family: 'Cinzel', serif; font-size: .72rem; color: var(--accent); background: var(--parchment-dark); border: 1px solid var(--parchment-deeper); border-radius: 2px; padding: 0 .25rem; margin: 0 .15rem; white-space: nowrap; cursor: default; }
+  .ms { font-size: .78rem; color: var(--faded); margin: 0 .1rem; cursor: default; }
+  .ed { color: var(--faded); }
+  mark, .reader-hit { background: var(--hit); color: inherit; border-radius: 2px; padding: 0 .05em; }
+  .reader-hit.cur { background: #e7b955; outline: 1px solid var(--accent-light); }
+
+  /* ── panel ── */
+  .tabs { display: flex; gap: .3rem; margin: 0 0 .8rem; }
+  .field { margin: 0 0 .6rem; }
+  .field label.title { display: block; font-family: 'Cinzel', serif; font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; color: var(--accent-light); margin-bottom: .15rem; }
+  .field input[type=text] { width: 100%; font-size: 1.1rem; }
+  .opts { display: flex; flex-wrap: wrap; gap: .3rem 1rem; align-items: center; font-size: .95rem; margin: .35rem 0 0; }
+  .opts label { white-space: nowrap; }
+  .hint { color: var(--faded); font-size: .92rem; margin: .4rem 0; }
+  .summary { margin: .6rem 0 .5rem; font-size: 1rem; }
+  .summary b { color: var(--accent); }
+  details.group { margin: .5rem 0; }
+  details.group > summary { cursor: pointer; font-family: 'Cinzel', serif; font-size: .85rem; letter-spacing: .05em; color: var(--accent); }
+  details.group > summary .n { color: var(--faded); font-family: 'EB Garamond', serif; letter-spacing: 0; }
+  .hit { display: block; width: 100%; text-align: left; margin: .25rem 0; padding: .3rem .5rem; background: var(--parchment); border: 1px solid var(--parchment-deeper); border-radius: 3px; color: var(--ink); }
+  .hit:hover { background: #fbf6e8; border-color: var(--accent-light); }
+  .hit.sel { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+  .hit .cite { display: block; font-size: .78rem; color: var(--faded); font-family: 'Cinzel', serif; letter-spacing: .02em; }
+  .hit .snip { display: block; font-size: 1rem; line-height: 1.4; }
+  .approx { color: var(--accent-light); font-style: italic; margin-left: .3rem; font-family: 'EB Garamond', serif; }
+  .more { margin: .3rem 0 .6rem; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; background: var(--parchment); }
+  th { font-family: 'Cinzel', serif; font-weight: 400; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; text-align: right; color: var(--accent-light); border-bottom: 1px solid var(--line); padding: .25rem .4rem; }
+  th:first-child, td:first-child { text-align: left; }
+  td { text-align: right; padding: .25rem .4rem; border-bottom: 1px solid var(--parchment-deeper); }
+  h3 { font-family: 'Cinzel', serif; font-weight: 400; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-light); margin: 1.1rem 0 .3rem; }
+  .forms { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: .2rem .8rem; font-size: .98rem; }
+  .forms small { color: var(--faded); }
+  .strip { display: flex; align-items: flex-end; height: 3.2rem; gap: 1px; background: var(--parchment); border-bottom: 1px solid var(--line); margin: .15rem 0 .5rem; }
+  .strip button { padding: 0; border: 0; border-radius: 1px 1px 0 0; background: var(--accent-light); min-width: 2px; }
+  .strip button:hover { background: var(--accent); }
+  .strip button.empty { background: var(--parchment-deeper); height: 2px; }
+  .striplabel { font-size: .85rem; color: var(--faded); margin: .5rem 0 0; }
+  .link { background: none; border: 0; color: var(--accent); text-decoration: underline; padding: 0; }
+  .note { font-size: .88rem; color: var(--faded); margin: .8rem 0 0; }
 </style>
 </head>
 <body>
@@ -53,25 +134,458 @@
 <header>
   <h1>Logic Corpus</h1>
   <a href="../../">Kant Lab</a>
+  <div class="works" id="works" role="tablist" aria-label="Transcript"></div>
+  <div class="secnav">
+    <button id="prevSec" title="Previous section" aria-label="Previous section">‹</button>
+    <select id="secSel" aria-label="Section"></select>
+    <button id="nextSec" title="Next section" aria-label="Next section">›</button>
+  </div>
 </header>
 
-<main></main>
+<main>
+  <section id="reader" aria-label="Transcript">
+    <div id="readerInner">
+      <p class="worknote" id="workNote"></p>
+      <h2 id="secTitle"></h2>
+      <p class="secmeta" id="secMeta"></p>
+      <div id="blocks"></div>
+    </div>
+  </section>
+  <aside id="panel" aria-label="Search">
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div id="panes"></div>
+  </aside>
+</main>
 
-<!-- Shared data goes here, before the tool's own script, as plain <script src>
-     includes so the page still works from a file:// URL. See data/README.md.
-<script src="../../data/phases-adickes.js"></script>
--->
+<!-- Shared data, before the tool's own script, as plain <script src> includes so the
+     page still works from a file:// URL. See data/README.md. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
 
 <script>
 // ── Data ──
+// Kant's three logic lectures as AA XXIV prints them. Each work is { meta, sections }; a
+// section's blocks are paragraphs of running prose (kind "text"), AA cross-references
+// ("note") or rules, with the AA and manuscript pages kept as offsets into the text.
+const WORKS = [
+  { key: 'blomberg', short: 'Blomberg', abbr: 'Bl', L: LOGIK_BLOMBERG },
+  { key: 'busolt',   short: 'Busolt',   abbr: 'Bu', L: LOGIK_BUSOLT },
+  { key: 'wiener',   short: 'Wiener',   abbr: 'Wi', L: LOGIK_WIENER },
+];
+const MIN_QUERY = 2;        // letters a search needs before it runs
+const SHOW_STEP = 60;       // hits listed per work, and per "show more"
+const SNIP = 70;            // characters of context either side of a hit
+
+function sectionTitle(sec) {
+  if (sec.title) return sec.title;
+  if (sec.titleSrc === 'none') return '[Titelei]';      // the transcription gives it no title
+  return (sec.headings && sec.headings[0]) || '[untitled]';
+}
+
+const BLOCK_AT = new Map();                 // block id -> { w, s, b }
+for (const [w, W] of WORKS.entries()) {
+  W.secs = W.L.sections.map((sec, s) => {
+    let from = Infinity, to = 0;
+    sec.blocks.forEach((b, bi) => {
+      BLOCK_AT.set(b.id, { w, s, b: bi });
+      from = Math.min(from, b.aa); to = Math.max(to, b.aaEnd || b.aa);
+    });
+    return { sec, title: sectionTitle(sec), from, to };
+  });
+}
+const aaRange = (a, b) => a === b ? 'AA 24:' + a : 'AA 24:' + a + '–' + b;
 
 // ── State ──
+const firstReal = w => Math.max(0, WORKS[w].secs.findIndex(x => x.sec.titleSrc !== 'none'));
+const cur = { w: 0, s: firstReal(0) };      // the work and section in the reader
+let focus = null;                           // { id, from } the hit last opened in the reader
+let active = null;                          // { byBlock } the ranges the reader highlights
+let tab = 'word';
+const opts = {
+  word:    { q: '', mode: 'prefix', fold: true, scope: [true, true, true], shown: [SHOW_STEP, SHOW_STEP, SHOW_STEP], res: null },
+  concept: { q: '', mode: 'prefix', fold: true },
+};
 
-// ── Render ──
+// ── Small helpers ──
+const $ = id => document.getElementById(id);
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in (attrs || {})) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  }
+  for (const kid of kids.flat()) {
+    if (kid == null || kid === false) continue;
+    e.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return e;
+}
+const plural = (n, one, many) => n + ' ' + (n === 1 ? one : (many || one + 's'));
+const fmt = n => n.toLocaleString('en-US');
+
+// ── Matching across spellings ──
+// Both the query and the text are folded the same way, and each folded letter remembers
+// where it came from, so a hit can be shown in the text exactly as printed.
+//   case · ß = ss · ä ö ü = ae oe ue · other accents dropped · y = i (seyn = sein) ·
+//   th = t (Urtheil = Urteil) · doubled letters are one (Begrif = Begriff) ·
+//   anything that is not a letter or digit is a single space.
+// With folding off only case and spacing are ignored.
+const UMLAUT = { 'ä': 'ae', 'ö': 'oe', 'ü': 'ue', 'ß': 'ss' };
+const WORDCHAR = /[\p{L}\p{N}]/u;
+function normalize(text, fold) {
+  const out = [], map = [];
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (!WORDCHAR.test(ch)) {
+      if (out.length && out[out.length - 1] !== ' ') { out.push(' '); map.push(i); }
+      continue;
+    }
+    let low = ch.toLowerCase();
+    if (!fold) { out.push(low); map.push(i); continue; }
+    if (UMLAUT[low]) low = UMLAUT[low];
+    else low = low.normalize('NFD').replace(/\p{M}/gu, '');
+    for (let c of low) {
+      if (c === 'y') c = 'i';
+      const last = out[out.length - 1];
+      if (c === last) continue;                                       // doubled letter
+      if (c === 'h' && last === 't' && text[i - 1] && text[i - 1].toLowerCase() === 't') continue;   // th
+      out.push(c); map.push(i);
+    }
+  }
+  if (out[out.length - 1] === ' ') { out.pop(); map.pop(); }
+  return { n: out.join(''), map };
+}
+
+const INDEX = {};           // fold? -> one entry per text block: { w, s, bi, b, n, map }
+function getIndex(fold) {
+  if (INDEX[fold]) return INDEX[fold];
+  const arr = [];
+  for (const [w, W] of WORKS.entries())
+    W.L.sections.forEach((sec, s) => sec.blocks.forEach((b, bi) => {
+      if (b.kind !== 'text') return;
+      const { n, map } = normalize(b.text, fold);
+      arr.push({ w, s, bi, b, n, map });
+    }));
+  return INDEX[fold] = arr;
+}
+let WORDS = null;           // words per work and per section, for rates
+function wordCounts() {
+  if (WORDS) return WORDS;
+  WORDS = WORKS.map(W => W.L.sections.map(() => 0));
+  for (const e of getIndex(true)) if (e.n) WORDS[e.w][e.s] += e.n.split(' ').length;
+  return WORDS;
+}
+
+// The hits of `q` in the works `scope` allows, in reading order. `mode` is where in a word
+// the match may start (prefix) or must lie (whole), or neither (any).
+function search(q, mode, fold, scope) {
+  const nq = normalize(q, fold).n;
+  if (nq.length < MIN_QUERY) return null;
+  const plainQ = normalize(q, false).n;
+  const hits = [], byBlock = new Map();
+  for (const e of getIndex(fold)) {
+    if (scope && !scope[e.w]) continue;
+    const n = e.n, text = e.b.text;
+    let i = n.indexOf(nq);
+    while (i !== -1) {
+      const j = i + nq.length;
+      const startOk = i === 0 || n[i - 1] === ' ';
+      const endOk = j === n.length || n[j] === ' ';
+      if (mode === 'any' || (mode === 'prefix' && startOk) || (mode === 'whole' && startOk && endOk)) {
+        let from = e.map[i], to = e.map[j - 1] + 1;
+        if (fold) {           // take in the letters the folding dropped after the last one matched
+          const lw = c => c.toLowerCase();
+          while (to < text.length && (lw(text[to]) === lw(text[to - 1]) || (lw(text[to - 1]) === 't' && lw(text[to]) === 'h'))) to++;
+        }
+        const hit = { w: e.w, s: e.s, bi: e.bi, b: e.b, from, to,
+                      approx: normalize(text.slice(from, to), false).n !== plainQ };
+        hits.push(hit);
+        if (!byBlock.has(e.b.id)) byBlock.set(e.b.id, []);
+        byBlock.get(e.b.id).push([from, to]);
+        i = n.indexOf(nq, j);
+      } else i = n.indexOf(nq, i + 1);
+    }
+  }
+  return { hits, byBlock, q };
+}
+
+function pageAt(b, off) {
+  let p = b.aa;
+  for (const pg of b.pages || []) if (pg.i <= off) p = pg.p;
+  return p;
+}
+function cite(h) {
+  const parts = [WORKS[h.w].short, 'AA 24:' + pageAt(h.b, h.from)];
+  if (h.b.para && h.b.para.raw) parts.push(h.b.para.raw);
+  return parts.join(' · ');
+}
+function snippet(h) {
+  const t = h.b.text;
+  let a = Math.max(0, h.from - SNIP), b = Math.min(t.length, h.to + SNIP);
+  if (a > 0) { const sp = t.indexOf(' ', a); if (sp !== -1 && sp < h.from) a = sp + 1; }
+  if (b < t.length) { const sp = t.lastIndexOf(' ', b); if (sp > h.to) b = sp; }
+  return el('span', { class: 'snip' }, a > 0 ? '… ' : '', t.slice(a, h.from), el('mark', null, t.slice(h.from, h.to)), t.slice(h.to, b), b < t.length ? ' …' : '');
+}
+function surfaceWord(h) {                       // the whole printed word a hit lies in
+  const t = h.b.text, L = /\p{L}/u;
+  let a = h.from, b = h.to;
+  while (a > 0 && L.test(t[a - 1])) a--;
+  while (b < t.length && L.test(t[b])) b++;
+  return t.slice(a, b);
+}
+
+// ── Render: the reader ──
+const EDITORIAL = /\[[^\]]*\]|<[^>]*>/g;      // [ Textlücke: AA: Die ]  [AA: judicium ]  < bricht ab >
+function fillText(parent, b, ranges, focusFrom) {
+  const t = b.text, len = t.length;
+  const eds = [...t.matchAll(EDITORIAL)].map(m => [m.index, m.index + m[0].length]);
+  const marks = new Map();
+  const addMark = (i, node) => { if (!marks.has(i)) marks.set(i, []); marks.get(i).push(node); };
+  for (const pg of b.pages || []) if (pg.i > 0) addMark(pg.i, el('span', { class: 'pg', title: 'AA 24:' + pg.p + ' begins here' }, '‖ ' + pg.p));
+  for (const m of b.ms || []) addMark(m.i, el('span', { class: 'ms', title: 'The manuscript\'s own page ' + m.p + ' begins here' }, '[ms ' + m.p + ']'));
+  const cuts = new Set([0, len, ...marks.keys()]);
+  for (const [a, c] of eds.concat(ranges)) { cuts.add(a); cuts.add(c); }
+  const pts = [...cuts].filter(x => x >= 0 && x <= len).sort((x, y) => x - y);
+  for (let k = 0; k < pts.length; k++) {
+    const a = pts[k], c = pts[k + 1];
+    for (const m of marks.get(a) || []) parent.append(m);
+    if (c === undefined) break;
+    const piece = t.slice(a, c);
+    const inEd = eds.some(([s, e]) => a >= s && c <= e);
+    const hit = ranges.find(([s, e]) => a >= s && c <= e);
+    if (!inEd && !hit) { parent.append(piece); continue; }
+    const cls = [];
+    if (inEd) cls.push('ed');
+    if (hit) { cls.push('reader-hit'); if (focusFrom === hit[0]) cls.push('cur'); }
+    parent.append(el('span', { class: cls.join(' ') }, piece));
+  }
+}
+
+function renderReader(scrollTo, keepPlace) {   // keepPlace: a refresh for new highlights, not a move
+  const W = WORKS[cur.w], S = W.secs[cur.s];
+  const meta = W.L.meta;
+  $('workNote').replaceChildren(
+    meta.label + ', ' + meta.date + '. AA 24:' + meta.aa[0] + '–' + meta.aa[1] + '. ',
+    el('span', { class: 'legend-dash' }), 'A dashed rule marks a paragraph the extractor joined on its own judgement; ‖ 28 marks where AA page 28 begins.');
+  $('secTitle').textContent = S.title;
+  const bits = [aaRange(S.from, S.to)];
+  $('secMeta').replaceChildren(bits.join(' · '),
+    ...(S.sec.headings || []).filter(h => h !== S.title).map(h => el('i', null, h)),
+    el('i', null, S.sec.provenance || ''));
+  const box = $('blocks');
+  const place = $('reader').scrollTop;          // taken before the old text is cleared
+  box.replaceChildren();
+  let prevAa = null, prevPara = null;
+  S.sec.blocks.forEach(b => {
+    const blk = el('div', { class: 'blk ' + b.kind, id: 'blk-' + b.id });
+    if ((b.joined || []).includes('inferred')) {
+      blk.classList.add('inferred');
+      blk.title = 'This paragraph was joined from more than one line of the transcription on the extractor\'s own judgement.';
+    }
+    if (b.kind === 'rule') { blk.append(el('hr')); box.append(blk); return; }
+    const gutter = el('div', { class: 'gutter' });
+    if (b.aa !== prevAa) gutter.append(el('span', { class: 'aa' }, 'AA ' + b.aa));
+    const para = b.para && b.para.raw;
+    if (para && para !== prevPara) gutter.append(el('span', { class: 'para', title: 'Meier\'s § as the transcription heads it' }, para));
+    prevAa = b.aaEnd || b.aa; prevPara = para || prevPara;
+    blk.append(gutter);
+    const ranges = active && active.byBlock.get(b.id) || [];
+    fillText(blk, b, ranges, focus && focus.id === b.id ? focus.from : null);
+    box.append(blk);
+  });
+  if (keepPlace) $('reader').scrollTop = place;
+  else if (scrollTo) {
+    const target = $('blk-' + scrollTo);
+    if (target) { target.scrollIntoView({ block: 'center' }); target.classList.add('flash'); }
+  } else $('reader').scrollTop = 0;
+}
+
+function renderTop() {
+  $('works').replaceChildren(...WORKS.map((W, w) =>
+    el('button', { role: 'tab', 'aria-selected': String(w === cur.w), title: W.L.meta.label + ', ' + W.L.meta.date,
+                   onclick: () => { if (w === cur.w) return; cur.w = w; cur.s = firstReal(w); focus = null; renderTop(); renderReader(); } },
+       W.short, ' ', el('small', null, W.L.meta.date))));
+  const sel = $('secSel');
+  sel.replaceChildren(...WORKS[cur.w].secs.map((x, s) =>
+    el('option', { value: String(s) }, (s + 1) + '. ' + x.title + ' (' + aaRange(x.from, x.to) + ')')));
+  sel.value = String(cur.s);
+  $('prevSec').disabled = cur.s === 0;
+  $('nextSec').disabled = cur.s === WORKS[cur.w].secs.length - 1;
+}
+
+function go(w, s, blockId) {                    // open a section, and a block in it
+  cur.w = w; cur.s = s;
+  renderTop(); renderReader(blockId);
+}
+function goHit(h) {
+  focus = { id: h.b.id, from: h.from };
+  go(h.w, h.s, h.b.id);
+}
+
+// ── Render: the panel ──
+function optionControls(o, rerun, withScope) {
+  const mode = el('select', { 'aria-label': 'Where in a word the match may fall', onchange: () => { o.mode = mode.value; rerun(); } },
+    el('option', { value: 'prefix' }, 'Word beginning'), el('option', { value: 'any' }, 'Anywhere in a word'), el('option', { value: 'whole' }, 'Whole word'));
+  mode.value = o.mode;
+  const fold = el('input', { type: 'checkbox', checked: '', onchange: () => { o.fold = fold.checked; rerun(); } });
+  const bits = [mode, el('label', null, fold, ' Match across spellings')];
+  const scope = [];
+  if (withScope) WORKS.forEach((W, w) => {
+    const cb = el('input', { type: 'checkbox', checked: '', onchange: () => { o.scope[w] = cb.checked; rerun(); } });
+    scope.push(cb);
+    bits.push(el('label', null, cb, ' ' + W.short));
+  });
+  const box = el('div', { class: 'opts' }, bits);
+  box.sync = () => { mode.value = o.mode; fold.checked = o.fold; scope.forEach((cb, w) => { cb.checked = o.scope[w]; }); };
+  return box;
+}
+
+function buildWordPane() {
+  const o = opts.word;
+  const results = el('div');
+  const run = () => { o.shown = [SHOW_STEP, SHOW_STEP, SHOW_STEP]; o.res = search(o.q, o.mode, o.fold, o.scope); showResults(); };
+  let timer;
+  const input = el('input', { type: 'text', id: 'wordQ', placeholder: 'e.g. Urteil, Begriff, a priori', autocomplete: 'off', spellcheck: 'false',
+    oninput: () => { o.q = input.value; clearTimeout(timer); timer = setTimeout(run, 220); } });
+  function showResults() {
+    active = o.res ? { byBlock: o.res.byBlock } : null;
+    renderReader(null, true);
+    results.replaceChildren();
+    if (!o.q.trim()) { results.append(el('p', { class: 'hint' }, 'Type a word or a phrase. A search ignores case and punctuation, and matches across the old and new spellings.')); return; }
+    if (!o.res) { results.append(el('p', { class: 'hint' }, 'Type at least ' + MIN_QUERY + ' letters.')); return; }
+    const { hits } = o.res;
+    const per = WORKS.map((W, w) => hits.filter(h => h.w === w));
+    const approx = hits.filter(h => h.approx).length;
+    results.append(el('p', { class: 'summary' }, el('b', null, plural(hits.length, 'hit')), ' for “' + o.q.trim() + '”',
+      hits.length ? ' — ' + WORKS.map((W, w) => W.short + ' ' + per[w].length).join(' · ') : ''));
+    if (approx) results.append(el('p', { class: 'hint' }, plural(approx, 'hit') + ' matched across spellings, marked ≈; the text is shown as printed.'));
+    WORKS.forEach((W, w) => {
+      if (!per[w].length) return;
+      const g = el('details', { class: 'group', open: '' }, el('summary', null, W.short + ' ', el('span', { class: 'n' }, '(' + per[w].length + ')')));
+      per[w].slice(0, o.shown[w]).forEach(h => {
+        const b = el('button', { class: 'hit', onclick: () => { results.querySelectorAll('.hit.sel').forEach(x => x.classList.remove('sel')); b.classList.add('sel'); goHit(h); } },
+          el('span', { class: 'cite' }, cite(h), h.approx ? el('span', { class: 'approx', title: 'Matched across spellings' }, '≈') : ''), snippet(h));
+        g.append(b);
+      });
+      if (per[w].length > o.shown[w]) g.append(el('button', { class: 'more', onclick: () => { o.shown[w] += SHOW_STEP; showResults(); } },
+        'Show ' + Math.min(SHOW_STEP, per[w].length - o.shown[w]) + ' more of ' + (per[w].length - o.shown[w])));
+      results.append(g);
+    });
+  }
+  const optBox = optionControls(o, run, true);
+  const pane = el('div', null,
+    el('div', { class: 'field' }, el('label', { class: 'title', for: 'wordQ' }, 'Word or phrase'), input, optBox),
+    results);
+  pane.search = (q, from) => {                  // run another tab's term here, under the same options, in all three lectures
+    o.mode = from.mode; o.fold = from.fold; o.scope = [true, true, true]; optBox.sync();
+    input.value = q; o.q = q; run();
+  };
+  pane.refresh = showResults;
+  showResults();
+  return pane;
+}
+
+function buildConceptPane(wordPane) {
+  const o = opts.concept;
+  const results = el('div');
+  let timer;
+  const run = () => showResults();
+  const input = el('input', { type: 'text', id: 'conceptQ', placeholder: 'any term, e.g. Begriff, Schluß, Wahrheit', autocomplete: 'off', spellcheck: 'false',
+    oninput: () => { o.q = input.value; clearTimeout(timer); timer = setTimeout(run, 220); } });
+  function showResults() {
+    results.replaceChildren();
+    const res = o.q.trim() ? search(o.q, o.mode, o.fold, null) : null;
+    active = res ? { byBlock: res.byBlock } : null;
+    renderReader(null, true);
+    if (!o.q.trim()) { results.append(el('p', { class: 'hint' }, 'Type any term to see where each lecture uses it, side by side: how often, in which spellings, and where in the lecture.')); return; }
+    if (!res) { results.append(el('p', { class: 'hint' }, 'Type at least ' + MIN_QUERY + ' letters.')); return; }
+    const words = wordCounts();
+    const per = WORKS.map((W, w) => res.hits.filter(h => h.w === w));
+    const secHits = WORKS.map((W, w) => W.secs.map((x, s) => per[w].filter(h => h.s === s).length));
+    const total = words.map(ws => ws.reduce((a, b) => a + b, 0));
+
+    results.append(el('p', { class: 'summary' }, el('b', null, plural(res.hits.length, 'occurrence')), ' of “' + o.q.trim() + '” in the three lectures'));
+    const rows = WORKS.map((W, w) => el('tr', null,
+      el('td', null, W.short), el('td', null, fmt(per[w].length)),
+      el('td', null, (per[w].length / total[w] * 10000).toFixed(1)),
+      el('td', null, secHits[w].filter(n => n).length + ' of ' + W.secs.length),
+      el('td', null, fmt(total[w]))));
+    results.append(el('table', null,
+      el('tr', null, el('th', null, 'Lecture'), el('th', null, 'Occurrences'), el('th', null, 'Per 10,000 words'), el('th', null, 'Sections'), el('th', null, 'Words')),
+      rows));
+
+    // the spellings the term was found in
+    const forms = new Map();
+    for (const h of res.hits) {
+      const f = surfaceWord(h);
+      if (!forms.has(f)) forms.set(f, [0, 0, 0, 0]);
+      const c = forms.get(f); c[0]++; c[h.w + 1]++;
+    }
+    const top = [...forms.entries()].sort((a, b) => b[1][0] - a[1][0]);
+    results.append(el('h3', null, 'Forms found'));
+    results.append(el('ul', { class: 'forms' }, top.slice(0, 24).map(([f, c]) => el('li', null, f + ' ', el('small', null, c[0] + (c.slice(1).filter(n => n).length > 1 ? ' (' + WORKS.map((W, w) => c[w + 1] ? W.abbr + ' ' + c[w + 1] : '').filter(Boolean).join(', ') + ')' : ''))))));
+    if (top.length > 24) results.append(el('p', { class: 'hint' }, '… and ' + (top.length - 24) + ' rarer forms.'));
+
+    // where in each lecture: a bar per section, as wide as the section is long and as tall as the term is dense in it
+    results.append(el('h3', null, 'Where in each lecture'));
+    const rate = WORKS.map((W, w) => secHits[w].map((n, s) => words[w][s] ? n / words[w][s] : 0));
+    const peak = Math.max(...rate.flat(), 1e-9);
+    WORKS.forEach((W, w) => {
+      results.append(el('p', { class: 'striplabel' }, W.short + ' — bar width is the section’s length, height the term’s density'));
+      const strip = el('div', { class: 'strip' });
+      W.secs.forEach((x, s) => {
+        const n = secHits[w][s];
+        const first = per[w].find(h => h.s === s);
+        strip.append(el('button', { class: n ? '' : 'empty', style: 'flex:' + Math.max(words[w][s], 1) + ' 1 0;' + (n ? 'height:' + Math.max(8, rate[w][s] / peak * 100) + '%' : ''),
+          title: x.title + ' (' + aaRange(x.from, x.to) + '): ' + plural(n, 'occurrence'),
+          onclick: () => first ? goHit(first) : (focus = null, go(w, s)) }));
+      });
+      results.append(strip);
+    });
+
+    // the first passages of each
+    results.append(el('h3', null, 'First passages'));
+    WORKS.forEach((W, w) => {
+      if (!per[w].length) { results.append(el('p', { class: 'hint' }, W.short + ': none.')); return; }
+      results.append(el('p', { class: 'striplabel' }, W.short));
+      per[w].slice(0, 3).forEach(h => results.append(el('button', { class: 'hit', onclick: () => goHit(h) },
+        el('span', { class: 'cite' }, cite(h), h.approx ? el('span', { class: 'approx', title: 'Matched across spellings' }, '≈') : ''), snippet(h))));
+    });
+    results.append(el('p', { class: 'more' }, el('button', { class: 'link', onclick: () => { setTab('word'); wordPane.search(o.q, o); } },
+      'List all ' + fmt(res.hits.length) + ' in Word / phrase search')));
+    results.append(el('p', { class: 'note' }, 'Counts use the transcription’s prose paragraphs only, not its AA cross-references. Spelling folding follows the Word / phrase tab’s rules; ≈ marks a hit whose printed spelling differs from what was typed.'));
+  }
+  const pane = el('div', null,
+    el('div', { class: 'field' }, el('label', { class: 'title', for: 'conceptQ' }, 'Term'), input, optionControls(o, run, false)),
+    results);
+  pane.refresh = showResults;
+  showResults();
+  return pane;
+}
+
+const TABS = [['word', 'Word / phrase'], ['concept', 'Concept occurrences']];
+let panes = {};
+function setTab(t) {
+  tab = t;
+  $('tabs').replaceChildren(...TABS.map(([k, label]) => el('button', { role: 'tab', 'aria-selected': String(k === tab), onclick: () => setTab(k) }, label)));
+  for (const k in panes) panes[k].hidden = k !== tab;
+  panes[tab].refresh();                       // the reader shows the hits of whichever tab is open
+}
 
 // ── Events ──
+$('secSel').addEventListener('change', e => { cur.s = Number(e.target.value); focus = null; renderTop(); renderReader(); });
+$('prevSec').addEventListener('click', () => { if (cur.s > 0) { cur.s--; focus = null; renderTop(); renderReader(); } });
+$('nextSec').addEventListener('click', () => { if (cur.s < WORKS[cur.w].secs.length - 1) { cur.s++; focus = null; renderTop(); renderReader(); } });
 
 // ── Init ──
+renderTop();
+renderReader();
+panes.word = buildWordPane();
+panes.concept = buildConceptPane(panes.word);
+$('panes').append(panes.word, panes.concept);
+setTab('word');
 </script>
 </body>
 </html>
