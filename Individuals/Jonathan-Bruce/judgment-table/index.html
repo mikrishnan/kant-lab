@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Table of Judgments — a learning tool</title>
+<style>
+:root{
+  --parchment:#f4ecd8; --parchment-2:#ebe0c3; --card:#fbf6e8; --ink:#2a2118; --ink-soft:#5b4c3a;
+  --accent:#5c3d1e; --accent-2:#8a5a2b; --rule:#c9b78f; --good:#3d7a4a; --bad:#a23b2a; --glow:240,200,90;
+  --cat:#2f4a6b; --syl:#b5651d; --pri:#3d7a4a;
+  --body:'EB Garamond',Garamond,'Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+  --display:'Cinzel','Trajan Pro',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--parchment);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+header.top{padding:10px 24px;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:4px 18px;align-items:baseline}
+header.top h1{font-family:var(--display);font-weight:600;font-size:1.2rem;letter-spacing:.06em;margin:0;color:var(--accent)}
+header.top p{margin:0;color:var(--ink-soft);font-style:italic;font-size:.9rem}
+header.top .links{margin-left:auto;font-size:.88rem}
+header.top .links a{color:var(--accent);margin-left:14px}
+.wrap{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(330px,1fr);gap:18px;max-width:1550px;margin:0 auto;padding:14px 22px 40px;align-items:start}
+@media(max-width:1000px){.wrap{display:block}}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 14px;margin-bottom:12px}
+.panel h2{font-family:var(--display);font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;margin:0 0 6px;color:var(--accent)}
+.hint{color:var(--ink-soft);font-style:italic;font-size:.9rem}
+.btn{background:var(--parchment-2);border:1px solid var(--rule);border-radius:3px;padding:2px 10px;font-size:.88rem}
+.btn:hover{background:var(--rule)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--parchment);border-color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin:4px 0}
+
+/* lit bar */
+.litbar{min-height:2.4em;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chipx{display:inline-flex;align-items:center;gap:6px;border-radius:14px;padding:1px 4px 1px 11px;font-size:.88rem;color:#fff}
+.chipx.cat{background:var(--cat)} .chipx.syl{background:var(--syl)} .chipx.pri{background:var(--pri)}
+.chipx button{background:rgba(255,255,255,.25);border:none;border-radius:50%;width:1.3em;height:1.3em;line-height:1.2;color:#fff;padding:0}
+
+/* the table */
+.table{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.col{display:flex;flex-direction:column;gap:10px}
+.colhead{background:var(--accent);color:var(--parchment);border:none;border-radius:4px;padding:6px 8px;text-align:center;transition:box-shadow .25s}
+.colhead .de{font-family:var(--display);letter-spacing:.07em;font-size:.82rem;display:block}
+.colhead .la{font-size:.78rem;opacity:.85;display:block}
+.colhead.lit{box-shadow:0 0 0 3px #f0d98a,0 0 16px 3px rgba(var(--glow),.9)}
+.cell{position:relative;min-height:112px;background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:8px 8px 6px;text-align:center;transition:box-shadow .3s,background .3s,opacity .3s,transform .2s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.cell:hover{transform:translateY(-1px)}
+.cell .de{font-family:var(--display);font-size:1rem;letter-spacing:.04em;font-weight:600}
+.cell .sub{font-size:.82rem;color:var(--ink-soft);font-style:italic}
+.cell .tags{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;margin-top:3px}
+.cell.dim{opacity:.35}
+.cell.focus{outline:3px solid var(--ink);outline-offset:2px}
+.tag{font-size:.7rem;line-height:1.25;border-radius:9px;padding:0 6px;color:#fff;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag.cat{background:var(--cat)} .tag.syl{background:var(--syl)} .tag.pri{background:var(--pri)}
+.tag.bar{background:repeating-linear-gradient(45deg,#fff 0 4px,#e7d6ad 4px 8px);color:var(--bad);border:1px solid var(--bad)}
+.cell.hasbar{border-color:var(--bad);border-style:dashed}
+.cell.q-on{cursor:pointer;opacity:1;box-shadow:0 0 0 2px var(--accent-2)}
+.cell.q-off{opacity:.3;pointer-events:none}
+.cell.q-correct{box-shadow:0 0 0 4px var(--good),0 0 18px 4px rgba(61,122,74,.6);background:rgba(61,122,74,.14);opacity:1}
+.cell.q-wrong{box-shadow:0 0 0 4px var(--bad);background:rgba(162,59,42,.12);opacity:1}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.82rem;color:var(--ink-soft);margin-top:8px}
+.legend i{display:inline-block;width:.9em;height:.9em;border-radius:50%;vertical-align:-.1em;margin-right:4px}
+
+/* explain */
+.why .f{border-top:1px solid var(--rule);padding:5px 0}
+.why .f b{font-weight:600}
+.why ul{margin:2px 0 0;padding-left:1.2em;font-size:.92rem}
+.mine,.srcb{font-family:var(--display);font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;padding:0 5px;border-radius:2px;margin-left:5px;vertical-align:.1em;white-space:nowrap}
+.mine{border:1px dashed var(--accent-2);color:var(--accent-2)}
+.srcb{background:var(--accent-2);color:var(--parchment)}
+.qt{font-style:italic}
+.cite{font-family:var(--display);font-size:.6rem;letter-spacing:.05em;color:var(--accent-2)}
+.lk{background:none;border:none;color:var(--accent);text-decoration:underline;padding:0;font-size:.88rem}
+
+/* right pane */
+.tabbar{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--rule);margin-bottom:10px}
+.tab{font-family:var(--display);font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;background:var(--parchment-2);border:1px solid var(--rule);border-bottom:none;border-radius:4px 4px 0 0;padding:6px 11px}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--parchment);border-color:var(--accent)}
+.item{border:1px solid var(--rule);border-radius:4px;background:var(--card);margin:6px 0}
+.item.on{border-color:var(--ink);box-shadow:0 0 0 2px rgba(var(--glow),.8)}
+.item .hd{display:flex;gap:8px;align-items:center;padding:5px 8px}
+.item .hd .name{flex:1;text-align:left;background:none;border:none;padding:0;font-weight:600}
+.item .hd .name small{display:block;font-weight:400;color:var(--ink-soft);font-size:.82rem}
+.sw{border:1px solid var(--rule);background:var(--parchment-2);border-radius:12px;padding:0 10px;font-size:.8rem;white-space:nowrap}
+.sw[aria-pressed="true"]{background:var(--ink);color:var(--parchment);border-color:var(--ink)}
+.item .bd{padding:2px 10px 8px;border-top:1px solid var(--rule);font-size:.95rem}
+.item .bd p{margin:.35em 0}
+.grp{font-family:var(--display);font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin:12px 0 0;border-bottom:2px solid var(--rule)}
+.ex{margin:.3em 0;padding-left:.7em;border-left:3px solid var(--rule)}
+.ex.attested{border-left-color:var(--accent-2)}
+.srcl{font-size:.88rem;margin:.25em 0}
+.sch{font-family:ui-monospace,Consolas,monospace;font-size:.86rem;background:var(--parchment);padding:1px 6px;border-radius:3px}
+.cav{font-size:.88rem;border-left:3px solid var(--bad);padding-left:8px;margin:.4em 0;color:var(--ink-soft)}
+.qbox{font-size:1.1rem}
+.fb.good{color:var(--good)} .fb.bad{color:var(--bad)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(42,33,24,.55);display:flex;align-items:center;justify-content:center;z-index:10;padding:20px}
+.modal .box{background:var(--card);border:1px solid var(--accent);border-radius:6px;max-width:760px;max-height:85vh;overflow:auto;padding:14px 20px}
+.modal p{margin:.5em 0}
+.modal mark{background:#f0d98a;color:inherit}
+.modal .cur{background:rgba(240,217,138,.3);padding:2px 6px;border-radius:3px}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>The Table of Judgments</h1>
+  <p>Twelve forms of judgment, lit up by categories, syllogisms and principles drawn from three logic-lecture transcripts.</p>
+  <span class="links"><a href="../busolt/index.html">Busolt lecture ↗</a><a href="../busolt/division-checker.html">Division checker ↗</a></span>
+</header>
+
+<div class="wrap">
+  <section>
+    <div class="panel">
+      <h2>Lit up by</h2>
+      <div class="litbar" id="litbar"></div>
+      <div class="row" id="modebar"></div>
+    </div>
+    <div class="table" id="table" role="group" aria-label="Table of judgments"></div>
+    <div class="legend" id="legend"></div>
+    <div id="below" style="margin-top:12px"></div>
+  </section>
+  <section>
+    <div class="tabbar" id="tabs" role="tablist" aria-label="Factors"></div>
+    <div id="side"></div>
+  </section>
+</div>
+
+<script src="../busolt/logik-busolt-24.js"></script>
+<script src="../busolt/logik-blomberg-24.js"></script>
+<script src="../busolt/logik-wiener-24.js"></script>
+<script src="../busolt/busolt-annotations.js"></script>
+<script src="judgment-table-data.js"></script>
+<script>
+'use strict';
+/* ═══ INDEXES ════════════════════════════════════════════════════════════ */
+const WORKS = {busolt:{name:'Busolt', data:LOGIK_BUSOLT}, blomberg:{name:'Blomberg', data:LOGIK_BLOMBERG}, wiener:{name:'Wiener', data:LOGIK_WIENER}};
+const BLK = {};
+Object.entries(WORKS).forEach(([w, o]) => o.data.sections.forEach(s => s.blocks.forEach((b, i) => { BLK[b.id] = {w, s, b, i}; })));
+const CELLS = {};            // 'quant-allgemein' -> {title, moment}
+JT_TITLES.forEach(t => t.moments.forEach(m => { CELLS[t.id + '-' + m.id] = {t, m}; }));
+const KINDCOL = {cat:'#2f4a6b', syl:'#b5651d', pri:'#3d7a4a'};
+const KINDNAME = {cat:'category', syl:'inference', pri:'principle'};
+
+const FACTORS = {};
+JT_CATEGORY_SETS.forEach(set => set.items.forEach(it => {
+  const key = 'cat:' + set.id + ':' + it.id;
+  FACTORS[key] = {key, kind:'cat', label:it.de, sub:it.en, lights:it.lights || [], item:it, set};
+}));
+const MOODS = buildMoodItems();
+MOODS.concat(JT_OTHER_SYLLOGISMS).forEach(it => { FACTORS[it.id] = {key:it.id, kind:'syl', label:it.label, sub:it.group, lights:it.lights, item:it}; });
+JT_PRINCIPLES.forEach(it => { FACTORS[it.id] = {key:it.id, kind:'pri', label:it.label, sub:it.short, lights:it.lights, item:it}; });
+
+function pageAt(b, idx){ let p = b.aa; (b.pages || []).forEach(e => { if(idx >= e.i) p = e.p; }); return p; }
+function citeRef(ref){
+  const r = BLK[ref.id]; if(!r) return WORKS[ref.w].name + ' (unlocated)';
+  const i = ref.q ? Math.max(0, r.b.text.indexOf(ref.q)) : 0;
+  return WORKS[r.w].name + ' AA 24:' + pageAt(r.b, i);
+}
+function el(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
+function btn(label, cls, fn){ const b = el('button', cls || 'btn', label); b.type = 'button'; if(fn) b.addEventListener('click', fn); return b; }
+const cellName = id => CELLS[id].t.de + ': ' + CELLS[id].m.de;
+const mineTag = () => el('span', 'mine', 'my mapping');
+const srcTag = () => el('span', 'srcb', 'from the source');
+
+/* ═══ STATE ══════════════════════════════════════════════════════════════ */
+const ST = {tab:'categories', set:'kant', factors:[], mode:'any', cell:null, open:{}, practice:null};
+const listeners = [];
+
+function hashWrite(){
+  const p = new URLSearchParams();
+  if(ST.factors.length) p.set('f', ST.factors.join(','));
+  if(ST.mode === 'all') p.set('m', 'all');
+  if(ST.cell) p.set('c', ST.cell);
+  p.set('t', ST.tab);
+  try { history.replaceState(null, '', '#' + p.toString()); } catch(e) {}
+}
+function emit(){
+  hashWrite();
+  const st = JudgmentTable.state();
+  listeners.forEach(fn => { try { fn(st); } catch(e) {} });
+  if(window.parent !== window) { try { window.parent.postMessage({type:'jt:state', state:st}, '*'); } catch(e) {} }
+}
+function setFactors(keys){ ST.factors = keys.filter(k => FACTORS[k]); renderAll(); emit(); }
+function toggleFactor(k){ setFactors(ST.factors.includes(k) ? ST.factors.filter(x => x !== k) : ST.factors.concat(k)); }
+
+const JudgmentTable = window.JudgmentTable = {
+  select(keys){ setFactors([].concat(keys)); },
+  clear(){ setFactors([]); },
+  focusCell(id){ ST.cell = CELLS[id] ? id : null; renderAll(); emit(); },
+  setMode(m){ ST.mode = m === 'all' ? 'all' : 'any'; renderAll(); emit(); },
+  state(){ return {factors:ST.factors.slice(), mode:ST.mode, cell:ST.cell, tab:ST.tab, lit:litCells()}; },
+  ids(){ return {cells:Object.keys(CELLS), factors:Object.keys(FACTORS)}; },
+  on(fn){ listeners.push(fn); }
+};
+window.addEventListener('message', e => {
+  const d = e.data; if(!d || typeof d !== 'object') return;
+  if(d.type === 'jt:select') JudgmentTable.select(d.ids || []);
+  else if(d.type === 'jt:clear') JudgmentTable.clear();
+  else if(d.type === 'jt:cell') JudgmentTable.focusCell(d.id);
+  else if(d.type === 'jt:mode') JudgmentTable.setMode(d.mode);
+});
+
+/* ═══ VIEW COMPUTATION ═══════════════════════════════════════════════════ */
+function perFactor(){
+  return ST.factors.map(k => {
+    const f = FACTORS[k], cells = new Map(), heads = [];
+    f.lights.forEach(l => { if(l.c){ if(!cells.has(l.c)) cells.set(l.c, []); cells.get(l.c).push(l); } else if(l.t) heads.push(l); });
+    return {f, cells, heads};
+  });
+}
+function cellView(){
+  const pf = perFactor(), out = {};
+  Object.keys(CELLS).forEach(id => {
+    const touch = pf.filter(x => x.cells.has(id));
+    const lit = ST.mode === 'all' ? (pf.length > 0 && touch.length === pf.length) : touch.length > 0;
+    out[id] = {lit, touch, n:touch.length};
+  });
+  return out;
+}
+function litCells(){ const v = cellView(); return Object.keys(v).filter(id => v[id].lit); }
+function headView(){
+  const pf = perFactor(), out = {};
+  JT_TITLES.forEach(t => {
+    const touch = pf.filter(x => x.heads.some(h => h.t === t.id));
+    out[t.id] = ST.mode === 'all' ? (pf.length > 0 && touch.length === pf.length) : touch.length > 0;
+  });
+  return out;
+}
+
+/* ═══ TABLE ══════════════════════════════════════════════════════════════ */
+function renderTable(){
+  const box = document.getElementById('table'); box.innerHTML = '';
+  const practice = ST.tab === 'practice' && ST.practice;
+  const view = practice ? null : cellView(), hv = practice ? {} : headView();
+  const any = !practice && ST.factors.length > 0;
+  JT_TITLES.forEach(t => {
+    const col = el('div', 'col');
+    const h = el('div', 'colhead' + (hv[t.id] ? ' lit' : ''));
+    h.appendChild(el('span', 'de', t.de)); h.appendChild(el('span', 'la', t.la + ' · ' + t.en));
+    col.appendChild(h);
+    t.moments.forEach(m => {
+      const id = t.id + '-' + m.id;
+      const c = el('button', 'cell'); c.type = 'button'; c.dataset.cell = id;
+      c.appendChild(el('span', 'de', m.de)); c.appendChild(el('span', 'sub', m.la + ' · ' + m.en));
+      if(ST.cell === id && !practice) c.classList.add('focus');
+      if(practice){
+        const p = ST.practice, q = p.q;
+        if(!p.done){ c.classList.add(q.dim === t.id ? 'q-on' : 'q-off'); }
+        else { if(id === q.dim + '-' + q.answer) c.classList.add('q-correct'); else if(id === p.picked) c.classList.add('q-wrong'); else c.classList.add('q-off'); }
+        c.addEventListener('click', () => answer(id));
+      } else {
+        const v = view[id];
+        if(any && !v.lit) c.classList.add('dim');
+        if(v.lit){
+          const kinds = [...new Set(v.touch.map(x => x.f.kind))];
+          c.style.boxShadow = kinds.map((k, i) => '0 0 0 ' + (3 + 3 * i) + 'px ' + KINDCOL[k]).join(',') + ', 0 0 ' + (10 + 8 * v.n) + 'px ' + (2 + v.n) + 'px rgba(240,200,90,' + Math.min(.35 + .15 * v.n, .85) + ')';
+          c.style.background = 'rgba(240,217,138,' + Math.min(.18 + .16 * v.n, .75) + ')';
+          const tags = el('div', 'tags');
+          let bars = false;
+          v.touch.forEach(x => {
+            const ls = x.cells.get(id), isBar = ls.some(l => l.bar); bars = bars || isBar;
+            const tg = el('span', 'tag ' + (isBar ? 'bar' : x.f.kind), (isBar ? '✗ ' : '') + x.f.label.split(' ').slice(0, 3).join(' ') + ' · ' + [...new Set(ls.map(l => l.tag))].join(' '));
+            tg.title = ls.map(l => l.why).join(' ');
+            tags.appendChild(tg);
+          });
+          if(bars) c.classList.add('hasbar');
+          c.appendChild(tags);
+          c.setAttribute('aria-label', cellName(id) + ' — lit: ' + v.touch.map(x => x.f.label).join(', '));
+        }
+        c.addEventListener('click', () => { ST.cell = ST.cell === id ? null : id; renderTable(); renderBelow(); emit(); });
+      }
+      col.appendChild(c);
+    });
+    box.appendChild(col);
+  });
+}
+function renderLegend(){
+  const g = document.getElementById('legend'); g.innerHTML = '';
+  [['cat', 'categories'], ['syl', 'syllogism / inference types'], ['pri', 'principles and laws']].forEach(([k, l]) => {
+    const s = el('span'); const i = el('i'); i.style.background = KINDCOL[k]; s.appendChild(i); s.appendChild(document.createTextNode(l)); g.appendChild(s);
+  });
+  g.appendChild(el('span', null, 'Brighter glow = more of your choices touch that cell. Hatched tag = forbidden there.'));
+}
+function renderLitbar(){
+  const lb = document.getElementById('litbar'); lb.innerHTML = '';
+  if(ST.tab === 'practice'){ lb.appendChild(el('span', 'hint', 'Practice mode: the table shows only the question’s column. Your chosen lights are kept and return when you leave Practice.')); document.getElementById('modebar').innerHTML = ''; return; }
+  if(!ST.factors.length) lb.appendChild(el('span', 'hint', 'Nothing chosen. Pick categories, inference types or principles on the right; click a cell for its card.'));
+  ST.factors.forEach(k => {
+    const f = FACTORS[k]; const c = el('span', 'chipx ' + f.kind); c.appendChild(document.createTextNode(f.label));
+    const x = el('button', null, '×'); x.type = 'button'; x.setAttribute('aria-label', 'Remove ' + f.label); x.addEventListener('click', () => toggleFactor(k)); c.appendChild(x); lb.appendChild(c);
+  });
+  if(ST.factors.length) lb.appendChild(btn('Clear', 'btn', () => setFactors([])));
+  const mb = document.getElementById('modebar'); mb.innerHTML = '';
+  if(ST.factors.length > 1){
+    mb.appendChild(el('span', 'hint', 'Cells to light:'));
+    [['any', 'touched by any'], ['all', 'touched by all']].forEach(([m, l]) => { const b = btn(l, 'btn', () => JudgmentTable.setMode(m)); b.setAttribute('aria-pressed', String(ST.mode === m)); mb.appendChild(b); });
+  }
+}
+
+/* ═══ BELOW THE TABLE: cell card and “why lit” ═══════════════════════════ */
+function showContext(ref){
+  const r = BLK[ref.id]; if(!r) return;
+  const ov = el('div', 'modal'); const box = el('div', 'box'); ov.appendChild(box);
+  box.appendChild(el('h2', null, WORKS[r.w].name + ' · ' + (r.s.title || 'section') + ' · ' + citeRef(ref)));
+  for(let i = Math.max(0, r.i - 2); i <= Math.min(r.s.blocks.length - 1, r.i + 2); i++){
+    const b = r.s.blocks[i]; if(b.kind === 'rule') continue;
+    const p = el('p', i === r.i ? 'cur' : null);
+    if(i === r.i && ref.q && b.text.includes(ref.q)){
+      const at = b.text.indexOf(ref.q);
+      p.appendChild(document.createTextNode(b.text.slice(0, at))); p.appendChild(el('mark', null, ref.q)); p.appendChild(document.createTextNode(b.text.slice(at + ref.q.length)));
+    } else p.textContent = b.text;
+    box.appendChild(p);
+  }
+  const row = el('div', 'row');
+  if(r.w === 'busolt'){ const a = el('a', 'lk', 'Open in the Busolt lecture ↗'); a.href = '../busolt/index.html#r=search&b=' + r.b.id; a.target = '_blank'; row.appendChild(a); }
+  row.appendChild(btn('Close', 'btn', () => ov.remove()));
+  box.appendChild(row);
+  ov.addEventListener('click', e => { if(e.target === ov) ov.remove(); });
+  document.addEventListener('keydown', function esc(e){ if(e.key === 'Escape'){ ov.remove(); document.removeEventListener('keydown', esc); } });
+  document.body.appendChild(ov);
+}
+function srcLine(ref, label){
+  const d = el('div', 'srcl');
+  d.appendChild(el('span', 'srcb', citeRef(ref)));
+  d.appendChild(document.createTextNode(' '));
+  d.appendChild(el('span', 'qt', '“' + (ref.q.length > 170 ? ref.q.slice(0, 170) + ' …' : ref.q) + '”'));
+  d.appendChild(document.createTextNode(' '));
+  d.appendChild(btn('context', 'lk', () => showContext(ref)));
+  return d;
+}
+function renderBelow(){
+  const box = document.getElementById('below'); box.innerHTML = '';
+  if(ST.tab === 'practice') return;
+  if(ST.cell){
+    const c = CELLS[ST.cell], p = el('div', 'panel');
+    p.appendChild(el('h2', null, c.t.de + ' · ' + c.m.de + ' (' + c.m.la + ')'));
+    p.appendChild(el('p', null, c.m.gloss)); p.lastChild.appendChild(mineTag());
+    p.appendChild(srcLine(c.m.def));
+    const asked = c.t.ask + (c.t.askNote ? ' ' + c.t.askNote : ''); const ap = el('p', 'hint', 'School question: “' + c.t.ask + '”. ' + (c.t.askNote || '')); p.appendChild(ap);
+    const exs = JUDGMENT_EXAMPLES.filter(e => e.t[c.t.id] === c.m.id && (e.x || []).includes(c.t.id));
+    if(exs.length){
+      p.appendChild(el('div', 'cite', 'Busolt’s own examples'));
+      exs.slice(0, 4).forEach(e => { const r = BLK[e.b]; const d = el('div', 'srcl'); d.appendChild(el('span', 'qt', '“' + e.q + '”')); d.appendChild(document.createTextNode(' ')); d.appendChild(el('span', 'srcb', citeRef({id:e.b, q:e.q, w:'busolt'}))); p.appendChild(d); });
+    }
+    const rel = Object.values(FACTORS).filter(f => f.lights.some(l => l.c === ST.cell));
+    [['cat', 'Categories'], ['syl', 'Inference types'], ['pri', 'Principles']].forEach(([k, lab]) => {
+      const fs = rel.filter(f => f.kind === k); if(!fs.length) return;
+      p.appendChild(el('div', 'cite', lab + ' that touch this cell'));
+      const w = el('div', 'row');
+      fs.forEach(f => { const b = btn(f.label, 'btn', () => toggleFactor(f.key)); b.setAttribute('aria-pressed', String(ST.factors.includes(f.key))); w.appendChild(b); });
+      p.appendChild(w);
+    });
+    box.appendChild(p);
+  }
+  if(ST.factors.length){
+    const p = el('div', 'panel why'); p.appendChild(el('h2', null, 'Why these cells are lit'));
+    perFactor().forEach(x => {
+      const f = el('div', 'f'); const b = el('b', null, x.f.label); f.appendChild(b);
+      f.appendChild(el('span', 'hint', ' — ' + KINDNAME[x.f.kind]));
+      const ul = el('ul');
+      x.f.lights.forEach(l => {
+        const li = el('li', null, (l.c ? cellName(l.c) : 'Column “' + JT_TITLES.find(t => t.id === l.t).de + '”') + (l.bar ? ' (forbidden)' : '') + ' [' + l.tag + ']: ' + l.why);
+        li.appendChild(l.by === 'source' ? srcTag() : mineTag()); ul.appendChild(li);
+      });
+      if(!x.f.lights.length) ul.appendChild(el('li', null, x.f.item.none || 'This item has no counterpart in the table.'));
+      f.appendChild(ul); p.appendChild(f);
+    });
+    box.appendChild(p);
+  }
+}
+
+/* ═══ RIGHT PANE ═════════════════════════════════════════════════════════ */
+const TABS = [['categories', 'Categories'], ['syllogisms', 'Syllogisms'], ['principles', 'Principles'], ['practice', 'Practice']];
+function renderTabs(){
+  const bar = document.getElementById('tabs'); bar.innerHTML = '';
+  TABS.forEach(([id, l]) => { const b = el('button', 'tab', l); b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(ST.tab === id));
+    b.addEventListener('click', () => { ST.tab = id; if(id === 'practice' && !ST.practice) startPractice(); renderAll(); emit(); }); bar.appendChild(b); });
+}
+function exampleNode(e){
+  const d = el('div', 'ex ' + e.k);
+  if(e.k === 'attested'){
+    d.appendChild(el('div', 'qt', e.de)); d.appendChild(el('div', null, e.en)); d.lastChild.appendChild(mineTag());
+    const l = el('div', 'srcl'); l.appendChild(el('span', 'srcb', 'attested · ' + citeRef(e.src))); l.appendChild(document.createTextNode(' ')); l.appendChild(btn('context', 'lk', () => showContext(e.src))); d.appendChild(l);
+    if(e.note) d.appendChild(el('div', 'hint', e.note));
+  } else { d.appendChild(el('div', null, e.en)); d.lastChild.appendChild(el('span', 'mine', 'constructed (mine)')); }
+  return d;
+}
+function detailBody(f){
+  const it = f.item, bd = el('div', 'bd');
+  const desc = it.desc || it.explain || it.blurb || '';
+  if(desc){ bd.appendChild(el('p', null, desc)); bd.lastChild.appendChild(mineTag()); }
+  if(it.schema){ const p = el('p'); p.appendChild(el('span', 'sch', it.schema)); bd.appendChild(p); }
+  if(f.kind === 'cat' && f.set){ bd.appendChild(el('p', 'hint', f.set.provenance)); }
+  if(it.title){ bd.appendChild(el('p', 'hint', 'Under the title: ' + JT_TITLES.find(t => t.id === it.title).de)); }
+  const forms = (it.forms || []).concat(it.srcs || []).concat(it.extra || []);
+  if(forms.length){ bd.appendChild(el('div', 'cite', 'Where it comes from')); forms.forEach(s => bd.appendChild(srcLine(s))); }
+  if(it.examples && it.examples.length){ bd.appendChild(el('div', 'cite', 'Examples')); it.examples.forEach(e => bd.appendChild(exampleNode(e))); }
+  if(it.caution){ const c = el('div', 'cav', it.caution); bd.appendChild(c); if(it.cautionSrc) bd.appendChild(srcLine(it.cautionSrc)); }
+  if(it.note) bd.appendChild(el('p', 'hint', it.note));
+  if(it.none) bd.appendChild(el('p', 'hint', it.none));
+  if(it.link){ const p = el('p'); const a = el('a', 'lk', it.link.label + ' ↗'); a.href = it.link.href; p.appendChild(a); bd.appendChild(p); }
+  if(f.lights.length){
+    bd.appendChild(el('div', 'cite', 'Lights up'));
+    const ul = el('ul'); ul.style.margin = '2px 0'; ul.style.paddingLeft = '1.2em';
+    f.lights.forEach(l => { const li = el('li', null, (l.c ? cellName(l.c) : 'Column “' + JT_TITLES.find(t => t.id === l.t).de + '”') + (l.bar ? ' (forbidden)' : '') + ': ' + l.why); li.appendChild(l.by === 'source' ? srcTag() : mineTag()); ul.appendChild(li); });
+    bd.appendChild(ul);
+  } else bd.appendChild(el('p', 'hint', 'Lights nothing: it has no counterpart in the table.'));
+  return bd;
+}
+function itemRow(f){
+  const on = ST.factors.includes(f.key);
+  const it = el('div', 'item' + (on ? ' on' : ''));
+  const hd = el('div', 'hd');
+  const nm = el('button', 'name'); nm.type = 'button'; nm.appendChild(document.createTextNode(f.label)); if(f.sub) nm.appendChild(el('small', null, f.sub));
+  nm.setAttribute('aria-expanded', String(!!ST.open[f.key]));
+  nm.addEventListener('click', () => { ST.open[f.key] = !ST.open[f.key]; renderSide(); });
+  hd.appendChild(nm);
+  const sw = el('button', 'sw', on ? '◉ lit' : '○ light up'); sw.type = 'button'; sw.setAttribute('aria-pressed', String(on));
+  sw.addEventListener('click', () => toggleFactor(f.key)); hd.appendChild(sw);
+  it.appendChild(hd);
+  if(ST.open[f.key]) it.appendChild(detailBody(f));
+  return it;
+}
+function renderSide(){
+  const side = document.getElementById('side'); side.innerHTML = '';
+  if(ST.tab === 'categories'){
+    const p = el('div', 'row');
+    JT_CATEGORY_SETS.forEach(s => { const b = btn(s.label, 'btn', () => { ST.set = s.id; renderSide(); }); b.setAttribute('aria-pressed', String(ST.set === s.id)); p.appendChild(b); });
+    side.appendChild(p);
+    const set = JT_CATEGORY_SETS.find(s => s.id === ST.set);
+    side.appendChild(el('p', 'hint', set.blurb)); side.appendChild(el('p', 'hint', set.provenance));
+    ['quant', 'qual', 'rel', 'mod', ''].forEach(tid => {
+      const its = set.items.filter(i => (i.title || '') === tid); if(!its.length) return;
+      if(tid) side.appendChild(el('div', 'grp', JT_TITLES.find(t => t.id === tid).de));
+      its.forEach(i => side.appendChild(itemRow(FACTORS['cat:' + set.id + ':' + i.id])));
+    });
+  } else if(ST.tab === 'syllogisms'){
+    side.appendChild(el('p', 'hint', 'Types of syllogism and of immediate inference, with their abstract form, examples, and the transcripts they come from. Light several to compare which cells they share.'));
+    const groups = []; MOODS.concat(JT_OTHER_SYLLOGISMS).forEach(i => { if(!groups.includes(i.group)) groups.push(i.group); });
+    groups.forEach(g => {
+      side.appendChild(el('div', 'grp', g));
+      if(g === 'Figure I') { const p = el('p', 'hint', 'Busolt lists nineteen moods in four figures and says the vowels of their names express quantity and quality.'); side.appendChild(p); }
+      MOODS.concat(JT_OTHER_SYLLOGISMS).filter(i => i.group === g).forEach(i => { const f = FACTORS[i.id]; f.sub = i.vowels ? i.vowels + ' · ' + i.schema.split(' (')[0] : i.schema; side.appendChild(itemRow(f)); });
+    });
+  } else if(ST.tab === 'principles'){
+    side.appendChild(el('p', 'hint', 'Principles and laws stated in the transcripts, in their own words, with an example and the cells they bear on.'));
+    JT_PRINCIPLES.forEach(i => side.appendChild(itemRow(FACTORS[i.id])));
+  } else renderPractice(side);
+}
+
+/* ═══ PRACTICE ═══════════════════════════════════════════════════════════ */
+function buildPool(){
+  const pool = [];
+  JUDGMENT_EXAMPLES.forEach(e => (e.x || []).forEach(d => { if(['quant', 'qual', 'rel', 'mod'].includes(d) && e.t[d]) pool.push({e, dim:d, answer:e.t[d]}); }));
+  for(let i = pool.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  return pool;
+}
+function startPractice(){ const pool = buildPool(); ST.practice = {pool, i:0, score:0, asked:0, done:false, picked:null, hint:false, q:pool[0]}; }
+function answer(id){
+  const p = ST.practice; if(p.done) return;
+  p.picked = id; p.done = true; p.asked++; if(id === p.q.dim + '-' + p.q.answer) p.score++;
+  renderTable(); renderSide();
+}
+function nextQ(){ const p = ST.practice; p.i = (p.i + 1) % p.pool.length; p.q = p.pool[p.i]; p.done = false; p.picked = null; p.hint = false; renderTable(); renderSide(); }
+function renderPractice(side){
+  const p = ST.practice, q = p.q, t = JT_TITLES.find(x => x.id === q.dim);
+  side.appendChild(el('p', 'hint', 'Busolt’s own examples. Read the sentence, then click the right moment in the highlighted column of the table. Only questions where Busolt himself gives the answer are used.'));
+  const box = el('div', 'panel');
+  box.appendChild(el('div', 'cite', 'Question ' + (p.asked + (p.done ? 0 : 1)) + ' · score ' + p.score + '/' + p.asked));
+  box.appendChild(el('p', 'qbox qt', '“' + q.e.q + '”'));
+  box.appendChild(el('p', null, 'Which moment of ' + t.de + ' (' + t.en + ') is this?'));
+  const row = el('div', 'row');
+  if(!p.done) row.appendChild(btn(p.hint ? 'Hide hint' : 'Hint', 'btn', () => { p.hint = !p.hint; renderSide(); }));
+  box.appendChild(row);
+  if(p.hint && !p.done){ t.moments.forEach(m => { const d = el('div', 'srcl'); d.appendChild(el('b', null, m.de + ': ')); d.appendChild(document.createTextNode(m.gloss)); box.appendChild(d); }); }
+  if(p.done){
+    const ok = p.picked === q.dim + '-' + q.answer, m = t.moments.find(x => x.id === q.answer);
+    box.appendChild(el('p', 'fb ' + (ok ? 'good' : 'bad'), ok ? 'Correct: ' + m.de + '.' : 'Not quite. It is ' + m.de + ' (' + m.la + ').'));
+    box.appendChild(el('p', null, m.gloss)); box.lastChild.appendChild(mineTag());
+    box.appendChild(srcLine(m.def));
+    if(q.e.note) box.appendChild(el('p', 'hint', q.e.note));
+    const r = BLK[q.e.b]; const a = el('a', 'lk', 'See the sentence in the Busolt lecture (' + citeRef({id:q.e.b, q:q.e.q, w:'busolt'}) + ') ↗'); a.href = '../busolt/index.html#r=search&b=' + q.e.b; a.target = '_blank'; box.appendChild(a);
+    const n = el('div', 'row'); n.appendChild(btn('Next question', 'btn', nextQ)); box.appendChild(n);
+  }
+  side.appendChild(box);
+  side.appendChild(btn('Restart', 'btn', () => { startPractice(); renderAll(); }));
+}
+
+/* ═══ INIT ═══════════════════════════════════════════════════════════════ */
+function renderAll(){ renderTabs(); renderLitbar(); renderTable(); renderLegend(); renderBelow(); renderSide(); }
+(function init(){
+  const p = new URLSearchParams(location.hash.replace(/^#/, ''));
+  if(p.get('f')) ST.factors = p.get('f').split(',').filter(k => FACTORS[k]);
+  if(p.get('m') === 'all') ST.mode = 'all';
+  if(p.get('c') && CELLS[p.get('c')]) ST.cell = p.get('c');
+  if(['categories', 'syllogisms', 'principles', 'practice'].includes(p.get('t'))) ST.tab = p.get('t');
+  ST.factors.forEach(k => { ST.open[k] = true; });
+  if(ST.tab === 'practice') startPractice();
+  if(ST.factors.length && !p.get('t')){ const f = FACTORS[ST.factors[0]]; if(f.kind === 'cat') { ST.tab = 'categories'; ST.set = f.set.id; } else if(f.kind === 'syl') ST.tab = 'syllogisms'; else ST.tab = 'principles'; }
+  renderAll();
+})();
+</script>
+</body>
+</html>
