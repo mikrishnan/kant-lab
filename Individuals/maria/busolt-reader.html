@@ -103,6 +103,17 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
   width: 360px; flex: none; display: flex; flex-direction: column; min-height: 0;
   background: var(--panel-bg); border-left: 1px solid var(--line);
 }
+.sent { cursor: pointer; border-radius: 2px; }
+.sent:hover { background: var(--parch-dark); }
+.sent.on { background: var(--hit); box-shadow: 0 0 0 2px var(--hit); }
+#sent { flex: none; max-height: 45%; overflow-y: auto; border-bottom: 1px solid var(--line); }
+#sent[hidden] { display: none; }
+.sbox { margin: 0 16px 12px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--parchment); font-size: .95rem; line-height: 1.4; }
+#s-where { font-family: 'Cinzel', serif; font-size: .68rem; letter-spacing: .06em; color: var(--aa-ink); margin-bottom: 4px; }
+.sl { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faded); margin-top: 6px; }
+#s-note { font-size: .78rem; font-style: italic; color: var(--faded); margin-top: 8px; }
+.sbtns { display: flex; gap: 6px; margin-top: 8px; }
+.sbtns button { font: inherit; font-size: .8rem; padding: 2px 9px; border: 1px solid var(--line); border-radius: 3px; background: var(--parch-dark); color: var(--accent); cursor: pointer; }
 #side h2 {
   font-family: 'Cinzel', serif; font-weight: 400; font-size: .72rem; letter-spacing: .12em;
   color: var(--faded); margin: 12px 16px 6px; text-transform: uppercase;
@@ -142,6 +153,16 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
     <div id="reader"><div id="page"></div></div>
   </section>
   <aside id="side">
+    <div id="sent" hidden>
+      <h2>Selected sentence · Meier</h2>
+      <div class="sbox">
+        <div id="s-where"></div>
+        <div class="sl">German</div><div id="s-de" lang="de"></div>
+        <div class="sl">English</div><div id="s-en" lang="en"></div>
+        <div id="s-note"></div>
+        <div class="sbtns"><button type="button" id="s-prev">‹ previous</button><button type="button" id="s-next">next ›</button><button type="button" id="s-close">Close</button></div>
+      </div>
+    </div>
     <h2>Search terms</h2>
     <form id="sf"><input type="search" id="q" placeholder="e.g. Urtheil, Begriff, cognitio" aria-label="Search" autocomplete="off"><button type="button" id="clr">Clear</button></form>
     <div class="opts"><label><input type="checkbox" id="whole"> whole words only</label> &nbsp; <label><input type="checkbox" id="allw" checked> all three texts</label></div>
@@ -153,6 +174,7 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
 <script src="../../data/logik-busolt-24.js"></script>
 <script src="../../data/logik-blomberg-24.js"></script>
 <script src="meier-auszug.js"></script>
+<script src="translations/meier-aligned.js"></script>
 <script>
 /* ── data ──
    LOGIK_BUSOLT and LOGIK_BLOMBERG come from ../../data/; MEIER_AUSZUG from meier-auszug.js.
@@ -294,6 +316,22 @@ function buildTabs() {
   });
 }
 
+/* Meier's § as a row of sentences, each a unit with its English counterpart (MEIER_ALIGNED).
+   The spans are slices of the source's own text, so nothing in the German is altered. */
+function renderSentences(tx, b) {
+  let at = 0;
+  MEIER_ALIGNED[b.n].forEach((g, k) => {
+    if (g.o[0] > at) tx.appendChild(document.createTextNode(b.text.slice(at, g.o[0])));
+    const sp = el('span', 'sent');
+    sp.dataset.n = b.n; sp.dataset.k = k;
+    addText(sp, b.text.slice(g.o[0], g.o[1]));
+    sp.onclick = () => { if (!String(getSelection())) selectSentence(b.n, k); };
+    tx.appendChild(sp);
+    at = g.o[1];
+  });
+  if (at < b.text.length) tx.appendChild(document.createTextNode(b.text.slice(at)));
+}
+
 function renderBlock(b) {
   const d = el('div', 'blk');
   d.id = b.id;
@@ -308,7 +346,8 @@ function renderBlock(b) {
     tx.appendChild(pageChip(p.p));
     at = p.i;
   });
-  addText(tx, b.text.slice(at));
+  if (b.n && MEIER_ALIGNED[b.n]) renderSentences(tx, b);
+  else addText(tx, b.text.slice(at));
   d.appendChild(tx);
   if (inferred) {
     const t = el('span', 'tag', 'joined · inferred');
@@ -370,6 +409,7 @@ function show(i, blockId) {
   const on = document.querySelector('#tabs .tab.on');
   if (on) on.scrollIntoView({ block: 'nearest', inline: 'center' });
   markTabs();
+  markSelected();
   if (blockId) {
     const t = document.getElementById(blockId);
     if (t) { t.scrollIntoView({ block: 'center' }); t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1600); return; }
@@ -401,6 +441,47 @@ function goTo(n) {
   const hit = W().logik ? findAA(n) : findPara(n);
   if (hit) show(hit.i, hit.id);
   return !!hit;
+}
+
+/* ── sentence units (Meier) ── */
+let sel = null;          // { n, k } — the sentence selected, or null
+let seq = null;          // every Meier sentence in reading order, for previous / next
+
+function meierSeq() {
+  if (!seq) {
+    seq = [];
+    WORKS.find(w => w.key === 'meier').sections.forEach((s, si) =>
+      s.blocks.forEach(b => MEIER_ALIGNED[b.n].forEach((g, k) => seq.push({ n: b.n, k, si }))));
+  }
+  return seq;
+}
+function markSelected() {
+  document.querySelectorAll('.sent.on').forEach(x => x.classList.remove('on'));
+  const card = document.getElementById('sent');
+  card.hidden = !(sel && W().key === 'meier');
+  if (!sel || W().key !== 'meier') return;
+  const sp = document.querySelector('.sent[data-n="' + sel.n + '"][data-k="' + sel.k + '"]');
+  if (sp) sp.classList.add('on');
+}
+function selectSentence(n, k, go) {
+  const mw = WORKS.findIndex(w => w.key === 'meier');
+  const g = MEIER_ALIGNED[n][k], text = MEIER_AUSZUG.paras[String(n)];
+  sel = { n, k };
+  document.getElementById('s-where').textContent = '§ ' + n + ' · sentence ' + (k + 1) + ' of ' + MEIER_ALIGNED[n].length;
+  document.getElementById('s-de').textContent = text.slice(g.o[0], g.o[1]).replace(/\s+/g, ' ');
+  document.getElementById('s-en').textContent = g.en;
+  document.getElementById('s-note').textContent = (g.m
+    ? 'Alignment joins ' + g.m[0] + ' German with ' + g.m[1] + ' English sentence' + (g.m[1] === 1 ? '' : 's') + ' into one unit. '
+    : '') + 'The pairing is inferred, by length and shared words; the English is an unreviewed machine translation.';
+  if (go || wi !== mw) {
+    const si = meierSeq().find(x => x.n === n).si;
+    if (wi !== mw) { wi = mw; buildTabs(); }
+    show(si, 'meier-para-' + n);
+  } else markSelected();
+}
+function stepSentence(d) {
+  const q = meierSeq(), i = q.findIndex(x => x.n === sel.n && x.k === sel.k) + d;
+  if (i >= 0 && i < q.length) selectSentence(q[i].n, q[i].k, true);
 }
 
 /* ── search ── */
@@ -492,6 +573,10 @@ document.getElementById('sf').addEventListener('submit', e => e.preventDefault()
 document.getElementById('whole').onchange = runSearch;
 document.getElementById('allw').onchange = runSearch;
 document.getElementById('clr').onclick = () => { document.getElementById('q').value = ''; runSearch(); document.getElementById('q').focus(); };
+document.getElementById('s-prev').onclick = () => stepSentence(-1);
+document.getElementById('s-next').onclick = () => stepSentence(1);
+document.getElementById('s-close').onclick = () => { sel = null; markSelected(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && sel) { sel = null; markSelected(); } });
 document.getElementById('goaa').addEventListener('change', e => {
   const n = +e.target.value, w = W();
   if (!goTo(n)) e.target.setCustomValidity(w.logik ? 'Not in AA 24:' + w.aaRange[0] + '–' + w.aaRange[1] : 'Not in §§ 1–563'), e.target.reportValidity();
