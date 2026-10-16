@@ -166,6 +166,42 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 .tcard .tt { font-size: .95rem; line-height: 1.45; }
 .full { background: #fffdf6; border: 1px solid var(--accent-lt); border-top: none; border-radius: 0 0 3px 3px; padding: 8px 11px; margin: -6px 0 8px; font-size: .98rem; line-height: 1.5; }
 
+/* ── translate selection ───────────────────────────────── */
+#trBtn { position: fixed; z-index: 40; display: none; font: inherit; font-size: .85rem; background: var(--accent); color: var(--parchment); border: 1px solid #2e1a00; border-radius: 14px; padding: 3px 13px; cursor: pointer; box-shadow: 0 3px 10px rgba(40, 25, 5, .35); }
+#trBtn:hover { background: var(--accent-lt); }
+#trPanel { position: fixed; left: 0; right: 0; bottom: 0; height: 56vh; z-index: 30; display: none; flex-direction: column; background: var(--panel-bg); border-top: 3px solid var(--accent); box-shadow: 0 -8px 24px rgba(40, 25, 5, .3); }
+#trPanel.open { display: flex; }
+.trhead { display: flex; align-items: baseline; gap: 12px; padding: 7px 18px; background: var(--parch-dark); border-bottom: 1px solid var(--line); }
+.trhead b { font-family: 'Cinzel', serif; font-size: .8rem; letter-spacing: .07em; color: var(--accent); }
+.trhead .sp { flex: 1; }
+.trhead button { font: inherit; font-size: .85rem; background: var(--panel-bg); border: 1px solid var(--line); border-radius: 3px; padding: 1px 10px; cursor: pointer; color: var(--accent); }
+.trhead button:hover:not(:disabled) { background: var(--parch-deep); }
+.trhead button:disabled { opacity: .4; cursor: default; }
+.trsrc { padding: 6px 18px; font-size: .92rem; border-bottom: 1px solid var(--parch-deep); max-height: 15vh; overflow-y: auto; background: #fffdf6; }
+.trsrc .lab { font-size: .75rem; color: var(--aa-ink); display: block; margin-bottom: 1px; }
+.trkey { padding: 5px 18px; font-size: .82rem; color: var(--faded); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; border-bottom: 1px solid var(--parch-deep); }
+.trkey input { font: inherit; font-size: .88rem; padding: 2px 7px; border: 1px solid var(--line); border-radius: 3px; width: 270px; background: #fff; }
+.trcols { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; }
+.trcol { min-height: 0; display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+.trcol:last-child { border-right: none; }
+.trcol h4 { margin: 0; padding: 6px 18px 0; font-family: 'Cinzel', serif; font-size: .78rem; letter-spacing: .06em; color: var(--accent); }
+.trcol h4 small { display: block; font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: .78rem; color: var(--faded); font-weight: 400; }
+.trbody { flex: 1; overflow-y: auto; padding: 6px 18px 12px; }
+.trout { font-size: 1.08rem; line-height: 1.55; white-space: pre-wrap; }
+.trstat { font-size: .78rem; color: var(--faded); font-style: italic; margin: 2px 0; }
+.trstat.err { color: #9a2a1a; font-style: normal; }
+.trnotes { margin-top: 10px; padding-top: 6px; border-top: 1px dashed var(--line); font-size: .86rem; line-height: 1.4; color: #3a2e1a; }
+.trnotes h5 { margin: 0 0 3px; font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .06em; color: var(--accent-lt); font-weight: 600; }
+.trnotes ul { margin: 0; padding-left: 18px; }
+.trmark { font-size: .72rem; color: var(--accent-lt); border: 1px solid var(--accent-lt); border-radius: 8px; padding: 0 7px; margin-left: 6px; }
+.trcol details { margin: 4px 0; font-size: .8rem; color: var(--faded); }
+.trcol details summary { cursor: pointer; color: var(--accent); }
+.trcol details ol { margin: 4px 0 4px 16px; padding: 0; } .trcol details li { margin-bottom: 3px; }
+.trcol details li .p { color: var(--aa-ink); }
+.trcopy { font: inherit; font-size: .78rem; background: none; border: 1px dashed var(--line); border-radius: 3px; padding: 0 8px; cursor: pointer; color: var(--accent); margin-left: 8px; }
+.trfoot { padding: 3px 18px; font-size: .72rem; color: var(--faded); border-top: 1px solid var(--parch-deep); font-style: italic; }
+@media (max-width: 900px) { .trcols { grid-template-columns: 1fr; } #trPanel { height: 80vh; } }
+
 /* ── term mode result lists ────────────────────────────── */
 .summary { font-size: .92rem; margin: 0 0 8px; }
 .summary b { color: var(--accent); }
@@ -233,6 +269,24 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
   </section>
 </main>
 
+<button id="trBtn" type="button">Translate selection</button>
+<div id="trPanel" role="dialog" aria-label="Translation of the selected passage">
+  <div class="trhead">
+    <b>TRANSLATE</b><span id="trWhat" style="font-size:.85rem;color:var(--faded)"></span><span class="sp"></span>
+    <button id="trRun" type="button">Translate</button>
+    <button id="trStop" type="button" disabled>Stop</button>
+    <button id="trPrompts" type="button" title="Copy the instructions and passage, to paste into claude.ai instead">Copy prompts</button>
+    <button id="trClose" type="button" aria-label="Close">&times;</button>
+  </div>
+  <div class="trsrc" id="trSrc"></div>
+  <div class="trkey">
+    <span>Anthropic API key:</span><input type="password" id="trKey" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" aria-label="Anthropic API key">
+    <span>Kept only in this tab’s memory (never saved, never in the repository) and sent only to api.anthropic.com. The selected passage is sent with it. No key? <b>Copy prompts</b> and paste them into claude.ai.</span>
+  </div>
+  <div class="trcols" id="trCols"></div>
+  <div class="trfoot">Machine drafts written in the manner of two translators’ stated principles. Neither translator translated these texts, and neither draft is theirs. Check against the German. For a published scholarly translation of the logic lectures, see the Cambridge Edition’s <i>Lectures on Logic</i>.</div>
+</div>
+
 <!-- Shared data, loaded and never copied. Two exceptions, both in this folder because data/ has no file for them yet:
      meier-auszug-data.js (Meier's text) and jaesche-logik-data.js (the Jäsche Logik); their headers say how they were made. -->
 <script src="meier-auszug-data.js"></script>
@@ -245,6 +299,7 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 <script src="../../data/reflexionen-17-18-baumgarten.js"></script>
 <script src="../../data/tradition-meier.js"></script>
 <script src="../../data/phases-adickes.js"></script>
+<script src="translation-briefs.js"></script>
 <script>
 /* ── data ─────────────────────────────────────────────────────────────── */
 const PARAS = MEIER_AUSZUG.paras;
@@ -498,6 +553,7 @@ function renderMeierPara() {
   wrap.append(badges);
 
   const t = el('div', 'mtext');
+  t.dataset.src = `G. F. Meier, Auszug aus der Vernunftlehre (1752), § ${n}${MEIER_AUSZUG.citations[n] ? ' (' + MEIER_AUSZUG.citations[n] + ')' : ''}`; t.dataset.lang = 'de';
   t.append(highlighted(PARAS[n], re));
   wrap.append(t);
 
@@ -513,7 +569,7 @@ function renderMeierPara() {
     box.append(el('h3', null, 'TRADITION · parallel passages'));
     box.append(el('div', 'note', 'Hand-curated by the lab for the Meier reader (data/tradition-meier.js); an editor’s annotations, not a text.'));
     tr.forEach(t => {
-      const c = el('div', 'tcard ' + t.strata);
+      const c = el('div', 'tcard ' + t.strata); c.dataset.lang = 'en';
       const hd = el('div', 'th');
       hd.append(el('b', null, t.author), el('span', null, t.source), el('span', 'rel', t.relation));
       c.append(hd, Object.assign(el('div', 'tt'), {}));
@@ -552,7 +608,7 @@ function renderKantPara() {
         }
         const inferred = (b.joined || []).includes('inferred');
         const d = el('div', 'kblock' + (b.kind === 'note' ? ' note' : '') + (inferred ? ' inferred' : ''));
-        d.dataset.id = b.id;
+        d.dataset.id = b.id; d.dataset.lang = 'de'; d.dataset.src = `Kant, Logik Blomberg (ca. 1771), AA 24:${aaRange(b)}${b.para ? ', ' + b.para.raw : ''}`;
         const g = el('div', 'gut');
         if (b.aa !== lastAA) g.append(el('span', 'aa', `24:${b.aa}`));
         lastAA = b.aaEnd || b.aa;
@@ -577,7 +633,7 @@ function renderKantPara() {
         let lastAA = null;
         const draw = list => list.forEach(({ b }) => {
           const d = el('div', 'kblock' + (b.kind === 'heading' ? ' note' : ''));
-          d.dataset.id = b.id;
+          d.dataset.id = b.id; d.dataset.lang = 'de'; d.dataset.src = `Jäsche, Logik (1800), AA 9:${aaRange(b)}${b.para ? ', Jäsche § ' + b.para : ''}`;
           const g = el('div', 'gut');
           if (b.aa !== lastAA) g.append(el('span', 'aa', `9:${b.aa}`));
           if (b.para && b.kind === 'heading') g.append(el('span', 'para', `J § ${b.para}`));
@@ -606,7 +662,7 @@ function renderKantPara() {
       items.forEach(e => {
         const interp = e.src === 'none' || e.interp;
         const c = el('div', 'rcard' + (interp ? ' interp' : ''));
-        c.dataset.id = 'r' + e.r;
+        c.dataset.id = 'r' + e.r; c.dataset.lang = 'de'; c.dataset.src = `Kant, Reflexion ${e.r}${e.aa ? ', AA 16:' + e.aa : ''}${e.phRaw ? ' (phase ' + e.phRaw + ')' : ''}`;
         const rh = el('div', 'rh');
         rh.append(el('b', null, `Refl. ${e.r}`));
         if (e.aa) rh.append(el('span', null, `AA 16:${e.aa}${e.aaEnd && e.aaEnd !== e.aa ? '–' + e.aaEnd : ''}`));
@@ -714,6 +770,8 @@ function exButton(hit, ref, onClick, expand) {
   const x = el('button', 'ex' + (onClick || expand ? '' : ' static'));
   const r = el('span', 'ref');
   ref.forEach(p => r.append(p instanceof Node ? p : document.createTextNode(p)));
+  const srcLabel = r.textContent.replace(/\s+/g, ' ').trim();
+  x.dataset.src = srcLabel; x.dataset.lang = /METAPHYSICA/.test(srcLabel) ? 'la' : /TRADITION/.test(srcLabel) ? 'en' : 'de';
   x.append(r, snippet(hit));
   if (onClick) x.addEventListener('click', onClick);
   if (!expand) return x;
@@ -722,6 +780,7 @@ function exButton(hit, ref, onClick, expand) {
   x.addEventListener('click', () => {
     if (open) { open.remove(); open = null; return; }
     open = el('div', 'full');
+    open.dataset.src = srcLabel; open.dataset.lang = x.dataset.lang;
     open.append(expand());
     wrap.append(open);
   });
@@ -811,12 +870,12 @@ function renderKantTerm() {
         n0 ? () => openAt(n0, 'reflexionen', { kind: 'refl', id: e.r, k: h.i }) : null));
     } else if (k === 'blomberg') {
       const b = h.row.b, n0 = b.para && (b.para.from != null ? b.para.from : b.para.nums[0]);
-      wrap.append(exButton(h, [`AA 24:${b.aa}`, b.para ? ` · ${b.para.raw}` : '', secI],
+      wrap.append(exButton(h, [`LOGIK BLOMBERG · AA 24:${b.aa}`, b.para ? ` · ${b.para.raw}` : '', secI],
         n0 ? () => openAt(n0, 'blomberg', { kind: 'block', id: b.id, k: h.i }) : null));
     } else if (k === 'jaesche') {
       const b = h.row.b, ps = meierParasForPage(b.aa);
       const link = ps.length ? el('i', null, ` · the AA’s headers tie this page to Meier § ${ps.slice(0, 4).join(', ')}${ps.length > 4 ? '…' : ''}`) : '';
-      wrap.append(exButton(h, [`AA 9:${aaRange(b)}`, b.para ? ` · Jäsche § ${b.para}` : '', secI, link || ''],
+      wrap.append(exButton(h, [`JÄSCHE LOGIK · AA 9:${aaRange(b)}`, b.para ? ` · Jäsche § ${b.para}` : '', secI, link || ''],
         null, () => {
           const f = document.createDocumentFragment();
           f.append(lines(b.text, re));
@@ -825,7 +884,7 @@ function renderKantTerm() {
         }));
     } else if (k === 'busolt' || k === 'wiener') {
       const b = h.row.b;
-      wrap.append(exButton(h, [`AA 24:${b.aa}`, secI], null, plain(b.text)));
+      wrap.append(exButton(h, [`LOGIK ${k.toUpperCase()} · AA 24:${b.aa}`, secI], null, plain(b.text)));
     } else if (k === 'reflm') {
       const e = h.row.e;
       wrap.append(exButton(h, [`${e.part === 'erl' ? 'ERLÄUTERUNG' : 'REFL.'} ${e.r}`, ` · AA ${e.vol}${e.aa ? ':' + e.aa : ''}${e.paras && e.paras.length ? ' · on Baumgarten § ' + e.paras.slice(0, 4).join(', ') + (e.paras.length > 4 ? '…' : '') : ''}`, e.src === 'locus' ? '' : ' · § placement not from Kant’s locus note'],
@@ -1048,6 +1107,7 @@ function renderTabs() {
 }
 function renderAll() {
   renderBar(); renderTabs();
+  if (typeof checkSelection === 'function') checkSelection();
   if (state.mode === 'para') { renderMeierPara(); renderKantPara(); } else { renderMeierTerm(); renderKantTerm(); }
 }
 
@@ -1091,6 +1151,214 @@ document.addEventListener('keydown', e => { if (e.key === '/' && document.active
   const s = (window.getSelection().toString() || '').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
   if (s && !/\s/.test(s)) setQuery(s);
 }));
+
+
+/* ── Translate the selected passage ───────────────────────────────────── */
+// Two drafts of the selection, each written under one translator's stated method (translation-briefs.js).
+// The model is called straight from this page with a key the reader pastes in; the key lives in this
+// variable and in the field, and nowhere else. Streaming keeps a long answer from timing out.
+const TR_URL = 'https://api.anthropic.com/v1/messages';
+const TR_MODEL = 'claude-opus-5-5';
+const TR = { text: '', context: '', src: '', lang: 'de', ctl: {}, out: {} };
+
+function selectionInfo() {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+  const range = sel.getRangeAt(0);
+  const host = n => (n.nodeType === 3 ? n.parentElement : n);
+  const a = host(range.startContainer), b = host(range.endContainer);
+  if (!a || !b) return null;
+  if (!(a.closest('#meierPane, #kantPane') && b.closest('#meierPane, #kantPane'))) return null;
+  const text = sel.toString().replace(/\s+/g, ' ').trim();
+  if (text.length < 4 || text.length > 4000) return null;
+  const box = a.closest('[data-src]') || b.closest('[data-src]');
+  const lang = box ? box.dataset.lang || 'de' : 'de';
+  if (lang === 'en') return null;                         // already English
+  // The block the selection sits in, as context (not to be translated), without the margin labels.
+  let context = '';
+  if (box) { const c = box.cloneNode(true); c.querySelectorAll('.gut, .ref, .pgmark, .msmark, .rh, .dating').forEach(n => n.remove()); context = c.textContent.replace(/\s+/g, ' ').trim(); }
+  if (context === text || context.length > 2500) context = context === text ? '' : context.slice(0, 2500);
+  const same = a.closest('[data-src]') === b.closest('[data-src]');
+  return { text, context, src: box ? box.dataset.src + (same ? '' : ' (selection runs across several passages)') : 'selected passage', lang, rect: range.getBoundingClientRect() };
+}
+
+function userPrompt() {
+  return `Passage to translate (${TR.src}; language of the source: ${TR.lang === 'la' ? 'Latin' : TR.lang === 'mixed' ? 'German and Latin' : 'German, possibly with Latin'}):\n\n<passage>\n${TR.text}\n</passage>` +
+    (TR.context ? `\n\nContext (the passage it was selected from, for reference only; do NOT translate it):\n\n<context>\n${TR.context}\n</context>` : '');
+}
+
+// Minimal emphasis markup, built with DOM nodes so nothing from the model is ever read as HTML.
+function richInto(node, text) {
+  text.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/).forEach(part => {
+    if (!part) return;
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) node.append(el('b', null, part.slice(2, -2)));
+    else if (part.startsWith('*') && part.endsWith('*') && part.length > 2) node.append(el('i', null, part.slice(1, -1)));
+    else node.append(part);
+  });
+}
+function splitNotes(full) {
+  const i = full.indexOf('===NOTES===');
+  return i === -1 ? { tr: full.trim(), notes: '' } : { tr: full.slice(0, i).trim(), notes: full.slice(i + 11).trim() };
+}
+
+function buildPanel() {
+  const cols = $('trCols'); cols.replaceChildren();
+  Object.keys(TRANSLATION_BRIEFS).forEach(k => {
+    const br = TRANSLATION_BRIEFS[k];
+    const col = el('div', 'trcol'); col.id = 'tr-' + k;
+    const h = el('h4', null, br.label.toUpperCase());
+    h.append(el('small', null, br.tagline));
+    col.append(h);
+    const body = el('div', 'trbody');
+    const det = el('details');
+    det.append(el('summary', null, 'Principles applied'));
+    det.append(el('div', null, br.citation + '. The principles below are the translators’ own, as they state them.'));
+    const ol = el('ol');
+    br.principles.forEach(p => { const li = el('li'); li.append(p.t + ' '); li.append(el('span', 'p', '[' + p.p + ']')); ol.append(li); });
+    det.append(ol);
+    const tdet = el('details');
+    tdet.append(el('summary', null, `Vocabulary used (${br.terms.length})`));
+    tdet.append(el('div', null, br.terms.map(t => t.join(' = ')).join(' · ')));
+    body.append(det, tdet);
+    body.append(Object.assign(el('div', 'trstat'), { id: 'trs-' + k }));
+    body.append(Object.assign(el('div', 'trout'), { id: 'tro-' + k }));
+    body.append(Object.assign(el('div', 'trnotes'), { id: 'trn-' + k, hidden: true }));
+    col.append(body);
+    cols.append(col);
+  });
+}
+
+function openTranslate(info) {
+  TR.text = info.text; TR.context = info.context; TR.src = info.src; TR.lang = info.lang;
+  buildPanel();
+  $('trWhat').textContent = '';
+  const box = $('trSrc'); box.replaceChildren();
+  box.append(Object.assign(el('span', 'lab'), { textContent: TR.src }), TR.text);
+  $('trPanel').classList.add('open');
+  $('trBtn').style.display = 'none';
+  $('trKey').focus();
+  if ($('trKey').value.trim()) runTranslation();
+  else Object.keys(TRANSLATION_BRIEFS).forEach(k => setStatus(k, 'Enter your API key above and press Translate, or press Copy prompts.'));
+}
+function setStatus(k, msg, err) { const s = $('trs-' + k); if (s) { s.textContent = msg; s.className = 'trstat' + (err ? ' err' : ''); } }
+
+// One streaming request. First with the server-side fallback the API offers for refusals; if the API
+// rejects that field, once more without it.
+async function streamOne(k, signal, onText) {
+  const key = $('trKey').value.trim();
+  const body = { model: TR_MODEL, max_tokens: 16000, stream: true, thinking: { type: 'adaptive' }, output_config: { effort: 'high' },
+    system: TRANSLATION_BRIEFS[k].system, messages: [{ role: 'user', content: userPrompt() }] };
+  const attempt = async withFallback => {
+    const headers = { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' };
+    const b = withFallback ? { ...body, fallbacks: 'default' } : body;
+    if (withFallback) headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+    return fetch(TR_URL, { method: 'POST', signal, headers, body: JSON.stringify(b) });
+  };
+  let res = await attempt(true);
+  if (res.status === 400) {
+    const err = await res.clone().json().catch(() => ({}));
+    if (/fallback|beta/i.test((err.error && err.error.message) || '')) res = await attempt(false);
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg = (err.error && err.error.message) || res.statusText || 'request failed';
+    throw new Error(res.status === 401 ? 'The API key was not accepted (401).' : `${res.status}: ${msg}`);
+  }
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf = '', acc = '', stop = null;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf('\n\n')) !== -1) {
+      const ev = buf.slice(0, i); buf = buf.slice(i + 2);
+      const line = ev.split('\n').find(l => l.startsWith('data:'));
+      if (!line) continue;
+      let d; try { d = JSON.parse(line.slice(5)); } catch { continue; }
+      if (d.type === 'content_block_delta' && d.delta && d.delta.type === 'text_delta') { acc += d.delta.text; onText(acc); }
+      else if (d.type === 'message_delta' && d.delta && d.delta.stop_reason) stop = d.delta.stop_reason;
+      else if (d.type === 'error') throw new Error((d.error && d.error.message) || 'stream error');
+    }
+  }
+  if (stop === 'refusal') throw new Error('The model declined to translate this passage.');
+  return { text: acc, stop };
+}
+
+function showResult(k, full, final) {
+  const { tr, notes } = splitNotes(full);
+  const out = $('tro-' + k), nd = $('trn-' + k);
+  out.replaceChildren(); richInto(out, tr);
+  if (notes) {
+    nd.hidden = false; nd.replaceChildren(el('h5', null, 'TRANSLATOR’S NOTES'));
+    const ul = el('ul');
+    notes.split('\n').map(l => l.replace(/^\s*[-•]\s*/, '').trim()).filter(Boolean).forEach(l => { const li = el('li'); richInto(li, l); ul.append(li); });
+    nd.append(ul);
+  } else nd.hidden = true;
+  if (final) {
+    const st = $('trs-' + k); st.replaceChildren();
+    st.append(`Machine draft (${TR_MODEL}) in the manner of ${TRANSLATION_BRIEFS[k].label.replace(' principles', '')}. `);
+    st.append(el('span', 'trmark', 'not the published translation'));
+    const cp = el('button', 'trcopy', 'Copy'); cp.type = 'button';
+    cp.addEventListener('click', () => {
+      const t = `${TRANSLATION_BRIEFS[k].label} (machine draft)\nSource: ${TR.src}\n\n${tr}\n\n${notes ? 'Notes:\n' + notes : ''}`;
+      const done = () => { cp.textContent = 'Copied'; setTimeout(() => { cp.textContent = 'Copy'; }, 1400); };
+      const fb = () => { const x = el('textarea'); x.value = t; document.body.append(x); x.select(); document.execCommand('copy'); x.remove(); done(); };
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, fb); else fb();
+    });
+    st.append(cp);
+  }
+}
+
+async function runTranslation() {
+  if (!$('trKey').value.trim()) { Object.keys(TRANSLATION_BRIEFS).forEach(k => setStatus(k, 'Enter your API key above, or press Copy prompts.', true)); return; }
+  Object.values(TR.ctl).forEach(c => c.abort());
+  $('trRun').disabled = true; $('trStop').disabled = false;
+  await Promise.all(Object.keys(TRANSLATION_BRIEFS).map(async k => {
+    const ctl = new AbortController(); TR.ctl[k] = ctl;
+    $('tro-' + k).replaceChildren(); $('trn-' + k).hidden = true;
+    setStatus(k, 'Translating …');
+    try {
+      const r = await streamOne(k, ctl.signal, t => { showResult(k, t, false); setStatus(k, 'Translating …'); });
+      showResult(k, r.text, true);
+      if (r.stop === 'max_tokens') setStatus(k, 'The answer was cut off at the length limit.', true);
+    } catch (e) {
+      if (e.name === 'AbortError') setStatus(k, 'Stopped.');
+      else setStatus(k, e.message || String(e), true);
+    }
+  }));
+  $('trRun').disabled = false; $('trStop').disabled = true;
+}
+
+function copyPrompts() {
+  const t = Object.keys(TRANSLATION_BRIEFS).map(k => `===== ${TRANSLATION_BRIEFS[k].label.toUpperCase()} =====\n\n[System instructions]\n${TRANSLATION_BRIEFS[k].system}\n\n[Message]\n${userPrompt()}`).join('\n\n\n');
+  const b = $('trPrompts'), done = () => { b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy prompts'; }, 1500); };
+  const fb = () => { const x = el('textarea'); x.value = t; document.body.append(x); x.select(); document.execCommand('copy'); x.remove(); done(); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, fb); else fb();
+}
+
+let trTimer;
+function checkSelection() {
+  clearTimeout(trTimer);
+  trTimer = setTimeout(() => {
+    const info = selectionInfo(), btn = $('trBtn');
+    if (!info || $('trPanel').classList.contains('open')) { btn.style.display = 'none'; return; }
+    btn._info = info;
+    btn.style.display = 'block';
+    btn.style.left = Math.max(8, Math.min(window.innerWidth - 170, info.rect.right - 20)) + 'px';
+    btn.style.top = Math.min(window.innerHeight - 40, info.rect.bottom + 6) + 'px';
+  }, 20);
+}
+document.addEventListener('mouseup', checkSelection);
+document.addEventListener('keyup', e => { if (e.shiftKey || e.key.startsWith('Arrow')) checkSelection(); });
+$('trBtn').addEventListener('mousedown', e => e.preventDefault());           // keep the selection alive
+$('trBtn').addEventListener('click', () => { if ($('trBtn')._info) openTranslate($('trBtn')._info); });
+$('trRun').addEventListener('click', runTranslation);
+$('trStop').addEventListener('click', () => Object.values(TR.ctl).forEach(c => c.abort()));
+$('trPrompts').addEventListener('click', copyPrompts);
+$('trClose').addEventListener('click', () => { Object.values(TR.ctl).forEach(c => c.abort()); $('trPanel').classList.remove('open'); });
+$('trKey').addEventListener('keydown', e => { if (e.key === 'Enter') runTranslation(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('trPanel').classList.contains('open')) $('trClose').click(); });
 
 /* ── init ─────────────────────────────────────────────────────────────── */
 state.n = 5;      // a § all three layers speak to
