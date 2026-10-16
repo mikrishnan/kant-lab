@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meier and Kant: Cross-reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:        #1a1208;
+  --parchment:  #f4ede0;
+  --parch-dark: #e8dcc8;
+  --parch-deep: #d8ccb4;
+  --accent:     #5c3d1e;
+  --accent-lt:  #8b5e3c;
+  --faded:      #7a6a52;
+  --line:       #b8a88a;
+  --panel-bg:   #faf7f0;
+  --aa-ink:     #3a5a3a;
+  --aa-bg:      #eef5ee;
+  --aa-bd:      #8aaa8a;
+  --meier:      #2f4a6b;   /* Meier's column */
+  --meier-bg:   #eaf0f7;
+  --hit-bg:     #f6d77a;
+  --hit-focus:  #e8a33a;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 18px;
+  color: var(--ink);
+  background: var(--parchment);
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; }
+
+/* ── header and controls ───────────────────────────────── */
+header { background: var(--accent); color: var(--parchment); padding: 8px 20px; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+header h1 { margin: 0; font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.05rem; letter-spacing: .08em; }
+header .sub { font-size: .9rem; opacity: .85; }
+.bar {
+  display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center;
+  padding: 8px 20px; background: var(--parch-dark); border-bottom: 1px solid var(--line);
+}
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.seg button { border: none; background: var(--panel-bg); padding: 4px 14px; cursor: pointer; font-size: .92rem; color: var(--accent); }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button.on { background: var(--accent); color: var(--parchment); }
+.group { display: inline-flex; align-items: center; gap: 6px; }
+.bar select, .bar input[type=number], .bar input[type=search] {
+  font: inherit; font-size: .92rem; padding: 4px 7px; border: 1px solid var(--line); border-radius: 3px; background: #fff; color: var(--ink);
+}
+.bar select { max-width: 360px; }
+.bar input[type=number] { width: 72px; }
+.bar input[type=search] { width: 230px; }
+button.nav { font-size: .92rem; padding: 4px 11px; background: var(--panel-bg); border: 1px solid var(--line); border-radius: 3px; cursor: pointer; color: var(--accent); }
+button.nav:hover:not(:disabled) { background: var(--parch-deep); }
+button.nav:disabled { opacity: .4; cursor: default; }
+.bar label { font-size: .85rem; color: var(--faded); display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
+.spacer { flex: 1; }
+
+/* ── two columns ───────────────────────────────────────── */
+main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.col { min-height: 0; display: flex; flex-direction: column; }
+.col + .col { border-left: 1px solid var(--line); }
+.colhead {
+  padding: 8px 20px 0; border-bottom: 1px solid var(--parch-deep);
+  font-family: 'Cinzel', serif; font-size: .8rem; letter-spacing: .07em;
+}
+.colhead .t { padding-bottom: 7px; }
+.col.meier .colhead { color: var(--meier); background: var(--meier-bg); }
+.col.kant .colhead { color: var(--accent); background: var(--panel-bg); }
+.colhead small { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-size: .8rem; margin-left: 6px; }
+.tabs { display: flex; gap: 2px; margin-top: -2px; }
+.tab { border: 1px solid transparent; border-bottom: none; background: none; padding: 4px 13px 5px; cursor: pointer; color: var(--faded); border-radius: 4px 4px 0 0; margin-bottom: -1px; font-family: 'EB Garamond', serif; font-size: .95rem; letter-spacing: 0; }
+.tab:hover { color: var(--accent); }
+.tab.on { background: var(--parchment); border-color: var(--line); color: var(--accent); font-weight: 600; }
+.tab .n { background: var(--parch-dark); border-radius: 9px; padding: 0 6px; font-size: .75rem; margin-left: 5px; font-weight: 500; color: var(--ink); }
+.tab.on .n { background: var(--hit-bg); }
+.scroll { flex: 1; overflow-y: auto; padding: 16px 22px 60px; }
+.col.meier .scroll { background: #fbfcfe; }
+
+/* ── Meier column ──────────────────────────────────────── */
+.where { font-size: .82rem; color: var(--faded); font-style: italic; line-height: 1.4; margin-bottom: 8px; }
+.pnum { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.2rem; color: var(--meier); }
+.cite { display: inline-block; font-size: .7rem; color: var(--aa-ink); background: var(--aa-bg); border: 1px solid var(--aa-bd); border-radius: 3px; padding: 0 5px; margin-left: 8px; vertical-align: middle; font-family: 'EB Garamond', serif; font-weight: 400; }
+.mtext { font-size: 1.12rem; line-height: 1.62; margin: 8px 0 18px; }
+.badges { margin: 4px 0 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+.badge { font-size: .75rem; border: 1px solid var(--line); border-radius: 10px; padding: 0 9px; background: var(--panel-bg); color: var(--accent); }
+.badge.none { color: var(--faded); border-style: dashed; }
+.tools { margin: 8px 0 16px; }
+.copy { font-size: .8rem; background: none; border: 1px dashed var(--line); border-radius: 3px; padding: 2px 10px; cursor: pointer; color: var(--accent); }
+.copy:hover { background: var(--parch-dark); }
+
+.vocab { border: 1px solid var(--parch-deep); border-radius: 4px; background: var(--panel-bg); padding: 10px 12px 12px; }
+.vocab h3 { margin: 0 0 2px; font-family: 'Cinzel', serif; font-size: .78rem; letter-spacing: .07em; color: var(--accent); }
+.vocab .note { font-size: .78rem; color: var(--faded); font-style: italic; margin-bottom: 8px; line-height: 1.35; }
+.vocab .row { margin: 7px 0 0; }
+.vocab .lab { font-size: .75rem; color: var(--faded); letter-spacing: .03em; display: block; margin-bottom: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { font-size: .88rem; border-radius: 11px; padding: 0 9px; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+.chip.m { border-color: #9db4cf; background: var(--meier-bg); }
+.chip.k { border-color: #cfb27a; background: #fbf1dc; }
+.chip.s { background: var(--parch-dark); }
+.chip.on { outline: 2px solid var(--hit-focus); }
+.chip sup { font-size: .65rem; color: var(--faded); margin-left: 3px; }
+
+/* ── Kant column ───────────────────────────────────────── */
+.kblock { position: relative; padding: 2px 0 2px 70px; margin: 0 0 9px; line-height: 1.55; }
+.kblock .gut { position: absolute; left: 0; top: 5px; width: 62px; text-align: right; font-size: .7rem; line-height: 1.2; color: var(--aa-ink); }
+.gut .aa { display: inline-block; background: var(--aa-bg); border: 1px solid var(--aa-bd); border-radius: 3px; padding: 0 4px; white-space: nowrap; }
+.kblock.inferred { border-left: 2px dashed var(--accent-lt); margin-left: -2px; }
+.kblock.inferred::after { content: 'paragraph join inferred'; display: block; font-size: .65rem; color: var(--accent-lt); }
+.kblock.note { font-style: italic; color: var(--faded); }
+.kblock.flash, .rcard.flash { animation: flash 2.2s ease-out; }
+@keyframes flash { 0% { background: #f9e7ae; } 100% { background: transparent; } }
+.shead { font-family: 'Cinzel', serif; font-size: .78rem; letter-spacing: .06em; color: var(--accent); margin: 14px 0 6px; padding-bottom: 2px; border-bottom: 1px solid var(--parch-deep); }
+.shead:first-child { margin-top: 0; }
+.shead span { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); }
+.rangenote { font-size: .78rem; color: var(--accent-lt); font-style: italic; margin: 0 0 4px 70px; }
+.rcard { background: #fff; border: 1px solid var(--parch-deep); border-radius: 3px; padding: 8px 11px; margin: 0 0 9px; }
+.rcard.interp { border-style: dashed; border-color: var(--accent-lt); }
+.rcard .rh { font-size: .8rem; color: var(--faded); margin-bottom: 4px; display: flex; flex-wrap: wrap; gap: 3px 10px; align-items: baseline; }
+.rcard .rh b { font-family: 'Cinzel', serif; color: var(--accent); font-size: .85rem; }
+.rcard .lemma { font-style: italic; color: var(--meier); }
+.rcard .tag { font-size: .65rem; color: var(--accent-lt); border: 1px solid var(--accent-lt); border-radius: 8px; padding: 0 6px; }
+.rcard .rt { font-size: 1rem; line-height: 1.5; }
+.empty { color: var(--faded); font-size: .95rem; line-height: 1.5; padding: 4px 0; }
+
+mark.hit { background: var(--hit-bg); color: inherit; border-radius: 2px; padding: 0 1px; }
+mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent); }
+
+/* ── term mode result lists ────────────────────────────── */
+.summary { font-size: .92rem; margin: 0 0 8px; }
+.summary b { color: var(--accent); }
+.rate { font-size: .8rem; color: var(--faded); font-style: italic; margin-bottom: 8px; }
+.ex { display: block; width: 100%; text-align: left; font-size: .95rem; line-height: 1.4; background: #fff; border: 1px solid var(--parch-deep); border-radius: 3px; padding: 6px 9px; margin: 5px 0; cursor: pointer; }
+.ex:hover { border-color: var(--accent-lt); background: #fffdf6; }
+.ex.static { cursor: default; }
+.ex.static:hover { border-color: var(--parch-deep); background: #fff; }
+.ex .ref { display: block; font-size: .72rem; color: var(--aa-ink); margin-bottom: 2px; }
+.ex .ref i { color: var(--faded); }
+.more { font-size: .85rem; color: var(--accent); background: none; border: 1px dashed var(--line); border-radius: 3px; padding: 4px 10px; cursor: pointer; margin: 4px 0; }
+.more:hover { background: var(--parch-dark); }
+.suggest { margin-top: 10px; }
+
+@media (max-width: 900px) {
+  body { height: auto; display: block; } html { height: auto; }
+  main { display: block; }
+  .col + .col { border-left: none; border-top: 1px solid var(--line); }
+  .scroll { max-height: 75vh; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Meier &amp; Kant</h1>
+  <span class="sub">Cross-reference: Meier's <i>Auszug aus der Vernunftlehre</i> against Kant's lectures and marginalia</span>
+</header>
+
+<div class="bar">
+  <div class="seg" id="modeSeg">
+    <button data-mode="para">By §</button>
+    <button data-mode="term">By term</button>
+  </div>
+  <div class="group" id="paraCtl">
+    <button class="nav" id="prev" title="Previous §">&larr;</button>
+    <select id="secSel" aria-label="Section of Meier's Auszug"></select>
+    <span>§</span><input type="number" id="nInput" min="1" max="563" aria-label="Jump to §">
+    <button class="nav" id="next" title="Next §">&rarr;</button>
+    <label><input type="checkbox" id="skip"> only §§ with Kant material</label>
+  </div>
+  <span class="spacer"></span>
+  <div class="group">
+    <input type="search" id="q" placeholder="Term, e.g. Wahrheit" autocomplete="off" spellcheck="false" aria-label="Term">
+    <label><input type="checkbox" id="whole"> whole word</label>
+    <label title="Match th/t, h after a vowel, ß/ss, ey/ei and doubled/single consonants alike, so Meier's Wahrheit finds Kant's Warheit"><input type="checkbox" id="variants" checked> spelling variants</label>
+  </div>
+</div>
+
+<main>
+  <section class="col meier">
+    <div class="colhead"><div class="t">MEIER <small>Auszug aus der Vernunftlehre, 1752 (AA 16)</small></div></div>
+    <div class="scroll" id="meierPane"></div>
+  </section>
+  <section class="col kant">
+    <div class="colhead"><div class="t">KANT <small>lecture transcripts (AA 24) and his own notes in Meier's handbook (AA 16)</small></div><div class="tabs" id="ktabs"></div></div>
+    <div class="scroll" id="kantPane"></div>
+  </section>
+</main>
+
+<!-- Shared data, loaded and never copied. Meier's text is the one exception: see the header of meier-auszug-data.js. -->
+<script src="meier-auszug-data.js"></script>
+<script src="../../data/reflexionen-16-meier.js"></script>
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script>
+/* ── data ─────────────────────────────────────────────────────────────── */
+const PARAS = MEIER_AUSZUG.paras;
+const PARA_NUMS = Object.keys(PARAS).map(Number).sort((a, b) => a - b);
+const LECTURES = {
+  blomberg: { label: 'Blomberg', data: LOGIK_BLOMBERG },
+  busolt:   { label: 'Busolt',   data: LOGIK_BUSOLT },
+  wiener:   { label: 'Wiener',   data: LOGIK_WIENER },
+};
+const SUGGESTIONS = ['Wahrheit', 'Irrthum', 'Erkenntniß', 'Merkmal', 'Vernunft', 'Urtheil', 'Gewißheit'];
+const PER_PAGE = 20;
+
+// Blomberg is the only transcript keyed to Meier's §§. A passage keyed to a range
+// ("§ 66- 91") stands for every § in it; `range` records that, so the page can say so.
+const BLOMBERG_BY_PARA = {};
+LOGIK_BLOMBERG.sections.forEach((sec, si) => sec.blocks.forEach(b => {
+  if (!b.para) return;
+  const p = b.para;
+  const ns = (p.from != null && p.to != null) ? Array.from({ length: p.to - p.from + 1 }, (_, i) => p.from + i) : p.nums;
+  const isRange = p.from != null && p.to != null && p.to > p.from;
+  ns.forEach(n => (BLOMBERG_BY_PARA[n] = BLOMBERG_BY_PARA[n] || []).push({ b, si, range: isRange ? [p.from, p.to] : null }));
+}));
+
+// Kant's own Reflexionen, filed under § by the extractor, with provenance on every entry.
+function reflFor(n) { return (REFL_BY_PARA[n] || []).map(i => REFL_ENTRIES[i]); }
+
+function hasKant(n) { return !!(BLOMBERG_BY_PARA[n] || REFL_BY_PARA[n]); }
+
+// Searchable corpora, each a flat list of { text, ... }.
+const CORPORA = {
+  meier: PARA_NUMS.map(n => ({ n, text: PARAS[n] })),
+  reflexionen: REFL_ENTRIES.filter(e => e.text).map(e => ({ e, text: e.text.replace(/\n/g, ' ') })),
+};
+Object.keys(LECTURES).forEach(k => {
+  CORPORA[k] = [];
+  LECTURES[k].data.sections.forEach((sec, si) => sec.blocks.forEach(b => {
+    if (b.kind !== 'rule' && b.text) CORPORA[k].push({ b, si, text: b.text });
+  }));
+});
+const WORDS = {};
+Object.keys(CORPORA).forEach(k => { WORDS[k] = CORPORA[k].reduce((n, r) => n + (r.text.match(/\S+/g) || []).length, 0); });
+
+const OUTLINE = [];   // [{ label, from, to }] for the section picker
+MEIER_AUSZUG.hierarchy.forEach(part => {
+  if (part.sections) part.sections.forEach(s => OUTLINE.push({
+    label: `${part.title_de.replace(/^[^:]*:\s*/, '')} · ${s.sec_num}. ${s.title_de}`,
+    part: part.title_de, from: s.para_range[0], to: s.para_range[1] }));
+  else OUTLINE.push({ label: part.title_de, part: part.title_de, from: part.para_range[0], to: part.para_range[1] });
+});
+
+/* ── state ────────────────────────────────────────────────────────────── */
+const state = {
+  mode: 'para',
+  n: 1,
+  ktab: 'blomberg',
+  query: '',
+  whole: false,
+  variants: true,
+  skip: false,
+  focus: null,                // { kind: 'block' | 'refl', id }
+  hits: null,                 // term mode: { corpus: [hit] }
+  shown: {},                  // term mode: how many of each list are visible
+  vocabTerm: null,            // a chip the reader clicked, highlighted like a query
+};
+
+/* ── helpers ──────────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+
+const escRe = c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// Kant's hand and the Academy Edition's spelling differ from Meier's print in regular ways:
+// Wahrheit/Warheit, Urtheil/Urteil, Erkenntniß/Erkenntniss, bey/bei. With `variants` on, the
+// query is widened to match all of them: an optional h after a vowel or t, ß = ss, ey = ei, and a doubled consonant
+// (nn, tt, …) allowed to be single.
+function variantPattern(q) {
+  const t = q.trim().toLowerCase();
+  let out = '', afterOptH = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (c === 'h' && afterOptH) continue;             // the optional h is already there
+    afterOptH = false;
+    if (c === 'ß' || (c === 's' && t[i + 1] === 's')) { out += '(?:ß|ss)'; if (c === 's') i++; }
+    else if (c === 'e' && (t[i + 1] === 'y' || t[i + 1] === 'i')) { out += 'e[yi]h?'; i++; afterOptH = true; }
+    else if (c === t[i + 1] && /[bdfgklmnprt]/.test(c)) {  // doubled consonant: Erkenntniß/Erkentniß
+      out += escRe(c) + escRe(c) + '?' + (c === 't' ? 'h?' : ''); i++; afterOptH = c === 't';
+    }
+    else if (/[aeiouäöüy]/.test(c) || c === 't') { out += escRe(c) + 'h?'; afterOptH = true; }
+    else if (/\s/.test(c)) { out += '\\s+'; while (/\s/.test(t[i + 1] || '')) i++; }
+    else out += escRe(c);
+  }
+  return out;
+}
+function makeRegex(q, whole, variants) {
+  const t = (q || '').trim();
+  if (!t) return null;
+  const body = variants ? variantPattern(t) : escRe(t).replace(/\s+/g, '\\s+');
+  return new RegExp(whole ? `(?<![\\p{L}\\p{N}])${body}(?![\\p{L}\\p{N}])` : body, 'giu');
+}
+function matchesIn(text, re) {
+  const out = [];
+  if (!re) return out;
+  re.lastIndex = 0;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    if (!m[0].length) { re.lastIndex++; continue; }
+    out.push({ start: m.index, end: m.index + m[0].length });
+  }
+  return out;
+}
+// The regex currently being highlighted: the query, or a vocabulary chip.
+function activeRegex() {
+  if (state.vocabTerm) return makeRegex(state.vocabTerm, true, true);
+  return makeRegex(state.query, state.whole, state.variants);
+}
+// Text with hits wrapped in <mark>. `focusK` is the index of one hit to mark as the focus.
+function highlighted(text, re, focusK) {
+  const frag = document.createDocumentFragment();
+  const ms = matchesIn(text, re);
+  let pos = 0;
+  ms.forEach((m, k) => {
+    frag.append(text.slice(pos, m.start));
+    frag.append(el('mark', 'hit' + (k === focusK ? ' focus' : ''), text.slice(m.start, m.end)));
+    pos = m.end;
+  });
+  frag.append(text.slice(pos));
+  return frag;
+}
+function lines(text, re) {            // the AA's own line breaks kept as <br>
+  const frag = document.createDocumentFragment();
+  text.split('\n').forEach((ln, i) => { if (i) frag.append(document.createElement('br')); frag.append(highlighted(ln, re)); });
+  return frag;
+}
+function aaRange(b) { return b.aaEnd && b.aaEnd !== b.aa ? `${b.aa}–${b.aaEnd}` : `${b.aa}`; }
+function whereIs(n) {
+  const part = MEIER_AUSZUG.hierarchy.find(p => n >= p.para_range[0] && n <= p.para_range[1]);
+  if (!part) return '';
+  const sec = part.sections && part.sections.find(s => n >= s.para_range[0] && n <= s.para_range[1]);
+  return sec ? `${part.title_de} — Abschnitt ${sec.sec_num}: ${sec.title_de}` : part.title_de;
+}
+
+/* ── vocabulary comparison (computed by this page) ───────────────────── */
+const STOP = new Set(('nicht welche welcher welches welchen welchem werden wird würde wurde worden diese dieser dieses diesen diesem einer eines einem einen ' +
+  'sowohl daher dahero sondern aber auch wenn kann können müssen muß haben hat sind seyn seine seiner seinen ihrer ihre ihrem ihren dass daß davon dadurch ' +
+  'denn also noch nach über unter durch weil mehr sehr ihnen dieselbe dieselben derselben dasselbe wieder schon gewiß heißt nennt wann wenigstens ' +
+  'welchem keine keiner keinen keinem andere anderen anderer anderes ander eben einige einigen derjenigen diejenigen diejenige dieienige giebt kömmt ' +
+  'bloß blos bey zwey drey weder indem damit darum dabey dazu sich selbst solche solcher solchen solches überhaupt allein allen aller alles ' +
+  'manche mancher manchen müßte könnte sollte sollen soll muss mus kan kann seyn seyn.').split(/\s+/));
+// Words are compared under a fold that undoes the regular spelling differences
+// (th/t, h after a vowel, ß/ss, y/i, doubled consonants); each folded word is shown as its commonest printed form.
+const fold = w => w.replace(/ß/g, 'ss').replace(/([bdfgklmnprt])\1/g, '$1').replace(/th/g, 't').replace(/([aeiouäöüy])h/g, '$1').replace(/y/g, 'i');
+function tokenCounts(texts) {
+  const c = new Map();                                    // folded → { n, forms: Map(form → n) }
+  texts.forEach(text => (text.toLowerCase().match(/\p{L}{4,}/gu) || []).forEach(w => {
+    const k = fold(w);
+    if (k.length < 5 || STOP.has(w) || STOP.has(k)) return;
+    const e = c.get(k) || { n: 0, forms: new Map() };
+    e.n++; e.forms.set(w, (e.forms.get(w) || 0) + 1);
+    c.set(k, e);
+  }));
+  return c;
+}
+const formOf = e => [...e.forms.entries()].sort((a, b) => b[1] - a[1])[0][0];
+function topN(entries, n) { return entries.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de')).slice(0, n); }
+
+function vocabPanel(meierText, kantTexts, kantLabel) {
+  const M = tokenCounts([meierText]), K = tokenCounts(kantTexts);
+  const mOnly = [], shared = [], kOnly = [];
+  M.forEach((e, k) => { if (K.has(k)) shared.push([formOf(e), e.n + K.get(k).n, e.n, K.get(k).n]); else mOnly.push([formOf(e), e.n]); });
+  K.forEach((e, k) => { if (!M.has(k)) kOnly.push([formOf(e), e.n]); });
+
+  const box = el('div', 'vocab');
+  box.append(el('h3', null, 'VOCABULARY COMPARED'));
+  box.append(el('div', 'note', `Computed by this page, not stated by either text: words of five or more letters in Meier’s § set against ${kantLabel}. Common function words are dropped, and regular spelling differences (Wahrheit/Warheit, Urtheil/Urteil, ß/ss, ey/ei) are folded together; irregular ones are not, so a word can still appear on one side only because it is spelled differently. Click a word to highlight it in both columns.`));
+  const row = (label, cls, items, fmt) => {
+    const r = el('div', 'row');
+    r.append(el('span', 'lab', label));
+    const ch = el('div', 'chips');
+    if (!items.length) ch.append(el('span', 'empty', '—'));
+    items.forEach(it => {
+      const c = el('button', `chip ${cls}` + (state.vocabTerm === it[0] ? ' on' : ''), it[0]);
+      c.append(el('sup', null, fmt(it)));
+      c.addEventListener('click', () => { state.vocabTerm = state.vocabTerm === it[0] ? null : it[0]; renderAll(); });
+      ch.append(c);
+    });
+    r.append(ch);
+    box.append(r);
+  };
+  row(`Only in Meier (${mOnly.length})`, 'm', topN(mOnly, 14), it => it[1]);
+  row(`In both (${shared.length})`, 's', topN(shared, 14), it => `${it[2]}·${it[3]}`);
+  row(`Only in ${kantLabel} (${kOnly.length})`, 'k', topN(kOnly, 14), it => it[1]);
+  return box;
+}
+
+/* ── By §: Meier column ──────────────────────────────────────────────── */
+function kantTextsFor(n) {
+  if (state.ktab === 'reflexionen') return reflFor(n).filter(e => e.text).map(e => e.text);
+  return (BLOMBERG_BY_PARA[n] || []).map(x => x.b.text);
+}
+
+function renderMeierPara() {
+  const n = state.n, re = activeRegex();
+  const pane = $('meierPane');
+  const wrap = el('div');
+  wrap.append(el('div', 'where', whereIs(n)));
+  const h = el('div', 'pnum', `§ ${n}`);
+  if (MEIER_AUSZUG.citations[n]) h.append(el('span', 'cite', MEIER_AUSZUG.citations[n]));
+  wrap.append(h);
+
+  const bl = BLOMBERG_BY_PARA[n], rf = reflFor(n);
+  const badges = el('div', 'badges');
+  badges.append(el('span', 'badge' + (bl ? '' : ' none'), bl ? `Blomberg: ${bl.length} paragraph${bl.length === 1 ? '' : 's'}` : 'Blomberg: nothing keyed here'));
+  badges.append(el('span', 'badge' + (rf.length ? '' : ' none'), rf.length ? `Reflexionen: ${rf.length}` : 'Reflexionen: none filed here'));
+  wrap.append(badges);
+
+  const t = el('div', 'mtext');
+  t.append(highlighted(PARAS[n], re));
+  wrap.append(t);
+
+  const tools = el('div', 'tools');
+  const cp = el('button', 'copy', 'Copy this comparison with citations');
+  cp.addEventListener('click', () => copyComparison(cp));
+  tools.append(cp);
+  wrap.append(tools);
+
+  const kl = state.ktab === 'reflexionen' ? 'the Reflexionen on this §' : 'Blomberg on this §';
+  wrap.append(vocabPanel(PARAS[n], kantTextsFor(n), kl));
+  pane.replaceChildren(wrap);
+}
+
+/* ── By §: Kant column ───────────────────────────────────────────────── */
+function renderKantPara() {
+  const n = state.n, re = activeRegex();
+  const pane = $('kantPane');
+  const wrap = el('div');
+
+  if (state.ktab === 'blomberg') {
+    const items = BLOMBERG_BY_PARA[n];
+    if (!items) {
+      wrap.append(el('div', 'empty', `The Blomberg transcript has no passage keyed to § ${n}. Blomberg is keyed to ${Object.keys(BLOMBERG_BY_PARA).length} of Meier's 563 §§; the Busolt and Wiener transcripts carry no § apparatus at all, so use By term to compare them with Meier.`));
+    } else {
+      let lastAA = null, lastHead = null;
+      items.forEach(({ b, si, range }) => {
+        const raw = b.para.raw;
+        if (raw !== lastHead) {
+          const sh = el('div', 'shead', `LOGIK BLOMBERG · ${raw.toUpperCase()} `);
+          sh.append(el('span', null, LOGIK_BLOMBERG.sections[si].title.slice(0, 60)));
+          wrap.append(sh);
+          if (range) wrap.append(el('div', 'rangenote', `Keyed to the whole range §§ ${range[0]}–${range[1]}, not to § ${n} alone.`));
+          else if (b.para.nums.length > 1) wrap.append(el('div', 'rangenote', `The transcript heads this passage with §§ ${b.para.nums.join(', ')} together.`));
+          lastHead = raw; lastAA = null;
+        }
+        const inferred = (b.joined || []).includes('inferred');
+        const d = el('div', 'kblock' + (b.kind === 'note' ? ' note' : '') + (inferred ? ' inferred' : ''));
+        d.dataset.id = b.id;
+        const g = el('div', 'gut');
+        if (b.aa !== lastAA) g.append(el('span', 'aa', `24:${b.aa}`));
+        lastAA = b.aaEnd || b.aa;
+        d.append(g);
+        const focusK = state.focus && state.focus.kind === 'block' && state.focus.id === b.id ? (state.focus.k || 0) : -1;
+        d.append(highlighted(b.text, re, focusK));
+        wrap.append(d);
+      });
+    }
+  } else {
+    const items = reflFor(n);
+    if (!items.length) {
+      wrap.append(el('div', 'empty', `No Reflexion in AA XVI is filed under § ${n}.`));
+    } else {
+      const sh = el('div', 'shead', `KANT'S REFLEXIONEN ON § ${n} `);
+      sh.append(el('span', null, `${items.length} · AA 16`));
+      wrap.append(sh);
+      items.forEach(e => {
+        const interp = e.src === 'none' || e.interp;
+        const c = el('div', 'rcard' + (interp ? ' interp' : ''));
+        c.dataset.id = 'r' + e.r;
+        const rh = el('div', 'rh');
+        rh.append(el('b', null, `Refl. ${e.r}`));
+        if (e.aa) rh.append(el('span', null, `AA 16:${e.aa}${e.aaEnd && e.aaEnd !== e.aa ? '–' + e.aaEnd : ''}`));
+        if (e.phRaw) rh.append(el('span', null, `phase ${e.phRaw}`));
+        if (e.sig) rh.append(el('span', null, e.sig));
+        if (e.loc && e.loc.raw) rh.append(el('span', null, e.loc.raw));
+        if (e.loc && e.loc.lemma) rh.append(el('span', 'lemma', `on Meier’s words: ${e.loc.lemma}`));
+        const src = e.src === 'locus' ? null : e.src === 'group' ? '§ from the AA’s block header' : 'interpolated §';
+        if (src) rh.append(el('span', 'tag', src));
+        c.append(rh);
+        const t = el('div', 'rt');
+        if (e.vacat) t.append(el('i', null, 'Vacat. (the AA records no text)'));
+        else {
+          const focusK = state.focus && state.focus.kind === 'refl' && state.focus.id === e.r ? (state.focus.k || 0) : -1;
+          const frag = document.createDocumentFragment();
+          let k0 = 0;
+          e.text.split('\n').forEach((ln, i) => {
+            if (i) frag.append(document.createElement('br'));
+            const ms = matchesIn(ln, re);
+            let pos = 0;
+            ms.forEach((m, j) => {
+              frag.append(ln.slice(pos, m.start));
+              frag.append(el('mark', 'hit' + (k0 + j === focusK ? ' focus' : ''), ln.slice(m.start, m.end)));
+              pos = m.end;
+            });
+            k0 += ms.length;
+            frag.append(ln.slice(pos));
+          });
+          t.append(frag);
+        }
+        c.append(t);
+        wrap.append(c);
+      });
+    }
+  }
+  pane.replaceChildren(wrap);
+}
+
+function paraTabs() {
+  return [
+    { id: 'blomberg', label: 'Blomberg lecture', n: (BLOMBERG_BY_PARA[state.n] || []).length },
+    { id: 'reflexionen', label: 'Reflexionen', n: reflFor(state.n).length },
+  ];
+}
+
+/* ── By term ─────────────────────────────────────────────────────────── */
+function runSearch() {
+  const re = makeRegex(state.query, state.whole, state.variants);
+  if (!re) { state.hits = null; return; }
+  state.hits = {};
+  Object.keys(CORPORA).forEach(k => {
+    const hs = [];
+    CORPORA[k].forEach(row => matchesIn(row.text, re).forEach((m, i) => hs.push({ row, ...m, i })));
+    state.hits[k] = hs;
+  });
+  state.shown = {};
+}
+
+function snippet(hit) {
+  const text = hit.row.text, W = 75;
+  let a = Math.max(0, hit.start - W), z = Math.min(text.length, hit.end + W);
+  if (a > 0) { const sp = text.indexOf(' ', a); if (sp !== -1 && sp < hit.start) a = sp + 1; }
+  if (z < text.length) { const sp = text.lastIndexOf(' ', z); if (sp > hit.end) z = sp; }
+  const frag = document.createDocumentFragment();
+  if (a > 0) frag.append('… ');
+  frag.append(text.slice(a, hit.start), el('mark', 'hit', text.slice(hit.start, hit.end)), text.slice(hit.end, z));
+  if (z < text.length) frag.append(' …');
+  return frag;
+}
+const rate = k => state.hits[k].length / WORDS[k] * 10000;
+const fmtRate = r => r >= 10 ? r.toFixed(0) : r.toFixed(1);
+
+function openAt(n, ktab, focus) {
+  state.mode = 'para'; state.n = n; if (ktab) state.ktab = ktab; state.focus = focus || null; state.vocabTerm = null;
+  renderAll();
+  const t = focus && document.querySelector(`#kantPane [data-id="${CSS.escape(focus.kind === 'refl' ? 'r' + focus.id : focus.id)}"]`);
+  if (t) { t.scrollIntoView({ block: 'center' }); t.classList.add('flash'); }
+}
+
+function exButton(hit, ref, onClick) {
+  const x = el('button', 'ex' + (onClick ? '' : ' static'));
+  const r = el('span', 'ref');
+  ref.forEach(p => r.append(p instanceof Node ? p : document.createTextNode(p)));
+  x.append(r, snippet(hit));
+  if (onClick) x.addEventListener('click', onClick);
+  return x;
+}
+function moreBtn(key, total, rerender) {
+  const shown = state.shown[key] || PER_PAGE;
+  if (total <= shown) return null;
+  const m = el('button', 'more', `Show ${Math.min(PER_PAGE, total - shown)} more of ${total - shown} remaining`);
+  m.addEventListener('click', () => { state.shown[key] = shown + PER_PAGE; rerender(); });
+  return m;
+}
+
+function renderMeierTerm() {
+  const pane = $('meierPane'), wrap = el('div');
+  if (!state.hits) {
+    wrap.append(el('div', 'empty', 'Type a term in the box above (top right) to see every place Meier uses it, set against Kant’s use of it on the right.'));
+    const ch = el('div', 'chips suggest');
+    SUGGESTIONS.forEach(s => { const c = el('button', 'chip s', s); c.addEventListener('click', () => setQuery(s)); ch.append(c); });
+    wrap.append(ch);
+    pane.replaceChildren(wrap); return;
+  }
+  const hs = state.hits.meier;
+  const secs = new Set(hs.map(h => h.row.n)).size;
+  const s = el('div', 'summary');
+  s.append(el('b', null, String(hs.length)), ` occurrence${hs.length === 1 ? '' : 's'} of “${state.query.trim()}” in ${secs} of Meier’s §§`);
+  wrap.append(s, el('div', 'rate', `${fmtRate(rate('meier'))} per 10,000 words of Meier (computed here).`));
+  if (!hs.length) wrap.append(el('div', 'empty', 'No match in Meier. Try a shorter stem, or switch off whole word.'));
+  const shown = state.shown.meier || PER_PAGE;
+  hs.slice(0, shown).forEach(h => {
+    wrap.append(exButton(h, [`MEIER § ${h.row.n}`, ' ', Object.assign(el('i'), { textContent: MEIER_AUSZUG.citations[h.row.n] ? '· ' + MEIER_AUSZUG.citations[h.row.n] : '' })],
+      () => openAt(h.row.n, hasKant(h.row.n) && !BLOMBERG_BY_PARA[h.row.n] ? 'reflexionen' : 'blomberg')));
+  });
+  const m = moreBtn('meier', hs.length, renderMeierTerm); if (m) wrap.append(m);
+  pane.replaceChildren(wrap);
+}
+
+function termTabs() {
+  return ['blomberg', 'busolt', 'wiener', 'reflexionen'].map(k => ({
+    id: k, label: k === 'reflexionen' ? 'Reflexionen' : LECTURES[k].label, n: state.hits ? state.hits[k].length : null }));
+}
+
+function renderKantTerm() {
+  const pane = $('kantPane'), wrap = el('div');
+  if (!state.hits) { wrap.append(el('div', 'empty', 'Kant’s uses of the term will appear here: the three lecture transcripts and the Reflexionen, one tab each.')); pane.replaceChildren(wrap); return; }
+  const k = state.ktab, hs = state.hits[k];
+  const label = k === 'reflexionen' ? 'Kant’s Reflexionen on Meier' : `Logik ${LECTURES[k].label}`;
+  const s = el('div', 'summary');
+  s.append(el('b', null, String(hs.length)), ` occurrence${hs.length === 1 ? '' : 's'} in ${label}`);
+  wrap.append(s, el('div', 'rate', `${fmtRate(rate(k))} per 10,000 words (Meier: ${fmtRate(rate('meier'))}) — computed here. The texts differ in length and genre, so read it as a pointer, not a measure.`));
+  if (k === 'busolt' || k === 'wiener') wrap.append(el('div', 'rate', 'This transcript carries no § apparatus, so its hits cannot be placed against a § of Meier’s; they are shown with their AA page only.'));
+  if (!hs.length) wrap.append(el('div', 'empty', 'No match here.'));
+  const shown = state.shown[k] || PER_PAGE;
+  hs.slice(0, shown).forEach(h => {
+    if (k === 'reflexionen') {
+      const e = h.row.e, n0 = e.paras[0];
+      wrap.append(exButton(h, [`REFL. ${e.r}`, ` · AA 16${e.aa ? ':' + e.aa : ''} · on § ${e.paras.slice(0, 4).join(', ')}${e.paras.length > 4 ? '…' : ''}`, e.src === 'locus' ? '' : ' · § not stated by Kant’s locus note'],
+        n0 ? () => openAt(n0, 'reflexionen', { kind: 'refl', id: e.r, k: h.i }) : null));
+    } else {
+      const b = h.row.b, n0 = b.para && (b.para.from != null ? b.para.from : b.para.nums[0]);
+      const sec = LECTURES[k].data.sections[h.row.si].title;
+      wrap.append(exButton(h, [`AA 24:${b.aa}`, b.para ? ` · ${b.para.raw}` : '', Object.assign(el('i'), { textContent: sec ? ' · ' + (sec.length > 40 ? sec.slice(0, 38) + '…' : sec) : '' })],
+        n0 ? () => openAt(n0, 'blomberg', { kind: 'block', id: b.id, k: h.i }) : null));
+    }
+  });
+  const m = moreBtn(k, hs.length, renderKantTerm); if (m) wrap.append(m);
+  pane.replaceChildren(wrap);
+}
+
+/* ── copy a comparison ───────────────────────────────────────────────── */
+function copyComparison(btn) {
+  const n = state.n, out = [];
+  out.push(`Meier, Auszug aus der Vernunftlehre, § ${n}${MEIER_AUSZUG.citations[n] ? ' (' + MEIER_AUSZUG.citations[n] + ')' : ''}:\n${PARAS[n]}`);
+  (BLOMBERG_BY_PARA[n] || []).forEach(({ b }) => out.push(`Kant, Logik Blomberg, AA 24:${aaRange(b)}, ${b.para.raw}:\n${b.text}`));
+  reflFor(n).forEach(e => { if (e.text) out.push(`Kant, Reflexion ${e.r}${e.aa ? ', AA 16:' + e.aa : ''}${e.phRaw ? ', phase ' + e.phRaw : ''}${e.src === 'locus' ? '' : ' [§ placement not from Kant’s own locus note]'}:\n${e.text}`); });
+  const text = out.join('\n\n');
+  const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy this comparison with citations'; }, 1600); };
+  const fallback = () => { const t = el('textarea'); t.value = text; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); done(); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+}
+
+/* ── render shell ─────────────────────────────────────────────────────── */
+function renderBar() {
+  document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === state.mode));
+  $('paraCtl').style.display = state.mode === 'para' ? '' : 'none';
+  if (state.mode === 'para') {
+    const i = OUTLINE.findIndex(o => state.n >= o.from && state.n <= o.to);
+    $('secSel').value = i;
+    $('nInput').value = state.n;
+    $('prev').disabled = !step(-1); $('next').disabled = !step(1);
+  }
+}
+function renderTabs() {
+  const tabs = state.mode === 'para' ? paraTabs() : termTabs();
+  if (!tabs.some(t => t.id === state.ktab)) state.ktab = 'blomberg';
+  const box = $('ktabs'); box.replaceChildren();
+  tabs.forEach(t => {
+    const b = el('button', 'tab' + (t.id === state.ktab ? ' on' : ''), t.label);
+    if (t.n != null) b.append(el('span', 'n', String(t.n)));
+    b.addEventListener('click', () => { state.ktab = t.id; state.focus = null; renderAll(); });
+    box.append(b);
+  });
+}
+function renderAll() {
+  renderBar(); renderTabs();
+  if (state.mode === 'para') { renderMeierPara(); renderKantPara(); } else { renderMeierTerm(); renderKantTerm(); }
+}
+
+// The next § in a direction, skipping those Kant doesn't address when asked to.
+function step(d) {
+  let i = PARA_NUMS.indexOf(state.n) + d;
+  while (i >= 0 && i < PARA_NUMS.length) { if (!state.skip || hasKant(PARA_NUMS[i])) return PARA_NUMS[i]; i += d; }
+  return null;
+}
+function goPara(n) { if (n == null || !PARAS[n]) return; state.n = n; state.focus = null; state.vocabTerm = null; renderAll(); $('meierPane').scrollTop = 0; $('kantPane').scrollTop = 0; }
+function setQuery(q) {
+  $('q').value = q; state.query = q; state.vocabTerm = null; state.focus = null; state.shown = {};
+  runSearch(); renderAll();
+}
+
+/* ── events ───────────────────────────────────────────────────────────── */
+OUTLINE.forEach((o, i) => { const op = el('option', null, `${o.label} (§§ ${o.from}–${o.to})`); op.value = i; $('secSel').append(op); });
+document.querySelectorAll('#modeSeg button').forEach(b => b.addEventListener('click', () => { state.mode = b.dataset.mode; state.focus = null; if (state.mode === 'term' && state.ktab === 'reflexionen' && !state.hits) state.ktab = 'blomberg'; renderAll(); }));
+$('secSel').addEventListener('change', e => goPara(OUTLINE[+e.target.value].from));
+$('nInput').addEventListener('change', e => { const n = +e.target.value; if (PARAS[n]) goPara(n); else e.target.value = state.n; });
+$('prev').addEventListener('click', () => goPara(step(-1)));
+$('next').addEventListener('click', () => goPara(step(1)));
+$('skip').addEventListener('change', e => { state.skip = e.target.checked; renderBar(); });
+let timer;
+$('q').addEventListener('input', e => { clearTimeout(timer); timer = setTimeout(() => setQuery(e.target.value), 150); });
+$('whole').addEventListener('change', e => { state.whole = e.target.checked; setQuery($('q').value); });
+$('variants').addEventListener('change', e => { state.variants = e.target.checked; setQuery($('q').value); });
+document.addEventListener('keydown', e => { if (e.key === '/' && document.activeElement.tagName !== 'INPUT') { e.preventDefault(); $('q').focus(); } });
+// Double-click a word in either column to search for it.
+['meierPane', 'kantPane'].forEach(id => $(id).addEventListener('dblclick', () => {
+  const s = (window.getSelection().toString() || '').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+  if (s && !/\s/.test(s)) setQuery(s);
+}));
+
+/* ── init ─────────────────────────────────────────────────────────────── */
+state.n = 5;      // a § all three layers speak to
+renderAll();
+</script>
+</body>
+</html>
