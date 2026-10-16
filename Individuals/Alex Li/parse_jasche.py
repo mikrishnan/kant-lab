@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Extract the Jäsche *Logik* (AA IX) into data/logik-jasche-9.js.
+"""Extract the Jäsche *Logik* (AA IX) into Individuals/Alex Li/logik-jasche-9.js.
 
-    python3 scripts/parse_jasche.py Textfiles/Vol9Logic.rtfd/TXT.rtf data/logik-jasche-9.js
+    python3 "Individuals/Alex Li/parse_jasche.py" Textfiles/Vol9Logic.rtfd/TXT.rtf "Individuals/Alex Li/logik-jasche-9.js"
 
 Unlike the other extractors this one reads the RTF itself, so it needs neither
 `textutil` nor a Mac. It does so because the formatting is evidence here: the
@@ -542,7 +542,7 @@ def check(sections, paras_idx, rep, emitted, expected):
 HEADER = """/* ─────────────────────────────────────────────────────────────────────────────
    Jäsche Logik, Academy Edition IX (1800)
    Machine-extracted from the transcription in Textfiles/Vol9Logic.rtfd by
-   scripts/parse_jasche.py — do not hand-edit; corrections belong in the
+   Individuals/Alex Li/parse_jasche.py — do not hand-edit; corrections belong in the
    extractor so they survive the next run.
 
    Immanuel Kant's Logik, the handbook for lectures that G. B. Jäsche edited from
@@ -673,7 +673,7 @@ def run(rtf, out):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("rtf", help="Textfiles/Vol9Logic.rtfd/TXT.rtf")
-    ap.add_argument("out", help="data/logik-jasche-9.js")
+    ap.add_argument("out", help="logik-jasche-9.js")
     a = ap.parse_args()
     sys.exit(run(a.rtf, a.out))
 

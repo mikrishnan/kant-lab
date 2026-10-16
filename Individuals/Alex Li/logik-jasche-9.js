@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    Jäsche Logik, Academy Edition IX (1800)
    Machine-extracted from the transcription in Textfiles/Vol9Logic.rtfd by
-   scripts/parse_jasche.py — do not hand-edit; corrections belong in the
+   Individuals/Alex Li/parse_jasche.py — do not hand-edit; corrections belong in the
    extractor so they survive the next run.
 
    Immanuel Kant's Logik, the handbook for lectures that G. B. Jäsche edited from
