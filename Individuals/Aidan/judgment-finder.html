@@ -205,10 +205,11 @@ mark.form { background: var(--mark-form); box-shadow: 0 0 0 1px #b9cfa6; }
       <div id="table"></div>
       <div id="kwhint" hidden>Type words that occur in a judgment (German, any spelling). Each example found is labelled with its forms.</div>
       <div class="opts" id="opts-form">
-        <label id="l-unmk"><input type="checkbox" id="o-unmk"> also unmarked sentences worded like the form</label>
+        <label id="l-unmk"><input type="checkbox" id="o-unmk" checked> include implicit examples (no z.E., but a simple sentence in a passage about judgments)</label>
       </div>
       <div class="opts" id="opts-kw" hidden>
-        <label><input type="checkbox" id="o-all"> search every sentence, not only marked examples</label>
+        <label><input type="checkbox" id="o-unmk-kw" checked> include implicit examples</label>
+        <label><input type="checkbox" id="o-all"> search every sentence, not only examples</label>
       </div>
       <div class="opts">
         <label><input type="checkbox" id="o-tr" checked> show English translation</label>
@@ -216,7 +217,7 @@ mark.form { background: var(--mark-form); box-shadow: 0 0 0 1px #b9cfa6; }
     </div>
     <div id="summary"></div>
     <div id="results"></div>
-    <div id="note">An <b>example</b> is a sentence the lecturer introduces with <i>z.E.</i>, <i>z.B.</i> or <i>zum Beispiel</i>. Form labels are <b>inferred</b> from the wording of the sentence — quantifiers, negation, <i>wenn…so</i>, <i>entweder…oder</i>, <i>muß</i>, <i>kann</i> — and can be wrong; the German is the transcription's, the English is machine translation.</div>
+    <div id="note">An <b>example</b> is a <b>simple sentence</b> — one subject and predicate, no subordinate clause — that demonstrates a form: either <b>explicit</b> (introduced with <i>z.E.</i>, <i>z.B.</i>, <i>zum Beispiel</i>) or <b>implicit</b> (unmarked, but in a passage about judgments and worded like a form). Only hypothetical and disjunctive examples may have two clauses (ground–consequence, division). Form labels are <b>inferred</b> from the wording of the sentence — quantifiers, negation, <i>wenn…so</i>, <i>entweder…oder</i>, <i>muß</i>, <i>kann</i> — and can be wrong; the German is the transcription's, the English is machine translation.</div>
   </aside>
 </main>
 
@@ -233,34 +234,26 @@ const JF_WORKS = [
 ];
 
 const B = '(?<![\\p{L}])';
-/* The table of judgments (KrV A70/B95). `shape` is the surface wording that gives a form away; it is only
-   used for the "unmarked sentences" option. Forms with no such tell have none. */
+/* The table of judgments (KrV A70/B95). */
 const JF_FORMS = [
   { id: 'universal',   group: 'Quantity', axis: 1, de: 'allgemeine',    la: 'universale',   en: 'universal',
-    def: 'The predicate holds of the whole sphere of the subject — “All men are mortal.”',
-    shape: B + '(Alle|Jeder|Jede|Jedes|Jeden|Ein jeder|Omnis|Omne|Omnes|Omnia|Kein|Keine|Keiner|Keines|Nullus)\\s+\\p{L}+' },
+    def: 'The predicate holds of the whole sphere of the subject — “All men are mortal.”' },
   { id: 'particular',  group: 'Quantity', axis: 1, de: 'besondere',     la: 'particulare',  en: 'particular',
-    def: 'The predicate holds of part of the sphere — “Some men are learned.”',
-    shape: B + '(Einige|Einiger|Etliche|Manche|Mancher|Manches|Quidam|Quaedam|Quoddam|Aliqui|Aliquis|Aliquod|Nonnulli)\\s+\\p{L}+' },
+    def: 'The predicate holds of part of the sphere — “Some men are learned.”' },
   { id: 'singular',    group: 'Quantity', axis: 1, de: 'einzelne',      la: 'singulare',    en: 'singular',
-    def: 'The subject is a single thing — “Caius is mortal.”',
-    shape: B + '(Caius|Cajus|Socrates|Sokrates|Titius|Petrus|Sempronius|Dieser|Diese|Dieses)\\s+(ist|sind|est|hat|war)\\s' },
+    def: 'The subject is a single thing — “Caius is mortal.”' },
   { id: 'affirmative', group: 'Quality', axis: 2, de: 'bejahende',      la: 'affirmativum', en: 'affirmative',
     def: 'The predicate is attributed to the subject — “The soul is mortal.”' },
   { id: 'negative',    group: 'Quality', axis: 2, de: 'verneinende',    la: 'negativum',    en: 'negative',
-    def: 'The predicate is denied of the subject — “The soul is not mortal.”',
-    shape: B + '(nicht|kein\\p{L}*|nullus|nulla|nullum|non)(?![\\p{L}-])' },
+    def: 'The predicate is denied of the subject — “The soul is not mortal.”' },
   { id: 'infinite',    group: 'Quality', axis: 2, de: 'unendliche',     la: 'infinitum',    en: 'infinite',
-    def: 'An affirmation with a negated predicate — “The soul is non-mortal.”',
-    shape: B + '(ist|sind|est|sunt|sey|seyn)\\s+(nicht-?\\p{L}{4,}|un(?!ser|ter|mittel)\\p{L}{4,}|non-\\p{L}+)' },
+    def: 'An affirmation with a negated predicate — “The soul is non-mortal.”' },
   { id: 'categorical', group: 'Relation', axis: 3, de: 'kategorische',  la: 'categoricum',  en: 'categorical',
     def: 'A predicate is related to a subject, unconditionally.' },
   { id: 'hypothetical',group: 'Relation', axis: 3, de: 'hypothetische', la: 'hypotheticum', en: 'hypothetical',
-    def: 'One judgment is related to another as ground to consequence — “If … then …”.',
-    shape: '(?:^|[\\s,;:])(Wenn|Wann|Falls|Si)\\s.+\\s(so|dann|ita|tum|ergo)\\s' },
+    def: 'One judgment is related to another as ground to consequence — “If … then …”.' },
   { id: 'disjunctive', group: 'Relation', axis: 3, de: 'disjunktive',   la: 'disjunctivum', en: 'disjunctive',
-    def: 'Judgments related as parts of one divided sphere — “Either … or …”.',
-    shape: B + '(Entweder|Aut)\\s.+\\s(oder|aut|vel)\\s' },
+    def: 'Judgments related as parts of one divided sphere — “Either … or …”.' },
   { id: 'problematic', group: 'Modality', axis: 4, de: 'problematische', la: 'problematicum', en: 'problematic',
     def: 'Affirmation or denial taken as merely possible.' },
   { id: 'assertoric',  group: 'Modality', axis: 4, de: 'assertorische', la: 'assertoricum',  en: 'assertoric',
@@ -286,7 +279,7 @@ const JF_ALIASES = {
    Marker: the lecturer's own signal that an example follows. */
 const EX_MARK = new RegExp(B + '(?:[zZ]\\.\\s?[EeBb]\\.?|[zZ]um\\s+(?:Beyspiel|Beispiel|Exempel)|exempli\\s+gratia|e\\.\\s?g\\.)(?![\\p{L}])', 'gu');
 /* A clause counts as a judgment only if it has a finite verb we know. */
-const VERB = new RegExp(B + '(ist|sind|war|waren|seyn|sey|sei|bin|bist|hat|haben|hatte|kann|können|könnte|kan|muß|müßen|müssen|muss|soll|sollen|wird|werden|wurde|mag|darf|gilt|steht|stehet|liegt|folgt|est|sunt|sit|sint|esse|erat|potest|possunt|habet|habent|debet)(?![\\p{L}])', 'iu');
+const VERB = new RegExp(B + '(ist|sind|war|waren|seyn|sey|sei|bin|bist|hat|haben|hatte|ists|kann|können|könnte|kan|muß|müßen|müssen|muss|soll|sollen|wird|werden|wurde|mag|darf|gilt|steht|stehet|liegt|folgt|nennt|nennen|heißt|heißen|bedeutet|bedeuten|macht|machen|giebt|gibt|geschieht|bleibt|bleiben|läßt|laßen|lassen|besteht|bestehet|enthält|enthalten|kommt|kommen|gehört|gehören|entspringt|hängt|wirkt|gelten|dient|dienen|fordert|erfordert|braucht|brauchen|zeigt|zeigen|sagt|sagen|bezieht|beziehen|gründet|lebt|leben|stirbt|sterben|denkt|denken|erkennt|erkennen|urtheilt|schließt|schließen|est|sunt|sit|sint|esse|erat|potest|possunt|habet|habent|debet)(?![\\p{L}])', 'iu');
 const MAX_EX_CHARS = 320;
 
 function sentencesOf(text) {
@@ -311,9 +304,11 @@ function tidy(text, s, e) {
   const lead = t.match(/^[\s:,„"“»«(]+/);
   if (lead) s += lead[0].length;
   t = text.slice(s, e);
+  const bars = t.match(/^\|\|\s*\S\s+/);   // the Wiener Logik's "|| V"
+  if (bars) { s += bars[0].length; t = text.slice(s, e); }
   const frame = t.match(/^.{0,40}?\b(?:ich sage|sage ich|man sagt|sagt man|heißt es|spricht man)\s*[:,]\s*/i);
   if (frame) { s += frame[0].length; t = text.slice(s, e); }
-  const trail = t.match(/[\s"“”«»)]+$/);
+  const trail = t.match(/[\s"“”«»),]+$/);
   if (trail) e -= trail[0].length;
   return e > s ? { s, e } : null;
 }
@@ -323,7 +318,7 @@ function tidy(text, s, e) {
 function splitJudgments(text, s, e) {
   const seg = text.slice(s, e);
   const cut = [0];
-  const re = /[,;]\s+(?=(?:\p{Lu}\p{L}+\s+(?:ist|sind|hat|haben|kann|muß|est|sunt)(?![\p{L}]))|(?:also|folglich|mithin|ergo|so\s+ist)(?![\p{L}]))/gu;
+  const re = /[,;]\s+(?=(?:\p{Lu}\p{L}+\s+(?:ist|sind|hat|haben|kann|muß|est|sunt)(?![\p{L}]))|(?:also|folglich|mithin|ergo)(?![\p{L}]))/gu;
   let m;
   while ((m = re.exec(seg))) cut.push(m.index + m[0].length);
   cut.push(seg.length);
@@ -338,6 +333,47 @@ function splitJudgments(text, s, e) {
 function isJudgment(t) {
   const words = t.split(/\s+/).length;
   return words >= 3 && words <= 45 && VERB.test(t);
+}
+
+/* A passage "concerns a judgment" if it, or the block before or after it, says so. */
+const JF_JUDGMENT = new RegExp(B + '(Urtheil\\p{L}*|Urteil\\p{L}*|judic\\p{L}*|Satz|Sätze|Säzze|Sazze|Saz|propositio\\p{L}*|proposition\\p{L}*|Subject\\p{L}*|Subiect\\p{L}*|Praedicat\\p{L}*|Prädicat\\p{L}*)', 'iu');
+const VERB_G = new RegExp(VERB.source, 'giu');
+const SUBORD = new RegExp(B + '(daß|dass|weil|ob|indem|damit|obgleich|obwohl|obschon|wiewohl|nachdem|bevor|sobald|solange|welche|welcher|welches|welchen|welchem|welch|dessen|deren|wobei|wodurch|womit|denn|quod|quia|cum|qui|quae|quo)(?![\\p{L}])|,\\s+(da|wo|wie|als)\\s', 'iu');
+
+/* A simple sentence: one subject and predicate, no subordinate clause, no heading debris or enumeration.
+   Only a hypothetical (ground–consequence) or disjunctive (division) may have two clauses. */
+function isSimple(t, labels) {
+  if (/[\[\]<>?\d:;]|Abschnitt|etc\.|(?<![\p{L}])[zZ]\.\s?[EeBb]\b/u.test(t)) return false;
+  if (/(?<![\p{L}])(entweder|nehmlich|und|oder|als|aber|auch|so|wenn)\s*[,.]?$/iu.test(t)) return false;   // cut off mid-sentence
+  const compound = labels.includes('hypothetical') || labels.includes('disjunctive');
+  if (/^(wenn|wann|falls|si)(?![\p{L}])/iu.test(t) && !labels.includes('hypothetical')) return false;   // a wenn-clause with no consequence
+  if (/^(wie|als|wo|nicht|von|vom|zwischen|mit|durch|für|in|auf|an|zu|bey|bei|aus|nach|über|unter|ohne|um)\s/iu.test(t)) return false;   // starts mid-sentence
+  if (!compound && VERB.test(t.split(/\s+/).pop().replace(/[.!,]+$/, ''))) return false;   // verb-final: a subordinate clause, not a simple sentence
+  const words = t.split(/\s+/).length;
+  if (words < 3 || words > (compound ? 30 : 14)) return false;
+  const verbs = (t.match(VERB_G) || []).length;
+  if (verbs < 1 || verbs > (compound ? 2 : 1)) return false;
+  if ((t.match(/,/g) || []).length > 2) return false;
+  if (/,\s+(und|aber|doch|deshalb|daher|also|folglich|mithin|sondern|denn|weswegen)(?![\p{L}])/iu.test(t)) return false;
+  const sub = SUBORD.exec(t);
+  if (sub) {
+    const w = (sub[1] || sub[2] || '').toLowerCase();
+    // a ground–consequence "weil … so" is allowed, but not when it is nested inside a wenn-clause
+    if (!(compound && (w === 'weil' || w === 'da') && !/(?<![\p{L}])(wenn|wann|falls|si)(?![\p{L}])/iu.test(t))) return false;
+  }
+  return true;
+}
+
+/* The wording that makes an unmarked sentence read as a demonstration of a form: a quantifier or an
+   individual's name opening the sentence, a wenn…so, an entweder…oder, a negated predicate. */
+const IMPLICIT_START = new RegExp('^(?:' + [
+  '(?:Alle|Aller|Jeder|Jede|Jedes|Jeden|Ein jeder|Omnis|Omne|Omnes|Omnia|Kein|Keine|Keiner|Keines|Nullus|Nulla|Nullum)\\s+\\p{L}+',
+  '(?:Einige|Etliche|Manche|Mancher|Manches|Quidam|Quaedam|Quoddam|Aliqui|Aliquis|Aliquod|Nonnulli)\\s+\\p{L}+',
+  '(?:Caius|Cajus|Socrates|Sokrates|Titius|Petrus|Sempronius)\\s+(?:ist|sind|war|hat|est)',
+  '(?:Wenn|Wann|Falls|Si)\\s'
+].join('|') + ')', 'iu');
+function isImplicitExample(t, labels) {
+  return IMPLICIT_START.test(t) || labels.includes('disjunctive') || labels.includes('infinite');
 }
 
 /* ── labelling a judgment with its forms ──────────────────────────────────────
@@ -367,17 +403,18 @@ function classify(t) {
   return labels;
 }
 
-/* Every marked example in the three works, with its labels. Built once, on first use. */
+/* Every example in the three works, with its labels: the marked ones (z.E. …), and the implicit ones —
+   simple sentences, in a passage about judgments, worded like a form. Built once, on first use. */
 let EXAMPLES = null;
 function buildExamples() {
   if (EXAMPLES) return EXAMPLES;
   EXAMPLES = [];
-  JF_WORKS.forEach((w, wi) => w.data.sections.forEach((sec, si) => sec.blocks.forEach(b => {
+  const seen = new Set();
+  JF_WORKS.forEach((w, wi) => w.data.sections.forEach((sec, si) => sec.blocks.forEach((b, bi) => {
     const text = b.text;
     if (!text) return;
     EX_MARK.lastIndex = 0;
     let m;
-    const seen = new Set();
     while ((m = EX_MARK.exec(text))) {
       const from = m.index + m[0].length;
       const rest = sentencesOf(text.slice(from))[0];
@@ -385,13 +422,28 @@ function buildExamples() {
       const e = from + rest.e;
       if (e - from > MAX_EX_CHARS) continue;
       splitJudgments(text, from, e).forEach(p => {
-        const t = text.slice(p.s, p.e);
-        if (!isJudgment(t) || seen.has(p.s)) return;
-        seen.add(p.s);
-        EXAMPLES.push({ wi, si, b, s: p.s, e: p.e, text: t, marker: m[0].replace(/\s+/g, ''), marked: true, labels: classify(t) });
+        const t = text.slice(p.s, p.e), key = b.id + ':' + p.s;
+        if (seen.has(key) || !isJudgment(t)) return;
+        const labels = classify(t);
+        if (!isSimple(t, labels)) return;
+        seen.add(key);
+        EXAMPLES.push({ wi, si, bi, b, s: p.s, e: p.e, text: t, marker: m[0].replace(/\s+/g, ''), marked: true, labels });
       });
     }
   })));
+  const taken = new Map();   // block id → ranges already used by a marked example
+  EXAMPLES.forEach(x => { const l = taken.get(x.b.id) || []; l.push([x.s, x.e]); taken.set(x.b.id, l); });
+  for (const x of allSentences()) {
+    if (x.text.split(/\s+/).length > 30 || !/[.!]$/.test(x.text)) continue;
+    if ((taken.get(x.b.id) || []).some(r => x.s < r[1] && x.e > r[0])) continue;
+    const labels = classify(x.text);
+    if (!isImplicitExample(x.text, labels) || !isSimple(x.text, labels)) continue;
+    const blocks = x.sec.blocks;
+    const around = [blocks[x.bi - 1], x.b, blocks[x.bi + 1]].map(y => (y && y.text) || '').join(' ');
+    if (!JF_JUDGMENT.test(around)) continue;
+    EXAMPLES.push({ ...x, marker: '', marked: false, labels });
+  }
+  EXAMPLES.sort((a, c) => a.wi - c.wi || a.si - c.si || a.bi - c.bi || a.s - c.s);
   return EXAMPLES;
 }
 
@@ -399,13 +451,14 @@ function buildExamples() {
 function* allSentences() {
   for (let wi = 0; wi < JF_WORKS.length; wi++) {
     const secs = JF_WORKS[wi].data.sections;
-    for (let si = 0; si < secs.length; si++) for (const b of secs[si].blocks) {
+    for (let si = 0; si < secs.length; si++) for (let bi = 0; bi < secs[si].blocks.length; bi++) {
+      const b = secs[si].blocks[bi];
       if (!b.text) continue;
       for (const se of sentencesOf(b.text)) {
         const t = tidy(b.text, se.s, se.e);
         if (!t) continue;
         const text = b.text.slice(t.s, t.e);
-        if (isJudgment(text)) yield { wi, si, b, s: t.s, e: t.e, text };
+        if (isJudgment(text)) yield { wi, si, bi, sec: secs[si], b, s: t.s, e: t.e, text };
       }
     }
   }
@@ -555,17 +608,8 @@ function groupByWork(hits) {
 }
 
 function searchForm(f) {
-  const hits = buildExamples().filter(x => x.labels.includes(f.id));
-  if ($('o-unmk').checked && f.shape) {
-    const re = new RegExp(f.shape, 'iu');
-    const marked = new Set(buildExamples().map(x => x.b.id + ':' + x.s));
-    for (const x of allSentences()) {
-      if (x.text.split(/\s+/).length > 16 || marked.has(x.b.id + ':' + x.s) || !re.test(x.text)) continue;
-      const labels = classify(x.text);
-      if (labels.includes(f.id)) hits.push({ ...x, marker: '', marked: false, labels });
-    }
-  }
-  return hits;
+  const implicit = $('o-unmk').checked;
+  return buildExamples().filter(x => x.labels.includes(f.id) && (x.marked || implicit));
 }
 
 function keywordRanges(text, words) {
@@ -580,7 +624,7 @@ function keywordRanges(text, words) {
 function searchKeywords(words) {
   const ws = words.map(foldKeep);
   const has = t => { const f = foldKeep(t); return ws.every(w => f.includes(w)); };
-  if (!$('o-all').checked) return buildExamples().filter(x => has(x.text));
+  if (!$('o-all').checked) { const implicit = $('o-unmk-kw').checked; return buildExamples().filter(x => has(x.text) && (x.marked || implicit)); }
   const hits = [];
   const marked = new Map(buildExamples().map(x => [x.b.id + ':' + x.s, x]));
   for (const x of allSentences()) {
@@ -635,8 +679,8 @@ function renderResults() {
   const total = results.reduce((n, h) => n + h.length, 0);
   if (!total) {
     box.append(el('div', 'empty', mode === 'form'
-      ? 'No marked examples of this form were found. Try “also unmarked sentences”, if it is offered.'
-      : 'No example contains all those words. Try fewer, or “search every sentence”.'));
+      ? 'No simple example of this form was found.'
+      : 'No example contains all those words. Try fewer words, or “search every sentence”.'));
     return;
   }
   JF_WORKS.forEach((w, wi) => {
@@ -659,7 +703,7 @@ function renderExample(h) {
   const sec = JF_WORKS[h.wi].data.sections[h.si];
   const loc = el('div', 'loc');
   const left = el('span', null, (h.b.aa ? 'AA 24:' + h.b.aa : '') + (h.b.para && h.b.para.raw ? ' · ' + h.b.para.raw : ''));
-  left.append(el('span', 'tag' + (h.marked ? ' mk' : ''), h.marked ? h.marker : 'UNMARKED'));
+  left.append(el('span', 'tag' + (h.marked ? ' mk' : ''), h.marked ? h.marker : 'IMPLICIT'));
   loc.append(left, el('i', null, (sec.title || '').slice(0, 30)));
   card.append(loc);
 
@@ -817,20 +861,11 @@ function chooseForm(f) {
   $('q').value = f.en;
   hideSuggest();
   syncChips();
-  updateUnmarkedOption();
   runSearch();
 }
 function syncChips() {
   document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', mode === 'form' && !!curForm && c.dataset.id === curForm.id));
 }
-function updateUnmarkedOption() {
-  const ok = !!(curForm && curForm.shape);
-  $('o-unmk').disabled = !ok;
-  $('l-unmk').classList.toggle('off', !ok);
-  $('l-unmk').title = ok ? '' : 'This form has no wording of its own to match';
-  if (!ok) $('o-unmk').checked = false;
-}
-
 function showSuggest(list) {
   const s = $('suggest');
   s.textContent = '';
@@ -894,13 +929,13 @@ function init() {
 
   $('o-unmk').addEventListener('change', runSearch);
   $('o-all').addEventListener('change', runSearch);
+  $('o-unmk-kw').addEventListener('change', runSearch);
   $('o-tr').addEventListener('change', () => {
     document.querySelectorAll('#results .en').forEach(n => { n.hidden = !$('o-tr').checked; });
     observeTranslations();
   });
 
   setMode('form');
-  updateUnmarkedOption();
   openWork(0, 0);
 }
 init();
