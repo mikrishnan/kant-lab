@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kant's Logic Transcripts: Read &amp; Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:        #1a1208;
+  --parchment:  #f4ede0;
+  --parch-dark: #e8dcc8;
+  --parch-deep: #d8ccb4;
+  --accent:     #5c3d1e;
+  --accent-lt:  #8b5e3c;
+  --faded:      #7a6a52;
+  --line:       #b8a88a;
+  --panel-bg:   #faf7f0;
+  --aa-ink:     #3a5a3a;
+  --aa-bg:      #eef5ee;
+  --aa-bd:      #8aaa8a;
+  --hit-bg:     #f6d77a;
+  --hit-focus:  #e8a33a;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 18px;
+  color: var(--ink);
+  background: var(--parchment);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── header ─────────────────────────────────────────────── */
+header {
+  padding: 10px 24px;
+  background: var(--accent);
+  color: var(--parchment);
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+header h1 {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: .08em;
+}
+header .sub { font-size: .9rem; opacity: .85; }
+
+/* ── two-column layout ──────────────────────────────────── */
+main {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 400px;
+}
+.left, .right { min-height: 0; display: flex; flex-direction: column; }
+.right {
+  background: var(--panel-bg);
+  border-left: 1px solid var(--line);
+}
+
+/* ── tabs ───────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  background: var(--parch-dark);
+  border-bottom: 1px solid var(--line);
+  padding: 0 12px;
+  gap: 2px;
+}
+.tab {
+  font: inherit;
+  font-family: 'Cinzel', serif;
+  font-size: .85rem;
+  letter-spacing: .05em;
+  padding: 10px 18px 9px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: none;
+  color: var(--faded);
+  cursor: pointer;
+  margin-bottom: -1px;
+  border-radius: 4px 4px 0 0;
+}
+.tab small { display: block; font-family: 'EB Garamond', serif; font-size: .75rem; letter-spacing: 0; }
+.tab:hover { color: var(--accent); }
+.tab.active {
+  background: var(--parchment);
+  border-color: var(--line);
+  color: var(--accent);
+  font-weight: 600;
+}
+.tab .n {
+  font-family: 'EB Garamond', serif;
+  background: var(--hit-bg);
+  color: var(--ink);
+  border-radius: 9px;
+  padding: 0 6px;
+  font-size: .75rem;
+  margin-left: 6px;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+/* ── section toolbar ────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--parch-deep);
+  background: var(--parchment);
+}
+.toolbar select {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: .9rem;
+  padding: 4px 6px;
+  background: var(--panel-bg);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--ink);
+}
+button.nav {
+  font: inherit;
+  font-size: .9rem;
+  padding: 4px 12px;
+  background: var(--panel-bg);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  cursor: pointer;
+  color: var(--accent);
+}
+button.nav:hover:not(:disabled) { background: var(--parch-dark); }
+button.nav:disabled { opacity: .4; cursor: default; }
+
+/* ── reading pane ───────────────────────────────────────── */
+#text {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 32px 60px;
+  scroll-behavior: smooth;
+}
+#text .inner { max-width: 760px; margin: 0 auto; }
+.sec-title {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: #2e1a00;
+  margin: 6px 0 4px;
+  line-height: 1.3;
+}
+.sec-meta { font-size: .85rem; color: var(--faded); font-style: italic; margin-bottom: 14px; }
+.sec-meta div { margin-top: 2px; }
+.legend {
+  font-size: .8rem;
+  color: var(--faded);
+  border-top: 1px solid var(--parch-deep);
+  padding-top: 6px;
+  margin-bottom: 18px;
+}
+
+.block {
+  position: relative;
+  margin: 0 0 10px;
+  padding: 2px 0 2px 78px;
+  line-height: 1.55;
+}
+.block .gutter {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 68px;
+  text-align: right;
+  font-size: .7rem;
+  line-height: 1.2;
+  color: var(--aa-ink);
+}
+.gutter .aa {
+  display: inline-block;
+  background: var(--aa-bg);
+  border: 1px solid var(--aa-bd);
+  border-radius: 3px;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+.gutter .para {
+  display: block;
+  margin-top: 3px;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  color: var(--accent);
+  font-size: .72rem;
+  white-space: nowrap;
+}
+.block.note { font-style: italic; color: var(--faded); }
+.block.inferred { border-left: 2px dashed var(--accent-lt); margin-left: -2px; }
+.block.inferred::after {
+  content: 'paragraph join inferred';
+  display: block;
+  font-size: .65rem;
+  font-style: normal;
+  color: var(--accent-lt);
+  letter-spacing: .03em;
+}
+.block.flash { animation: flash 2.2s ease-out; }
+@keyframes flash { 0% { background: #f9e7ae; } 100% { background: transparent; } }
+hr.rule { border: none; border-top: 1px solid var(--line); margin: 14px 0 14px 78px; }
+
+.pgmark, .msmark {
+  font-family: 'EB Garamond', serif;
+  font-style: normal;
+  font-size: .68rem;
+  vertical-align: super;
+  line-height: 0;
+  margin: 0 2px;
+  padding: 0 3px;
+  border-radius: 2px;
+  white-space: nowrap;
+  user-select: none;
+}
+.pgmark { color: var(--aa-ink); background: var(--aa-bg); border: 1px solid var(--aa-bd); }
+.msmark { color: var(--faded); border: 1px solid var(--line); }
+
+mark.hit { background: var(--hit-bg); color: inherit; border-radius: 2px; padding: 0 1px; }
+mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent); }
+
+/* ── search panel ───────────────────────────────────────── */
+.right h2 {
+  margin: 0;
+  padding: 12px 16px 0;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: .85rem;
+  letter-spacing: .08em;
+  color: var(--accent);
+}
+.searchbox { padding: 8px 16px 10px; border-bottom: 1px solid var(--parch-deep); }
+.searchbox input[type=search] {
+  width: 100%;
+  font: inherit;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #fff;
+  color: var(--ink);
+}
+.searchbox input[type=search]:focus { outline: 2px solid var(--accent-lt); outline-offset: -1px; }
+.opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 8px;
+  font-size: .85rem;
+  color: var(--faded);
+}
+.opts label { cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.hint { font-size: .78rem; color: var(--faded); margin-top: 6px; font-style: italic; }
+
+#results { flex: 1; overflow-y: auto; padding: 8px 16px 40px; }
+.summary { font-size: .9rem; margin: 6px 0 10px; color: var(--ink); }
+.summary b { color: var(--accent); }
+.group-h {
+  font-family: 'Cinzel', serif;
+  font-size: .78rem;
+  letter-spacing: .06em;
+  color: var(--accent);
+  margin: 14px 0 4px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--parch-deep);
+}
+.group-h span { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); }
+.ex {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: .95rem;
+  line-height: 1.4;
+  background: #fff;
+  border: 1px solid var(--parch-deep);
+  border-radius: 3px;
+  padding: 6px 9px;
+  margin: 5px 0;
+  cursor: pointer;
+  color: var(--ink);
+}
+.ex:hover { border-color: var(--accent-lt); background: #fffdf6; }
+.ex .ref { display: block; font-size: .72rem; color: var(--aa-ink); margin-bottom: 2px; }
+.ex .ref .sec { color: var(--faded); }
+.more {
+  font: inherit;
+  font-size: .85rem;
+  color: var(--accent);
+  background: none;
+  border: 1px dashed var(--line);
+  border-radius: 3px;
+  padding: 4px 10px;
+  cursor: pointer;
+  margin: 4px 0;
+}
+.more:hover { background: var(--parch-dark); }
+.empty { font-size: .95rem; color: var(--faded); line-height: 1.5; }
+.chips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font: inherit;
+  font-size: .9rem;
+  background: var(--parch-dark);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1px 11px;
+  cursor: pointer;
+  color: var(--accent);
+}
+.chip:hover { background: var(--parch-deep); }
+
+@media (max-width: 900px) {
+  body { height: auto; display: block; }
+  html { height: auto; }
+  main { display: block; }
+  #text { max-height: 70vh; padding: 14px 16px 40px; }
+  .right { border-left: none; border-top: 1px solid var(--line); }
+  #results { max-height: 70vh; }
+  .block { padding-left: 62px; }
+  .block .gutter { width: 54px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Kant's Logic Transcripts</h1>
+  <span class="sub">Blomberg · Busolt · Wiener Logik &mdash; Academy Edition XXIV, read and searched in one place</span>
+</header>
+
+<main>
+  <section class="left">
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="toolbar">
+      <button class="nav" id="prev" title="Previous section">&larr;</button>
+      <select id="secSelect" aria-label="Section"></select>
+      <button class="nav" id="next" title="Next section">&rarr;</button>
+    </div>
+    <div id="text"><div class="inner"></div></div>
+  </section>
+
+  <aside class="right">
+    <h2>SEARCH TERMS &amp; EXAMPLES</h2>
+    <div class="searchbox">
+      <input type="search" id="q" placeholder="Type a term, e.g. Begriff" autocomplete="off" spellcheck="false" aria-label="Search term">
+      <div class="opts">
+        <label><input type="radio" name="scope" value="all" checked> All three texts</label>
+        <label><input type="radio" name="scope" value="this"> This text only</label>
+        <label><input type="checkbox" id="whole"> Whole word</label>
+      </div>
+      <div class="hint">Matching ignores case, nothing else: spelling is the transcription's (<i>Erkenntniß</i>, <i>Urtheil</i>). Double-click any word in the text to search for it.</div>
+    </div>
+    <div id="results"></div>
+  </aside>
+</main>
+
+<!-- The three transcripts: shared data, loaded and never copied. Shapes are documented in each file's header. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script>
+/* ── data ─────────────────────────────────────────────────────────────── */
+const WORKS = [
+  { key: 'blomberg', short: 'Blomberg', data: LOGIK_BLOMBERG },
+  { key: 'busolt',   short: 'Busolt',   data: LOGIK_BUSOLT },
+  { key: 'wiener',   short: 'Wiener',   data: LOGIK_WIENER },
+];
+const SUGGESTIONS = ['Begriff', 'Erkenntniß', 'Urtheil', 'Vernunft', 'Verstand', 'Wahrheit', 'Definition'];
+const PER_PAGE = 25;
+
+// Flat, searchable list of every block of running text, per work.
+const INDEX = WORKS.map((w, wi) => {
+  const rows = [];
+  w.data.sections.forEach((sec, si) => {
+    sec.blocks.forEach(b => {
+      if (b.kind !== 'rule' && b.text) rows.push({ w: wi, s: si, b });
+    });
+  });
+  return rows;
+});
+
+/* ── state ────────────────────────────────────────────────────────────── */
+const state = {
+  work: 0,
+  sec: 0,
+  query: '',
+  whole: false,
+  scope: 'all',
+  results: null,                 // per work: [{ row, start, end, k }]
+  shown: [PER_PAGE, PER_PAGE, PER_PAGE],
+  focus: null,                   // { id, k }: the occurrence a result jumped to
+};
+
+/* ── helpers ──────────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+};
+
+function makeRegex(q, whole) {
+  const esc = q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  if (!esc) return null;
+  const src = whole ? `(?<![\\p{L}\\p{N}])${esc}(?![\\p{L}\\p{N}])` : esc;
+  return new RegExp(src, 'giu');
+}
+
+function matchesIn(text, re) {
+  const out = [];
+  if (!re) return out;
+  re.lastIndex = 0;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    if (m[0].length === 0) { re.lastIndex++; continue; }
+    out.push({ start: m.index, end: m.index + m[0].length });
+  }
+  return out;
+}
+
+function secPages(sec) {
+  const bs = sec.blocks.filter(b => b.aa != null);
+  if (!bs.length) return '';
+  const a = bs[0].aa;
+  const z = Math.max(...bs.map(b => b.aaEnd || b.aa));
+  return a === z ? `AA 24:${a}` : `AA 24:${a}–${z}`;
+}
+
+/* ── search ───────────────────────────────────────────────────────────── */
+function runSearch() {
+  const re = makeRegex(state.query, state.whole);
+  if (!re) { state.results = null; return; }
+  state.results = INDEX.map(rows => {
+    const hits = [];
+    rows.forEach(row => {
+      matchesIn(row.b.text, re).forEach((m, k) => hits.push({ row, start: m.start, end: m.end, k }));
+    });
+    return hits;
+  });
+  state.shown = [PER_PAGE, PER_PAGE, PER_PAGE];
+}
+
+/* ── render: tabs / section picker ────────────────────────────────────── */
+function renderTabs() {
+  const box = $('tabs');
+  box.replaceChildren();
+  WORKS.forEach((w, i) => {
+    const b = el('button', 'tab' + (i === state.work ? ' active' : ''));
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', i === state.work);
+    b.append(w.short);
+    if (state.results) b.append(el('span', 'n', String(state.results[i].length)));
+    b.append(el('small', null, w.data.meta.date));
+    b.addEventListener('click', () => { state.work = i; state.sec = 0; state.focus = null; renderAll(); $('text').scrollTop = 0; });
+    box.append(b);
+  });
+}
+
+function renderPicker() {
+  const w = WORKS[state.work].data;
+  const sel = $('secSelect');
+  sel.replaceChildren();
+  w.sections.forEach((sec, i) => {
+    const t = sec.title ? sec.title : 'Title pages / front matter';
+    const o = el('option', null, `${i + 1}. ${t.length > 70 ? t.slice(0, 68) + '…' : t}  (${secPages(sec)})`);
+    o.value = i;
+    sel.append(o);
+  });
+  sel.value = state.sec;
+  $('prev').disabled = state.sec === 0;
+  $('next').disabled = state.sec === w.sections.length - 1;
+}
+
+/* ── render: the text ─────────────────────────────────────────────────── */
+// Lay a block's prose out with page markers and search hits, all anchored to
+// offsets in the original text, so a hit that crosses a page break stays whole.
+function composeText(b, ranges) {
+  const text = b.text;
+  const ev = [];
+  (b.pages || []).forEach(p => { if (p.i > 0) ev.push({ i: Math.min(p.i, text.length), t: 1, node: () => el('span', 'pgmark', `${p.p}`) }); });
+  (b.ms || []).forEach(p => ev.push({ i: Math.min(p.i, text.length), t: 1, node: () => el('span', 'msmark', `[${p.p}]`) }));
+  ranges.forEach(r => {
+    ev.push({ i: r.start, t: 2, on: true, k: r.k });
+    ev.push({ i: r.end, t: 0, on: false });
+  });
+  ev.sort((a, c) => a.i - c.i || a.t - c.t);
+
+  const frag = document.createDocumentFragment();
+  let pos = 0, inHit = false, focusK = null;
+  const emit = upto => {
+    if (upto <= pos) return;
+    const s = text.slice(pos, upto);
+    if (inHit) {
+      const m = el('mark', 'hit' + (state.focus && state.focus.id === b.id && state.focus.k === focusK ? ' focus' : ''), s);
+      frag.append(m);
+    } else frag.append(document.createTextNode(s));
+    pos = upto;
+  };
+  ev.forEach(e => {
+    emit(e.i);
+    if (e.t === 1) frag.append(e.node());
+    else if (e.on) { inHit = true; focusK = e.k; }
+    else inHit = false;
+  });
+  emit(text.length);
+  return frag;
+}
+
+function renderText() {
+  const w = WORKS[state.work];
+  const sec = w.data.sections[state.sec];
+  const re = makeRegex(state.query, state.whole);
+  const inner = el('div', 'inner');
+
+  inner.append(el('div', 'sec-title', sec.title || 'Title pages / front matter'));
+  const meta = el('div', 'sec-meta');
+  meta.append(el('div', null, `${w.data.meta.label} · ${secPages(sec)}`));
+  if (sec.provenance) meta.append(el('div', null, sec.provenance));
+  if (sec.headings && sec.headings.length) meta.append(el('div', null, 'Manuscript heading: ' + sec.headings.join(' / ')));
+  inner.append(meta);
+  inner.append(el('div', 'legend',
+    'Green numbers are Academy Edition (AA XXIV) page breaks, kept where the transcription puts them; [bracketed] numbers are the manuscript’s own pages. ' +
+    'Editorial brackets are verbatim. A dashed edge marks a paragraph the extractor joined by its own judgement.'));
+
+  let lastAA = null;
+  sec.blocks.forEach(b => {
+    if (b.kind === 'rule') { inner.append(el('hr', 'rule')); return; }
+    const inferred = (b.joined || []).includes('inferred');
+    const d = el('div', 'block' + (b.kind === 'note' ? ' note' : '') + (inferred ? ' inferred' : ''));
+    d.dataset.id = b.id;
+
+    const g = el('div', 'gutter');
+    if (b.aa != null && b.aa !== lastAA) g.append(el('span', 'aa', `24:${b.aa}`));
+    if (b.para) g.append(el('span', 'para', b.para.raw));
+    d.append(g);
+    if (b.aa != null) lastAA = b.aaEnd || b.aa;
+
+    d.append(composeText(b, matchesIn(b.text, re).map((m, k) => ({ ...m, k }))));
+    inner.append(d);
+  });
+
+  const box = $('text');
+  box.replaceChildren(inner);
+}
+
+/* ── render: results panel ────────────────────────────────────────────── */
+function snippet(hit) {
+  const text = hit.row.b.text;
+  const W = 70;
+  let a = Math.max(0, hit.start - W);
+  let z = Math.min(text.length, hit.end + W);
+  if (a > 0) { const sp = text.indexOf(' ', a); if (sp !== -1 && sp < hit.start) a = sp + 1; }
+  if (z < text.length) { const sp = text.lastIndexOf(' ', z); if (sp > hit.end) z = sp; }
+  const frag = document.createDocumentFragment();
+  if (a > 0) frag.append('… ');
+  frag.append(text.slice(a, hit.start));
+  frag.append(el('mark', 'hit', text.slice(hit.start, hit.end)));
+  frag.append(text.slice(hit.end, z));
+  if (z < text.length) frag.append(' …');
+  return frag;
+}
+
+function renderResults() {
+  const box = $('results');
+  box.replaceChildren();
+
+  if (!state.results) {
+    const e = el('div', 'empty');
+    e.append('Type a term above to see every place it occurs in the three transcripts, each with its context. Click an example to jump to it in the text.');
+    const chips = el('div', 'chips');
+    SUGGESTIONS.forEach(s => {
+      const c = el('button', 'chip', s);
+      c.addEventListener('click', () => setQuery(s));
+      chips.append(c);
+    });
+    e.append(chips);
+    box.append(e);
+    return;
+  }
+
+  const order = state.scope === 'this' ? [state.work] : WORKS.map((_, i) => i);
+  const total = order.reduce((n, i) => n + state.results[i].length, 0);
+  const sum = el('div', 'summary');
+  const bold = el('b', null, String(total));
+  sum.append(bold, ` occurrence${total === 1 ? '' : 's'} of “${state.query.trim()}”`);
+  if (state.scope === 'all') sum.append(' across the three texts');
+  sum.append('.');
+  box.append(sum);
+
+  if (total === 0) {
+    box.append(el('div', 'empty', 'No matches. Try a shorter stem (e.g. “Erkenn”) or switch off Whole word.'));
+    return;
+  }
+
+  order.forEach(wi => {
+    const hits = state.results[wi];
+    if (!hits.length) return;
+    const w = WORKS[wi];
+    const h = el('div', 'group-h', w.short.toUpperCase() + ' ');
+    h.append(el('span', null, `${hits.length} hit${hits.length === 1 ? '' : 's'} · ${w.data.meta.date}`));
+    box.append(h);
+
+    hits.slice(0, state.shown[wi]).forEach(hit => {
+      const b = hit.row.b;
+      const x = el('button', 'ex');
+      const ref = el('span', 'ref');
+      ref.append(`AA 24:${b.aa}` + (b.para ? ` · ${b.para.raw}` : ''));
+      const secTitle = w.data.sections[hit.row.s].title;
+      if (secTitle) ref.append(el('span', 'sec', ` · ${secTitle.length > 44 ? secTitle.slice(0, 42) + '…' : secTitle}`));
+      x.append(ref, snippet(hit));
+      x.addEventListener('click', () => jumpTo(hit));
+      box.append(x);
+    });
+
+    if (hits.length > state.shown[wi]) {
+      const m = el('button', 'more', `Show ${Math.min(PER_PAGE, hits.length - state.shown[wi])} more of ${hits.length - state.shown[wi]} remaining`);
+      m.addEventListener('click', () => { state.shown[wi] += PER_PAGE; renderResults(); });
+      box.append(m);
+    }
+  });
+}
+
+/* ── events ───────────────────────────────────────────────────────────── */
+function renderAll() { renderTabs(); renderPicker(); renderText(); renderResults(); }
+
+function setQuery(q) {
+  $('q').value = q;
+  state.query = q;
+  state.focus = null;
+  runSearch();
+  renderAll();
+}
+
+function jumpTo(hit) {
+  state.work = hit.row.w;
+  state.sec = hit.row.s;
+  state.focus = { id: hit.row.b.id, k: hit.k };
+  renderAll();
+  const target = $('text').querySelector(`[data-id="${CSS.escape(hit.row.b.id)}"]`);
+  if (target) {
+    target.scrollIntoView({ block: 'center' });
+    target.classList.add('flash');
+  }
+}
+
+let timer;
+$('q').addEventListener('input', e => {
+  clearTimeout(timer);
+  timer = setTimeout(() => setQuery(e.target.value), 150);
+});
+$('whole').addEventListener('change', e => { state.whole = e.target.checked; setQuery($('q').value); });
+document.querySelectorAll('input[name=scope]').forEach(r =>
+  r.addEventListener('change', e => { state.scope = e.target.value; renderResults(); }));
+$('secSelect').addEventListener('change', e => { state.sec = +e.target.value; state.focus = null; renderAll(); $('text').scrollTop = 0; });
+$('prev').addEventListener('click', () => { state.sec--; state.focus = null; renderAll(); $('text').scrollTop = 0; });
+$('next').addEventListener('click', () => { state.sec++; state.focus = null; renderAll(); $('text').scrollTop = 0; });
+
+// Double-click a word in the text to search for it.
+$('text').addEventListener('dblclick', () => {
+  const s = (window.getSelection().toString() || '').trim().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+  if (s && !/\s/.test(s)) setQuery(s);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== $('q')) { e.preventDefault(); $('q').focus(); }
+});
+
+/* ── init ─────────────────────────────────────────────────────────────── */
+renderAll();
+</script>
+</body>
+</html>
