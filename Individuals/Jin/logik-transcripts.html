@@ -49,7 +49,7 @@ header h1 { font-family: 'Cinzel', serif; font-weight: 400; font-size: 16px; let
 .b-head h2 { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; color: var(--accent); margin: 0; }
 .b-head .ctl { font-size: 13.5px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
 .b-head select { font-size: 13.5px; padding: 1px 4px; background: var(--parchment); border: 1px solid var(--accent-soft); color: var(--ink); }
-.b-head .how { margin-left: auto; font-size: 13px; color: var(--muted); font-style: italic; }
+.b-head .how { margin-left: auto; font-size: 13px; color: var(--accent); font-style: italic; background: none; border: 0; cursor: pointer; text-decoration: underline; padding: 0; }
 #refline { padding: 0 16px 6px; font-size: 14.5px; }
 #refline b { color: var(--ref); font-weight: 500; }
 .b-cols { display: grid; grid-template-columns: repeat(3, 1fr); }
@@ -75,7 +75,7 @@ header h1 { font-family: 'Cinzel', serif; font-weight: 400; font-size: 16px; let
 .none { color: var(--muted); font-style: italic; font-size: 14px; }
 
 /* ---------- three reading panels ---------- */
-main { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+main { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
 .panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--rule); }
 .panel:last-child { border-right: 0; }
 .phead { padding: 6px 12px; background: var(--parchment-dark); border-bottom: 1px solid var(--rule); }
@@ -158,6 +158,18 @@ table.ov td.lead { font-size: 13.5px; color: var(--muted); }
 
 #tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--parchment); font-size: 13px; padding: 4px 8px; border-radius: 3px; z-index: 30; display: none; max-width: 320px; line-height: 1.35; }
 footer { font-size: 12px; color: var(--muted); padding: 4px 16px; border-top: 1px solid var(--rule); background: var(--parchment-dark); }
+footer p { margin: 0; }
+#about { margin-top: 3px; }
+#about summary { cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: .06em; color: var(--accent); }
+#about .body { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; max-height: 62vh; overflow-y: auto; font-size: 14.5px; line-height: 1.45; color: var(--ink); background: var(--parchment); border-top: 3px solid var(--accent); box-shadow: 0 -8px 30px #0003; padding: 14px 24px 18px; columns: 2 420px; column-gap: 36px; }
+#about .close { float: right; background: none; border: 1px solid var(--accent-soft); color: var(--accent); cursor: pointer; padding: 1px 10px; font-size: 14px; margin: 0 0 6px 12px; }
+#about h5 { font-family: 'Cinzel', serif; font-size: 11.5px; letter-spacing: .06em; color: var(--accent); margin: 0 0 3px; font-weight: 600; break-after: avoid; }
+#about .blk2 { break-inside: avoid; margin-bottom: 10px; }
+#about ol, #about ul { margin: 2px 0 0; padding-left: 20px; }
+#about li { margin-bottom: 2px; }
+#about .live { background: var(--parchment); border: 1px solid var(--rule); border-left: 3px solid var(--shared); padding: 4px 8px; }
+#about .live i { font-style: normal; color: var(--shared); }
+#about .live b { color: var(--ref); font-weight: 500; }
 @media (max-width: 900px) {
   main { grid-template-columns: 1fr; grid-auto-rows: minmax(60vh, auto); overflow-y: auto; }
   .b-cols { grid-template-columns: 1fr; }
@@ -192,7 +204,7 @@ footer { font-size: 12px; color: var(--muted); padding: 4px 16px; border-top: 1p
     <h2 id="bTitle"></h2>
     <span class="ctl">Key passages per lecture <select id="nPass"><option>4</option><option selected>6</option><option>10</option></select></span>
     <span class="ctl">Order <select id="order"><option value="lecture">as in the lecture</option><option value="sim">most similar first</option></select></span>
-    <span class="how" title="Each passage's words, with the spelling evened out (Urtheil = Urteil, Obiect = Object) and the term itself left out, weighted by how rare they are across the three lectures, its defining sentences counting three times, then compared (cosine similarity). It measures shared wording, not shared meaning.">How similarity is measured ⓘ</span>
+    <button class="how" id="howBtn">What the percentages measure ⓘ</button>
   </div>
   <div id="refline"></div>
   <div class="b-cols" id="bCols"></div>
@@ -217,7 +229,54 @@ footer { font-size: 12px; color: var(--muted); padding: 4px 16px; border-top: 1p
 </div>
 <div id="tip"></div>
 
-<footer>Student transcripts of Kant's lectures on Meier's <i>Auszug aus der Vernunftlehre</i>, AA XXIV, in full, from <code>data/</code>, oldest on the left. Key passages are picked automatically: a paragraph with a sentence shaped like a definition (yellow), or one that keeps returning to the term, plus the paragraphs that carry it on. Choose one as the reference (red) and each lecture scrolls to the passage closest to it in wording (teal edge). Words shared with the reference are in teal. All of this is computed from the wording. It points you to the passages; comparing what they say is your reading.</footer>
+<footer>
+  <p>Student transcripts of Kant's lectures on Meier's <i>Auszug aus der Vernunftlehre</i>, AA XXIV, in full, from <code>data/</code>, oldest on the left. Key passages are picked automatically: a paragraph with a sentence shaped like a definition (yellow), or one that keeps returning to the term, plus the paragraphs that carry it on. Choose one as the reference (red) and each lecture scrolls to the passage closest to it in wording (teal edge). Words shared with the reference are in teal. All of this is computed from the wording. It points you to the passages; comparing what they say is your reading.</p>
+  <details id="about">
+    <summary>What the percentages measure, and what they are good for</summary>
+    <div class="body">
+      <button class="close" id="aboutClose">Close</button>
+      <div class="blk2">
+        <h5>In one sentence</h5>
+        The percentage on a passage says how much of the same <em>distinctive vocabulary</em> it uses as the reference passage (the one framed in red): 0% means the two have no telling word in common, 100% would mean they use exactly the same words in the same proportions. It is a count of words, not a judgement about ideas.
+      </div>
+      <div class="blk2">
+        <h5>How it is worked out</h5>
+        <ol>
+          <li><b>Collect the words</b> of each passage, and leave out two kinds: small words that carry no content (<i>der, und, ist, nicht, also</i>…), and the concept's own word. Every key passage on <i>Wahrheit</i> contains "Wahrheit", so counting it would make them all look alike.</li>
+          <li><b>Even out the spelling</b>, so that <i>Urtheil</i> and <i>Urteil</i>, <i>Obiect</i> and <i>Object</i>, <i>Merckmahl</i> and <i>Merkmal</i> count as one word, and trim the endings, so that <i>Erkenntniß</i> and <i>Erkenntnißes</i> do too. The text on screen is never changed; this is only for counting.</li>
+          <li><b>Weigh each word by how rare it is</b> across all three lectures. A word the lecturer uses everywhere (<i>Erkenntniß</i>, <i>Verstand</i>) counts for little, since sharing it says nothing; a word he uses seldom (<i>Übereinstimmung</i>, <i>Object</i>, <i>Kriterium</i>) counts for a lot. The words of the passage's definition-like sentence (shaded yellow) count three times, so that what weighs most is how each passage says what the concept <em>is</em>.</li>
+          <li><b>Compare the two weighted word lists.</b> The more of their heavy words two passages share, and the more of their weight lies in those shared words, the higher the score (cosine similarity, shown ×100).</li>
+        </ol>
+      </div>
+      <div class="blk2">
+        <h5>On the passages now on screen</h5>
+        <div class="live" id="aboutLive"></div>
+      </div>
+      <div class="blk2">
+        <h5>How to read the numbers</h5>
+        <ul>
+          <li>Real passages seldom go above about 40%, because even close parallels differ in most of their words. Roughly: <b>20% and up</b> means the same formulation recurs; <b>10–20%</b> some shared terms; <b>under 5%</b> next to nothing in common. The bars are full at 50%.</li>
+          <li>Compare the numbers <em>with each other</em>, for the same reference: which passage in each lecture is closest, and by how much. Change the reference and every number changes.</li>
+          <li>Long passages score lower simply because they contain more that the reference lacks.</li>
+        </ul>
+      </div>
+      <div class="blk2">
+        <h5>What it is good for</h5>
+        <ul>
+          <li><b>Finding the parallel passage.</b> The three transcripts are notes from the same course on the same textbook, years apart, so the lecturer often comes back to the same point. The highest score in each lecture is the best place to look for where he did.</li>
+          <li><b>Seeing whether a formulation was kept or replaced.</b> Two passages that both define the concept, one scoring high and one low against the same reference, are a pointer that the definition was worded differently in one of them. That is often where a change of view shows, though it is not proof of one.</li>
+        </ul>
+      </div>
+      <div class="blk2">
+        <h5>What it cannot tell you</h5>
+        <ul>
+          <li><b>Whether two passages agree.</b> The same thought in other words scores low: synonyms are not matched, nor Latin with German (<i>conceptus</i> and <i>Begriff</i>). Opposite claims in the same words score high, since <i>nicht</i> is one of the words left out.</li>
+          <li><b>What a passage means.</b> A low score says "worded differently", which is a reason to read both passages side by side, not a finding about Kant. The finding is yours to make from the texts.</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+</footer>
 
 <!-- Shared data, generated from Textfiles/ — see data/README.md. Plain <script src> so the page also works from file:// -->
 <script src="../../data/logik-blomberg-24.js"></script>
@@ -627,6 +686,7 @@ function renderBoard() {
     }).filter(Boolean);
     rl.innerHTML = 'Reference <b>' + R.label + '</b> (' + esc(panels[ref.wi].w.short) + ', AA 24:' + panels[ref.wi].w.blocks[R.b0].b.aa + '). Closest in wording: ' + parts.join(' · ') + '. <span class="none">Click any passage to compare from it.</span>';
   }
+  renderAbout();
   const cols = document.getElementById('bCols');
   cols.innerHTML = '';
   panels.forEach((p, wi) => {
@@ -664,6 +724,23 @@ function renderBoard() {
     col.appendChild(cards);
     cols.appendChild(col);
   });
+}
+
+/* The worked example in the footnote: why the closest passages score what they score. */
+function renderAbout() {
+  const box = document.getElementById('aboutLive'), R = refPassage();
+  if (!R) { box.innerHTML = 'No key passages are on screen for this term, so there is nothing to compare.'; return; }
+  const rw = panels[ref.wi].w;
+  const lines = panels.map((p, wi) => {
+    if (p.closest < 0) return null;
+    const c = p.passages[p.closest];
+    const sh = sharedWords(c.vec, R.vec, 3), own = ownWords(c.vec, R.vec, 3);
+    return '<li><b>' + c.label + '</b> (' + esc(p.w.short) + ') scores <b>' + Math.round(c.sim * 100) + '%</b>' +
+      (sh.length ? ': most of that comes from sharing <i>' + wordList(c.vec, sh) + '</i>' : ': it shares no distinctive word') +
+      (own.length ? '; what pulls it down is its own <u>' + wordList(c.vec, own) + '</u>, which ' + R.label + ' does not use.' : '.') + '</li>';
+  }).filter(Boolean);
+  box.innerHTML = 'The reference is <b>' + R.label + '</b> (' + esc(rw.short) + ', AA 24:' + rw.blocks[R.b0].b.aa + ') on <em>' + esc(concept.label) + '</em>. The closest passage in each lecture:' +
+    '<ul>' + lines.join('') + '</ul>';
 }
 
 /* ---------- navigation ---------- */
@@ -840,10 +917,12 @@ document.getElementById('custom').onsubmit = e => {
 document.getElementById('nPass').onchange = e => { nPass = +e.target.value; setConcept(concept); };
 document.getElementById('order').onchange = e => { order = e.target.value; renderBoard(); };
 document.getElementById('openOv').onclick = openOverview;
+document.getElementById('howBtn').onclick = () => { const d = document.getElementById('about'); d.open = !d.open; };
+document.getElementById('aboutClose').onclick = () => { document.getElementById('about').open = false; };
 document.getElementById('closeOv').onclick = closeOverview;
 document.getElementById('ovSort').onchange = renderOverview;
 document.getElementById('overview').onclick = e => { if (e.target.id === 'overview') closeOverview(); };
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverview(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeOverview(); document.getElementById('about').open = false; } });
 document.getElementById('t-board').onchange = e => { document.getElementById('board').hidden = !e.target.checked; };
 document.getElementById('t-sh').onchange = e => document.body.classList.toggle('hide-sh', !e.target.checked);
 document.getElementById('t-term').onchange = e => document.body.classList.toggle('hide-term', !e.target.checked);
