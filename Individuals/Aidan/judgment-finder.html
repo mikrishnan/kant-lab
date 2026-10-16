@@ -176,6 +176,8 @@ mark.form { background: var(--mark-form); box-shadow: 0 0 0 1px #b9cfa6; }
 .tag.inf { background: var(--mark-form); }
 .lab.att { border-color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
 .lab.req { border-color: var(--accent-soft); box-shadow: inset 0 -2px 0 var(--mark-form); }
+.lab.spec { border-style: dashed; }
+.tag.spec { border: 1px dashed var(--accent-soft); }
 .empty { color: var(--ink-soft); font-style: italic; padding: 16px 0; }
 .more { font: inherit; margin: 4px 0 10px; padding: 3px 12px; background: transparent; border: 1px solid var(--rule); color: var(--accent); cursor: pointer; }
 #note { font-size: 12.5px; color: var(--ink-soft); padding: 8px 16px; border-top: 1px solid var(--rule); background: var(--parchment-deep); }
@@ -221,6 +223,7 @@ mark.form { background: var(--mark-form); box-shadow: 0 0 0 1px #b9cfa6; }
       <div class="opts" id="opts-form">
         <label><input type="checkbox" id="o-ev-named" checked> named: the text calls it this form</label>
         <label><input type="checkbox" id="o-ev-inf" checked> inference: a syllogism fixes its form</label>
+        <label><input type="checkbox" id="o-ev-spec" checked> speculated: form read off its wording</label>
       </div>
       <div class="opts" id="opts-kw" hidden>
         <label><input type="checkbox" id="o-all"> search every sentence, not only the examples</label>
@@ -231,7 +234,7 @@ mark.form { background: var(--mark-form); box-shadow: 0 0 0 1px #b9cfa6; }
     </div>
     <div id="summary"></div>
     <div id="results"></div>
-    <div id="note">An <b>example</b> is a <b>simple sentence</b> — one subject and predicate, no subordinate clause (only a hypothetical or disjunctive may have two, for ground–consequence or division) — on one of two grounds: <b>named</b>, the text sets it off (<i>z.E.</i>, <i>z.B.</i>, a colon) and calls it that form; or <b>premise / conclusion</b>, it stands in a syllogism that goes through, which is what fixes its quantity and quality. A label <u>underlined</u> is named in the text, one with a green foot is required by the inference, a plain one is only read off the wording and can be wrong. <b>Click any sentence on the left</b> to read it the same way. The German is the transcription's, the English is machine translation.</div>
+    <div id="note">An <b>example</b> is a <b>simple sentence</b> — one subject and predicate, no subordinate clause (only a hypothetical or disjunctive may have two, for ground–consequence or division) — whose content carries no weight in the lecture — it is about men, bodies, souls, God, gold, triangles, Caius, not about cognition, reason or truth — so that it shows a form rather than making a point. What its form rests on is then one of three things: <b>named</b>, the text calls it that form; <b>premise / conclusion</b>, it stands in a syllogism that goes through, which fixes its quantity and quality; or <b>speculated</b>, nothing says what it is and the form is read off the wording alone. A label <u>underlined</u> is named in the text, one with a green foot is required by the inference, a <i>dashed</i> one is speculated and can be wrong. <b>Click any sentence on the left</b> to read it the same way. The German is the transcription's, the English is machine translation.</div>
   </aside>
 </main>
 
@@ -363,6 +366,104 @@ function isJudgment(t) {
   return words >= 3 && words <= 45 && VERB.test(t);
 }
 
+/* ── does the sentence function as an example? ────────────────────────────────
+   A sentence is an example of a form when its content carries no weight of its own in the lecture: Kant
+   is not telling us that men are mortal, he is showing what a universal judgment looks like. So a
+   sentence whose subject matter IS the lecture's — cognition, reason, judgment, truth, science, proof,
+   method — is making the point, not illustrating it, however neatly it fits a form. Expounding voices
+   ("man nennt", "wir sehen", "ich sage") go the same way. */
+const DOCTRINE = new RegExp(B + '(?:erkenntni\\p{L}*|erkenn\\p{L}*|vernunft\\p{L}*|vernünftig\\p{L}*|verstand\\p{L}*|verstandes\\p{L}*|urthei\\p{L}*|urtei\\p{L}*|judic\\p{L}*|begrif\\p{L}*|satz|sätze|säzze|sazze|saz|proposition\\p{L}*|wahrheit\\p{L}*|irrthum\\p{L}*|irrtum\\p{L}*|wißenschaft\\p{L}*|wissenschaft\\p{L}*|logi[ck]\\p{L}*|philosoph\\p{L}*|gelehrsamkeit\\p{L}*|gelahrtsamkeit\\p{L}*|gelehrt\\p{L}*|vorstellung\\p{L}*|merkmahl\\p{L}*|merkmal\\p{L}*|merckmahl\\p{L}*|definition\\p{L}*|erklärung\\p{L}*|beweis\\p{L}*|beweisen|regel\\p{L}*|reguln|methode\\p{L}*|schluß\\p{L}*|schlüße\\p{L}*|schließ\\p{L}*|gewißheit\\p{L}*|gewissheit\\p{L}*|meinung\\p{L}*|zweifel\\p{L}*|deutlich\\p{L}*|klarheit\\p{L}*|verworren\\p{L}*|anschauung\\p{L}*|hypothes\\p{L}*|wahrscheinlich\\p{L}*|vollkommenheit\\p{L}*|eintheilung\\p{L}*|sphaer\\p{L}*|subject\\p{L}*|subiect\\p{L}*|praedicat\\p{L}*|prädicat\\p{L}*|terminus|termin\\p{L}*|kenntni\\p{L}*|lehre\\p{L}*|autor|verfasser|dogma\\p{L}*|kritik\\p{L}*|skeptisch\\p{L}*|critic\\p{L}*|analytisch\\p{L}*|synthetisch\\p{L}*)', 'iu');
+const EXPOUNDING = new RegExp('^(?:man|wir|ich|uns|unser\\p{L}*|du|hier|dieses|dies|daher|deswegen)(?![\\p{L}])|' +
+  B + '(?:nennt|nennen|nennet|heißt|heißen|bedeutet|bedeuten|sagt|sagen|verstehet|versteht|erklär\\p{L}*)(?![\\p{L}])', 'iu');
+/* The furniture of school-logic examples: men and bodies, souls and God, gold, iron, triangles, Caius.
+   The list is the subjects of the text's OWN marked examples (Mensch 18×, Triangel, Körper, Gott, Eisen,
+   Tugend, Seele, Metall, Caius, Künstler, Haus, Buch, Welt …) with the rest of the stock joined to them.
+   A sentence about one of these is not telling us anything the lecture needs: it is showing a form. */
+const EXAMPLE_SUBJECT = new RegExp(B + '(?:' + [
+  'mensch',
+  'körper',
+  'seele',
+  'geist',
+  'engel',
+  'teufel',
+  'triangel',
+  'zirkel',
+  'quadrat',
+  'linie',
+  'zahl',
+  'gold',
+  'eisen',
+  'metall',
+  'stein',
+  'silber',
+  'holz',
+  'baum',
+  'birnbaum',
+  'pflanze',
+  'blume',
+  'rose',
+  'gras',
+  'thier',
+  'tier',
+  'vogel',
+  'fisch',
+  'pferd',
+  'hund',
+  'löwe',
+  'wurm',
+  'wasser',
+  'feuer',
+  'luft',
+  'erde',
+  'sonne',
+  'mond',
+  'stern',
+  'himmel',
+  'welt',
+  'haus',
+  'kleid',
+  'uhr',
+  'schiff',
+  'vestung',
+  'barometer',
+  'tugend',
+  'laster',
+  'reichthum',
+  'reichtum',
+  'nothlüge',
+  'notlüge',
+  'künstler',
+  'medicus',
+  'richter',
+  'könig',
+  'fürst',
+  'einwohner',
+  'nichtsterbliche',
+  'jemand',
+  'niemand',
+  'caius',
+  'cajus',
+  'socrates',
+  'sokrates',
+  'titius',
+  'sempronius',
+  'petrus',
+  'alexander',
+  'cäsar',
+  'caesar'
+].join('|') + ')(?:e|en|es|er|n|s|ne|nen)?(?![\\p{L}])', 'iu');
+
+/* The subject phrase: what stands before the finite verb. */
+function subjectOf(t) {
+  const i = t.search(VERB);
+  return (i > 0 ? t.slice(0, i) : t).trim();
+}
+function functionsAsExample(t, setOff) {
+  const head = subjectOf(t);
+  if (EXPOUNDING.test(t) || DOCTRINE.test(head)) return false;
+  return setOff || EXAMPLE_SUBJECT.test(head);
+}
+
 /* Which forms the text itself names, in the run-up to an example: the sentence before it in the block,
    and the block before that. A form counts only if the example's own wording agrees — where Kant names
    two ("einem allgemein bejahenden ein allgemein verneinendes") only the one that fits is kept. */
@@ -407,6 +508,7 @@ function isSimple(t, labels) {
   if (/(?<![\p{L}])(entweder|nehmlich|und|oder|als|aber|auch|so|wenn)\s*[,.]?$/iu.test(t)) return false;   // cut off mid-sentence
   const compound = labels.includes('hypothetical') || labels.includes('disjunctive');
   if (/^(wenn|wann|falls|si)(?![\p{L}])/iu.test(t) && !labels.includes('hypothetical')) return false;   // a wenn-clause with no consequence
+  if (!/^(?:\p{Lu}|alle|aller|allen|alles|jeder|jede|jedes|jeden|kein|keine|keiner|keines|einige|etliche|manche|wenn|wann|falls|si|entweder|also|folglich|mithin|demnach|ergo|der|die|das|den|ein|eine|einer|ein\s)/u.test(t)) return false;   // begins mid-clause
   if (/^(wie|als|wo|nicht|von|vom|zwischen|mit|durch|für|in|auf|an|zu|bey|bei|aus|nach|über|unter|ohne|um)\s/iu.test(t)) return false;   // starts mid-sentence
   if (!compound && VERB.test(t.split(/\s+/).pop().replace(/[.!,]+$/, ''))) return false;   // verb-final: a subordinate clause, not a simple sentence
   const words = t.split(/\s+/).length;
@@ -463,62 +565,60 @@ function classify(t) {
   return labels;
 }
 
-/* Every example in the three works. A sentence is an example only on one of two grounds:
-     named     the text presents it as an example (z.E., or after a colon) and names the form it shows;
-     inference it is a premise or the conclusion of a syllogism that goes through, which is what fixes
-               its quantity and quality.
-   Nothing else is shown, however much it may look like a form. Built once, on first use. */
+/* Every example in the three works. A sentence is an example when it works as one (above) and is simple;
+   what it is worth as evidence of a form is a further question, and gets one of three answers:
+     named       the text names that form within a few lines of it;
+     premise /
+     conclusion  it stands in a syllogism that goes through, which is what fixes its quantity and quality;
+     speculated  neither — the form is read off its wording alone, and may be wrong.
+   Built once, on first use. */
 let EXAMPLES = null;
 function buildExamples() {
   if (EXAMPLES) return EXAMPLES;
   const found = new Map();                       // block id + offset → the example
-  const add = x => { const k = x.b.id + ':' + x.s; const old = found.get(k);
-    if (!old) found.set(k, x);
-    else { old.named = old.named.length ? old.named : x.named; old.inferred = old.inferred || x.inferred;
-           old.presented = old.presented || x.presented; } };
+  const add = x => {
+    const k = x.b.id + ':' + x.s, old = found.get(k);
+    if (!old) { found.set(k, x); return; }
+    if (!old.named.length) old.named = x.named;
+    old.inferred = old.inferred || x.inferred;
+    old.role = old.role || x.role;
+    old.marker = old.marker || x.marker;
+  };
 
   JF_WORKS.forEach((w, wi) => w.data.sections.forEach((sec, si) => sec.blocks.forEach((b, bi) => {
     const text = b.text;
     if (!text) return;
     const sents = sentencesOf(text);
 
-    /* The spans the text itself sets off: what follows an example marker, and what follows a colon. */
+    /* The spans a judgment may be cut from: what follows an example marker, every sentence on its own,
+       and a conclusion joined to the sentence before it, where its premises stand there. */
     const spans = [];
     EX_MARK.lastIndex = 0;
     let m;
     while ((m = EX_MARK.exec(text))) {
-      const from = m.index + m[0].length;
-      const se = sents.find(x => from >= x.s && from < x.e);
-      if (se && se.e - from <= MAX_EX_CHARS) spans.push({ s: from, e: se.e, marker: m[0].replace(/\s+/g, '') });
+      const i = m.index + m[0].length;
+      const se = sents.find(x => i >= x.s && i < x.e);
+      if (se) spans.push({ s: i, e: se.e, marker: m[0].replace(/\s+/g, '') });
     }
-    sents.forEach(se => {
-      const colon = /:\s*$/.test(text.slice(Math.max(0, se.s - 3), se.s));
-      if (colon && se.e - se.s <= MAX_EX_CHARS) spans.push({ s: se.s, e: se.e, marker: ':' });
-    });
-
-    /* And the spans that carry an inference: a sentence that draws a conclusion, with the sentence
-       before it where the premises stand there. */
     sents.forEach((se, i) => {
-      const parts = splitJudgments(text, se.s, se.e);
-      if (!parts.some(p => p.concl)) return;
-      if (parts[0].concl && i > 0) spans.push({ s: sents[i - 1].s, e: se.e, marker: '' });
-      else spans.push({ s: se.s, e: se.e, marker: '' });
+      const own = splitJudgments(text, se.s, se.e);
+      if (own.length && own[0].concl && i > 0) spans.push({ s: sents[i - 1].s, e: se.e, marker: '' });
+      spans.push({ s: se.s, e: se.e, marker: '' });
     });
 
     spans.forEach(sp => {
+      if (sp.e - sp.s > MAX_EX_CHARS) return;
       const parts = splitJudgments(text, sp.s, sp.e).map(p => {
-        const t = text.slice(p.s, p.e);
-        return { ...p, text: t, labels: classify(t), ok: isJudgment(t) && isSimple(t, classify(t)) };
+        const t = text.slice(p.s, p.e), labels = classify(t);
+        return { ...p, text: t, labels, simple: isJudgment(t) && isSimple(t, labels) };
       });
-      if (!parts.length) return;
-      const holds = parts.every(p => p.ok) && inferenceHolds(parts);
+      /* A syllogism's premises are examples whatever they are about — only their form is at work. */
+      const holds = parts.length > 1 && parts.every(p => p.simple && !EXPOUNDING.test(p.text)) && inferenceHolds(parts);
       parts.forEach(p => {
-        if (!p.ok) return;
-        const named = sp.marker ? namedForms(sec, bi, b, sp.s, p.labels, sp.e) : [];
-        if (!named.length && !holds) return;
-        add({ wi, si, bi, b, s: p.s, e: p.e, text: p.text, labels: p.labels,
-              marker: sp.marker, presented: !!sp.marker, named, inferred: holds,
-              role: holds ? (p.concl ? 'conclusion' : 'premise') : '' });
+        if (!p.simple || !functionsAsExample(p.text, !!sp.marker || holds)) return;
+        add({ wi, si, bi, b, s: p.s, e: p.e, text: p.text, labels: p.labels, marker: sp.marker,
+              named: namedForms(sec, bi, b, p.s, p.labels, p.e),
+              inferred: holds, role: holds ? (p.concl ? 'conclusion' : 'premise') : '' });
       });
     });
   })));
@@ -534,10 +634,9 @@ function exampleStatus(sec, bi, b, s, e) {
   const labels = classify(text);
   const hit = buildExamples().find(x => x.b.id === b.id && x.s < e && x.e > s);
   if (hit) return { labels: hit.labels, hit, why: '' };
-  if (!isSimple(text, labels)) return { labels, why: 'Not shown as an example: not a simple sentence (a subordinate clause, a second verb, or too long).' };
-  const named = namedForms(sec, bi, b, s, labels, e);
-  if (named.length) return { labels, why: 'Not shown as an example: the form is named nearby, but the text does not set this sentence off as an example.' };
-  return { labels, why: 'Not shown as an example: the text neither names its form nor draws it in an inference.' };
+  if (!isSimple(text, labels)) return { labels, why: 'Not an example: not a simple sentence — a subordinate clause, a second verb, or too long.' };
+  if (!functionsAsExample(text, EX_MARK.test(b.text.slice(Math.max(0, s - 6), s)))) return { labels, why: 'Not an example: its content carries the point Kant is making, rather than illustrating a form. The lecture is not out to tell us this.' };
+  return { labels, why: 'It works as an example, but it is part of a longer judgment that is shown instead.' };
 }
 
 /* Every sentence that could be a judgment, marker or none. Scanned on demand; classified only if kept. */
@@ -719,9 +818,14 @@ function inspectSentence(span) {
     box.append(labs);
   }
   if (st.why) box.append(el('div', 'iwhy', st.why));
-  else box.append(el('div', 'iwhy', st.hit.named.length
-    ? 'Shown on the right: the text names this form.'
-    : 'Shown on the right: it is the ' + st.hit.role + ' of an inference that goes through.'));
+  else {
+    const st2 = standingOf(st.hit);
+    box.append(el('div', 'iwhy', 'Shown on the right. ' + (st2 === 'named'
+      ? 'The text names this form.'
+      : st2 === 'inference'
+        ? 'It is the ' + st.hit.role + ' of an inference that goes through, which fixes its quantity and quality.'
+        : 'Nothing says what form it is, so the labels are speculated from its wording.')));
+  }
   blk.after(box);
 }
 function mergeRanges(list) {
@@ -742,8 +846,10 @@ function groupByWork(hits) {
   return by;
 }
 
+function standingOf(x) { return x.named.length ? 'named' : x.inferred ? 'inference' : 'speculated'; }
 function evidenceOK(x) {
-  return (x.named.length && $('o-ev-named').checked) || (x.inferred && $('o-ev-inf').checked);
+  const st = standingOf(x);
+  return $(st === 'named' ? 'o-ev-named' : st === 'inference' ? 'o-ev-inf' : 'o-ev-spec').checked;
 }
 function searchForms(forms) {
   return buildExamples().filter(x => evidenceOK(x) && forms.every(f => x.labels.includes(f.id)));
@@ -847,7 +953,7 @@ function renderExample(h) {
   const left = el('span', null, (h.b.aa ? 'AA 24:' + h.b.aa : '') + (h.b.para && h.b.para.raw ? ' · ' + h.b.para.raw : ''));
   if (h.named && h.named.length) left.append(el('span', 'tag mk', (h.marker && h.marker !== ':' ? h.marker + ' · ' : '') + 'NAMED'));
   if (h.inferred) left.append(el('span', 'tag inf', h.role === 'conclusion' ? 'CONCLUSION' : 'PREMISE'));
-  if (!(h.named && h.named.length) && !h.inferred) left.append(el('span', 'tag', 'SENTENCE'));
+  if (!(h.named && h.named.length) && !h.inferred) left.append(el('span', 'tag spec', h.marker ? h.marker + ' · SPECULATED' : 'SPECULATED'));
   loc.append(left, el('i', null, (sec.title || '').slice(0, 30)));
   card.append(loc);
 
@@ -886,8 +992,8 @@ function labelChip(id, h) {
   const f = JF_BY_ID[id];
   const named = h.named && h.named.includes(id);
   const required = h.inferred && FIXED_BY_INFERENCE.includes(id);
-  const how = named ? 'named in the text' : required ? 'required for the inference to go through' : 'inferred from the wording';
-  const b = el('button', 'lab q' + f.axis + (named ? ' att' : required ? ' req' : ''), f.en);
+  const how = named ? 'named in the text' : required ? 'required for the inference to go through' : 'speculated from the wording';
+  const b = el('button', 'lab q' + f.axis + (named ? ' att' : required ? ' req' : ' spec'), f.en);
   b.title = f.de + ' · ' + f.la + ' — ' + how + '. Click for its examples.';
   b.addEventListener('click', () => { curForms = {}; setMode('form'); chooseForm(f); });
   return b;
@@ -1091,7 +1197,7 @@ function init() {
     [...items].forEach((n, i) => n.classList.toggle('on', i === suggestIdx));
   });
 
-  ['o-ev-named', 'o-ev-inf', 'o-all'].forEach(id => $(id).addEventListener('change', runSearch));
+  ['o-ev-named', 'o-ev-inf', 'o-ev-spec', 'o-all'].forEach(id => $(id).addEventListener('change', runSearch));
   $('o-tr').addEventListener('change', () => {
     document.querySelectorAll('#results .en').forEach(n => { n.hidden = !$('o-tr').checked; });
     observeTranslations();
