@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Immediate Inferences — Kant's logic lectures and Reflexionen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5efe0;
+    --parchment-deep: #ece3cc;
+    --card: #fbf8ef;
+    --ink: #2b2118;
+    --ink-soft: #5a4a3a;
+    --rule: #d6c9a8;
+    --accent: #5c3d1e;
+    --accent-soft: #e9dcc0;
+    --hilite: #f1dfae;
+    --warn: #8a2b1c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex;
+    flex-direction: column;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    line-height: 1.45;
+  }
+
+  header {
+    padding: 16px 28px 12px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--parchment-deep);
+  }
+  header h1 {
+    margin: 0;
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 600;
+    font-size: 21px;
+    letter-spacing: .06em;
+    color: var(--accent);
+  }
+  header p { margin: 4px 0 0; color: var(--ink-soft); font-size: 16px; max-width: 62em; }
+
+  /* ── Kind buttons ─────────────────────────────────────────────────────── */
+  nav#kinds {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 28px;
+    border-bottom: 1px solid var(--rule);
+  }
+  nav#kinds button {
+    font: inherit;
+    font-size: 16px;
+    padding: 5px 14px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+  }
+  nav#kinds button .n { margin-left: 7px; font-size: 13px; opacity: .75; font-variant-numeric: tabular-nums; }
+  nav#kinds button:hover { background: var(--accent-soft); }
+  nav#kinds button[aria-pressed="true"] { background: var(--accent); color: var(--parchment); }
+  nav#kinds button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  nav#kinds .grp { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 3px 8px 3px 10px; border: 1px solid var(--rule); }
+  nav#kinds .grp > span {
+    font-family: 'Cinzel', Georgia, serif; font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 440px minmax(0, 1fr);
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Judgements (left) ────────────────────────────────────────────────── */
+  aside {
+    border-right: 1px solid var(--rule);
+    background: var(--parchment-deep);
+    overflow-y: auto;
+    padding: 14px 20px 30px;
+  }
+  h2 {
+    margin: 0;
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .count {
+    margin: 2px 0 10px;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .filters { border-top: 1px solid var(--rule); padding: 9px 0 4px; }
+  .filters .row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 7px; }
+  .filters .lab {
+    font-family: 'Cinzel', Georgia, serif; font-size: 11.5px; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--accent); min-width: 78px;
+  }
+  .opt { display: inline-flex; align-items: baseline; gap: 5px; cursor: pointer; font-size: 16px; }
+  .opt input { accent-color: var(--accent); width: 15px; height: 15px; transform: translateY(2px); cursor: pointer; }
+  .opt .n { color: var(--ink-soft); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .fbtn {
+    font: inherit; font-size: 15px; width: 30px; height: 28px; padding: 0; cursor: pointer;
+    background: transparent; border: 1px solid var(--accent); color: var(--accent);
+  }
+  .fbtn[aria-pressed="true"] { background: var(--accent); color: var(--parchment); }
+  .fbtn:hover { background: var(--accent-soft); }
+  .fbtn[aria-pressed="true"]:hover { background: var(--accent); }
+  details.legend { margin: 6px 0 12px; font-size: 15px; color: var(--ink-soft); }
+  details.legend summary { cursor: pointer; font-family: 'Cinzel', Georgia, serif; font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--accent); }
+  details.legend p { margin: 6px 0 0; }
+
+  .src {
+    margin: 18px 0 8px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--rule);
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .src small { margin-left: 8px; text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', Georgia, serif; font-size: 14px; color: var(--ink-soft); }
+  ul.js { list-style: none; margin: 0; padding: 0; }
+  li.j {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    padding: 9px 10px 8px;
+    margin: 0 0 8px;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    cursor: pointer;
+  }
+  li.j:hover { border-color: var(--accent); }
+  li.j:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  li.j.rejected { border-style: dashed; }
+  .form {
+    width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', Georgia, serif; font-weight: 600; font-size: 17px;
+    background: var(--accent); color: var(--parchment); border: 1px solid var(--accent);
+  }
+  .form.inferred { background: transparent; color: var(--accent); border-style: dashed; font-weight: 400; }
+  .form sup { font-size: 11px; line-height: 0; margin-left: 1px; }
+  li.j .t { margin: 0; font-size: 19px; line-height: 1.3; font-weight: 500; }
+  li.j .supply { margin: 1px 0 0; font-size: 15px; font-style: italic; color: var(--ink-soft); }
+  li.j .supply b { font-style: normal; font-weight: 400; font-family: 'Cinzel', Georgia, serif; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; margin-right: 5px; }
+  li.j .meta { margin: 4px 0 0; font-size: 14.5px; color: var(--ink-soft); }
+  li.j .meta .tag { display: inline-block; margin-left: 6px; padding: 0 7px; border: 1px solid var(--ink-soft); border-radius: 9px; font-size: 13px; }
+  li.j .cite { margin: 3px 0 0; font-size: 15px; display: flex; flex-wrap: wrap; gap: 0 12px; }
+  .cite .work { font-family: 'Cinzel', Georgia, serif; font-size: 12.5px; letter-spacing: .06em; color: var(--accent); }
+  .cite .aa { font-weight: 600; }
+  .cite .sub { color: var(--ink-soft); }
+  .cite .anchor.inferred { font-style: italic; border-bottom: 1px dashed var(--ink-soft); }
+  #jempty { border: 1px dashed var(--rule); padding: 16px; color: var(--ink-soft); font-style: italic; }
+
+  /* ── Examples (right) ─────────────────────────────────────────────────── */
+  main { overflow-y: auto; padding: 18px 28px 44px; }
+  #blurb { max-width: 48em; margin: 0 0 6px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+  #blurb h2 { font-size: 17px; }
+  #blurb .de { font-style: italic; color: var(--ink-soft); font-size: 16px; margin-left: 8px; font-family: 'EB Garamond', Georgia, serif; text-transform: none; letter-spacing: 0; font-weight: 400; }
+  #blurb p { margin: 6px 0 0; font-size: 17px; color: var(--ink-soft); }
+  #blurb p.by { font-size: 14px; font-style: italic; margin-top: 4px; }
+  #ecount { margin: 10px 0 12px; }
+  .group {
+    margin: 20px 0 10px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--rule);
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 14px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .group small { margin-left: 8px; text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', Georgia, serif; font-size: 15px; color: var(--ink-soft); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    padding: 12px 18px 11px;
+    margin: 0 0 14px;
+    max-width: 60em;
+  }
+  .card.rule { border-left-style: dashed; }
+  .card.counter, .card.unresolved { border-left-color: var(--warn); }
+  .card.flash, li.j.flash { animation: flash 1.6s ease-out; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 4px var(--hilite); background: #f6e8bd; } 100% { box-shadow: 0 0 0 0 transparent; } }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 9px; }
+  .chip {
+    font-size: 14px;
+    padding: 1px 9px;
+    border: 1px solid var(--accent);
+    border-radius: 11px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .chip b { font-family: 'Cinzel', Georgia, serif; font-weight: 400; font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; margin-right: 5px; opacity: .75; }
+  .chip.inferred { border-style: dashed; background: transparent; color: var(--ink-soft); border-color: var(--ink-soft); font-style: italic; }
+  .chip.plain { background: transparent; border-color: var(--rule); color: var(--ink-soft); }
+  .chip.bad { background: transparent; border-color: var(--warn); color: var(--warn); }
+  .chip .arrow { margin: 0 4px; }
+  blockquote {
+    margin: 0 0 8px;
+    padding: 0 0 0 12px;
+    border-left: 2px solid var(--rule);
+    font-size: 20px;
+    line-height: 1.38;
+    white-space: pre-line;
+  }
+  blockquote mark { background: var(--hilite); color: var(--ink); padding: 0 2px; cursor: pointer; }
+  blockquote mark.conclusion { background: #e3cf9e; border-bottom: 2px solid var(--accent); }
+  blockquote mark.rejected { background: transparent; text-decoration: line-through; text-decoration-color: var(--warn); }
+  blockquote mark sup { font-family: 'Cinzel', Georgia, serif; font-size: 10px; color: var(--accent); margin-left: 2px; letter-spacing: .03em; }
+  blockquote mark sup.inferred { font-style: italic; opacity: .8; }
+  .card .cite { font-size: 15px; display: flex; flex-wrap: wrap; gap: 2px 14px; }
+  .note { margin: 7px 0 0; font-size: 15.5px; font-style: italic; color: var(--ink-soft); }
+  .flag { margin: 7px 0 0; font-size: 15.5px; color: var(--warn); }
+  .flag b { font-family: 'Cinzel', Georgia, serif; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; margin-right: 6px; }
+  #eempty { border: 1px dashed var(--rule); padding: 20px; color: var(--ink-soft); font-style: italic; max-width: 60em; }
+
+  @media (max-width: 960px) {
+    body { display: block; height: auto; }
+    .layout { grid-template-columns: 1fr; }
+    aside { border-right: 0; border-bottom: 1px solid var(--rule); overflow: visible; }
+    main { overflow: visible; padding: 16px; }
+    nav#kinds, header { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Immediate Inferences</h1>
+  <p>Kant's examples of the <i>consequentiae immediatae</i> — equipollence, subalternation, opposition, conversion, contraposition — from the Blomberg, Wiener and Busolt logic transcripts (Academy Edition vol. 24) and from his own Reflexionen on Meier's <i>Auszug</i> (vol. 16). The examples are on the right. On the left are the judgements they are made of, each with the transcript or Reflexion, the volume and the page.</p>
+</header>
+
+<nav id="kinds" aria-label="Kind of immediate inference"></nav>
+
+<div class="layout">
+  <aside aria-label="Judgements">
+    <h2>Judgements</h2>
+    <p class="count" id="jcount"></p>
+
+    <div class="filters">
+      <div class="row"><span class="lab">Source</span><span id="sources"></span></div>
+      <div class="row"><span class="lab">Form</span><span id="forms"></span></div>
+      <div class="row"><label class="opt"><input type="checkbox" id="withj"><span>Only passages that write out a judgement</span></label></div>
+    </div>
+
+    <details class="legend">
+      <summary>How to read this list</summary>
+      <p><b>A E I O</b> — universal affirmative, universal negative, particular affirmative, particular negative; <b>S</b> singular. A box with a <i>solid</i> edge: the passage itself says what form the judgement has. A <i>dashed</i> edge: the form is read off the quantifier and the copula here, and the passage does not state it.</p>
+      <p><i>Read as</i> — the judgement written out where the passage leaves part of it to be understood (“einige”). It is not in the text.</p>
+      <p>Pages are the Academy pages (<b>AA 24</b> for the transcripts, <b>AA 16</b> for the Reflexionen). A transcript’s page is the page on which the sentence stands. A Reflexion’s is the whole range of the Reflexion, since the data does not say where inside it a sentence falls. A dashed underline on a § means it was taken from the Academy’s block heading, not the Reflexion’s own locus note.</p>
+      <p>Click a judgement to find its example; click a highlighted judgement in an example to find it in this list.</p>
+    </details>
+
+    <div id="jlist"></div>
+    <div id="jempty" hidden>No judgements fit. Choose another kind, or loosen the source and form filters.</div>
+  </aside>
+
+  <main id="examples" aria-live="polite">
+    <div id="blurb"></div>
+    <p class="count" id="ecount"></p>
+    <div id="elist"></div>
+    <div id="eempty" hidden>Nothing fits. Choose another kind, tick another source, or untick the filters.</div>
+  </main>
+</div>
+
+<!-- Shared data (generated; read-only), then this tool's own hand-curated examples. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/reflexionen-16-meier.js"></script>
+<script src="../../data/phases-adickes.js"></script>
+<script src="immediate-inference-examples.js"></script>
+
+<script>
+/* ── Data ─────────────────────────────────────────────────────────────────── */
+
+// Chronological, which is also the order the sources are listed in.
+const SOURCES = {
+  blomberg: { label: 'Logik Blomberg', date: 'ca. 1771',    vol: 24, order: 0, data: () => LOGIK_BLOMBERG },
+  wiener:   { label: 'Wiener Logik',   date: '1780ff.',     vol: 24, order: 1, data: () => LOGIK_WIENER },
+  busolt:   { label: 'Logik Busolt',   date: 'ca. 1789/90', vol: 24, order: 2, data: () => LOGIK_BUSOLT },
+  refl16:   { label: 'Reflexionen on Meier', date: 'Kant’s notes in his copy of the Auszug', vol: 16, order: 3 }
+};
+const SOURCE_KEYS = Object.keys(SOURCES);
+
+const KINDS = [
+  { key: 'all', label: 'All kinds',
+    title: 'All the immediate inferences', de: '',
+    text: 'Every passage in the four sources, under the kind of inference it is filed under (a passage that speaks of several appears once, under its first). Choose a kind above to see only that one.' },
+  { key: 'general', label: 'What it is', short: 'definition', de: 'Verstandesschluß · consequentia immediata',
+    title: 'What an immediate inference is',
+    text: 'A judgement drawn from another with no middle term (“absque medio termino”). A Vernunftschluß needs a middle term (“per iudicium intermedium”). The transcripts list five ways an immediate inference can go: by equipollence, subalternation, opposition, conversion and contraposition. Kant’s own sorting of them under the four heads of the categories is in Refl. 3170.' },
+  { key: 'aequipollentia', label: 'Equipollence', short: 'equipollence', de: 'iudicia aequipollentia',
+    title: 'Equipollence',
+    text: 'Two judgements that say the same in different words. Blomberg and Busolt deny that it is an inference at all (“gar kein Schluß”, “sie ist leer”); the Wiener transcript lists it first and calls such pairs substitutions.' },
+  { key: 'subalternation', label: 'Subalternation', short: 'subalternation', de: 'iudicia subalternata',
+    title: 'Subalternation',
+    text: 'From the universal to the particular under it: the quality is kept and only the quantity changes (“vom allgemeinen aufs besondere”). Kant adds a caution in Refl. 3171: the particulars are contained under the universal but not conversely, so one cannot infer the falsity of the particulars from the falsity of the universal, nor the universal from the particulars.' },
+  { key: 'contradictory', label: 'Contradictory', short: 'contradictory', de: 'iudicia opposita · contradictorie', group: 'Opposition',
+    title: 'Opposition: contradictory',
+    text: 'A against O, or E against I. Of the two exactly one is true, so from the truth of one follows the falsity of the other, and conversely (“posito uno tollitur alterum”). The Wiener transcript calls it “die eigentliche Opposition”.' },
+  { key: 'contrary', label: 'Contrary', short: 'contrary', de: 'iudicia opposita · contrarie', group: 'Opposition',
+    title: 'Opposition: contrary',
+    text: 'A against E. Both can be false, not both true, because each says too much (Refl. 3177: “zuviel zum Wiederstreit”). Busolt: “die Falschheit steckt in der Allgemeinheit”.' },
+  { key: 'subcontrary', label: 'Subcontrary', short: 'subcontrary', de: 'iudicia opposita · subcontrarie', group: 'Opposition',
+    title: 'Opposition: subcontrary',
+    text: 'I against O. Both can be true, not both false, because each says too little (Refl. 3175: “nicht genug zum Wiederstreit”).' },
+  { key: 'conversion', label: 'Conversion', short: 'conversion', de: 'conversio · Umkehrung',
+    title: 'Conversion',
+    text: 'The terms are transposed (“metathesis terminorum”) and the quality is kept. As the transcripts give the rule, universal affirmatives convert per accidens, to a particular; universal negatives and particulars convert simpliciter. Busolt notes that an A whose subject and predicate have equal spheres converts simply.' },
+  { key: 'contraposition', label: 'Contraposition', short: 'contraposition', de: 'contrapositio · Entgegenstellung',
+    title: 'Contraposition',
+    text: 'The terms are transposed and the quality changed, the quantity kept: from “Alle Menschen sind sterblich” to “was nicht sterblich ist, ist kein Mensch”. In Kant’s list (Refl. 3170) it is the inference by modality: an assertoric judgement is made apodictic.' }
+];
+const KIND_BY_KEY = {};
+KINDS.forEach(k => { KIND_BY_KEY[k.key] = k; });
+const KIND_ORDER = KINDS.filter(k => k.key !== 'all').map(k => k.key);
+
+const FORMS = [
+  { key: 'A', title: 'Universal affirmative' },
+  { key: 'E', title: 'Universal negative' },
+  { key: 'I', title: 'Particular affirmative' },
+  { key: 'O', title: 'Particular negative' },
+  { key: 'S', title: 'Singular' }
+];
+
+const ROLE_LABEL = {
+  premise: 'Premise', conclusion: 'Conclusion', member: 'One of the pair',
+  intermediate: 'Intermediate step', rejected: 'Rejected by the passage'
+};
+
+/* ── State ────────────────────────────────────────────────────────────────── */
+
+let kind = 'all';
+let sources = new Set();     // sources ticked; empty means all four
+let forms = new Set();       // forms pressed; empty means all
+let withJudgements = false;
+let examples = [];           // IMMEDIATE_EXAMPLES, each resolved against its source
+let blocksByWork = {};       // work -> block id -> block, with its start pages worked out
+let reflByNumber = {};       // Reflexion number -> entry
+
+/* ── Resolving an example against its source ──────────────────────────────── */
+
+// Index every block of a transcript. `aa` on a block is documented as the page
+// it starts on, but where its first page break falls inside it the extractor
+// records the page it ENDS on. So the start page is worked out here instead:
+// the page of the first marker if that stands at character 0, else the page
+// the previous block ended on. The manuscript pages are carried the same way.
+function indexWork(key) {
+  const byId = {};
+  let curAA = null, curMS = null;
+  SOURCES[key].data().sections.forEach(sec => sec.blocks.forEach(b => {
+    const pg = b.pages || [], ms = b.ms || [];
+    if (pg.length && pg[0].i === 0) b._aa0 = pg[0].p;
+    else if (pg.length) b._aa0 = curAA != null ? curAA : b.aa;
+    else b._aa0 = b.aa;
+    b._ms0 = curMS;
+    curAA = pg.length ? pg[pg.length - 1].p : b.aa;
+    if (ms.length) curMS = ms[ms.length - 1].p;
+    byId[b.id] = b;
+  }));
+  return byId;
+}
+
+// The page that stands at character offset `off` of a block: the last marker at
+// or before it, else the page the block started on.
+function pageAt(markers, off, first) {
+  let found = first;
+  (markers || []).forEach(m => { if (m.i <= off) found = m.p; });
+  return found;
+}
+
+function resolve(raw) {
+  const ex = Object.assign({}, raw);
+  ex.judgements = raw.judgements.map(j => Object.assign({}, j));
+  const src = SOURCES[raw.src];
+  ex.vol = src.vol;
+
+  // Where each judgement stands in the quote, in the order the passage writes them.
+  let cursor = 0;
+  ex.judgements.forEach(j => {
+    let at = raw.quote.indexOf(j.t, cursor);
+    if (at < 0) at = raw.quote.indexOf(j.t);
+    j.at = at;
+    if (at >= 0) cursor = at + j.t.length;
+  });
+  const judgementsFound = ex.judgements.every(j => j.at >= 0);
+
+  if (raw.src === 'refl16') {
+    const e = reflByNumber[raw.r];
+    ex.entry = e;
+    ex.ok = !!e && e.text.indexOf(raw.quote) >= 0 && judgementsFound;
+    if (!ex.ok) return ex;
+    ex.pageFrom = e.aa != null ? e.aa : e.aaEnd;
+    ex.pageTo = e.aaEnd != null ? e.aaEnd : ex.pageFrom;
+    ex.judgements.forEach(j => { j.pageFrom = ex.pageFrom; j.pageTo = ex.pageTo; });
+    return ex;
+  }
+
+  const b = (blocksByWork[raw.src] || {})[raw.block];
+  const start = b ? b.text.indexOf(raw.quote) : -1;
+  ex.block_ = b;
+  ex.ok = start >= 0 && judgementsFound;
+  if (!ex.ok) return ex;
+  ex.pageFrom = pageAt(b.pages, start, b._aa0);
+  ex.pageTo = pageAt(b.pages, start + raw.quote.length - 1, b._aa0);
+  ex.msFrom = pageAt(b.ms, start, b._ms0);
+  ex.msTo = pageAt(b.ms, start + raw.quote.length - 1, b._ms0);
+  ex.judgements.forEach(j => {
+    j.pageFrom = j.pageTo = pageAt(b.pages, start + j.at, b._aa0);
+    j.msPage = pageAt(b.ms, start + j.at, b._ms0);
+  });
+  return ex;
+}
+
+function loadExamples() {
+  ['blomberg', 'wiener', 'busolt'].forEach(w => { blocksByWork[w] = indexWork(w); });
+  REFL_ENTRIES.forEach(e => { reflByNumber[e.r] = e; });
+  examples = IMMEDIATE_EXAMPLES.map(resolve);
+  examples.forEach((ex, n) => { ex.n = n; });
+  examples.sort((a, b) =>
+    SOURCES[a.src].order - SOURCES[b.src].order ||
+    (a.pageFrom || 0) - (b.pageFrom || 0) ||
+    a.n - b.n);
+}
+
+/* ── Matching ─────────────────────────────────────────────────────────────── */
+
+function formKey(f) { return f.charAt(0); }   // S+ and S- are both S
+
+function primaryKind(ex) {
+  if (kind !== 'all' && ex.kinds.indexOf(kind) >= 0) return kind;
+  return ex.kinds[0];
+}
+
+function hasKind(ex) { return kind === 'all' || ex.kinds.indexOf(kind) >= 0; }
+function hasSource(ex) { return !sources.size || sources.has(ex.src); }
+function hasForm(ex) {
+  return !forms.size || ex.judgements.some(j => forms.has(formKey(j.form)));
+}
+function hasJudgement(ex) { return !withJudgements || ex.judgements.length > 0; }
+
+function fits(ex) { return hasKind(ex) && hasSource(ex) && hasForm(ex) && hasJudgement(ex); }
+
+/* ── Building the page ────────────────────────────────────────────────────── */
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function pageRange(a, b) { return a === b ? String(a) : a + '–' + b; }
+
+// A judgement as it stands in the transcription: a page break `|` and the
+// line breaks of a Reflexion run together.
+function flat(t) { return t.replace(/\s*\|?\s*\n\s*/g, ' ').trim(); }
+
+function parasLabel(paras) {
+  if (!paras || !paras.length) return '';
+  const p = paras.slice().sort((a, b) => a - b);
+  if (p.length === 1) return '§ ' + p[0];
+  const run = p.every((v, i) => i === 0 || v === p[i - 1] + 1);
+  return '§§ ' + (run ? p[0] + '–' + p[p.length - 1] : p.join(', '));
+}
+
+function phaseTip(e) {
+  try { return 'Adickes’ phase ' + e.phRaw + ' — ' + (e.ph || []).map(s => s + ': ' + phaseYears(s)).join('; '); }
+  catch (err) { return 'Adickes’ phase ' + e.phRaw; }
+}
+
+function chip(label, value, cls, title) {
+  const c = el('span', 'chip' + (cls ? ' ' + cls : ''));
+  if (title) c.title = title;
+  if (label) c.append(el('b', null, label));
+  c.append(value);
+  return c;
+}
+
+function citation(ex, j) {
+  const src = SOURCES[ex.src];
+  const cite = el('div', 'cite');
+  const from = j ? j.pageFrom : ex.pageFrom, to = j ? j.pageTo : ex.pageTo;
+  if (ex.src === 'refl16') {
+    cite.append(el('span', 'work', 'Refl. ' + ex.r));
+    cite.append(el('span', 'aa', 'AA 16:' + pageRange(from, to)));
+    cite.append(el('span', 'sub', 'vol. 16 · ' + src.label));
+    if (!j) {
+      const e = ex.entry;
+      const lab = parasLabel(e.paras);
+      if (lab) {
+        const own = e.src === 'locus';
+        const a = el('span', 'sub anchor' + (own ? '' : ' inferred'), 'on Meier ' + lab);
+        a.title = own ? 'From the Reflexion’s own locus note: ' + (e.loc && e.loc.raw)
+                      : e.src === 'group' ? 'From the Academy’s block heading, not from a locus note of this Reflexion'
+                                          : 'No § is stated; interpolated from the neighbouring Reflexionen';
+        cite.append(a);
+      }
+      if (e.sig) cite.append(el('span', 'sub', 'sheet ' + e.sig.replace(/\.$/, '')));
+      const ph = el('span', 'sub', 'phase ' + e.phRaw);
+      ph.title = phaseTip(e);
+      cite.append(ph);
+    }
+  } else {
+    cite.append(el('span', 'work', src.label));
+    cite.append(el('span', 'aa', 'AA 24:' + pageRange(from, to)));
+    cite.append(el('span', 'sub', 'vol. 24 · ' + src.date));
+    const ms = j ? j.msPage : ex.msFrom;
+    const msTo = j ? j.msPage : ex.msTo;
+    if (ms != null) cite.append(el('span', 'sub', 'Ms. p. ' + pageRange(ms, msTo != null ? msTo : ms)));
+    if (!j) cite.append(el('span', 'sub', ex.block));
+  }
+  return cite;
+}
+
+function kindChips(ex) {
+  const box = el('div', 'chips');
+  ex.kinds.forEach(k => {
+    const info = KIND_BY_KEY[k];
+    box.append(chip('Kind', info.short, ex.named ? '' : 'inferred',
+      ex.named ? 'The passage itself names this kind'
+               : 'Assigned here; the passage does not name the kind'));
+  });
+  if (ex.sub) box.append(chip('', ex.sub, ex.named ? '' : 'inferred', 'Species'));
+  // The argument in letters, where the passage writes out a premise and a conclusion.
+  const pre = ex.judgements.filter(j => j.role === 'premise')[0];
+  const con = ex.judgements.filter(j => j.role === 'conclusion')[0];
+  const pair = ex.judgements.filter(j => j.role === 'member');
+  if (pre && con) {
+    const c = chip('Form', '', '', 'The forms of premise and conclusion');
+    c.append(pre.form, el('span', 'arrow', '→'), con.form);
+    box.append(c);
+  } else if (pair.length > 1) {
+    const c = chip('Pair', pair.map(j => j.form).join(' · '), '', 'The forms of the opposed judgements');
+    box.append(c);
+  }
+  if (!ex.judgements.length) box.append(chip('', 'rule, no instance', 'plain', 'The passage states a rule or names the kind and writes out no judgement of its own'));
+  if (ex.counter) box.append(chip('', 'not immediate', 'bad', ex.counter));
+  if (ex.invalid) box.append(chip('', 'inference ruled out', 'bad', ex.invalid));
+  return box;
+}
+
+function buildQuote(ex) {
+  const q = el('blockquote');
+  q.lang = 'de';
+  const marks = ex.judgements
+    .map((j, n) => ({ j, n, at: j.at, end: j.at + j.t.length }))
+    .sort((a, b) => a.at - b.at);
+  let pos = 0;
+  marks.forEach(m => {
+    if (m.at < pos) return;                       // overlaps the one before: leave unmarked
+    if (m.at > pos) q.append(ex.quote.slice(pos, m.at));
+    const mk = el('mark', m.j.role === 'conclusion' || m.j.role === 'rejected' ? m.j.role : '');
+    mk.append(ex.quote.slice(m.at, m.end));
+    const sup = el('sup', m.j.formStated ? '' : 'inferred', m.j.form);
+    sup.title = (m.j.formStated ? 'Form named by the passage' : 'Form read off the sentence here; not named by the passage');
+    mk.append(sup);
+    mk.title = 'Show this judgement in the list';
+    mk.addEventListener('click', () => goTo('j-' + ex.id + '-' + m.n));
+    q.append(mk);
+    pos = m.end;
+  });
+  if (pos < ex.quote.length) q.append(ex.quote.slice(pos));
+  return q;
+}
+
+function buildCard(ex) {
+  const card = el('article', 'card' + (ex.judgements.length ? '' : ' rule') +
+    (ex.counter || ex.invalid ? ' counter' : '') + (ex.ok ? '' : ' unresolved'));
+  card.id = 'ex-' + ex.id;
+  if (!ex.ok) {
+    card.append(el('p', 'flag', 'The quotation could not be found in ' + (ex.block || 'Refl. ' + ex.r) +
+      '. The data file may have been regenerated; check immediate-inference-examples.js.'));
+    return card;
+  }
+  card.append(kindChips(ex), buildQuote(ex), citation(ex, null));
+  if (ex.counter) { const p = el('p', 'flag'); p.append(el('b', null, 'Not immediate'), ex.counter); card.append(p); }
+  if (ex.invalid) { const p = el('p', 'flag'); p.append(el('b', null, 'Ruled out'), ex.invalid); card.append(p); }
+  if (ex.note) card.append(el('p', 'note', ex.note));
+  return card;
+}
+
+function buildJudgement(ex, j, n) {
+  const li = el('li', 'j' + (j.role === 'rejected' ? ' rejected' : ''));
+  li.id = 'j-' + ex.id + '-' + n;
+  li.tabIndex = 0;
+  li.title = 'Show the example this judgement belongs to';
+
+  const f = el('div', 'form' + (j.formStated ? '' : ' inferred'));
+  f.title = (FORMS.filter(x => x.key === formKey(j.form))[0].title) +
+    (j.formStated ? ' — named by the passage' : ' — read off the sentence here, not named by the passage');
+  f.append(formKey(j.form));
+  if (j.form.length > 1) f.append(el('sup', null, j.form.charAt(1) === '+' ? '+' : '−'));
+
+  const body = el('div');
+  const t = el('p', 't', flat(j.t));
+  t.lang = 'de';
+  body.append(t);
+  if (j.supply) {
+    const s = el('p', 'supply');
+    s.lang = 'de';
+    s.append(el('b', null, 'Read as'), j.supply);
+    body.append(s);
+  }
+  const meta = el('p', 'meta');
+  const k = KIND_BY_KEY[primaryKind(ex)];
+  const what = ex.counter ? 'offered as not immediate'
+    : k.short + (ex.sub && ex.kinds.length === 1 ? ' (' + ex.sub + ')' : '');
+  meta.append(ROLE_LABEL[j.role] + ' · ' + what);
+  if (j.tv) meta.append(el('span', 'tag', j.tv));
+  if (j.mod) meta.append(el('span', 'tag', j.mod));
+  body.append(meta, citation(ex, j));
+
+  li.append(f, body);
+  li.addEventListener('click', () => goTo('ex-' + ex.id));
+  li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goTo('ex-' + ex.id); } });
+  return li;
+}
+
+/* ── Rendering ────────────────────────────────────────────────────────────── */
+
+function renderBlurb() {
+  const k = KIND_BY_KEY[kind];
+  const box = document.getElementById('blurb');
+  const h = el('h2', null, k.title);
+  if (k.de) h.append(el('span', 'de', k.de));
+  const by = el('p', 'by', 'A summary of what the passages below say; not the Academy Edition’s words.');
+  box.replaceChildren(h, el('p', null, k.text), by);
+}
+
+function renderExamples(hits) {
+  const nodes = [];
+  // One kind: grouped by source. All kinds: grouped by kind, then by source.
+  const groupOf = ex => kind === 'all' ? primaryKind(ex) : ex.src;
+  const order = kind === 'all' ? KIND_ORDER : SOURCE_KEYS;
+  order.forEach(g => {
+    const mine = hits.filter(ex => groupOf(ex) === g);
+    if (!mine.length) return;
+    const title = kind === 'all' ? KIND_BY_KEY[g].title : SOURCES[g].label;
+    const sub = kind === 'all' ? mine.length + '' : SOURCES[g].date + ' · ' + mine.length;
+    const h = el('h3', 'group', title);
+    h.append(el('small', null, sub));
+    nodes.push(h);
+    if (kind === 'all') mine.sort((a, b) => SOURCES[a.src].order - SOURCES[b.src].order || (a.pageFrom || 0) - (b.pageFrom || 0) || a.n - b.n);
+    mine.forEach(ex => nodes.push(buildCard(ex)));
+  });
+  document.getElementById('elist').replaceChildren(...nodes);
+  document.getElementById('eempty').hidden = hits.length > 0;
+  const withJ = hits.filter(h => h.judgements.length).length;
+  document.getElementById('ecount').textContent =
+    hits.length + ' passage' + (hits.length === 1 ? '' : 's') + ' · ' +
+    withJ + ' with a judgement written out, ' + (hits.length - withJ) + ' rule only';
+}
+
+function renderJudgements(hits) {
+  const nodes = [];
+  let total = 0;
+  SOURCE_KEYS.forEach(s => {
+    const items = [];
+    hits.filter(ex => ex.src === s).forEach(ex => {
+      ex.judgements.forEach((j, n) => {
+        if (forms.size && !forms.has(formKey(j.form))) return;
+        items.push(buildJudgement(ex, j, n));
+      });
+    });
+    if (!items.length) return;
+    total += items.length;
+    const h = el('h3', 'src', SOURCES[s].label);
+    h.append(el('small', null, 'vol. ' + SOURCES[s].vol + ' · ' + items.length));
+    const ul = el('ul', 'js');
+    ul.append(...items);
+    nodes.push(h, ul);
+  });
+  document.getElementById('jlist').replaceChildren(...nodes);
+  document.getElementById('jempty').hidden = total > 0;
+  const passages = hits.filter(ex => ex.judgements.length).length;
+  document.getElementById('jcount').textContent =
+    total + ' judgement' + (total === 1 ? '' : 's') + ' · ' + passages + ' passage' + (passages === 1 ? '' : 's');
+}
+
+function render() {
+  const hits = examples.filter(fits);
+  renderBlurb();
+  renderExamples(hits);
+  renderJudgements(hits);
+  refreshCounts();
+}
+
+// Counts under every other setting, so each button says what it would show.
+function refreshCounts() {
+  KINDS.forEach(k => {
+    const n = examples.filter(ex => (k.key === 'all' || ex.kinds.indexOf(k.key) >= 0) &&
+      hasSource(ex) && hasForm(ex) && hasJudgement(ex)).length;
+    document.querySelector('#kinds button[data-kind="' + k.key + '"] .n').textContent = n;
+  });
+  SOURCE_KEYS.forEach(s => {
+    const n = examples.filter(ex => ex.src === s && hasKind(ex) && hasForm(ex) && hasJudgement(ex)).length;
+    document.querySelector('#sources input[value="' + s + '"]').closest('label').querySelector('.n').textContent = n;
+  });
+}
+
+/* ── Jumping between the two lists ────────────────────────────────────────── */
+
+function goTo(id) {
+  const n = document.getElementById(id);
+  if (!n) return;
+  n.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  n.classList.remove('flash');
+  void n.offsetWidth;            // restart the animation
+  n.classList.add('flash');
+}
+
+/* ── Buttons and filters ──────────────────────────────────────────────────── */
+
+function setKind(k) {
+  kind = k;
+  document.querySelectorAll('#kinds button').forEach(b => {
+    b.setAttribute('aria-pressed', b.dataset.kind === k ? 'true' : 'false');
+  });
+  // The hash lets a link open on one kind; a browser that refuses to set it loses only that.
+  try { if (location.hash.slice(1) !== k) history.replaceState(null, '', '#' + k); } catch (e) { /* not essential */ }
+  render();
+  document.getElementById('examples').scrollTop = 0;
+  document.querySelector('aside').scrollTop = 0;
+}
+
+function buildButtons() {
+  const nav = document.getElementById('kinds');
+  let grp = null;
+  KINDS.forEach(k => {
+    const b = el('button', null, k.label);
+    b.type = 'button';
+    b.dataset.kind = k.key;
+    b.setAttribute('aria-pressed', 'false');
+    b.append(el('span', 'n', '0'));
+    b.addEventListener('click', () => setKind(k.key));
+    if (k.group) {
+      if (!grp) { grp = el('span', 'grp'); grp.append(el('span', null, k.group)); nav.append(grp); }
+      grp.append(b);
+    } else {
+      nav.append(b);
+    }
+  });
+}
+
+function buildFilters() {
+  const host = document.getElementById('sources');
+  SOURCE_KEYS.forEach(s => {
+    const lab = el('label', 'opt');
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.value = s;
+    box.addEventListener('change', () => { if (box.checked) sources.add(s); else sources.delete(s); render(); });
+    lab.append(box, el('span', null, SOURCES[s].label), el('span', 'n', '0'));
+    host.append(lab, ' ');
+  });
+  const fh = document.getElementById('forms');
+  FORMS.forEach(f => {
+    const b = el('button', 'fbtn', f.key);
+    b.type = 'button';
+    b.title = f.title;
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => {
+      if (forms.has(f.key)) forms.delete(f.key); else forms.add(f.key);
+      b.setAttribute('aria-pressed', forms.has(f.key) ? 'true' : 'false');
+      render();
+    });
+    fh.append(b, ' ');
+  });
+}
+
+/* ── Wiring and init ──────────────────────────────────────────────────────── */
+
+document.getElementById('withj').addEventListener('change', e => { withJudgements = e.target.checked; render(); });
+window.addEventListener('hashchange', () => {
+  const k = location.hash.slice(1);
+  if (KIND_BY_KEY[k] && k !== kind) setKind(k);
+});
+
+loadExamples();
+buildButtons();
+buildFilters();
+setKind(KIND_BY_KEY[location.hash.slice(1)] ? location.hash.slice(1) : kind);
+</script>
+</body>
+</html>
