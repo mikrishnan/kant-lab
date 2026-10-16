@@ -24,8 +24,7 @@ Claude makes it, you can also work [on your own computer](#working-on-your-own-c
 | everything else | `docs/`, `.github/`, this page | the professor |
 
 The Baumgarten and Meier readers, and the data they are built from, are owned by
-**Sophia Wyatt** (@sophia-wyatt) and **Maria** (@mari637-pixel). Either can approve
-the other's pull requests, and they decide how those tools and their data develop.
+**Sophia Wyatt** (@sophia-wyatt) and **Maria** (@mari637-pixel).
 
 The repository is public, and the site publishes all of it.
 
