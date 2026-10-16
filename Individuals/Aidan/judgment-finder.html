@@ -131,13 +131,20 @@ mark.form { background: var(--mark-form); }
 #summary .def { display: block; margin-top: 3px; font-style: italic; }
 #results { flex: 1; overflow-y: auto; padding: 8px 16px 40px; }
 .rw { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: .06em; color: var(--accent); margin: 14px 0 4px; padding-bottom: 2px; border-bottom: 1px solid var(--rule); }
+.hitw { margin: 0 0 6px; }
 .hit {
   display: block; width: 100%; text-align: left; font: inherit; font-size: 15px; line-height: 1.4;
-  background: #fffdf6; border: 1px solid var(--rule); border-radius: 3px; padding: 6px 9px; margin: 0 0 6px; color: var(--ink); cursor: pointer;
+  background: #fffdf6; border: 1px solid var(--rule); border-radius: 3px; padding: 6px 9px; margin: 0; color: var(--ink); cursor: pointer;
 }
 .hit:hover { border-color: var(--accent-soft); }
 .hit .loc { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--ink-soft); margin-bottom: 2px; }
 .hit .loc i { font-style: normal; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .05em; }
+.trrow { display: flex; align-items: baseline; gap: 8px; padding: 2px 4px 0; font-size: 13px; }
+.trbtn { font: inherit; font-size: 12px; padding: 0 8px; background: transparent; border: 1px solid var(--rule); border-radius: 10px; color: var(--accent); cursor: pointer; text-decoration: none; }
+.trbtn:hover { border-color: var(--accent-soft); }
+.tr { flex: 1; font-style: italic; color: var(--ink-soft); line-height: 1.35; }
+.tr .tag { background: var(--parchment-deep); font-style: normal; margin: 0 6px 0 0; }
+.tr.err { color: #8b2f1f; }
 .tag { display: inline-block; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: .06em; padding: 0 5px; border-radius: 3px; margin-left: 4px; vertical-align: 1px; }
 .tag.term { background: var(--mark); }
 .tag.form { background: var(--mark-form); }
@@ -183,11 +190,12 @@ mark.form { background: var(--mark-form); }
         <label><input type="checkbox" id="o-term" checked> where the form is named</label>
         <label><input type="checkbox" id="o-form" checked> sentences shaped like it</label>
         <label><input type="checkbox" id="o-ctx" checked> named passages must concern a judgment</label>
+        <label id="o-tr-l" hidden><input type="checkbox" id="o-tr"> translate every hit into English</label>
       </div>
     </div>
     <div id="summary">Choose a form from Kant's table, or type one in German, Latin or English. Hits come from all three transcripts.</div>
     <div id="results"></div>
-    <div id="note">Every hit is <b>inferred</b> by keyword and sentence-shape matching, not catalogued by an editor. A green tag marks a sentence whose wording only <i>resembles</i> the form; a yellow tag marks a passage that names it. Click a hit to read it in place.</div>
+    <div id="note">Every hit is <b>inferred</b> by keyword and sentence-shape matching, not catalogued by an editor. A green tag marks a sentence whose wording only <i>resembles</i> the form; a yellow tag marks a passage that names it. Click a hit to read it in place. <b>EN</b> gives a machine translation of the German (Latin passages come out rough).</div>
   </aside>
 </main>
 
@@ -573,6 +581,7 @@ function renderResults() {
 }
 
 function renderHit(h) {
+  const wrap = el('div', 'hitw');
   const btn = el('button', 'hit');
   const sec = JF_WORKS[h.wi].data.sections[h.si];
   const loc = el('div', 'loc');
@@ -597,7 +606,56 @@ function renderHit(h) {
   body.append(piece.slice(pos), sn.post);
   btn.append(body);
   btn.addEventListener('click', () => openWork(h.wi, h.si, h.b.id));
-  return btn;
+  wrap.append(btn, renderTranslateRow(h));
+  return wrap;
+}
+
+/* ── German → English ──────────────────────────────────────────────────────────
+   Translation runs in the browser (Chrome's built-in Translator API, on-device, nothing is sent
+   anywhere). Where a browser lacks it, EN opens the same sentence in Google Translate instead.
+   Either way the result is machine output and is labelled so. */
+const TR_OK = typeof self !== 'undefined' && 'Translator' in self;
+let trPromise = null;
+const trCache = new Map();
+
+function getTranslator() {
+  if (!trPromise) trPromise = Translator.create({ sourceLanguage: 'de', targetLanguage: 'en' });
+  return trPromise;
+}
+function hitSentence(h) {
+  return h.b.text.slice(h.s, h.e).replace(/\s+/g, ' ').trim().slice(0, 700);
+}
+async function translateHit(h, out) {
+  const src = hitSentence(h), key = src;
+  out.className = 'tr';
+  out.textContent = trCache.size ? 'translating…' : 'translating… (the first use may download a small language model)';
+  try {
+    if (!trCache.has(key)) trCache.set(key, await (await getTranslator()).translate(src));
+    out.textContent = '';
+    out.append(el('span', 'tag', 'MACHINE TRANSLATION'), trCache.get(key));
+  } catch (e) {
+    trPromise = null;
+    out.className = 'tr err';
+    out.textContent = 'Could not translate here (' + (e && e.name || 'error') + '). Use the EN link for Google Translate.';
+  }
+}
+function renderTranslateRow(h) {
+  const row = el('div', 'trrow');
+  const out = el('span', 'tr');
+  if (TR_OK) {
+    const b = el('button', 'trbtn', 'EN');
+    b.title = 'Translate this sentence from German into English';
+    b.addEventListener('click', () => translateHit(h, out));
+    row.append(b, out);
+    if ($('o-tr').checked) translateHit(h, out);
+  } else {
+    const a = el('a', 'trbtn', 'EN ↗');
+    a.href = 'https://translate.google.com/?sl=de&tl=en&op=translate&text=' + encodeURIComponent(hitSentence(h));
+    a.target = '_blank'; a.rel = 'noopener';
+    a.title = 'Open this sentence in Google Translate (German → English)';
+    row.append(a);
+  }
+  return row;
 }
 
 /* ── the table of forms and the type-ahead ─────────────────────────────────── */
@@ -683,6 +741,10 @@ function init() {
     else return;
     [...items].forEach((n, i) => n.classList.toggle('on', i === suggestIdx));
   });
+  if (TR_OK) {
+    $('o-tr-l').hidden = false;
+    $('o-tr').addEventListener('change', renderResults);
+  }
   ['o-term', 'o-form', 'o-ctx'].forEach(id => $(id).addEventListener('change', () => { if (curForm || curFree) runSearch(); }));
 
   openWork(0, 0);
