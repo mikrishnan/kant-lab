@@ -19,3 +19,14 @@ rule blocks have no entry. Latin terms are left in Latin, and the editorial brac
 the Academy Edition (`[ Textlücke: AA: … ]`, `< bricht ab >`) are carried through
 unchanged. Where a source block is only a sentence fragment, its translation is a
 fragment too. A scholar should check them before they are quoted.
+
+## Sentence-aligned Meier
+
+`meier-aligned.json` pairs Meier's German with the English sentence by sentence
+(`{ "para", "seg", "de", "en" }`, in § order). It is built by `../align-meier.py` from
+`../meier-auszug.js` and `meier-en.json`. Where two or more sentences on one side answer
+to one on the other, they are joined into one segment, which carries `"merged": {"de": n,
+"en": m}`. Segments never cross a § boundary. The source runs the next section's heading
+straight on after some §§ ("…Erkenntniss.von der Weitläuftigkeit…"); those headings are
+kept as their own segments, as they are in the translation. Five segments are merged, all in
+§§ 387–389 (a garbled syllogism table) and § 546.
