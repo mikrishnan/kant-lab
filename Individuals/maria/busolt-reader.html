@@ -107,7 +107,7 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
 .sent:hover { background: var(--parch-dark); }
 .sent.on { background: var(--hit); box-shadow: 0 0 0 2px var(--hit); }
 #pop {
-  position: fixed; z-index: 20; max-width: min(34em, 90vw); padding: 8px 12px;
+  position: fixed; z-index: 20; max-width: 34em; padding: 8px 12px;
   background: #2e1a00; color: var(--parchment); border-radius: 5px; box-shadow: 0 3px 12px rgba(0,0,0,.35);
   font-size: .95rem; line-height: 1.4; pointer-events: none;
 }
@@ -443,13 +443,15 @@ let hov = null;          // the sentence span under the pointer
 function englishOf(sp) { return MEIER_ALIGNED[sp.dataset.n][sp.dataset.k].en; }
 function showPop(sp) {
   const pop = document.getElementById('pop');
+  const box = document.getElementById('left').getBoundingClientRect();   // never leave the text side
   pop.textContent = englishOf(sp);
+  pop.style.maxWidth = Math.min(34 * 16, box.width - 8) + 'px';
   pop.hidden = false;
   const rects = sp.getClientRects(), r0 = rects[0], gap = 6;
   const pw = pop.offsetWidth, ph = pop.offsetHeight;
   let top = r0.top - ph - gap;
-  if (top < 4) top = rects[rects.length - 1].bottom + gap;            // no room above: below the last line
-  let left = Math.min(Math.max(4, r0.left), innerWidth - pw - 4);
+  if (top < box.top + 4) top = rects[rects.length - 1].bottom + gap;  // no room above: below the last line
+  let left = Math.min(Math.max(box.left + 4, r0.left), box.right - pw - 4);
   pop.style.top = top + 'px';
   pop.style.left = left + 'px';
 }
