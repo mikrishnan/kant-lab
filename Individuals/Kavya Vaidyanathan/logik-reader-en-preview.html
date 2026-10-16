@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logik Busolt — English preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--parchment:#f6f0e2;--panel:#efe6d0;--ink:#2b2118;--accent:#5c3d1e;--muted:#8a7a63;--rule:#d4c6a8}
+*{box-sizing:border-box}
+body{margin:0;font-family:'EB Garamond',Georgia,serif;background:var(--parchment);color:var(--ink);font-size:18px;line-height:1.6}
+header{padding:.8rem 1.5rem;border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--parchment);z-index:2}
+h1{font-family:Cinzel,serif;font-size:1rem;letter-spacing:.08em;color:var(--accent);margin:0}
+.note{font-size:.85rem;color:var(--muted);margin-top:.2rem}
+.note b{color:var(--accent)}
+main{max-width:1200px;margin:0 auto;padding:0 1.5rem 4rem}
+h2{font-family:Cinzel,serif;font-size:1.05rem;color:var(--accent);margin:2rem 0 .6rem;border-bottom:1px solid var(--rule);padding-bottom:.2rem}
+h2 small{font-family:'EB Garamond',serif;color:var(--muted);font-size:.85rem;margin-left:.5rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;padding:.6rem 0;border-bottom:1px dotted var(--rule)}
+.de .pg{font-family:Cinzel,serif;font-size:.62rem;color:var(--muted);margin-right:.4rem}
+.en{background:var(--panel);border-left:3px solid var(--accent);padding:.4rem .8rem;border-radius:3px}
+.en .tag{display:block;font-family:Cinzel,serif;font-size:.58rem;letter-spacing:.06em;color:var(--muted);margin-bottom:.15rem}
+.col-h{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;font-family:Cinzel,serif;font-size:.7rem;letter-spacing:.08em;color:var(--muted);padding-top:1rem}
+@media(max-width:800px){.row,.col-h{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<script src="../../data/logik-busolt-24.js"></script>
+<header>
+  <h1>Logik Busolt · English preview</h1>
+  <div class="note">German original (left) is read from <code>data/logik-busolt-24.js</code>, untouched. English (right) is a <b>machine translation</b> of the first sections only, kept in this file — nothing in <code>data/</code> is changed.</div>
+</header>
+<main>
+<div class="col-h"><div>GERMAN — AS TRANSCRIBED</div><div>ENGLISH — MACHINE TRANSLATION (PREVIEW)</div></div>
+<div id="out"></div>
+</main>
+<script>
+// English renderings, keyed by block id. Not part of the Academy Edition text.
+const EN = {
+"busolt-s02-001":"Everything acts according to certain rules, which are either 1. general or necessary ones, which are used in every respect and are needed without looking at this or that object in particular. Without these no use of the understanding is possible at all; or 2.) particular ones, which take account of this or that object for particular purposes. The former rules are unalterable; the latter are changed arbitrarily, for everything particular is contingent. Without the particular, the use of the understanding is possible only within a certain science. For the understanding is properly the faculty of rules, whereas the senses are the faculty of intuition. E.g. in mathematics one can comprehend, without using eyes or instruments, that a triangle has three sides and as many angles; but if one wants to know how a triangle is measured, the use of the eyes is necessarily required. The student learns mathematics as it can be grasped through the understanding, the surveyor as it can be grasped through the senses, and so both act according to particular rules. Natural powers one observes before one knows them. Acquired powers one must know before using them. Animals and inanimate nature act according to laws, according to rules, without being aware of them. They are often unknown to human beings too, although they act according to them. One acts according to natural rules:",
+"busolt-s02-002":"1.) Because they are already in nature.",
+"busolt-s02-003":"2.) From imitation, where the practice takes place without knowledge of the rules.",
+"busolt-s02-004":"3.) Through one's own use and practice; here we often err, but through this we arrive at skill. Habitual faults excepted, however. Logic is the science of the rules of the use of the understanding and of reason.",
+"busolt-s02-005":"Here below we find in ourselves the faculty of acting, and from this natural logic arises. For logic is the science of rules. In the beginning a human being acts according to rules of which he is not conscious; so for that long he has a natural logic; when he reaches maturer age he corrects this through rules, and thus artificial logic arises. So someone speaks German and afterwards teaches himself rules from a German grammar. Grammar, however, is only a discipline, logic a science, a doctrine. The difference between discipline and science or doctrine is this: in the former one cannot know why something is so and not otherwise, but in the latter one has an inner proof of it; in the former we consult experience, in the latter the understanding alone; the former is particular, the latter general; the first is called scientia empirica, the other scientia scientifica. The human being has powers, some of which serve to produce materials, others to order them. The first is done by sensibility, the second by reason and the power of judgment.",
+"busolt-s02-006":"Artificial logic now (for it is of this that we speak here) deals with general rules, hence with those that must be used in all sciences and in the judging of all objects. It therefore sets aside everything contingent, everything particular, and so also abstracts from the difference of objects. It chooses only the form, not the matter or content of things. In every cognition one must distinguish the material, e.g. if bodies are heavy, then they are driven by others; and the formal, e.g. if God is just, he punishes evil actions. Matter is the object of cognition, form the way in which we cognize the objects. E.g. physics cognizes the objects of outer sense, psychology those of inner sense. Both we cognize empirically; this is the form, which is therefore the same in both. Logic is accordingly, in this regard, the science of the form of the understanding. Its rules are therefore a priori, i.e. its general rules have reason for their principles, whereas grammar and every other empirical science have rules a posteriori, i.e. rules that have experience for their principles. Experience teaches us how a thing actually is, but reason how it must be, or whence it is so. That water is fluid, e.g., experience teaches; whence it is fluid, reason teaches. How human beings act morally we see from experience; how they ought to act we see from reason. All our cognitions have two sources, the senses and the understanding; both together make up the faculty of cognition. This cognizing is called cognoscere. The senses give the matter for thinking, the understanding however thinks. The senses give the representation, the understanding the rule. The rules of cognition are either",
+"busolt-s03-001":"Aristotle was the first logician; he is the father of logic. His logic is a product of great acuteness. The Scholastics adopted his doctrines and sought to elevate logic above all, but gained nothing by it. Bacon of Verulam also took some pains over logic. Descartes did the same in his book on method. Malebranche writes, in his work Recherches de la vérité, more metaphysics than logic. Von Tschirnhaus writes Medicina mentis et corporis mathematice illustrata, which is highly to be recommended. Locke and Leibniz also contributed a great deal to logic. Wolff's logic is the best; most of these men did not set logic its proper limits. It is, so to speak, the anatomy of the understanding. Crusius also pleases, but only his followers. Lambert's Organon contains a multitude of insights.",
+"busolt-s04-001":"This is clear: for the form of the understanding is more important than the content, whereas a logical error is the worst of all, for one does not commit it alone, but also makes it a rule to sin. It also has a general usefulness when it is presented popularly. All cognition is accordingly divided",
+"busolt-s04-002":"1.) Into cognitio ex datis, i.e. cognitio a posteriori.",
+"busolt-s04-003":"2.) Into cognitio ex principiis, i.e. cognitio a priori, or rational cognitions, antequam nobis data sunt (before they are given to us).",
+"busolt-s04-004":"Cognitio ex datis is when an object is given to us, e.g. what we have from the account of others, such as the motion of the stars; but whoever can state why an eclipse of the sun occurred just at that time proves ex principiis. Cognitio a posteriori is the empirical; cognitio a priori is speculative rational cognition. We have this either 1. from concepts, i.e. philosophical cognition,",
+"busolt-s04-005":"2. from construction, that is mathematical cognition. Mathematics and philosophy therefore differ greatly: for philosophy is cognized from concepts, mathematics from the construction of concepts. Both, however, are not distinguished by their object. For philosophy too has magnitudes as its object. Both are rational cognitions, and indeed both speculative; the difference lies in this, that the one rests on concepts, the other on the construction of concepts. E.g. if I wished to reflect on a triangle, how large the angle would be that contains all three within itself, I would find nothing out philosophically that would give me a correct concept of it. I must therefore construct the concepts, i.e. I must look at the things in the singular coram intuitu (in the presence of intuition). Intuitus a priori is when I do not think and draw the figure from experience. Intuitus empiricus, however, is when I make the figure from experience. Mathematics has to do with intuitus a priori. Otherwise one is accustomed to distinguish philosophy and mathematics by object, by saying that philosophy deals with qualities, mathematics with quantities. This distinction, however, is incorrect, for philosophy as well as mathematics treats of magnitudes, but mathematics especially, because I can construct a concept only according to magnitude. Philosophy is a science and must make up a system. It is therefore the system of all speculative cognition from concepts. Our thinking is properly a cognition through concepts, or a discursive cognition. The senses, however, give us only cognition through intuition, or intuitive cognitions. Whoever possesses the former one could call a philosopher; whoever has the latter, a man of sound understanding. Philosophy is not practical, but is the legislation of reason. The laws according to which we proceed are",
+"busolt-s04-006":"1.) Rules of skill, i.e. political laws."
+};
+const out=document.getElementById('out');
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+LOGIK_BUSOLT.sections.forEach(s=>{
+  const bs=s.blocks.filter(b=>EN[b.id]);
+  if(!bs.length) return;
+  out.insertAdjacentHTML('beforeend',`<h2>${esc(s.title)}</h2>`);
+  bs.forEach(b=>out.insertAdjacentHTML('beforeend',
+    `<div class="row"><div class="de"><span class="pg">AA 24:${b.aa}</span>${esc(b.text)}</div>`+
+    `<div class="en"><span class="tag">MACHINE TRANSLATION</span>${esc(EN[b.id])}</div></div>`));
+});
+</script>
+</body>
+</html>
