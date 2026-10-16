@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logik Busolt — text and tools</title>
+<style>
+:root{
+  --parchment:#f4ecd8; --parchment-2:#ebe0c3; --card:#fbf6e8; --ink:#2a2118; --ink-soft:#5b4c3a;
+  --accent:#5c3d1e; --accent-2:#8a5a2b; --rule:#c9b78f; --hit:#f0d98a;
+  --j:#8a5a2b; --i:#2f4a6b; --user:#3d5a3a;
+  --body:'EB Garamond',Garamond,'Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+  --display:'Cinzel','Trajan Pro',Georgia,serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--parchment);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;display:grid;grid-template-rows:auto 1fr;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+header.top{padding:8px 20px;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 18px}
+header.top h1{font-family:var(--display);font-weight:600;font-size:1.15rem;letter-spacing:.06em;margin:0;color:var(--accent)}
+header.top .sub{margin:0;color:var(--ink-soft);font-style:italic;font-size:.88rem}
+.spread{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);min-height:0}
+@media(max-width:900px){body{overflow:auto;display:block}.spread{display:block}.pane{max-height:none!important}}
+.pane{display:flex;flex-direction:column;min-height:0;max-height:calc(100vh - 52px)}
+.pane+.pane{border-left:1px solid var(--rule);background:var(--parchment-2)}
+.tabbar{display:flex;flex-wrap:wrap;gap:4px;padding:8px 14px 0;border-bottom:1px solid var(--rule);flex:none}
+.tab{font-family:var(--display);font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;background:var(--parchment-2);border:1px solid var(--rule);border-bottom:none;border-radius:4px 4px 0 0;padding:6px 11px}
+.pane+.pane .tab{background:var(--parchment)}
+.tab[aria-selected="true"],.pane+.pane .tab[aria-selected="true"]{background:var(--accent);color:var(--parchment);border-color:var(--accent)}
+.tab small{opacity:.7;margin-left:4px;font-family:var(--body);text-transform:none;letter-spacing:0}
+.tools{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:6px 14px;font-size:.86rem;border-bottom:1px solid var(--rule);flex:none;background:var(--card)}
+.tools label{display:inline-flex;gap:4px;align-items:center;cursor:pointer}
+.tools select{background:var(--parchment);border:1px solid var(--rule);border-radius:3px;padding:1px 4px;max-width:230px}
+.scroll{overflow:auto;flex:1;min-height:0;padding:12px 22px 30px}
+.btn{background:var(--parchment-2);border:1px solid var(--rule);border-radius:3px;padding:2px 10px;font-size:.88rem}
+.btn:hover:not(:disabled){background:var(--rule)}
+.btn:disabled{opacity:.4;cursor:default}
+.hint{color:var(--ink-soft);font-style:italic;font-size:.9rem}
+
+/* text pane */
+.sec h3{font-family:var(--display);font-weight:600;font-size:1.05rem;letter-spacing:.04em;color:var(--accent);margin:22px 0 0}
+.sec:first-child h3{margin-top:4px}
+.sec .meta{margin:0 0 8px;color:var(--ink-soft);font-size:.82rem}
+.text{max-width:46em}
+.blk{margin:0 0 .7em;scroll-margin-top:60px;cursor:default;border-radius:3px}
+.blk.line{margin:0 0 .12em}
+.blk.sel{background:rgba(240,217,138,.35);box-shadow:-4px 0 0 var(--accent-2)}
+.blk.flash{animation:flash 2.4s ease-out}
+@keyframes flash{from{background:var(--hit)}to{background:transparent}}
+.pg,.ms{font-family:var(--display);font-size:.62rem;letter-spacing:.05em;border-radius:2px;padding:0 4px;margin:0 3px;vertical-align:.18em;white-space:nowrap;user-select:none}
+.pg{background:var(--accent);color:var(--parchment)}
+.ms{border:1px solid var(--accent-2);color:var(--accent-2)}
+body.hide-aa .pg,body.hide-ms .ms{display:none}
+.ed{color:var(--ink-soft);font-style:italic}
+a.term{color:inherit;text-decoration:none;border-bottom:1px dotted var(--accent-2);background:rgba(240,217,138,.4)}
+a.term:hover{background:var(--hit)}
+.ann{border-bottom:2px solid var(--j);cursor:pointer}
+.ann.i{border-bottom-color:var(--i)}
+.ann.user{border-bottom-style:dotted;border-bottom-color:var(--user)}
+body.hide-ann .ann{border-bottom-color:transparent}
+.ann.focus{background:var(--hit)}
+.cite{font-family:var(--display);font-size:.58rem;letter-spacing:.05em;color:var(--ink-soft);background:none;border:1px solid transparent;border-radius:2px;padding:0 4px;margin-left:6px;opacity:0;user-select:none}
+.blk:hover .cite,.blk.sel .cite,.cite:focus-visible{opacity:.9;border-color:var(--rule)}
+
+/* right pane */
+.selbar{padding:6px 16px;border-bottom:1px solid var(--rule);background:var(--card);font-size:.88rem;flex:none;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.selbar b{font-family:var(--display);font-size:.7rem;letter-spacing:.06em;color:var(--accent)}
+.panel-sec{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:10px 14px;margin-bottom:12px}
+.panel-sec h4{font-family:var(--display);font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;margin:0 0 6px;color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0}
+.row input[type=search],.row input[type=text],.row input[type=number]{background:var(--parchment);border:1px solid var(--rule);border-radius:3px;padding:4px 8px}
+.row input[type=search]{flex:1 1 180px}
+.row select{background:var(--parchment);border:1px solid var(--rule);border-radius:3px;padding:3px 6px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{background:var(--parchment);border:1px solid var(--rule);border-radius:13px;padding:1px 9px;font-size:.86rem}
+.chip:hover{background:var(--parchment-2)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--parchment);border-color:var(--accent)}
+.chip small{opacity:.7;margin-left:3px}
+.dimrow{margin:6px 0}
+.dimrow .lab{font-family:var(--display);font-size:.62rem;letter-spacing:.07em;text-transform:uppercase;color:var(--accent-2);display:block;margin-bottom:2px}
+.card{border-bottom:1px solid var(--rule);padding:7px 2px}
+.card.focus{background:rgba(240,217,138,.5)}
+.card .q{font-style:italic}
+.card .where{font-family:var(--display);font-size:.62rem;letter-spacing:.05em;color:var(--accent-2)}
+.card .note{font-size:.88rem;color:var(--ink-soft);margin:2px 0}
+.card .acts{margin-top:3px;display:flex;gap:6px;flex-wrap:wrap}
+.tg{display:inline-block;font-size:.76rem;border-radius:3px;padding:0 6px;margin:1px 3px 1px 0;border:1px solid var(--accent-2);background:var(--accent-2);color:var(--parchment)}
+.tg.mine{background:transparent;color:var(--accent-2);border-style:dashed}
+.tg.user{background:transparent;color:var(--user);border:1px dotted var(--user)}
+.tg.cat{border-color:var(--i);background:var(--i)}
+.tg.cat.mine{background:transparent;color:var(--i)}
+.grp{font-family:var(--display);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin:12px 0 2px;border-bottom:2px solid var(--rule)}
+.grp small{font-family:var(--body);text-transform:none;letter-spacing:0;color:var(--ink-soft)}
+.catdesc{font-size:.85rem;color:var(--ink-soft);margin:0 0 2px}
+.legend{font-size:.82rem;color:var(--ink-soft);margin:4px 0 8px}
+.hit{display:block;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--rule);padding:6px 2px}
+.hit:hover{background:var(--parchment)}
+.hit .where{font-family:var(--display);font-size:.62rem;letter-spacing:.05em;color:var(--accent-2);display:block}
+.hit mark,.par mark{background:var(--hit);color:inherit;padding:0 1px;border-radius:2px}
+.par{border:1px solid var(--rule);border-radius:4px;padding:7px 10px;margin:6px 0;background:var(--parchment)}
+.par .score{float:right;font-size:.78rem;color:var(--ink-soft)}
+.par .full{margin:4px 0;font-size:.95rem}
+.badge{font-family:var(--display);font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;padding:1px 6px;border-radius:2px;color:#fff;background:var(--ink-soft);margin-right:5px}
+.badge.curated{background:var(--accent)} .badge.computed{background:var(--constructed,#8a3b2a)}
+.addbox textarea{width:100%;background:var(--parchment);border:1px solid var(--rule);border-radius:3px;padding:4px 8px;min-height:3em}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Logik Busolt</h1>
+  <p class="sub">A student's transcript of Kant's logic lectures, ca. 1789/90 — AA 24:603–686. Title page: Königsberg, 8 Sept. 1790, G.C.W. Busolt.</p>
+  <a href="division-checker.html" style="margin-left:auto;color:var(--accent);font-size:.9rem">Division checker →</a>
+  <a href="../judgment-table/index.html" style="color:var(--accent);font-size:.9rem">Table of judgments →</a>
+</header>
+
+<div class="spread">
+  <section class="pane" aria-label="Text">
+    <div class="tabbar" id="leftTabs" role="tablist" aria-label="Parts of the lecture"></div>
+    <div class="tools" id="leftTools"></div>
+    <div class="scroll" id="textPane"></div>
+  </section>
+
+  <section class="pane" aria-label="Tools">
+    <div class="tabbar" id="rightTabs" role="tablist" aria-label="Tools"></div>
+    <div class="selbar" id="selbar"></div>
+    <div class="scroll" id="rightPane"></div>
+  </section>
+</div>
+
+<script src="logik-busolt-24.js"></script>
+<script src="logik-blomberg-24.js"></script>
+<script src="logik-wiener-24.js"></script>
+<script src="busolt-annotations.js"></script>
+<script>
+'use strict';
+/* ═══ DATA ═══════════════════════════════════════════════════════════════ */
+const SECTIONS = LOGIK_BUSOLT.sections;
+const SECTION_BY_ID = {}; SECTIONS.forEach(s => { SECTION_BY_ID[s.id] = s; });
+const BLOCK = {};            // block id -> {s, b, i}
+SECTIONS.forEach(s => s.blocks.forEach((b, i) => { BLOCK[b.id] = {s, b, i}; }));
+
+const range = ids => ids.map(n => 's' + String(n).padStart(2, '0'));
+const TABS = [
+  {label:'Opening',     secs:range([1,2,3,4,5])},
+  {label:'Knowledge',   secs:range([6,7,8,9,10,11,12,13,14,15,16,17,18])},
+  {label:'Concepts',    secs:range([19,20,21,22])},
+  {label:'Judgments',   secs:range([23,24,25,26])},
+  {label:'Inferences',  secs:range([27,28,29])},
+  {label:'Practical & close', secs:range([30,31,32,33])}
+];
+const TAB_OF_SECTION = {}; TABS.forEach((t, i) => t.secs.forEach(id => { TAB_OF_SECTION[id] = i; }));
+
+const EXT = {
+  blomberg:{name:'Blomberg Logik', data:LOGIK_BLOMBERG},
+  wiener:{name:'Wiener Logik', data:LOGIK_WIENER}
+};
+
+const TERMS = [
+  {label:'Begriff', pat:'Begri(?:ff?)\\p{L}{0,3}'},
+  {label:'Merkmal', pat:'Merkmah?l\\p{L}{0,3}'},
+  {label:'Gattung / Genus', pat:'Gattung\\p{L}{0,3}|Gen(?:us|era)'},
+  {label:'Art / Species', pat:'Arten?|Species'},
+  {label:'Sphäre', pat:'Sph(?:ä|ae)re\\p{L}{0,2}|Sphaera'},
+  {label:'Eintheilung', pat:'Ein(?:t|th)eilung\\p{L}{0,3}'},
+  {label:'Dichotomie', pat:'Dichotomi\\p{L}{0,3}'},
+  {label:'Definizion', pat:'Defini(?:zion|tion)\\p{L}{0,3}'},
+  {label:'Urtheil', pat:'Ur(?:t|th)eil\\p{L}{0,3}'},
+  {label:'Schluß', pat:'Schl(?:u|ü)(?:ß|ss)\\p{L}{0,3}|Schlüße'},
+  {label:'Verstand', pat:'Verstand\\p{L}{0,4}'},
+  {label:'Vernunft', pat:'Vernunft\\p{L}{0,4}'}
+];
+const wordRe = pat => '(?<![\\p{L}])(?:' + pat + ')(?![\\p{L}])';
+const RICH = new RegExp('(\\[[^\\]]{0,120}\\])|(' + TERMS.map(t => wordRe(t.pat)).join('|') + ')', 'giu');
+
+/* ═══ HELPERS ════════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text != null) e.textContent = text;
+  return e;
+}
+function btn(label, cls, fn){ const b = el('button', cls || 'btn', label); b.type = 'button'; if(fn) b.addEventListener('click', fn); return b; }
+const sectionTitle = s => s.title || 'Title page and contents';
+function secRange(s){
+  const a = s.blocks[0].aa, z = s.blocks.reduce((m, b) => Math.max(m, b.aaEnd || b.aa), 0);
+  return a === z ? String(a) : a + '–' + z;
+}
+function pageAt(b, idx){ let p = b.aa; (b.pages || []).forEach(e => { if(idx >= e.i) p = e.p; }); return p; }
+const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function citeOf(b, idx){
+  if(idx != null) return 'AA 24:' + pageAt(b, idx);
+  return 'AA 24:' + b.aa + (b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '');
+}
+function copyText(txt, node){
+  const done = () => { const old = node.textContent; node.textContent = 'copied'; setTimeout(() => { node.textContent = old; }, 1100); };
+  (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(done, () => { node.title = txt; });
+}
+
+/* ═══ STATE & STORE ══════════════════════════════════════════════════════ */
+const STORE_KEY = 'jb-busolt-notes-v1';
+let store = {ann:[], par:[]};
+try { const r = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); if(r && r.ann && r.par) store = r; } catch(e) {}
+function saveStore(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch(e) {} }
+let uid = store.ann.length + store.par.length + 1;
+
+const S = {
+  tab:0, right:'search', selected:null, focusAnn:null,
+  show:{aa:true, ms:true, terms:true, ann:true},
+  search:{q:'', term:null, scope:'tab', fold:true, sec:''},
+  jFilter:{}, jGroup:'none', iFilter:null,
+  pending:null, reader:null, parAll:false
+};
+
+function allJ(){ return JUDGMENT_EXAMPLES.map(e => Object.assign({src:'curated'}, e)).concat(store.ann.filter(a => a.kind === 'judgment')); }
+function allI(){ return INFERENCE_EXAMPLES.map(e => Object.assign({src:'curated'}, e)).concat(store.ann.filter(a => a.kind === 'inference')); }
+function annStart(a){ const r = BLOCK[a.b]; return r ? r.b.text.indexOf(a.q) : -1; }
+
+/* ═══ LEFT PANE ══════════════════════════════════════════════════════════ */
+function renderTabs(){
+  const bar = $('leftTabs'); bar.innerHTML = '';
+  TABS.forEach((t, i) => {
+    const first = SECTION_BY_ID[t.secs[0]], last = SECTION_BY_ID[t.secs[t.secs.length - 1]];
+    const b = el('button', 'tab', t.label); b.type = 'button';
+    b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(i === S.tab));
+    b.appendChild(el('small', null, secRange(first).split('–')[0] + '–' + secRange(last).split('–').pop()));
+    b.addEventListener('click', () => setTab(i));
+    bar.appendChild(b);
+  });
+}
+function renderTools(){
+  const box = $('leftTools'); box.innerHTML = '';
+  [['aa','AA page tags'], ['ms','Manuscript tags'], ['terms','Link logic terms'], ['ann','Show annotations']].forEach(([k, label]) => {
+    const l = el('label'); const c = el('input'); c.type = 'checkbox'; c.checked = S.show[k];
+    c.addEventListener('change', () => { S.show[k] = c.checked; applyShow(); if(k === 'terms' || k === 'ann') renderText(); });
+    l.appendChild(c); l.appendChild(document.createTextNode(label)); box.appendChild(l);
+  });
+  const sel = el('select'); sel.setAttribute('aria-label', 'Jump to section');
+  sel.appendChild(Object.assign(el('option'), {value:'', textContent:'Jump to section…'}));
+  SECTIONS.forEach(s => sel.appendChild(Object.assign(el('option'), {value:s.id, textContent:'AA ' + secRange(s).split('–')[0] + ' · ' + sectionTitle(s)})));
+  sel.addEventListener('change', () => { if(sel.value){ jumpToSection(sel.value); sel.value = ''; } });
+  box.appendChild(sel);
+  const hl = el('span', 'hint', 'Click a paragraph to select it; select words to add them as an example.');
+  box.appendChild(hl);
+}
+function applyShow(){
+  document.body.classList.toggle('hide-aa', !S.show.aa);
+  document.body.classList.toggle('hide-ms', !S.show.ms);
+  document.body.classList.toggle('hide-ann', !S.show.ann);
+}
+function setTab(i){ S.tab = i; renderTabs(); renderText(); $('textPane').scrollTop = 0; if(S.right === 'search') renderRight(); }
+
+function appendRich(parent, str){
+  let last = 0;
+  for(const m of str.matchAll(RICH)){
+    if(m.index > last) parent.appendChild(document.createTextNode(str.slice(last, m.index)));
+    if(m[1]) parent.appendChild(el('span', 'ed', m[1]));
+    else if(S.show.terms){
+      const a = el('a', 'term', m[2]); a.href = '#'; a.dataset.q = m[2];
+      a.title = 'Search for “' + m[2] + '”';
+      parent.appendChild(a);
+    } else parent.appendChild(document.createTextNode(m[2]));
+    last = m.index + m[0].length;
+  }
+  if(last < str.length) parent.appendChild(document.createTextNode(str.slice(last)));
+}
+
+/* Annotation spans for one block: non-overlapping, earliest and longest first. */
+function annSpans(b){
+  if(!S.show.ann) return [];
+  const list = [];
+  allJ().forEach(a => { if(a.b === b.id){ const st = b.text.indexOf(a.q); if(st >= 0) list.push({id:a.id, k:'j', user:a.src === 'user', start:st, end:st + a.q.length}); } });
+  allI().forEach(a => { if(a.b === b.id){ const st = b.text.indexOf(a.q); if(st >= 0) list.push({id:a.id, k:'i', user:a.src === 'user', start:st, end:st + a.q.length}); } });
+  list.sort((x, y) => x.start - y.start || (y.end - y.start) - (x.end - x.start));
+  const out = []; let edge = -1;
+  list.forEach(a => { if(a.start >= edge){ out.push(a); edge = a.end; } });
+  return out;
+}
+
+function renderBlock(s, b, st){
+  if(b.kind === 'rule') return el('hr');
+  const p = el('p', 'blk' + (s.id === 's01' ? ' line' : '')); p.id = b.id;
+  const marks = [{i:0, t:'aa', p:b.aa}];
+  (b.pages || []).forEach(e => marks.push({i:e.i, t:'aa', p:e.p}));
+  (b.ms || []).forEach(e => marks.push({i:e.i, t:'ms', p:e.p}));
+  const spans = annSpans(b);
+  const cuts = new Set([0, b.text.length]);
+  marks.forEach(m => cuts.add(m.i)); spans.forEach(a => { cuts.add(a.start); cuts.add(a.end); });
+  const pts = [...cuts].filter(x => x >= 0 && x <= b.text.length).sort((x, y) => x - y);
+  let curSpan = null, curAnn = null;
+  for(let k = 0; k < pts.length; k++){
+    const a = pts[k], z = pts[k + 1];
+    const ann = spans.find(x => x.start <= a && a < x.end) || null;
+    let host = p;
+    if(ann){
+      if(ann !== curAnn){
+        curSpan = el('span', 'ann ' + ann.k + (ann.user ? ' user' : '')); curSpan.dataset.aid = ann.id; p.appendChild(curSpan); curAnn = ann;
+      }
+      host = curSpan;
+    } else curAnn = null;
+    marks.filter(m => m.i === a).sort((x, y) => (x.t === 'aa' ? -1 : 1)).forEach(m => {
+      if(m.t === 'aa' && m.p !== st.aa){ st.aa = m.p; const t = el('span', 'pg', 'AA ' + m.p); t.title = 'Academy Edition page ' + m.p + ' begins'; host.appendChild(t); }
+      else if(m.t === 'ms' && m.p !== st.ms){ st.ms = m.p; const t = el('span', 'ms', 'ms ' + m.p); t.title = 'Manuscript page ' + m.p + ' begins'; host.appendChild(t); }
+    });
+    if(z != null && z > a) appendRich(host, b.text.slice(a, z));
+  }
+  const c = el('button', 'cite', citeOf(b)); c.type = 'button'; c.title = 'Copy this citation';
+  c.addEventListener('click', e => { e.stopPropagation(); copyText(citeOf(b), c); });
+  p.appendChild(c);
+  return p;
+}
+
+function renderText(){
+  const pane = $('textPane'); pane.innerHTML = '';
+  TABS[S.tab].secs.forEach(id => {
+    const s = SECTION_BY_ID[id];
+    const sec = el('section', 'sec'); sec.id = 'sec-' + id;
+    sec.appendChild(el('h3', null, sectionTitle(s)));
+    sec.appendChild(el('p', 'meta', 'AA 24:' + secRange(s) + ' · ' + s.provenance));
+    const body = el('div', 'text'); const st = {aa:null, ms:null};
+    s.blocks.forEach(b => body.appendChild(renderBlock(s, b, st)));
+    sec.appendChild(body); pane.appendChild(sec);
+  });
+  markSelected();
+}
+function markSelected(){
+  document.querySelectorAll('.blk.sel').forEach(n => n.classList.remove('sel'));
+  if(S.selected && document.getElementById(S.selected)) document.getElementById(S.selected).classList.add('sel');
+}
+function jumpToSection(sid){
+  const t = TAB_OF_SECTION[sid];
+  if(t !== S.tab) setTab(t);
+  const n = document.getElementById('sec-' + sid); if(n) n.scrollIntoView({block:'start'});
+}
+function jumpToBlock(bid, select){
+  const r = BLOCK[bid]; if(!r) return;
+  const t = TAB_OF_SECTION[r.s.id];
+  if(t !== S.tab) setTab(t);
+  const n = document.getElementById(bid); if(!n) return;
+  n.scrollIntoView({block:'center'}); n.classList.remove('flash'); void n.offsetWidth; n.classList.add('flash');
+  if(select !== false) selectBlock(bid);
+}
+function selectBlock(bid){
+  S.selected = bid; markSelected(); renderSelbar();
+  if(S.right === 'parallels') renderRight();
+}
+
+/* text clicks and selections */
+$('textPane').addEventListener('click', e => {
+  const term = e.target.closest('a.term');
+  if(term){ e.preventDefault(); S.search.q = term.dataset.q; S.search.term = null; setRight('search'); return; }
+  if(window.getSelection().toString().trim()) return;
+  const ann = e.target.closest('.ann');
+  const blk = e.target.closest('.blk');
+  if(blk) selectBlock(blk.id);
+  if(ann) openAnnotation(ann.dataset.aid);
+});
+$('textPane').addEventListener('mouseup', () => {
+  const sel = window.getSelection();
+  if(!sel || sel.isCollapsed) return;
+  const a = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+  const f = sel.focusNode && (sel.focusNode.nodeType === 1 ? sel.focusNode : sel.focusNode.parentElement);
+  const ba = a && a.closest('.blk'), bf = f && f.closest('.blk');
+  let q = sel.toString().replace(/\s+/g, ' ').trim();
+  if(!ba || ba !== bf){ S.pending = {err:'Select within a single paragraph.'}; }
+  else {
+    const text = BLOCK[ba.id].b.text;
+    q = q.replace(/AA \d+/g, '').replace(/\bms \d+/g, '').replace(/AA 24:\d+(–\d+)?/g, '').replace(/\s+/g, ' ').trim();
+    S.pending = text.includes(q) && q.length > 2 ? {b:ba.id, q} : {err:'That selection crosses a page tag or note; select a stretch without one.'};
+  }
+  if(S.right === 'judgments' || S.right === 'inferences') renderRight();
+});
+
+/* ═══ RIGHT PANE ═════════════════════════════════════════════════════════ */
+const RIGHT_TABS = [['search','Search'], ['judgments','Judgments'], ['inferences','Inferences'], ['parallels','Parallels']];
+function renderRightTabs(){
+  const bar = $('rightTabs'); bar.innerHTML = '';
+  RIGHT_TABS.forEach(([id, label]) => {
+    const b = el('button', 'tab', label); b.type = 'button';
+    b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(id === S.right));
+    b.addEventListener('click', () => setRight(id)); bar.appendChild(b);
+  });
+}
+function setRight(id){ S.right = id; S.reader = null; renderRightTabs(); renderRight(); $('rightPane').scrollTop = 0; }
+function renderSelbar(){
+  const box = $('selbar'); box.innerHTML = '';
+  if(!S.selected){ box.appendChild(el('span', 'hint', 'No paragraph selected. Click one in the text.')); return; }
+  const r = BLOCK[S.selected];
+  box.appendChild(el('b', null, citeOf(r.b)));
+  box.appendChild(el('span', null, sectionTitle(r.s)));
+  const copy = btn('copy cite', 'btn', () => copyText(citeOf(r.b), copy)); box.appendChild(copy);
+}
+function renderRight(){
+  const pane = $('rightPane'); pane.innerHTML = '';
+  if(S.reader){ renderReader(pane); return; }
+  ({search:renderSearch, judgments:renderJudgments, inferences:renderInferences, parallels:renderParallels})[S.right](pane);
+}
+
+/* ---- search ------------------------------------------------------------ */
+const FOLD = {a:'aä', o:'oö', u:'uü', s:'sß'};
+function searchRegex(){
+  if(S.search.term != null) return new RegExp(wordRe(TERMS[S.search.term].pat), 'giu');
+  const t = S.search.q.trim().toLowerCase(); if(!t) return null;
+  return new RegExp([...t].map(ch => {
+    const base = ch === 'ä' ? 'a' : ch === 'ö' ? 'o' : ch === 'ü' ? 'u' : ch === 'ß' ? 's' : ch;
+    return S.search.fold && FOLD[base] ? '[' + FOLD[base] + ']' : escapeRe(ch);
+  }).join(''), 'giu');
+}
+const termCountCache = {};
+function termCount(i){
+  if(termCountCache[i] == null){
+    const re = new RegExp(wordRe(TERMS[i].pat), 'giu'); let n = 0;
+    SECTIONS.forEach(s => s.blocks.forEach(b => { if(b.kind === 'text') for(const m of b.text.matchAll(re)) n++; }));
+    termCountCache[i] = n;
+  }
+  return termCountCache[i];
+}
+function renderSearch(pane){
+  const form = el('div', 'panel-sec'); form.appendChild(el('h4', null, 'Search the transcript'));
+  const r1 = el('div', 'row');
+  const q = el('input'); q.type = 'search'; q.value = S.search.q; q.placeholder = 'e.g. Gattung, Merkmal, Eintheilung…'; q.setAttribute('aria-label', 'Search term');
+  q.addEventListener('input', () => { S.search.q = q.value; S.search.term = null; renderSearchResults(); syncChips(); });
+  r1.appendChild(q);
+  const scope = el('select'); scope.setAttribute('aria-label', 'Scope');
+  [['tab', 'This part (' + TABS[S.tab].label + ')'], ['all', 'Whole lecture']].forEach(([v, l]) => scope.appendChild(Object.assign(el('option'), {value:v, textContent:l, selected:S.search.scope === v})));
+  scope.addEventListener('change', () => { S.search.scope = scope.value; S.search.sec = ''; renderSearchResults(); });
+  r1.appendChild(scope);
+  form.appendChild(r1);
+  const r2 = el('div', 'row');
+  const lf = el('label'); const cf = el('input'); cf.type = 'checkbox'; cf.checked = S.search.fold;
+  cf.addEventListener('change', () => { S.search.fold = cf.checked; renderSearchResults(); });
+  lf.appendChild(cf); lf.appendChild(document.createTextNode(' treat ä ö ü ß as a o u s')); r2.appendChild(lf);
+  const pg = el('input'); pg.type = 'number'; pg.min = '603'; pg.max = '686'; pg.placeholder = 'AA page'; pg.style.width = '7em'; pg.setAttribute('aria-label', 'Go to AA page');
+  const go = btn('Go to page', 'btn', () => {
+    const n = parseInt(pg.value, 10); const hitB = findPage(n);
+    if(hitB) jumpToBlock(hitB.id); else msg.textContent = 'No block starts or turns on AA 24:' + n + '.';
+  });
+  const msg = el('span', 'hint');
+  pg.addEventListener('keydown', e => { if(e.key === 'Enter') go.click(); });
+  r2.appendChild(pg); r2.appendChild(go); r2.appendChild(msg);
+  form.appendChild(r2);
+  form.appendChild(el('p', 'hint', 'This transcript keeps its own spelling (Eintheilung, Urtheil, Definizion, Begrif), so a short stem like “theil” finds more.'));
+  pane.appendChild(form);
+
+  const vocab = el('div', 'panel-sec'); vocab.appendChild(el('h4', null, 'Logic vocabulary (counts over the whole lecture)'));
+  const chips = el('div', 'chips'); chips.id = 'termChips';
+  TERMS.forEach((t, i) => {
+    const c = el('button', 'chip', t.label); c.type = 'button'; c.appendChild(el('small', null, String(termCount(i))));
+    c.addEventListener('click', () => { S.search.term = S.search.term === i ? null : i; if(S.search.term != null) S.search.q = ''; q.value = S.search.q; syncChips(); renderSearchResults(); });
+    chips.appendChild(c);
+  });
+  vocab.appendChild(chips); pane.appendChild(vocab);
+
+  const res = el('div', 'panel-sec'); res.id = 'searchResults'; pane.appendChild(res);
+  syncChips(); renderSearchResults();
+}
+function syncChips(){ const c = $('termChips'); if(c) [...c.children].forEach((b, i) => b.setAttribute('aria-pressed', String(i === S.search.term))); }
+function findPage(n){
+  for(const s of SECTIONS) for(const b of s.blocks) if(b.aa === n || (b.pages || []).some(e => e.p === n)) return b;
+  return null;
+}
+function renderSearchResults(){
+  const box = $('searchResults'); if(!box) return; box.innerHTML = '';
+  const re = searchRegex();
+  if(!re){ box.appendChild(el('p', 'hint', 'Type a word, or choose a term above.')); return; }
+  const secs = S.search.scope === 'tab' ? TABS[S.tab].secs.map(id => SECTION_BY_ID[id]) : SECTIONS;
+  const hits = [];
+  secs.forEach(s => s.blocks.forEach(b => { if(b.kind === 'text') for(const m of b.text.matchAll(re)) if(m[0].length) hits.push({s, b, idx:m.index, len:m[0].length}); }));
+  const counts = {}; hits.forEach(h => { counts[h.s.id] = (counts[h.s.id] || 0) + 1; });
+  const shown = S.search.sec ? hits.filter(h => h.s.id === S.search.sec) : hits;
+  const label = S.search.term != null ? TERMS[S.search.term].label : '“' + S.search.q.trim() + '”';
+  box.appendChild(el('h4', null, shown.length + (shown.length === 1 ? ' hit' : ' hits') + ' for ' + label + (shown.length > 200 ? ' (first 200)' : '')));
+  const ids = Object.keys(counts);
+  if(ids.length > 1 || S.search.sec){
+    const row = el('div', 'chips'); row.style.marginBottom = '6px';
+    ids.forEach(id => {
+      const c = el('button', 'chip', sectionTitle(SECTION_BY_ID[id])); c.type = 'button'; c.appendChild(el('small', null, String(counts[id])));
+      c.setAttribute('aria-pressed', String(S.search.sec === id));
+      c.addEventListener('click', () => { S.search.sec = S.search.sec === id ? '' : id; renderSearchResults(); });
+      row.appendChild(c);
+    });
+    box.appendChild(row);
+  }
+  shown.slice(0, 200).forEach(h => {
+    const b = el('button', 'hit'); b.type = 'button';
+    b.appendChild(el('span', 'where', citeOf(h.b, h.idx) + ' · ' + sectionTitle(h.s)));
+    const t = h.b.text, from = Math.max(0, h.idx - 70), to = Math.min(t.length, h.idx + h.len + 70);
+    b.appendChild(document.createTextNode((from > 0 ? '… ' : '') + t.slice(from, h.idx)));
+    b.appendChild(el('mark', null, t.slice(h.idx, h.idx + h.len)));
+    b.appendChild(document.createTextNode(t.slice(h.idx + h.len, to) + (to < t.length ? ' …' : '')));
+    b.addEventListener('click', () => jumpToBlock(h.b.id));
+    box.appendChild(b);
+  });
+  if(!hits.length) box.appendChild(el('p', 'hint', 'No hits' + (S.search.scope === 'tab' ? ' in this part; try “Whole lecture”.' : '.')));
+}
+
+/* ---- shared: cards, tags, add-your-own -------------------------------- */
+function legendNode(){
+  const p = el('p', 'legend');
+  p.appendChild(el('span', 'tg', 'filled')); p.appendChild(document.createTextNode(' Busolt names this for that very example. '));
+  p.appendChild(el('span', 'tg mine', 'dashed')); p.appendChild(document.createTextNode(' my classification. '));
+  p.appendChild(el('span', 'tg user', 'dotted')); p.appendChild(document.createTextNode(' yours.'));
+  return p;
+}
+function annCard(a, tagsNode){
+  const r = BLOCK[a.b]; const idx = r ? r.b.text.indexOf(a.q) : -1;
+  const c = el('div', 'card' + (S.focusAnn === a.id ? ' focus' : '')); c.id = 'card-' + a.id;
+  c.appendChild(el('div', 'where', (r ? citeOf(r.b, Math.max(0, idx)) + ' · ' + sectionTitle(r.s) : a.b) + (a.src === 'user' ? ' · yours' : '')));
+  c.appendChild(el('div', 'q', '“' + a.q + '”'));
+  c.appendChild(tagsNode);
+  if(a.note) c.appendChild(el('div', 'note', a.note));
+  const acts = el('div', 'acts');
+  acts.appendChild(btn('Show in text', 'btn', () => jumpToBlock(a.b)));
+  if(a.src === 'user') acts.appendChild(btn('Delete', 'btn', () => { store.ann = store.ann.filter(x => x.id !== a.id); saveStore(); renderRight(); if(S.show.ann) renderText(); }));
+  c.appendChild(acts);
+  return c;
+}
+function openAnnotation(aid){
+  S.focusAnn = aid;
+  const isJ = allJ().some(a => a.id === aid);
+  S.right = isJ ? 'judgments' : 'inferences'; S.reader = null;
+  S.jFilter = {}; S.jGroup = 'none'; S.iFilter = null;
+  renderRightTabs(); renderRight();
+  const c = $('card-' + aid); if(c) c.scrollIntoView({block:'center'});
+}
+function pendingBox(kind){
+  const box = el('div', 'panel-sec addbox'); box.appendChild(el('h4', null, 'Add your own example'));
+  if(!S.pending){ box.appendChild(el('p', 'hint', 'Select a stretch of words inside one paragraph in the text, then come back here.')); return box; }
+  if(S.pending.err){ box.appendChild(el('p', 'hint', S.pending.err)); return box; }
+  const r = BLOCK[S.pending.b];
+  box.appendChild(el('p', 'q', '“' + S.pending.q + '”  (' + citeOf(r.b, r.b.text.indexOf(S.pending.q)) + ')'));
+  const sels = {};
+  if(kind === 'judgment'){
+    const row = el('div', 'row');
+    JUDGMENT_DIMS.forEach(d => {
+      const s = el('select'); s.setAttribute('aria-label', d.label);
+      s.appendChild(Object.assign(el('option'), {value:'', textContent:d.label + ' —'}));
+      d.vals.forEach(v => s.appendChild(Object.assign(el('option'), {value:v, textContent:v})));
+      sels[d.id] = s; row.appendChild(s);
+    });
+    box.appendChild(row);
+  } else {
+    const s = el('select'); s.setAttribute('aria-label', 'Inference type');
+    s.appendChild(Object.assign(el('option'), {value:'', textContent:'Inference type —'}));
+    INFERENCE_GROUPS.forEach(g => { const og = el('optgroup'); og.label = g.label; g.cats.forEach(c => og.appendChild(Object.assign(el('option'), {value:c.id, textContent:c.label}))); s.appendChild(og); });
+    sels.cat = s; box.appendChild(s);
+  }
+  const note = el('textarea'); note.placeholder = 'Note (optional)'; box.appendChild(note);
+  const err = el('span', 'hint');
+  box.appendChild(btn('Add', 'btn', () => {
+    const e = {id:'u' + (uid++), kind, b:S.pending.b, q:S.pending.q, note:note.value.trim(), src:'user'};
+    if(kind === 'judgment'){ e.t = {}; JUDGMENT_DIMS.forEach(d => { if(sels[d.id].value) e.t[d.id] = sels[d.id].value; }); if(!Object.keys(e.t).length){ err.textContent = ' Pick at least one category.'; return; } }
+    else { if(!sels.cat.value){ err.textContent = ' Pick a type.'; return; } e.cat = sels.cat.value; }
+    store.ann.push(e); saveStore(); S.pending = null; S.focusAnn = e.id; renderRight(); renderText();
+  }));
+  box.appendChild(err);
+  return box;
+}
+function exportImportBox(){
+  const box = el('div', 'panel-sec'); box.appendChild(el('h4', null, 'Your notes'));
+  box.appendChild(el('p', 'hint', 'Your added examples and saved parallels (' + store.ann.length + ' + ' + store.par.length + ') live in this browser only. Export them to keep or share.'));
+  const row = el('div', 'row');
+  row.appendChild(btn('Export JSON', 'btn', () => {
+    const a = el('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(store, null, 1)], {type:'application/json'})); a.download = 'busolt-notes.json'; a.click();
+  }));
+  const fi = el('input'); fi.type = 'file'; fi.accept = '.json,application/json'; fi.style.display = 'none';
+  fi.addEventListener('change', () => {
+    const f = fi.files[0]; if(!f) return; const rd = new FileReader();
+    rd.onload = () => { try { const d = JSON.parse(rd.result);
+      (d.ann || []).forEach(x => { if(x.id && !store.ann.some(y => y.id === x.id)) store.ann.push(x); });
+      (d.par || []).forEach(x => { if(x.id && !store.par.some(y => y.id === x.id)) store.par.push(x); });
+      saveStore(); renderRight(); renderText(); } catch(e) { alert('Not a notes file.'); } };
+    rd.readAsText(f);
+  });
+  row.appendChild(btn('Import JSON', 'btn', () => fi.click())); row.appendChild(fi);
+  box.appendChild(row); return box;
+}
+
+/* ---- judgments ---------------------------------------------------------- */
+function tagsForJudgment(a){
+  const w = el('div');
+  JUDGMENT_DIMS.forEach(d => {
+    const v = a.t && a.t[d.id]; if(!v) return;
+    const attested = a.src === 'curated' && (a.x || []).includes(d.id);
+    const t = el('span', 'tg' + (a.src === 'user' ? ' user' : attested ? '' : ' mine'), v);
+    t.title = d.label + (a.src === 'user' ? ' (yours)' : attested ? ' (named by Busolt)' : ' (my classification)'); w.appendChild(t);
+  });
+  return w;
+}
+function renderJudgments(pane){
+  const intro = el('div', 'panel-sec'); intro.appendChild(el('h4', null, 'Examples of judgments, by Busolt’s own four titles'));
+  intro.appendChild(el('p', 'hint', 'Busolt (s24-001..006) sorts every judgment under Quantität, Qualität, Relation and Modalität, three modes each, and elsewhere draws further distinctions (s25–s26). Filter by any combination, or group the list by one title.'));
+  intro.appendChild(legendNode());
+  const list = allJ();
+  JUDGMENT_DIMS.forEach(d => {
+    const row = el('div', 'dimrow'); row.appendChild(el('span', 'lab', d.label));
+    const chips = el('div', 'chips');
+    d.vals.forEach(v => {
+      const n = list.filter(a => a.t && a.t[d.id] === v).length;
+      const c = el('button', 'chip', v); c.type = 'button'; c.appendChild(el('small', null, String(n)));
+      c.setAttribute('aria-pressed', String(S.jFilter[d.id] === v));
+      c.addEventListener('click', () => { if(S.jFilter[d.id] === v) delete S.jFilter[d.id]; else S.jFilter[d.id] = v; renderRight(); });
+      chips.appendChild(c);
+    });
+    row.appendChild(chips); intro.appendChild(row);
+  });
+  const g = el('div', 'row'); g.appendChild(document.createTextNode('Group by'));
+  const gs = el('select'); gs.setAttribute('aria-label', 'Group by');
+  [['none', 'nothing (text order)']].concat(JUDGMENT_DIMS.map(d => [d.id, d.label])).forEach(([v, l]) => gs.appendChild(Object.assign(el('option'), {value:v, textContent:l, selected:S.jGroup === v})));
+  gs.addEventListener('change', () => { S.jGroup = gs.value; renderRight(); });
+  g.appendChild(gs);
+  if(Object.keys(S.jFilter).length) g.appendChild(btn('Clear filters', 'btn', () => { S.jFilter = {}; renderRight(); }));
+  intro.appendChild(g);
+  pane.appendChild(intro);
+
+  let items = list.filter(a => Object.entries(S.jFilter).every(([k, v]) => a.t && a.t[k] === v));
+  items.sort((x, y) => (BLOCK[x.b] ? ORDER[x.b] : 1e9) - (BLOCK[y.b] ? ORDER[y.b] : 1e9) || annStart(x) - annStart(y));
+  const res = el('div', 'panel-sec'); res.appendChild(el('h4', null, items.length + ' of ' + list.length + ' examples'));
+  if(S.jGroup === 'none') items.forEach(a => res.appendChild(annCard(a, tagsForJudgment(a))));
+  else {
+    const d = JUDGMENT_DIMS.find(x => x.id === S.jGroup);
+    d.vals.concat(['']).forEach(v => {
+      const grp = items.filter(a => ((a.t && a.t[d.id]) || '') === v); if(!grp.length) return;
+      const h = el('div', 'grp', v || '(not classified under ' + d.label + ')'); h.appendChild(el('small', null, ' — ' + grp.length)); res.appendChild(h);
+      grp.forEach(a => res.appendChild(annCard(a, tagsForJudgment(a))));
+    });
+  }
+  if(!items.length) res.appendChild(el('p', 'hint', 'No example matches.'));
+  pane.appendChild(res);
+  pane.appendChild(pendingBox('judgment'));
+  pane.appendChild(exportImportBox());
+}
+const ORDER = {}; (function(){ let n = 0; SECTIONS.forEach(s => s.blocks.forEach(b => { ORDER[b.id] = n++; })); })();
+
+/* ---- inferences --------------------------------------------------------- */
+function renderInferences(pane){
+  const intro = el('div', 'panel-sec'); intro.appendChild(el('h4', null, 'Syllogism and inference types'));
+  intro.appendChild(el('p', 'hint', 'The types are Busolt’s own (s26-035..055, s27–s29): immediate inferences, the three kinds of Vernunftschluß, the figures, and the faults. Each example is placed under one type. Click a type to filter.'));
+  intro.appendChild(legendNode());
+  const list = allI();
+  INFERENCE_GROUPS.forEach(g => {
+    const row = el('div', 'dimrow'); row.appendChild(el('span', 'lab', g.label));
+    const chips = el('div', 'chips');
+    g.cats.forEach(c => {
+      const n = list.filter(a => a.cat === c.id).length;
+      const b = el('button', 'chip', c.label); b.type = 'button'; b.appendChild(el('small', null, String(n)));
+      b.title = c.desc; b.setAttribute('aria-pressed', String(S.iFilter === c.id));
+      b.addEventListener('click', () => { S.iFilter = S.iFilter === c.id ? null : c.id; renderRight(); });
+      chips.appendChild(b);
+    });
+    row.appendChild(chips); intro.appendChild(row);
+  });
+  if(S.iFilter) intro.appendChild(btn('Show all types', 'btn', () => { S.iFilter = null; renderRight(); }));
+  pane.appendChild(intro);
+
+  const res = el('div', 'panel-sec');
+  INFERENCE_GROUPS.forEach(g => g.cats.forEach(c => {
+    if(S.iFilter && S.iFilter !== c.id) return;
+    const grp = list.filter(a => a.cat === c.id).sort((x, y) => ORDER[x.b] - ORDER[y.b]);
+    const h = el('div', 'grp', c.label); h.appendChild(el('small', null, ' — ' + g.label + ' · ' + grp.length)); res.appendChild(h);
+    res.appendChild(el('p', 'catdesc', c.desc));
+    grp.forEach(a => {
+      const w = el('div');
+      const t = el('span', 'tg cat' + (a.src === 'user' ? ' user' : a.x ? '' : ' mine'), a.src === 'user' ? 'your type' : a.x ? 'type named by Busolt' : 'type: my classification');
+      w.appendChild(t); res.appendChild(annCard(a, w));
+    });
+    if(!grp.length) res.appendChild(el('p', 'hint', 'No example sentence in the text.'));
+  }));
+  pane.appendChild(res);
+  pane.appendChild(pendingBox('inference'));
+  pane.appendChild(exportImportBox());
+}
+
+/* ---- parallels ---------------------------------------------------------- */
+let PIDX = null;
+function stems(str){
+  return (str.toLowerCase().replace(/ß/g, 'ss').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/th/g, 't').replace(/y/g, 'i').match(/[a-z]{4,}/g) || []).map(w => w.slice(0, 6));
+}
+function buildIndex(){
+  /* pass 1: document frequencies; stems in more than 3% of blocks are treated as function words */
+  const docs = [], df = new Map();
+  Object.keys(EXT).forEach(w => EXT[w].data.sections.forEach(s => s.blocks.forEach(b => {
+    if(b.kind !== 'text' || b.text.length < 60) return;
+    const tf = new Map(); stems(b.text).forEach(t => tf.set(t, (tf.get(t) || 0) + 1));
+    docs.push({w, s, b, tf}); tf.forEach((_, t) => df.set(t, (df.get(t) || 0) + 1));
+  })));
+  const N = docs.length, idf = new Map(); df.forEach((n, t) => { if(n <= 0.03 * N) idf.set(t, Math.log((N + 1) / (n + 1)) + 1); });
+  docs.forEach(d => d.tf.forEach((_, t) => { if(!idf.has(t)) d.tf.delete(t); }));
+  const inv = new Map();
+  docs.forEach((d, i) => {
+    let norm = 0;
+    d.tf.forEach((c, t) => { const x = (1 + Math.log(c)) * idf.get(t); norm += x * x; });
+    d.norm = Math.sqrt(norm) || 1;
+    d.tf.forEach((c, t) => { if(!inv.has(t)) inv.set(t, []); inv.get(t).push([i, (1 + Math.log(c)) * idf.get(t)]); });
+  });
+  return {docs, idf, inv};
+}
+function queryText(bid){
+  const r = BLOCK[bid]; let txt = r.b.text, i = r.i;
+  while(txt.length < 300 && ++i < r.s.blocks.length && i <= r.i + 3) txt += ' ' + r.s.blocks[i].text;
+  return txt;
+}
+function nearest(bid, perWork){
+  if(!PIDX) PIDX = buildIndex();
+  const qtf = new Map(); stems(queryText(bid)).forEach(t => qtf.set(t, (qtf.get(t) || 0) + 1));
+  let qn = 0; const qw = new Map();
+  qtf.forEach((c, t) => { if(PIDX.idf.has(t)){ const x = (1 + Math.log(c)) * PIDX.idf.get(t); qw.set(t, x); qn += x * x; } });
+  qn = Math.sqrt(qn) || 1;
+  const score = new Map();
+  qw.forEach((x, t) => PIDX.inv.get(t).forEach(([i, w]) => score.set(i, (score.get(i) || 0) + x * w)));
+  const out = {blomberg:[], wiener:[]};
+  [...score.entries()].sort((a, b) => b[1] / PIDX.docs[b[0]].norm - a[1] / PIDX.docs[a[0]].norm).forEach(([i, sc]) => {
+    const d = PIDX.docs[i]; if(out[d.w].length >= perWork) return;
+    const shared = [...qw.keys()].filter(t => d.tf.has(t)).sort((a, b) => PIDX.idf.get(b) - PIDX.idf.get(a));
+    if(shared.length < 3 || sc / (qn * d.norm) < 0.12) return;
+    out[d.w].push({d, score:sc / (qn * d.norm), shared:shared.slice(0, 6)});
+  });
+  return out;
+}
+function extFind(w, title){ return EXT[w].data.sections.find(s => s.title === title); }
+
+function renderParallels(pane){
+  if(!S.selected){ const p = el('div', 'panel-sec'); p.appendChild(el('p', 'hint', 'Click a paragraph in the text to see passages that run parallel to it in the Blomberg and Wiener logic transcripts.')); pane.appendChild(p); pane.appendChild(savedBox()); return; }
+  const r = BLOCK[S.selected];
+  const q = el('div', 'panel-sec'); q.appendChild(el('h4', null, 'Passage')); q.appendChild(el('p', 'q', r.b.text.length > 260 ? r.b.text.slice(0, 260) + ' …' : r.b.text)); pane.appendChild(q);
+
+  const cur = el('div', 'panel-sec');
+  const h = el('h4', null, ''); h.appendChild(el('span', 'badge curated', 'curated')); h.appendChild(document.createTextNode('Same topic in the other transcripts')); cur.appendChild(h);
+  const maps = PARALLEL_SECTIONS[r.s.id] || [];
+  if(!maps.length) cur.appendChild(el('p', 'hint', 'I have not matched this section to a section of the other transcripts.'));
+  maps.forEach(([w, title]) => {
+    const sec = extFind(w, title); const row = el('div', 'card');
+    row.appendChild(el('div', 'where', EXT[w].name + (sec ? ' · AA 24:' + secRange(sec) : '')));
+    row.appendChild(el('div', null, title));
+    const acts = el('div', 'acts'); acts.appendChild(btn('Read section', 'btn', () => { S.reader = {w, sec, from:0, focus:null}; renderRight(); }));
+    row.appendChild(acts); cur.appendChild(row);
+  });
+  cur.appendChild(el('p', 'hint', 'Section matches are by topic and are my editorial judgment, not the Academy Edition’s.'));
+  pane.appendChild(cur);
+
+  const comp = el('div', 'panel-sec');
+  const h2 = el('h4', null, ''); h2.appendChild(el('span', 'badge computed', 'computed')); h2.appendChild(document.createTextNode('Closest passages by shared vocabulary')); comp.appendChild(h2);
+  comp.appendChild(el('p', 'hint', 'Inferred, not attested: a similarity score over word stems (TF-IDF), using this passage and the few lines after it. A finding aid: check any match against the text before treating it as a parallel.'));
+  const near = nearest(S.selected, 4);
+  Object.keys(near).forEach(w => {
+    comp.appendChild(el('div', 'grp', EXT[w].name));
+    if(!near[w].length) comp.appendChild(el('p', 'hint', 'No passage shares enough vocabulary.'));
+    near[w].forEach(m => comp.appendChild(parCard(m, r)));
+  });
+  pane.appendChild(comp);
+  pane.appendChild(savedBox());
+}
+function parCard(m, r){
+  const d = m.d; const c = el('div', 'par');
+  c.appendChild(el('span', 'score', Math.round(m.score * 100) + '% match'));
+  c.appendChild(el('div', 'where', 'AA 24:' + d.b.aa + ' · ' + d.s.title.slice(0, 60)));
+  const full = el('div', 'full'); let open = false;
+  const short = d.b.text.length > 320 ? d.b.text.slice(0, 320) + ' …' : d.b.text;
+  const paint = () => { full.innerHTML = ''; const t = open ? d.b.text : short; appendShared(full, t, m.shared); };
+  paint(); c.appendChild(full);
+  c.appendChild(el('div', 'hint', 'shared stems: ' + m.shared.join(', ')));
+  const acts = el('div', 'acts');
+  if(d.b.text.length > 320){ const t = btn('Show all', 'btn', () => { open = !open; t.textContent = open ? 'Show less' : 'Show all'; paint(); }); acts.appendChild(t); }
+  acts.appendChild(btn('Read in context', 'btn', () => { S.reader = {w:d.w, sec:d.s, from:Math.max(0, d.s.blocks.indexOf(d.b) - 3), focus:d.b.id}; renderRight(); }));
+  const saved = store.par.some(p => p.b === r.b.id && p.ext === d.b.id && p.w === d.w);
+  const sv = btn(saved ? 'Saved' : 'Save as parallel', 'btn', () => {
+    if(saved) return; store.par.push({id:'p' + (uid++), b:r.b.id, w:d.w, ext:d.b.id, note:''}); saveStore(); renderRight();
+  });
+  sv.disabled = saved; acts.appendChild(sv);
+  c.appendChild(acts); return c;
+}
+function appendShared(parent, text, shared){
+  const set = new Set(shared); let last = 0;
+  for(const m of text.matchAll(/[A-Za-zÄÖÜäöüß]+/g)){
+    const st = stems(m[0])[0];
+    if(st && set.has(st)){ if(m.index > last) parent.appendChild(document.createTextNode(text.slice(last, m.index))); parent.appendChild(el('mark', null, m[0])); last = m.index + m[0].length; }
+  }
+  if(last < text.length) parent.appendChild(document.createTextNode(text.slice(last)));
+}
+function savedBox(){
+  const box = el('div', 'panel-sec'); box.appendChild(el('h4', null, 'Your saved parallels'));
+  const l = el('label'); const c = el('input'); c.type = 'checkbox'; c.checked = S.parAll; c.addEventListener('change', () => { S.parAll = c.checked; renderRight(); });
+  l.appendChild(c); l.appendChild(document.createTextNode(' show all, not just this passage')); box.appendChild(l);
+  const list = store.par.filter(p => S.parAll || p.b === S.selected);
+  if(!list.length) box.appendChild(el('p', 'hint', 'None yet. Use “Save as parallel” on a computed match.'));
+  list.forEach(p => {
+    const sr = EXT[p.w].data.sections.find(s => s.blocks.some(b => b.id === p.ext)); const eb = sr && sr.blocks.find(b => b.id === p.ext);
+    const row = el('div', 'card');
+    row.appendChild(el('div', 'where', BLOCK[p.b] ? citeOf(BLOCK[p.b].b) + ' ↔ ' + EXT[p.w].name + (eb ? ' AA 24:' + eb.aa : '') : p.b));
+    row.appendChild(el('div', 'q', eb ? (eb.text.length > 160 ? eb.text.slice(0, 160) + ' …' : eb.text) : '(passage not found)'));
+    const acts = el('div', 'acts');
+    acts.appendChild(btn('Busolt passage', 'btn', () => jumpToBlock(p.b)));
+    if(sr) acts.appendChild(btn('Read in context', 'btn', () => { S.reader = {w:p.w, sec:sr, from:Math.max(0, sr.blocks.indexOf(eb) - 3), focus:eb.id}; renderRight(); }));
+    acts.appendChild(btn('Delete', 'btn', () => { store.par = store.par.filter(x => x.id !== p.id); saveStore(); renderRight(); }));
+    row.appendChild(acts); box.appendChild(row);
+  });
+  box.appendChild(exportImportBox().lastChild);
+  return box;
+}
+
+/* reader for the other transcripts */
+function renderReader(pane){
+  const R = S.reader, sec = R.sec;
+  const top = el('div', 'panel-sec');
+  const row = el('div', 'row');
+  row.appendChild(btn('← Back', 'btn', () => { S.reader = null; renderRight(); }));
+  row.appendChild(el('b', null, EXT[R.w].name + ' · ' + (sec.title || '(untitled)').slice(0, 70)));
+  top.appendChild(row);
+  if(!sec){ top.appendChild(el('p', 'hint', 'That section was not found.')); pane.appendChild(top); return; }
+  top.appendChild(el('p', 'hint', 'AA 24:' + secRange(sec) + ' · blocks ' + (R.from + 1) + '–' + Math.min(sec.blocks.length, R.from + 30) + ' of ' + sec.blocks.length));
+  const nav = el('div', 'row');
+  nav.appendChild(Object.assign(btn('Earlier', 'btn', () => { R.from = Math.max(0, R.from - 30); R.focus = null; renderRight(); }), {disabled:R.from === 0}));
+  nav.appendChild(Object.assign(btn('Later', 'btn', () => { R.from += 30; R.focus = null; renderRight(); }), {disabled:R.from + 30 >= sec.blocks.length}));
+  top.appendChild(nav); pane.appendChild(top);
+  const body = el('div', 'panel-sec'); let last = null;
+  sec.blocks.slice(R.from, R.from + 30).forEach(b => {
+    if(b.kind === 'rule') return;
+    const p = el('p', 'blk' + (R.focus === b.id ? ' sel' : '')); p.id = 'ext-' + b.id;
+    if(b.aa !== last){ p.appendChild(el('span', 'pg', 'AA ' + b.aa)); last = b.aa; }
+    p.appendChild(document.createTextNode(b.text)); body.appendChild(p);
+  });
+  pane.appendChild(body);
+  const f = document.getElementById('ext-' + R.focus); if(f) setTimeout(() => f.scrollIntoView({block:'center'}), 0);
+}
+
+/* ═══ INIT ═══════════════════════════════════════════════════════════════ */
+(function init(){
+  const bad = [];
+  Object.values(PARALLEL_SECTIONS).forEach(l => l.forEach(([w, t]) => { if(!extFind(w, t)) bad.push(w + ': ' + t); }));
+  if(bad.length) console.warn('Unmatched parallel section titles:', bad);
+  applyShow(); renderTabs(); renderTools(); renderRightTabs();
+  const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  if(h.get('r') && RIGHT_TABS.some(t => t[0] === h.get('r'))) S.right = h.get('r');
+  if(h.get('q')) S.search.q = h.get('q');
+  const b = h.get('b');
+  if(b && BLOCK[b]){ S.tab = TAB_OF_SECTION[BLOCK[b].s.id]; renderTabs(); S.selected = b; }
+  renderText(); renderSelbar(); renderRightTabs(); renderRight();
+  if(b && BLOCK[b]) setTimeout(() => jumpToBlock(b), 0);
+})();
+</script>
+</body>
+</html>

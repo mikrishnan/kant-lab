@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Division checker — Busolt, Logische Eintheilung</title>
+<style>
+:root{
+  --parchment:#f4ecd8; --parchment-2:#ebe0c3; --card:#fbf6e8; --ink:#2a2118; --ink-soft:#5b4c3a;
+  --accent:#5c3d1e; --accent-2:#8a5a2b; --rule:#c9b78f; --ok:#3d5a3a; --bad:#8a3b2a; --skip:#6b6b6b; --hit:#f0d98a;
+  --body:'EB Garamond',Garamond,'Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+  --display:'Cinzel','Trajan Pro',Georgia,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--parchment);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+header.top{padding:10px 24px;border-bottom:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:4px 18px;align-items:baseline}
+header.top h1{font-family:var(--display);font-weight:600;font-size:1.15rem;letter-spacing:.06em;margin:0;color:var(--accent)}
+header.top p{margin:0;color:var(--ink-soft);font-style:italic;font-size:.9rem}
+header.top a{color:var(--accent);margin-left:auto;font-size:.9rem}
+.wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;max-width:1500px;margin:0 auto;padding:16px 24px 40px}
+@media(max-width:950px){.wrap{display:block}}
+.panel{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:12px 16px;margin-bottom:14px}
+.panel h2{font-family:var(--display);font-size:.78rem;letter-spacing:.09em;text-transform:uppercase;margin:0 0 8px;color:var(--accent)}
+.hint{color:var(--ink-soft);font-style:italic;font-size:.9rem}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0}
+.btn{background:var(--parchment-2);border:1px solid var(--rule);border-radius:3px;padding:2px 10px;font-size:.88rem}
+.btn:hover{background:var(--rule)}
+select,input[type=text],textarea{background:var(--parchment);border:1px solid var(--rule);border-radius:3px;padding:3px 7px}
+textarea{width:100%;min-height:3.6em;resize:vertical;font-size:.95rem}
+label.lab{display:block;font-family:var(--display);font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;color:var(--accent-2);margin:6px 0 1px}
+
+/* editor */
+.node{border:1px solid var(--rule);border-radius:4px;background:var(--parchment);padding:8px 12px;margin:8px 0}
+.kids{margin-left:22px;border-left:1px dotted var(--rule);padding-left:12px}
+.node .head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.node .head input.name{flex:1 1 160px;font-weight:600}
+.badge{font-family:var(--display);font-size:.6rem;letter-spacing:.07em;text-transform:uppercase;padding:1px 7px;border-radius:2px;color:#fff;white-space:nowrap}
+.badge.ok{background:var(--ok)} .badge.bad{background:var(--bad)} .badge.skip{background:var(--skip)}
+.marks{font-size:.85rem;color:var(--ink-soft);margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+
+/* report */
+.div h3{font-size:1rem;margin:10px 0 2px;font-weight:600}
+.chk{display:grid;grid-template-columns:1.6em 1fr;gap:0 6px;padding:5px 0;border-bottom:1px solid var(--rule)}
+.chk .ic{font-weight:700;text-align:center}
+.chk.ok .ic{color:var(--ok)} .chk.fault .ic{color:var(--bad)} .chk.skip .ic,.chk.info .ic{color:var(--skip)}
+.chk .what{font-size:.98rem}
+.chk .src{font-size:.82rem;color:var(--ink-soft);margin-top:2px}
+.chk .src q{font-style:italic}
+.chk .src a{color:var(--accent)}
+.sum{font-size:1rem}
+.rule{border-bottom:1px solid var(--rule);padding:6px 0;font-size:.95rem}
+.rule q{font-style:italic}
+.rule .c{font-family:var(--display);font-size:.6rem;letter-spacing:.05em;color:var(--accent-2);display:block}
+.rule a{color:var(--accent);font-size:.85rem}
+.tagm{font-family:var(--display);font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;border:1px dashed var(--accent-2);color:var(--accent-2);padding:0 5px;border-radius:2px;margin-right:4px}
+.tagb{font-family:var(--display);font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-2);color:var(--parchment);padding:0 5px;border-radius:2px;margin-right:4px}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Division checker</h1>
+  <p>Tests a logical division of a concept against the rules in Busolt’s “Die Logische Eintheilung eines Begriffs” (AA 24:660–661).</p>
+  <a href="index.html">← back to the lecture</a>
+</header>
+
+<div class="wrap">
+  <section>
+    <div class="panel">
+      <h2>Your division</h2>
+      <p class="hint">A division splits one concept into narrower concepts. Name the concept, add its members, and list the things you take to fall under each. List the whole sphere of the divided concept too, so completeness can be tested.</p>
+      <div class="row">
+        <label for="exSel">Start from</label>
+        <select id="exSel"></select>
+        <button class="btn" id="copyBtn" type="button">Copy outline</button>
+      </div>
+      <p class="hint" id="exNote"></p>
+    </div>
+    <div id="editor"></div>
+  </section>
+
+  <section>
+    <div class="panel"><h2>Verdict, as far as the lists you gave</h2><div id="report"></div></div>
+    <div class="panel"><h2>Busolt’s rules, quoted</h2><div id="rules"></div></div>
+    <div class="panel">
+      <h2>How the tests work</h2>
+      <p><span class="tagb">Busolt</span> a rule he states, quoted from the transcript. <span class="tagm">my test</span> how I turned it into something a program can check.</p>
+      <p class="hint">The program does not know what falls under a concept. It compares only the lists you type, so it can show that your lists contradict a rule but not that your lists are right. Busolt gives no instance lists; the ones in the examples are mine. Whether “opposed” (<i>entgegen</i>) means exactly “no shared instance” is my reading, not his definition.</p>
+    </div>
+  </section>
+</div>
+
+<script src="logik-busolt-24.js"></script>
+<script>
+'use strict';
+/* ═══ BUSOLT'S RULES, quoted from the data ═══════════════════════════════ */
+const SECTIONS = LOGIK_BUSOLT.sections;
+const S22 = SECTIONS.find(s => s.id === 's22');
+function pageAt(b, idx){ let p = b.aa; (b.pages || []).forEach(e => { if(idx >= e.i) p = e.p; }); return p; }
+function findQuote(sub){
+  for(const b of S22.blocks){ const i = b.text.indexOf(sub); if(i >= 0) return {text:sub, cite:'AA 24:' + pageAt(b, i), id:b.id}; }
+  console.warn('Quote not found in s22:', sub); return {text:sub + ' [NOT FOUND]', cite:'', id:S22.blocks[0].id};
+}
+const Q = {
+  sphere:   findQuote('Die Logische Eintheilung ist also die Eintheilung der Sphäre.'),
+  complete: findQuote('Wenn alle disiunctive Begriffe zusammengenommen, der Sphaera conceptus gleich sind, so ist dies eine Logische vollkommene Eintheilung'),
+  equal:    findQuote('müßen der Sphaera conceptus divisi gleich seyn'),
+  opposed:  findQuote('Wenn die Membra dividentia sich nicht einander entgegen sind'),
+  subdiv:   findQuote('Die Glieder der Subdivision müßen nicht unter die Glieder der division gebracht werden'),
+  dichot:   findQuote('Die leichteste Eintheilung ist die Dichotomie. Alle Substanzen sind entweder Körper; oder nicht; dies ist das Fundament aller Logischen Definizionen.'),
+  faulty:   findQuote('Die Triangel sind Gleichseitig oder Gleichschenklich. Diese Einteilung ist falsch.'),
+  repair:   findQuote('Die Triangel sind entweder in allen 3 Seiten gleich, oder ungleich. Die Ungleichen sind entweder Gleichschenklich, welche zwey gleiche Seiten haben, oder Ungleichschenklich, wo keine Seite gleich ist.')
+};
+
+/* ═══ MODEL ══════════════════════════════════════════════════════════════ */
+let nextId = 1;
+function mk(name, o){ o = o || {}; return {id:'n' + (nextId++), name, diff:o.diff || '', neg:!!o.neg, instances:(o.inst || []).join('\n'), kids:o.kids || []}; }
+
+const EXAMPLES = [
+  {id:'faulty', label:'Busolt’s faulty division (triangles)', note:'Busolt: “Die Triangel sind Gleichseitig oder Gleichschenklich. Diese Einteilung ist falsch.” The instances are my own; in ordinary geometry an equilateral triangle also has two equal sides, so I list it under both.',
+   build:() => mk('Triangel', {inst:['equilateral 3-3-3','isosceles 5-5-3','right isosceles 1-1-√2','scalene 3-4-5'], kids:[
+     mk('Gleichseitig', {diff:'all three sides equal', inst:['equilateral 3-3-3']}),
+     mk('Gleichschenklich', {diff:'two sides equal', inst:['isosceles 5-5-3','right isosceles 1-1-√2','equilateral 3-3-3']})]})},
+  {id:'repair', label:'Busolt’s repaired division (triangles)', note:'Busolt’s own correction, with a subdivision of the unequal triangles. The instances are my own.',
+   build:() => mk('Triangel', {inst:['equilateral 3-3-3','isosceles 5-5-3','right isosceles 1-1-√2','scalene 3-4-5'], kids:[
+     mk('In allen 3 Seiten gleich', {diff:'all three sides equal', inst:['equilateral 3-3-3']}),
+     mk('Ungleich', {diff:'not all three sides equal', inst:['isosceles 5-5-3','right isosceles 1-1-√2','scalene 3-4-5'], kids:[
+       mk('Gleichschenklich', {diff:'two equal sides', inst:['isosceles 5-5-3','right isosceles 1-1-√2']}),
+       mk('Ungleichschenklich', {diff:'no side equal', inst:['scalene 3-4-5']})]})]})},
+  {id:'dichot', label:'Dichotomy: substances into body / not body', note:'Busolt’s dichotomy example (“Alle Substanzen sind entweder Körper; oder nicht”). The three instances are my illustration of the school view, not a claim of my own about souls.',
+   build:() => mk('Substanz', {inst:['this stone','this tree','this soul'], kids:[
+     mk('Körper', {diff:'extended', inst:['this stone','this tree']}),
+     mk('Nicht Körper', {diff:'not extended', neg:true, inst:['this soul']})]})},
+  {id:'blank', label:'Blank', note:'', build:() => mk('', {kids:[mk(''), mk('')]})}
+];
+let root = EXAMPLES[0].build();
+
+/* ═══ CHECKS ═════════════════════════════════════════════════════════════ */
+const norm = s => s.trim().toLowerCase().replace(/\s+/g, ' ');
+const own = n => new Set(n.instances.split('\n').map(norm).filter(Boolean));
+function ext(n){ const s = own(n); n.kids.forEach(k => ext(k).forEach(x => s.add(x))); return s; }
+const nm = n => '“' + (n.name.trim() || '(unnamed)') + '”';
+const subset = (a, b) => [...a].every(x => b.has(x));
+const list = a => [...a].join('; ');
+
+function checkDivision(n){
+  const items = [];
+  const add = (status, text, q, test) => items.push({status, text, q, test});
+  const k = n.kids;
+  if(k.length < 2){ add('fault', 'A division needs at least two members; ' + nm(n) + ' has ' + k.length + '.', Q.sphere, 'Fewer than two members cannot divide a sphere.'); return items; }
+
+  const names = k.map(x => norm(x.name));
+  const dup = names.filter((x, i) => x && names.indexOf(x) !== i);
+  if(dup.length) add('fault', 'Two members share the name “' + dup[0] + '”.', Q.opposed, 'Members with the same name cannot be opposed to one another.');
+
+  const exts = k.map(ext);
+  const untested = k.filter((x, i) => !exts[i].size);
+  untested.forEach(x => add('skip', nm(x) + ' has no things listed, so it cannot be tested.', null, null));
+
+  let overlapFound = false;
+  for(let i = 0; i < k.length; i++) for(let j = i + 1; j < k.length; j++){
+    if(!exts[i].size || !exts[j].size) continue;
+    const inter = [...exts[i]].filter(x => exts[j].has(x));
+    if(!inter.length) continue;
+    overlapFound = true;
+    if(subset(exts[i], exts[j]) || subset(exts[j], exts[i])){
+      const [inner, outer] = subset(exts[i], exts[j]) ? [k[i], k[j]] : [k[j], k[i]];
+      add('fault', nm(inner) + ' falls wholly within ' + nm(outer) + ' (' + list(inter) + '). A part of ' + nm(outer) + ' is standing beside it as if it were a separate member.', Q.subdiv, 'One member’s list is contained in a sister’s list. This is my reading of the fault Busolt names: a subdivision placed among the members.');
+    } else {
+      add('fault', nm(k[i]) + ' and ' + nm(k[j]) + ' overlap (' + list(inter) + '); the members are not opposed.', Q.opposed, 'Two members list a thing in common.');
+    }
+  }
+  if(!overlapFound && !untested.length) add('ok', 'No thing is listed under two members: the members are opposed, as far as your lists show.', Q.opposed, 'No shared instance between any two members.');
+
+  const sphere = own(n);
+  if(!sphere.size){
+    add('skip', 'Completeness not tested: no things are listed under ' + nm(n) + '. List its whole sphere to test it.', Q.complete, null);
+  } else {
+    const union = new Set(); exts.forEach(e => e.forEach(x => union.add(x)));
+    const left = [...sphere].filter(x => !union.has(x)), extra = [...union].filter(x => !sphere.has(x));
+    if(left.length) add('fault', 'Left out: ' + list(left) + ' fall under ' + nm(n) + ' but under no member. The members do not equal the sphere.', Q.equal, 'Things in the divided concept’s list that no member contains.');
+    if(extra.length) add('fault', 'Too much: ' + list(extra) + ' appear under members but not in the sphere of ' + nm(n) + '. Add them to the sphere or take them out of the member.', Q.equal, 'Things in members that the divided concept’s list lacks.');
+    if(!left.length && !extra.length) add('ok', 'The members together equal the sphere of ' + nm(n) + ' (' + sphere.size + ' listed).', Q.complete, 'The union of the members’ lists equals the divided concept’s list.');
+  }
+
+  const negs = k.filter(x => x.neg);
+  if(negs.length && k.length !== 2) add('fault', 'A member is marked as the negation of its sister, but there are ' + k.length + ' members; a dichotomy has two.', Q.dichot, 'The negation mark only makes sense with exactly two members.');
+  else if(negs.length) add('info', 'This is a dichotomy: ' + nm(negs[0]) + ' is the plain negation of its sister. Busolt calls it the easiest division.', Q.dichot, 'Two members, one marked as the negation of the other.');
+  else if(k.length === 2) add('info', 'Two members, but neither is marked as the negation of the other, so this is not treated as a dichotomy.', Q.dichot, null);
+  return items;
+}
+
+function allDivisions(n, out){ out = out || []; if(n.kids.length) out.push(n); n.kids.forEach(k => allDivisions(k, out)); return out; }
+function verdict(items){
+  const f = items.filter(i => i.status === 'fault').length, s = items.filter(i => i.status === 'skip').length;
+  return f ? {cls:'bad', label:f + (f === 1 ? ' fault' : ' faults')} : s ? {cls:'skip', label:'sound so far; ' + s + ' untested'} : {cls:'ok', label:'sound'};
+}
+
+/* ═══ RENDER ═════════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+function el(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
+function btn(label, fn){ const b = el('button', 'btn', label); b.type = 'button'; b.addEventListener('click', fn); return b; }
+
+function findNode(id, n){ n = n || root; if(n.id === id) return n; for(const k of n.kids){ const r = findNode(id, k); if(r) return r; } return null; }
+function parentOf(id, n){ n = n || root; for(const k of n.kids){ if(k.id === id) return n; const r = parentOf(id, k); if(r) return r; } return null; }
+function marksOf(n){
+  const chain = []; for(let c = n; c; c = parentOf(c.id)) chain.unshift(c);
+  const out = []; chain.forEach((c, i) => { if(i === 0){ if(c.name.trim()) out.push(c.name.trim()); } else if(c.diff.trim()) out.push(c.diff.trim()); });
+  return out;
+}
+
+function renderEditor(){
+  const box = $('editor'); box.innerHTML = '';
+  box.appendChild(renderNode(root, null));
+  refresh();
+}
+function renderNode(n, parent){
+  const wrap = el('div'); const card = el('div', 'node'); card.dataset.id = n.id;
+  const head = el('div', 'head');
+  const name = el('input', 'name'); name.type = 'text'; name.value = n.name; name.placeholder = parent ? 'Member (a narrower concept)' : 'Concept to divide';
+  name.setAttribute('aria-label', 'Concept name'); name.addEventListener('input', () => { n.name = name.value; refresh(); });
+  head.appendChild(name);
+  const bd = el('span', 'badge skip', ''); bd.dataset.badge = n.id; bd.style.display = 'none'; head.appendChild(bd);
+  head.appendChild(btn('+ member', () => { n.kids.push(mk('')); renderEditor(); }));
+  if(parent) head.appendChild(btn('Delete', () => { parent.kids = parent.kids.filter(x => x !== n); renderEditor(); }));
+  card.appendChild(head);
+
+  if(parent){
+    const g = el('div', 'grid2');
+    const d = el('div'); d.appendChild(el('label', 'lab', 'Differentia: the mark that sets it apart from its sisters'));
+    const di = el('input'); di.type = 'text'; di.value = n.diff; di.style.width = '100%'; di.addEventListener('input', () => { n.diff = di.value; refresh(); }); d.appendChild(di);
+    g.appendChild(d);
+    const ng = el('div');
+    if(parent.kids.length === 2){
+      const l = el('label'); l.style.display = 'block'; l.style.marginTop = '1.4em';
+      const c = el('input'); c.type = 'checkbox'; c.checked = n.neg; c.addEventListener('change', () => { n.neg = c.checked; refresh(); });
+      l.appendChild(c); l.appendChild(document.createTextNode(' simply the negation of its sister')); ng.appendChild(l);
+    }
+    g.appendChild(ng); card.appendChild(g);
+  }
+  card.appendChild(el('label', 'lab', n.kids.length ? 'Sphere: everything you take to fall under this concept (one per line)' : 'Things that fall under it (one per line)'));
+  const ta = el('textarea'); ta.value = n.instances; ta.setAttribute('aria-label', 'Things that fall under this concept');
+  ta.addEventListener('input', () => { n.instances = ta.value; refresh(); }); card.appendChild(ta);
+  const mm = el('div', 'marks'); mm.dataset.marks = n.id; card.appendChild(mm);
+  wrap.appendChild(card);
+  if(n.kids.length){ const kids = el('div', 'kids'); n.kids.forEach(k => kids.appendChild(renderNode(k, n))); wrap.appendChild(kids); }
+  return wrap;
+}
+
+/* live update: badges, marks lines and the report; the editor itself is not rebuilt */
+function refresh(){
+  document.querySelectorAll('[data-marks]').forEach(m => {
+    const n = findNode(m.dataset.marks); if(!n) return;
+    const mk_ = marksOf(n);
+    m.textContent = mk_.length ? 'Marks, from what you entered (root concept, then each differentia): ' + mk_.join(' → ') : '';
+  });
+  document.querySelectorAll('[data-badge]').forEach(b => {
+    const n = findNode(b.dataset.badge); if(!n || !n.kids.length){ b.style.display = 'none'; return; }
+    const v = verdict(checkDivision(n)); b.className = 'badge ' + v.cls; b.textContent = v.label; b.style.display = '';
+  });
+  renderReport();
+}
+function renderReport(){
+  const box = $('report'); box.innerHTML = '';
+  const divs = allDivisions(root);
+  if(!divs.length){ box.appendChild(el('p', 'hint', 'Add members to a concept to divide it.')); return; }
+  const results = divs.map(n => ({n, items:checkDivision(n)}));
+  const faults = results.reduce((a, r) => a + r.items.filter(i => i.status === 'fault').length, 0);
+  const skips = results.reduce((a, r) => a + r.items.filter(i => i.status === 'skip').length, 0);
+  const tail = faults ? faults + (faults === 1 ? ' fault found.' : ' faults found.')
+    : skips ? 'no fault found yet, but ' + skips + (skips === 1 ? ' test' : ' tests') + ' could not run for lack of listed things.'
+    : 'no fault found in the lists you gave.';
+  box.appendChild(el('p', 'sum', results.length + (results.length === 1 ? ' division' : ' divisions') + ' checked: ' + tail));
+  results.forEach(r => {
+    const d = el('div', 'div'); d.appendChild(el('h3', null, nm(r.n) + ' into ' + r.n.kids.length + ' ' + (r.n.kids.length === 1 ? 'member' : 'members') + ': ' + r.n.kids.map(nm).join(', ')));
+    r.items.forEach(i => {
+      const c = el('div', 'chk ' + i.status);
+      c.appendChild(el('span', 'ic', {ok:'✓', fault:'✗', skip:'○', info:'ℹ'}[i.status]));
+      const w = el('div'); w.appendChild(el('div', 'what', i.text));
+      if(i.q || i.test){
+        const s = el('div', 'src');
+        if(i.q){
+          s.appendChild(el('span', 'tagb', 'Busolt'));
+          const q = el('q', null, i.q.text.length > 150 ? i.q.text.slice(0, 150) + ' …' : i.q.text); s.appendChild(q);
+          s.appendChild(document.createTextNode(' ' + i.q.cite + ' ')); const a = el('a', null, 'read in the lecture'); a.href = 'index.html#r=search&b=' + i.q.id; s.appendChild(a);
+        }
+        if(i.test){ if(i.q) s.appendChild(el('br')); s.appendChild(el('span', 'tagm', 'my test')); s.appendChild(document.createTextNode(i.test)); }
+        w.appendChild(s);
+      }
+      c.appendChild(w); d.appendChild(c);
+    });
+    box.appendChild(d);
+  });
+}
+
+function renderRules(){
+  const box = $('rules');
+  [['The sphere', Q.sphere], ['Completeness', Q.complete], ['Members equal the sphere', Q.equal], ['First fault: members not opposed', Q.opposed],
+   ['Second fault: subdivision placed among the members', Q.subdiv], ['The easiest division', Q.dichot], ['His faulty example', Q.faulty], ['His repair', Q.repair]].forEach(([label, q]) => {
+    const r = el('div', 'rule'); r.appendChild(el('span', 'c', label + ' · ' + q.cite));
+    r.appendChild(el('q', null, q.text + ' ')); const a = el('a', null, 'in the lecture'); a.href = 'index.html#r=search&b=' + q.id; r.appendChild(a);
+    box.appendChild(r);
+  });
+}
+
+function outline(n, depth){
+  const pad = '  '.repeat(depth);
+  let s = pad + (n.name.trim() || '(unnamed)') + (n.diff.trim() ? '  [' + n.diff.trim() + ']' : '') + (n.neg ? '  (negation of its sister)' : '') + '\n';
+  const inst = [...own(n)]; if(inst.length) s += pad + '  things: ' + inst.join('; ') + '\n';
+  n.kids.forEach(k => { s += outline(k, depth + 1); }); return s;
+}
+
+/* ═══ INIT ═══════════════════════════════════════════════════════════════ */
+function load(id){
+  const ex = EXAMPLES.find(e => e.id === id) || EXAMPLES[0];
+  root = ex.build(); $('exNote').textContent = ex.note; $('exSel').value = ex.id; renderEditor();
+}
+(function init(){
+  EXAMPLES.forEach(e => $('exSel').appendChild(Object.assign(el('option'), {value:e.id, textContent:e.label})));
+  $('exSel').addEventListener('change', () => load($('exSel').value));
+  $('copyBtn').addEventListener('click', () => {
+    const t = outline(root, 0), b = $('copyBtn');
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = 'copied'; setTimeout(() => { b.textContent = 'Copy outline'; }, 1100); }, () => { window.prompt('Copy this outline:', t); });
+  });
+  renderRules();
+  load(new URLSearchParams(location.hash.replace(/^#/, '')).get('ex') || 'faulty');
+})();
+</script>
+</body>
+</html>
