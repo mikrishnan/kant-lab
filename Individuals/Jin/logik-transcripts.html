@@ -3,99 +3,214 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kant's Logic Lectures — Blomberg, Wiener, Busolt</title>
+<title>Kant's Logic Lectures over Time — Blomberg, Wiener, Busolt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
-:root { --parchment:#f6efe0; --parchment-dark:#ebe1cb; --ink:#2a2118; --muted:#7a6a58; --accent:#5c3d1e; --accent-soft:#c9ac84; --rule:#d8c9aa; --mark:#fff0a6; }
-* { box-sizing:border-box; }
-html,body { height:100%; margin:0; }
-body { font-family:'EB Garamond',Georgia,serif; font-size:18px; line-height:1.55; background:var(--parchment); color:var(--ink); display:flex; flex-direction:column; }
-header { display:flex; flex-wrap:wrap; align-items:center; gap:8px 22px; padding:10px 18px; background:var(--accent); color:var(--parchment); }
-header h1 { font-family:'Cinzel',serif; font-weight:400; font-size:17px; letter-spacing:.08em; margin:0; }
-.toggles { display:flex; gap:14px; font-size:14px; margin-left:auto; }
-.toggles label { cursor:pointer; display:flex; align-items:center; gap:5px; }
-main { flex:1; min-height:0; display:flex; }
-#left { flex:1 1 62%; min-width:0; display:flex; flex-direction:column; border-right:1px solid var(--rule); }
-#right { flex:0 0 38%; max-width:520px; min-width:300px; display:flex; flex-direction:column; background:var(--parchment-dark); }
-.tabs { display:flex; background:var(--parchment-dark); border-bottom:1px solid var(--rule); }
-.tabs button { flex:1; font-family:'Cinzel',serif; font-size:13px; letter-spacing:.06em; padding:9px 6px; background:transparent; border:0; border-bottom:3px solid transparent; color:var(--muted); cursor:pointer; }
-.tabs button small { display:block; font-family:'EB Garamond',serif; font-size:12px; letter-spacing:0; }
-.tabs button.on { color:var(--accent); border-bottom-color:var(--accent); background:var(--parchment); }
-.bar { display:flex; gap:8px; align-items:center; padding:6px 14px; border-bottom:1px solid var(--rule); font-size:14px; color:var(--muted); }
-.bar select { flex:1; min-width:0; font:inherit; font-size:14px; padding:2px 5px; background:var(--parchment); border:1px solid var(--accent-soft); color:var(--ink); }
-.bar form { display:flex; gap:4px; align-items:center; }
-.bar input { width:60px; font:inherit; font-size:14px; padding:2px 5px; border:1px solid var(--accent-soft); background:var(--parchment); }
-.bar button { font:inherit; font-size:14px; background:var(--parchment); border:1px solid var(--accent-soft); color:var(--accent); cursor:pointer; padding:1px 9px; }
-#text { flex:1; overflow-y:auto; padding:18px 26px 80px; scroll-behavior:auto; }
-h2.sec-title { font-family:'Cinzel',serif; font-weight:600; font-size:20px; color:var(--accent); margin:38px 0 4px; border-top:2px solid var(--rule); padding-top:16px; }
-h2.sec-title:first-child { margin-top:0; border-top:0; padding-top:0; }
-.pane-meta { color:var(--muted); font-size:15px; font-style:italic; margin-bottom:14px; }
-.badge { font-style:normal; font-family:'Cinzel',serif; font-size:10px; letter-spacing:.06em; border:1px solid var(--accent-soft); padding:0 6px; margin-left:6px; }
-.front { text-align:center; margin:0 0 20px; }
-.front p { margin:.2em 0; }
-details.toc { margin-bottom:22px; font-size:15px; }
-details.toc summary { cursor:pointer; font-family:'Cinzel',serif; font-size:13px; letter-spacing:.06em; color:var(--accent); }
-details.toc li { display:flex; justify-content:space-between; gap:12px; border-bottom:1px dotted var(--rule); }
-details.toc ul { list-style:none; padding:0; margin:8px 0; }
-.blk { display:grid; grid-template-columns:74px 1fr; gap:0 12px; margin:0 0 .7em; padding:2px 0; border-left:3px solid transparent; }
-.blk .cite { font-family:'Cinzel',serif; font-size:10.5px; color:var(--muted); text-align:right; padding-top:5px; user-select:none; }
-.blk .txt { white-space:pre-wrap; }
-.blk.inferred { border-left:3px dashed var(--accent-soft); padding-left:8px; }
-.blk.note .txt { font-style:italic; color:var(--muted); }
-.blk.rule .txt { border-top:1px solid var(--rule); height:0; margin-top:12px; }
-.blk.flash { background:var(--mark); }
-.blk.fade { background:transparent; transition:background 2.5s; }
-.aa,.ms { font-family:'Cinzel',serif; font-size:10px; vertical-align:super; line-height:0; padding:1px 4px; margin:0 2px; white-space:nowrap; }
-.aa { background:var(--accent); color:var(--parchment); }
-.ms { border:1px solid var(--accent-soft); color:var(--muted); }
-body.hide-aa .aa, body.hide-ms .ms { display:none; }
-mark { background:var(--mark); padding:0 1px; }
-.sec-par { font-family:'Cinzel',serif; color:var(--accent); font-size:14px; letter-spacing:.06em; margin:1.3em 0 .3em 86px; border-bottom:1px solid var(--rule); }
-.panel-head { padding:12px 14px 8px; border-bottom:1px solid var(--rule); }
-.panel-head h3 { font-family:'Cinzel',serif; font-weight:400; font-size:14px; letter-spacing:.08em; color:var(--accent); margin:0 0 8px; }
-.panel-head form { display:flex; gap:6px; }
-.panel-head input[type=search] { flex:1; min-width:0; padding:5px 8px; font:inherit; font-size:16px; border:1px solid var(--accent-soft); background:var(--parchment); color:var(--ink); }
-.panel-head button { background:var(--accent); color:var(--parchment); border:0; padding:4px 14px; cursor:pointer; font:inherit; font-size:15px; }
-.scope { display:flex; flex-wrap:wrap; gap:4px 14px; font-size:14px; margin-top:8px; color:var(--muted); }
-.scope label { cursor:pointer; display:flex; align-items:center; gap:4px; }
-#results { flex:1; overflow-y:auto; padding:6px 14px 40px; }
-#results h4 { font-family:'Cinzel',serif; color:var(--accent); font-weight:400; margin:16px 0 4px; letter-spacing:.05em; font-size:13px; }
-.hit { display:block; width:100%; text-align:left; background:none; border:0; border-bottom:1px solid var(--rule); padding:6px 2px; font:inherit; font-size:15.5px; line-height:1.4; color:var(--ink); cursor:pointer; }
-.hit:hover { background:var(--parchment); }
-.hit .where { font-family:'Cinzel',serif; font-size:10.5px; color:var(--muted); display:block; }
-.empty { color:var(--muted); font-style:italic; font-size:15px; }
-footer { font-size:12.5px; color:var(--muted); padding:5px 18px; border-top:1px solid var(--rule); background:var(--parchment-dark); }
-@media (max-width:800px) { main { flex-direction:column; } #right { flex:0 0 45%; max-width:none; } .blk { grid-template-columns:1fr; } .blk .cite { text-align:left; } .sec-par { margin-left:0; } }
+:root {
+  --parchment: #f6efe0;
+  --parchment-dark: #ebe1cb;
+  --ink: #2a2118;
+  --muted: #6f604f;
+  --accent: #5c3d1e;
+  --accent-soft: #c9ac84;
+  --rule: #d8c9aa;
+  --cur: #fff0a6;
+  /* one colour per wording of a concept (validated against --parchment: CVD-separable, >= 3:1);
+     each also has its own border style, so colour is never the only cue */
+  --f0: #b04a12;
+  --f1: #008aa0;
+  --f2: #7748c0;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: 'EB Garamond', Georgia, serif; font-size: 16.5px; line-height: 1.5;
+  background: var(--parchment); color: var(--ink);
+  display: flex; flex-direction: column;
+}
+button, select, input { font: inherit; }
+
+/* ---------- header: concept picker ---------- */
+header {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px;
+  padding: 9px 16px; background: var(--accent); color: var(--parchment);
+}
+header h1 { font-family: 'Cinzel', serif; font-weight: 400; font-size: 16px; letter-spacing: .08em; margin: 0; }
+.picker { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.picker label { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: .08em; }
+.picker select { font-size: 15.5px; padding: 3px 6px; min-width: 300px; max-width: 46vw; background: var(--parchment); color: var(--ink); border: 0; }
+.picker button, .picker input { font-size: 14.5px; }
+.hbtn { background: transparent; color: var(--parchment); border: 1px solid var(--accent-soft); padding: 3px 11px; cursor: pointer; }
+.hbtn:hover, .hbtn.on { background: var(--parchment); color: var(--accent); }
+#custom { display: flex; gap: 4px; }
+#custom input { width: 150px; padding: 3px 7px; border: 0; background: var(--parchment); color: var(--ink); }
+.toggles { display: flex; gap: 12px; font-size: 13.5px; margin-left: auto; }
+.toggles label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+/* ---------- concept summary, one column per lecture ---------- */
+#summary { border-bottom: 1px solid var(--rule); background: var(--parchment-dark); }
+#summary[hidden] { display: none; }
+.sum-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; padding: 8px 16px 2px; }
+.sum-head h2 { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; color: var(--accent); margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.sw { display: inline-block; width: 22px; height: 13px; border: 2px solid; border-radius: 2px; }
+.sw.def { border-width: 3px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .05em; border: 1px solid var(--accent-soft); color: var(--accent); background: var(--parchment); padding: 1px 7px; border-radius: 9px; white-space: nowrap; }
+.sum-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.sum-col { padding: 6px 16px 10px; border-right: 1px solid var(--rule); min-width: 0; }
+.sum-col:last-child { border-right: 0; }
+.stat { display: flex; align-items: baseline; gap: 8px; }
+.stat b { font-size: 22px; font-weight: 500; }
+.stat small { color: var(--muted); font-size: 13.5px; }
+.forms { margin: 4px 0 6px; font-size: 13.5px; }
+.frow { display: grid; grid-template-columns: 92px 1fr 34px; align-items: center; gap: 6px; height: 17px; }
+.frow .fl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+.frow .ft { height: 9px; background: var(--rule); border-radius: 0 4px 4px 0; position: relative; }
+.frow .fb { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 0 4px 4px 0; }
+.frow .fn { text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hist-label { font-family: 'Cinzel', serif; font-size: 9.5px; letter-spacing: .06em; color: var(--muted); display: flex; justify-content: space-between; }
+.hist { display: flex; align-items: flex-end; gap: 2px; height: 34px; border-bottom: 1px solid var(--accent-soft); cursor: pointer; }
+.hist div { flex: 1; background: var(--accent); border-radius: 2px 2px 0 0; min-height: 0; opacity: .85; }
+.hist div:hover { opacity: 1; background: var(--f0); }
+.hist div.zero { background: transparent; }
+.defs { margin-top: 7px; }
+.defs h4 { margin: 0 0 2px; font-family: 'Cinzel', serif; font-weight: 400; font-size: 10.5px; letter-spacing: .06em; color: var(--muted); }
+.defbtn { display: block; width: 100%; text-align: left; background: var(--parchment); border: 1px solid var(--rule); border-left: 3px solid var(--accent); padding: 3px 7px; margin-bottom: 4px; font-size: 14.5px; line-height: 1.35; color: var(--ink); cursor: pointer; }
+.defbtn:hover { border-color: var(--accent-soft); border-left-color: var(--accent); }
+.defbtn .where { display: block; font-family: 'Cinzel', serif; font-size: 9.5px; color: var(--muted); }
+.none { color: var(--muted); font-style: italic; font-size: 14px; }
+
+/* ---------- three reading panels ---------- */
+main { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+.panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--rule); }
+.panel:last-child { border-right: 0; }
+.phead { padding: 6px 12px; background: var(--parchment-dark); border-bottom: 1px solid var(--rule); }
+.phead .row1 { display: flex; align-items: baseline; gap: 8px; }
+.phead h3 { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; color: var(--accent); margin: 0; letter-spacing: .05em; }
+.phead .date { color: var(--muted); font-size: 13.5px; }
+.phead .row2 { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 13.5px; }
+.phead select { flex: 1; min-width: 0; font-size: 13.5px; padding: 1px 4px; background: var(--parchment); border: 1px solid var(--accent-soft); color: var(--ink); }
+.occnav { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+.occnav button, .jump button { background: var(--parchment); border: 1px solid var(--accent-soft); color: var(--accent); cursor: pointer; padding: 0 8px; font-size: 13.5px; }
+.occnav button:disabled { opacity: .35; cursor: default; }
+.occnav span { min-width: 70px; text-align: center; color: var(--muted); font-variant-numeric: tabular-nums; }
+.jump { display: flex; align-items: center; gap: 3px; color: var(--muted); }
+.jump input { width: 48px; font-size: 13.5px; padding: 0 3px; border: 1px solid var(--accent-soft); background: var(--parchment); }
+.ptext { flex: 1; overflow-y: auto; position: relative; padding: 12px 16px 70px; }
+.sec-title { font-family: 'Cinzel', serif; font-weight: 600; font-size: 16px; color: var(--accent); margin: 30px 0 2px; border-top: 2px solid var(--rule); padding-top: 12px; }
+.sec-title.first { margin-top: 0; border-top: 0; padding-top: 0; }
+.pmeta { color: var(--muted); font-size: 13.5px; font-style: italic; margin-bottom: 10px; }
+.badge { font-style: normal; font-family: 'Cinzel', serif; font-size: 9.5px; border: 1px solid var(--accent-soft); padding: 0 5px; margin-left: 5px; }
+.front { text-align: center; margin: 0 0 16px; }
+.front p { margin: .15em 0; }
+.blk { margin: 0 0 .65em; padding: 1px 0 1px 8px; border-left: 3px solid transparent; white-space: pre-wrap; }
+.blk .cite { display: block; font-family: 'Cinzel', serif; font-size: 9.5px; color: var(--muted); letter-spacing: .03em; user-select: none; white-space: normal; }
+.blk.inferred { border-left: 3px dashed var(--accent-soft); }
+.blk.note { font-style: italic; color: var(--muted); }
+.blk.rule { border-top: 1px solid var(--rule); height: 0; margin: 14px 0; }
+body.dim-on .blk.dim { color: #8d7f6e; }
+body.dim-on .blk.dim .aa, body.dim-on .blk.dim .ms { opacity: .6; }
+.sec-par { font-family: 'Cinzel', serif; color: var(--accent); font-size: 12.5px; letter-spacing: .05em; margin: 1.2em 0 .3em; border-bottom: 1px solid var(--rule); }
+.aa, .ms { font-family: 'Cinzel', serif; font-size: 9.5px; vertical-align: super; line-height: 0; padding: 1px 3px; margin: 0 2px; white-space: nowrap; font-style: normal; }
+.aa { background: var(--accent); color: var(--parchment); }
+.ms { border: 1px solid var(--accent-soft); color: var(--muted); }
+body.hide-aa .aa, body.hide-ms .ms { display: none; }
+
+/* occurrences: a box in the wording's colour; a heavier, tinted box where the
+   passage looks like a definition of the concept */
+mark.c { background: transparent; color: inherit; border: 1.5px solid; border-radius: 3px; padding: 0 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+mark.f0 { border-color: var(--f0); border-style: solid; }
+mark.f1 { border-color: var(--f1); border-style: dashed; }
+mark.f2 { border-color: var(--f2); border-style: dotted; border-width: 2px; }
+mark.def { border-width: 3px; font-weight: 500; }
+mark.f0.def { background: #b04a1222; }
+mark.f1.def { background: #008aa022; }
+mark.f2.def { background: #7748c022; }
+mark.cur { background: var(--cur) !important; outline: 2px solid var(--ink); outline-offset: 1px; }
+.blk.defblk { background: #5c3d1e0d; border-left: 3px solid var(--accent); }
+
+/* ---------- overview of all concepts ---------- */
+#overview { position: fixed; inset: 0; background: #2a211866; display: none; align-items: flex-start; justify-content: center; padding: 40px 16px; z-index: 20; }
+#overview.on { display: flex; }
+.ov-box { background: var(--parchment); max-width: 1050px; width: 100%; max-height: calc(100vh - 80px); display: flex; flex-direction: column; box-shadow: 0 8px 40px #0004; }
+.ov-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 18px; border-bottom: 1px solid var(--rule); }
+.ov-head h2 { font-family: 'Cinzel', serif; font-size: 17px; color: var(--accent); margin: 0; font-weight: 600; }
+.ov-head p { margin: 0; flex-basis: 100%; color: var(--muted); font-size: 14px; }
+.ov-head select { font-size: 14px; padding: 2px 5px; background: var(--parchment); border: 1px solid var(--accent-soft); }
+.ov-head .x { margin-left: auto; background: none; border: 1px solid var(--accent-soft); color: var(--accent); cursor: pointer; padding: 2px 10px; }
+.ov-scroll { overflow-y: auto; }
+table.ov { border-collapse: separate; border-spacing: 2px; width: 100%; font-size: 14.5px; padding: 6px 12px 16px; }
+table.ov th { font-family: 'Cinzel', serif; font-size: 10.5px; letter-spacing: .05em; color: var(--muted); font-weight: 400; text-align: left; padding: 4px 6px; position: sticky; top: 0; background: var(--parchment); }
+table.ov th.num { text-align: center; }
+table.ov td { padding: 3px 6px; vertical-align: middle; }
+table.ov tr.row { cursor: pointer; }
+table.ov tr.row:hover td { outline: 1px solid var(--accent-soft); }
+table.ov td.heat { text-align: center; font-variant-numeric: tabular-nums; width: 92px; border-radius: 3px; }
+table.ov td.c-name { font-weight: 500; }
+table.ov td.c-grp { color: var(--muted); font-size: 13px; }
+table.ov td.lead { font-size: 13.5px; color: var(--muted); }
+
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--parchment); font-size: 13px; padding: 4px 8px; border-radius: 3px; z-index: 30; display: none; max-width: 300px; line-height: 1.35; }
+footer { font-size: 12px; color: var(--muted); padding: 4px 16px; border-top: 1px solid var(--rule); background: var(--parchment-dark); }
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; grid-auto-rows: minmax(60vh, auto); overflow-y: auto; }
+  .sum-cols { grid-template-columns: 1fr; }
+  .sum-col { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .picker select { min-width: 0; max-width: 90vw; }
+}
 </style>
 </head>
 <body>
 <header>
-  <h1>Kant's Logic Lectures</h1>
+  <h1>Kant's Logic Lectures over Time</h1>
+  <div class="picker">
+    <label for="concept">Concept</label>
+    <button class="hbtn" id="prevC" title="Previous concept" aria-label="Previous concept">‹</button>
+    <select id="concept"></select>
+    <button class="hbtn" id="nextC" title="Next concept" aria-label="Next concept">›</button>
+    <button class="hbtn" id="openOv">All concepts…</button>
+    <form id="custom"><input type="search" id="cterm" placeholder="or your own term" aria-label="Your own term"><button class="hbtn">Show</button></form>
+  </div>
   <div class="toggles">
+    <label><input type="checkbox" id="t-sum" checked> Summary</label>
+    <label><input type="checkbox" id="t-dim"> Dim other text</label>
     <label><input type="checkbox" id="t-aa" checked> AA pages</label>
-    <label><input type="checkbox" id="t-ms" checked> Manuscript pages</label>
+    <label><input type="checkbox" id="t-ms" checked> MS pages</label>
   </div>
 </header>
-<main>
-  <section id="left">
-    <div class="tabs" id="tabs"></div>
-    <div class="bar">
-      <span>Go to</span><select id="secSel" aria-label="Section"></select>
-      <form id="jump">Meier § <input type="number" min="1" aria-label="Meier section number"> <button>Go</button></form>
+
+<section id="summary">
+  <div class="sum-head">
+    <h2 id="sumTitle"></h2>
+    <div class="legend" id="legend"></div>
+    <div class="tags" id="sumTags"></div>
+  </div>
+  <div class="sum-cols" id="sumCols"></div>
+</section>
+
+<main id="panels"></main>
+
+<div id="overview" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="ov-box">
+    <div class="ov-head">
+      <h2 id="ovTitle">All concepts across the three lectures</h2>
+      <label>Sort by <select id="ovSort">
+        <option value="change">most change over time</option>
+        <option value="freq">most discussed</option>
+        <option value="topic">topic</option>
+      </select></label>
+      <button class="x" id="closeOv">Close</button>
+      <p>Occurrences per 10,000 words in each transcript, darker = more frequent. "Leading term" is the wording each lecture uses most. The tags are computed from these counts and nothing else; they say where to look, not what Kant meant. Click a row to open it.</p>
     </div>
-    <div id="text"></div>
-  </section>
-  <aside id="right">
-    <div class="panel-head">
-      <h3>Search the texts</h3>
-      <form id="searchForm"><input type="search" id="q" placeholder="e.g. Verstand, Begriff, Urtheil…" aria-label="Search term"><button>Search</button></form>
-      <div class="scope" id="scope"></div>
-    </div>
-    <div id="results"><p class="empty">Type a term to search. Case and the long ſ are ignored; spelling is otherwise as the Academy Edition prints it, so a word stem often works best.</p></div>
-  </aside>
-</main>
-<footer>Academy Edition XXIV transcriptions, whole texts, from <code>data/</code>. A dashed rule marks a paragraph the extractor joined on its own judgement (inferred). Editorial brackets are the Academy Edition's.</footer>
+    <div class="ov-scroll"><table class="ov" id="ovTable"></table></div>
+  </div>
+</div>
+<div id="tip"></div>
+
+<footer>Student transcripts of Kant's lectures on Meier's <i>Auszug aus der Vernunftlehre</i>, AA XXIV, in full, from <code>data/</code>, oldest on the left. Boxes mark the selected concept, one colour and border per wording. A heavy box marks a sentence that <em>looks</em> like a definition, found automatically from its wording (the term followed by <i>ist</i>, <i>heißt</i>, <i>nennt man</i>…), so check it in context. A dashed left rule marks a paragraph the extractor joined by inference.</footer>
 
 <!-- Shared data, generated from Textfiles/ — see data/README.md. Plain <script src> so the page also works from file:// -->
 <script src="../../data/logik-blomberg-24.js"></script>
@@ -103,181 +218,479 @@ footer { font-size:12.5px; color:var(--muted); padding:5px 18px; border-top:1px 
 <script src="../../data/logik-busolt-24.js"></script>
 <script>
 /* ---------- data ---------- */
+// The three transcripts, oldest first, so that left to right reads as time.
 const WORKS = [
   { key: 'blomberg', short: 'Blomberg', data: LOGIK_BLOMBERG },
   { key: 'wiener',   short: 'Wiener',   data: LOGIK_WIENER },
   { key: 'busolt',   short: 'Busolt',   data: LOGIK_BUSOLT },
 ];
-const WORK = Object.fromEntries(WORKS.map(w => [w.key, w]));
+
+/* The concepts. Each has one or more wordings ("forms"), each a regular-expression
+   stem matched at the start of a word, in any case. Spellings follow the transcripts
+   (Urtheil, Merkmahl, Gewisheit), and Latin terms are a wording of their own, since
+   a lecture's passing from Latin to German is part of what changes. Add a concept by
+   adding a line here. */
+const L = '\\p{L}*';   // "and any further letters": a stem
+const CONCEPTS = [
+  { id: 'kanon',      group: 'What logic is',            label: 'Kanon / Organon', forms: [['Kanon', '[ck]anon' + L], ['Organon', 'organon' + L]] },
+  { id: 'gelehrsamkeit', group: 'What logic is',         label: 'Gelehrsamkeit', forms: [['Gelehrsamkeit', 'gel(?:eh|ah)rt?samkeit' + L], ['eruditio', 'erudit' + L]] },
+  { id: 'popularitaet', group: 'What logic is',          label: 'Popularität', forms: [['Popularität', 'popul(?:[aä]|ai)r' + L]] },
+  { id: 'horizont',   group: 'What logic is',            label: 'Horizont der Erkenntniß', forms: [['Horizont', 'horizont' + L]] },
+  { id: 'aesthetik',  group: 'What logic is',            label: 'Geschmack / Ästhetik', forms: [['Geschmack', 'geschmack' + L], ['ästhetisch', '(?:ae|ä)sthet' + L]] },
+  { id: 'verstand',   group: 'Faculties and sources',    label: 'Verstand', forms: [['Verstand', 'verstand(?!en(?!\\p{L}))' + L], ['intellectus', 'intellect' + L]] },
+  { id: 'vernunft',   group: 'Faculties and sources',    label: 'Vernunft', forms: [['Vernunft', 'vernunft' + L]] },
+  { id: 'sinnlichkeit', group: 'Faculties and sources',  label: 'Sinnlichkeit', forms: [['Sinnlichkeit', 'sinnlichkeit' + L], ['sinnlich', 'sinnlich(?!keit)' + L]] },
+  { id: 'anschauung', group: 'Faculties and sources',    label: 'Anschauung', forms: [['Anschauung, anschauend', 'anschau' + L], ['intuitus', 'intuit' + L]] },
+  { id: 'erfahrung',  group: 'Faculties and sources',    label: 'Erfahrung', forms: [['Erfahrung', 'erfahrung' + L], ['experientia', 'experien' + L]] },
+  { id: 'apriori',    group: 'Faculties and sources',    label: 'a priori / a posteriori', forms: [['a priori', 'a\\s+priori'], ['a posteriori', 'a\\s+posteriori']] },
+  { id: 'wahrheit',   group: 'Perfections of cognition', label: 'Wahrheit', forms: [['Wahrheit', 'wahrheit' + L], ['veritas', 'verit' + L]] },
+  { id: 'irrthum',    group: 'Perfections of cognition', label: 'Irrthum', forms: [['Irrthum', 'irr?th[uü]m' + L], ['error', 'error' + L]] },
+  { id: 'klarheit',   group: 'Perfections of cognition', label: 'Klarheit', forms: [['klar', 'klar' + L], ['clarus', 'clar' + L]] },
+  { id: 'deutlichkeit', group: 'Perfections of cognition', label: 'Deutlichkeit', forms: [['deutlich', 'deutlich' + L], ['distinctus', 'distinct' + L]] },
+  { id: 'gewissheit', group: 'Perfections of cognition', label: 'Gewißheit', forms: [['Gewißheit', 'gewi(?:ß|ss|s)heit' + L], ['certitudo', 'certitud' + L]] },
+  { id: 'wahrscheinlichkeit', group: 'Perfections of cognition', label: 'Wahrscheinlichkeit', forms: [['wahrscheinlich', 'wahrscheinlich' + L], ['probabilis', 'probab' + L]] },
+  { id: 'meinen',     group: 'Holding-true',             label: 'Meinen, Glauben, Wissen', forms: [['Meinung', 'me[iy]nung' + L], ['Glaube(n)', 'glaube(?:n|ns)?(?!\\p{L})'], ['Wissen', 'wi(?:ß|ss)ens?(?!\\p{L})']] },
+  { id: 'beyfall',    group: 'Holding-true',             label: 'Beyfall', forms: [['Beyfall', 'be[iy]fall' + L], ['assensus', 'assens' + L]] },
+  { id: 'vorurtheil', group: 'Holding-true',             label: 'Vorurtheil', forms: [['Vorurtheil', 'vorurt?h?eil' + L], ['praejudicium', 'pr(?:ae|ä)judic' + L]] },
+  { id: 'zweifel',    group: 'Holding-true',             label: 'Zweifel / Skepsis', forms: [['Zweifel', 'zweifel' + L], ['Scepticismus', '(?:sc|sk)epti' + L]] },
+  { id: 'hypothese',  group: 'Holding-true',             label: 'Hypothese', forms: [['Hypothese', 'hypothes' + L]] },
+  { id: 'zeugniss',   group: 'Holding-true',             label: 'Zeugniß', forms: [['Zeugniß', 'zeugni(?:ß|ss|s)' + L], ['testimonium', 'testimon' + L]] },
+  { id: 'begriff',    group: 'Concepts',                 label: 'Begriff', forms: [['Begriff', 'begrie?f' + L], ['conceptus', 'concept' + L]] },
+  { id: 'merkmal',    group: 'Concepts',                 label: 'Merkmal', forms: [['Merkmahl, Merckmahl', 'merc?km[aä]h?l' + L], ['nota', 'not(?:a|ae|am|is)(?!\\p{L})'], ['Kennzeichen', 'kennzeichen' + L]] },
+  { id: 'abstraction', group: 'Concepts',                label: 'Abstraction', forms: [['abstrahiren', 'abstra[hck]' + L]] },
+  { id: 'reflexion',  group: 'Concepts',                 label: 'Reflexion', forms: [['Reflexion', 'refle[xc]' + L], ['Überlegung', 'überlegung' + L]] },
+  { id: 'definition', group: 'Concepts',                 label: 'Definition', forms: [['Definition, definiren', 'defini(?:t|z|r)' + L], ['Erklärung', 'erklärung' + L]] },
+  { id: 'urtheil',    group: 'Judgements and inferences', label: 'Urtheil', forms: [['Urtheil', 'urt?h?eil' + L], ['judicium', '[ij]udic' + L]] },
+  { id: 'analytisch', group: 'Judgements and inferences', label: 'analytisch / synthetisch', forms: [['analytisch', 'analyt' + L], ['synthetisch', 'synthet' + L]] },
+  { id: 'vernunftschluss', group: 'Judgements and inferences', label: 'Vernunftschluß', forms: [['Vernunftschluß', 'vernunft-?\\s?schl[uü]' + L], ['Schluß (any)', 'schl[uü](?:ß|ss)(?!el)' + L], ['syllogismus, ratiocinium', '(?:syllogis|ratiocin)' + L]] },
+  { id: 'objectiv',   group: 'Judgements and inferences', label: 'objectiv / subjectiv', forms: [['objectiv, obiectiv', 'ob[ij]e[ck]ti[vu]' + L], ['subjectiv, subiectiv', 'sub[ij]e[ck]ti[vu]' + L]] },
+  { id: 'methode',    group: 'Method',                   label: 'Methode', forms: [['Methode', 'method' + L]] },
+  { id: 'beweis',     group: 'Method',                   label: 'Beweis / Demonstration', forms: [['Beweis, Beweiß', 'bewei[sß]' + L], ['Demonstration', 'demonstr' + L]] },
+  { id: 'philmath',   group: 'Method',                   label: 'Philosophie / Mathematik', forms: [['Philosophie', 'philosoph' + L], ['Mathematik', 'mathemati' + L]] },
+  { id: 'genie',      group: 'Method',                   label: 'Genie', forms: [['Genie', 'genie(?:s)?(?!\\p{L})']] },
+];
+// A sentence "looks like a definition" when the term stands near its start and is
+// followed, within a few words, by one of these verbs, or when it opens "Unter X versteht man".
+const DEF_AFTER = /^[^.;:!?]{0,18}?(?<!\p{L})(ist|sind|heißt|heisst|heißen|heisset|nennt man|nennet man|nennen wir|bestehet|besteht|bedeutet|wird genannt|definirt|definiret)(?!\p{L})/iu;
+const DEF_BEFORE = /(?<!\p{L})unter\s+(?:\p{L}+\s+){0,3}$/iu;
+const BINS = 40;
 
 /* ---------- state ---------- */
-let current = WORKS[0];
-let activeQuery = '';
+let concept = null;     // the concept on show
+let panels = [];
+let stats = {};         // concept id -> per-work counts, for the overview and the picker
 
 /* ---------- helpers ---------- */
 function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-function fold(s) { return s.toLowerCase().replace(/ſ/g, 's'); }
-function highlight(raw, q) {
-  const safe = esc(raw);
-  if (!q) return safe;
-  return safe.replace(new RegExp('(' + escRe(esc(q)) + ')', 'gi'), '<mark>$1</mark>');
-}
 function sectionLabel(s) { return s.title || (s.titleSrc === 'none' ? 'Titelei' : s.id); }
-function firstAA(s) { const b = s.blocks.find(x => x.aa != null); return b ? b.aa : '—'; }
+function fmt(n) { return n >= 10 ? Math.round(n).toString() : n.toFixed(1); }
+const tip = document.getElementById('tip');
+function showTip(e, html) { tip.innerHTML = html; tip.style.display = 'block'; tip.style.left = Math.min(e.clientX + 14, innerWidth - 310) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; }
+function hideTip() { tip.style.display = 'none'; }
 
-/* A block's text with its page marks put back where the transcription had them. */
-function blockHtml(b, q) {
-  const ev = [];
-  (b.pages || []).forEach(p => ev.push({ i: p.i, html: '<span class="aa">AA ' + p.p + '</span>' }));
-  (b.ms || []).forEach(p => ev.push({ i: p.i, html: '<span class="ms">[' + p.p + ']</span>' }));
-  ev.sort((a, c) => a.i - c.i);
-  let out = '', at = 0;
-  ev.forEach(e => { out += highlight(b.text.slice(at, e.i), q) + e.html; at = e.i; });
-  return out + highlight(b.text.slice(at), q);
+// Flatten each work once: its blocks in order, with their section, and a word count.
+WORKS.forEach(w => {
+  w.blocks = [];
+  w.data.sections.forEach((s, si) => s.blocks.forEach(b => w.blocks.push({ b, s, si })));
+  w.words = w.blocks.reduce((n, x) => n + (x.b.kind === 'rule' ? 0 : x.b.text.split(/\s+/).filter(Boolean).length), 0);
+});
+
+function conceptRegex(c) {
+  return new RegExp('(?<!\\p{L})(?:' + c.forms.map(f => '(' + f[1] + ')').join('|') + ')', 'giu');
 }
 
-/* ---------- the whole text of one work, every section in order ---------- */
-function renderWork(work, focusId) {
-  const d = work.data, box = document.getElementById('text');
-  box.innerHTML = '';
-  if (d.front && d.front.length) {
-    const f = el('div', 'front');
-    d.front.forEach(line => f.appendChild(el('p', null, typeof line === 'string' ? line : (line.text || JSON.stringify(line)))));
-    box.appendChild(f);
+/* Every occurrence of a concept in a work: { bi, s, e, form, def } in reading order. */
+function findAll(c, w) {
+  const re = conceptRegex(c), out = [];
+  w.blocks.forEach((x, bi) => {
+    if (x.b.kind === 'rule') return;
+    const t = x.b.text;
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(t))) {
+      if (!m[0]) { re.lastIndex++; continue; }
+      const form = m.slice(1).findIndex(g => g !== undefined);
+      out.push({ bi, s: m.index, e: m.index + m[0].length, form, def: false });
+    }
+  });
+  return out;
+}
+
+/* The sentence around t[s..e]. A full stop ends a sentence only where the next word
+   follows a space and begins in capitals, and not after a numeral or a lone letter,
+   so that "1." and "a." in the lecturer's enumerations do not cut it short. */
+function sentenceAround(t, s, e) {
+  const isEnd = i => {
+    if (!/[.;!?]/.test(t[i])) return false;
+    if (t[i] === '.' && /(?:^|[\s(])(?:\d+|\p{L})$/u.test(t.slice(Math.max(0, i - 6), i))) return false;
+    return i + 1 >= t.length || /^\s+[\p{Lu}„"(\d]/u.test(t.slice(i + 1, i + 4));
+  };
+  let a = s; while (a > 0 && !isEnd(a - 1)) a--;
+  while (a < s && /\s/.test(t[a])) a++;
+  let z = e; while (z < t.length && !isEnd(z)) z++;
+  return [a, Math.min(z + 1, t.length)];
+}
+
+/* Mark the occurrences that stand in a sentence shaped like a definition, and
+   return those sentences, best first: the term at the very start of the sentence
+   with its verb right behind it, a sentence of middling length, and one inside a
+   section whose title names the concept. */
+function findDefs(w, occ) {
+  const cands = [], re = conceptRegex(concept);
+  const secHit = new Map();
+  occ.forEach((o, oi) => {
+    const x = w.blocks[o.bi], t = x.b.text;
+    const [a, z] = sentenceAround(t, o.s, o.e);
+    const lead = o.s - a;
+    if (lead > 30) return;
+    const after = DEF_AFTER.exec(t.slice(o.e, Math.min(z, o.e + 40)));
+    const before = DEF_BEFORE.test(t.slice(a, o.s)) && /versteh/i.test(t.slice(o.e, z));
+    if (!after && !before) return;
+    o.def = true;
+    if (!secHit.has(x.si)) { re.lastIndex = 0; secHit.set(x.si, re.test(sectionLabel(x.s) + ' ' + (x.s.headings || []).join(' '))); }
+    const len = z - a, gap = after ? after.index : 0;
+    const score = lead + gap * 1.5 + Math.abs(len - 160) / 20 + (len < 40 ? 40 : 0) + (/^\s*,/.test(t.slice(o.e)) ? 15 : 0) - (secHit.get(x.si) ? 25 : 0);
+    cands.push({ oi, bi: o.bi, a, z, score });
+  });
+  const seen = new Set();
+  return cands.sort((p, q) => p.score - q.score).filter(c => !seen.has(c.bi) && seen.add(c.bi));
+}
+
+/* Counts for one concept in every work, and what they say about change. */
+function computeStats(c) {
+  const per = WORKS.map(w => {
+    const occ = findAll(c, w), forms = c.forms.map(() => 0);
+    occ.forEach(o => forms[o.form]++);
+    const lead = forms.indexOf(Math.max(...forms));
+    return { n: occ.length, rate: occ.length / w.words * 10000, forms, lead: occ.length ? lead : -1 };
+  });
+  const rates = per.map(p => p.rate), max = Math.max(...rates), min = Math.min(...rates);
+  const tags = [];
+  per.forEach((p, i) => { if (p.n === 0 && Math.max(...per.map(q => q.n)) >= 5) tags.push('absent in ' + WORKS[i].short); });
+  const leads = per.filter(p => p.n >= 5).map(p => p.lead);
+  const shift = new Set(leads).size > 1;
+  if (shift) tags.push('wording changes');
+  if (max > 0 && (max + 1) / (min + 1) >= 2) {
+    if (rates[0] <= rates[1] && rates[1] <= rates[2]) tags.push('rises over time');
+    else if (rates[0] >= rates[1] && rates[1] >= rates[2]) tags.push('falls over time');
+    else tags.push('uneven');
   }
-  if (d.contents && d.contents.length) {
-    const det = el('details', 'toc');
-    det.appendChild(el('summary', null, 'Inhaltsverzeichnis (' + d.contents.length + ')'));
-    const ul = el('ul');
-    d.contents.forEach(c => { const li = el('li'); li.append(el('span', null, c.label), el('span', null, c.pages || '')); ul.appendChild(li); });
-    det.appendChild(ul);
-    box.appendChild(det);
+  const score = Math.log((max + 1) / (min + 1)) + (shift ? 0.7 : 0) + (tags.some(t => t.startsWith('absent')) ? 0.5 : 0);
+  return { per, tags, score, total: per.reduce((n, p) => n + p.n, 0) };
+}
+
+/* A block's html: its text with page marks put back where the transcription had
+   them, and occurrences boxed. A box that a page mark falls inside is split around it. */
+function blockHtml(b, occs, firstOcc) {
+  const marks = [];
+  (b.pages || []).forEach(p => marks.push({ i: p.i, html: '<span class="aa">AA ' + p.p + '</span>' }));
+  (b.ms || []).forEach(p => marks.push({ i: p.i, html: '<span class="ms">[' + p.p + ']</span>' }));
+  marks.sort((x, y) => x.i - y.i);
+  const t = b.text;
+  const seg = (a, z) => {
+    let out = '', at = a;
+    occs.forEach((o, k) => {
+      const s = Math.max(o.s, a), e = Math.min(o.e, z);
+      if (s >= e) return;
+      out += esc(t.slice(at, s));
+      const cls = 'c f' + o.form + (o.def ? ' def' : '');
+      const label = concept.forms[o.form][0] + (o.def ? ' · reads like a definition' : '');
+      out += '<mark class="' + cls + '" data-occ="' + (firstOcc + k) + '" title="' + esc(label) + '">' + esc(t.slice(s, e)) + '</mark>';
+      at = e;
+    });
+    return out + esc(t.slice(at, z));
+  };
+  let out = '', at = 0;
+  marks.forEach(m => { out += seg(at, m.i) + m.html; at = m.i; });
+  return out + seg(at, t.length);
+}
+
+/* ---------- a reading panel per work ---------- */
+function makePanel(w) {
+  const p = { w, occ: [], defs: [], cur: -1, root: el('section', 'panel') };
+  const head = el('div', 'phead');
+  const r1 = el('div', 'row1');
+  r1.append(el('h3', null, w.data.meta.work), el('span', 'date', w.data.meta.date + ' · AA 24:' + w.data.meta.aa[0] + '–' + w.data.meta.aa[1]));
+  const r2 = el('div', 'row2');
+  const sel = el('select');
+  sel.setAttribute('aria-label', w.data.meta.work + ': go to section');
+  w.data.sections.forEach((s, i) => { const o = el('option', null, sectionLabel(s)); o.value = i; sel.appendChild(o); });
+  sel.onchange = () => { const h = p.text.querySelector('#' + w.key + '-sec-' + sel.value); if (h) h.scrollIntoView({ block: 'start' }); };
+  const nav = el('div', 'occnav');
+  p.prev = el('button', null, '‹'); p.next = el('button', null, '›'); p.count = el('span');
+  p.prev.title = 'Previous occurrence'; p.next.title = 'Next occurrence';
+  p.prev.onclick = () => goOcc(p, p.cur - 1);
+  p.next.onclick = () => goOcc(p, p.cur + 1);
+  nav.append(p.prev, p.count, p.next);
+  r2.append(sel, nav);
+  // Only Blomberg keys its lecture to Meier's §§.
+  if (w.blocks.some(x => x.b.para)) {
+    const j = el('form', 'jump');
+    j.innerHTML = '§ <input type="number" min="1" aria-label="Meier section"><button>Go</button>';
+    j.title = "Jump to Meier's §";
+    j.onsubmit = e => {
+      e.preventDefault();
+      const n = j.querySelector('input').value;
+      const hit = [...p.text.querySelectorAll('.sec-par')].find(x => x.dataset.nums.split(',').includes(n));
+      if (hit) hit.scrollIntoView({ block: 'start' });
+    };
+    r2.appendChild(j);
   }
-  let target = null;
-  d.sections.forEach((s, si) => {
-    const h = el('h2', 'sec-title', sectionLabel(s));
-    h.id = 'sec-' + si;
-    box.appendChild(h);
-    const meta = el('div', 'pane-meta');
-    let m = s.provenance || '';
-    if (s.headings && s.headings.length) m += (m ? ' — ' : '') + 'Manuscript heading: ' + s.headings.join(' / ');
-    meta.textContent = m;
-    if (s.titleSrc) meta.appendChild(el('span', 'badge', 'title: ' + s.titleSrc));
-    box.appendChild(meta);
-    let lastPara = null;
-    s.blocks.forEach(b => {
-      const p = b.para ? b.para.raw : null;
-      if (p && p !== lastPara) { const sp = el('div', 'sec-par', 'Meier ' + p); sp.dataset.nums = (b.para.nums || []).join(','); box.appendChild(sp); }
-      lastPara = p;
-      const inferred = b.joined && b.joined.includes('inferred');
-      const row = el('div', 'blk ' + b.kind + (inferred ? ' inferred' : ''));
-      row.id = work.key + '-' + b.id;
-      const cite = el('div', 'cite', b.aa != null ? 'AA 24:' + b.aa + (b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '') : '');
-      if (inferred) cite.title = "Paragraph break removed by the extractor's inference";
-      const txt = el('div', 'txt');
-      txt.innerHTML = b.kind === 'rule' ? '' : blockHtml(b, activeQuery);
-      row.append(cite, txt);
-      box.appendChild(row);
-      if (b.id === focusId) target = row;
+  head.append(r1, r2);
+  p.text = el('div', 'ptext');
+  // keep the section menu on the section being read
+  let ticking = false;
+  p.text.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      const y = p.text.scrollTop + 40;
+      let i = 0;
+      for (let k = 0; k < (p.heads || []).length; k++) { if (p.heads[k].offsetTop <= y) i = k; else break; }
+      if (p.heads && p.heads[i]) sel.value = p.heads[i].id.split('-sec-')[1];
     });
   });
-  if (target) flashTo(target); else box.scrollTop = 0;
+  p.root.append(head, p.text);
+  return p;
 }
 
-function flashTo(row) {
-  row.scrollIntoView({ block: 'center' });
-  row.classList.add('flash');
-  requestAnimationFrame(() => requestAnimationFrame(() => { row.classList.add('fade'); row.classList.remove('flash'); }));
-  setTimeout(() => row.classList.remove('fade'), 3000);
-}
-
-function showWork(work, focusId) {
-  current = work;
-  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.key === work.key));
-  const sel = document.getElementById('secSel');
-  sel.innerHTML = '';
-  work.data.sections.forEach((s, i) => {
-    const o = el('option', null, sectionLabel(s) + '  ·  AA ' + firstAA(s)); o.value = i; sel.appendChild(o);
+function renderPanel(p) {
+  const w = p.w, d = w.data;
+  const byBlock = new Map();
+  p.occ.forEach((o, i) => { if (!byBlock.has(o.bi)) byBlock.set(o.bi, { first: i, list: [] }); byBlock.get(o.bi).list.push(o); });
+  const defBlocks = new Set(p.defs.map(c => c.bi));
+  let html = '';
+  if (d.front && d.front.length) html += '<div class="front">' + d.front.map(l => '<p>' + esc(typeof l === 'string' ? l : (l.text || '')) + '</p>').join('') + '</div>';
+  let lastSec = -1, lastPara = null;
+  w.blocks.forEach((x, bi) => {
+    const { b, s, si } = x;
+    if (si !== lastSec) {
+      html += '<h4 class="sec-title' + (lastSec < 0 && !html ? ' first' : '') + '" id="' + w.key + '-sec-' + si + '">' + esc(sectionLabel(s)) + '</h4>';
+      let m = s.provenance || '';
+      if (s.headings && s.headings.length) m += (m ? ' — ' : '') + 'MS heading: ' + s.headings.join(' / ');
+      html += '<div class="pmeta">' + esc(m) + (s.titleSrc ? '<span class="badge">title: ' + esc(s.titleSrc) + '</span>' : '') + '</div>';
+      lastSec = si; lastPara = null;
+    }
+    const pr = b.para ? b.para.raw : null;
+    if (pr && pr !== lastPara) html += '<div class="sec-par" data-nums="' + (b.para.nums || []).join(',') + '">Meier ' + esc(pr) + '</div>';
+    lastPara = pr;
+    if (b.kind === 'rule') { html += '<div class="blk rule"></div>'; return; }
+    const hit = byBlock.get(bi);
+    const inferred = b.joined && b.joined.includes('inferred');
+    const cls = 'blk ' + b.kind + (inferred ? ' inferred' : '') + (hit ? '' : ' dim') + (defBlocks.has(bi) ? ' defblk' : '');
+    const cite = b.aa != null ? 'AA 24:' + b.aa + (b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '') : '';
+    html += '<div class="' + cls + '" id="' + w.key + '-b' + bi + '"><span class="cite"' + (inferred ? ' title="Paragraph break removed by the extractor\'s inference"' : '') + '>' + cite + '</span>' +
+      (hit ? blockHtml(b, hit.list, hit.first) : esc(b.text)) + '</div>';
   });
-  // Only Blomberg is keyed to Meier's §§.
-  document.getElementById('jump').style.display = work.data.sections.some(s => s.blocks.some(b => b.para)) ? '' : 'none';
-  renderWork(work, focusId);
+  p.text.innerHTML = html;
+  p.heads = [...p.text.querySelectorAll('.sec-title')];
+  p.cur = -1;
+  updateNav(p);
 }
 
-/* ---------- wiring: tabs, jumps ---------- */
-const tabs = document.getElementById('tabs');
-WORKS.forEach(w => {
-  const b = el('button');
-  b.dataset.key = w.key;
-  b.append(w.data.meta.work, el('small', null, w.data.meta.date + ' · AA ' + w.data.meta.aa[0] + '–' + w.data.meta.aa[1]));
-  b.onclick = () => showWork(w);
-  tabs.appendChild(b);
-});
-document.getElementById('secSel').onchange = e => {
-  const h = document.getElementById('sec-' + e.target.value);
-  if (h) h.scrollIntoView({ block: 'start' });
-};
-document.getElementById('jump').onsubmit = e => {
+function updateNav(p) {
+  const n = p.occ.length;
+  p.count.textContent = n ? (p.cur >= 0 ? (p.cur + 1) + ' / ' + n : n + ' found') : 'none';
+  p.prev.disabled = !n || p.cur <= 0;
+  p.next.disabled = !n || p.cur >= n - 1;
+}
+
+function goOcc(p, i) {
+  if (i < 0 || i >= p.occ.length) return;
+  p.text.querySelectorAll('mark.cur').forEach(m => m.classList.remove('cur'));
+  const parts = p.text.querySelectorAll('mark[data-occ="' + i + '"]');
+  if (!parts.length) return;
+  parts.forEach(m => m.classList.add('cur'));
+  parts[0].scrollIntoView({ block: 'center' });
+  p.cur = i;
+  updateNav(p);
+}
+
+/* ---------- the summary strip ---------- */
+function renderSummary(st) {
+  document.getElementById('sumTitle').textContent = concept.label;
+  const lg = document.getElementById('legend');
+  lg.innerHTML = '';
+  const styles = ['solid', 'dashed', 'dotted'];
+  concept.forms.forEach((f, i) => {
+    const s = el('span');
+    const sw = el('span', 'sw'); sw.style.borderColor = 'var(--f' + i + ')'; sw.style.borderStyle = styles[i];
+    s.append(sw, f[0]);
+    lg.appendChild(s);
+  });
+  const sd = el('span'); const sw = el('span', 'sw def'); sw.style.borderColor = 'var(--accent)'; sd.append(sw, 'reads like a definition');
+  lg.appendChild(sd);
+  const tg = document.getElementById('sumTags');
+  tg.innerHTML = '';
+  st.tags.forEach(t => tg.appendChild(el('span', 'tag', t)));
+
+  const cols = document.getElementById('sumCols');
+  cols.innerHTML = '';
+  const maxForm = Math.max(1, ...st.per.flatMap(p => p.forms));
+  panels.forEach((p, wi) => {
+    const ps = st.per[wi], col = el('div', 'sum-col');
+    const stat = el('div', 'stat');
+    stat.append(el('b', null, String(ps.n)), el('small', null, (ps.n === 1 ? 'occurrence' : 'occurrences') + ' · ' + fmt(ps.rate) + ' per 10,000 words · ' + p.w.short));
+    col.appendChild(stat);
+    if (concept.forms.length > 1) {
+      const fm = el('div', 'forms');
+      concept.forms.forEach((f, i) => {
+        const r = el('div', 'frow'), tr = el('div', 'ft'), bar = el('div', 'fb');
+        bar.style.width = (ps.forms[i] / maxForm * 100) + '%';
+        bar.style.background = 'var(--f' + i + ')';
+        tr.appendChild(bar);
+        r.append(el('span', 'fl', f[0]), tr, el('span', 'fn', String(ps.forms[i])));
+        fm.appendChild(r);
+      });
+      col.appendChild(fm);
+    }
+    // where in the lecture: occurrences in 40 equal stretches of its blocks
+    const hl = el('div', 'hist-label'); hl.append(el('span', null, 'start of lecture'), el('span', null, 'where it occurs'), el('span', null, 'end'));
+    const hist = el('div', 'hist');
+    const nb = p.w.blocks.length, bins = Array.from({ length: BINS }, () => []);
+    p.occ.forEach((o, i) => bins[Math.min(BINS - 1, Math.floor(o.bi / nb * BINS))].push(i));
+    const bmax = Math.max(1, ...bins.map(b => b.length));
+    bins.forEach((b, k) => {
+      const bar = el('div', b.length ? '' : 'zero');
+      bar.style.height = (b.length / bmax * 100) + '%';
+      const bi0 = Math.floor(k / BINS * nb), x = p.w.blocks[Math.min(bi0, nb - 1)];
+      bar.onmousemove = e => showTip(e, '<b>' + b.length + '</b> in this stretch<br>' + esc(sectionLabel(x.s)) + ' · from AA 24:' + x.b.aa + (b.length ? '<br>click to go to the first' : ''));
+      bar.onmouseleave = hideTip;
+      bar.onclick = () => { if (b.length) goOcc(p, b[0]); else document.getElementById(p.w.key + '-b' + bi0)?.scrollIntoView({ block: 'start' }); };
+      hist.appendChild(bar);
+    });
+    col.append(hl, hist);
+    const defs = el('div', 'defs');
+    defs.appendChild(el('h4', null, 'Sentences that read like a definition: ' + p.defs.length));
+    if (!p.defs.length) defs.appendChild(el('div', 'none', ps.n ? 'None found, so read the occurrences themselves.' : 'Not mentioned in this lecture.'));
+    p.defs.slice(0, 2).forEach(c => {
+      const x = p.w.blocks[c.bi], btn = el('button', 'defbtn');
+      btn.append(el('span', 'where', sectionLabel(x.s) + ' · AA 24:' + x.b.aa + (x.b.para ? ' · Meier ' + x.b.para.raw : '')));
+      let sn = x.b.text.slice(c.a, c.z);
+      if (sn.length > 230) sn = sn.slice(0, 230) + '…';
+      btn.append(sn);
+      btn.onclick = () => goOcc(p, c.oi);
+      defs.appendChild(btn);
+    });
+    col.appendChild(defs);
+    cols.appendChild(col);
+  });
+}
+
+/* ---------- choosing a concept ---------- */
+function setConcept(c, opts = {}) {
+  concept = c;
+  const st = stats[c.id] || computeStats(c);
+  panels.forEach(p => {
+    p.occ = findAll(c, p.w);
+    p.defs = findDefs(p.w, p.occ);
+    renderPanel(p);
+  });
+  renderSummary(st);
+  const sel = document.getElementById('concept');
+  if (!c.custom) { sel.value = c.id; history.replaceState(null, '', '#' + c.id); }
+  else { sel.value = ''; history.replaceState(null, '', '#term=' + encodeURIComponent(c.label)); }
+  // Line the three lectures up: each opens where it seems to define the concept,
+  // or else at its first mention.
+  panels.forEach(p => {
+    if (p.defs.length) goOcc(p, p.defs[0].oi);
+    else if (p.occ.length) goOcc(p, 0);
+    else p.text.scrollTop = 0;
+  });
+}
+
+function customConcept(term) {
+  const safe = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  return { id: 'custom', custom: true, group: 'Your term', label: term, forms: [[term, safe + L]] };
+}
+
+function fillPicker() {
+  const sel = document.getElementById('concept');
+  sel.innerHTML = '';
+  const blank = el('option', null, '— your own term —'); blank.value = ''; blank.hidden = true; sel.appendChild(blank);
+  let grp = null, og = null;
+  CONCEPTS.forEach(c => {
+    if (c.group !== grp) { og = document.createElement('optgroup'); og.label = c.group; sel.appendChild(og); grp = c.group; }
+    const st = stats[c.id];
+    const o = el('option', null, c.label + '  (' + st.per.map(p => p.n).join(' · ') + ')' + (st.tags.length ? '  · ' + st.tags.join(', ') : ''));
+    o.value = c.id;
+    og.appendChild(o);
+  });
+}
+
+/* ---------- overview ---------- */
+function renderOverview() {
+  const how = document.getElementById('ovSort').value;
+  const rows = CONCEPTS.slice();
+  if (how === 'change') rows.sort((a, b) => stats[b.id].score - stats[a.id].score);
+  if (how === 'freq') rows.sort((a, b) => stats[b.id].total - stats[a.id].total);
+  const maxRate = Math.max(...CONCEPTS.flatMap(c => stats[c.id].per.map(p => p.rate)));
+  const t = document.getElementById('ovTable');
+  t.innerHTML = '<thead><tr><th>Concept</th><th>Topic</th>' + WORKS.map(w => '<th class="num">' + esc(w.short) + '<br>' + esc(w.data.meta.date) + '</th>').join('') + '<th>Leading term</th><th>Computed signals</th></tr></thead>';
+  const tb = el('tbody');
+  rows.forEach(c => {
+    const st = stats[c.id], tr = el('tr', 'row');
+    tr.appendChild(el('td', 'c-name', c.label));
+    tr.appendChild(el('td', 'c-grp', c.group));
+    st.per.forEach((p, wi) => {
+      const td = el('td', 'heat', p.n ? fmt(p.rate) : '—');
+      // one hue, light to dark, on a square-root scale so the rarer terms still show
+      const v = Math.sqrt(p.rate / maxRate);
+      td.style.background = p.n ? 'rgba(92,61,30,' + (0.08 + v * 0.82).toFixed(2) + ')' : 'transparent';
+      td.style.color = v > 0.5 ? 'var(--parchment)' : 'var(--ink)';
+      td.onmousemove = e => showTip(e, esc(WORKS[wi].data.meta.work) + ': <b>' + p.n + '</b> occurrences, ' + fmt(p.rate) + ' per 10,000 words' + (c.forms.length > 1 ? '<br>' + c.forms.map((f, i) => esc(f[0]) + ' ' + p.forms[i]).join(' · ') : ''));
+      td.onmouseleave = hideTip;
+      tr.appendChild(td);
+    });
+    const leads = st.per.map(p => p.lead >= 0 ? c.forms[p.lead][0].split(',')[0] : '—');
+    tr.appendChild(el('td', 'lead', new Set(leads).size === 1 ? leads[0] + ' throughout' : leads.join(' → ')));
+    const tg = el('td'); st.tags.forEach(x => tg.appendChild(el('span', 'tag', x))); tr.appendChild(tg);
+    tr.onclick = () => { closeOverview(); setConcept(c); };
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+}
+function openOverview() { renderOverview(); document.getElementById('overview').classList.add('on'); }
+function closeOverview() { document.getElementById('overview').classList.remove('on'); hideTip(); }
+
+/* ---------- wiring ---------- */
+const main = document.getElementById('panels');
+panels = WORKS.map(makePanel);
+panels.forEach(p => main.appendChild(p.root));
+CONCEPTS.forEach(c => { stats[c.id] = computeStats(c); });
+fillPicker();
+
+document.getElementById('concept').onchange = e => { const c = CONCEPTS.find(x => x.id === e.target.value); if (c) setConcept(c); };
+function stepConcept(d) {
+  const i = concept && !concept.custom ? CONCEPTS.indexOf(concept) : -1;
+  setConcept(CONCEPTS[(i + d + CONCEPTS.length) % CONCEPTS.length]);
+}
+document.getElementById('prevC').onclick = () => stepConcept(-1);
+document.getElementById('nextC').onclick = () => stepConcept(1);
+document.getElementById('custom').onsubmit = e => {
   e.preventDefault();
-  const inp = e.target.querySelector('input'), n = String(+inp.value);
-  const hit = [...document.querySelectorAll('#text .sec-par')].find(x => x.dataset.nums.split(',').includes(n));
-  if (hit) hit.scrollIntoView({ block: 'start' });
-  else { inp.setCustomValidity('No such §'); inp.reportValidity(); setTimeout(() => inp.setCustomValidity(''), 1500); }
+  const term = document.getElementById('cterm').value.trim();
+  if (term) setConcept(customConcept(term));
 };
+document.getElementById('openOv').onclick = openOverview;
+document.getElementById('closeOv').onclick = closeOverview;
+document.getElementById('ovSort').onchange = renderOverview;
+document.getElementById('overview').onclick = e => { if (e.target.id === 'overview') closeOverview(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOverview(); });
+document.getElementById('t-sum').onchange = e => { document.getElementById('summary').hidden = !e.target.checked; };
+document.getElementById('t-dim').onchange = e => document.body.classList.toggle('dim-on', e.target.checked);
 document.getElementById('t-aa').onchange = e => document.body.classList.toggle('hide-aa', !e.target.checked);
 document.getElementById('t-ms').onchange = e => document.body.classList.toggle('hide-ms', !e.target.checked);
 
-/* ---------- search panel ---------- */
-const scope = document.getElementById('scope');
-WORKS.forEach(w => {
-  const l = el('label'), c = el('input');
-  c.type = 'checkbox'; c.checked = true; c.value = w.key;
-  l.append(c, w.short);
-  scope.appendChild(l);
-});
-
-document.getElementById('searchForm').onsubmit = e => {
-  e.preventDefault();
-  const q = document.getElementById('q').value.trim();
-  const res = document.getElementById('results');
-  res.innerHTML = '';
-  activeQuery = q;
-  renderWork(current);   // re-render the open text so every occurrence is highlighted
-  if (!q) return;
-  const nq = fold(q), LIMIT = 200;
-  const keys = [...scope.querySelectorAll('input:checked')].map(c => c.value);
-  const sum = el('p', 'empty');
-  res.appendChild(sum);
-  let total = 0;
-  WORKS.filter(w => keys.includes(w.key)).forEach(w => {
-    const hits = [];
-    w.data.sections.forEach(s => s.blocks.forEach(b => {
-      if (b.kind === 'rule') return;
-      const at = fold(b.text).indexOf(nq);
-      if (at >= 0) hits.push({ s, b, at });
-    }));
-    total += hits.length;
-    res.appendChild(el('h4', null, w.data.meta.work + ' — ' + hits.length + (hits.length === 1 ? ' passage' : ' passages')));
-    hits.slice(0, LIMIT).forEach(h => {
-      const btn = el('button', 'hit');
-      const where = el('span', 'where', sectionLabel(h.s) + ' · AA 24:' + h.b.aa + (h.b.para ? ' · Meier ' + h.b.para.raw : ''));
-      const start = Math.max(0, h.at - 60), snip = el('span');
-      snip.innerHTML = (start ? '… ' : '') + highlight(h.b.text.slice(start, h.at + q.length + 100), q) + ' …';
-      btn.append(where, snip);
-      btn.onclick = () => {
-        if (current !== w) showWork(w, h.b.id);
-        else flashTo(document.getElementById(w.key + '-' + h.b.id));
-      };
-      res.appendChild(btn);
-    });
-    if (hits.length > LIMIT) res.appendChild(el('p', 'empty', 'Showing the first ' + LIMIT + '.'));
-  });
-  sum.textContent = total ? total + ' passages for “' + q + '”. Matches are highlighted in the open text.' : 'Nothing found for “' + q + '”. Try a shorter stem.';
-};
-
-showWork(WORKS[0]);
+// Start on the concept in the link (#wahrheit, #term=Gemüth), else on Wahrheit,
+// whose definition visibly moves between the three lectures.
+(function init() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h.startsWith('term=') && h.length > 5) { document.getElementById('cterm').value = h.slice(5); setConcept(customConcept(h.slice(5))); return; }
+  setConcept(CONCEPTS.find(c => c.id === h) || CONCEPTS.find(c => c.id === 'wahrheit'));
+})();
 </script>
 </body>
 </html>
