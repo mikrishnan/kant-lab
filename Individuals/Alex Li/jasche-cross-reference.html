@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jäsche Logik · cross-reference · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --rule: #cfc3a6;
+    --hit: rgba(214, 170, 60, 0.45);
+    /* one colour per lecture, muted to sit on the parchment */
+    --c-blomberg: 183, 121, 31;
+    --c-busolt: 63, 125, 107;
+    --c-wiener: 74, 95, 143;
+    --panel-w: 450px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: var(--parchment); color: var(--ink); font-family: 'EB Garamond', serif; font-size: 1.05rem; line-height: 1.5; display: flex; flex-direction: column; overflow: hidden; }
+  button, select, input { font: inherit; color: inherit; }
+
+  header { border-bottom: 1px solid var(--accent-light); background: var(--parchment-dark); padding: 0.6rem 1.25rem; display: flex; align-items: baseline; gap: 1.1rem; flex: none; }
+  header h1 { font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: 0.04em; font-size: 1.15rem; color: var(--accent); }
+  header .sub { color: var(--faded); font-size: 0.9rem; font-style: italic; }
+  header a { color: var(--faded); font-size: 0.88rem; margin-left: auto; }
+
+  .app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) var(--panel-w); }
+  .reader, .panel { min-height: 0; display: flex; flex-direction: column; }
+  .panel { border-left: 1px solid var(--accent-light); background: #f9f4e8; }
+
+  /* ── left: toolbar ─────────────────────────────────────────────────── */
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.9rem; padding: 0.55rem 1rem; border-bottom: 1px solid var(--accent-light); background: var(--parchment); flex: none; }
+  .bar .find { display: flex; align-items: center; gap: 0.3rem; flex: 1 1 15rem; min-width: 13rem; }
+  .bar input[type="search"] { flex: 1; min-width: 0; padding: 0.3rem 0.5rem; background: #fffaf0; border: 1px solid var(--accent-light); border-radius: 2px; }
+  .bar input[type="search"]:focus { outline: 2px solid rgba(139, 94, 60, 0.4); }
+  .btn { padding: 0.25rem 0.6rem; background: transparent; border: 1px solid var(--accent-light); border-radius: 2px; cursor: pointer; color: var(--accent); font-size: 0.92rem; }
+  .btn:hover { background: var(--parchment-dark); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .count { font-size: 0.85rem; color: var(--faded); min-width: 4.2rem; text-align: center; white-space: nowrap; }
+  .opt { font-size: 0.85rem; color: var(--faded); display: inline-flex; gap: 0.25rem; align-items: center; cursor: pointer; white-space: nowrap; }
+  .bar select { padding: 0.25rem 0.4rem; background: #fffaf0; border: 1px solid var(--accent-light); border-radius: 2px; max-width: 16rem; }
+  .xrbtn { font-family: 'Cinzel', serif; font-size: 0.74rem; letter-spacing: 0.04em; padding: 0.38rem 0.8rem; border: 1px solid var(--accent); border-radius: 2px; background: transparent; color: var(--accent); cursor: pointer; }
+  .xrbtn:hover { background: var(--parchment-dark); }
+  .xrbtn[aria-pressed="true"] { background: var(--accent); color: var(--parchment); }
+
+  .body { flex: 1; min-height: 0; display: grid; grid-template-columns: 250px minmax(0, 1fr); }
+  .toc { border-right: 1px solid var(--rule); background: #f9f4e8; overflow-y: auto; padding: 0.7rem 0.4rem 3rem 0.7rem; font-size: 0.93rem; }
+  .toc h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--faded); margin-bottom: 0.4rem; }
+  .toc .part { font-family: 'Cinzel', serif; font-size: 0.74rem; letter-spacing: 0.05em; color: var(--accent); margin: 0.85rem 0 0.2rem; }
+  .toc .row { display: flex; align-items: baseline; }
+  .toc button.t { flex: 1; text-align: left; background: transparent; border: none; cursor: pointer; padding: 0.12rem 0.35rem; border-radius: 2px; line-height: 1.3; color: var(--ink); }
+  .toc button.t:hover { background: var(--parchment-dark); }
+  .toc button.t.active { background: rgba(139, 94, 60, 0.18); font-weight: 600; }
+  .toc button.d { width: 1.1rem; background: transparent; border: none; cursor: pointer; color: var(--faded); font-size: 0.7rem; }
+  .toc .paras { margin: 0 0 0.3rem 1.1rem; border-left: 1px solid var(--rule); padding-left: 0.3rem; display: none; }
+  .toc .paras.open { display: block; }
+  .toc .paras button.t { font-size: 0.86rem; color: #4b3a22; }
+  .toc .rng { color: var(--faded); font-size: 0.8rem; }
+
+  .text { overflow-y: auto; padding: 1.1rem 1.5rem 5rem; background: #fffaf0; scroll-behavior: smooth; }
+  .inner { max-width: 44rem; margin: 0 auto; }
+  .work-meta { color: var(--faded); font-size: 0.88rem; margin-bottom: 0.8rem; }
+  .partlabel { font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 0.08em; color: var(--accent-light); margin: 2.4rem 0 0.2rem; text-transform: uppercase; }
+  h2.sec { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.12rem; letter-spacing: 0.03em; color: var(--accent); margin: 1.6rem 0 0.2rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--rule); }
+  h2.sec + .secnote { color: var(--faded); font-size: 0.85rem; font-style: italic; margin-bottom: 0.7rem; }
+  h3.par { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.86rem; letter-spacing: 0.04em; color: var(--accent); margin: 1.5rem 0 0.4rem 3.4rem; }
+  h3.par span { font-family: 'EB Garamond', serif; font-weight: 500; font-size: 1.02rem; letter-spacing: 0; color: var(--ink); }
+
+  .blk { position: relative; padding-left: 3.4rem; margin-bottom: 0.8rem; border-radius: 3px; }
+  .blk .gut { position: absolute; left: 0; top: 0.4rem; width: 3rem; text-align: right; font-family: 'Cinzel', serif; font-size: 0.64rem; color: var(--faded); text-decoration: none; }
+  .blk .gut:hover { color: var(--accent); text-decoration: underline; }
+  .blk p { font-size: 1.1rem; line-height: 1.7; hyphens: auto; }
+  .blk.ctr p { text-align: center; font-style: italic; color: #4b3a22; }
+  .blk.flash { animation: flash 2.6s ease-out; }
+  @keyframes flash { 0% { background: rgba(214, 170, 60, 0.5); } 100% { background: transparent; } }
+  hr.rule { border: none; border-top: 1px solid var(--rule); margin: 0.9rem 0 0.9rem 3.4rem; }
+  .pg { font-family: 'Cinzel', serif; font-size: 0.62rem; color: var(--faded); vertical-align: 0.18em; white-space: nowrap; padding: 0 0.15rem; border: 1px solid var(--rule); border-radius: 2px; margin: 0 0.15rem; background: var(--parchment); }
+  .unset { color: var(--faded); }
+  mark.hit, .hit { background: var(--hit); color: inherit; border-radius: 2px; }
+  .hit.cur { outline: 2px solid var(--accent); }
+
+  /* cross-reference highlights: colour is the lecture, line style is the strength */
+  .x { cursor: pointer; border-radius: 2px; }
+  .x.exact { border-bottom: 3px solid; }
+  .x.pot { border-bottom: 2px dashed; }
+  .x-blomberg { color: inherit; border-color: rgb(var(--c-blomberg)); }
+  .x-busolt { border-color: rgb(var(--c-busolt)); }
+  .x-wiener { border-color: rgb(var(--c-wiener)); }
+  .x-blomberg.exact { background: rgba(var(--c-blomberg), 0.30); } .x-blomberg.pot { background: rgba(var(--c-blomberg), 0.13); }
+  .x-busolt.exact   { background: rgba(var(--c-busolt), 0.30); }   .x-busolt.pot   { background: rgba(var(--c-busolt), 0.13); }
+  .x-wiener.exact   { background: rgba(var(--c-wiener), 0.30); }   .x-wiener.pot   { background: rgba(var(--c-wiener), 0.13); }
+  .x:hover { filter: brightness(0.93); }
+  .xchip { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.04em; color: #fff; padding: 0.02rem 0.3rem; border-radius: 2px; margin-right: 0.25rem; vertical-align: 0.2em; cursor: pointer; white-space: nowrap; }
+  .xchip.x-blomberg { background: rgb(var(--c-blomberg)); } .xchip.x-busolt { background: rgb(var(--c-busolt)); } .xchip.x-wiener { background: rgb(var(--c-wiener)); }
+
+  /* ── right: the cross-reference panel ──────────────────────────────── */
+  .phead { padding: 0.7rem 1rem 0.6rem; border-bottom: 1px solid var(--rule); flex: none; }
+  .phead h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.9rem; letter-spacing: 0.05em; color: var(--accent); }
+  .pbody { flex: 1; min-height: 0; overflow-y: auto; padding: 0.8rem 1rem 3rem; scroll-behavior: smooth; }
+  .off { color: var(--faded); font-style: italic; padding: 0.5rem 0; }
+  .off p { margin-bottom: 0.7rem; }
+  .ctl { display: grid; gap: 0.5rem; padding: 0.6rem 1rem; border-bottom: 1px solid var(--rule); background: #f9f4e8; flex: none; font-size: 0.9rem; }
+  .ctl .tol { display: flex; align-items: center; gap: 0.6rem; }
+  .ctl input[type="range"] { flex: 1; accent-color: var(--accent); }
+  .ctl .tolv { font-family: 'Cinzel', serif; font-size: 0.82rem; color: var(--accent); min-width: 2.6rem; text-align: right; }
+  .ctl .warn { color: #8a4b12; font-size: 0.82rem; font-style: italic; }
+  .filters { display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; align-items: center; }
+  .sw { display: inline-block; width: 0.8rem; height: 0.8rem; border-radius: 2px; vertical-align: -0.1em; margin-right: 0.15rem; }
+  .sw.l-blomberg { background: rgb(var(--c-blomberg)); } .sw.l-busolt { background: rgb(var(--c-busolt)); } .sw.l-wiener { background: rgb(var(--c-wiener)); }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; font-size: 0.82rem; color: var(--faded); }
+  .legend .ex { border-bottom: 3px solid var(--faded); background: rgba(122,106,82,0.28); padding: 0 0.3rem; }
+  .legend .po { border-bottom: 2px dashed var(--faded); background: rgba(122,106,82,0.12); padding: 0 0.3rem; }
+
+  .sum { font-size: 0.92rem; margin-bottom: 0.8rem; }
+  .sum b { font-weight: 600; }
+  .bars { margin: 0.4rem 0 0.2rem; display: grid; gap: 0.2rem; }
+  .bar2 { display: grid; grid-template-columns: 5.2rem 1fr 7.6rem; gap: 0.5rem; align-items: center; font-size: 0.84rem; }
+  .bar2 .track { height: 0.55rem; background: var(--parchment-dark); border-radius: 2px; overflow: hidden; display: flex; }
+  .bar2 .track i { display: block; height: 100%; }
+  .progress { height: 0.5rem; background: var(--parchment-dark); border-radius: 2px; overflow: hidden; margin: 0.6rem 0; }
+  .progress i { display: block; height: 100%; background: var(--accent-light); width: 0; transition: width 0.1s; }
+
+  .card { background: #fffaf0; border: 1px solid var(--rule); border-left: 5px solid var(--accent-light); border-radius: 3px; padding: 0.5rem 0.7rem; margin-bottom: 0.6rem; }
+  .card.l-blomberg { border-left-color: rgb(var(--c-blomberg)); } .card.l-busolt { border-left-color: rgb(var(--c-busolt)); } .card.l-wiener { border-left-color: rgb(var(--c-wiener)); }
+  .card.flash { animation: flash 2.6s ease-out; }
+  .card .head { display: flex; flex-wrap: wrap; gap: 0.15rem 0.55rem; align-items: baseline; font-size: 0.8rem; color: var(--faded); cursor: pointer; }
+  .card .who { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--accent); }
+  .tag { display: inline-block; padding: 0 0.4rem; border-radius: 2px; font-size: 0.72rem; border: 1px solid var(--rule); color: var(--faded); }
+  .tag.exact { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .tag.pot { border-style: dashed; border-color: var(--accent-light); color: var(--accent-light); }
+  .card .snip { margin-top: 0.3rem; font-size: 0.98rem; line-height: 1.45; cursor: pointer; }
+  .card .snip:hover { color: var(--accent); }
+  .card .more { margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px dashed var(--rule); display: none; }
+  .card.open .more { display: block; }
+  .pair { margin-bottom: 0.6rem; }
+  .pair .lab { font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.05em; color: var(--faded); text-transform: uppercase; display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+  .pair .lab a { text-transform: none; font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: 0.8rem; }
+  .pair p { font-size: 0.97rem; line-height: 1.5; }
+  .miss { background: rgba(160, 60, 40, 0.18); border-bottom: 1px solid rgba(160, 60, 40, 0.6); }
+  .extra { color: var(--faded); }
+  .srcpar { font-size: 0.9rem; color: #4b3a22; margin-top: 0.3rem; display: none; line-height: 1.5; }
+  .srcpar.open { display: block; }
+  .srcpar mark { background: rgba(214, 170, 60, 0.4); }
+  .linkbtn { background: none; border: none; color: var(--accent-light); text-decoration: underline; cursor: pointer; font-size: 0.8rem; padding: 0; }
+  .empty { color: var(--faded); font-style: italic; padding: 0.6rem 0; }
+  .foot { padding: 0.45rem 1rem; border-top: 1px solid var(--rule); font-size: 0.76rem; color: var(--faded); background: var(--parchment); flex: none; }
+
+  @media (max-width: 1000px) {
+    body { overflow: auto; }
+    .app { display: block; }
+    .reader { height: 75vh; } .panel { height: 85vh; border-left: none; border-top: 1px solid var(--accent-light); }
+    .body { grid-template-columns: 1fr; } .toc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Jäsche Logik</h1>
+  <span class="sub">AA IX, 1800 · read against Blomberg, Busolt and the Wiener Logik</span>
+  <a href="logic-corpus.html">Logic Corpus ↗</a>
+</header>
+
+<div class="app">
+  <section class="reader" aria-label="Jäsche Logik">
+    <div class="bar">
+      <div class="find">
+        <input type="search" id="q" placeholder="Search the Jäsche text…" autocomplete="off" spellcheck="false" aria-label="Search the Jäsche text">
+        <button class="btn" id="prev" title="Previous hit (Shift+Enter)" disabled>↑</button>
+        <button class="btn" id="next" title="Next hit (Enter)" disabled>↓</button>
+        <span class="count" id="count"></span>
+      </div>
+      <label class="opt" title="Let one printed spelling find the others: Schluß · Schlüsse, Logik · Logic, Begriff · Begrif"><input type="checkbox" id="loose" checked> spelling-tolerant</label>
+      <select id="goto" aria-label="Go to a section or §"></select>
+      <button class="xrbtn" id="xr" aria-pressed="false">Read Jäsche in cross-reference mode</button>
+    </div>
+    <div class="body">
+      <nav class="toc" id="toc" aria-label="Contents"></nav>
+      <div class="text" id="text"><div class="inner" id="inner"></div></div>
+    </div>
+  </section>
+
+  <aside class="panel" aria-label="Cross-reference">
+    <div class="phead"><h2>Cross-reference</h2></div>
+    <div class="ctl" id="ctl" hidden>
+      <div class="tol">
+        <label for="tol">Tolerance</label>
+        <input type="range" id="tol" min="60" max="100" step="5" value="90">
+        <span class="tolv" id="tolv">90%</span>
+      </div>
+      <div class="warn" id="tolwarn" hidden>Below the 90% rule: these are looser parallels, not likely copies.</div>
+      <div class="filters" id="filters"></div>
+      <div class="legend"><span><span class="ex">underline</span> exact overlap</span><span><span class="po">dashed</span> potential source</span></div>
+    </div>
+    <div class="pbody" id="pbody"></div>
+    <div class="foot" id="foot"></div>
+  </aside>
+</div>
+
+<!-- Shared data, as plain <script src> includes so the page still opens from a file:// URL.
+     The Jäsche Logik is Alex Li's own extraction (logik-jasche-9.js, beside this page);
+     the three lectures come from data/. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script src="logik-jasche-9.js"></script>
+<script>
+/* ── data ───────────────────────────────────────────────────────────────── */
+/* The lectures Jäsche is compared with. Another lecture is one more line here:
+   a { key, label, data, rgb } whose data has the same sections/blocks shape. */
+const XR_SOURCES = [
+  { key: 'blomberg', label: 'Blomberg', data: LOGIK_BLOMBERG },
+  { key: 'busolt',   label: 'Busolt',   data: LOGIK_BUSOLT },
+  { key: 'wiener',   label: 'Wiener',   data: LOGIK_WIENER }
+];
+const XR_MIN_WORDS = 6;        // a sentence shorter than this is not compared
+const XR_FLOOR = 0.6;          // the lowest tolerance the slider offers
+const XR_RULE = 0.9;           // the tolerance this tool was asked to apply
+const XR_GRAM = 3;             // shared word-run that nominates a candidate
+const XR_STOP_GRAM = 60;       // a run found this often is too common to nominate by
+const J = LOGIK_JASCHE;
+
+/* ── state ──────────────────────────────────────────────────────────────── */
+let xrOn = false;
+let xrReady = false;           // the comparison has been computed
+let tol = XR_RULE;
+let showWork = {};  XR_SOURCES.forEach(s => { showWork[s.key] = true; });
+let showStrength = { exact: true, pot: true };
+let query = '';
+let loose = true;
+let HITS = [];  let hitCur = -1;  let hitsByBlock = {};  let sentsByBlock = {};
+let XR = { sents: [], order: [], src: [], passages: [], bySent: new Map(), progress: 0 };
+const jb = {};  J.sections.forEach((s, si) => s.blocks.forEach(b => { jb[b.id] = { b, si }; }));
+const srcBlock = {};   // block id → { work, b }
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/* ── text helpers ───────────────────────────────────────────────────────── */
+const ABBR = /(?:^|[\s(])(?:d\.\s?h|d\.\s?i|z\.\s?b|z\.\s?e|u\.\s?s\.\s?w|u\.\s?s\.\s?f|u\.\s?dgl|u\.\s?a|s\.\s?w|s\.\s?o|v\.\s?a|bzw|etc|vgl|nr|no|dgl|m|c|dr|prof|st)\.$/i;
+function sentenceSpans(text) {
+  const out = []; let start = 0, m;
+  const re = /[.!?]+["»”’)\]]*\s+(?=["«„“(\[]?[A-ZÄÖÜ0-9])/g;
+  while ((m = re.exec(text))) {
+    const end = m.index + m[0].trimEnd().length;
+    if (ABBR.test(text.slice(start, end))) continue;
+    out.push([start, end]); start = m.index + m[0].length;
+  }
+  if (start < text.length) out.push([start, text.length]);
+  return out;
+}
+/* Words are compared after folding the spelling the lectures differ in:
+   case, ß/ss, umlauts, c/k, y/i, ph/f, th/t, tz/zz/z, doubled letters, gelahrt/gelehrt. */
+function normWord(w) {
+  return w.toLowerCase().replace(/ß/g, 'ss').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
+    .replace(/gelahr/g, 'gelehr').replace(/ch/g, '\u0001').replace(/ph/g, 'f').replace(/th/g, 't')
+    .replace(/c/g, 'k').replace(/\u0001/g, 'ch').replace(/y/g, 'i').replace(/tz|zz/g, 'z').replace(/(.)\1+/g, '$1');
+}
+function tokens(text) {
+  const out = [], re = /[A-Za-zÄÖÜäöüßæœ]+/g; let m;
+  while ((m = re.exec(text))) out.push({ w: normWord(m[0]), s: m.index, e: m.index + m[0].length });
+  return out;
+}
+function pageAt(b, off) { let p = b.aa; (b.pages || []).forEach(x => { if (x.i <= off) p = x.p; }); return p; }
+
+/* A query as a regular expression; spelling-tolerant widens it, never what is shown. */
+function qRegex(q, flags) {
+  const t = q.trim().toLowerCase().replace(/\s+/g, ' ');
+  if (!t) return null;
+  if (!loose) return new RegExp(escRe(t).replace(/ /g, '\\s+'), flags);
+  let out = '';
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i], two = t.slice(i, i + 2);
+    if (c === ' ') out += '\\s+';
+    else if (two === 'ss' || c === 'ß') { out += '(?:ss|ß)'; if (two === 'ss') i++; }
+    else if (two === 'tz' || two === 'zz' || c === 'z') { out += '(?:tz|zz|z)'; if (two === 'tz' || two === 'zz') i++; }
+    else if (two === 'th') { out += 'th?'; i++; }
+    else if (c === 'c' || c === 'k') out += '[ck]';
+    else if (c === 'y' || c === 'i') out += '[iy]';
+    else if (c === 'a' || c === 'ä') out += '[aä]';
+    else if (c === 'o' || c === 'ö') out += '[oö]';
+    else if (c === 'u' || c === 'ü') out += '[uü]';
+    else if ('flmnprt'.indexOf(c) >= 0) { out += c + '{1,2}'; if (t[i + 1] === c) i++; }
+    else out += escRe(c);
+  }
+  return new RegExp(out, flags);
+}
+
+/* ── the comparison ─────────────────────────────────────────────────────── */
+function buildSources() {
+  const src = [], gram = new Map();
+  XR_SOURCES.forEach(S => S.data.sections.forEach(sec => sec.blocks.forEach(b => {
+    if (b.kind !== 'text' || !b.text) return;
+    const t = tokens(b.text), id = src.length;
+    src.push({ work: S.key, b, t, w: t.map(x => x.w) });
+    srcBlock[b.id] = { work: S.key, b, id };
+    for (let i = 0; i + XR_GRAM <= t.length; i++) {
+      const key = t.slice(i, i + XR_GRAM).map(x => x.w).join(' ');
+      let a = gram.get(key); if (!a) gram.set(key, a = []);
+      a.push(id, i);
+    }
+  })));
+  return { src, gram };
+}
+function lcsLen(a, b) {
+  const n = a.length, m = b.length; let prev = new Uint16Array(m + 1), cur = new Uint16Array(m + 1);
+  for (let i = 1; i <= n; i++) { for (let j = 1; j <= m; j++) cur[j] = a[i - 1] === b[j - 1] ? prev[j - 1] + 1 : Math.max(prev[j], cur[j - 1]); const t = prev; prev = cur; cur = t; }
+  return prev[m];
+}
+function lcsPairs(a, b) {
+  const n = a.length, m = b.length, dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+  for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++) dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+  const pairs = []; let i = n, j = m;
+  while (i > 0 && j > 0) { if (a[i - 1] === b[j - 1]) { pairs.push([i - 1, j - 1]); i--; j--; } else if (dp[i - 1][j] >= dp[i][j - 1]) i--; else j--; }
+  return pairs.reverse();
+}
+/* The best window of each lecture for one Jäsche sentence: the share of its words
+   that occur, in order, in a stretch of that lecture's words only a little longer
+   than the sentence. A stretch is only tried where the two share a run of words. */
+function compareSentence(jw, S) {
+  const n = jw.length, cand = new Map();
+  for (let j = 0; j + XR_GRAM <= n; j++) {
+    const a = S.gram.get(jw.slice(j, j + XR_GRAM).join(' '));
+    if (!a || a.length > 2 * XR_STOP_GRAM) continue;
+    for (let h = 0; h < a.length; h += 2) cand.set(a[h] + ':' + Math.round((a[h + 1] - j) / 3), [a[h], a[h + 1] - j]);
+  }
+  const slack = Math.max(4, Math.ceil(n * 0.25)), best = {};
+  cand.forEach(([id, d]) => {
+    const src = S.src[id], lo = Math.max(0, d - slack), hi = Math.min(src.w.length, d + n + slack);
+    if (hi <= lo) return;
+    const win = src.w.slice(lo, hi), cov = lcsLen(jw, win) / n;
+    if (cov < XR_FLOOR) return;
+    const cur = best[src.work];
+    if (!cur || cov > cur.cov || (cov === cur.cov && win.length < cur.hi - cur.lo)) best[src.work] = { work: src.work, id, lo, hi, cov, n };
+  });
+  return best;
+}
+function finishMatch(m, jw, S) {
+  const win = S.src[m.id].w.slice(m.lo, m.hi);
+  m.pairs = lcsPairs(jw, win);
+  m.exact = false;
+  for (let q = 0; q + m.n <= win.length && !m.exact; q++) { let ok = true; for (let i = 0; i < m.n; i++) if (win[q + i] !== jw[i]) { ok = false; break; } m.exact = ok; }
+  m.matched = m.pairs.length;
+  return m;
+}
+
+function runComparison() {
+  const S = buildSources();
+  XR.src = S.src; XR.sents = []; XR.order = [];
+  const todo = [];
+  J.sections.forEach(sec => sec.blocks.forEach(b => {
+    if (b.kind !== 'text') return;
+    sentenceSpans(b.text).forEach(([s, e]) => { const t = tokens(b.text.slice(s, e)); if (t.length >= XR_MIN_WORDS) todo.push({ id: b.id, s, e, t, jw: t.map(x => x.w) }); });
+  }));
+  let k = 0;
+  return new Promise(resolve => {
+    (function step() {
+      const stop = Math.min(todo.length, k + 120);
+      for (; k < stop; k++) {
+        const sn = todo[k], best = compareSentence(sn.jw, S), keys = Object.keys(best);
+        sn.m = {}; keys.forEach(w => { sn.m[w] = finishMatch(best[w], sn.jw, S); });
+        XR.order.push(sn);
+      }
+      XR.progress = k / todo.length; paintProgress();
+      if (k < todo.length) setTimeout(step, 0);
+      else { sentsByBlock = {}; XR.order.forEach(sn => { (sentsByBlock[sn.id] = sentsByBlock[sn.id] || []).push(sn); }); xrReady = true; resolve(); }
+    })();
+  });
+}
+
+/* Which matches count at the current tolerance and filters, and how they group. */
+function active(sn) {
+  let pick = null;
+  for (const w of Object.keys(sn.m)) {
+    const m = sn.m[w];
+    if (!showWork[w] || m.cov + 1e-9 < tol) continue;
+    const kind = m.exact ? 'exact' : 'pot';
+    if (!showStrength[kind]) continue;
+    if (!pick || (m.exact && !pick.exact) || (m.exact === pick.exact && m.cov > pick.cov)) pick = m;
+  }
+  return pick;
+}
+function buildPassages() {
+  XR.passages = []; XR.bySent = new Map();
+  let cur = null, prev = null;
+  XR.order.forEach(sn => {
+    const m = active(sn); sn.act = m;
+    if (!m) { cur = null; prev = null; return; }
+    const pm = prev && prev.act;
+    const near = pm && pm.work === m.work && (
+      (pm.id === m.id && m.lo >= pm.lo && m.lo - pm.hi <= 30) ||
+      (m.id === pm.id + 1 && XR.src[m.id].work === XR.src[pm.id].work));
+    if (!cur || !near) { cur = { idx: XR.passages.length, work: m.work, sents: [] }; XR.passages.push(cur); }
+    cur.sents.push(sn); XR.bySent.set(sn, cur); prev = sn;
+  });
+  XR.passages.forEach(p => {
+    p.exact = p.sents.every(s => s.act.exact);
+    p.cov = p.sents.reduce((a, s) => a + s.act.cov, 0) / p.sents.length;
+    p.words = p.sents.reduce((a, s) => a + s.jw.length, 0);
+  });
+}
+
+/* ── left: the Jäsche text ──────────────────────────────────────────────── */
+const parts = [];
+J.sections.forEach(s => { let p = parts.find(x => x.name === s.part); if (!p) parts.push(p = { name: s.part, secs: [] }); p.secs.push(s); });
+const parasBySec = {};  J.paras.forEach(p => { (parasBySec[p.sec] = parasBySec[p.sec] || []).push(p); });
+
+function blockHtml(b) {
+  if (b.kind === 'rule') return '<hr class="rule" id="' + esc(b.id) + '">';
+  const text = b.text, cuts = new Set([0, text.length]), ranges = [], marks = {};
+  (b.em || []).forEach(([s, e]) => ranges.push({ s, e, tag: 'i' }));
+  [...text.matchAll(/￼/g)].forEach(m => ranges.push({ s: m.index, e: m.index + 1, cls: 'unset', title: 'A glyph the transcription could not set' }));
+  (hitsByBlock[b.id] || []).forEach(hi => { const h = HITS[hi]; ranges.push({ s: h.s, e: h.e, cls: 'hit' + (hi === hitCur ? ' cur' : ''), hit: hi }); });
+  if (xrOn && xrReady) {
+    (sentsByBlock[b.id] || []).forEach(sn => {
+      if (!sn.act) return;
+      const p = XR.bySent.get(sn);
+      ranges.push({ s: sn.s, e: sn.e, cls: 'x x-' + sn.act.work + ' ' + (sn.act.exact ? 'exact' : 'pot'), xr: p.idx });
+      if (p.sents[0] === sn) (marks[sn.s] = marks[sn.s] || []).push('<span class="xchip x-' + p.work + '" data-xr="' + p.idx + '" title="Open this passage in the cross-reference panel">' +
+        esc(XR_SOURCES.find(x => x.key === p.work).label) + (p.sents.length > 1 ? ' ×' + p.sents.length : '') + '</span>');
+    });
+  }
+  ranges.forEach(r => { cuts.add(r.s); cuts.add(r.e); });
+  (b.pages || []).forEach(x => { if (x.i > 0) { cuts.add(x.i); (marks[x.i] = marks[x.i] || []).push('<span class="pg" title="Academy Edition page begins here">‹' + x.p + '›</span>'); } });
+  const pts = [...cuts].sort((a, c) => a - c);
+  let html = '';
+  for (let k = 0; k < pts.length; k++) {
+    const s = pts[k], e = pts[k + 1];
+    if (marks[s]) html += marks[s].join('');
+    if (e === undefined || e <= s) continue;
+    const act = ranges.filter(r => r.s <= s && r.e >= e);
+    let piece = esc(text.slice(s, e)).replace(/￼/g, '⬚');
+    if (!act.length) { html += piece; continue; }
+    act.filter(r => r.tag).forEach(r => { piece = '<' + r.tag + '>' + piece + '</' + r.tag + '>'; });
+    const sp = act.filter(r => !r.tag);
+    if (sp.length) {
+      const cls = sp.map(r => r.cls).filter(Boolean).join(' ');
+      const xr = sp.find(r => r.xr !== undefined), hit = sp.find(r => r.hit !== undefined), ti = sp.find(r => r.title);
+      piece = '<span class="' + cls + '"' + (xr ? ' data-xr="' + xr.xr + '"' : '') + (hit ? ' data-hit="' + hit.hit + '"' : '') + (ti ? ' title="' + esc(ti.title) + '"' : '') + '>' + piece + '</span>';
+    }
+    html += piece;
+  }
+  const cls = 'blk' + (b.align === 'center' ? ' ctr' : '');
+  return '<div class="' + cls + '" id="' + esc(b.id) + '"' + (b.indent ? ' style="margin-left:' + (b.indent * 1.1) + 'rem"' : '') + '><a class="gut" href="#' + esc(b.id) + '" title="' + esc(b.id) + '">' + b.aa + '</a><p>' + html + '</p></div>';
+}
+
+function renderText() {
+  const m = J.meta;
+  let html = '<div class="work-meta">' + esc(m.work) + ' · ' + esc(m.date) + ' · ed. ' + esc(m.editor) + ' · AA ' + m.volume + ':' + m.aa[0] + '–' + m.aa[1] + '</div>';
+  let lastPart = null, lastPara = null;
+  J.sections.forEach(sec => {
+    if (sec.part !== lastPart) { lastPart = sec.part; html += '<div class="partlabel">' + esc(sec.part) + '</div>'; }
+    html += '<h2 class="sec" id="sec-' + sec.id + '">' + esc(sec.title) + '</h2>';
+    const note = [sec.running, sec.range && sec.range.raw].filter(Boolean).join(' · ');
+    if (note) html += '<div class="secnote">' + esc(note) + '</div>';
+    sec.blocks.forEach(b => {
+      if (b.para && b.para !== lastPara) {
+        lastPara = b.para;
+        const p = J.paras[b.para - 1];
+        html += '<h3 class="par" id="para-' + p.n + '">§. ' + p.n + '. <span>' + esc(p.title) + '</span></h3>';
+      }
+      html += blockHtml(b);
+    });
+  });
+  const keep = $('text').scrollTop;
+  $('inner').innerHTML = html;
+  $('text').style.scrollBehavior = 'auto'; $('text').scrollTop = keep; $('text').style.scrollBehavior = '';
+}
+
+function renderToc() {
+  let html = '<h2>CONTENTS</h2>';
+  parts.forEach(p => {
+    html += '<div class="part">' + esc(p.name) + '</div>';
+    p.secs.forEach(sec => {
+      const ps = parasBySec[sec.id] || [];
+      html += '<div class="row">' + (ps.length ? '<button class="d" data-open="' + sec.id + '" aria-label="Show the §§">▸</button>' : '<span style="width:1.1rem"></span>') +
+        '<button class="t" data-sec="' + sec.id + '" id="toc-' + sec.id + '">' + esc(sec.title) + (sec.range ? ' <span class="rng">' + esc(sec.range.raw.replace(/[\[\]]/g, '')) + '</span>' : '') + '</button></div>';
+      if (ps.length) html += '<div class="paras" id="paras-' + sec.id + '">' + ps.map(q => '<button class="t" data-para="' + q.n + '" id="toc-p' + q.n + '">§ ' + q.n + ' ' + esc(q.title) + '</button>').join('') + '</div>';
+    });
+  });
+  $('toc').innerHTML = html;
+  let g = '<option value="">Go to…</option>';
+  parts.forEach(p => { g += '<optgroup label="' + esc(p.name) + '">' + p.secs.map(sec => '<option value="sec-' + sec.id + '">' + esc(sec.title) + '</option>' + (parasBySec[sec.id] || []).map(q => '<option value="para-' + q.n + '">    § ' + q.n + ' ' + esc(q.title) + '</option>').join('')).join('') + '</optgroup>'; });
+  $('goto').innerHTML = g;
+}
+
+function flash(el, cls) { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 2800); }
+function scrollToId(id, fl) {
+  const el = document.getElementById(id); if (!el) return;
+  el.scrollIntoView({ block: fl ? 'center' : 'start' });
+  if (fl) flash(el.closest('.blk') || el, 'flash');
+}
+
+let tocTick = 0;
+function updateToc() {
+  const box = $('text'), top = box.getBoundingClientRect().top + 60;
+  let cur = null, curPara = null;
+  document.querySelectorAll('#inner h2.sec, #inner h3.par').forEach(h => {
+    if (h.getBoundingClientRect().top <= top) { if (h.classList.contains('sec')) { cur = h.id.slice(4); curPara = null; } else curPara = h.id.slice(5); }
+  });
+  document.querySelectorAll('#toc button.t.active').forEach(b => b.classList.remove('active'));
+  if (cur) { const t = $('toc-' + cur); if (t) { t.classList.add('active'); const ps = $('paras-' + cur); if (ps && !ps.classList.contains('open')) { ps.classList.add('open'); const d = document.querySelector('[data-open="' + cur + '"]'); if (d) d.textContent = '▾'; } } }
+  if (curPara) { const t = $('toc-p' + curPara); if (t) { t.classList.add('active'); } }
+}
+
+/* ── search over the Jäsche text ────────────────────────────────────────── */
+function runSearch() {
+  HITS = []; hitCur = -1; hitsByBlock = {};
+  const re = query.trim().length >= 2 ? qRegex(query, 'gi') : null;
+  if (re) J.sections.forEach(sec => sec.blocks.forEach(b => {
+    if (b.kind !== 'text') return;
+    re.lastIndex = 0; let m;
+    while ((m = re.exec(b.text))) { if (!m[0].length) { re.lastIndex++; continue; } (hitsByBlock[b.id] = hitsByBlock[b.id] || []).push(HITS.length); HITS.push({ id: b.id, s: m.index, e: m.index + m[0].length }); }
+  }));
+  paintCount();
+}
+function paintCount() {
+  $('count').textContent = query.trim().length < 2 ? '' : (HITS.length ? (hitCur >= 0 ? (hitCur + 1) + ' / ' : '') + HITS.length : 'no hits');
+  $('prev').disabled = $('next').disabled = !HITS.length;
+}
+function gotoHit(d) {
+  if (!HITS.length) return;
+  hitCur = hitCur < 0 ? (d > 0 ? 0 : HITS.length - 1) : (hitCur + d + HITS.length) % HITS.length;
+  renderText(); paintCount();
+  const el = document.querySelector('#inner .hit.cur');
+  if (el) el.scrollIntoView({ block: 'center' });
+}
+
+/* ── right: the panel ───────────────────────────────────────────────────── */
+function paintProgress() {
+  const el = document.querySelector('.progress i'); if (el) el.style.width = Math.round(XR.progress * 100) + '%';
+}
+const wlabel = k => XR_SOURCES.find(s => s.key === k).label;
+const pct = x => Math.round(x * 100) + '%';
+function citeJ(sn) { const r = jb[sn.id]; const para = r.b.para ? ' · § ' + r.b.para : ''; return 'AA 9:' + pageAt(r.b, sn.s) + para; }
+function citeS(m) { const S = XR.src[m.id], t = S.t[Math.min(m.lo, S.t.length - 1)]; return 'AA ' + XR_SOURCES.find(x => x.key === S.work).data.meta.volume + ':' + pageAt(S.b, t ? t.s : 0); }
+
+function diffJ(sn, m) {
+  const matched = new Set(m.pairs.map(p => p[0])), text = jb[sn.id].b.text.slice(sn.s, sn.e);
+  let out = '', last = 0;
+  sn.t.forEach((t, i) => { if (matched.has(i)) return; out += esc(text.slice(last, t.s - sn.s)) + '<span class="miss">' + esc(text.slice(t.s - sn.s, t.e - sn.s)) + '</span>'; last = t.e - sn.s; });
+  return out + esc(text.slice(last));
+}
+function diffS(m) {
+  const S = XR.src[m.id], matched = new Set(m.pairs.map(p => p[1] + m.lo)), a = S.t[m.lo].s, z = S.t[m.hi - 1].e, text = S.b.text;
+  let out = '', last = a;
+  for (let i = m.lo; i < m.hi; i++) { const t = S.t[i]; if (matched.has(i)) continue; out += esc(text.slice(last, t.s)) + '<span class="extra">' + esc(text.slice(t.s, t.e)) + '</span>'; last = t.e; }
+  return (a > 0 ? '… ' : '') + out + esc(text.slice(last, z)) + (z < text.length ? ' …' : '');
+}
+function srcParagraph(m) {
+  const S = XR.src[m.id], a = S.t[m.lo].s, z = S.t[m.hi - 1].e;
+  return esc(S.b.text.slice(0, a)) + '<mark>' + esc(S.b.text.slice(a, z)) + '</mark>' + esc(S.b.text.slice(z));
+}
+
+function passageCard(p) {
+  const first = p.sents[0], m = first.act, many = p.sents.length > 1;
+  const snip = jb[first.id].b.text.slice(first.s, first.e);
+  let body = '';
+  p.sents.forEach((sn, i) => {
+    const a = sn.act, S = XR.src[a.id];
+    body += '<div class="pair"><div class="lab"><span>Jäsche · ' + esc(citeJ(sn)) + '</span><span class="tag ' + (a.exact ? 'exact' : 'pot') + '">' + (a.exact ? 'exact' : 'potential source') + ' · ' + pct(a.cov) + ' (' + a.matched + '/' + a.n + ' words)</span></div>' +
+      '<p>' + diffJ(sn, a) + '</p>' +
+      '<div class="lab" style="margin-top:0.35rem"><span>' + esc(wlabel(a.work)) + ' · ' + esc(citeS(a)) + '</span><a href="logic-corpus.html#' + esc(S.b.id) + '" target="_blank" rel="noopener">open in Logic Corpus ↗</a> <button class="linkbtn" data-src="' + p.idx + '-' + i + '">source paragraph</button></div>' +
+      '<p>' + diffS(a) + '</p><div class="srcpar" id="sp-' + p.idx + '-' + i + '">' + srcParagraph(a) + '</div></div>';
+  });
+  return '<div class="card l-' + p.work + '" id="xc-' + p.idx + '" data-xr="' + p.idx + '">' +
+    '<div class="head" data-toggle="' + p.idx + '"><span class="who">' + esc(wlabel(p.work)) + '</span>' +
+    '<span class="tag ' + (p.exact ? 'exact' : 'pot') + '">' + (p.exact ? 'exact overlap' : 'potential source') + '</span>' +
+    '<span>' + (many ? p.sents.length + ' sentences · ' : '') + pct(p.cov) + '</span><span>' + esc(citeJ(first)) + '</span></div>' +
+    '<div class="snip" data-go="' + esc(first.id) + '" data-s="' + first.s + '">' + esc(snip.length > 190 ? snip.slice(0, 190) + '…' : snip) + '</div>' +
+    '<div class="more">' + body + '</div></div>';
+}
+
+function renderPanel() {
+  const body = $('pbody'), ctl = $('ctl');
+  if (!xrOn) {
+    ctl.hidden = true; $('foot').textContent = '';
+    body.innerHTML = '<div class="off"><p>Cross-reference mode is off.</p><p>Press <b>Read Jäsche in cross-reference mode</b> above the text. Each Jäsche sentence is then compared with Blomberg, Busolt and the Wiener Logik, and where one of them overlaps it, the sentence is highlighted in the lecture’s colour and listed here.</p></div>';
+    return;
+  }
+  ctl.hidden = false;
+  $('tolv').textContent = Math.round(tol * 100) + '%';
+  $('tolwarn').hidden = tol + 1e-9 >= XR_RULE;
+  $('filters').innerHTML = XR_SOURCES.map(s => '<label class="opt"><input type="checkbox" data-work="' + s.key + '"' + (showWork[s.key] ? ' checked' : '') + '><span class="sw l-' + s.key + '"></span>' + esc(s.label) + '</label>').join('') +
+    '<label class="opt"><input type="checkbox" data-str="exact"' + (showStrength.exact ? ' checked' : '') + '> exact</label><label class="opt"><input type="checkbox" data-str="pot"' + (showStrength.pot ? ' checked' : '') + '> potential source</label>';
+  if (!xrReady) {
+    body.innerHTML = '<div class="off"><p>Comparing ' + (XR.order.length || '1,600') + ' sentences with three lectures…</p><div class="progress"><i></i></div></div>';
+    paintProgress(); return;
+  }
+  XR.maxN = Math.max.apply(null, XR_SOURCES.map(s => XR.order.filter(x => x.act && x.act.work === s.key).length));
+  const ex = XR.passages.filter(p => p.exact).length, nS = XR.order.filter(s => s.act).length;
+  let sum = '<div class="sum"><b>' + nS + '</b> of ' + XR.order.length + ' sentences (≥ ' + XR_MIN_WORDS + ' words) overlap at ≥ ' + Math.round(tol * 100) + '% — in <b>' + XR.passages.length + '</b> passage' + (XR.passages.length === 1 ? '' : 's') + ', ' + ex + ' of them exact.';
+  sum += '<div class="bars">' + XR_SOURCES.map(s => {
+    const n = XR.order.filter(x => x.act && x.act.work === s.key).length, e = XR.order.filter(x => x.act && x.act.work === s.key && x.act.exact).length;
+    return '<div class="bar2"><span><span class="sw l-' + s.key + '"></span>' + esc(s.label) + '</span><span class="track"><i style="width:' + (n / Math.max(1, XR.maxN) * 100) + '%;background:rgb(var(--c-' + s.key + '))"></i></span><span>' + n + ' sentence' + (n === 1 ? '' : 's') + (e ? ' · ' + e + ' exact' : '') + '</span></div>';
+  }).join('') + '</div></div>';
+  body.innerHTML = sum + (XR.passages.length ? XR.passages.map(passageCard).join('') : '<div class="empty">Nothing overlaps at this tolerance. Lower it to see the nearest parallels.</div>');
+  $('foot').textContent = 'A machine comparison, not a finding: words are compared after folding spelling (ß/ss, c/k, y/i, tz/z, umlauts), in order. Exact = every word of the Jäsche sentence appears unbroken in the lecture; potential source = at least the tolerance share appears in order in a stretch of the lecture only slightly longer than the sentence.';
+}
+
+function refresh() { if (xrReady) buildPassages(); renderText(); renderPanel(); }
+
+async function setXr(on) {
+  xrOn = on; $('xr').setAttribute('aria-pressed', on);
+  $('xr').textContent = on ? 'Reading in cross-reference mode — press to leave' : 'Read Jäsche in cross-reference mode';
+  if (on && !xrReady) { renderPanel(); await runComparison(); }
+  refresh();
+}
+
+/* ── events ─────────────────────────────────────────────────────────────── */
+$('xr').addEventListener('click', () => setXr(!xrOn));
+$('toc').addEventListener('click', ev => {
+  const d = ev.target.closest('[data-open]'); if (d) { const el = $('paras-' + d.dataset.open); el.classList.toggle('open'); d.textContent = el.classList.contains('open') ? '▾' : '▸'; return; }
+  const s = ev.target.closest('[data-sec]'); if (s) { scrollToId('sec-' + s.dataset.sec); return; }
+  const p = ev.target.closest('[data-para]'); if (p) scrollToId('para-' + p.dataset.para);
+});
+$('goto').addEventListener('change', ev => { if (ev.target.value) scrollToId(ev.target.value); ev.target.value = ''; });
+$('text').addEventListener('scroll', () => { if (!tocTick) tocTick = requestAnimationFrame(() => { tocTick = 0; updateToc(); }); });
+
+let qTimer = 0;
+$('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => { query = $('q').value; runSearch(); renderText(); if (HITS.length) gotoHit(1); }, 160); });
+$('q').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); gotoHit(ev.shiftKey ? -1 : 1); } });
+$('prev').addEventListener('click', () => gotoHit(-1));
+$('next').addEventListener('click', () => gotoHit(1));
+$('loose').addEventListener('change', ev => { loose = ev.target.checked; runSearch(); renderText(); });
+
+$('tol').addEventListener('input', ev => { tol = +ev.target.value / 100; refresh(); });
+$('ctl').addEventListener('change', ev => {
+  const w = ev.target.dataset.work, s = ev.target.dataset.str;
+  if (w) showWork[w] = ev.target.checked; if (s) showStrength[s] = ev.target.checked;
+  if (w || s) refresh();
+});
+
+function openPassage(idx) {
+  const card = $('xc-' + idx); if (!card) return;
+  card.classList.add('open'); card.scrollIntoView({ block: 'center' }); flash(card, 'flash');
+}
+$('inner').addEventListener('click', ev => {
+  const x = ev.target.closest('[data-xr]'); if (x) { openPassage(+x.dataset.xr); return; }
+  const g = ev.target.closest('.gut'); if (g) { ev.preventDefault(); history.replaceState(null, '', g.getAttribute('href')); }
+});
+$('pbody').addEventListener('click', ev => {
+  const t = ev.target;
+  const sb = t.closest('[data-src]'); if (sb) { $('sp-' + sb.dataset.src).classList.toggle('open'); return; }
+  const go = t.closest('[data-go]'); if (go) { const card = go.closest('.card'); card.classList.add('open'); scrollToId(go.dataset.go, true); return; }
+  const h = t.closest('[data-toggle]'); if (h) h.closest('.card').classList.toggle('open');
+});
+window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (document.getElementById(id)) scrollToId(id, true); });
+
+/* ── init ───────────────────────────────────────────────────────────────── */
+renderToc(); renderText(); renderPanel(); updateToc();
+if (location.hash && document.getElementById(location.hash.slice(1))) scrollToId(location.hash.slice(1), true);
+</script>
+</body>
+</html>
