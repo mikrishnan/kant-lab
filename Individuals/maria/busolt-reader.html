@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kant's logic lectures and Meier's Auszug — Reading Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:        #1a1208;
+  --parchment:  #f4ede0;
+  --parch-dark: #e8dcc8;
+  --parch-deep: #d8ccb4;
+  --accent:     #5c3d1e;
+  --accent-lt:  #8b5e3c;
+  --faded:      #7a6a52;
+  --line:       #b8a88a;
+  --aa-ink:     #3a5a3a;
+  --aa-bg:      #eef5ee;
+  --aa-bd:      #8aaa8a;
+  --panel-bg:   #faf7f0;
+  --hit:        #f3d98a;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 19px; line-height: 1.55;
+  background: var(--parchment); color: var(--ink);
+  display: flex; flex-direction: column;
+}
+header {
+  background: var(--accent); color: var(--parchment);
+  padding: 10px 20px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px;
+}
+header h1 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.15rem; letter-spacing: .08em; margin: 0; }
+header .sub { font-size: .9rem; opacity: .85; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .85rem; padding: 6px 20px; border-bottom: 1px solid var(--line); background: var(--panel-bg); }
+input[type=search], input[type=number] {
+  font: inherit; padding: 3px 8px; border: 1px solid var(--line); border-radius: 3px;
+  background: var(--parchment); color: var(--ink);
+}
+.tools input[type=number] { width: 9em; }
+.tools label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+main { flex: 1; display: flex; min-height: 0; }
+#left { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+#works { display: flex; flex: none; gap: 0; background: var(--accent); padding: 0 12px; overflow-x: auto; }
+.work {
+  font: inherit; font-family: 'Cinzel', serif; font-size: .78rem; letter-spacing: .06em; white-space: nowrap;
+  color: var(--parch-deep); background: transparent; border: 0; border-bottom: 3px solid transparent;
+  padding: 8px 16px 6px; cursor: pointer;
+}
+.work small { font-family: 'EB Garamond', serif; font-size: .8rem; letter-spacing: 0; opacity: .8; margin-left: 6px; }
+.work:hover { color: #fff; }
+.work.on { color: #fff; border-bottom-color: var(--parchment); }
+.work .n { margin-left: 6px; color: var(--accent); background: var(--parchment); border-radius: 8px; padding: 0 6px; font-size: .64rem; }
+#tabs {
+  display: flex; flex: none; overflow-x: auto; background: var(--parch-dark);
+  border-bottom: 1px solid var(--line); padding: 6px 12px 0; gap: 2px;
+}
+.tab {
+  flex: none; font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .04em;
+  padding: 6px 11px; color: var(--accent); background: var(--parch-deep);
+  border: 1px solid var(--line); border-bottom: 0; border-radius: 4px 4px 0 0;
+  cursor: pointer; white-space: nowrap; max-width: 17em; overflow: hidden; text-overflow: ellipsis;
+}
+.tab:hover { background: var(--parchment); }
+.tab.on { background: var(--parchment); color: #2e1a00; font-weight: 600; margin-bottom: -1px; padding-bottom: 7px; }
+.tab.untitled { font-style: italic; }
+.tab .n { margin-left: 5px; color: #fff; background: var(--accent-lt); border-radius: 8px; padding: 0 5px; font-size: .62rem; }
+#reader { flex: 1; overflow-y: auto; padding: 24px 32px 80px; }
+#page { max-width: 46em; margin: 0 auto; }
+#page h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.3rem; color: #2e1a00; margin: 0 0 4px; letter-spacing: .04em; }
+.prov { font-size: .85rem; font-style: italic; color: var(--faded); margin-bottom: 18px; }
+.heads { font-size: .85rem; color: var(--faded); margin: -10px 0 14px; }
+.blk { position: relative; margin: 0 0 .75em; padding-left: 4.6em; scroll-margin-top: 12px; }
+
+.blk .mg {
+  position: absolute; left: 0; top: .25em; width: 3.8em; text-align: right; line-height: 1.25;
+  font-family: 'Cinzel', serif; font-size: .68rem; color: var(--aa-ink);
+}
+.blk .mg i { display: block; font-style: normal; color: var(--accent-lt); }
+.blk .mg .ct { display: block; font-family: 'EB Garamond', serif; font-size: .72rem; color: var(--faded); }
+.blk.flash { background: var(--hit); transition: background 1.5s; }
+.pg {
+  font-family: 'Cinzel', serif; font-size: .68rem; color: var(--aa-ink);
+  background: var(--aa-bg); border: 1px solid var(--aa-bd); border-radius: 3px;
+  padding: 0 4px; margin: 0 3px; white-space: nowrap; cursor: pointer;
+}
+body.nopg .pg { display: none; }
+.blk.inf .tx { border-bottom: 1px dashed var(--accent-lt); }
+.tag { font-size: .65rem; font-family: 'Cinzel', serif; color: var(--accent-lt); margin-left: 6px; letter-spacing: .05em; }
+body.noinf .tag { display: none; }
+body.noinf .blk.inf .tx { border-bottom: 0; }
+.ed { color: var(--accent-lt); }              /* editorial brackets, kept verbatim */
+.blk.rule { padding-left: 4.6em; }
+.blk.rule hr { border: 0; border-top: 1px solid var(--line); margin: .6em 0; }
+mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2px; }
+.step { display: flex; justify-content: space-between; margin-top: 30px; font-size: .9rem; }
+.step a { color: var(--accent); cursor: pointer; }
+#side {
+  width: 360px; flex: none; display: flex; flex-direction: column; min-height: 0;
+  background: var(--panel-bg); border-left: 1px solid var(--line);
+}
+#side h2 {
+  font-family: 'Cinzel', serif; font-weight: 400; font-size: .72rem; letter-spacing: .12em;
+  color: var(--faded); margin: 12px 16px 6px; text-transform: uppercase;
+}
+#side form { padding: 0 16px 8px; display: flex; gap: 6px; }
+#side input[type=search] { flex: 1; min-width: 0; font-size: 1rem; padding: 5px 9px; }
+#side button { font: inherit; font-size: .85rem; padding: 3px 10px; border: 1px solid var(--line); border-radius: 3px; background: var(--parch-dark); color: var(--accent); cursor: pointer; }
+#side .opts { padding: 0 16px 8px; font-size: .82rem; color: var(--faded); }
+#side .opts label { cursor: pointer; }
+#count { padding: 0 16px 6px; font-size: .85rem; color: var(--faded); }
+#hits { flex: 1; overflow-y: auto; border-top: 1px solid var(--line); }
+#hits .g {
+  font-family: 'Cinzel', serif; font-size: .68rem; letter-spacing: .06em; color: var(--accent);
+  background: var(--parch-dark); padding: 4px 16px; position: sticky; top: 0; cursor: pointer;
+}
+#hits .r { padding: 6px 16px; border-bottom: 1px solid var(--parch-dark); cursor: pointer; font-size: .9rem; line-height: 1.35; }
+#hits .r:hover { background: var(--parch-dark); }
+#hits .r .w { font-family: 'Cinzel', serif; font-size: .64rem; color: var(--aa-ink); display: block; }
+#hits .none { padding: 8px 16px; color: var(--faded); font-style: italic; font-size: .9rem; }
+@media (max-width: 860px) { main { flex-direction: column; } #side { width: auto; height: 40%; border-left: 0; border-top: 1px solid var(--line); } #reader { padding: 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Kant’s Logic</h1>
+  <span class="sub">Two student transcripts of the lectures (AA XXIV) and the textbook they follow, Meier’s Auszug (1752)</span>
+</header>
+<main>
+  <section id="left">
+    <div id="works" role="tablist" aria-label="Text"></div>
+    <div id="tabs" role="tablist" aria-label="Sections"></div>
+    <div class="tools">
+      <input type="number" id="goaa" placeholder="Go to AA page" aria-label="Go to page">
+      <label id="lpg"><input type="checkbox" id="tpg" checked> page breaks</label>
+      <label id="linf"><input type="checkbox" id="tinf" checked> inferred joins</label>
+    </div>
+    <div id="reader"><div id="page"></div></div>
+  </section>
+  <aside id="side">
+    <h2>Search terms</h2>
+    <form id="sf"><input type="search" id="q" placeholder="e.g. Urtheil, Begriff, cognitio" aria-label="Search" autocomplete="off"><button type="button" id="clr">Clear</button></form>
+    <div class="opts"><label><input type="checkbox" id="whole"> whole words only</label> &nbsp; <label><input type="checkbox" id="allw" checked> all three texts</label></div>
+    <div id="count">Type at least two letters. ß and ss are treated alike; case is ignored.</div>
+    <div id="hits"></div>
+  </aside>
+</main>
+
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="meier-auszug.js"></script>
+<script>
+/* ── data ──
+   LOGIK_BUSOLT and LOGIK_BLOMBERG come from ../../data/; MEIER_AUSZUG from meier-auszug.js.
+   All three are normalised into one shape, WORKS[].sections[].blocks[], below. */
+const ED_RE = /(\[[^\]]*\]|<[^>]*>)/g;   // [ Textlücke: … ], [AA: …], < bricht ab >
+
+function logikWork(key, L, label, sub) {
+  return {
+    key, label, sub, logik: true, aaRange: L.meta.aa,
+    goto: 'Go to AA page',
+    sections: L.sections.map(s => ({
+      id: s.id, untitled: !s.title,
+      label: s.title || (s.titleSrc === 'none' ? 'Titelei (no title)' : s.headings[0] || s.id),
+      headings: s.titleSrc === 'heading' ? [] : s.headings,
+      provenance: s.provenance, blocks: s.blocks
+    }))
+  };
+}
+function meierWork(M) {
+  return {
+    key: 'meier', label: 'Meier · Auszug', sub: '1752', logik: false, numRange: [1, 563],
+    goto: 'Go to §',
+    sections: M.nav.map((n, i) => ({
+      id: 'm' + String(i + 1).padStart(2, '0'), tabNo: n.sec_num == null ? 'Einl.' : n.part_num + '.' + n.sec_num,
+      label: n.sec_title_de, untitled: false,
+      headings: [n.part_title_de],
+      provenance: 'G. F. Meier, Auszug aus der Vernunftlehre (1752) · §§ ' + n.paras[0] + '–' + n.paras[n.paras.length - 1],
+      blocks: n.paras.map(num => ({
+        id: 'meier-para-' + num, kind: 'text', n: num, text: M.paras[String(num)], cite: M.citations[String(num)]
+      }))
+    }))
+  };
+}
+const WORKS = [
+  logikWork('busolt', LOGIK_BUSOLT, 'Logik Busolt', 'ca. 1789/90'),
+  logikWork('blomberg', LOGIK_BLOMBERG, 'Logik Blomberg', 'ca. 1771'),
+  meierWork(MEIER_AUSZUG)
+];
+
+/* ── state ── */
+let wi = 0;              // the text on show
+let cur = -1;            // the section on show
+let queryRe = null;      // the compiled search, or null
+let hitCount = null;     // per work, per section: occurrences, for the tab badges
+
+/* ── helpers ── */
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+const W = () => WORKS[wi];
+function secPages(s) {
+  const a = s.blocks.map(b => b.aa).filter(Boolean), z = s.blocks.map(b => b.aaEnd || b.aa).filter(Boolean);
+  return a.length ? (Math.min(...a) === Math.max(...z) ? '' + a[0] : Math.min(...a) + '–' + Math.max(...z)) : '';
+}
+function blockWhere(w, b) { return w.logik ? 'AA ' + b.aa : '§ ' + b.n; }
+function paraLabel(b) {                 // Blomberg's own § heading, as parsed numbers; the raw form stays in the tooltip
+  const n = b.para && b.para.nums;
+  if (!n || !n.length) return '';
+  if (n.length === 2 && /\d\s*[-–]\s*\d/.test(b.para.raw)) return '§ ' + n[0] + '–' + n[1];   // printed as a range
+  return '§ ' + (n.length > 3 ? n[0] + '…' + n[n.length - 1] : n.join(', '));
+}
+/* A search term as a regex over the text itself, so offsets stay true to it.
+   ß and ss match each other; case is ignored; optionally whole words only. */
+function makeRe(q, whole) {
+  q = q.trim();
+  if (q.length < 2) return null;
+  const body = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ß|ss/gi, '(?:ß|ss)');
+  return new RegExp(whole ? '(?<![\\p{L}])' + body + '(?![\\p{L}])' : body, 'giu');
+}
+
+/* Split text at its editorial brackets and search hits, appending to parent.
+   Everything goes in as text nodes — the text is never parsed as HTML. */
+function addText(parent, text) {
+  text.split(ED_RE).forEach(part => {
+    if (!part) return;
+    const host = /^[\[<]/.test(part) ? el('span', 'ed') : parent;
+    if (host !== parent) parent.appendChild(host);
+    if (!queryRe) { host.appendChild(document.createTextNode(part)); return; }
+    let i = 0, m;
+    queryRe.lastIndex = 0;
+    while ((m = queryRe.exec(part))) {
+      if (!m[0]) { queryRe.lastIndex++; continue; }
+      host.appendChild(document.createTextNode(part.slice(i, m.index)));
+      host.appendChild(el('mark', null, m[0]));
+      i = m.index + m[0].length;
+    }
+    host.appendChild(document.createTextNode(part.slice(i)));
+  });
+}
+
+function pageChip(p) {
+  const c = el('span', 'pg', 'AA ' + p);
+  c.title = 'AA 24:' + p + ' — click to link to this page';
+  c.onclick = () => { location.hash = W().key + ':aa-' + p; };
+  return c;
+}
+
+/* ── render ── */
+function buildWorks() {
+  const box = document.getElementById('works');
+  WORKS.forEach((w, i) => {
+    const b = el('button', 'work', w.label);
+    b.type = 'button';
+    b.setAttribute('role', 'tab');
+    b.dataset.w = i;
+    b.appendChild(el('small', null, w.sub));
+    b.onclick = () => showWork(i);
+    box.appendChild(b);
+  });
+}
+
+function buildTabs() {
+  const tabs = document.getElementById('tabs');
+  tabs.textContent = '';
+  const w = W();
+  w.sections.forEach((s, i) => {
+    const t = el('button', 'tab' + (s.untitled ? ' untitled' : ''), (s.tabNo || i + 1) + ' ' + s.label);
+    t.type = 'button';
+    t.setAttribute('role', 'tab');
+    t.dataset.i = i;
+    t.title = s.label + (w.logik && secPages(s) ? ' · AA 24:' + secPages(s) : '');
+    t.onclick = () => show(i);
+    tabs.appendChild(t);
+  });
+  const g = document.getElementById('goaa');
+  g.placeholder = w.goto;
+  g.min = w.logik ? w.aaRange[0] : w.numRange[0];
+  g.max = w.logik ? w.aaRange[1] : w.numRange[1];
+  g.value = '';
+  g.setCustomValidity('');
+  document.getElementById('linf').style.display = w.logik ? '' : 'none';
+  document.getElementById('lpg').style.display = w.logik ? '' : 'none';
+  document.querySelectorAll('#works .work').forEach(b => {
+    b.classList.toggle('on', +b.dataset.w === wi);
+    b.setAttribute('aria-selected', +b.dataset.w === wi);
+  });
+}
+
+function renderBlock(b) {
+  const d = el('div', 'blk');
+  d.id = b.id;
+  if (b.kind === 'rule') { d.className = 'blk rule'; d.appendChild(document.createElement('hr')); return d; }
+  const inferred = (b.joined || []).includes('inferred');
+  if (inferred) d.classList.add('inf');
+  const tx = el('span', 'tx');
+  const cuts = (b.pages || []).filter(p => p.i > 0);
+  let at = 0;
+  cuts.forEach(p => {
+    addText(tx, b.text.slice(at, p.i));
+    tx.appendChild(pageChip(p.p));
+    at = p.i;
+  });
+  addText(tx, b.text.slice(at));
+  d.appendChild(tx);
+  if (inferred) {
+    const t = el('span', 'tag', 'joined · inferred');
+    t.title = 'The transcription broke this line mid-sentence; the extractor joined the next line on its own judgement.';
+    d.appendChild(t);
+  }
+  if (b.kind === 'note') d.classList.add('xref');
+  return d;
+}
+
+function margin(w, b, prev) {
+  const m = el('span', 'mg');
+  if (!w.logik) {                                        // Meier: every block is a §
+    m.textContent = '§ ' + b.n;
+    if (b.cite) m.appendChild(el('span', 'ct', b.cite));
+    return m;
+  }
+  let any = false;
+  if ((b.pages || []).some(p => p.i === 0) || b.aa !== prev.end) { m.textContent = 'AA ' + b.aa; any = true; }
+  const pl = paraLabel(b);
+  if (pl && (!prev.b || !prev.b.para || prev.b.para.raw !== b.para.raw)) {
+    const i = el('i', null, pl);
+    i.title = 'Blomberg’s own heading: ' + b.para.raw;
+    m.appendChild(i); any = true;
+  }
+  return any ? m : null;
+}
+
+function show(i, blockId) {
+  const w = W();
+  if (i < 0 || i >= w.sections.length) return;
+  cur = i;
+  const s = w.sections[i], page = document.getElementById('page');
+  page.textContent = '';
+  page.appendChild(el('h2', null, s.label));
+  if (s.headings.length) page.appendChild(el('div', 'heads', (w.logik ? 'Manuscript heading: ' : '') + s.headings.join(' · ')));
+  page.appendChild(el('div', 'prov', s.provenance + (w.logik && secPages(s) ? ' · AA 24:' + secPages(s) : '')));
+  const prev = { end: 0, b: null };
+  s.blocks.forEach(b => {
+    const d = renderBlock(b);
+    if (b.kind !== 'rule') {
+      const m = margin(w, b, prev);
+      if (m) d.insertBefore(m, d.firstChild);
+      prev.end = b.aaEnd || b.aa; prev.b = b;
+    }
+    page.appendChild(d);
+  });
+  const step = el('div', 'step');
+  const pv = el('a', null, i > 0 ? '← ' + w.sections[i - 1].label : '');
+  const nx = el('a', null, i < w.sections.length - 1 ? w.sections[i + 1].label + ' →' : '');
+  pv.onclick = () => show(i - 1);
+  nx.onclick = () => show(i + 1);
+  step.append(pv, nx);
+  page.appendChild(step);
+  document.querySelectorAll('#tabs .tab').forEach(t => {
+    t.classList.toggle('on', +t.dataset.i === i);
+    t.setAttribute('aria-selected', +t.dataset.i === i);
+  });
+  const on = document.querySelector('#tabs .tab.on');
+  if (on) on.scrollIntoView({ block: 'nearest', inline: 'center' });
+  markTabs();
+  if (blockId) {
+    const t = document.getElementById(blockId);
+    if (t) { t.scrollIntoView({ block: 'center' }); t.classList.add('flash'); setTimeout(() => t.classList.remove('flash'), 1600); return; }
+  }
+  document.getElementById('reader').scrollTop = 0;
+}
+
+function showWork(k, si, blockId) {
+  wi = k;
+  buildTabs();
+  show(si || 0, blockId);
+}
+
+/* AA page / § number → where it is */
+function findAA(p) {
+  const w = W();
+  for (let i = 0; i < w.sections.length; i++)
+    for (const b of w.sections[i].blocks)
+      if (b.aa && p >= b.aa && p <= (b.aaEnd || b.aa)) return { i, id: b.id };
+  return null;
+}
+function findPara(n) {
+  const w = W();
+  for (let i = 0; i < w.sections.length; i++)
+    for (const b of w.sections[i].blocks) if (b.n === n) return { i, id: b.id };
+  return null;
+}
+function goTo(n) {
+  const hit = W().logik ? findAA(n) : findPara(n);
+  if (hit) show(hit.i, hit.id);
+  return !!hit;
+}
+
+/* ── search ── */
+function markTabs() {
+  document.querySelectorAll('#tabs .n').forEach(n => n.remove());
+  if (!hitCount) return;
+  document.querySelectorAll('#tabs .tab').forEach(t => {
+    const n = hitCount[wi][+t.dataset.i];
+    if (n) t.appendChild(el('span', 'n', n));
+  });
+}
+
+function runSearch() {
+  queryRe = makeRe(document.getElementById('q').value, document.getElementById('whole').checked);
+  const all = document.getElementById('allw').checked;
+  const box = document.getElementById('hits'), count = document.getElementById('count');
+  box.textContent = '';
+  document.querySelectorAll('#works .n').forEach(n => n.remove());
+  if (!queryRe) {
+    hitCount = null;
+    count.textContent = 'Type at least two letters. ß and ss are treated alike; case is ignored.';
+    if (cur >= 0) show(cur);
+    return;
+  }
+  hitCount = WORKS.map(w => w.sections.map(() => 0));
+  const groups = [], perWork = WORKS.map(() => 0);
+  let total = 0, passages = 0;
+  WORKS.forEach((w, k) => {
+    if (!all && k !== wi) return;
+    w.sections.forEach((s, i) => {
+      const rows = [];
+      s.blocks.forEach(b => {
+        if (b.kind === 'rule') return;
+        queryRe.lastIndex = 0;
+        const first = queryRe.exec(b.text);
+        if (!first) return;
+        let n = 1;
+        while (queryRe.exec(b.text)) n++;
+        rows.push({ b, k: first.index, len: first[0].length });
+        total += n; passages++; perWork[k] += n; hitCount[k][i] += n;
+      });
+      if (rows.length) groups.push({ k, i, rows });
+    });
+  });
+  count.textContent = total
+    ? total + ' occurrence' + (total === 1 ? '' : 's') + ' in ' + passages + ' passage' + (passages === 1 ? '' : 's') +
+      ' across ' + groups.length + ' section' + (groups.length === 1 ? '' : 's') + '.'
+    : 'Nothing found. Spelling is each text’s own (Nuzzen, Urtheil, Kenntniße / Erkenntniss).';
+  document.querySelectorAll('#works .work').forEach(b => {
+    const n = perWork[+b.dataset.w];
+    if (n) b.appendChild(el('span', 'n', n));
+  });
+  let shown = 0;
+  groups.forEach(g => {
+    if (shown >= 400) return;
+    const w = WORKS[g.k], s = w.sections[g.i];
+    const h = el('div', 'g', w.label + ' · ' + (s.tabNo || g.i + 1) + ' ' + s.label + ' · ' + g.rows.length);
+    h.onclick = () => showWork(g.k, g.i, g.rows[0].b.id);
+    box.appendChild(h);
+    g.rows.forEach(x => {
+      if (shown++ >= 400) return;
+      const r = el('div', 'r');
+      r.appendChild(el('span', 'w', blockWhere(w, x.b)));
+      const t = x.b.text, from = Math.max(0, x.k - 50);
+      r.appendChild(document.createTextNode((from ? '…' : '') + t.slice(from, x.k)));
+      r.appendChild(el('mark', null, t.slice(x.k, x.k + x.len)));
+      r.appendChild(document.createTextNode(t.slice(x.k + x.len, x.k + x.len + 70) + '…'));
+      r.onclick = () => showWork(g.k, g.i, x.b.id);
+      box.appendChild(r);
+    });
+  });
+  if (passages > 400) box.appendChild(el('div', 'none', 'Showing the first 400 passages; narrow the term, or search one text at a time.'));
+  // re-render what is on show so the highlights and tab badges follow the search
+  if (groups.some(g => g.k === wi && g.i === cur)) show(cur);
+  else {
+    const first = groups.find(g => g.k === wi) || groups[0];
+    if (first) showWork(first.k, first.i, first.rows[0].b.id);
+    else if (cur >= 0) show(cur);
+  }
+}
+
+/* ── events ── */
+let timer;
+document.getElementById('q').addEventListener('input', () => {
+  clearTimeout(timer);
+  timer = setTimeout(runSearch, 250);
+});
+document.getElementById('sf').addEventListener('submit', e => e.preventDefault());
+document.getElementById('whole').onchange = runSearch;
+document.getElementById('allw').onchange = runSearch;
+document.getElementById('clr').onclick = () => { document.getElementById('q').value = ''; runSearch(); document.getElementById('q').focus(); };
+document.getElementById('goaa').addEventListener('change', e => {
+  const n = +e.target.value, w = W();
+  if (!goTo(n)) e.target.setCustomValidity(w.logik ? 'Not in AA 24:' + w.aaRange[0] + '–' + w.aaRange[1] : 'Not in §§ 1–563'), e.target.reportValidity();
+  else e.target.setCustomValidity('');
+});
+document.getElementById('tpg').onchange = e => document.body.classList.toggle('nopg', !e.target.checked);
+document.getElementById('tinf').onchange = e => document.body.classList.toggle('noinf', !e.target.checked);
+window.addEventListener('hashchange', route);
+
+/* #busolt  #blomberg:s06  #blomberg:aa-80  #meier:para-12   (a bare #aa-614 or #s04 means Busolt) */
+function route() {
+  let h = location.hash.slice(1), k = 0;
+  const m0 = /^(busolt|blomberg|meier)(?::(.*))?$/.exec(h);
+  if (m0) { k = WORKS.findIndex(w => w.key === m0[1]); h = m0[2] || ''; }
+  if (k !== wi || cur < 0) { wi = k; buildTabs(); cur = -1; }
+  let m;
+  if ((m = /^aa-(\d+)$/.exec(h)) && WORKS[wi].logik && goTo(+m[1])) return;
+  if ((m = /^para-(\d+)$/.exec(h)) && !WORKS[wi].logik && goTo(+m[1])) return;
+  const i = WORKS[wi].sections.findIndex(s => s.id === h);
+  if (i >= 0) return show(i);
+  if (cur < 0) show(0);
+}
+
+/* ── init ── */
+buildWorks();
+route();
+</script>
+</body>
+</html>

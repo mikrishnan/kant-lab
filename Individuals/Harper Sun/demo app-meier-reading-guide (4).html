@@ -1123,8 +1123,8 @@ header h1 {
 <!-- Shared data. Adickes' chronology of the phases of Kant's hand (AA XIV) and
      the Reflexionen on Meier extracted from AA XVI. Both are plain <script>
      includes rather than fetch() so the page still works from a file:// URL. -->
-<script src="../data/phases-adickes.js"></script>
-<script src="../data/reflexionen-16-meier.js"></script>
+<script src="../../data/phases-adickes.js"></script>
+<script src="../../data/reflexionen-16-meier.js"></script>
 
 <script>
 // ── Fallback stubs for external data files (phases-adickes.js, reflexionen-16-meier.js) ──
@@ -2601,20 +2601,14 @@ async function fetchTranslation(paraNum) {
   translationPending[key] = true;
 
   // MyMemory has a 500-char limit per request; split longer paragraphs into
-  // sentence-sized chunks and join the results.
-  const chunks = splitIntoChunks(german, 480);
+  // sentence-sized chunks and join the results. Chunks are sent one at a time
+  // (a burst of parallel requests trips MyMemory's rate limit), and each chunk
+  // falls back to a second free endpoint if MyMemory refuses or is unreachable.
+  const chunks = splitIntoChunks(german.replace(/\u00a0/g, ' '), 480);
 
   try {
-    const parts = await Promise.all(chunks.map(async chunk => {
-      const url = 'https://api.mymemory.translated.net/get?q='
-                + encodeURIComponent(chunk) + '&langpair=de|en';
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const data = await resp.json();
-      if (data.responseStatus !== 200) throw new Error(data.responseDetails || 'Translation failed');
-      return data.responseData.translatedText;
-    }));
-
+    const parts = [];
+    for (const chunk of chunks) parts.push(await translateChunk(chunk));
     const text = parts.join(' ');
     translationCache[key] = text;
     delete translationPending[key];
@@ -2624,6 +2618,33 @@ async function fetchTranslation(paraNum) {
     delete translationPending[key];
     return { error: e.message };
   }
+}
+
+async function translateChunk(chunk) {
+  const q = encodeURIComponent(chunk);
+  const attempts = [
+    async () => {
+      const r = await fetch('https://api.mymemory.translated.net/get?q=' + q + '&langpair=de|en');
+      if (!r.ok) throw new Error('MyMemory HTTP ' + r.status);
+      const d = await r.json();
+      const t = d.responseData && d.responseData.translatedText;
+      // Over quota, MyMemory can answer with a warning in place of a translation.
+      if (Number(d.responseStatus) !== 200 || !t || /MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(t))
+        throw new Error('MyMemory: ' + (d.responseDetails || t || 'no translation'));
+      return t;
+    },
+    async () => {
+      const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=en&dt=t&q=' + q);
+      if (!r.ok) throw new Error('fallback HTTP ' + r.status);
+      const d = await r.json();
+      return d[0].map(x => x[0]).join('');
+    }
+  ];
+  let last;
+  for (const go of attempts) {
+    try { return await go(); } catch (e) { last = e; console.warn(e.message); }
+  }
+  throw last;
 }
 
 // Split text into chunks no longer than maxLen, breaking at sentence boundaries.

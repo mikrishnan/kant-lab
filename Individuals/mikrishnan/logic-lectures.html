@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Three Logic Lectures · Kant Lab</title>
+<!--
+  Kant's three logic lectures of AA XXIV, in full, side by side or one at a time.
+  The text is data/logik-*.js, loaded and never copied; nothing is added to it here.
+-->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --parchment-deeper: #d9cdb0;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #9e8d6f;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; flex-direction: column;
+    background: var(--parchment); color: var(--ink);
+    font-family: 'EB Garamond', Garamond, serif; font-size: 1.05rem; line-height: 1.5;
+  }
+
+  header {
+    flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.1rem;
+    padding: .55rem 1.2rem; background: var(--parchment-dark); border-bottom: 1px solid var(--accent-light);
+  }
+  header h1 { margin: 0; font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.1rem; letter-spacing: .04em; color: var(--accent); }
+  header a { color: var(--faded); font-size: .9rem; }
+  .legend { margin-left: auto; font-size: .86rem; color: var(--faded); }
+  .legend .dash { display: inline-block; height: .9rem; border-left: 2px dashed var(--accent-light); vertical-align: -.15rem; margin: 0 .3rem 0 .1rem; }
+  button, select { font: inherit; }
+  button { cursor: pointer; padding: .2rem .7rem; background: transparent; color: var(--accent); border: 1px solid var(--line); border-radius: 3px; }
+  button:hover { background: var(--parchment-deeper); }
+  button[aria-pressed=true] { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  .layouts { display: flex; gap: .3rem; flex-wrap: wrap; }
+  select { padding: .2rem .4rem; color: var(--ink); background: var(--parchment); border: 1px solid var(--line); border-radius: 3px; }
+  button:focus-visible, select:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 1px; }
+
+  main { flex: 1 1 auto; min-height: 0; display: grid; overflow-x: auto; }
+  main.cols3 { grid-template-columns: repeat(3, minmax(22rem, 1fr)); }
+  main.one { grid-template-columns: minmax(0, 1fr); }
+  .col { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-right: 1px solid var(--parchment-deeper); }
+  .col:last-child { border-right: 0; }
+  .col[hidden] { display: none; }
+  .colhead { flex: none; padding: .45rem .9rem; background: var(--parchment); border-bottom: 1px solid var(--parchment-deeper); }
+  .colhead .name { font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: .03em; color: var(--accent); }
+  .colhead .meta { color: var(--faded); font-size: .88rem; }
+  .colhead select { width: 100%; margin-top: .3rem; }
+  .colbody { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: .6rem .9rem 5rem; }
+  main.one .colbody > .inner { max-width: 50rem; margin: 0 auto; }
+
+  .sec { margin: 0 0 1.4rem; }
+  .sectitle { margin: 1.2rem 0 .1rem; font-family: 'Cinzel', serif; font-weight: 600; font-size: 1rem; letter-spacing: .03em; color: var(--accent); }
+  .secmeta { margin: 0 0 .8rem; font-size: .86rem; color: var(--faded); }
+  .secmeta i { display: block; }
+
+  .blk { position: relative; margin: 0 0 .65rem; padding-left: 3.6rem; font-size: 1.08rem; line-height: 1.62; }
+  .blk .gutter { position: absolute; left: 0; top: .2rem; width: 3.2rem; text-align: right; font-family: 'Cinzel', serif; font-size: .7rem; line-height: 1.3; color: var(--faded); }
+  .blk .gutter .para { display: block; color: var(--accent); }
+  .blk.inferred { border-left: 2px dashed var(--accent-light); margin-left: -.4rem; padding-left: 4rem; }
+  .blk.inferred .gutter { left: .4rem; }
+  .blk.note { font-style: italic; color: var(--faded); font-size: .98rem; }
+  .blk.rule hr { border: 0; border-top: 1px solid var(--line); margin: .7rem 0; }
+  .pg { font-family: 'Cinzel', serif; font-size: .68rem; color: var(--accent); background: var(--parchment-dark); border: 1px solid var(--parchment-deeper); border-radius: 2px; padding: 0 .22rem; margin: 0 .12rem; white-space: nowrap; cursor: default; }
+  .ms { font-size: .75rem; color: var(--faded); margin: 0 .1rem; cursor: default; }
+  .ed { color: var(--faded); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Three Logic Lectures</h1>
+  <a href="../../">Kant Lab</a>
+  <div class="layouts" id="layouts" role="group" aria-label="Layout"></div>
+  <div class="legend"><span class="dash"></span>joined by the extractor’s judgement &nbsp; ‖ 28 = AA page 28 begins &nbsp; [ms 8] = manuscript page</div>
+</header>
+
+<main id="main"></main>
+
+<!-- Shared data, as plain <script src> includes so the page still works from a file:// URL. See data/README.md. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+
+<script>
+// ── Data ──
+// Each work is { meta, sections }. A section's blocks are paragraphs of running prose
+// (kind "text"), AA cross-references ("note") or rules; the AA and manuscript pages are
+// kept as offsets into a block's text.
+const WORKS = [
+  { key: 'blomberg', short: 'Blomberg', L: LOGIK_BLOMBERG },
+  { key: 'busolt',   short: 'Busolt',   L: LOGIK_BUSOLT },
+  { key: 'wiener',   short: 'Wiener',   L: LOGIK_WIENER },
+];
+const EDITORIAL = /\[[^\]]*\]|<[^>]*>/g;     // [ Textlücke: AA: Die ]  [AA: judicium ]  < bricht ab >
+
+function sectionTitle(sec) {
+  if (sec.title) return sec.title;
+  if (sec.titleSrc === 'none') return '[Titelei]';        // the transcription gives it no title
+  return (sec.headings && sec.headings[0]) || '[untitled]';
+}
+function aaRange(a, b) { return a === b ? 'AA 24:' + a : 'AA 24:' + a + '–' + b; }
+
+// ── State ──
+let layout = 'cols3';                        // 'cols3', or the key of the one work shown
+const cols = {};                             // work key -> { root, body, select, secEls, jumping }
+
+// ── Render ──
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in (attrs || {})) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  }
+  for (const kid of kids.flat()) {
+    if (kid == null || kid === false) continue;
+    e.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return e;
+}
+
+// A block's text, with the AA page breaks, the manuscript's pages and the editorial brackets
+function fillText(parent, b) {
+  const t = b.text, len = t.length;
+  const eds = [...t.matchAll(EDITORIAL)].map(m => [m.index, m.index + m[0].length]);
+  const marks = new Map();
+  const addMark = (i, node) => { if (!marks.has(i)) marks.set(i, []); marks.get(i).push(node); };
+  for (const pg of b.pages || []) if (pg.i > 0) addMark(pg.i, el('span', { class: 'pg', title: 'AA 24:' + pg.p + ' begins here' }, '‖ ' + pg.p));
+  for (const m of b.ms || []) addMark(m.i, el('span', { class: 'ms', title: 'The manuscript\'s own page ' + m.p + ' begins here' }, '[ms ' + m.p + ']'));
+  const cuts = new Set([0, len, ...marks.keys()]);
+  for (const [a, c] of eds) { cuts.add(a); cuts.add(c); }
+  const pts = [...cuts].filter(x => x >= 0 && x <= len).sort((x, y) => x - y);
+  for (let k = 0; k < pts.length; k++) {
+    const a = pts[k], c = pts[k + 1];
+    for (const m of marks.get(a) || []) parent.append(m);
+    if (c === undefined) break;
+    const piece = t.slice(a, c);
+    if (eds.some(([s, e]) => a >= s && c <= e)) parent.append(el('span', { class: 'ed' }, piece));
+    else parent.append(piece);
+  }
+}
+
+function buildSection(sec, title, from, to) {
+  const box = el('section', { class: 'sec' });
+  box.append(el('h3', { class: 'sectitle' }, title));
+  box.append(el('p', { class: 'secmeta' }, aaRange(from, to),
+    ...(sec.headings || []).filter(h => h !== title).map(h => el('i', null, h)),
+    el('i', null, sec.provenance || '')));
+  let prevAa = null, prevPara = null;
+  for (const b of sec.blocks) {
+    const blk = el('div', { class: 'blk ' + b.kind });
+    if ((b.joined || []).includes('inferred')) {
+      blk.classList.add('inferred');
+      blk.title = 'This paragraph was joined from more than one line of the transcription on the extractor\'s own judgement.';
+    }
+    if (b.kind === 'rule') { blk.append(el('hr')); box.append(blk); continue; }
+    const gutter = el('div', { class: 'gutter' });
+    if (b.aa !== prevAa) gutter.append('AA ' + b.aa);
+    const para = b.para && b.para.raw;
+    if (para && para !== prevPara) gutter.append(el('span', { class: 'para', title: 'Meier\'s § as the transcription heads it' }, para));
+    prevAa = b.aaEnd || b.aa; prevPara = para || prevPara;
+    blk.append(gutter);
+    fillText(blk, b);
+    box.append(blk);
+  }
+  return box;
+}
+
+function buildColumn(W) {
+  const meta = W.L.meta;
+  const select = el('select', { 'aria-label': W.short + ': go to section' });
+  const inner = el('div', { class: 'inner' });
+  const body = el('div', { class: 'colbody' }, inner);
+  const secEls = [];
+  W.L.sections.forEach((sec, i) => {
+    let from = Infinity, to = 0;
+    for (const b of sec.blocks) { from = Math.min(from, b.aa); to = Math.max(to, b.aaEnd || b.aa); }
+    const title = sectionTitle(sec);
+    const node = buildSection(sec, title, from, to);
+    secEls.push(node); inner.append(node);
+    select.append(el('option', { value: String(i) }, (i + 1) + '. ' + title + ' (' + aaRange(from, to) + ')'));
+  });
+  const root = el('div', { class: 'col', id: 'col-' + W.key },
+    el('div', { class: 'colhead' },
+      el('div', { class: 'name' }, meta.label), el('div', { class: 'meta' }, meta.date + ' · AA 24:' + meta.aa[0] + '–' + meta.aa[1] + ' · ' + W.L.sections.length + ' sections'),
+      select),
+    body);
+  const col = { root, body, select, secEls, jumping: false };
+  select.addEventListener('change', () => {          // jump to a section
+    col.jumping = true;
+    body.scrollTop = secEls[Number(select.value)].offsetTop - 6;
+    requestAnimationFrame(() => { col.jumping = false; });
+  });
+  let queued = false;
+  body.addEventListener('scroll', () => {            // the list follows the reading
+    if (queued || col.jumping) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      let cur = 0;
+      for (let i = 0; i < secEls.length; i++) if (secEls[i].offsetTop - 40 <= body.scrollTop) cur = i;
+      select.value = String(cur);
+    });
+  });
+  return col;
+}
+
+function applyLayout() {
+  $main.className = layout === 'cols3' ? 'cols3' : 'one';
+  for (const W of WORKS) {                     // a hidden column forgets its place, so keep it
+    const c = cols[W.key], hide = layout !== 'cols3' && layout !== W.key;
+    if (hide && !c.root.hidden) c.saved = c.body.scrollTop;
+    c.root.hidden = hide;
+    if (!hide && c.saved != null) { c.body.scrollTop = c.saved; c.saved = null; }
+  }
+  const choices = [['cols3', 'Side by side'], ...WORKS.map(W => [W.key, W.short + ' alone'])];
+  $layouts.replaceChildren(...choices.map(([k, label]) =>
+    el('button', { 'aria-pressed': String(k === layout), onclick: () => { layout = k; applyLayout(); } }, label)));
+}
+
+// ── Events ──
+// (each column wires its own scroll and select in buildColumn)
+
+// ── Init ──
+const $main = document.getElementById('main');
+const $layouts = document.getElementById('layouts');
+for (const W of WORKS) { cols[W.key] = buildColumn(W); $main.append(cols[W.key].root); }
+applyLayout();
+for (const W of WORKS) {                       // begin each lecture at its first titled section, not its title page
+  const first = W.L.sections.findIndex(sec => sec.titleSrc !== 'none');
+  if (first > 0) { cols[W.key].select.value = String(first); cols[W.key].select.dispatchEvent(new Event('change')); }
+}
+</script>
+</body>
+</html>

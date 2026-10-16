@@ -12,15 +12,15 @@
 :root{
   --lapis:#1c2b52;        /* the night sky of the canvas */
   --lapis-deep:#15213f;
-  --gilt:#d2ad4c;         /* lines and differentiae on the canvas */
-  --gilt-ink:#80620f;     /* gilt, darkened for text on paper */
-  --paper:#f1f0ea;        /* reading panel */
-  --paper-2:#e6e4da;      /* sidebar */
-  --card:#f6f4ec;
+  --gilt:#6fb3ff;         /* lines and differentiae on the canvas */
+  --gilt-ink:#1f5fa8;     /* gilt, darkened for text on paper */
+  --paper:#eef3fa;        /* reading panel */
+  --paper-2:#dde7f4;      /* sidebar */
+  --card:#f3f7fc;
   --ink:#1f2635;
   --ink-2:#4f5668;
   --ink-3:#7a8091;
-  --rule:#cfccbf;
+  --rule:#c2cfe2;
   --link:#2b4486;
   --text:"Libre Caslon Text", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --display:"Libre Caslon Display", "Libre Caslon Text", Georgia, serif;
@@ -111,7 +111,7 @@ main{display:grid;grid-template-columns:17.5rem minmax(0,1fr) 25rem;min-height:0
   background-image:
     radial-gradient(1px 1px at 12% 18%, #fff 50%, transparent 51%),
     radial-gradient(1px 1px at 33% 72%, #fff 50%, transparent 51%),
-    radial-gradient(1.4px 1.4px at 58% 26%, #f3e3b0 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 58% 26%, #cfe6ff 50%, transparent 51%),
     radial-gradient(1px 1px at 81% 61%, #fff 50%, transparent 51%),
     radial-gradient(1px 1px at 70% 88%, #fff 50%, transparent 51%),
     radial-gradient(1.2px 1.2px at 22% 46%, #dfe6ff 50%, transparent 51%),
@@ -135,12 +135,12 @@ main{display:grid;grid-template-columns:17.5rem minmax(0,1fr) 25rem;min-height:0
 .card rect.inner{fill:none;stroke:rgba(31,38,53,.12);stroke-width:1}
 .card:hover rect.face{stroke:var(--gilt)}
 .card.path rect.face{stroke:var(--gilt);stroke-width:1.6}
-.card.sel rect.face{fill:#fffdf4;stroke:var(--gilt);stroke-width:3}
-.card.root rect.face{fill:#fbf8ec}
-.card.empty rect.face{fill:rgba(246,244,236,.18);stroke:rgba(246,244,236,.55);stroke-dasharray:4 4}
+.card.sel rect.face{fill:#f7fbff;stroke:var(--gilt);stroke-width:3}
+.card.root rect.face{fill:#eef5ff}
+.card.empty rect.face{fill:rgba(243,247,252,.18);stroke:rgba(243,247,252,.55);stroke-dasharray:4 4}
 .card.empty text{fill:#e9ecf5}
 .card.formula rect.face{stroke-dasharray:6 3}
-.card.hidden rect.face{fill:#2a3b68;stroke:rgba(210,173,76,.55)}
+.card.hidden rect.face{fill:#2a3b68;stroke:rgba(111,179,255,.55)}
 .card.hidden text{fill:#e9ecf5}
 .card:focus-visible{outline:none}
 .card:focus-visible rect.face{stroke:#fff;stroke-width:3}
@@ -158,7 +158,7 @@ main{display:grid;grid-template-columns:17.5rem minmax(0,1fr) 25rem;min-height:0
 .stage-ui{position:absolute;z-index:2;display:flex;gap:.3rem}
 .zoom{right:.8rem;bottom:.8rem;flex-direction:column}
 .zoom button{
-  width:2rem;height:2rem;border-radius:3px;border:1px solid rgba(210,173,76,.6);background:rgba(21,33,63,.85);
+  width:2rem;height:2rem;border-radius:3px;border:1px solid rgba(111,179,255,.6);background:rgba(21,33,63,.85);
   color:var(--gilt);cursor:pointer;font-size:1.05rem;line-height:1
 }
 .zoom button:hover{background:var(--gilt);color:var(--lapis-deep)}
@@ -1285,7 +1285,7 @@ function renderPanel(){
       }
       h += `<div class="g ${i === path.length - 1 ? "here" : ""}" ${i < path.length - 1 ? `data-go="${esc(keyOf(p))}" role="button" tabindex="0"` : ""}>${esc(disp(p))}</div>`;
     });
-    h += `</div><p class="hint">Gold, left: the difference taken at each step. Struck through, right: the opposed branches it rules out.</p></section>`;
+    h += `</div><p class="hint">Blue, left: the difference taken at each step. Struck through, right: the opposed branches it rules out.</p></section>`;
   }
 
   if(n.gloss) h += `<section><h3>Gloss</h3><p>${esc(n.gloss)}</p></section>`;

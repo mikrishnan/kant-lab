@@ -44,7 +44,7 @@ which waits on O12 below. Unless noted otherwise, each task needs the repository
 The ruleset depends on `.github/CODEOWNERS` being on `main`. Without it, "require review
 from Code Owners" has nothing to enforce.
 
-- [ ] **O7. A ruleset on `main`.** Go to Settings → Rules → Rulesets → New ruleset →
+- [x] **O7. A ruleset on `main`.** *Done: active by 10 October 2026.* Go to Settings → Rules → Rulesets → New ruleset →
   New branch ruleset, and set:
   - Name `main`, Enforcement status **Active**, target: **Default branch**;
   - Bypass list: **Repository admin**, and the maintainers on the `*` line of `.github/CODEOWNERS`;

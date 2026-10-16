@@ -4,6 +4,14 @@ An interactive reading guide to **A. G. Baumgarten, *Metaphysica*** (4th edition
 Halle 1757 — the text reprinted as Academy Edition vol. XVII, and the textbook Kant
 lectured from for forty years).
 
+**Owners:** Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), who also own
+the Meier reader and the shared data in [`../data/`](../data/). Text errors, bugs and
+proposals go to them, through the issue forms described in the
+[root README](../README.md).
+
+**Spec:** [SPEC.md](SPEC.md) — what the tool does, item by item, and the questions it
+leaves open.
+
 ## Running it
 
 Open [baumgartenreading-guide.html](baumgartenreading-guide.html) in any modern

@@ -5,6 +5,14 @@ An interactive reading guide to **G. F. Meier, *Auszug aus der Vernunftlehre*** 
 book whose interleaved pages carry the *Reflexionen zur Logik* of Academy Edition
 vol. XVI.
 
+**Owners:** Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), who also own
+the Baumgarten reader and the shared data in [`../data/`](../data/). Text errors, bugs and
+proposals go to them, through the issue forms described in the
+[root README](../README.md).
+
+**Spec:** [SPEC.md](SPEC.md) — what the tool does, item by item, and the questions it
+leaves open.
+
 ## Running it
 
 Open [meier-reading-guide.html](meier-reading-guide.html) in any modern browser —

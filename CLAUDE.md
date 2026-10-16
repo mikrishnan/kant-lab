@@ -24,7 +24,10 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | [.claude/launch.json](.claude/launch.json) | The preview server for the Claude desktop app's Browser pane: `python3 -m http.server` at the repository root |
 
 Each SPA directory has its own `CLAUDE.md` with the data shapes and function map for
-that app, and a `README.md` aimed at a human opening it for the first time.
+that app, and a `README.md` aimed at a human opening it for the first time. The two
+readers also have a `SPEC.md`, which is the source of truth for what each does, as a
+group's spec is for its tool. Each spec numbers the tool's behaviours, marks those that
+fail at present, and keeps a list of open questions.
 
 ## Architecture: one HTML file per app, plus shared generated data
 
@@ -47,6 +50,9 @@ might read, or that participants should be able to extend without touching app c
 | [data/reflexionen-16-meier.js](data/reflexionen-16-meier.js) | The Reflexionen on Meier's *Auszug* (AA XVI). **Generated** — see below. |
 | [data/metaphysica-17.js](data/metaphysica-17.js) | Baumgarten's *Metaphysica* itself (AA XVII): 804 §§ and the work's outline. **Generated** — see below. |
 | [data/reflexionen-17-18-baumgarten.js](data/reflexionen-17-18-baumgarten.js) | The Reflexionen on Baumgarten's *Metaphysica* (AA XVII–XVIII), 2967 of them. **Generated** — see below. |
+| [data/logik-blomberg-24.js](data/logik-blomberg-24.js) | *Logik Blomberg*, Kant's logic lecture of ca. 1771 (AA 24:7–301), keyed to Meier's §§. **Generated** — see below. |
+| [data/logik-busolt-24.js](data/logik-busolt-24.js) | *Logik Busolt*, ca. 1789/90 (AA 24:603–686). **Generated** — see below. |
+| [data/logik-wiener-24.js](data/logik-wiener-24.js) | The *Wiener Logik*, 1780ff. (AA 24:785–940). **Generated** — see below. |
 | [data/tradition-meier.js](data/tradition-meier.js) | `TRADITION`, the Meier reader's parallel passages from Wolff, the Scholastics and Aristotle, keyed to Meier's §§. **Hand-curated** — edit it directly; its header says how. |
 
 They are `<script src>` includes rather than `fetch()` on purpose: a classic script tag
@@ -98,6 +104,12 @@ through the UI, and a pull request should say which of the two was done.
 Everything in `data/` except `phases-adickes.js` and `tradition-meier.js` is
 machine-extracted and **must not be hand-edited**; corrections belong in the extractor so
 they survive the next run.
+
+These pipelines belong to the readers' owners, along with `data/`, `scripts/` and
+`Textfiles/` (see "Git" below). This section stays here, so that every session sees it.
+A pull request that changes a pipeline's commands or what an extractor knows updates
+this section in the same pull request. Since this file is outside the owners' folders,
+that also brings in the professor's approval.
 
 `textutil` is macOS-only, so as things stand **regenerating needs a Mac**. Committing its
 `.txt` output, so that the Python steps run anywhere, is the open task in
@@ -200,14 +212,89 @@ Things the extractor knows about the AA's conventions, which are easy to break:
 - A capital `Α` (U+0391) in the transcription is an OCR artefact of Latin `A` ("Αus"),
   not a phase.
 
+### The Logik transcripts of AA XXIV
+
+```sh
+textutil -convert txt -output /tmp/blomberg.txt Textfiles/Vol24logikBlomberg.rtfd/TXT.rtf
+textutil -convert txt -output /tmp/busolt.txt   Textfiles/Vol24logikBusolt.rtf
+textutil -convert txt -output /tmp/wiener.txt   Textfiles/Vol24logikWien.rtf
+python3 scripts/parse_logik.py blomberg /tmp/blomberg.txt data/logik-blomberg-24.js
+python3 scripts/parse_logik.py busolt   /tmp/busolt.txt   data/logik-busolt-24.js
+python3 scripts/parse_logik.py wiener   /tmp/wiener.txt   data/logik-wiener-24.js
+```
+
+These transcriptions set the text in short lines broken by the Academy Edition's page
+markers, so one paragraph of the lecture arrives in three or four pieces. The extractor
+joins them back into running prose and keeps every page the prose crossed as a character
+offset into it, so that any stretch can still be cited as `AA 24:N` and the pagination
+put back exactly where it stood.
+
+`parse_logik.py` prints a report per work — sections, blocks, words, the AA page range
+and any gap in it, how many paragraph joins were attested and how many inferred,
+manuscript pages, and, for Blomberg, the Meier §§ it found. **Read it.** It ends in
+`clean` when every block **round-trips**: re-inserting the page markers it pulled out, at
+the offsets it recorded, reproduces the transcription's own text exactly. Know what that
+does **not** cover: it checks the blocks that were emitted, not that every line of the
+transcription became one. A line dropped before a block was ever built — as the title bug
+below dropped two paragraphs — passes `clean`. Check the block and word counts against
+the previous run too.
+
+All three report a gap over the first few pages — `7→9, 9→11` in Blomberg, and the same
+pattern in the other two. That is the volume's front matter standing on rectos with blank
+versos between, not a dropped page. Leave it.
+
+What the extractor knows about these transcriptions, which is easy to break:
+
+- `― xxiv.162 ―` marks the *start* of AA XXIV page 162. The suffixed forms `613u` and
+  `613uu` are the transcription's way of marking a second and third anchor on one page,
+  not pages of their own; both are page 613, and the raw form is kept beside the number.
+- `|` marks a page break, and **at the end of a line, before a page marker, it is the
+  signal that the paragraph continues** — a page marker with no `|` before it falls
+  between two paragraphs. Getting this backwards either shatters the text into
+  page-sized fragments or runs unrelated paragraphs together. Tight against the
+  preceding character it rejoins a split word (`Gewiß|heit` → `Gewißheit`); with a space
+  before it, it fell between two whole words and becomes a space.
+- `||` is not that. In the Wiener Logik `|| V` marks 57 passages and is kept verbatim.
+- `[471]` is the manuscript's own pagination, lifted out of the text into `ms` with the
+  offset it stood at, as the AA pages are. Every other bracket is editorial and stays:
+  `[ Textlücke: AA: Die ]`, `[AA: judicium ]`, `[erg. nicht]`, `< bricht ab >`.
+- A section opens with its provenance line — `[Logik Busolt] (ca. 1789/90. Ms.: Berlin.
+  Nach dem Orig.)` — followed by the manuscript's own heading, sometimes twice and in a
+  different form, and *usually* preceded by the section's title as well. Those after are
+  kept as `headings`, unreconciled with `title`, because the difference is the AA's.
+- **The line before the provenance line is not always a title**, and taking it on trust
+  cost two paragraphs of Blomberg: where that printing is absent, the line before is the
+  previous section's last paragraph, which became the title and was cut from the text
+  with it. So it is taken as the title only when the transcription prints it after the
+  provenance line too — compared on letters alone, since the two printings differ in
+  punctuation and in where the `|` line breaks fall. Otherwise the manuscript's heading
+  stands in and the line stays where it belongs. `titleSrc` records which happened:
+  `line`, `heading`, or `none` for the Titelei of Busolt and the Wiener Logik, which the
+  transcription gives no title at all. The report counts the three.
+- Blomberg alone keys its lecture to Meier's §§, in headings that stand alone on their
+  line: `§ 249`, `§: 92: et §: 93:`, `§ 66- 91`, `§phus 250`. The heading is kept
+  verbatim with the numbers parsed out beside it, so a tool can line the lecture up
+  against the Meier reader. A § inside a sentence is a cross-reference and stays in the
+  text.
+- The InteLex navigation and copyright lines wrapping the transcription are not the AA,
+  and are dropped.
+
+Per "Attested vs. inferred" below: a paragraph joined on the transcription's own `|`
+carries `joined: ["mark"]`; one joined on the extractor's judgement — the line broke off
+without terminal punctuation and the next began in lower case — carries
+`joined: ["inferred"]`, so a reader can see the paragraph break was removed by inference.
+
 ## Shared conventions
 
-**Design language.** All three apps use the same palette and typography: a parchment
-background (`--parchment`, warm off-white), dark ink text, `EB Garamond` for body copy,
-`Cinzel` for small-caps display headings and labels, and a sienna/brown accent
-(`--accent`, `#5c3d1e` family). Colour and font choices live in a `:root` custom-property
-block at the top of each `<style>`. Keep new UI inside that vocabulary rather than
-introducing new hues — the parchment look is deliberate and consistent across the suite.
+**Design language.** The apps share one typography: `EB Garamond` for body copy and
+`Cinzel` for small-caps display headings and labels. The Baumgarten reader and the
+Porphyrian tree also share one palette: a parchment background (`--parchment`, warm
+off-white), dark ink text, and a sienna/brown accent (`--accent`, `#5c3d1e` family). The
+Meier reader is the exception, with a dark navy header and sidebar and a Prussian-blue
+accent; whether it should follow the others is Open question 7 in
+[meier-reader/SPEC.md](meier-reader/SPEC.md). Colour and font choices live in a `:root`
+custom-property block at the top of each `<style>`. Keep new UI inside its app's
+vocabulary rather than introducing new hues.
 
 **Data-first script layout.** Each `<script>` opens with the content data as `const`s,
 then state `let`s, then builder/render functions, then event wiring, then an init call
@@ -313,12 +400,21 @@ consequences worth knowing:
 ## Git
 
 `main` is protected: every change arrives by pull request, and `.github/CODEOWNERS`
-decides who must approve it. In short, the professor approves anything outside
-`groups/` and `Individuals/`; another member of the group approves changes to a group's
-folder; and `Individuals/` changes need no approval. Pull requests are squash-merged,
-so a pull request's title becomes its commit message. Keep titles short and
-descriptive of the scholarly content rather than the code, as the history so far is.
-There is no CI.
+decides who must approve it. In short:
+
+- the Baumgarten and Meier readers, and `data/`, `scripts/` and `Textfiles/`, belong to
+  their student owners, Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), either
+  of whom approves the other's changes;
+- another member of the group approves changes to a group's folder;
+- `Individuals/` changes need no approval;
+- the professor approves everything else.
+
+A pull request that touches folders with different owners needs an approval from each,
+so keep each one within a single owner's folders where you can.
+
+Pull requests are squash-merged, so a pull request's title becomes its commit message.
+Keep titles short and descriptive of the scholarly content rather than the code, as the
+history so far is. There is no CI.
 
 Participants push through the GitHub web UI, often many commits at a time, so **fetch
 before you believe the working tree.**

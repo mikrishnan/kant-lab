@@ -1,6 +1,6 @@
 # Work in progress
 
-Handoff notes, written 3 October 2026 and updated 6 October 2026. Read this alongside
+Handoff notes, written 3 October 2026 and updated 10 October 2026. Read this alongside
 the root [CLAUDE.md](CLAUDE.md), which is the standing description of the repository —
 this file is only the state of play.
 
@@ -9,6 +9,38 @@ How the repository is now run — working groups, specs, pull requests, review �
 [docs/maintaining.md](docs/maintaining.md). What is left of that rollout is in
 [docs/todo-in-repo.md](docs/todo-in-repo.md) and
 [docs/todo-outside-repo.md](docs/todo-outside-repo.md).
+
+## 9–10 October 2026: student owners for the readers, and their specs
+
+The Baumgarten and Meier readers were handed to Sophia Wyatt (@sophia-wyatt) and Maria
+(@mari637-pixel), together with `data/`, `scripts/` and `Textfiles/`: working out how to
+handle the data is meant to be their work. `.github/CODEOWNERS` gained a line for each of
+those five folders, and the docs that said the professor approves the tools now say who
+does. [docs/maintaining.md](docs/maintaining.md) has a new section, *Tools with student
+owners*, on handing over a tool and taking it back.
+
+The pipeline's commands stay in "Regenerating the generated data" in the root
+`CLAUDE.md`, so that every session sees them. A pull request that changes them updates
+that section too, and so needs the professor's approval as well as an owner's; the
+section now says so. The ruleset on `main` (O7) is active, so `CODEOWNERS` is enforced.
+
+**Each reader has a `SPEC.md`**, drafted on 10 October from what the page did, with
+every Behaviour item checked by driving the page in headless Chrome (not clicked through
+by hand). Items the page does not satisfy are marked **Fails at present**. The owners'
+first job is to review them. The drafting turned up several things the specs record as
+Open questions:
+
+- **Baumgarten:** the scroll problem, now diagnosed (item 1 below); the page's
+  `lang="la"` making the font show every upright u as v, German included; and ten
+  Reflexionen tagged `no § stated` whose own locus note names a §, most of them with
+  the end of their entry header run into the text (about 40 entries have that debris).
+- **Meier:** 6 of its 9 unfound lemmata are missed only because the text has
+  non-breaking spaces; two blocks in the panel are headed `§§ 1–5` though the AA gives
+  them no §; the Tradition entries carry no edition, page or annotator; and its palette
+  is not the suite's.
+
+`meier-reader/CLAUDE.md` had drifted from the code. It said 562 §§ were present (all
+563 are), and it described a `switchWork()` that no longer exists. Both are corrected.
 
 ## 6 October 2026: the working-group rollout
 
@@ -38,8 +70,8 @@ Made on the `jweirich/spike/revamp-layout` branch, for review before it reaches 
   build. `meier-reader/CLAUDE.md`'s line map, which had drifted by more than a hundred
   lines, was redone.
 
-**Nothing enforces any of this yet.** `CODEOWNERS` does nothing until the ruleset in
-O7 of the outside-repo list exists, and every participant can still push to `main`.
+**Nothing enforced any of this at first.** `CODEOWNERS` does nothing without the ruleset
+in O7 of the outside-repo list. The ruleset was active by 10 October 2026.
 
 ## 3 October 2026
 
@@ -58,52 +90,34 @@ Six commits, oldest first:
 
 ### 1. Scroll problems in the Baumgarten reader
 
-**Reported from the live site on 3 October 2026, and not yet diagnosed.** The symptom
-has not been characterised beyond "scroll problems" — before changing anything, find
-out which scroll is meant, since the app has several that could be at fault
-independently:
+**Reported from the live site on 3 October 2026; diagnosed on 10 October.** The full
+account is Open question 1 in [baumgarten-reader/SPEC.md](baumgarten-reader/SPEC.md),
+and Behaviour items 26–29 there are what a fix must make pass. In short, there are two
+layers:
 
-- the main text column (`#text-canvas` / `#text-inner`);
-- the Reflexionen panel's own scroller (`#refl-scroll`), which is a separate
-  scrolling region beside it;
-- the TOC sidebar (`#toc-scroll`);
-- the *programmatic* scrolling, which is a different thing again — `scrollToPara()`
-  is the single navigation entry point, and `watchParasInView()` is what moves the
-  panel and the TOC highlight as the text scrolls. A jump that overshoots, a panel
-  that rebuilds underneath you, or a § that will not stay put are all this code
-  rather than CSS.
+- `<body>` has `min-height: 100vh` where it needs `height: 100vh`. So `#text-canvas`
+  grows to its full ~132,000 px, the document scrolls instead of the canvas, and after
+  any jump the top bar, the TOC and the panel are far above the window.
+  `watchParasInView()` observes the canvas, which never scrolls, so the panel does not
+  follow scrolling. It does fire on any reflow, which resets the panel to § 1.
+- With the height fixed (tried in a test browser only), the panel follows scrolling, but
+  `watchParasInView()` also fires during `scrollToPara()`'s smooth scroll. A jump to
+  § 50 leaves the panel on § 47, and a lemma-chip click rebuilds the panel under the
+  reader, which is exactly the case `andPanel = false` was meant to protect. The observer
+  has to stand aside while a programmatic scroll is running.
 
-A likely place to look first is the interaction between those last two: arriving at a
-§ *from* a card calls `scrollToPara(num, false)` precisely so the panel is not rebuilt
-under the reader, and `watchParasInView()` firing during that programmatic scroll
-would defeat it.
+Fix both together. Neither the TOC highlight nor `.focused` moves on plain scrolling;
+earlier versions of these notes said the TOC did.
 
-This is the first real bug found in the new panel and should come before anything
-cosmetic.
+### 1b. The rest of that panel — verified in headless Chrome on 10 October
 
-### 1b. The rest of that panel is still unverified
-
-Roughly 969 lines of new Reflexionen-panel UI went live without a visual check; the
-3 October look at the live site surfaced the scrolling but did not clear the rest.
-The inline scripts of all three apps do parse (see the syntax-check note below), but
-that only rules out typos. Still unconfirmed, and all of it in the Baumgarten reader:
-
-- **the lemma chip — explicitly not checked yet.** Where the AA names the exact Latin
-  words a note attaches to, the card shows them as a small clickable pill in
-  guillemets (`»quicquid est, illud«`); clicking it should scroll to those words and
-  tint them. This is the newest and likeliest-to-misbehave code, and it is **rare** —
-  only 82 of the 2967 notes carry a lemma, so most cards have no pill at all. To find
-  one, go to **§ 11** (Refl. 3489, `»quicquid est, illud«`) or **§ 12**, which has
-  three including `»Posito — quod«` — that one is the better test, being an
-  abbreviated lemma where the AA gives only the first and last words and the code has
-  to find the span between them;
-- a **phase chip** (e.g. `κ−σ`), which should open Adickes' note on that phase;
-- the drag-resizer, the `×` close and the `Reflexionen` button that reopens the panel;
-- the "belong to no §" view, from the button at the foot of the panel;
-- whether the browser console is clean.
-
-Open it with `open baumgarten-reader/baumgartenreading-guide.html`, or at
-<https://mikrishnan.github.io/kant-lab/baumgarten-reader/baumgartenreading-guide.html>.
+Everything this item listed as unconfirmed now passes, driven in headless Chrome by
+real mouse events and screenshots; it has still not been clicked through by hand. The
+lemma chips work: 75 of 82 lemmata are found, as documented, and § 12's abbreviated
+`»Posito — quod«` (Refl. 3490) spans the gloss chips correctly. So do the phase chips
+and the Adickes overlay, the `×` close, the `Reflexionen` button, the resizer (260–640
+px), the "belong to no §" view (708 entries) and the Synopsis, and the console is clean.
+Each is now a Behaviour item in [baumgarten-reader/SPEC.md](baumgarten-reader/SPEC.md).
 
 ### 2. Spaces remain inside `Individuals/`
 
