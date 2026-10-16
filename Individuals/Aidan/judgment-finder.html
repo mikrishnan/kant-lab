@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kant's Forms of Judgment — Logik Blomberg, Busolt, Wiener</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --parchment: #f6f0e2;
+  --parchment-deep: #ebe2cc;
+  --ink: #2a2118;
+  --ink-soft: #6b5d4a;
+  --accent: #5c3d1e;
+  --accent-soft: #8a6a45;
+  --rule: #d4c7a9;
+  --mark: #f3d98a;
+  --mark-form: #cfe0c3;
+  --flash: #fff1b8;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 17px;
+  color: var(--ink);
+  background: var(--parchment);
+  display: flex;
+  flex-direction: column;
+}
+header {
+  padding: 10px 18px 0;
+  border-bottom: 1px solid var(--rule);
+  background: var(--parchment-deep);
+}
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: .08em;
+  margin: 0 0 8px;
+  color: var(--accent);
+}
+main { flex: 1; display: flex; min-height: 0; }
+
+/* ── left: the text ─────────────────────────────── */
+#reader { flex: 1 1 62%; display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--rule); }
+#tabs { display: flex; gap: 2px; }
+.tab {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: .06em;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+}
+.tab:hover { color: var(--accent); }
+.tab[aria-selected="true"] {
+  background: var(--parchment);
+  border-color: var(--rule);
+  color: var(--accent);
+  position: relative;
+  top: 1px;
+}
+.tab small { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--ink-soft); margin-left: 6px; }
+#toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 18px; border-bottom: 1px solid var(--rule); font-size: 15px;
+}
+#toolbar select { flex: 1; min-width: 0; font: inherit; padding: 3px 6px; background: #fffdf6; border: 1px solid var(--rule); color: var(--ink); }
+#toolbar button { font: inherit; padding: 2px 10px; background: #fffdf6; border: 1px solid var(--rule); color: var(--accent); cursor: pointer; }
+#toolbar button:disabled { opacity: .35; cursor: default; }
+#meta { padding: 6px 18px; font-size: 14px; color: var(--ink-soft); font-style: italic; border-bottom: 1px dotted var(--rule); }
+#text { flex: 1; overflow-y: auto; padding: 14px 22px 60px; }
+.blk { position: relative; margin: 0 0 .85em; padding-left: 64px; line-height: 1.55; border-radius: 3px; transition: background .6s; }
+.blk .gutter {
+  position: absolute; left: 0; top: .15em; width: 56px; text-align: right;
+  font-family: 'Cinzel', serif; font-size: 11px; color: var(--accent-soft); line-height: 1.5;
+}
+.blk .gutter .para { display: block; color: var(--accent); }
+.blk.note { color: var(--ink-soft); font-style: italic; }
+.blk.rule { border-top: 1px solid var(--rule); height: 1px; padding: 0; margin: 1em 0; }
+.blk.flash { background: var(--flash); }
+.pg, .ms {
+  font-family: 'Cinzel', serif; font-size: 10px; color: var(--accent-soft);
+  vertical-align: super; padding: 0 3px; margin: 0 1px; border: 1px solid var(--rule); border-radius: 3px; background: var(--parchment-deep);
+  white-space: nowrap;
+}
+.ms { border-style: dashed; }
+mark { background: var(--mark); color: inherit; padding: 0 1px; border-radius: 2px; }
+mark.form { background: var(--mark-form); }
+.sect-title { font-family: 'Cinzel', serif; font-size: 16px; color: var(--accent); margin: 0 0 4px; }
+.sect-prov { font-size: 14px; color: var(--ink-soft); font-style: italic; margin: 0 0 14px; }
+
+/* ── right: the panel ───────────────────────────── */
+#panel { flex: 1 1 38%; min-width: 340px; max-width: 560px; display: flex; flex-direction: column; background: #faf5e8; }
+#panel-head { padding: 12px 16px 10px; border-bottom: 1px solid var(--rule); }
+#panel-head h2 { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: .08em; margin: 0 0 8px; color: var(--accent); font-weight: 600; }
+#q-wrap { position: relative; }
+#q {
+  width: 100%; font: inherit; padding: 7px 10px; border: 1px solid var(--accent-soft);
+  background: #fffdf6; color: var(--ink); border-radius: 3px;
+}
+#q:focus { outline: 2px solid var(--mark); }
+#suggest {
+  position: absolute; z-index: 5; left: 0; right: 0; top: 100%; background: #fffdf6;
+  border: 1px solid var(--accent-soft); border-top: none; max-height: 260px; overflow-y: auto; display: none;
+}
+#suggest div { padding: 5px 10px; cursor: pointer; font-size: 15px; display: flex; justify-content: space-between; gap: 8px; }
+#suggest div small { color: var(--ink-soft); }
+#suggest div.on, #suggest div:hover { background: var(--parchment-deep); }
+#table { margin-top: 10px; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: baseline; font-size: 14px; }
+#table .grp { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+#table .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  font: inherit; font-size: 14px; padding: 1px 9px; background: #fffdf6; border: 1px solid var(--rule);
+  border-radius: 12px; color: var(--accent); cursor: pointer;
+}
+.chip:hover { border-color: var(--accent-soft); }
+.chip.on { background: var(--accent); color: #fffdf6; border-color: var(--accent); }
+#opts { margin-top: 10px; font-size: 14px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+#opts label { cursor: pointer; white-space: nowrap; }
+#summary { padding: 8px 16px; border-bottom: 1px solid var(--rule); font-size: 14px; color: var(--ink-soft); min-height: 2.3em; }
+#summary b { color: var(--ink); font-weight: 500; }
+#summary .def { display: block; margin-top: 3px; font-style: italic; }
+#results { flex: 1; overflow-y: auto; padding: 8px 16px 40px; }
+.rw { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: .06em; color: var(--accent); margin: 14px 0 4px; padding-bottom: 2px; border-bottom: 1px solid var(--rule); }
+.hit {
+  display: block; width: 100%; text-align: left; font: inherit; font-size: 15px; line-height: 1.4;
+  background: #fffdf6; border: 1px solid var(--rule); border-radius: 3px; padding: 6px 9px; margin: 0 0 6px; color: var(--ink); cursor: pointer;
+}
+.hit:hover { border-color: var(--accent-soft); }
+.hit .loc { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--ink-soft); margin-bottom: 2px; }
+.hit .loc i { font-style: normal; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .05em; }
+.tag { display: inline-block; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: .06em; padding: 0 5px; border-radius: 3px; margin-left: 4px; vertical-align: 1px; }
+.tag.term { background: var(--mark); }
+.tag.form { background: var(--mark-form); }
+.empty { color: var(--ink-soft); font-style: italic; padding: 16px 0; }
+.more { font: inherit; margin: 4px 0 10px; padding: 3px 12px; background: transparent; border: 1px solid var(--rule); color: var(--accent); cursor: pointer; }
+#note { font-size: 12.5px; color: var(--ink-soft); padding: 8px 16px; border-top: 1px solid var(--rule); background: var(--parchment-deep); }
+
+@media (max-width: 860px) {
+  main { flex-direction: column; }
+  #reader { flex: 1 1 55%; border-right: none; border-bottom: 1px solid var(--rule); }
+  #panel { flex: 1 1 45%; max-width: none; min-width: 0; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>KANT'S FORMS OF JUDGMENT IN THE LOGIC LECTURES</h1>
+  <div id="tabs" role="tablist"></div>
+</header>
+
+<main>
+  <section id="reader" aria-label="Transcript">
+    <div id="toolbar">
+      <button id="prev" title="Previous section">‹</button>
+      <select id="sect" aria-label="Section"></select>
+      <button id="next" title="Next section">›</button>
+    </div>
+    <div id="meta"></div>
+    <div id="text" tabindex="0"></div>
+  </section>
+
+  <aside id="panel" aria-label="Judgment search">
+    <div id="panel-head">
+      <h2>FIND A FORM OF JUDGMENT</h2>
+      <div id="q-wrap">
+        <input id="q" type="text" autocomplete="off" spellcheck="false"
+               placeholder="e.g. universal, hypothetisch, apodictisch, particulare…">
+        <div id="suggest" role="listbox"></div>
+      </div>
+      <div id="table"></div>
+      <div id="opts">
+        <label><input type="checkbox" id="o-term" checked> where the form is named</label>
+        <label><input type="checkbox" id="o-form" checked> sentences shaped like it</label>
+        <label><input type="checkbox" id="o-ctx" checked> named passages must concern a judgment</label>
+      </div>
+    </div>
+    <div id="summary">Choose a form from Kant's table, or type one in German, Latin or English. Hits come from all three transcripts.</div>
+    <div id="results"></div>
+    <div id="note">Every hit is <b>inferred</b> by keyword and sentence-shape matching, not catalogued by an editor. A green tag marks a sentence whose wording only <i>resembles</i> the form; a yellow tag marks a passage that names it. Click a hit to read it in place.</div>
+  </aside>
+</main>
+
+<!-- The three transcripts (generated; see data/README.md). Classic scripts, so this page opens from file://. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script>
+/* ── data: the works and Kant's table of judgments ───────────────────────── */
+const JF_WORKS = [
+  { key: 'blomberg', label: 'Blomberg', year: 'ca. 1771',   data: LOGIK_BLOMBERG },
+  { key: 'busolt',   label: 'Busolt',   year: 'ca. 1789/90', data: LOGIK_BUSOLT },
+  { key: 'wiener',   label: 'Wiener',   year: '1780ff.',    data: LOGIK_WIENER }
+];
+
+/* Terminology is matched with a Unicode-aware, case-blind regex: the lectures spell
+   Urtheil / Satz / Sätze, apodictisch / apodiktisch, and mix Latin with German.
+   `term`  : words that name the form.
+   `generic`: the word is common outside logic (allgemein, besonder, möglich…), so by default a hit
+              must sit in or beside a passage that speaks of a judgment.
+   `shape` : a regex tried on single short sentences; where the surface wording of an example gives
+              the form away (Alle…, Einige…, Wenn…so…, Entweder…oder). Forms with no such tell
+              (categorical, the modalities) have none and are found by name only. */
+const L = '\\p{L}*';
+const B = '(?<![\\p{L}])';
+const JF_FORMS = [
+  { id: 'universal',   group: 'Quantity', de: 'allgemeine',   la: 'universale',  en: 'universal',
+    def: 'The predicate holds of the whole sphere of the subject — “All men are mortal.”',
+    term: B + '(allgemein' + L + '|universal' + L + '|generalia|generell' + L + ')', generic: true,
+    shape: B + '(Alle|Jeder|Jede|Jedes|Jeden|Ein jeder|Omnis|Omne|Omnes|Omnia)\\s+\\p{L}+' },
+  { id: 'particular',  group: 'Quantity', de: 'besondere',    la: 'particulare', en: 'particular',
+    def: 'The predicate holds of part of the sphere — “Some men are learned.”',
+    term: B + '(besonder' + L + '|particul' + L + '|particular' + L + '|partikular' + L + '|specialia)', generic: true,
+    shape: B + '(Einige|Einiger|Etliche|Manche|Mancher|Manches|Quidam|Quaedam|Quoddam|Aliqui|Aliquis|Aliquod|Nonnulli)\\s+\\p{L}+' },
+  { id: 'singular',    group: 'Quantity', de: 'einzelne',     la: 'singulare',   en: 'singular',
+    def: 'The subject is a single thing — “Caius is mortal.”',
+    term: B + '(singular' + L + '|einzel' + L + '|individual' + L + '|individuell' + L + ')', generic: true,
+    shape: B + '(Caius|Cajus|Socrates|Sokrates|Titius|Petrus|Sempronius)\\s+(ist|sind|est|hat|war)\\s' },
+  { id: 'affirmative', group: 'Quality', de: 'bejahende',     la: 'affirmativum', en: 'affirmative',
+    def: 'The predicate is attributed to the subject — “The soul is mortal.”',
+    term: B + '(bejah' + L + '|affirmativ' + L + '|affirmat' + L + ')', generic: true },
+  { id: 'negative',    group: 'Quality', de: 'verneinende',   la: 'negativum',   en: 'negative',
+    def: 'The predicate is denied of the subject — “The soul is not mortal.”',
+    term: B + '(verneinen' + L + '|verneinung' + L + '|negativ' + L + '|negat' + L + ')', generic: true,
+    shape: B + '(Kein|Keine|Keiner|Keines|Keinem|Keinen|Nullus|Nulla|Nullum)\\s+\\p{L}+' },
+  { id: 'infinite',    group: 'Quality', de: 'unendliche',    la: 'infinitum',   en: 'infinite / limitative',
+    def: 'An affirmation with a negated predicate — “The soul is non-mortal.”',
+    term: B + '(unendlich' + L + '|infinit' + L + '|limitativ' + L + '|limitat' + L + ')', generic: true },
+  { id: 'categorical', group: 'Relation', de: 'kategorische', la: 'categoricum', en: 'categorical',
+    def: 'A predicate is related to a subject, unconditionally.',
+    term: B + '(kategorisch' + L + '|categorisch' + L + '|categoric' + L + ')' },
+  { id: 'hypothetical',group: 'Relation', de: 'hypothetische',la: 'hypotheticum',en: 'hypothetical',
+    def: 'One judgment is related to another as ground to consequence — “If … then …”.',
+    term: B + '(hypothetisch' + L + '|hypothetic' + L + ')',
+    shape: '^\\s*(Wenn|Wann|Falls|Si)\\s.+\\s(so|dann|ita|tum|ergo)\\s' },
+  { id: 'disjunctive', group: 'Relation', de: 'disjunktive',  la: 'disjunctivum',en: 'disjunctive',
+    def: 'Judgments related as parts of one divided sphere — “Either … or …”.',
+    term: B + '(disjunctiv' + L + '|disjunkt' + L + '|disjunct' + L + ')',
+    shape: B + '(Entweder|Aut)\\s.+\\s(oder|aut|vel)\\s' },
+  { id: 'problematic', group: 'Modality', de: 'problematische',la: 'problematicum',en: 'problematic',
+    def: 'Affirmation or denial taken as merely possible.',
+    term: B + '(problematisch' + L + '|problematic' + L + ')' },
+  { id: 'assertoric',  group: 'Modality', de: 'assertorische', la: 'assertoricum', en: 'assertoric',
+    def: 'Affirmation or denial taken as actual.',
+    term: B + '(assertorisch' + L + '|assertoric' + L + '|assertor' + L + ')' },
+  { id: 'apodictic',   group: 'Modality', de: 'apodiktische',  la: 'apodicticum',  en: 'apodictic',
+    def: 'Affirmation or denial taken as necessary.',
+    term: B + '(apodictisch' + L + '|apodiktisch' + L + '|apodict' + L + '|apodikt' + L + ')' },
+  { id: 'analytic',    group: 'Further', de: 'analytische',   la: 'analyticum',   en: 'analytic',
+    def: 'The predicate is already contained in the subject’s concept (not part of the table; a further division).',
+    term: B + '(analytisch' + L + '|analytic' + L + ')' },
+  { id: 'synthetic',   group: 'Further', de: 'synthetische',  la: 'syntheticum',  en: 'synthetic',
+    def: 'The predicate adds to the subject’s concept (not part of the table; a further division).',
+    term: B + '(synthetisch' + L + '|synthetic' + L + ')' }
+];
+const JF_GROUPS = ['Quantity', 'Quality', 'Relation', 'Modality', 'Further'];
+
+/* A passage "concerns a judgment" if it, or the block before or after it, says so. */
+const JF_JUDGMENT = new RegExp(B + '(Urtheil' + L + '|Urteil' + L + '|judic' + L + '|Satz|Sätze|Säzze|Sazze|Saz|Sätz' + L +
+  '|propositio' + L + '|proposition' + L + '|Subject' + L + '|Subiect' + L + '|Praedicat' + L + '|Prädicat' + L + ')', 'iu');
+
+/* Aliases a reader might type, beyond the three names above. */
+const JF_ALIASES = {
+  universal: ['allgemein', 'general', 'universalis', 'universal'],
+  particular: ['besonder', 'partikular', 'particularis', 'partikulär'],
+  singular: ['einzeln', 'individual', 'singularis'],
+  affirmative: ['bejahend', 'affirmativ', 'affirmative'],
+  negative: ['verneinend', 'negativ', 'negative'],
+  infinite: ['unendlich', 'limitativ', 'limitative', 'infinitum', 'unbestimmt'],
+  categorical: ['kategorisch', 'categorisch', 'categoricum'],
+  hypothetical: ['hypothetisch', 'conditional', 'wenn so'],
+  disjunctive: ['disjunktiv', 'disjunctiv', 'entweder oder', 'either or'],
+  problematic: ['problematisch', 'possible', 'möglich'],
+  assertoric: ['assertorisch', 'assertorisch', 'actual', 'wirklich'],
+  apodictic: ['apodiktisch', 'apodictisch', 'necessary', 'notwendig', 'nothwendig'],
+  analytic: ['analytisch', 'analytic'],
+  synthetic: ['synthetisch', 'synthetic']
+};
+
+/* ── state ─────────────────────────────────────────────────────────────────── */
+let curWork = 0;            // index into JF_WORKS
+let curSect = 0;            // section index within the current work
+let curForm = null;         // a JF_FORMS entry, or null
+let curFree = '';           // free-text query, when it matches no form
+let hlRes = [];             // [{ re, cls }] highlighted in the reading pane
+let hitCache = null;        // hits for the current query, grouped by work
+let suggestIdx = -1;
+const shown = {};           // per-work number of hits rendered so far
+const PAGE = 40;
+
+/* ── helpers ───────────────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+function mk(src, flags) { return new RegExp(src, flags); }
+function norm(s) { return s.toLowerCase().replace(/[ß]/g, 'ss').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/\s+/g, ' ').trim(); }
+
+/* Which form does the typed text mean? Match on names and aliases, prefix-wise. */
+function formsFor(q) {
+  const n = norm(q);
+  if (!n) return [];
+  return JF_FORMS.filter(f => {
+    const names = [f.id, f.de, f.la, f.en].concat(JF_ALIASES[f.id] || []).map(norm);
+    return names.some(x => x.startsWith(n) || (n.length > 3 && x.includes(n)));
+  });
+}
+
+/* ── the reading pane ──────────────────────────────────────────────────────── */
+function buildTabs() {
+  const tabs = $('tabs');
+  JF_WORKS.forEach((w, i) => {
+    const b = el('button', 'tab');
+    b.setAttribute('role', 'tab');
+    b.append(w.label, el('small', null, w.year));
+    b.addEventListener('click', () => { openWork(i, 0); });
+    tabs.append(b);
+    w.tab = b;
+  });
+}
+
+function openWork(wi, si, blockId) {
+  curWork = wi; curSect = si;
+  JF_WORKS.forEach((w, i) => w.tab.setAttribute('aria-selected', i === wi ? 'true' : 'false'));
+  const sel = $('sect');
+  sel.textContent = '';
+  JF_WORKS[wi].data.sections.forEach((s, i) => {
+    const first = s.blocks.find(b => b.aa);
+    const o = el('option', null, (s.title || '(untitled)') + (first ? '  · AA 24:' + first.aa : ''));
+    o.value = i;
+    sel.append(o);
+  });
+  sel.value = si;
+  renderSection(blockId);
+}
+
+function renderSection(blockId) {
+  const w = JF_WORKS[curWork], s = w.data.sections[curSect];
+  $('sect').value = curSect;
+  $('prev').disabled = curSect === 0;
+  $('next').disabled = curSect === w.data.sections.length - 1;
+  const aas = s.blocks.map(b => b.aa).filter(Boolean);
+  $('meta').textContent = w.data.meta.work + ' — section ' + (curSect + 1) + ' of ' + w.data.sections.length +
+    (aas.length ? ' · AA 24:' + aas[0] + (aas[aas.length - 1] !== aas[0] ? '–' + aas[aas.length - 1] : '') : '');
+
+  const box = $('text');
+  box.textContent = '';
+  box.append(el('div', 'sect-title', s.title || ''));
+  if (s.provenance) box.append(el('div', 'sect-prov', s.provenance));
+
+  const frag = document.createDocumentFragment();
+  s.blocks.forEach(b => frag.append(renderBlock(b)));
+  box.append(frag);
+
+  if (blockId) {
+    const t = document.getElementById(blockId);
+    if (t) {
+      t.scrollIntoView({ block: 'center' });
+      t.classList.add('flash');
+      setTimeout(() => t.classList.remove('flash'), 1600);
+    }
+  } else {
+    box.scrollTop = 0;
+  }
+}
+
+/* Ranges of `text` to mark for the active query: term matches, and whole sentences that fit a shape. */
+function highlightRanges(text) {
+  const ranges = [];
+  hlRes.forEach(h => {
+    if (h.sentence) {
+      sentencesOf(text).forEach(se => {
+        const t = text.slice(se.s, se.e);
+        if (t.split(/\s+/).length <= 22 && h.re.test(t)) ranges.push({ s: se.s, e: se.e, cls: h.cls });
+      });
+      return;
+    }
+    h.re.lastIndex = 0;
+    let m;
+    while ((m = h.re.exec(text))) {
+      if (m[0] === '') { h.re.lastIndex++; continue; }
+      ranges.push({ s: m.index, e: m.index + m[0].length, cls: h.cls });
+    }
+  });
+  ranges.sort((a, c) => a.s - c.s);
+  const merged = [];
+  ranges.forEach(r => {
+    const last = merged[merged.length - 1];
+    if (last && r.s < last.e) { last.e = Math.max(last.e, r.e); if (r.cls === 'term') last.cls = 'term'; }
+    else merged.push({ ...r });
+  });
+  return merged;
+}
+
+/* One block: gutter (AA page, §), then the prose with page markers and highlights spliced in. */
+function renderBlock(b) {
+  const d = el('div', 'blk' + (b.kind === 'note' ? ' note' : '') + (b.kind === 'rule' ? ' rule' : ''));
+  d.id = b.id;
+  if (b.kind === 'rule') return d;
+  const g = el('div', 'gutter');
+  if (b.aa) g.append('AA ' + b.aa);
+  if (b.para && b.para.raw) g.append(el('span', 'para', b.para.raw));
+  d.append(g);
+
+  const text = b.text || '';
+  // marks: page and manuscript markers at offsets
+  const marks = [];
+  (b.pages || []).forEach(p => { if (p.i > 0) marks.push({ i: p.i, node: () => el('span', 'pg', 'AA ' + p.p) }); });
+  (b.ms || []).forEach(m => marks.push({ i: m.i, node: () => el('span', 'ms', '[' + m.p + ']') }));
+  const merged = highlightRanges(text);
+
+  // cut points
+  const cuts = new Set([0, text.length]);
+  marks.forEach(m => cuts.add(Math.min(m.i, text.length)));
+  merged.forEach(r => { cuts.add(r.s); cuts.add(r.e); });
+  const pts = [...cuts].sort((a, c) => a - c);
+  for (let k = 0; k < pts.length - 1; k++) {
+    const a = pts[k], z = pts[k + 1];
+    marks.filter(m => Math.min(m.i, text.length) === a && a > 0).forEach(m => d.append(m.node()));
+    if (z > a) {
+      const r = merged.find(x => x.s <= a && x.e >= z);
+      if (r) { const mk_ = el('mark', r.cls === 'form' ? 'form' : '', text.slice(a, z)); d.append(mk_); }
+      else d.append(text.slice(a, z));
+    }
+  }
+  return d;
+}
+
+/* ── searching ─────────────────────────────────────────────────────────────── */
+function sentencesOf(text) {
+  // Split after . ! ? ; : — but not after the abbreviations the lectures lean on (z.E., z.B., d.i.)
+  const out = [];
+  let start = 0;
+  const re = /[.!?;:](?=\s+[\p{Lu}„"“(])/gu;
+  let m;
+  while ((m = re.exec(text))) {
+    const before = text.slice(Math.max(0, m.index - 4), m.index + 1);
+    if (/(?:z\.[EeBb]|d\.i|u\.s|\bz)\.$/.test(before) || /\b\p{L}\.$/u.test(before)) continue;
+    out.push({ s: start, e: m.index + 1 });
+    start = m.index + 1;
+  }
+  if (start < text.length) out.push({ s: start, e: text.length });
+  return out;
+}
+
+function snippet(text, s, e) {
+  // Show the sentence; if it is short, widen to the surrounding few words so it reads as an example.
+  const pad = 90;
+  let a = Math.max(0, s - pad), z = Math.min(text.length, e + pad);
+  if (a > 0) { const sp = text.indexOf(' ', a); if (sp > -1 && sp < s) a = sp + 1; }
+  if (z < text.length) { const sp = text.lastIndexOf(' ', z); if (sp > e) z = sp; }
+  return { a, z, pre: a > 0 ? '… ' : '', post: z < text.length ? ' …' : '' };
+}
+
+function searchForm(f) {
+  const termRe = mk(f.term, 'giu');
+  const shapeRe = f.shape ? mk(f.shape, 'iu') : null;
+  const useTerm = $('o-term').checked, useShape = $('o-form').checked, needCtx = $('o-ctx').checked && f.generic;
+  const res = [];
+  JF_WORKS.forEach((w, wi) => {
+    const hits = [];
+    w.data.sections.forEach((sec, si) => {
+      sec.blocks.forEach((b, bi) => {
+        const text = b.text;
+        if (!text) return;
+        const sents = sentencesOf(text);
+        let ctxOK = null;
+        if (useTerm) {
+          termRe.lastIndex = 0;
+          const m = termRe.exec(text);
+          if (m) {
+            if (needCtx && ctxOK === null) {
+              const around = [sec.blocks[bi - 1], b, sec.blocks[bi + 1]].map(x => (x && x.text) || '').join(' ');
+              ctxOK = JF_JUDGMENT.test(around);
+            }
+            if (!needCtx || ctxOK) {
+              let se = sents.find(x => m.index >= x.s && m.index < x.e) || { s: m.index, e: m.index + m[0].length };
+              hits.push({ kind: 'term', wi, si, b, s: se.s, e: se.e, at: m.index });
+            }
+          }
+        }
+        if (useShape && shapeRe) {
+          sents.forEach(se => {
+            const t = text.slice(se.s, se.e);
+            if (t.split(/\s+/).length <= 22 && shapeRe.test(t)) hits.push({ kind: 'form', wi, si, b, s: se.s, e: se.e, at: se.s });
+          });
+        }
+      });
+    });
+    res.push(hits);
+  });
+  return res;
+}
+
+function searchFree(q) {
+  const re = mk(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu');
+  return JF_WORKS.map((w, wi) => {
+    const hits = [];
+    w.data.sections.forEach((sec, si) => sec.blocks.forEach(b => {
+      if (!b.text) return;
+      re.lastIndex = 0;
+      const m = re.exec(b.text);
+      if (m) {
+        const se = sentencesOf(b.text).find(x => m.index >= x.s && m.index < x.e) || { s: m.index, e: m.index + m[0].length };
+        hits.push({ kind: 'term', wi, si, b, s: se.s, e: se.e, at: m.index });
+      }
+    }));
+    return hits;
+  });
+}
+
+function runSearch() {
+  let label = '';
+  if (curForm) {
+    hitCache = searchForm(curForm);
+    hlRes = [{ re: mk(curForm.term, 'giu'), cls: 'term' }];
+    if ($('o-form').checked && curForm.shape) hlRes.push({ re: mk(curForm.shape, 'iu'), cls: 'form', sentence: true });
+    label = curForm.en;
+  } else if (curFree) {
+    hitCache = searchFree(curFree);
+    hlRes = [{ re: mk(curFree.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'giu'), cls: 'term' }];
+    label = '“' + curFree + '”';
+  } else {
+    hitCache = null; hlRes = [];
+  }
+  JF_WORKS.forEach(w => { shown[w.key] = PAGE; });
+  renderSummary(label);
+  renderResults();
+  renderSection();   // refresh highlights in the pane
+}
+
+function renderSummary(label) {
+  const s = $('summary');
+  s.textContent = '';
+  if (!hitCache) { s.textContent = 'Choose a form from Kant’s table, or type one in German, Latin or English. Hits come from all three transcripts.'; return; }
+  const total = hitCache.reduce((n, h) => n + h.length, 0);
+  s.append(el('b', null, label), ' — ' + total + ' passage' + (total === 1 ? '' : 's') + ': ' +
+    JF_WORKS.map((w, i) => w.label + ' ' + hitCache[i].length).join(' · '));
+  if (curForm) s.append(el('span', 'def', curForm.de + ' · ' + curForm.la + ' — ' + curForm.def));
+}
+
+function renderResults() {
+  const box = $('results');
+  box.textContent = '';
+  if (!hitCache) return;
+  const total = hitCache.reduce((n, h) => n + h.length, 0);
+  if (!total) { box.append(el('div', 'empty', 'Nothing found. Try the German or Latin spelling, or turn off “named passages must concern a judgment”.')); return; }
+  JF_WORKS.forEach((w, wi) => {
+    const hits = hitCache[wi];
+    if (!hits.length) return;
+    box.append(el('div', 'rw', w.label.toUpperCase() + ' · ' + hits.length));
+    const n = shown[w.key];
+    hits.slice(0, n).forEach(h => box.append(renderHit(h)));
+    if (hits.length > n) {
+      const more = el('button', 'more', 'Show ' + Math.min(PAGE, hits.length - n) + ' more of ' + (hits.length - n));
+      more.addEventListener('click', () => { shown[w.key] += PAGE; renderResults(); });
+      box.append(more);
+    }
+  });
+}
+
+function renderHit(h) {
+  const btn = el('button', 'hit');
+  const sec = JF_WORKS[h.wi].data.sections[h.si];
+  const loc = el('div', 'loc');
+  const left = el('span', null, (h.b.aa ? 'AA 24:' + h.b.aa : '') + (h.b.para && h.b.para.raw ? ' · ' + h.b.para.raw : ''));
+  left.append(el('span', 'tag ' + h.kind, h.kind === 'term' ? 'NAMED' : 'SHAPE'));
+  loc.append(left, el('i', null, (sec.title || '').slice(0, 34)));
+  btn.append(loc);
+
+  const text = h.b.text;
+  const sn = snippet(text, h.s, h.e);
+  const piece = text.slice(sn.a, sn.z);
+  const body = el('span');
+  body.append(sn.pre);
+  let pos = 0;
+  highlightRanges(text).forEach(r => {
+    const rs = Math.max(r.s, sn.a) - sn.a, re_ = Math.min(r.e, sn.z) - sn.a;
+    if (re_ <= rs || rs < pos) return;
+    body.append(piece.slice(pos, rs));
+    body.append(el('mark', r.cls === 'form' ? 'form' : '', piece.slice(rs, re_)));
+    pos = re_;
+  });
+  body.append(piece.slice(pos), sn.post);
+  btn.append(body);
+  btn.addEventListener('click', () => openWork(h.wi, h.si, h.b.id));
+  return btn;
+}
+
+/* ── the table of forms and the type-ahead ─────────────────────────────────── */
+function buildTable() {
+  const t = $('table');
+  JF_GROUPS.forEach(g => {
+    t.append(el('div', 'grp', g));
+    const chips = el('div', 'chips');
+    JF_FORMS.filter(f => f.group === g).forEach(f => {
+      const c = el('button', 'chip', f.en.split(' ')[0]);
+      c.dataset.id = f.id;
+      c.addEventListener('click', () => chooseForm(f));
+      chips.append(c);
+    });
+    t.append(chips);
+  });
+}
+
+function chooseForm(f) {
+  curForm = f; curFree = '';
+  $('q').value = f.en;
+  hideSuggest();
+  syncChips();
+  runSearch();
+}
+function syncChips() {
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', !!curForm && c.dataset.id === curForm.id));
+}
+
+function showSuggest(list) {
+  const s = $('suggest');
+  s.textContent = '';
+  suggestIdx = -1;
+  if (!list.length) { s.style.display = 'none'; return; }
+  list.forEach(f => {
+    const d = el('div');
+    d.append(el('span', null, f.en), el('small', null, f.de + ' · ' + f.la));
+    d.addEventListener('mousedown', e => { e.preventDefault(); chooseForm(f); });
+    s.append(d);
+  });
+  s.style.display = 'block';
+}
+function hideSuggest() { $('suggest').style.display = 'none'; suggestIdx = -1; }
+
+function onType() {
+  const q = $('q').value;
+  const list = formsFor(q);
+  showSuggest(list);
+  curForm = null;
+  syncChips();
+  if (!q.trim()) { curFree = ''; runSearch(); return; }
+  // An exact single match is taken as the form; otherwise search the typed words as given.
+  if (list.length === 1 && [list[0].id, list[0].de, list[0].la, list[0].en].map(norm).includes(norm(q))) { chooseForm(list[0]); return; }
+  curFree = q.trim();
+  clearTimeout(onType.t);
+  if (curFree.length >= 3) onType.t = setTimeout(runSearch, 250);
+}
+
+/* ── wiring ────────────────────────────────────────────────────────────────── */
+function init() {
+  buildTabs();
+  buildTable();
+
+  $('sect').addEventListener('change', e => { curSect = +e.target.value; renderSection(); });
+  $('prev').addEventListener('click', () => { if (curSect > 0) { curSect--; renderSection(); } });
+  $('next').addEventListener('click', () => { if (curSect < JF_WORKS[curWork].data.sections.length - 1) { curSect++; renderSection(); } });
+
+  const q = $('q');
+  q.addEventListener('input', onType);
+  q.addEventListener('blur', () => setTimeout(hideSuggest, 120));
+  q.addEventListener('keydown', e => {
+    const items = $('suggest').children;
+    if (e.key === 'ArrowDown' && items.length) { e.preventDefault(); suggestIdx = (suggestIdx + 1) % items.length; }
+    else if (e.key === 'ArrowUp' && items.length) { e.preventDefault(); suggestIdx = (suggestIdx - 1 + items.length) % items.length; }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      const list = formsFor(q.value);
+      if (suggestIdx >= 0 && list[suggestIdx]) chooseForm(list[suggestIdx]);
+      else if (list.length === 1) chooseForm(list[0]);
+      else if (q.value.trim()) { curForm = null; curFree = q.value.trim(); hideSuggest(); runSearch(); }
+      return;
+    } else if (e.key === 'Escape') { hideSuggest(); return; }
+    else return;
+    [...items].forEach((n, i) => n.classList.toggle('on', i === suggestIdx));
+  });
+  ['o-term', 'o-form', 'o-ctx'].forEach(id => $(id).addEventListener('change', () => { if (curForm || curFree) runSearch(); }));
+
+  openWork(0, 0);
+}
+init();
+</script>
+</body>
+</html>
