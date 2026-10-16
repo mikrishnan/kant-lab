@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Judgement Explorer — Kant's Logik transcripts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5efe0;
+    --parchment-deep: #ece3cc;
+    --card: #fbf8ef;
+    --ink: #2b2118;
+    --ink-soft: #5a4a3a;
+    --rule: #d6c9a8;
+    --accent: #5c3d1e;
+    --accent-soft: #e9dcc0;
+    --warn: #8a2b1c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex;
+    flex-direction: column;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    line-height: 1.45;
+  }
+
+  header {
+    padding: 18px 28px 14px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--parchment-deep);
+  }
+  header h1 {
+    margin: 0;
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 600;
+    font-size: 21px;
+    letter-spacing: .06em;
+    color: var(--accent);
+  }
+  header p { margin: 4px 0 0; color: var(--ink-soft); font-size: 16px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Results (left) ───────────────────────────────────────────────────── */
+  #results { overflow-y: auto; padding: 18px 28px 40px; }
+  #count {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+  }
+  #empty {
+    border: 1px dashed var(--rule);
+    padding: 22px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px 12px;
+    margin: 0 0 14px;
+  }
+  .card.unresolved { border-left-color: var(--warn); }
+  .judgement {
+    font-size: 23px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin: 0 0 9px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 11px; }
+  .chip {
+    font-size: 14px;
+    padding: 1px 9px;
+    border: 1px solid var(--accent);
+    border-radius: 11px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .chip b {
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 400;
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-right: 5px;
+    opacity: .75;
+  }
+  .chip.inferred {
+    border-style: dashed;
+    background: transparent;
+    color: var(--ink-soft);
+    border-color: var(--ink-soft);
+    font-style: italic;
+  }
+  .chip.hit { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  .chip.hit b { opacity: .85; }
+  .chip.none {
+    border-style: dotted;
+    background: transparent;
+    color: #9c8c74;
+    border-color: #b9ab8e;
+  }
+
+  blockquote {
+    margin: 0 0 9px;
+    padding: 0 0 0 12px;
+    border-left: 2px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: 17px;
+  }
+  blockquote mark {
+    background: #f1dfae;
+    color: var(--ink);
+    padding: 0 2px;
+  }
+  .cite {
+    font-size: 15px;
+    color: var(--ink);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+  }
+  .cite .work { font-family: 'Cinzel', Georgia, serif; font-size: 13px; letter-spacing: .06em; color: var(--accent); }
+  .cite .aa { font-weight: 600; }
+  .cite .sub { color: var(--ink-soft); }
+  .note { margin: 7px 0 0; font-size: 15px; font-style: italic; color: var(--ink-soft); }
+  .warn { margin: 7px 0 0; font-size: 15px; color: var(--warn); }
+
+  /* ── Filters (right) ──────────────────────────────────────────────────── */
+  aside {
+    border-left: 1px solid var(--rule);
+    background: var(--parchment-deep);
+    overflow-y: auto;
+    padding: 16px 22px 30px;
+  }
+  aside h2 {
+    margin: 0 0 6px;
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset { border: 0; border-top: 1px solid var(--rule); margin: 0; padding: 11px 0 9px; }
+  legend {
+    padding: 0 8px 0 0;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  legend small { text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', Georgia, serif; font-size: 15px; color: var(--ink-soft); }
+  .opt { display: flex; align-items: baseline; gap: 8px; padding: 2px 0; cursor: pointer; }
+  .opt input { accent-color: var(--accent); width: 16px; height: 16px; flex: none; transform: translateY(2px); cursor: pointer; }
+  .opt .de { color: var(--ink-soft); font-style: italic; font-size: 16px; }
+  .opt .n { margin-left: auto; color: var(--ink-soft); font-size: 15px; font-variant-numeric: tabular-nums; }
+  .strict { border-top: 1px solid var(--rule); padding-top: 12px; }
+  .strict .hint { margin: 2px 0 0 24px; font-size: 15px; color: var(--ink-soft); }
+  button#clear {
+    margin: 12px 0 0;
+    font: inherit;
+    font-size: 15px;
+    padding: 4px 14px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+  }
+  button#clear:hover { background: var(--accent); color: var(--parchment); }
+  .legend { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 15px; color: var(--ink-soft); }
+  .legend p { margin: 0 0 7px; }
+  .legend .chip { font-size: 13px; padding: 0 7px; }
+
+  @media (max-width: 860px) {
+    body { display: block; height: auto; }
+    .layout { grid-template-columns: 1fr; }
+    aside { order: -1; border-left: 0; border-bottom: 1px solid var(--rule); overflow: visible; }
+    #results { overflow: visible; padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Judgement Explorer</h1>
+  <p>Examples of judgements from Kant's logic lectures — the Blomberg, Wiener and Busolt transcripts, Academy Edition vol. 24 — sorted by quantity, quality, relation and modality.</p>
+</header>
+
+<div class="layout">
+  <main id="results" aria-live="polite">
+    <p id="count"></p>
+    <div id="list"></div>
+    <div id="empty" hidden>No example in the three transcripts fits every box you have ticked. Untick one to widen the search, or clear all.</div>
+  </main>
+
+  <aside>
+    <h2>Select judgements</h2>
+    <div id="filters"></div>
+    <div class="strict">
+      <label class="opt">
+        <input type="checkbox" id="strict">
+        <span>Only what the transcript says</span>
+      </label>
+      <p class="hint">Count a judgement under a ticked box only where the lecture names that moment itself, not where it is read off the sentence.</p>
+    </div>
+    <button id="clear" type="button">Clear all</button>
+
+    <div class="legend">
+      <p>Within one group the boxes widen the search (either one); across groups they narrow it (both). A group with nothing ticked sets no condition.</p>
+      <p><span class="chip"><b>Quality</b>affirmative</span> the transcript names this moment for the judgement.</p>
+      <p><span class="chip inferred"><b>Quantity</b>universal</span> assigned here from the form of the sentence, and not stated by the transcript.</p>
+      <p><span class="chip none"><b>Modality</b>—</span> not assigned: the sentence does not settle it.</p>
+    </div>
+  </aside>
+</div>
+
+<!-- The three transcripts, shared data (generated; read-only), then this tool's own examples. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script src="judgement-examples.js"></script>
+
+<script>
+/* ── Data ─────────────────────────────────────────────────────────────────── */
+
+// Chronological, which is also the order the examples are listed in.
+const WORK_INFO = {
+  blomberg: { label: 'Logik Blomberg', date: 'ca. 1771',    data: () => LOGIK_BLOMBERG, order: 0 },
+  wiener:   { label: 'Wiener Logik',   date: '1780ff.',     data: () => LOGIK_WIENER,   order: 1 },
+  busolt:   { label: 'Logik Busolt',   date: 'ca. 1789/90', data: () => LOGIK_BUSOLT,   order: 2 }
+};
+
+const MOMENTS = [
+  { key: 'quantity', label: 'Quantity', de: 'Quantität',
+    values: [['universal', 'allgemein'], ['particular', 'besonders'], ['singular', 'einzeln']] },
+  { key: 'quality',  label: 'Quality',  de: 'Qualität',
+    values: [['affirmative', 'bejahend'], ['negative', 'verneinend'], ['infinite', 'unendlich']] },
+  { key: 'relation', label: 'Relation', de: 'Relation',
+    values: [['categorical', 'kategorisch'], ['hypothetical', 'hypothetisch'], ['disjunctive', 'disjunktiv']] },
+  { key: 'modality', label: 'Modality', de: 'Modalität',
+    values: [['problematic', 'problematisch'], ['assertoric', 'assertorisch'], ['apodictic', 'apodiktisch']] }
+];
+const GERMAN = {};
+MOMENTS.forEach(m => m.values.forEach(([en, de]) => { GERMAN[en] = de; }));
+
+/* ── State ────────────────────────────────────────────────────────────────── */
+
+let checked = { quantity: new Set(), quality: new Set(), relation: new Set(), modality: new Set(), work: new Set() };
+let strict = false;
+let examples = [];   // JUDGEMENT_EXAMPLES, each resolved against its block
+
+/* ── Resolving an example against the transcript ──────────────────────────── */
+
+function indexBlocks(work) {
+  const byId = {};
+  WORK_INFO[work].data().sections.forEach(sec => sec.blocks.forEach(b => { byId[b.id] = b; }));
+  return byId;
+}
+
+// The page (AA or manuscript) that stands at character offset `off` of a block's
+// text: the last marker at or before it. Null if none has begun yet.
+function markerAt(markers, off) {
+  let found = null;
+  (markers || []).forEach(mk => { if (mk.i <= off) found = mk.p; });
+  return found;
+}
+
+function resolve(raw, blocks) {
+  const ex = Object.assign({}, raw);
+  const b = blocks[raw.work][raw.block];
+  const start = b ? b.text.indexOf(raw.quote) : -1;
+  ex.ok = start >= 0 && raw.quote.indexOf(raw.judgement) >= 0;
+  if (!ex.ok) return ex;
+  const end = start + raw.quote.length - 1;
+  ex.aaFrom = markerAt(b.pages, start) || b.aa;
+  ex.aaTo = markerAt(b.pages, end) || b.aa;
+  ex.msFrom = markerAt(b.ms, start);
+  ex.msTo = markerAt(b.ms, end);
+  return ex;
+}
+
+function loadExamples() {
+  const blocks = {};
+  Object.keys(WORK_INFO).forEach(w => { blocks[w] = indexBlocks(w); });
+  examples = JUDGEMENT_EXAMPLES.map(raw => resolve(raw, blocks));
+  examples.sort((a, b) =>
+    WORK_INFO[a.work].order - WORK_INFO[b.work].order ||
+    (a.aaFrom || 0) - (b.aaFrom || 0) ||
+    a.id.localeCompare(b.id));
+}
+
+/* ── Matching ─────────────────────────────────────────────────────────────── */
+
+function fits(ex) {
+  if (checked.work.size && !checked.work.has(ex.work)) return false;
+  return MOMENTS.every(m => {
+    const want = checked[m.key];
+    if (!want.size) return true;
+    const have = ex[m.key];
+    if (!have || !have.some(v => want.has(v))) return false;
+    return !strict || ex.stated.indexOf(m.key) >= 0;
+  });
+}
+
+/* ── Rendering ────────────────────────────────────────────────────────────── */
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function pageRange(a, b) {
+  return a === b ? String(a) : a + '–' + b;
+}
+
+function buildChips(ex) {
+  const box = el('div', 'chips');
+  MOMENTS.forEach(m => {
+    const vals = ex[m.key];
+    let chip;
+    if (!vals) {
+      chip = el('span', 'chip none');
+      chip.title = 'Not assigned: the sentence does not settle it';
+      chip.append(el('b', null, m.label), '—');
+    } else {
+      const isStated = ex.stated.indexOf(m.key) >= 0;
+      chip = el('span', 'chip' + (isStated ? '' : ' inferred'));
+      chip.title = isStated ? 'Named by the transcript' : 'Assigned from the form of the sentence; not stated by the transcript';
+      chip.append(el('b', null, m.label), vals.join(' + '));
+      if (checked[m.key].size && vals.some(v => checked[m.key].has(v))) chip.classList.add('hit');
+    }
+    box.append(chip);
+  });
+  return box;
+}
+
+function buildQuote(ex) {
+  const q = el('blockquote');
+  q.lang = 'de';
+  const at = ex.quote.indexOf(ex.judgement);
+  q.append(
+    ex.quote.slice(0, at),
+    el('mark', null, ex.judgement),
+    ex.quote.slice(at + ex.judgement.length)
+  );
+  return q;
+}
+
+function buildCard(ex) {
+  const w = WORK_INFO[ex.work];
+  const card = el('article', 'card' + (ex.ok ? '' : ' unresolved'));
+
+  const j = el('p', 'judgement', ex.judgement);
+  j.lang = 'de';
+  card.append(j, buildChips(ex));
+
+  if (ex.ok) {
+    card.append(buildQuote(ex));
+    const cite = el('div', 'cite');
+    cite.append(el('span', 'work', w.label), el('span', 'aa', 'AA 24:' + pageRange(ex.aaFrom, ex.aaTo)));
+    cite.append(el('span', 'sub', 'vol. 24 · ' + w.label + ', ' + w.date));
+    if (ex.msFrom != null) cite.append(el('span', 'sub', 'Ms. p. ' + pageRange(ex.msFrom, ex.msTo != null ? ex.msTo : ex.msFrom)));
+    cite.append(el('span', 'sub', ex.block));
+    card.append(cite);
+  } else {
+    card.append(el('p', 'warn', 'The quotation could not be found in ' + ex.block + '. The data file may have been regenerated; check judgement-examples.js.'));
+  }
+  if (ex.note) card.append(el('p', 'note', ex.note));
+  return card;
+}
+
+function render() {
+  const hits = examples.filter(fits);
+  const list = document.getElementById('list');
+  list.replaceChildren(...hits.map(buildCard));
+  document.getElementById('empty').hidden = hits.length > 0;
+  document.getElementById('count').textContent =
+    hits.length + ' of ' + examples.length + ' judgements';
+}
+
+/* ── Filter panel ─────────────────────────────────────────────────────────── */
+
+function tally(key, value) {
+  return examples.filter(ex => ex[key] && ex[key].indexOf(value) >= 0).length;
+}
+
+function buildOption(group, value, en, de, n) {
+  const lab = el('label', 'opt');
+  const box = document.createElement('input');
+  box.type = 'checkbox';
+  box.value = value;
+  box.addEventListener('change', () => {
+    if (box.checked) checked[group].add(value); else checked[group].delete(value);
+    render();
+  });
+  lab.append(box, el('span', null, en));
+  if (de) lab.append(el('span', 'de', de));
+  lab.append(el('span', 'n', String(n)));
+  return lab;
+}
+
+function buildFilters() {
+  const host = document.getElementById('filters');
+
+  MOMENTS.forEach(m => {
+    const fs = el('fieldset');
+    const lg = el('legend', null, m.label + ' ');
+    lg.append(el('small', null, '(' + m.de + ')'));
+    fs.append(lg);
+    m.values.forEach(([en, de]) => fs.append(buildOption(m.key, en, en, de, tally(m.key, en))));
+    host.append(fs);
+  });
+
+  const fs = el('fieldset');
+  fs.append(el('legend', null, 'Transcript'));
+  Object.keys(WORK_INFO).forEach(w => {
+    const n = examples.filter(ex => ex.work === w).length;
+    fs.append(buildOption('work', w, WORK_INFO[w].label, WORK_INFO[w].date, n));
+  });
+  host.append(fs);
+}
+
+function clearAll() {
+  Object.keys(checked).forEach(k => checked[k].clear());
+  document.querySelectorAll('#filters input').forEach(b => { b.checked = false; });
+  strict = false;
+  document.getElementById('strict').checked = false;
+  render();
+}
+
+/* ── Wiring and init ──────────────────────────────────────────────────────── */
+
+document.getElementById('strict').addEventListener('change', e => { strict = e.target.checked; render(); });
+document.getElementById('clear').addEventListener('click', clearAll);
+
+loadExamples();
+buildFilters();
+render();
+</script>
+</body>
+</html>
