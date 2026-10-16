@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mediate inferences in Kant's logic lectures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --parchment: #f6f0e2;
+  --card: #fffdf6;
+  --ink: #2a2118;
+  --muted: #6e5f4d;
+  --accent: #5c3d1e;
+  --rule: #d8cbb0;
+  --mark: #f4d06a;
+  --mark-ink: #2a2118;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--parchment); color: var(--ink); font: 19px/1.55 'EB Garamond', Georgia, serif; }
+header { padding: 28px 24px 16px; max-width: 880px; margin: 0 auto; }
+h1 { font: 600 24px/1.2 'Cinzel', serif; letter-spacing: .04em; color: var(--accent); margin: 0 0 8px; }
+.lede { margin: 0; color: var(--muted); font-size: 17px; }
+.controls { position: sticky; top: 0; z-index: 5; background: var(--parchment); border-bottom: 1px solid var(--rule); padding: 10px 24px; }
+.controls-inner { max-width: 880px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 600 12px 'Cinzel', serif; letter-spacing: .05em; padding: 5px 11px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--parchment); }
+select, input[type=search] { font: 16px 'EB Garamond', serif; padding: 4px 8px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); border-radius: 4px; }
+input[type=search] { flex: 1 1 160px; min-width: 140px; }
+#count { margin-left: auto; color: var(--muted); font-size: 16px; }
+main { max-width: 880px; margin: 0 auto; padding: 18px 24px 60px; }
+.item { background: var(--card); border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 4px; padding: 14px 18px 12px; margin: 0 0 18px; }
+.item-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.cite { font: 600 14px 'Cinzel', serif; letter-spacing: .04em; color: var(--accent); }
+.cite .pages { font-family: 'EB Garamond', serif; font-weight: 500; letter-spacing: 0; color: var(--ink); font-size: 17px; margin-left: 6px; }
+.kind { font-size: 14px; font-style: italic; color: var(--muted); }
+.para { max-height: 15em; overflow-y: auto; padding-right: 8px; hyphens: auto; }
+mark { background: var(--mark); color: var(--mark-ink); padding: 1px 2px; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.pg { font: 600 11px 'Cinzel', serif; color: var(--muted); border: 1px solid var(--rule); border-radius: 3px; padding: 0 4px; margin: 0 3px; white-space: nowrap; vertical-align: 1px; background: var(--parchment); }
+.pg.ms { font-style: italic; font-family: 'EB Garamond', serif; font-weight: 400; }
+.note { margin: 8px 0 0; font-size: 15px; color: var(--muted); }
+.note b { font: 600 11px 'Cinzel', serif; letter-spacing: .06em; }
+.empty { text-align: center; color: var(--muted); padding: 40px 0; }
+footer { max-width: 880px; margin: 0 auto; padding: 0 24px 40px; color: var(--muted); font-size: 15px; }
+footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mediate inferences in Kant’s logic lectures</h1>
+  <p class="lede">Examples of mediate inferences (<i>Vernunftschlüsse</i>) in the Blomberg, Busolt and Wiener logic transcripts, each in its paragraph with the inference highlighted.</p>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="chips" id="works" role="group" aria-label="Lecture"></div>
+    <select id="kind" aria-label="Kind of inference"><option value="">All kinds</option></select>
+    <input id="q" type="search" placeholder="Search the paragraphs…" aria-label="Search">
+    <span id="count" aria-live="polite"></span>
+  </div>
+</div>
+
+<main id="list"></main>
+
+<footer>
+  <p><b>What is attested, what is not.</b> The paragraph text, the page numbers (Academy Edition, <i>AA</i> XXIV) and the manuscript page numbers are the transcriptions’, as <code>data/logik-*-24.js</code> carries them; a grey tag such as <span class="pg">AA 24:673</span> marks where a new page begins. <b>Which stretch counts as a mediate inference, and the label on each, is the compiler’s reading, not the edition’s.</b> The list is a curated selection from a read of the three transcripts, not an exhaustive census. Short notes are the compiler’s, not Kant’s or his students’.</p>
+  <p>Immediate inferences (<i>Verstandesschlüsse</i>: conversion, contraposition, subalternation and the like) are left out.</p>
+</footer>
+
+<!-- The three transcripts (generated; see data/README.md). Classic scripts, so this page opens from file://. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+// The lectures, oldest first. `key` is the prefix of each block id.
+const MI_WORKS = [
+  { key: 'blomberg', label: 'Blomberg Logic', date: 'ca. 1771',    data: LOGIK_BLOMBERG },
+  { key: 'wiener',   label: 'Wiener Logic',   date: '1780ff.',     data: LOGIK_WIENER },
+  { key: 'busolt',   label: 'Busolt Logic',   date: 'ca. 1789/90', data: LOGIK_BUSOLT }
+];
+
+// The curated examples. `block` is a block id in the data file; each of `spans` is
+// copied verbatim from that block's text and is highlighted wherever it occurs.
+// `note` is the compiler's gloss, shown as such. Add an example by adding a line.
+const MI_ITEMS = [
+ {"block":"blomberg-s03-017","kind":"Informal inference","spans":["daß der Mond Einwohner habe, weil in demselben Berge und Thäler befindlich sind"],"note":"Kant calls the ground insufficient: it shows only that inhabitants are possible."},
+ {"block":"blomberg-s06-006","kind":"Fallacy / sophism","spans":["Etwas ist wahr, wenn es mit dem Gegenstande übereinstimmet. nun aber kann ich dieses nicht einsehen, ohne den Gegenstand vorhero zu betrachten, und zu erkennen. Es ist also nichts anders, als daß die Wahrheit darinn bestehen wird, daß die Erkenntniß vom Gegenstand übereinstimmet mit der Erkenntniß vom Gegenstand."],"note":"The sceptics’ “diallele”: truth defined as agreement with the object, which can be known only through knowledge of it."},
+ {"block":"blomberg-s06-082","kind":"Categorical syllogism","spans":["alles, was zusammen gesezet ist, ist theilba hr, atqui ein jeder Körper ist zusammen gesezt, ergo ist ein jeder Körper theilba hr."],"note":"Offered as an example of a nota intermedia."},
+ {"block":"blomberg-s06-094","kind":"Informal inference","spans":["Mit einigem Grunde können wir zwar immer hieraus auf das Central-Feuer der Erde schlüßen, denn diese Feuerspeyende Berge, warme Bader etc. können mit vieler Mutmaßung ja selbst Wahrscheinlichkeit als Folgen eines dergleichen Central-Feuers angesehen werden, und aus den Folgen kann man sehr öfters richtig auf den Grund schlüßen."],"note":"An inference from consequences to ground."},
+ {"block":"blomberg-s06-147","kind":"Informal inference","spans":["Wer also einem gantzen Philosophischen Systema eines anderen sogleich auf einmahl und ohne viel darüber zu gedencken, zuversichtlich den Beyfall der Wahrheit giebt, von dem kann man immer richtig schlüßen, daß er es noch nicht verstehe, und im Stande sey, das wahre von dem Falschen recht zu unterscheiden."]},
+ {"block":"blomberg-s08-213","kind":"Informal inference","spans":["schlüßet daß etwas Gut, annehmlich, und vollkommen sey, darum, weil es uns reizt, weil es uns angenehm und unserem Geschmack angemeßen ist."],"note":"Given as an inference that rests on inclination."},
+ {"block":"blomberg-s08-274","kind":"Informal inference","spans":["woraus man schlüßet, daß bey derselben noch mehrere Vollkommenheiten anzutreffen seyn müßen"],"note":"Given as a prejudice."},
+ {"block":"blomberg-s08-286","kind":"Informal inference","spans":["man schlüßet: es würde schwerlich übrig geblieben, und bis auf uns gekommen seyn, wenn es nicht gut wäre, und nichts taugte"],"note":"The prejudice of antiquity, put as an inference."},
+ {"block":"blomberg-s08-518","kind":"Fallacy / sophism","spans":["wenn du sagest, du lügest, und in dem du dieses sa gst, die Wahrheit redest, so redest du die Wahrheit, indem du Lügest, atqui du sagest, du Lügest, und, in dem du dieses sagest, so redest du also die Wahrheit, indem du lügest. Die rechte Conclusion aber solte seyn: Ergo redest du die Wahrheit, indem du sagest, du Lügest."],"note":"The sceptics’ “Liar”, set out with “atqui” and “ergo”."},
+ {"block":"blomberg-s08-523","kind":"Fallacy / sophism","spans":["Ich habe in meiner Speisekammer täglich vielen Vorrath, wenn ich aber in dieselbige gehe, den Vorrath überzähle, und den Tag darauf wieder komme, so ist dieser Vorrath dennoch kleiner, als er gestern war, ein sicherer, und unwiedersprechlicher Beweis, daß die Sinne trügen müßen."],"note":"A sceptic’s argument against the senses."},
+ {"block":"blomberg-s10-072","kind":"Categorical syllogism","spans":["jeder Körper ist Theilbahr, die Seele aber ist einfach, folglich kann sie nicht corperlich seyn"],"note":"Used to show that one mark can suffice to prove something about a thing."},
+ {"block":"busolt-s26-035","kind":"Enthymeme","spans":["Alle Menschen sind Sterblich, also ist auch Caius sterblich"],"note":"Kant says this is wrongly drawn as an immediate inference: Caius is a concept not given before, so the inference must be mediate."},
+ {"block":"busolt-s26-046","kind":"Categorical syllogism","spans":["Alle Menschen sind Sterblich, Caius ist ein Mensch, also ist Caius sterblich"]},
+ {"block":"busolt-s27-004","kind":"Categorical syllogism","spans":["Veränderlich seyn ist ein Merkmahl alles theilbaren, theilbar seyn ist ein Merkmahl eines Körpers, also ist vermittelst der theilbarkeit die Veränderlichkeit ein Merkmahl des Körpers"],"note":"A negative-rule example (repugnans notae repugnat rei ipsi)."},
+ {"block":"busolt-s27-006","kind":"Categorical syllogism","spans":["Nichts Zusammengeseztes ist einfach, alle Materie ist zusammengesezt, also ist keine Materie einfach"]},
+ {"block":"busolt-s28-002","kind":"Categorical syllogism","spans":["Kein denkendes Wesen ist zusammengesetzt, alle Körper sind zusammengesezt daher ist kein Körper ein denkendes Wesen"],"note":"Second figure."},
+ {"block":"busolt-s28-003","kind":"Categorical syllogism","spans":["Alle Menschen sind unvollkommen; einige Menschen sind tugendhaft, also sind einige Tugendhafte unvollkommen"],"note":"Third figure."},
+ {"block":"busolt-s28-004","kind":"Categorical syllogism","spans":["Quidquid habet vim agendi est Spiritus omnis spiritus est substantia, ergo omnis substantia habet vim agendi"],"note":"Fourth figure."},
+ {"block":"busolt-s29-001","kind":"Fallacy / sophism","spans":["In dem Ort wo ich bin, ist kein anderer, die Stube das ist der Ort wo ich bin, also ist in der Stube kein anderer"],"note":"A middle term used in two senses."},
+ {"block":"busolt-s29-003","kind":"Fallacy / sophism","spans":["Kein Mensch ist ein unvernünftiges Thier, Kein Ochs ist ein Mensch also ist kein Ochs ein unvernünftiges Thier"],"note":"Offered to show that nothing follows from two negative premises."},
+ {"block":"busolt-s29-004","kind":"Fallacy / sophism","spans":["Einige empfindende Wesen sind Menschen, einige unvernünftige Thiere sind empfindende Wesen, also sind einige unvernünftige Thiere Menschen"],"note":"Offered to show that nothing follows from two particular premises."},
+ {"block":"busolt-s29-014","kind":"Categorical syllogism","spans":["kein denkendes Wesen ist zusammengesezt alle Körper sind zusammengesezt also ist kein Körper eine denkende Substanz"],"note":"Second figure, reduced to the first by converting the major."},
+ {"block":"busolt-s29-015","kind":"Categorical syllogism","spans":["Alle Menschen sind unvollkommen einige sind tugendhaft; also sind einige tugendhafte unvollkommen","Alle Menschen sind unvollkommen einige tugendhafte sind Menschen, also sind einige tugendhafte unvollkommen"],"note":"Third figure, then reduced to the first."},
+ {"block":"busolt-s29-022","kind":"Hypothetical syllogism","spans":["wenn ein Blindes Ohngefähr ist, so ist in der Welt keine Ordnung atqui falsum est posterius ergo primus"],"note":"Modus tollens."},
+ {"block":"busolt-s29-023","kind":"Hypothetical syllogism","spans":["Sind die Körper theilbar, so sind sie veränderlich; atqui verum est prius, ergo posterius"],"note":"Modus ponens."},
+ {"block":"busolt-s29-030","kind":"Enthymeme","spans":["Die Seele weil sie einfach ist, ist unvergänglich","Alle Menschen können irren also ich"],"note":"A hidden syllogism (ratiocinium cryptica) and an enthymeme."},
+ {"block":"busolt-s29-031","kind":"Induction","spans":["So sehe ich z.E. blos durch die Erfahrung ein, daß alle Menschen sterben müßen, weil nemlich dieser, jener und alle Menschen, die gelebt haben, gestorben sind"],"note":"Inference from the particular to the universal."},
+ {"block":"busolt-s29-031","kind":"Analogy","spans":["So schließen wir die circulation des Bluts bey thieren aus der sonstigen Aehnlichkeit des Menschlichen und thierischen Körpers in ihrer constitution.","Eben so den innern Bau der Polypen, an denen wir doch sonst keine Eingeweide bemerken."],"note":"Analogy; the same paragraph also holds the induction above."},
+ {"block":"busolt-s29-034","kind":"Fallacy / sophism","spans":["Alles einfache ist Unsterblich, Gott und alle Geister sind einfach"],"note":"Given as a copulative sophism, two syllogisms joined."},
+ {"block":"wiener-s04-069","kind":"Fallacy / sophism","spans":["Denn der Gegenstand ist nicht bey uns, sondern nur die Erkenntniß deßelben. Daher können wir unsere Erkenntniß davon nicht mit dem Gegenstand, sondern nur mit unserer Erkenntniß vergleichen. Da also keine andere Erkenntniß wahr ist, als die mit dem object übereinstimmt: so ist keine Erkenntniß vom object wahr, als die mit unserer Erkenntniß vom object übereinstimmt."],"note":"The “dialele”, which the text calls a Trugschluß."},
+ {"block":"wiener-s04-090","kind":"Informal inference","spans":["Doch brauchen wirs, und machen dabey diesen wahrscheinlichen Schluß. Wenn die meiste Folgen wahr sind: so sind sie alle wahr."],"note":"Given as a merely probable inference."},
+ {"block":"wiener-s04-091","kind":"Fallacy / sophism","spans":["alle Mohren sind Menschen. Der Respondent ist ein Mensch. Also ist er ein Mohr."],"note":"A subtle fallacy for confusing an opponent in disputation."},
+ {"block":"wiener-s05-007","kind":"Informal inference","spans":["aus Nichts wird Nichts. Wir müssen doch einen Stoff haben, aus dem wir Erkenntniße machen. Diese Materie können wir nicht selbst hervor bringen. Also muß doch Alles aus der Erfahrung herkommen"],"note":"An objector’s argument."},
+ {"block":"wiener-s06-003","kind":"Informal inference","spans":["Einer führt an, das denkende Wesen, die Seele wird noch im Tode nicht aufhören weil sie im Leben vom Körper nicht abgehangen hat"]},
+ {"block":"wiener-s06-004","kind":"Informal inference","spans":["Er gibt Alles vor Schein aus, und doch unterscheidet er den Schein von der Wahrheit, weil er uns warnet, nichts vor Wahrheit anzunehmen, so muß er doch ein Merkmahl haben, worin er Wahrheit erkennen kann, und da er den Grund angibt, warum man an alle dem zweifeln soll, so muß doch auch wohl das Gegentheil möglich seyn. Er kann also durch sich selbst widerlegt werden."],"note":"The self-refutation of scepticism."},
+ {"block":"wiener-s06-007","kind":"Informal inference","spans":["ich sage: es ist ein central Feuer in der Erde vorhanden, weil die Feuer speyende Berge, Erdbeben und andere phaenomene das beweisen."],"note":"A hypothesis: an inference from consequences to ground."},
+ {"block":"wiener-s12-001","kind":"Categorical syllogism","spans":["alle Körper theilbar, weil zusammengesetzt","alle Menschen sterblich folglich auch Cajus"],"note":"The first as an example of mediate inference, the second of a Vernunftschluß as distinct from a Verstandesschluß."},
+ {"block":"wiener-s13-001","kind":"Categorical syllogism","spans":["Cajus sterblich weil Mensch"],"note":"Here the nota intermedia is “Mensch”."}
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let workFilter = '';
+let kindFilter = '';
+let query = '';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+// Index every block of the three lectures by id, and remember document order.
+const BLOCKS = {};
+const ORDER = {};
+MI_WORKS.forEach(w => {
+  let n = 0;
+  w.data.sections.forEach(s => s.blocks.forEach(b => { BLOCKS[b.id] = { b, w }; ORDER[b.id] = n++; }));
+});
+
+// Resolve the curated list against the data once: block, work, highlight ranges.
+const ITEMS = MI_ITEMS.map((it, k) => {
+  const hit = BLOCKS[it.block];
+  if (!hit) { console.warn('Unknown block', it.block); return null; }
+  const ranges = [];
+  it.spans.forEach(sp => {
+    const i = hit.b.text.indexOf(sp);
+    if (i < 0) { console.warn('Span not found in', it.block, sp); return; }
+    ranges.push([i, i + sp.length]);
+  });
+  ranges.sort((a, b) => a[0] - b[0]);
+  return { k, it, b: hit.b, w: hit.w, ranges };
+}).filter(Boolean);
+const WORK_ORDER = {}; MI_WORKS.forEach((w, i) => WORK_ORDER[w.key] = i);
+ITEMS.sort((a, b) => WORK_ORDER[a.w.key] - WORK_ORDER[b.w.key] || ORDER[a.b.id] - ORDER[b.b.id] || a.k - b.k);
+
+// ── Rendering ─────────────────────────────────────────────────────────────────
+function pageLabel(b) {
+  const end = b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '';
+  return 'AA 24:' + b.aa + end;
+}
+
+// The paragraph, with the AA page markers and manuscript pages put back at the
+// offsets the extractor recorded, and the inference in <mark>.
+function renderParagraph(item) {
+  const b = item.b, text = b.text;
+  const cuts = new Set([0, text.length]);
+  item.ranges.forEach(r => { cuts.add(r[0]); cuts.add(r[1]); });
+  const pageAt = {}, msAt = {};
+  (b.pages || []).forEach(p => { if (p.i > 0 && p.i < text.length) { (pageAt[p.i] = pageAt[p.i] || []).push(p.p); cuts.add(p.i); } });
+  (b.ms || []).forEach(m => { if (m.i > 0 && m.i < text.length) { (msAt[m.i] = msAt[m.i] || []).push(m.p); cuts.add(m.i); } });
+  const pts = [...cuts].sort((a, c) => a - c);
+  const p = el('div', 'para');
+  let curPage = b.aa;
+  for (let n = 0; n < pts.length - 1; n++) {
+    const s = pts[n], e = pts[n + 1];
+    (pageAt[s] || []).forEach(pg => {
+      if (pg !== curPage) { p.appendChild(el('span', 'pg', 'AA 24:' + pg)); curPage = pg; }
+    });
+    (msAt[s] || []).forEach(m => p.appendChild(el('span', 'pg ms', 'ms. ' + m)));
+    const inside = item.ranges.some(r => s >= r[0] && e <= r[1]);
+    p.appendChild(inside ? el('mark', null, text.slice(s, e)) : document.createTextNode(text.slice(s, e)));
+  }
+  return p;
+}
+
+function renderItem(item) {
+  const card = el('article', 'item');
+  const head = el('div', 'item-head');
+  const cite = el('div', 'cite', item.w.label);
+  cite.appendChild(el('span', 'pages', pageLabel(item.b)));
+  head.appendChild(cite);
+  head.appendChild(el('div', 'kind', item.it.kind));
+  card.appendChild(head);
+  const para = renderParagraph(item);
+  card.appendChild(para);
+  if (item.it.note) {
+    const n = el('p', 'note');
+    n.appendChild(el('b', null, 'NOTE '));
+    n.appendChild(document.createTextNode(item.it.note));
+    card.appendChild(n);
+  }
+  // Long paragraphs scroll inside the card; start at the first highlight.
+  item.para = para;
+  return card;
+}
+
+function matches(item) {
+  if (workFilter && item.w.key !== workFilter) return false;
+  if (kindFilter && item.it.kind !== kindFilter) return false;
+  if (query && !item.b.text.toLowerCase().includes(query)) return false;
+  return true;
+}
+
+function render() {
+  const list = $('list');
+  list.textContent = '';
+  const shown = ITEMS.filter(matches);
+  shown.forEach(item => list.appendChild(renderItem(item)));
+  if (!shown.length) list.appendChild(el('p', 'empty', 'No examples match.'));
+  shown.forEach(item => {
+    const m = item.para.querySelector('mark');
+    if (m && item.para.scrollHeight > item.para.clientHeight) item.para.scrollTop = Math.max(0, m.offsetTop - item.para.offsetTop - 36);
+  });
+  $('count').textContent = shown.length + ' of ' + ITEMS.length + ' examples';
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+function buildControls() {
+  const box = $('works');
+  const defs = [{ key: '', label: 'All' }].concat(MI_WORKS.map(w => ({ key: w.key, label: w.label.replace(' Logic', '') })));
+  defs.forEach(d => {
+    const n = d.key ? ITEMS.filter(i => i.w.key === d.key).length : ITEMS.length;
+    const c = el('button', 'chip', d.label + ' ' + n);
+    c.type = 'button';
+    c.setAttribute('aria-pressed', d.key === workFilter ? 'true' : 'false');
+    c.addEventListener('click', () => {
+      workFilter = d.key;
+      box.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === c ? 'true' : 'false'));
+      render();
+    });
+    box.appendChild(c);
+  });
+  const kinds = [...new Set(ITEMS.map(i => i.it.kind))].sort();
+  kinds.forEach(k => { const o = el('option', null, k); o.value = k; $('kind').appendChild(o); });
+  $('kind').addEventListener('change', e => { kindFilter = e.target.value; render(); });
+  $('q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); render(); });
+}
+
+function init() { buildControls(); render(); }
+init();
+</script>
+</body>
+</html>
