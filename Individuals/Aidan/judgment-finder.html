@@ -131,6 +131,8 @@ mark.form { background: var(--mark-form); box-shadow: 0 0 0 1px #b9cfa6; }
 }
 .chip:hover { border-color: var(--accent-soft); }
 .chip.on { background: var(--accent); color: #fffdf6; border-color: var(--accent); }
+#thint { margin-top: 6px; font-size: 13px; color: var(--ink-soft); font-style: italic; }
+#thint[hidden] { display: none; }
 #kwhint { margin-top: 8px; font-size: 14px; color: var(--ink-soft); font-style: italic; }
 .opts { margin-top: 10px; font-size: 14px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .opts label { cursor: pointer; }
@@ -203,6 +205,7 @@ mark.form { background: var(--mark-form); box-shadow: 0 0 0 1px #b9cfa6; }
         <div id="suggest" role="listbox"></div>
       </div>
       <div id="table"></div>
+      <div id="thint">Pick one in each row — an example must have every form you pick. Click a pick again to drop it.</div>
       <div id="kwhint" hidden>Type words that occur in a judgment (German, any spelling). Each example found is labelled with its forms.</div>
       <div class="opts" id="opts-form">
         <label id="l-unmk"><input type="checkbox" id="o-unmk" checked> include implicit examples (no z.E., but a simple sentence in a passage about judgments)</label>
@@ -467,7 +470,7 @@ function* allSentences() {
 /* ── state ─────────────────────────────────────────────────────────────────── */
 let curWork = 0, curSect = 0;
 let mode = 'form';              // 'form' (form → examples) or 'kw' (keywords → forms)
-let curForm = null;
+let curForms = {};              // group → chosen form: at most one per head of the table
 let curWords = [];              // the keywords of the current keyword search
 let results = null;             // [ [hit,…] per work ]
 let hlMap = new Map();          // block id → [{ s, e, cls }]
@@ -607,9 +610,9 @@ function groupByWork(hits) {
   return by;
 }
 
-function searchForm(f) {
+function searchForms(forms) {
   const implicit = $('o-unmk').checked;
-  return buildExamples().filter(x => x.labels.includes(f.id) && (x.marked || implicit));
+  return buildExamples().filter(x => (x.marked || implicit) && forms.every(f => x.labels.includes(f.id)));
 }
 
 function keywordRanges(text, words) {
@@ -637,9 +640,9 @@ function searchKeywords(words) {
 function runSearch() {
   let hits = null, label = '';
   hlMap = new Map();
-  if (mode === 'form' && curForm) {
-    hits = searchForm(curForm);
-    label = curForm.en;
+  if (mode === 'form' && chosen().length) {
+    hits = searchForms(chosen());
+    label = chosen().map(f => f.en).join(' + ');
   } else if (mode === 'kw' && curWords.length) {
     hits = searchKeywords(curWords);
     label = curWords.join(' + ');
@@ -662,14 +665,19 @@ function renderSummary(label) {
   s.textContent = '';
   if (!results) {
     s.textContent = mode === 'form'
-      ? 'Choose a form from Kant’s table, or type one in German, Latin or English: you get the lecturers’ examples of it, from all three transcripts.'
+      ? 'Choose forms from Kant’s table — one in each row, or any fewer — or type one in German, Latin or English. You get the examples that have all of them, from all three transcripts.'
       : 'Type keywords: you get the examples that contain them, each labelled with the forms of judgment it appears to have.';
     return;
   }
   const total = results.reduce((n, h) => n + h.length, 0);
   s.append(el('b', null, label), ' — ' + total + ' example' + (total === 1 ? '' : 's') + ': ' +
     JF_WORKS.map((w, i) => w.label + ' ' + results[i].length).join(' · '));
-  if (mode === 'form' && curForm) s.append(el('span', 'def', curForm.de + ' · ' + curForm.la + ' — ' + curForm.def));
+  if (mode === 'form') {
+    chosen().forEach(f => s.append(el('span', 'def', f.en + ' (' + f.de + ' · ' + f.la + ') — ' + f.def)));
+    const clr = el('button', 'more', 'clear selection');
+    clr.addEventListener('click', () => { curForms = {}; $('q').value = ''; syncChips(); runSearch(); });
+    s.append(clr);
+  }
 }
 
 function renderResults() {
@@ -735,7 +743,7 @@ function renderExample(h) {
     const f = JF_BY_ID[id];
     const b = el('button', 'lab q' + f.axis, f.en);
     b.title = f.de + ' · ' + f.la + ' — click for its examples';
-    b.addEventListener('click', () => { setMode('form'); chooseForm(f); });
+    b.addEventListener('click', () => { curForms = {}; setMode('form'); chooseForm(f); });
     labs.append(b);
   });
   card.append(labs);
@@ -834,7 +842,7 @@ function buildTable() {
     JF_FORMS.filter(f => f.group === g).forEach(f => {
       const c = el('button', 'chip', f.en);
       c.dataset.id = f.id;
-      c.addEventListener('click', () => chooseForm(f));
+      c.addEventListener('click', () => chooseForm(f, true));
       chips.append(c);
     });
     t.append(chips);
@@ -846,25 +854,32 @@ function setMode(m) {
   $('m-form').setAttribute('aria-pressed', m === 'form');
   $('m-kw').setAttribute('aria-pressed', m === 'kw');
   $('table').hidden = m !== 'form';
+  $('thint').hidden = m !== 'form';
   $('opts-form').hidden = m !== 'form';
   $('kwhint').hidden = m !== 'kw';
   $('opts-kw').hidden = m !== 'kw';
   $('q').placeholder = m === 'form' ? 'a form: universal, hypothetisch, apodictisch, particulare…' : 'keywords: Mensch sterblich, Seele, Gott…';
-  $('q').value = m === 'form' ? (curForm ? curForm.en : '') : curWords.join(' ');
+  $('q').value = m === 'form' ? '' : curWords.join(' ');
   hideSuggest();
   syncChips();
   runSearch();
 }
 
-function chooseForm(f) {
-  curForm = f;
-  $('q').value = f.en;
+/* The forms picked so far, in table order. */
+function chosen() { return JF_GROUPS.map(g => curForms[g]).filter(Boolean); }
+
+/* Pick a form. One per head of the table: choosing another in the same head replaces it, and a chip
+   clicked again (toggle) lets go. Examples must then have every form that is picked. */
+function chooseForm(f, toggle) {
+  if (toggle && curForms[f.group] === f) delete curForms[f.group];
+  else curForms[f.group] = f;
+  $('q').value = '';
   hideSuggest();
   syncChips();
   runSearch();
 }
 function syncChips() {
-  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', mode === 'form' && !!curForm && c.dataset.id === curForm.id));
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', mode === 'form' && chosen().some(f => f.id === c.dataset.id)));
 }
 function showSuggest(list) {
   const s = $('suggest');
