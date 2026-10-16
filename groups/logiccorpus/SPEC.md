@@ -8,7 +8,7 @@ same pull request.*
 
 From the group's issue ([#17](https://github.com/mikrishnan/kant-lab/issues/17)): "We will iterate on this tool, it will be more efficiently studying the Kantian logical tradition."
 
-The tool is a transcript reader with a panel of searches beside it. On the left, Kant's logic lectures are read as the primary texts, in the manner of the Baumgarten and Meier readers. On the right, a tab for each way of searching them. It begins with three lectures and two searches: *where is this word or phrase used, whatever the spelling*, and *how do the three lectures use this concept, side by side*. More lectures and more searches are to follow; see Open questions.
+The tool is a transcript reader with a panel of searches beside it. On the left, Kant's logic lectures are read as the primary texts, in the manner of the Baumgarten and Meier readers. On the right, a tab for each way of searching them. It begins with three lectures and three searches: *where is this word or phrase used, whatever the spelling*; *how do the three lectures use this concept, side by side*; and *where does each type of judgment (hypothetical, disjunctive, universal negative, apodictic …) appear, with the Kantian description of it and the examples given*. More lectures and more searches are to follow; see Open questions.
 
 ## Sources
 
@@ -31,6 +31,7 @@ They are machine-extracted from the transcriptions in `Textfiles/` and are not e
 - A paragraph the extractor joined on its own judgement (the line broke off mid-sentence and the next began in lower case) has a dashed rule at its left. One joined on the transcription's own `|` mark does not, since the join is attested.
 - A hit found only by the spelling rules below is marked ≈, and the text is always shown as printed. The *Forms found* list shows the spellings behind a count.
 - A section the transcription gives no title (the Titelei of Busolt and the Wiener Logik) is listed as `[Titelei]`, in brackets, since that name is this page's and not the edition's.
+- In *Types of judgment*, a passage is attributed to a type only because it uses a word the page lists for it, in the table of judgments the page carries. The page does not decide whether a passage defines the type, gives an example of it, or only mentions it. Which sentence a card shows, and which words count as naming a type, are the page's choices, and the card says so.
 
 Everything else in the panel is computed: counts, rates per 10,000 words, and the bars showing where in a lecture a term falls.
 
@@ -74,21 +75,36 @@ keeps its meaning.*
 24. "List all … in Word / phrase search" switches to that tab and runs the same term there, with the same options, in all three lectures.
 25. The two tabs keep their own terms and options. The reader highlights the hits of whichever tab is open.
 
+26. A third tab, "Types of judgment", offers twelve types under the four heads of Kant's table, in German with an English gloss: *Quantität* (allgemeine, besondere, einzelne), *Qualität* (bejahende, verneinende, unendliche), *Relation* (kategorische, hypothetische, disjunctive), *Modalität* (problematische, assertorische, apodiktische). Each is a button with the number of passages that name it.
+27. With no type chosen, a table gives, for each type, the number of passages in the Blomberg, the Busolt and the Wiener, and in all three. Clicking a row chooses that type, as clicking its button does.
+28. Choosing one type lists, in reading order and grouped by lecture, every passage in the three lectures that uses a word naming it, German or Latin and in any of its spellings: *hypothetische* finds *Hypothetisches*, *Hypotheticum* and *hypothetischen*; *apodiktische* finds *apodictisch*; *assertorische* finds *Aßertorisch*. The first line gives the number of passages in all and in each lecture.
+29. A passage is a card. Its first line gives the lecture, the AA page, Meier's § where the lecture has one, and the types it names; the section's title follows. Below is the sentence in which the word stands, with the whole word highlighted and editorial brackets faded. Neighbouring sentences that name the same type are one card.
+30. A sentence after it that opens with `<` or `[` is part of the card, where the transcription sets an example in brackets. So is a following paragraph that opens that way, shown indented beneath it and labelled "next paragraph, set apart in brackets".
+31. "Show the whole paragraph" opens the paragraph the card is from, with every use of the chosen types marked, and "Hide the paragraph" closes it. "Open in the reader" opens the lecture and section at that paragraph. Every use of the chosen types in the section in view is highlighted in the reader.
+32. Choosing several types lists the passages in which all of them are named together: *verneinende* with *allgemeine* finds where a negative and a universal are named in one sentence. A drop-down changes "in the same sentence" (the default) to "in the same paragraph", and the card then runs from the first sentence naming one to the last naming another.
+33. A tick box, "Only paragraphs that also speak of a judgment (Urtheil, judicium, Satz)", is on by default. With it on, a paragraph counts only if it contains one of those words, which leaves out everyday uses of *allgemein* and *besondere*. With it off, every paragraph counts. The counts on the buttons and in the table follow it.
+34. Three tick boxes restrict the passages to the lectures ticked. "Clear the choice" returns to the table of item 27.
+35. A card that would show more than 1,400 characters stops there with "…"; the rest is in the paragraph or the reader.
+
 ## Out of scope
 
 - Correcting the transcription. The data are generated; a correction belongs in the extractor.
 - Finding the other inflected forms of a word, as a lemmatiser would. *Schluß* finds *Schluß* and *Schlußes*, but not the plural *Schlüße* or the verb *schließen*, which the spelling rules do not equate with it.
+- Deciding what a passage does: whether it defines a type of judgment, gives an example of it, or only mentions it. Nor does the page recognise a compound such as "negative universal" as one type; it finds where the two words are named together.
 - Searching the AA's cross-references and horizontal rules. Only the lectures' prose paragraphs are searched and counted.
 - Texts outside the three lectures: Meier, Baumgarten and the Reflexionen have their own readers.
 - Saving a search or a place in a lecture. As in the other tools, the page keeps nothing when it is reloaded.
 
 ## Open questions
 
-1. **Which searches next?** Two tabs exist. The group has not yet said which others it wants (a § or AA page lookup; a section browser; a search restricted to a § range of Meier; a comparison of two terms).
+1. **Which searches next?** Three tabs exist. The group has not yet said which others it wants (a § or AA page lookup; a section browser; a search restricted to a § range of Meier; a comparison of two terms).
 2. **More lectures.** AA XXIV also holds the Philippi, Pölitz and Dohna-Wundlacken Logik, and AA IX the Jäsche *Logik*. Which does the group want, and in what order? Each needs its own extraction.
 3. **The spelling rules.** They do not equate *c*, *k* and *z* (*Concept* and *Konzept*), *ph* and *f*, *u* and *v*, or *ae* with *ä* once it is printed as two letters, because folding these in would also blur the Latin in the lectures (*que*, *quae*). Which, if any, should be added, and should the Latin be searched by its own rules?
 4. **Reading Blomberg against Meier.** Blomberg is keyed to Meier's §§. Should a § in the margin link to that § in the [Meier reader](../../meier-reader/meier-reading-guide.html)?
 5. **Concept occurrences.** At present it counts occurrences of a typed term. Should the group build a list of the logical terms it cares about (Begriff, Urteil, Schluß, Merkmal, Umfang, Inhalt) to choose from, and should related terms be gathered under one concept?
 6. **Hits in inferred paragraphs.** A hit in a paragraph the extractor joined by inference is not marked as such in the hit list, only when the paragraph is opened. Should it be?
 7. **Citing a passage.** Each hit shows its AA page. Should it also give a link that reopens the page at that paragraph?
-8. **Not checked by a person.** The reader and both tabs were exercised in a headless browser, not clicked through by a person. The page was not tried on a narrow screen or a touch screen.
+8. **The judgment words.** The table of twelve types and the words listed for each are this page's, and are in `JUDGMENT_TYPES` at the top of the script. Are they the right ones? *allgemein* and *besondere* are everyday words; the other kinds of judgment (analytic and synthetic, exponible, restrictive, the *Erfahrungsurtheile*) are not yet in the table.
+9. **The model passage.** A passage of the form "2. hypothetische †, sie enthalten das Verhältnis des Grundes zur Folge. <Wenn die Seele nicht zusammengesetzt, so usw.>", followed by a paragraph of examples in `[ ]`, is not in the three lectures now loaded; it must be from a transcript the corpus does not yet have. The page handles the `<` and `[` convention (item 30) but has never met it. Which transcript is it from, and what do `†`, `< >` and `[ ]` mean in it?
+10. **Descriptions and examples.** Should a list heading ("1. categorische, 2. hypothetische …") or a sentence that defines a type be told apart from a mere mention, and shown differently?
+11. **Not checked by a person.** The reader and both tabs were exercised in a headless browser, not clicked through by a person. The page was not tried on a narrow screen or a touch screen.

@@ -127,6 +127,28 @@
   .striplabel { font-size: .85rem; color: var(--faded); margin: .5rem 0 0; }
   .link { background: none; border: 0; color: var(--accent); text-decoration: underline; padding: 0; }
   .note { font-size: .88rem; color: var(--faded); margin: .8rem 0 0; }
+
+  /* types of judgment */
+  .head { margin: .7rem 0 .2rem; font-family: 'Cinzel', serif; font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; color: var(--accent-light); }
+  .head small { text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', serif; font-size: .9rem; color: var(--faded); }
+  .chips { display: flex; flex-wrap: wrap; gap: .3rem; }
+  .chip { padding: .15rem .6rem; line-height: 1.25; text-align: left; background: var(--parchment); }
+  .chip small { display: block; font-size: .78rem; color: var(--faded); }
+  .chip .ct { color: var(--faded); font-size: .8rem; margin-left: .25rem; }
+  .chip[aria-pressed=true] { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  .chip[aria-pressed=true] small, .chip[aria-pressed=true] .ct { color: var(--parchment-deeper); }
+  tr.row { cursor: pointer; }
+  tr.row:hover td { background: #fbf6e8; }
+  tr.headrow td { font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-light); background: var(--parchment-dark); text-align: left; }
+  .card { margin: .45rem 0; padding: .5rem .7rem .4rem; background: var(--parchment); border: 1px solid var(--parchment-deeper); border-left: 3px solid var(--accent-light); border-radius: 3px; }
+  .card .cardhead { display: flex; flex-wrap: wrap; gap: .1rem .6rem; align-items: baseline; font-size: .78rem; color: var(--faded); font-family: 'Cinzel', serif; letter-spacing: .02em; }
+  .card .tags { font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: .9rem; color: var(--accent); font-style: italic; }
+  .card .where { font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: .85rem; flex-basis: 100%; }
+  .card .body { margin: .3rem 0 .2rem; font-size: 1.04rem; line-height: 1.5; }
+  .card .example { margin: .3rem 0 .2rem .9rem; padding-left: .6rem; border-left: 1px solid var(--line); font-size: .98rem; color: var(--ink); }
+  .card .example .lab { display: block; font-size: .75rem; color: var(--faded); font-style: italic; }
+  .card .para { margin: .4rem 0; padding: .4rem .6rem; background: var(--parchment-dark); border-radius: 2px; font-size: .98rem; line-height: 1.5; }
+  .card .foot { display: flex; gap: 1rem; font-size: .88rem; }
 </style>
 </head>
 <body>
@@ -177,6 +199,31 @@ const MIN_QUERY = 2;        // letters a search needs before it runs
 const SHOW_STEP = 60;       // hits listed per work, and per "show more"
 const SNIP = 70;            // characters of context either side of a hit
 
+// The judgments, by the four heads of Kant's table. `stems` are the beginnings of the words
+// that name each in these lectures, German and Latin; a stem is matched as a word beginning,
+// across spellings, so 'apodict' and 'apodikt' are both listed and Aßertorisch is found by 'assertor'.
+const JUDGMENT_HEADS = [
+  { id: 'quantity', de: 'Quantität', en: 'Quantity' },
+  { id: 'quality',  de: 'Qualität',  en: 'Quality' },
+  { id: 'relation', de: 'Relation',  en: 'Relation' },
+  { id: 'modality', de: 'Modalität', en: 'Modality' },
+];
+const JUDGMENT_TYPES = [
+  { id: 'allgemein',      head: 'quantity', de: 'allgemeine',     en: 'universal',    stems: ['allgemein', 'universal'] },
+  { id: 'besondere',      head: 'quantity', de: 'besondere',      en: 'particular',   stems: ['besondere', 'particul', 'partikul'] },
+  { id: 'einzelne',       head: 'quantity', de: 'einzelne',       en: 'singular',     stems: ['einzel', 'singular'] },
+  { id: 'bejahende',      head: 'quality',  de: 'bejahende',      en: 'affirmative',  stems: ['bejahend', 'affirmati'] },
+  { id: 'verneinende',    head: 'quality',  de: 'verneinende',    en: 'negative',     stems: ['verneinend', 'negati'] },
+  { id: 'unendliche',     head: 'quality',  de: 'unendliche',     en: 'infinite',     stems: ['unendlich', 'infinit', 'limitativ'] },
+  { id: 'kategorische',   head: 'relation', de: 'kategorische',   en: 'categorical',  stems: ['kategorisch', 'categorisch', 'kategoric', 'categoric'] },
+  { id: 'hypothetische',  head: 'relation', de: 'hypothetische',  en: 'hypothetical', stems: ['hypothet'] },
+  { id: 'disjunctive',    head: 'relation', de: 'disjunctive',    en: 'disjunctive',  stems: ['disjunct', 'disjunkt'] },
+  { id: 'problematische', head: 'modality', de: 'problematische', en: 'problematic',  stems: ['problemat'] },
+  { id: 'assertorische',  head: 'modality', de: 'assertorische',  en: 'assertoric',   stems: ['assertor'] },
+  { id: 'apodiktische',   head: 'modality', de: 'apodiktische',   en: 'apodictic',    stems: ['apodikt', 'apodict'] },
+];
+const JUDGMENT_WORDS = ['urtheil', 'judic', 'satz', 'saetz', 'proposit'];   // a paragraph that speaks of judgments
+
 function sectionTitle(sec) {
   if (sec.title) return sec.title;
   if (sec.titleSrc === 'none') return '[Titelei]';      // the transcription gives it no title
@@ -205,6 +252,7 @@ let tab = 'word';
 const opts = {
   word:    { q: '', mode: 'prefix', fold: true, scope: [true, true, true], shown: [SHOW_STEP, SHOW_STEP, SHOW_STEP], res: null },
   concept: { q: '', mode: 'prefix', fold: true },
+  judgment: { sel: [], together: 'sentence', needJ: true, scope: [true, true, true], shown: [20, 20, 20] },
 };
 
 // ── Small helpers ──
@@ -565,7 +613,226 @@ function buildConceptPane(wordPane) {
   return pane;
 }
 
-const TABS = [['word', 'Word / phrase'], ['concept', 'Concept occurrences']];
+// ── Types of judgment ──
+// Passages that use the words for a type of judgment (or for several together), each as a card:
+// the sentence the word is in, and any sentence after it that opens with < or [, where the
+// transcription sets an example. Which words count as a type is the table above, not a reading
+// of the passage: the tool does not decide whether a passage defines, illustrates or only mentions.
+const SENTENCE_END = /(?<![A-Za-zÄÖÜäöü]\.[A-Za-zÄÖÜäöü])(?<!\b\d{1,2})([.!?])(["»”')\]>]*)\s+(?=[A-ZÄÖÜ0-9<\[("„»])/g;
+const SENTENCES = new Map();
+function sentences(b) {                          // [from, to] of each sentence in a block
+  if (SENTENCES.has(b.id)) return SENTENCES.get(b.id);
+  const t = b.text, out = [];
+  let from = 0;
+  for (const m of t.matchAll(SENTENCE_END)) {
+    const to = m.index + m[1].length + m[2].length;
+    out.push([from, to]); from = m.index + m[0].length;
+  }
+  out.push([from, t.length]);
+  SENTENCES.set(b.id, out);
+  return out;
+}
+const sentenceAt = (S, pos) => { const i = S.findIndex(([f, c]) => pos >= f && pos < c); return i === -1 ? S.length - 1 : i; };
+
+const TYPE_HITS = {};                            // type id -> its hits in all three lectures, reading order
+function typeHits(t) {
+  if (TYPE_HITS[t.id]) return TYPE_HITS[t.id];
+  const hits = [];
+  for (const stem of t.stems) {
+    const r = search(stem, 'prefix', true, null);
+    if (r) for (const h of r.hits) {             // a stem begins a word: mark the whole word
+      while (h.to < h.b.text.length && /\p{L}/u.test(h.b.text[h.to])) h.to++;
+      hits.push(h);
+    }
+  }
+  hits.sort((a, b) => a.w - b.w || a.s - b.s || a.bi - b.bi || a.from - b.from);
+  return TYPE_HITS[t.id] = hits;
+}
+let JBLOCKS = null;                              // ids of the paragraphs that speak of a judgment
+function judgmentBlocks() {
+  if (JBLOCKS) return JBLOCKS;
+  JBLOCKS = new Set();
+  for (const w of JUDGMENT_WORDS) { const r = search(w, 'prefix', true, null); if (r) for (const id of r.byBlock.keys()) JBLOCKS.add(id); }
+  return JBLOCKS;
+}
+
+// The passages for the types in `ids` together: where one is chosen, each sentence (or run of
+// sentences) that has it; where several, each sentence or each paragraph that has all of them.
+function buildPassages(ids, needJ, together) {
+  const hitsOf = ids.map(id => typeHits(JUDGMENT_TYPES.find(t => t.id === id)).filter(h => !needJ || judgmentBlocks().has(h.b.id)));
+  const blocks = new Map();
+  hitsOf.forEach((hs, k) => hs.forEach(h => {
+    if (!blocks.has(h.b.id)) blocks.set(h.b.id, []);
+    blocks.get(h.b.id).push({ ...h, type: ids[k] });
+  }));
+  const out = [];
+  for (const hits of blocks.values()) {
+    if (!ids.every(id => hits.some(h => h.type === id))) continue;
+    const b = hits[0].b, S = sentences(b);
+    hits.forEach(h => { h.si = sentenceAt(S, h.from); });
+    const mk = (a, c, hs) => out.push({ w: hs[0].w, s: hs[0].s, bi: hs[0].bi, b, from: a, to: c, hits: hs, all: hits });
+    if (ids.length > 1 && together === 'paragraph') {
+      mk(Math.min(...hits.map(h => h.si)), Math.max(...hits.map(h => h.si)), hits);
+      continue;
+    }
+    const bySent = new Map();
+    for (const h of hits) { if (!bySent.has(h.si)) bySent.set(h.si, []); bySent.get(h.si).push(h); }
+    const keep = [...bySent.keys()].sort((a, c) => a - c).filter(si => ids.every(id => bySent.get(si).some(h => h.type === id)));
+    for (let k = 0; k < keep.length; k++) {      // a run of neighbouring sentences is one passage, where a single type is chosen
+      let a = keep[k], c = a, hs = bySent.get(a).slice();
+      while (ids.length === 1 && k + 1 < keep.length && keep[k + 1] === c + 1) { k++; c = keep[k]; hs = hs.concat(bySent.get(c)); }
+      mk(a, c, hs);
+    }
+  }
+  return out.sort((x, y) => x.w - y.w || x.s - y.s || x.bi - y.bi || x.from - y.from);
+}
+const PASSAGE_CAP = 1400;                        // characters a card shows before it stops and says so
+function passageText(p) {                        // the character range a card shows, with the examples after it
+  const S = sentences(p.b), t = p.b.text;
+  let last = p.to;
+  while (last + 1 < S.length && /^[<\[]/.test(t.slice(S[last + 1][0]))) last++;
+  const from = S[p.from][0], to = S[last][1];
+  return { from, to: Math.min(to, from + PASSAGE_CAP), cut: to > from + PASSAGE_CAP, ended: last === S.length - 1 };
+}
+function exampleBlock(p) {                       // a following paragraph that opens with < or [ : an example set apart
+  const at = BLOCK_AT.get(p.b.id), sec = WORKS[at.w].L.sections[at.s];
+  const nb = sec.blocks[at.b + 1];
+  return nb && nb.kind === 'text' && /^[<\[]/.test(nb.text) ? nb : null;
+}
+
+// Render text[from, to) of a block with the editorial brackets faded and the given ranges marked
+function fillRange(parent, b, from, to, ranges) {
+  const t = b.text;
+  const eds = [...t.matchAll(EDITORIAL)].map(m => [m.index, m.index + m[0].length]);
+  const cuts = new Set([from, to]);
+  for (const [a, c] of eds.concat(ranges)) { if (a > from && a < to) cuts.add(a); if (c > from && c < to) cuts.add(c); }
+  const pts = [...cuts].sort((x, y) => x - y);
+  for (let k = 0; k + 1 < pts.length; k++) {
+    const a = pts[k], c = pts[k + 1], piece = t.slice(a, c);
+    const inEd = eds.some(([s, e]) => a >= s && c <= e), hit = ranges.find(([s, e]) => a >= s && c <= e);
+    if (!inEd && !hit) { parent.append(piece); continue; }
+    parent.append(hit ? el('mark', { class: inEd ? 'ed' : '' }, piece) : el('span', { class: 'ed' }, piece));
+  }
+}
+
+function buildJudgmentPane() {
+  const o = opts.judgment;
+  const typeOf = id => JUDGMENT_TYPES.find(t => t.id === id);
+  const label = id => typeOf(id).de + ' (' + typeOf(id).en + ')';
+  const overview = {};                           // needJ -> { type id -> passages per lecture }
+  const counts = () => {
+    const key = String(o.needJ);
+    if (!overview[key]) {
+      overview[key] = {};
+      for (const t of JUDGMENT_TYPES) {
+        const per = [0, 0, 0];
+        for (const p of buildPassages([t.id], o.needJ, 'sentence')) per[p.w]++;
+        overview[key][t.id] = per;
+      }
+    }
+    return overview[key];
+  };
+  const body = el('div');
+  const toggle = id => { o.sel = o.sel.includes(id) ? o.sel.filter(x => x !== id) : [...o.sel, id]; o.shown = [20, 20, 20]; show(); };
+
+  const card = (p, results) => {
+    const W = WORKS[p.w], span = passageText(p);
+    const ranges = p.all.filter(h => h.from >= span.from && h.to <= span.to + 1).map(h => [h.from, h.to]);
+    const first = p.hits[0];
+    const types = [...new Set(p.hits.map(h => h.type))];
+    const c = el('div', { class: 'card' });
+    c.append(el('div', { class: 'cardhead' }, cite(first), el('span', { class: 'tags' }, types.map(id => typeOf(id).de).join(' · ')),
+      el('span', { class: 'where' }, W.secs[p.s].title)));
+    const text = el('div', { class: 'body' });
+    fillRange(text, p.b, span.from, span.to, ranges);
+    if (span.cut) text.append(' …');
+    c.append(text);
+    const ex = span.ended ? exampleBlock(p) : null;
+    if (ex) {
+      const exEl = el('div', { class: 'example' }, el('span', { class: 'lab' }, 'next paragraph, set apart in brackets'));
+      fillRange(exEl, ex, 0, Math.min(ex.text.length, PASSAGE_CAP), []);
+      c.append(exEl);
+    }
+    const para = el('div', { class: 'para', hidden: '' });
+    fillRange(para, p.b, 0, p.b.text.length, p.all.map(h => [h.from, h.to]));
+    c.append(para);
+    const showBtn = el('button', { class: 'link', onclick: () => { para.hidden = !para.hidden; showBtn.textContent = para.hidden ? 'Show the whole paragraph' : 'Hide the paragraph'; } }, 'Show the whole paragraph');
+    c.append(el('div', { class: 'foot' }, el('button', { class: 'link', onclick: () => goHit(first) }, 'Open in the reader'), showBtn));
+    return c;
+  };
+
+  function show() {
+    const per = counts();
+    // chips
+    body.replaceChildren();
+    body.append(el('p', { class: 'hint' }, 'Choose a type of judgment to see every passage in the three lectures that uses its name, or choose several to find where they are named together.'));
+    for (const h of JUDGMENT_HEADS) {
+      body.append(el('div', { class: 'head' }, h.de + ' ', el('small', null, h.en)));
+      body.append(el('div', { class: 'chips' }, JUDGMENT_TYPES.filter(t => t.head === h.id).map(t =>
+        el('button', { class: 'chip', 'aria-pressed': String(o.sel.includes(t.id)), onclick: () => toggle(t.id) },
+          t.de, el('span', { class: 'ct' }, String(per[t.id].reduce((a, b) => a + b, 0))), el('small', null, t.en)))));
+    }
+    // options
+    const needJ = el('input', { type: 'checkbox', onchange: () => { o.needJ = needJ.checked; o.shown = [20, 20, 20]; show(); } });
+    needJ.checked = o.needJ;
+    const opt = el('div', { class: 'opts', style: 'margin-top:.7rem' }, el('label', null, needJ, ' Only paragraphs that also speak of a judgment (Urtheil, judicium, Satz)'));
+    if (o.sel.length > 1) {
+      const tog = el('select', { 'aria-label': 'How close together', onchange: () => { o.together = tog.value; o.shown = [20, 20, 20]; show(); } },
+        el('option', { value: 'sentence' }, 'in the same sentence'), el('option', { value: 'paragraph' }, 'in the same paragraph'));
+      tog.value = o.together;
+      opt.append(el('label', null, 'Named together ', tog));
+    }
+    if (o.sel.length) {
+      WORKS.forEach((W, w) => {
+        const cb = el('input', { type: 'checkbox', onchange: () => { o.scope[w] = cb.checked; o.shown = [20, 20, 20]; show(); } });
+        cb.checked = o.scope[w];
+        opt.append(el('label', null, cb, ' ' + W.short));
+      });
+      opt.append(el('button', { onclick: () => { o.sel = []; show(); } }, 'Clear the choice'));
+    }
+    body.append(opt);
+
+    if (!o.sel.length) {                          // the overview: every type against every lecture
+      active = null; renderReader(null, true);
+      const tb = el('table');
+      tb.append(el('tr', null, el('th', null, 'Type of judgment'), ...WORKS.map(W => el('th', null, W.short)), el('th', null, 'All')));
+      for (const h of JUDGMENT_HEADS) {
+        tb.append(el('tr', { class: 'headrow' }, el('td', { colspan: '5' }, h.de + ' · ' + h.en)));
+        for (const t of JUDGMENT_TYPES.filter(t => t.head === h.id))
+          tb.append(el('tr', { class: 'row', onclick: () => toggle(t.id) }, el('td', null, t.de + ' ', el('small', { class: 'ct' }, t.en)),
+            ...per[t.id].map(n => el('td', null, String(n))), el('td', null, String(per[t.id].reduce((a, b) => a + b, 0)))));
+      }
+      body.append(el('h3', null, 'Passages naming each type'), tb,
+        el('p', { class: 'note' }, 'Each number counts the sentences, or neighbouring sentences, that use the word for the type. Click a row to read them. One passage can name several types.'));
+      return;
+    }
+
+    const passages = buildPassages(o.sel, o.needJ, o.together).filter(p => o.scope[p.w]);
+    const byBlock = new Map();
+    for (const p of passages) for (const h of p.all) { if (!byBlock.has(h.b.id)) byBlock.set(h.b.id, []); byBlock.get(h.b.id).push([h.from, h.to]); }
+    active = { byBlock };
+    renderReader(null, true);
+    const names = o.sel.map(label).join(' + ');
+    body.append(el('p', { class: 'summary' }, el('b', null, plural(passages.length, 'passage')), ' for ' + names +
+      (passages.length ? ' — ' + WORKS.map((W, w) => W.short + ' ' + passages.filter(p => p.w === w).length).join(' · ') : '')));
+    if (o.sel.length > 1) body.append(el('p', { class: 'hint' }, 'Passages in which every one of them is named, ' + (o.together === 'sentence' ? 'within one sentence.' : 'within one paragraph; the card runs from the first to the last.')));
+    WORKS.forEach((W, w) => {
+      const mine = passages.filter(p => p.w === w);
+      if (!mine.length) return;
+      const g = el('details', { class: 'group', open: '' }, el('summary', null, W.short + ' ', el('span', { class: 'n' }, '(' + mine.length + ')')));
+      mine.slice(0, o.shown[w]).forEach(p => g.append(card(p)));
+      if (mine.length > o.shown[w]) g.append(el('button', { class: 'more', onclick: () => { o.shown[w] += 20; show(); } },
+        'Show ' + Math.min(20, mine.length - o.shown[w]) + ' more of ' + (mine.length - o.shown[w])));
+      body.append(g);
+    });
+    body.append(el('p', { class: 'note' }, 'Passages are found by the words that name each type, across spellings, and shown as printed; the tool does not judge whether a passage defines a type, gives an example of it, or only mentions it. The dashed brackets and any paragraph set apart in brackets are the edition’s.'));
+  }
+  const pane = el('div', null, body);
+  pane.refresh = show;
+  return pane;
+}
+
+const TABS = [['word', 'Word / phrase'], ['concept', 'Concept occurrences'], ['judgment', 'Types of judgment']];
 let panes = {};
 function setTab(t) {
   tab = t;
@@ -584,7 +851,8 @@ renderTop();
 renderReader();
 panes.word = buildWordPane();
 panes.concept = buildConceptPane(panes.word);
-$('panes').append(panes.word, panes.concept);
+panes.judgment = buildJudgmentPane();
+$('panes').append(panes.word, panes.concept, panes.judgment);
 setTab('word');
 </script>
 </body>
