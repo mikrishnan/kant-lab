@@ -53,6 +53,7 @@ might read, or that participants should be able to extend without touching app c
 | [data/logik-blomberg-24.js](data/logik-blomberg-24.js) | *Logik Blomberg*, Kant's logic lecture of ca. 1771 (AA 24:7–301), keyed to Meier's §§. **Generated** — see below. |
 | [data/logik-busolt-24.js](data/logik-busolt-24.js) | *Logik Busolt*, ca. 1789/90 (AA 24:603–686). **Generated** — see below. |
 | [data/logik-wiener-24.js](data/logik-wiener-24.js) | The *Wiener Logik*, 1780ff. (AA 24:785–940). **Generated** — see below. |
+| [data/logik-jasche-9.js](data/logik-jasche-9.js) | The Jäsche *Logik*, 1800 (AA 9:3–150), §§ 1–120 with an index of them. **Generated** — see below. |
 | [data/tradition-meier.js](data/tradition-meier.js) | `TRADITION`, the Meier reader's parallel passages from Wolff, the Scholastics and Aristotle, keyed to Meier's §§. **Hand-curated** — edit it directly; its header says how. |
 
 They are `<script src>` includes rather than `fetch()` on purpose: a classic script tag
@@ -283,6 +284,49 @@ Per "Attested vs. inferred" below: a paragraph joined on the transcription's own
 carries `joined: ["mark"]`; one joined on the extractor's judgement — the line broke off
 without terminal punctuation and the next began in lower case — carries
 `joined: ["inferred"]`, so a reader can see the paragraph break was removed by inference.
+
+### The Jäsche Logik of AA IX
+
+```sh
+python3 scripts/parse_jasche.py Textfiles/Vol9Logic.rtfd/TXT.rtf data/logik-jasche-9.js
+```
+
+Unlike the others this extractor reads the RTF itself, so it needs no `textutil` and
+runs anywhere. It does so because the formatting is evidence here: the italics are
+Latin terms and emphasis, a centred line under a heading is the printed summary of the
+section, a hanging indent an enumeration.
+
+**Read the report.** It ends in `clean` when all 120 §§ are present once each in order,
+and every character of the transcription — less its page markers, `|` and whitespace —
+is in exactly one block or heading, in order. That is a stronger check than the Logik
+extractor's, and it would catch a dropped line. Compare the block and word counts with
+the previous run too (870 blocks, 40258 words).
+
+What the extractor knows about this transcription, which is easy to break:
+
+- `― 12 ―` stands alone and marks the *start* of AA IX page 12. Nine page numbers are
+  marked twice running (16, 21, 33, 49, 65, 81, 86, 131, 140) and one is not marked at
+  all (88). The transcription's own; reported, not corrected.
+- `|` marks a break inside the text. At the end of a paragraph, before a page marker, it
+  is the signal that the paragraph continues. Tight against the preceding character it
+  rejoins a word (`wirk|lich`), including where a word is hyphenated across a line;
+  with a space before it, it becomes a space. Page offsets are computed *after* the
+  pipes are removed, or they come out a character short wherever a word was split.
+- A page marker with no `|`, between a paragraph that breaks off without terminal
+  punctuation and one that begins in lower case, is joined and marked `joined:
+  ["inferred"]` (21). Where the next paragraph begins with a capital, German nouns do,
+  the two are **not** joined and the first is marked `maybeContinues` (9).
+- `——————` is a `rule` block, and every block after it in the § carries `zone`. It counts
+  and does not interpret: in the Elementarlehre and Methodenlehre the rule comes before
+  the §'s Anmerkungen; the Einleitung does not say.
+- Headings carry a running title (`[Einleitung.]`) and a printed range (`[§§ 1 – 16]`),
+  both kept beside the title. A § is a heading paragraph, `§. N.` and its title split by
+  U+2028; a § in running prose is a cross-reference and stays in the text.
+- Words set in Arial rather than Helvetica (`Analytik`) are a font-substitution artefact
+  of the file, not emphasis. Only italics are `em`.
+- Six places the transcription could not set, a placeholder image in braces and one stray
+  DEL character, become U+FFFC. They are in the Elementarlehre, at AA 9:103, 108 and 126, in
+  the discussion of the Urtheile and Schlüsse. Not repaired.
 
 ## Shared conventions
 
