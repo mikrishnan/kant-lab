@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   The logical principles that principles-search.html looks for, with the
+   The logical principles that principle-search-1016.html looks for, with the
    German and Latin forms under which the texts in data/ (and Meier's Auszug)
    name them. Hand-curated: edit it directly.
 
