@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logic Text Search · Meier, Reflexionen, Blomberg, Busolt · Kant Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5efe3;
+    --parchment-2: #ebe2cf;
+    --panel: #faf6ee;
+    --ink: #2a2118;
+    --ink-2: #5a4c3c;
+    --muted: #8a7a66;
+    --rule: #d6c9b1;
+    --accent: #5c3d1e;
+    --accent-2: #8b5a2b;
+    --accent-soft: #e9dcc6;
+    --hit: #f1d58a;
+    --hit-2: #cfe0c3;
+    --shared: #e6cfe0;
+    --body: "EB Garamond", Garamond, "Times New Roman", serif;
+    --display: "Cinzel", "Trajan Pro", serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--parchment); color: var(--ink);
+    font-family: var(--body); font-size: 17px; line-height: 1.5;
+    display: flex; flex-direction: column;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+
+  /* ── header ─────────────────────────────────────────────── */
+  header {
+    display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;
+    padding: 10px 20px; border-bottom: 1px solid var(--rule); background: var(--parchment-2);
+  }
+  header h1 { font-family: var(--display); font-weight: 600; font-size: 1.15rem; letter-spacing: .06em; margin: 0; color: var(--accent); }
+  header .sub { color: var(--ink-2); font-style: italic; font-size: .95rem; }
+
+  main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 6px var(--panel-w, 460px); min-height: 0; }
+  #resizer { cursor: col-resize; background: var(--rule); }
+  #resizer:hover { background: var(--accent-2); }
+
+  /* ── reader (left) ─────────────────────────────────────── */
+  #reader { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .readerbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    padding: 8px 16px; border-bottom: 1px solid var(--rule); background: var(--parchment);
+  }
+  .worktabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .worktab {
+    border: 1px solid var(--rule); background: var(--panel); border-radius: 4px; padding: 2px 10px;
+    font-family: var(--display); font-size: .78rem; letter-spacing: .04em;
+  }
+  .worktab small { font-family: var(--body); font-size: .85rem; color: var(--muted); margin-left: 4px; letter-spacing: 0; }
+  .worktab[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .worktab[aria-pressed="true"] small { color: #e8d9c3; }
+  .secnav { display: flex; gap: 4px; align-items: center; flex: 1; min-width: 240px; }
+  .secnav select { flex: 1; min-width: 0; padding: 2px 4px; border: 1px solid var(--rule); background: var(--panel); border-radius: 4px; }
+  .secnav button, .smallbtn { border: 1px solid var(--rule); background: var(--panel); border-radius: 4px; padding: 0 8px; }
+  .secnav button:disabled { opacity: .4; cursor: default; }
+
+  #text { flex: 1; overflow-y: auto; padding: 18px 28px 80px 28px; }
+  #text .sechead { max-width: 46rem; margin: 0 auto 18px auto; border-bottom: 1px solid var(--rule); padding-bottom: 8px; }
+  #text .sechead h2 { font-family: var(--display); font-weight: 400; font-size: 1.2rem; color: var(--accent); margin: 0 0 4px 0; letter-spacing: .03em; }
+  #text .sechead .meta { color: var(--ink-2); font-size: .95rem; }
+  #text .sechead .meta div + div { margin-top: 2px; }
+
+  .unit {
+    position: relative; max-width: 46rem; margin: 0 auto 12px auto;
+    display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); column-gap: 14px;
+    padding: 4px 6px; border-radius: 4px; border-left: 3px solid transparent;
+  }
+  .unit .margin { font-size: .82rem; color: var(--muted); text-align: right; line-height: 1.35; padding-top: 3px; }
+  .unit .margin b { display: block; color: var(--accent); font-weight: 600; font-size: .9rem; }
+  .unit .margin .tag { display: inline-block; margin-top: 3px; border: 1px dashed var(--accent-2); color: var(--accent-2); border-radius: 3px; padding: 0 3px; font-size: .75rem; }
+  .unit .body { min-width: 0; }
+  .unit.inferred-join { border-left: 3px dashed var(--muted); }
+  .unit.interp { border: 1px dashed var(--accent-2); }
+  .unit.note .body { font-style: italic; color: var(--ink-2); }
+  .unit.rule .body hr { border: 0; border-top: 1px solid var(--rule); margin: 10px 0; }
+  .unit.flash { animation: flash 1.6s ease-out; }
+  @keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
+  .unit .pin {
+    position: absolute; right: -30px; top: 2px; width: 24px; height: 24px; border-radius: 50%;
+    border: 1px solid var(--rule); background: var(--panel); color: var(--accent); font-size: .9rem; line-height: 1;
+    opacity: 0; transition: opacity .15s;
+  }
+  .unit:hover .pin, .unit .pin.on { opacity: 1; }
+  .unit .pin.on { background: var(--accent); color: #fff; }
+  .reflhead { font-size: .85rem; color: var(--ink-2); margin-bottom: 2px; }
+  .reflhead .ph { font-family: var(--body); }
+
+  .hit { background: var(--hit); border-radius: 2px; }
+  .hit.approx { background: transparent; box-shadow: inset 0 -2px 0 var(--accent-2); }
+  .hit2 { background: var(--hit-2); border-radius: 2px; }
+  .shared { background: var(--shared); border-radius: 2px; }
+  .ed { color: var(--muted); }
+  .pg { color: var(--accent-2); font-size: .8em; white-space: nowrap; }
+  .ms { color: var(--muted); font-size: .8em; white-space: nowrap; }
+  .xref { color: var(--accent-2); text-decoration: underline dotted; cursor: pointer; }
+  .approxmark { color: var(--accent-2); font-weight: 600; margin-left: 2px; }
+
+  .notice { max-width: 46rem; margin: 30px auto; padding: 14px 18px; border: 1px solid var(--rule); background: var(--panel); border-radius: 6px; }
+  .notice code { font-size: .9em; }
+
+  #selbtn {
+    position: fixed; z-index: 20; display: none; gap: 4px;
+    background: var(--accent); border-radius: 4px; padding: 2px; box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  }
+  #selbtn button { background: transparent; border: 0; color: #fff; font-size: .85rem; padding: 2px 8px; }
+  #selbtn button:hover { background: var(--accent-2); border-radius: 3px; }
+
+  /* ── panel (right) ─────────────────────────────────────── */
+  #panel { display: flex; flex-direction: column; min-height: 0; background: var(--panel); }
+  .tabs { display: flex; border-bottom: 1px solid var(--rule); }
+  .tabs button {
+    flex: 1; border: 0; background: transparent; padding: 8px 4px;
+    font-family: var(--display); font-size: .82rem; letter-spacing: .05em; color: var(--ink-2);
+    border-bottom: 2px solid transparent;
+  }
+  .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+  .tabpane { flex: 1; overflow-y: auto; padding: 12px 14px 40px; display: none; }
+  .tabpane.on { display: block; }
+  .subtabs { display: flex; gap: 4px; margin-bottom: 10px; }
+  .subtabs button { border: 1px solid var(--rule); background: transparent; border-radius: 4px; padding: 0 8px; font-size: .9rem; }
+  .subtabs button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-2); }
+
+  .qrow { display: flex; gap: 6px; }
+  .qrow input[type=search], .field {
+    flex: 1; min-width: 0; padding: 4px 8px; border: 1px solid var(--rule); border-radius: 4px; background: #fffdf8;
+  }
+  .qrow input:focus, .field:focus { outline: 2px solid var(--accent-2); outline-offset: -1px; }
+  .opts { margin: 8px 0; font-size: .92rem; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+  .opts label { white-space: nowrap; }
+  .opts .num { width: 4.2em; padding: 0 4px; border: 1px solid var(--rule); border-radius: 3px; background: #fffdf8; }
+  .opts fieldset { border: 0; padding: 0; margin: 0; display: contents; }
+  h3 { font-family: var(--display); font-weight: 400; font-size: .85rem; letter-spacing: .06em; color: var(--accent); margin: 16px 0 6px; border-bottom: 1px solid var(--rule); padding-bottom: 2px; }
+  .hint { color: var(--muted); font-size: .9rem; font-style: italic; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip {
+    border: 1px solid var(--rule); background: #fffdf8; border-radius: 12px; padding: 0 8px; font-size: .88rem;
+  }
+  .chip:hover { border-color: var(--accent-2); }
+  .chip .n { color: var(--muted); font-size: .8rem; margin-left: 3px; }
+  .chip.refine { background: var(--hit-2); border-color: #a9c39a; }
+  .chip.refine.not { background: #efd6d0; border-color: #d0a79c; }
+  .chip .x { margin-left: 4px; color: var(--ink-2); }
+
+  .summary { font-size: .95rem; margin: 6px 0; }
+  .summary b { color: var(--accent); }
+  .wgroup { margin-top: 10px; }
+  .wgroup > summary { cursor: pointer; font-family: var(--display); font-size: .8rem; letter-spacing: .04em; color: var(--accent); padding: 3px 0; border-bottom: 1px solid var(--rule); }
+  .wgroup > summary .n { font-family: var(--body); color: var(--ink-2); font-size: .9rem; letter-spacing: 0; }
+  .hitrow { padding: 6px 4px; border-bottom: 1px dotted var(--rule); cursor: pointer; font-size: .93rem; position: relative; }
+  .hitrow:hover { background: var(--accent-soft); }
+  .hitrow .where { font-size: .8rem; color: var(--ink-2); }
+  .hitrow .where b { color: var(--accent); font-weight: 600; }
+  .hitrow .pin { position: absolute; right: 4px; top: 4px; border: 1px solid var(--rule); background: var(--panel); border-radius: 50%; width: 22px; height: 22px; line-height: 1; font-size: .8rem; color: var(--accent); }
+  .hitrow .pin.on { background: var(--accent); color: #fff; }
+  .more { margin: 6px 0; }
+
+  table.cmp { border-collapse: collapse; width: 100%; font-size: .9rem; margin-top: 6px; }
+  table.cmp th, table.cmp td { border-bottom: 1px solid var(--rule); padding: 4px 4px; text-align: left; vertical-align: top; }
+  table.cmp th { font-family: var(--display); font-weight: 400; font-size: .72rem; letter-spacing: .04em; color: var(--accent); }
+  table.cmp td.cell { cursor: pointer; }
+  table.cmp td.cell:hover { background: var(--accent-soft); }
+  table.cmp .rate { color: var(--muted); font-size: .8rem; }
+  .strip { display: flex; align-items: flex-end; gap: 1px; height: 22px; margin-top: 3px; border-bottom: 1px solid var(--rule); }
+  .strip span { flex: 1; background: var(--accent-2); border-radius: 2px 2px 0 0; min-height: 0; }
+  .strip span.zero { background: transparent; }
+
+  .pins { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+  .card { border: 1px solid var(--rule); border-radius: 5px; background: #fffdf8; padding: 6px 8px; font-size: .9rem; display: flex; flex-direction: column; max-height: 360px; }
+  .card .ch { display: flex; justify-content: space-between; gap: 4px; font-size: .8rem; color: var(--ink-2); border-bottom: 1px solid var(--rule); padding-bottom: 3px; margin-bottom: 4px; }
+  .card .ch b { color: var(--accent); }
+  .card .ct { overflow-y: auto; }
+  .card .ch button { border: 0; background: transparent; color: var(--ink-2); padding: 0 2px; }
+
+  .bypara .col { margin-bottom: 10px; }
+  .bypara .item { border-left: 3px solid var(--rule); padding: 3px 8px; margin: 6px 0; font-size: .92rem; cursor: pointer; }
+  .bypara .item:hover { background: var(--accent-soft); }
+  .bypara .item.interp { border-left-style: dashed; border-left-color: var(--accent-2); }
+  .bypara .item .where { font-size: .8rem; color: var(--ink-2); }
+  .about { font-size: .92rem; color: var(--ink-2); }
+  .about p { margin: 6px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Logic Text Search</h1>
+  <span class="sub">Meier's <em>Auszug</em> (AA XVI), Kant's Reflexionen on it (AA XVI), and the <em>Logik Blomberg</em> and <em>Logik Busolt</em> (AA XXIV)</span>
+</header>
+
+<main>
+  <section id="reader">
+    <div class="readerbar">
+      <div class="worktabs" id="worktabs"></div>
+      <div class="secnav">
+        <button id="prevSec" title="Previous section">‹</button>
+        <select id="secSelect" aria-label="Section"></select>
+        <button id="nextSec" title="Next section">›</button>
+      </div>
+    </div>
+    <div id="text"></div>
+  </section>
+  <div id="resizer" title="Drag to resize the panel"></div>
+  <aside id="panel">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="search" aria-selected="true">Search</button>
+      <button role="tab" data-tab="compare" aria-selected="false">Compare</button>
+      <button role="tab" data-tab="about" aria-selected="false">About</button>
+    </div>
+
+    <div class="tabpane on" id="tab-search">
+      <div class="qrow">
+        <input type="search" id="q" placeholder="Wort oder Phrase — e.g. Urtheil, Begriff*, deutlich" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="opts">
+        <label><input type="radio" name="mode" value="variant" checked> spelling variants</label>
+        <label><input type="radio" name="mode" value="exact"> exact</label>
+        <label><input type="radio" name="mode" value="regex"> regex</label>
+        <label id="wholeLbl"><input type="checkbox" id="whole"> whole words</label>
+      </div>
+      <div class="opts" id="workFilter"></div>
+      <div class="opts">
+        <span>Meier §</span>
+        <input class="num" id="pFrom" type="number" min="1" max="563" placeholder="from">
+        <span>–</span>
+        <input class="num" id="pTo" type="number" min="1" max="563" placeholder="to">
+        <span class="hint" id="pHint"></span>
+      </div>
+      <div id="refineBox"></div>
+      <div id="results"><p class="hint">Type two or more letters. Use <code>*</code> for any ending (<code>Erkenntn*</code>). Double-click a word in the text, or select a phrase, to search for it.</p></div>
+      <div id="further"></div>
+      <div id="historyBox"></div>
+    </div>
+
+    <div class="tabpane" id="tab-compare">
+      <div class="subtabs" id="cmpTabs">
+        <button data-sub="terms" aria-pressed="true">Terms</button>
+        <button data-sub="pins" aria-pressed="false">Passages <span id="pinCount"></span></button>
+        <button data-sub="para" aria-pressed="false">By Meier §</button>
+      </div>
+      <div id="sub-terms"></div>
+      <div id="sub-pins" hidden></div>
+      <div id="sub-para" hidden></div>
+    </div>
+
+    <div class="tabpane about" id="tab-about">
+      <h3>Sources</h3>
+      <p><b>Meier, <em>Auszug aus der Vernunftlehre</em></b> (1752; AA XVI), all 563 §§, read from the Meier reader's own text (<code>meier-reader/meier-reading-guide.html</code>), with the AA page each § is cited from.</p>
+      <p><b>Kant's Reflexionen on Meier</b> (AA XVI, Refl. 1619–3488), from <code>data/reflexionen-16-meier.js</code>, grouped as the AA groups them by §§.</p>
+      <p><b><em>Logik Blomberg</em></b> (ca. 1771; AA 24:7–301) and <b><em>Logik Busolt</em></b> (ca. 1789/90; AA 24:603–686), from <code>data/logik-blomberg-24.js</code> and <code>data/logik-busolt-24.js</code>.</p>
+      <p>Nothing is copied: the three <code>data/</code> files are loaded with <code>&lt;script src&gt;</code>. Meier's text is not in <code>data/</code>, so the page reads it from the Meier reader when it is served over the web (GitHub Pages, raw.githack, or <code>python3 -m http.server</code>). Opened straight from disk, the browser forbids that, and the other three texts are searched without it.</p>
+      <h3>Attested vs. inferred</h3>
+      <p>The texts, their spelling, the AA pages and manuscript pages, the editorial brackets (faded), the Reflexionen's phase expressions and locus notes, and Blomberg's § headings are all shown as the edition has them.</p>
+      <p>Marked as inferences: a hit found <em>only</em> by the spelling-variant rules is underlined rather than highlighted, with ≈ beside it in the results; a Reflexion whose § was interpolated has a dashed border and the tag <span class="tag" style="border:1px dashed var(--accent-2);padding:0 3px;border-radius:3px">interpolated §</span>; a lecture paragraph the extractor joined on its own judgement has a dashed rule at its left.</p>
+      <p>Computed by this page: all counts, rates per 10,000 words, the distribution bars, the neighbouring words, the shared words between pinned passages, and the key words suggested for a Meier §.</p>
+      <h3>Spelling variants</h3>
+      <p>In that mode words are compared after folding: lower case; ß → ss; ä ö ü → a o u; th → t; dt → t; y → i; ck → k; c → z before e/i, otherwise k (but ch is kept); ie → i; initial j → i; h after a vowel and before a consonant dropped; doubled letters single. So <em>Urtheil</em> finds <em>Urteil</em>, <em>seyn</em> finds <em>sein</em>, <em>Erkenntniß</em> finds <em>Erkenntniss</em>, <em>Critick</em> finds <em>Kritik</em>.</p>
+    </div>
+  </aside>
+</main>
+
+<div id="selbtn"><button data-act="search">Search</button><button data-act="near">Refine: near</button><button data-act="compare">Compare</button></div>
+
+<!-- Shared data, before the tool's own script, as plain <script src> includes so the
+     page still opens from a file:// URL. See data/README.md for the globals. -->
+<script src="../../data/reflexionen-16-meier.js"></script>
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+
+<script>
+'use strict';
+
+/* ═════════════ Data ═════════════ */
+
+// The four texts, in the order the reader's tabs show them.
+const TS_WORKS = {
+  meier:    { label: 'Meier, Auszug',  date: '1752',        cite: 'AA XVI' },
+  refl:     { label: 'Reflexionen',    date: 'on Meier',    cite: 'AA XVI' },
+  blomberg: { label: 'Logik Blomberg', date: 'ca. 1771',    cite: 'AA XXIV' },
+  busolt:   { label: 'Logik Busolt',   date: 'ca. 1789/90', cite: 'AA XXIV' },
+};
+const TS_ORDER = ['meier', 'refl', 'blomberg', 'busolt'];
+
+// Meier's text lives in the Meier reader, not in data/; it is read from there.
+const MEIER_SRC = '../../meier-reader/meier-reading-guide.html';
+
+// Words left out of the neighbouring-words and shared-words lists.
+const STOP = new Set(`der die das des dem den ein eine einer eines einem einen und oder aber auch
+  als wie so daß dass das ist sind war waren wird werden worden seyn sein sey ihr ihre ihren ihrem
+  ihres sie er es ich wir man sich nicht nur noch schon sehr mehr wenn weil denn doch da dann
+  also aus auf an in im ins bey bei mit von vom zu zum zur für vor nach über unter durch gegen
+  ohne um hat haben hatte kann können könnte muß muss müssen soll sollen will wollen dieser diese
+  dieses diesen diesem jener jene jenes welche welcher welches welchen welchem alle allen aller
+  alles einige keine kein keinen nichts etwas was wer wo hier dort sondern ob zwar nun eben gar
+  wohl ja selbst iede ieder iedes jede jeder jedes andere andern anderen solche solcher solches
+  et est in non ad quod quae qui cum sed vel aut ut sunt esse per de ex z e b d i s g`.split(/\s+/).filter(Boolean));
+
+/* ═════════════ State ═════════════ */
+
+let UNITS = [];                 // every searchable passage, all four texts
+let SECTIONS = {};              // work → [{ title, meta: [], units: [uid] }]
+let WORDS = {};                 // work → word count (for rates)
+let meierStatus = 'loading';    // loading | ok | failed
+let meierError = '';
+
+let reader = { work: 'meier', sec: 0 };
+let query = { q: '', mode: 'variant', whole: false, works: new Set(TS_ORDER), from: null, to: null, refine: [] };
+let RESULT = null;              // last search result
+let shown = {};                 // work → how many hits listed
+let history = [];
+let pins = [];                  // uids
+let cmpSub = 'terms';
+let cmpTerms = ['', '', '', ''];
+let markShared = true;
+let paraView = 1;
+
+/* ═════════════ Building the corpus ═════════════ */
+
+function addUnit(u) { u.uid = UNITS.length; UNITS.push(u); return u.uid; }
+
+function buildMeier(M, CIT) {
+  SECTIONS.meier = [];
+  M.nav.forEach(nv => {
+    const title = nv.sec_title_de || nv.part_title_de;
+    const meta = [];
+    if (nv.sec_title_de) meta.push(nv.part_title_de);
+    const ps = nv.paras || [];
+    if (ps.length) meta.push(`§§ ${ps[0]}–${ps[ps.length - 1]}`);
+    const sec = { title, meta, units: [] };
+    const si = SECTIONS.meier.length;
+    ps.forEach(n => {
+      const text = M.paras[String(n)];
+      if (text == null) return;
+      sec.units.push(addUnit({ work: 'meier', sec: si, n, label: '§ ' + n, cite: (CIT && CIT[n]) || '', text, paras: [n] }));
+    });
+    SECTIONS.meier.push(sec);
+  });
+}
+
+function buildRefl() {
+  SECTIONS.refl = [];
+  const byGrp = REFL_GROUPS.map(() => []);
+  REFL_ENTRIES.forEach(e => { if (byGrp[e.grp]) byGrp[e.grp].push(e); });
+  byGrp.forEach((es, gi) => {
+    if (!es.length) return;
+    const g = REFL_GROUPS[gi];
+    const range = g.paras.length ? (g.paras.length > 1 ? `§§ ${g.paras[0]}–${g.paras[g.paras.length - 1]}` : `§ ${g.paras[0]}`) : '';
+    const title = g.topic ? `${range ? range + ' · ' : ''}${g.topic}` : (range || 'Without an AA §-heading');
+    const meta = [`Refl. ${es[0].r}–${es[es.length - 1].r}`];
+    if (g.raw && g.paras.length) meta.push('AA heading: ' + g.raw);
+    const sec = { title, meta, units: [] };
+    const si = SECTIONS.refl.length;
+    es.forEach(e => {
+      const p0 = e.aa || e.aaEnd;
+      const cite = p0 ? `AA 16:${p0}${e.aaEnd && e.aaEnd !== p0 ? '–' + e.aaEnd : ''}` : '';
+      sec.units.push(addUnit({ work: 'refl', sec: si, label: 'Refl. ' + e.r, cite, text: e.vacat ? '' : (e.text || ''), paras: e.paras || [], e }));
+    });
+    SECTIONS.refl.push(sec);
+  });
+}
+
+function buildLogik(work, L) {
+  SECTIONS[work] = [];
+  L.sections.forEach(s => {
+    const blocks = s.blocks;
+    const first = blocks.find(b => b.aa), last = [...blocks].reverse().find(b => b.aa);
+    const a = first ? first.aa : null, z = last ? (last.aaEnd || last.aa) : null;
+    const meta = [];
+    if (a) meta.push(`AA 24:${a}${z && z !== a ? '–' + z : ''}`);
+    (s.headings || []).forEach(h => { if (h && h !== s.title) meta.push(h); });
+    meta.push(s.provenance);
+    const sec = { title: s.title || '[Titelei]', meta, units: [] };
+    const si = SECTIONS[work].length;
+    blocks.forEach(b => {
+      let paras = [];
+      if (b.para) {
+        if (b.para.from && b.para.to) for (let n = b.para.from; n <= b.para.to; n++) paras.push(n);
+        else paras = b.para.nums || [];
+      }
+      const cite = b.aa ? `AA 24:${b.aa}${b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : ''}` : '';
+      sec.units.push(addUnit({ work, sec: si, label: b.aa ? 'AA 24:' + b.aa : '', cite, text: b.text || '', paras, b }));
+    });
+    SECTIONS[work].push(sec);
+  });
+}
+
+function buildCorpus(M, CIT) {
+  UNITS = []; SECTIONS = {}; WORDS = {};
+  if (M) buildMeier(M, CIT); else SECTIONS.meier = [];
+  buildRefl();
+  buildLogik('blomberg', LOGIK_BLOMBERG);
+  buildLogik('busolt', LOGIK_BUSOLT);
+}
+
+// Meier's MEIER and CITATIONS are single-line JSON literals in the Meier reader.
+async function loadMeier() {
+  try {
+    const r = await fetch(MEIER_SRC);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const html = await r.text();
+    const grab = name => {
+      const at = html.indexOf('\nconst ' + name + ' = ');
+      if (at < 0) return null;
+      const start = at + ('\nconst ' + name + ' = ').length;
+      const end = html.indexOf('\n', start);
+      return JSON.parse(html.slice(start, end).trim().replace(/;$/, ''));
+    };
+    const M = grab('MEIER');
+    if (!M || !M.paras) throw new Error('MEIER not found in the Meier reader');
+    return { M, CIT: grab('CITATIONS') || {} };
+  } catch (err) {
+    meierError = String(err && err.message || err);
+    return null;
+  }
+}
+
+/* ═════════════ Text: tokens and spelling folds ═════════════ */
+
+const WORD_RE = /[\p{L}\p{N}]+/gu;
+
+function fold(w) {
+  return w.toLowerCase()
+    .replace(/ß/g, 'ss').replace(/æ/g, 'ae').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
+    .replace(/ch/g, '\u0001').replace(/ck/g, 'k').replace(/c(?=[eiy])/g, 'z').replace(/c/g, 'k').replace(/\u0001/g, 'ch')
+    .replace(/th/g, 't').replace(/dt/g, 't').replace(/y/g, 'i').replace(/ie/g, 'i').replace(/^j(?=[aeiou])/, 'i')
+    .replace(/([aeiou])h(?![aeiou])/g, '$1')
+    .replace(/(.)\1+/g, '$1');
+}
+
+function tokens(u) {
+  if (u._tok) return u._tok;
+  const t = [];
+  let m; WORD_RE.lastIndex = 0;
+  while ((m = WORD_RE.exec(u.text))) {
+    const w = m[0].toLowerCase();
+    t.push({ s: m.index, e: m.index + m[0].length, w, n: fold(w) });
+  }
+  return (u._tok = t);
+}
+
+function wordCount(work) {
+  if (WORDS[work] == null) WORDS[work] = UNITS.filter(u => u.work === work).reduce((a, u) => a + tokens(u).length, 0);
+  return WORDS[work];
+}
+
+function tokIndexAt(u, pos) {         // index of the token containing or following pos
+  const t = tokens(u); let lo = 0, hi = t.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (t[mid].e <= pos) lo = mid + 1; else hi = mid; }
+  return lo;
+}
+
+/* ═════════════ Search ═════════════ */
+
+function escRe(s) { return s.replace(/[.+?^${}()|[\]\\]/g, '\\$&'); }
+
+// Returns a function unit → [{s, e, approx}] for a term in a mode, or null if the term is unusable.
+function compile(term, mode, whole) {
+  term = term.trim();
+  if (term.replace(/\*/g, '').length < 2) return null;
+  if (mode === 'regex') {
+    let re; try { re = new RegExp(term, 'giu'); } catch (e) { return { error: e.message }; }
+    return u => regexHits(re, u.text);
+  }
+  if (mode === 'exact') {
+    let src = escRe(term).replace(/\*/g, '[\\p{L}\\p{N}]*').replace(/\s+/g, '\\s+');
+    if (whole) src = '(?<![\\p{L}\\p{N}])' + src + '(?![\\p{L}\\p{N}])';
+    const re = new RegExp(src, 'giu');
+    return u => regexHits(re, u.text);
+  }
+  // variant: token by token, on folded spellings
+  const qt = (term.match(/[\p{L}\p{N}*]+/gu) || []).map(raw => {
+    const pre = raw.startsWith('*'), suf = raw.endsWith('*');
+    const core = raw.replace(/\*/g, '').toLowerCase();
+    return { pre, suf, core, n: fold(core) };
+  }).filter(q => q.core);
+  if (!qt.length) return null;
+  const rel = (q, a, b) => q.pre && q.suf ? a.includes(b) : q.suf ? a.startsWith(b) : q.pre ? a.endsWith(b) : a === b;
+  return u => {
+    const t = tokens(u), out = [];
+    for (let i = 0; i + qt.length <= t.length; i++) {
+      let ok = true, approx = false;
+      for (let j = 0; j < qt.length; j++) {
+        const tk = t[i + j], q = qt[j];
+        if (!rel(q, tk.n, q.n)) { ok = false; break; }
+        if (!rel(q, tk.w, q.core)) approx = true;
+      }
+      if (ok) { out.push({ s: t[i].s, e: t[i + qt.length - 1].e, approx }); i += qt.length - 1; }
+    }
+    return out;
+  };
+}
+
+function regexHits(re, text) {
+  const out = []; let m; re.lastIndex = 0;
+  while ((m = re.exec(text))) {
+    if (!m[0].length) { re.lastIndex++; continue; }
+    out.push({ s: m.index, e: m.index + m[0].length, approx: false });
+  }
+  return out;
+}
+
+function inScope(u) {
+  if (!query.works.has(u.work)) return false;
+  if (query.from || query.to) {
+    const a = query.from || 1, z = query.to || 9999;
+    if (!u.paras.some(n => n >= a && n <= z)) return false;
+  }
+  return true;
+}
+
+// The search as it stands: base term, then each refinement in order.
+function runQuery() {
+  const base = compile(query.q, query.mode, query.whole);
+  if (!base || base.error) return base;
+  const refs = [];
+  for (const r of query.refine) {
+    const f = compile(r.term, query.mode, query.whole);
+    if (!f || f.error) continue;
+    refs.push({ ...r, f });
+  }
+  const byWork = {}; TS_ORDER.forEach(w => byWork[w] = []);
+  const forms = new Map();
+  for (const u of UNITS) {
+    if (!u.text || !inScope(u)) continue;
+    let hits = base(u);
+    if (!hits.length) continue;
+    let hits2 = [], keep = true;
+    for (const r of refs) {
+      const h2 = r.f(u);
+      if (r.op === 'not') { if (h2.length) { keep = false; break; } continue; }
+      if (!h2.length) { keep = false; break; }
+      if (r.op === 'near') {
+        const idx2 = h2.map(h => tokIndexAt(u, h.s));
+        hits = hits.filter(h => { const i = tokIndexAt(u, h.s); return idx2.some(j => Math.abs(i - j) <= r.n); });
+        if (!hits.length) { keep = false; break; }
+      }
+      hits2 = hits2.concat(h2);
+    }
+    if (!keep) continue;
+    hits.forEach(h => {
+      const f = u.text.slice(h.s, h.e).toLowerCase().replace(/\s+/g, ' ');
+      const o = forms.get(f) || { n: 0, approx: h.approx };
+      o.n++; forms.set(f, o);
+      byWork[u.work].push({ uid: u.uid, s: h.s, e: h.e, approx: h.approx });
+    });
+    u._h2 = hits2;
+  }
+  return { byWork, forms };
+}
+
+function hitsInUnit(u) {               // for highlighting in the reader
+  if (!RESULT || !RESULT.byWork || !inScope(u)) return { h: [], h2: [] };
+  const h = RESULT.byWork[u.work].filter(x => x.uid === u.uid);
+  return { h, h2: h.length ? (u._h2 || []) : [] };
+}
+
+/* ═════════════ Rendering helpers ═════════════ */
+
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+// text + marks [{s,e,cls}] + inserts [{i,html}] → HTML. Marks may overlap.
+function rich(text, marks, inserts) {
+  marks = marks.filter(m => m.e > m.s);
+  inserts = inserts || [];
+  const pts = new Set([0, text.length]);
+  marks.forEach(m => { pts.add(Math.max(0, m.s)); pts.add(Math.min(text.length, m.e)); });
+  inserts.forEach(x => pts.add(x.i));
+  const ps = [...pts].sort((a, b) => a - b);
+  let out = '';
+  for (let k = 0; k < ps.length; k++) {
+    const a = ps[k];
+    inserts.forEach(x => { if (x.i === a) out += x.html; });
+    if (k === ps.length - 1) break;
+    const b = ps[k + 1];
+    const seg = esc(text.slice(a, b)).replace(/\n/g, '<br>');
+    const cls = [...new Set(marks.filter(m => m.s <= a && m.e >= b).map(m => m.cls))];
+    out += cls.length ? `<span class="${cls.join(' ')}">${seg}</span>` : seg;
+  }
+  return out;
+}
+
+function editorialMarks(text) {
+  const out = []; const re = /\[[^\]\n]*\]|<[^>\n]*>|\|\| ?V/g; let m;
+  while ((m = re.exec(text))) out.push({ s: m.index, e: m.index + m[0].length, cls: 'ed' });
+  return out;
+}
+function xrefMarks(text) {
+  const out = []; const re = /§\.?\s*\d+/g; let m;
+  while ((m = re.exec(text))) out.push({ s: m.index, e: m.index + m[0].length, cls: 'xref' });
+  return out;
+}
+function hitMarks(h, h2) {
+  return h.map(x => ({ s: x.s, e: x.e, cls: x.approx ? 'hit approx' : 'hit' }))
+    .concat(h2.map(x => ({ s: x.s, e: x.e, cls: 'hit2' })));
+}
+
+function unitBodyHTML(u, extraMarks) {
+  let marks = editorialMarks(u.text).concat(extraMarks || []);
+  let ins = [];
+  if (u.work === 'meier') marks = marks.concat(xrefMarks(u.text));
+  if (u.b) {
+    (u.b.pages || []).forEach(p => { if (p.i > 0) ins.push({ i: p.i, html: `<span class="pg" title="AA 24:${p.p} begins here"> ‖ ${p.p} </span>` }); });
+    (u.b.ms || []).forEach(p => ins.push({ i: p.i, html: `<span class="ms" title="the manuscript's own page ${p.p}">[ms ${p.p}]</span>` }));
+  }
+  return rich(u.text, marks, ins);
+}
+
+/* ═════════════ The reader ═════════════ */
+
+function renderWorkTabs() {
+  document.getElementById('worktabs').innerHTML = TS_ORDER.map(w =>
+    `<button class="worktab" data-work="${w}" aria-pressed="${reader.work === w}">${TS_WORKS[w].label}<small>${TS_WORKS[w].date}</small></button>`).join('');
+}
+
+function renderSecSelect() {
+  const secs = SECTIONS[reader.work] || [];
+  const sel = document.getElementById('secSelect');
+  sel.innerHTML = secs.map((s, i) => `<option value="${i}">${i + 1}. ${esc(s.title.length > 90 ? s.title.slice(0, 88) + '…' : s.title)}${s.meta[0] && reader.work !== 'refl' ? ' · ' + esc(s.meta[s.meta.length > 1 && reader.work === 'meier' ? 1 : 0]) : ''}</option>`).join('');
+  sel.value = reader.sec;
+  document.getElementById('prevSec').disabled = reader.sec <= 0;
+  document.getElementById('nextSec').disabled = reader.sec >= secs.length - 1;
+}
+
+function renderReader() {
+  renderWorkTabs();
+  renderSecSelect();
+  const box = document.getElementById('text');
+  if (reader.work === 'meier' && meierStatus !== 'ok') {
+    box.innerHTML = meierStatus === 'loading'
+      ? `<div class="notice">Loading Meier's <em>Auszug</em> from the Meier reader…</div>`
+      : `<div class="notice"><p><b>Meier's <em>Auszug</em> could not be loaded</b> (${esc(meierError)}).</p>
+         <p>Its text lives inside the Meier reader rather than in <code>data/</code>, and a browser will only let this page read it when the page is served over the web — on GitHub Pages, through raw.githack, or locally with <code>python3 -m http.server</code> at the repository root. Opened straight from disk, the other three texts still work.</p></div>`;
+    return;
+  }
+  const sec = SECTIONS[reader.work][reader.sec];
+  if (!sec) { box.innerHTML = ''; return; }
+  let html = `<div class="sechead"><h2>${esc(sec.title)}</h2><div class="meta">${sec.meta.map(m => `<div>${esc(m)}</div>`).join('')}</div></div>`;
+  let lastPara = null;
+  sec.units.forEach((uid, k) => {
+    const u = UNITS[uid];
+    const { h, h2 } = hitsInUnit(u);
+    const body = unitBodyHTML(u, hitMarks(h, h2));
+    const pinned = pins.includes(uid);
+    const pinBtn = `<button class="pin${pinned ? ' on' : ''}" data-pin="${uid}" title="${pinned ? 'Unpin' : 'Pin to Compare → Passages'}">⊕</button>`;
+    let cls = 'unit', margin = '', id = '', lead = '';
+    if (u.work === 'meier') {
+      id = ` id="para-${u.n}"`;
+      margin = `<b>§ ${u.n}</b>${esc(u.cite)}`;
+    } else if (u.work === 'refl') {
+      const e = u.e;
+      margin = `<b>Refl. ${e.r}</b>${esc(u.cite)}`;
+      if (e.interp) { cls += ' interp'; margin += `<br><span class="tag" title="No § is stated for this Reflexion; the extractor inferred it from its neighbours">interpolated §</span>`; }
+      lead = `<div class="reflhead">${e.phRaw ? `<span class="ph" title="Adickes' phase expression, verbatim">${esc(e.phRaw)}</span>` : (e.prose ? 'prose dating' : '')}${e.sig ? ' · ' + esc(e.sig) : ''}${e.loc && e.loc.raw ? ' · ' + esc(e.loc.raw) : ''} · § ${e.paras.join(', ') || '–'}${e.front ? ' (front matter)' : ''}</div>`;
+      if (e.vacat) lead += `<div class="ed">Vacat.</div>`;
+    } else {
+      const b = u.b;
+      if (b.kind === 'rule') { html += `<div class="unit rule" data-uid="${uid}"><div class="margin"></div><div class="body"><hr></div></div>`; return; }
+      if (b.kind === 'note') cls += ' note';
+      if (b.joined && b.joined.includes('inferred')) cls += ' inferred-join';
+      const prev = k > 0 ? UNITS[sec.units[k - 1]].b : null;
+      const startsPage = !prev || (prev.aaEnd || prev.aa) !== b.aa || (b.pages && b.pages.some(p => p.i === 0));
+      if (startsPage && b.aa) margin = `<b>AA ${b.aa}</b>`;
+      if (b.para && b.para.raw !== lastPara) { margin += `<div title="Meier's § as the transcription heads it">${esc(b.para.raw)}</div>`; }
+      lastPara = b.para ? b.para.raw : null;
+    }
+    const title = cls.includes('inferred-join') ? ' title="Joined from more than one line on the extractor\'s judgement (no mark in the transcription)"' : '';
+    html += `<div class="${cls}"${id} data-uid="${uid}"${title}><div class="margin">${margin}</div><div class="body">${lead}${body}</div>${pinBtn}</div>`;
+  });
+  box.innerHTML = html;
+}
+
+function openUnit(uid, pos) {
+  const u = UNITS[uid];
+  const changed = reader.work !== u.work || reader.sec !== u.sec;
+  reader.work = u.work; reader.sec = u.sec;
+  if (changed) renderReader();
+  const el = document.querySelector(`#text [data-uid="${uid}"]`);
+  if (!el) return;
+  let target = el;
+  if (pos != null) {
+    const hs = [...el.querySelectorAll('.hit')];
+    const nth = RESULT ? RESULT.byWork[u.work].filter(x => x.uid === uid).findIndex(x => x.s === pos) : -1;
+    if (nth >= 0 && hs[nth]) target = hs[nth];
+  }
+  target.scrollIntoView({ block: 'center', behavior: changed ? 'auto' : 'smooth' });
+  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+}
+
+function openMeierPara(n) {
+  const u = UNITS.find(x => x.work === 'meier' && x.n === n);
+  if (u) openUnit(u.uid);
+}
+
+/* ═════════════ The panel: search ═════════════ */
+
+function renderWorkFilter() {
+  document.getElementById('workFilter').innerHTML = 'In: ' + TS_ORDER.map(w =>
+    `<label><input type="checkbox" data-wf="${w}" ${query.works.has(w) ? 'checked' : ''}> ${TS_WORKS[w].label}</label>`).join('');
+  document.getElementById('wholeLbl').style.display = query.mode === 'exact' ? '' : 'none';
+  document.getElementById('pHint').textContent = (query.from || query.to) && query.works.has('busolt') ? 'Busolt has no §§, so a § range leaves it out.' : '';
+}
+
+function renderRefine() {
+  const box = document.getElementById('refineBox');
+  if (!query.refine.length) { box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="chips" style="margin:6px 0">` + query.refine.map((r, i) =>
+    `<span class="chip refine${r.op === 'not' ? ' not' : ''}">${r.op === 'near' ? `near (${r.n} words)` : r.op === 'and' ? 'and' : 'not'}: <b>${esc(r.term)}</b><button class="x smallbtn" style="border:0;background:transparent" data-unrefine="${i}" title="Remove">×</button></span>`).join('') + `</div>`;
+}
+
+function search(opts) {
+  opts = opts || {};
+  RESULT = null; shown = {};
+  UNITS.forEach(u => { u._h2 = null; });
+  const res = document.getElementById('results'), fur = document.getElementById('further');
+  renderWorkFilter(); renderRefine();
+  const q = query.q.trim();
+  if (!q) {
+    res.innerHTML = `<p class="hint">Type two or more letters. Use <code>*</code> for any ending (<code>Erkenntn*</code>). Double-click a word in the text, or select a phrase, to search for it.</p>`;
+    fur.innerHTML = ''; renderReader(); renderHistory(); return;
+  }
+  const r = runQuery();
+  if (!r) { res.innerHTML = `<p class="hint">Two or more letters, please.</p>`; fur.innerHTML = ''; renderReader(); return; }
+  if (r.error) { res.innerHTML = `<p class="hint">Not a valid regular expression: ${esc(r.error)}</p>`; fur.innerHTML = ''; return; }
+  RESULT = r;
+  if (opts.record !== false) remember();
+  renderResults(); renderFurther(); renderReader(); renderHistory();
+  if (cmpSub === 'para') renderPara();
+}
+
+function totalHits() { return TS_ORDER.reduce((a, w) => a + RESULT.byWork[w].length, 0); }
+
+function renderResults() {
+  const res = document.getElementById('results');
+  const tot = totalHits();
+  const approx = TS_ORDER.reduce((a, w) => a + RESULT.byWork[w].filter(h => h.approx).length, 0);
+  let html = `<div class="summary"><b>${tot}</b> hit${tot === 1 ? '' : 's'}${TS_ORDER.filter(w => query.works.has(w)).map(w => ` · ${TS_WORKS[w].label} ${RESULT.byWork[w].length}`).join('')}`;
+  if (approx) html += `<br><span class="hint">${approx} of them only by the spelling rules, marked ≈.</span>`;
+  if (query.works.has('meier') && meierStatus !== 'ok') html += `<br><span class="hint">Meier's Auszug is not loaded, so it was not searched.</span>`;
+  html += `</div>`;
+  TS_ORDER.forEach(w => {
+    if (!query.works.has(w)) return;
+    const hs = RESULT.byWork[w];
+    if (!hs.length) return;
+    const n = shown[w] || 40;
+    const passages = new Set(hs.map(h => h.uid)).size;
+    html += `<details class="wgroup" open><summary>${TS_WORKS[w].label} <span class="n">— ${hs.length} hits in ${passages} passage${passages === 1 ? '' : 's'}</span></summary>`;
+    hs.slice(0, n).forEach(h => html += hitRowHTML(h));
+    if (hs.length > n) html += `<div class="more"><button class="smallbtn" data-more="${w}">Show ${Math.min(80, hs.length - n)} more</button></div>`;
+    html += `</details>`;
+  });
+  res.innerHTML = html;
+}
+
+function kwic(u, h, width) {
+  width = width || 70;
+  let a = Math.max(0, h.s - width), z = Math.min(u.text.length, h.e + width);
+  while (a > 0 && /\S/.test(u.text[a - 1]) && h.s - a < width + 15) a--;
+  while (z < u.text.length && /\S/.test(u.text[z]) && z - h.e < width + 15) z++;
+  const slice = u.text.slice(a, z).replace(/\n/g, ' ');
+  const marks = editorialMarks(slice).concat([{ s: h.s - a, e: h.e - a, cls: h.approx ? 'hit approx' : 'hit' }])
+    .concat((u._h2 || []).filter(x => x.s >= a && x.e <= z).map(x => ({ s: x.s - a, e: x.e - a, cls: 'hit2' })));
+  return (a > 0 ? '…' : '') + rich(slice, marks) + (z < u.text.length ? '…' : '');
+}
+
+function whereHTML(u) {
+  let s = `<b>${esc(u.work === 'meier' ? 'Meier ' + u.label : u.work === 'refl' ? u.label : TS_WORKS[u.work].label)}</b>`;
+  if (u.cite && u.work !== 'blomberg' && u.work !== 'busolt') s += ' · ' + esc(u.cite);
+  if (u.work === 'blomberg' || u.work === 'busolt') s += ' · ' + esc(u.cite);
+  if (u.work === 'refl' && u.e.phRaw) s += ' · ' + esc(u.e.phRaw);
+  if (u.work !== 'meier' && u.paras.length) s += ` · Meier § ${u.paras.length > 3 ? u.paras[0] + '–' + u.paras[u.paras.length - 1] : u.paras.join(', ')}`;
+  if (u.work === 'refl' && u.e.interp) s += ' · <i>§ interpolated</i>';
+  return s;
+}
+
+function hitRowHTML(h) {
+  const u = UNITS[h.uid];
+  const pinned = pins.includes(h.uid);
+  return `<div class="hitrow" data-open="${h.uid}" data-pos="${h.s}">
+    <div class="where">${whereHTML(u)}${h.approx ? '<span class="approxmark" title="Found only by the spelling-variant rules">≈</span>' : ''}</div>
+    <div>${kwic(u, h)}</div>
+    <button class="pin${pinned ? ' on' : ''}" data-pin="${h.uid}" title="${pinned ? 'Unpin' : 'Pin to Compare → Passages'}">⊕</button></div>`;
+}
+
+// "Search further": the forms found, and the words most often near the hits.
+function renderFurther() {
+  const fur = document.getElementById('further');
+  if (!RESULT || !totalHits()) { fur.innerHTML = RESULT ? `<p class="hint">Nothing found. Try “spelling variants”, a <code>*</code>, or fewer words.</p>` : ''; return; }
+  let html = `<h3>Forms found</h3><div class="chips">`;
+  [...RESULT.forms.entries()].sort((a, b) => b[1].n - a[1].n).slice(0, 30).forEach(([f, o]) => {
+    html += `<button class="chip" data-exact="${esc(f)}" title="Search for exactly this form">${esc(f)}${o.approx ? ' ≈' : ''}<span class="n">${o.n}</span></button>`;
+  });
+  html += `</div>`;
+
+  // neighbouring words, ±5 words around each hit, spelling-folded
+  const counts = new Map(), qn = new Set((query.q.match(/[\p{L}\p{N}]+/gu) || []).map(x => fold(x.toLowerCase())));
+  TS_ORDER.forEach(w => RESULT.byWork[w].forEach(h => {
+    const u = UNITS[h.uid], t = tokens(u), i = tokIndexAt(u, h.s), j = tokIndexAt(u, h.e - 1);
+    for (let k = Math.max(0, i - 5); k <= Math.min(t.length - 1, j + 5); k++) {
+      if (k >= i && k <= j) continue;
+      const tk = t[k];
+      if (tk.w.length < 3 || STOP.has(tk.w) || /^\d+$/.test(tk.w) || qn.has(tk.n)) continue;
+      const o = counts.get(tk.n) || { n: 0, forms: new Map() };
+      o.n++; o.forms.set(tk.w, (o.forms.get(tk.w) || 0) + 1); counts.set(tk.n, o);
+    }
+  }));
+  const top = [...counts.values()].filter(o => o.n > 1).sort((a, b) => b.n - a.n).slice(0, 24);
+  if (top.length) {
+    html += `<h3>Words near the hits</h3><p class="hint" style="margin:0 0 4px">Within five words, counted by this page across spellings. Click to keep only hits near that word; shift-click to search it instead.</p><div class="chips">`;
+    top.forEach(o => {
+      const form = [...o.forms.entries()].sort((a, b) => b[1] - a[1])[0][0];
+      html += `<button class="chip" data-near="${esc(form)}">${esc(form)}<span class="n">${o.n}</span></button>`;
+    });
+    html += `</div>`;
+  }
+  html += `<h3>Search further</h3>
+    <div class="qrow"><select id="refOp" class="field" style="flex:0 0 auto">
+      <option value="and">and also contains</option><option value="near">within 10 words of</option><option value="not">but does not contain</option></select>
+      <input class="field" id="refTerm" placeholder="another word"><button class="smallbtn" id="refGo">Add</button></div>
+    <div class="opts"><button class="smallbtn" id="toCompare">Compare “${esc(query.q)}” across the texts →</button></div>`;
+  fur.innerHTML = html;
+}
+
+function remember() {
+  const key = JSON.stringify([query.q, query.mode, query.refine.map(r => [r.op, r.term])]);
+  history = history.filter(h => h.key !== key);
+  history.unshift({ key, q: query.q, mode: query.mode, refine: query.refine.map(r => ({ ...r })), n: totalHits() });
+  history = history.slice(0, 12);
+}
+
+function renderHistory() {
+  const box = document.getElementById('historyBox');
+  if (history.length < 2) { box.innerHTML = ''; return; }
+  box.innerHTML = `<h3>Earlier searches</h3><div class="chips">` + history.slice(1).map((h, i) =>
+    `<button class="chip" data-hist="${i + 1}">${esc(h.q)}${h.refine.length ? ' + ' + h.refine.length : ''}${h.mode !== 'variant' ? ' (' + h.mode + ')' : ''}<span class="n">${h.n}</span></button>`).join('') + `</div>`;
+}
+
+function setQuery(q, mode) {
+  query.q = q; if (mode) setMode(mode);
+  document.getElementById('q').value = q;
+  query.refine = [];
+  showTab('search');
+  search();
+}
+function setMode(m) {
+  query.mode = m;
+  document.querySelectorAll('input[name=mode]').forEach(r => r.checked = r.value === m);
+}
+function addRefine(op, term) {
+  term = term.trim(); if (!term) return;
+  query.refine.push({ op, term, n: op === 'near' ? (op === 'near' ? 10 : 0) : 0 });
+  search();
+}
+
+/* ═════════════ The panel: compare ═════════════ */
+
+function renderCompare() {
+  document.querySelectorAll('#cmpTabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.sub === cmpSub));
+  ['terms', 'pins', 'para'].forEach(s => document.getElementById('sub-' + s).hidden = s !== cmpSub);
+  document.getElementById('pinCount').textContent = pins.length ? `(${pins.length})` : '';
+  if (cmpSub === 'terms') renderTerms();
+  if (cmpSub === 'pins') renderPins();
+  if (cmpSub === 'para') renderPara();
+}
+
+const BINS = 20;
+
+function renderTerms() {
+  const box = document.getElementById('sub-terms');
+  if (!cmpTerms.some(Boolean) && query.q) cmpTerms[0] = query.q;
+  let html = `<p class="hint" style="margin-top:0">Up to four words or phrases, counted in each text with the search's current mode (${esc(query.mode)}). The bars show where in each text the hits fall, from its beginning to its end, in ${BINS} equal stretches of words. Click a cell to list those hits.</p>`;
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">` + cmpTerms.map((t, i) =>
+    `<input class="field" data-term="${i}" value="${esc(t)}" placeholder="term ${i + 1}">`).join('') + `</div>
+    <div class="opts"><button class="smallbtn" id="cmpGo">Compare</button></div>`;
+  const terms = cmpTerms.map(t => t.trim()).filter(t => t.replace(/\*/g, '').length >= 2);
+  const works = TS_ORDER.filter(w => w !== 'meier' || meierStatus === 'ok');
+  if (terms.length) {
+    // cumulative word offsets per work, for the bars
+    const offs = {};
+    works.forEach(w => { let c = 0; offs[w] = new Map(); UNITS.forEach(u => { if (u.work === w) { offs[w].set(u.uid, c); c += tokens(u).length; } }); });
+    html += `<table class="cmp"><thead><tr><th>term</th>${works.map(w => `<th>${TS_WORKS[w].label}<br><span class="rate">${wordCount(w).toLocaleString()} words</span></th>`).join('')}</tr></thead><tbody>`;
+    const rows = [];
+    terms.forEach(t => {
+      const f = compile(t, query.mode, query.whole);
+      html += `<tr><td><b>${esc(t)}</b></td>`;
+      const row = [];
+      works.forEach(w => {
+        if (!f || f.error) { html += `<td>–</td>`; return; }
+        const bins = new Array(BINS).fill(0); let n = 0, ax = 0;
+        const W = wordCount(w) || 1;
+        UNITS.forEach(u => {
+          if (u.work !== w || !u.text) return;
+          const hs = f(u); if (!hs.length) return;
+          n += hs.length; ax += hs.filter(h => h.approx).length;
+          const base = offs[w].get(u.uid);
+          hs.forEach(h => bins[Math.min(BINS - 1, Math.floor((base + tokIndexAt(u, h.s)) / W * BINS))]++);
+        });
+        const rate = n / W * 10000;
+        row.push({ w, n, rate });
+        const mx = Math.max(...bins) || 1;
+        const strip = bins.map((b, i) => `<span class="${b ? '' : 'zero'}" style="height:${Math.round(b / mx * 100)}%" title="${TS_WORKS[w].label}, stretch ${i + 1} of ${BINS}: ${b} hit${b === 1 ? '' : 's'}"></span>`).join('');
+        html += `<td class="cell" data-cterm="${esc(t)}" data-cwork="${w}" title="List these hits"><b>${n}</b>${ax ? ` <span class="rate">(${ax} ≈)</span>` : ''}<br><span class="rate">${rate.toFixed(1)} / 10k</span><div class="strip">${strip}</div></td>`;
+      });
+      html += `</tr>`;
+      rows.push({ t, row });
+    });
+    html += `</tbody></table>`;
+    html += `<p class="hint">Rates are per 10,000 words of each text, so texts of different length can be set side by side. ≈: hits found only by the spelling rules.</p>`;
+  }
+  box.innerHTML = html;
+}
+
+function sharedWords() {
+  if (pins.length < 2) return new Set();
+  const seen = new Map();
+  pins.forEach(uid => {
+    const set = new Set(tokens(UNITS[uid]).filter(t => t.w.length >= 4 && !STOP.has(t.w) && !/^\d+$/.test(t.w)).map(t => t.n));
+    set.forEach(n => seen.set(n, (seen.get(n) || 0) + 1));
+  });
+  return new Set([...seen].filter(([, c]) => c >= 2).map(([n]) => n));
+}
+
+function renderPins() {
+  const box = document.getElementById('sub-pins');
+  if (!pins.length) { box.innerHTML = `<p class="hint">Pin passages with the ⊕ beside a paragraph in the text or a search hit, and they are set side by side here.</p>`; return; }
+  const shared = markShared ? sharedWords() : new Set();
+  let html = `<div class="opts"><label><input type="checkbox" id="markShared" ${markShared ? 'checked' : ''}> mark words two or more passages share</label>
+    <button class="smallbtn" id="clearPins">Clear all</button></div>`;
+  if (markShared && pins.length > 1) html += `<p class="hint" style="margin-top:0">Shared words are found by this page: words of four letters or more, compared across spellings.</p>`;
+  html += `<div class="pins">`;
+  pins.forEach((uid, i) => {
+    const u = UNITS[uid];
+    const marks = tokens(u).filter(t => shared.has(t.n)).map(t => ({ s: t.s, e: t.e, cls: 'shared' }));
+    const { h, h2 } = hitsInUnit(u);
+    html += `<div class="card"><div class="ch"><span>${whereHTML(u)}</span><span style="white-space:nowrap">
+      ${i > 0 ? `<button data-pmove="${i}" title="Move left">←</button>` : ''}<button data-open="${uid}" title="Open in the text">↗</button><button data-pin="${uid}" title="Unpin">×</button></span></div>
+      <div class="ct">${unitBodyHTML(u, marks.concat(hitMarks(h, h2)))}</div></div>`;
+  });
+  html += `</div>`;
+  box.innerHTML = html;
+}
+
+function togglePin(uid) {
+  uid = +uid;
+  pins = pins.includes(uid) ? pins.filter(x => x !== uid) : pins.concat(uid);
+  document.querySelectorAll(`[data-pin="${uid}"]`).forEach(b => {
+    const on = pins.includes(uid); b.classList.toggle('on', on); b.title = on ? 'Unpin' : 'Pin to Compare → Passages';
+  });
+  document.getElementById('pinCount').textContent = pins.length ? `(${pins.length})` : '';
+  if (cmpSub === 'pins') renderPins();
+}
+
+// One § of Meier, with what the Reflexionen and Blomberg file under it.
+function renderPara() {
+  const box = document.getElementById('sub-para');
+  const n = paraView;
+  const mu = UNITS.find(u => u.work === 'meier' && u.n === n);
+  const refl = UNITS.filter(u => u.work === 'refl' && u.paras.includes(n));
+  const blom = UNITS.filter(u => u.work === 'blomberg' && u.paras.includes(n) && u.text);
+  const hl = u => { const { h, h2 } = hitsInUnit(u); return hitMarks(h, h2); };
+  let html = `<div class="qrow" style="align-items:center"><button class="smallbtn" id="paraPrev" ${n <= 1 ? 'disabled' : ''}>‹</button>
+    <span>Meier §</span><input class="num field" id="paraNum" type="number" min="1" max="563" value="${n}" style="flex:0 0 5em">
+    <button class="smallbtn" id="paraNext" ${n >= 563 ? 'disabled' : ''}>›</button>
+    <button class="smallbtn" id="paraPinAll" title="Pin all of these to Passages">pin all</button></div>`;
+  html += `<div class="bypara">`;
+  html += `<h3>Meier, Auszug § ${n}</h3>`;
+  if (mu) html += `<div class="item" data-open="${mu.uid}"><div class="where">${esc(mu.cite)}</div>${unitBodyHTML(mu, hl(mu))}</div>`;
+  else html += `<p class="hint">${meierStatus === 'ok' ? 'Not in the Meier reader’s text.' : 'Meier’s Auszug is not loaded (see About).'}</p>`;
+  html += `<h3>Reflexionen filed under § ${n} <span class="rate">(${refl.length})</span></h3>`;
+  if (!refl.length) html += `<p class="hint">None.</p>`;
+  refl.forEach(u => {
+    html += `<div class="item${u.e.interp ? ' interp' : ''}" data-open="${u.uid}"><div class="where">${whereHTML(u)} · § from ${u.e.src === 'locus' ? 'its own locus note' : u.e.src === 'group' ? 'the AA block heading' : 'interpolation'}</div>${u.text ? unitBodyHTML(u, hl(u)) : '<span class="ed">Vacat.</span>'}</div>`;
+  });
+  html += `<h3>Logik Blomberg on § ${n} <span class="rate">(${blom.length} paragraphs)</span></h3>`;
+  if (!blom.length) html += `<p class="hint">No paragraph of Blomberg is headed with this §.</p>`;
+  blom.forEach(u => {
+    html += `<div class="item" data-open="${u.uid}"><div class="where">${esc(u.cite)} · heading “${esc(u.b.para.raw)}”</div>${unitBodyHTML(u, hl(u))}</div>`;
+  });
+  html += `<h3>Logik Busolt</h3><p class="hint" style="margin-top:0">Busolt keys nothing to Meier's §§. ${mu ? 'Search it for a word of this § instead. The words below are this page’s choice: the §’s longest words.' : ''}</p>`;
+  if (mu) {
+    const seen = new Set(), picks = [];
+    tokens(mu).filter(t => t.w.length >= 6 && !STOP.has(t.w) && !/^\d+$/.test(t.w))
+      .sort((a, b) => b.w.length - a.w.length).forEach(t => { if (!seen.has(t.n) && picks.length < 8) { seen.add(t.n); picks.push(mu.text.slice(t.s, t.e)); } });
+    html += `<div class="chips">` + picks.map(p => `<button class="chip" data-busolt="${esc(p)}">${esc(p)}</button>`).join('') + `</div>`;
+  }
+  html += `</div>`;
+  box.innerHTML = html;
+}
+
+/* ═════════════ Events ═════════════ */
+
+function showTab(t) {
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t));
+  document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('on', p.id === 'tab-' + t));
+  if (t === 'compare') renderCompare();
+}
+
+document.querySelector('.tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) showTab(b.dataset.tab); });
+document.getElementById('cmpTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { cmpSub = b.dataset.sub; renderCompare(); } });
+
+document.getElementById('worktabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-work]'); if (!b) return;
+  reader.work = b.dataset.work; reader.sec = 0; renderReader(); document.getElementById('text').scrollTop = 0;
+});
+document.getElementById('secSelect').addEventListener('change', e => { reader.sec = +e.target.value; renderReader(); document.getElementById('text').scrollTop = 0; });
+document.getElementById('prevSec').addEventListener('click', () => { if (reader.sec > 0) { reader.sec--; renderReader(); document.getElementById('text').scrollTop = 0; } });
+document.getElementById('nextSec').addEventListener('click', () => { if (reader.sec < SECTIONS[reader.work].length - 1) { reader.sec++; renderReader(); document.getElementById('text').scrollTop = 0; } });
+
+let qTimer = null;
+document.getElementById('q').addEventListener('input', e => {
+  clearTimeout(qTimer); query.q = e.target.value;
+  qTimer = setTimeout(() => { query.refine = []; search(); }, 300);
+});
+document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(qTimer); query.q = e.target.value; search(); } });
+document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener('change', () => { query.mode = r.value; search({ record: false }); }));
+document.getElementById('whole').addEventListener('change', e => { query.whole = e.target.checked; search({ record: false }); });
+document.getElementById('workFilter').addEventListener('change', e => {
+  const w = e.target.dataset.wf; if (!w) return;
+  e.target.checked ? query.works.add(w) : query.works.delete(w); search({ record: false });
+});
+['pFrom', 'pTo'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+  query.from = +document.getElementById('pFrom').value || null;
+  query.to = +document.getElementById('pTo').value || null;
+  search({ record: false });
+}));
+
+// Clicks anywhere in the panel or the text, by data attribute.
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-pin],[data-open],[data-more],[data-exact],[data-near],[data-unrefine],[data-hist],[data-cterm],[data-busolt],[data-pmove],.xref,#refGo,#toCompare,#cmpGo,#clearPins,#paraPrev,#paraNext,#paraPinAll');
+  if (!t) return;
+  const d = t.dataset;
+  if (d.pin != null) { e.stopPropagation(); togglePin(d.pin); return; }
+  if (t.classList.contains('xref')) { const m = t.textContent.match(/\d+/); if (m) openMeierPara(+m[0]); return; }
+  if (d.open != null) { openUnit(+d.open, d.pos != null ? +d.pos : null); return; }
+  if (d.more) { shown[d.more] = (shown[d.more] || 40) + 80; renderResults(); return; }
+  if (d.exact != null) { setQuery(d.exact, 'exact'); return; }
+  if (d.near != null) { if (e.shiftKey) setQuery(d.near); else { query.refine.push({ op: 'near', term: d.near, n: 5 }); search(); } return; }
+  if (d.unrefine != null) { query.refine.splice(+d.unrefine, 1); search(); return; }
+  if (d.hist != null) {
+    const h = history[+d.hist]; query.q = h.q; setMode(h.mode); query.refine = h.refine.map(r => ({ ...r }));
+    document.getElementById('q').value = h.q; search(); return;
+  }
+  if (d.cterm != null) {
+    query.works = new Set([d.cwork]); query.from = query.to = null;
+    document.getElementById('pFrom').value = document.getElementById('pTo').value = '';
+    setQuery(d.cterm); return;
+  }
+  if (d.busolt != null) {
+    query.works = new Set(['busolt']); query.from = query.to = null;
+    document.getElementById('pFrom').value = document.getElementById('pTo').value = '';
+    setQuery(d.busolt, 'variant'); return;
+  }
+  if (d.pmove != null) { const i = +d.pmove; [pins[i - 1], pins[i]] = [pins[i], pins[i - 1]]; renderPins(); return; }
+  if (t.id === 'refGo') addRefine(document.getElementById('refOp').value, document.getElementById('refTerm').value);
+  if (t.id === 'toCompare') { cmpTerms = [query.q, '', '', '']; cmpSub = 'terms'; showTab('compare'); }
+  if (t.id === 'cmpGo') renderTerms();
+  if (t.id === 'clearPins') { pins = []; renderReader(); renderCompare(); }
+  if (t.id === 'paraPrev') { paraView = Math.max(1, paraView - 1); renderPara(); }
+  if (t.id === 'paraNext') { paraView = Math.min(563, paraView + 1); renderPara(); }
+  if (t.id === 'paraPinAll') {
+    document.querySelectorAll('#sub-para [data-open]').forEach(el => { const uid = +el.dataset.open; if (!pins.includes(uid)) pins.push(uid); });
+    renderReader(); cmpSub = 'pins'; renderCompare();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.target.id === 'refTerm' && e.key === 'Enter') addRefine(document.getElementById('refOp').value, e.target.value);
+  if (e.target.dataset && e.target.dataset.term != null && e.key === 'Enter') renderTerms();
+});
+document.addEventListener('input', e => {
+  if (e.target.dataset && e.target.dataset.term != null) cmpTerms[+e.target.dataset.term] = e.target.value;
+});
+document.addEventListener('change', e => {
+  if (e.target.id === 'markShared') { markShared = e.target.checked; renderPins(); }
+  if (e.target.id === 'paraNum') { const v = +e.target.value; if (v >= 1 && v <= 563) { paraView = v; renderPara(); } }
+});
+
+// Double-click a word in the text to search for it; select a phrase for more.
+const textEl = document.getElementById('text'), selBtn = document.getElementById('selbtn');
+let selText = '';
+textEl.addEventListener('dblclick', e => {
+  const s = window.getSelection().toString().trim();
+  if (s && /^[\p{L}\p{N}]+$/u.test(s)) { selBtn.style.display = 'none'; setQuery(s); }
+});
+textEl.addEventListener('mouseup', e => {
+  setTimeout(() => {
+    const s = window.getSelection().toString().replace(/\s+/g, ' ').trim();
+    if (!s || s.length < 2 || s.length > 80 || e.detail > 1) { selBtn.style.display = 'none'; return; }
+    selText = s;
+    selBtn.style.display = 'flex';
+    selBtn.style.left = Math.min(window.innerWidth - 260, e.clientX) + 'px';
+    selBtn.style.top = (e.clientY + 12) + 'px';
+  }, 0);
+});
+document.addEventListener('mousedown', e => { if (!e.target.closest('#selbtn')) selBtn.style.display = 'none'; });
+selBtn.addEventListener('click', e => {
+  const a = e.target.dataset.act; if (!a) return;
+  selBtn.style.display = 'none';
+  if (a === 'search') setQuery(selText);
+  if (a === 'near') { if (query.q) { query.refine.push({ op: 'near', term: selText, n: 10 }); showTab('search'); search(); } else setQuery(selText); }
+  if (a === 'compare') { const i = cmpTerms.findIndex(t => !t.trim()); cmpTerms[i < 0 ? 3 : i] = selText; cmpSub = 'terms'; showTab('compare'); }
+});
+
+// Dragging the divider resizes the panel.
+(() => {
+  const rz = document.getElementById('resizer'); let on = false;
+  rz.addEventListener('mousedown', e => { on = true; e.preventDefault(); });
+  document.addEventListener('mousemove', e => {
+    if (!on) return;
+    const w = Math.max(300, Math.min(window.innerWidth - 360, window.innerWidth - e.clientX));
+    document.querySelector('main').style.setProperty('--panel-w', w + 'px');
+  });
+  document.addEventListener('mouseup', () => { on = false; });
+})();
+
+/* ═════════════ Init ═════════════ */
+
+buildCorpus(null);
+renderWorkFilter();
+renderReader();
+loadMeier().then(r => {
+  if (r) { meierStatus = 'ok'; buildCorpus(r.M, r.CIT); }
+  else { meierStatus = 'failed'; }
+  pins = [];
+  if (query.q) search({ record: false }); else renderReader();
+});
+</script>
+</body>
+</html>
