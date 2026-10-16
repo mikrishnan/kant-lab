@@ -365,7 +365,7 @@ const FORMS = [
 // the file is saved. Keep it the same as the file's own.
 const FILE_HEADER = `/* ─────────────────────────────────────────────────────────────────────────────
    Examples in immediate-inference-examples.js that a reader has flagged as
-   miscategorised. Written by immediate-inferences.html ("Save
+   miscategorised. Written by immediate-inferences.html ("Update
    miscategorisations.js"), which also reads this file back on load, so the
    flags it holds show on the cards. It can be edited by hand.
 
@@ -842,47 +842,82 @@ function miscategorisationsText() {
   return head + 'const MISCATEGORISATIONS = [' + (body ? '\n' + body + '\n' : '\n') + '];\n';
 }
 
-// Saving goes through the File System Access API where the browser has it, so
-// the file can be chosen once and written in place. Elsewhere the file is
-// downloaded and has to be put back into this folder by hand.
+// The page cannot reach into the folder by itself, so the first update asks you
+// to pick miscategorisations.js (the one in this folder). The browser's handle on
+// that file is then kept, and later updates write to it in place with no dialog.
+// This needs the File System Access API: Chrome, Edge and the browsers built on them.
+const FILE_NAME = 'miscategorisations.js';
+const CAN_WRITE = !!window.showOpenFilePicker;
+let fileHandle = null;
+
+function handleStore(mode, fn) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(new Error('the browser did not answer')), 1500);   // never leave the button waiting
+    const open = indexedDB.open('miscategorisations', 1);
+    open.onupgradeneeded = () => open.result.createObjectStore('handles');
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const req = fn(open.result.transaction('handles', mode).objectStore('handles'));
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    };
+  });
+}
+// A browser that will not store the handle only means being asked again next visit.
+function rememberHandle(h) { return handleStore('readwrite', s => (h ? s.put(h, 'file') : s.delete('file'))).catch(() => {}); }
+function recallHandle() { return handleStore('readonly', s => s.get('file')).catch(() => null); }
+
+async function writableHandle() {
+  if (!fileHandle) fileHandle = await recallHandle();
+  if (fileHandle) {
+    let ok = (await fileHandle.queryPermission({ mode: 'readwrite' })) === 'granted';
+    if (!ok) ok = (await fileHandle.requestPermission({ mode: 'readwrite' })) === 'granted';
+    if (ok) return fileHandle;
+    fileHandle = null;
+  }
+  const picked = await window.showOpenFilePicker({
+    multiple: false,
+    types: [{ description: 'miscategorisations.js', accept: { 'text/javascript': ['.js'] } }]
+  });
+  const h = picked[0];
+  if (h.name !== FILE_NAME) throw new Error('that file is “' + h.name + '”; choose ' + FILE_NAME + ' in the Individuals/Nik Land folder');
+  if ((await h.requestPermission({ mode: 'readwrite' })) !== 'granted') throw new Error('write permission was not given');
+  fileHandle = h;
+  await rememberHandle(h);
+  return h;
+}
+
 async function saveFlags() {
-  const text = miscategorisationsText();
-  const status = document.getElementById('miscat-status');
+  let message = '', failed = false;
   try {
-    if (window.showSaveFilePicker) {
-      const h = await window.showSaveFilePicker({
-        suggestedName: 'miscategorisations.js',
-        types: [{ description: 'JavaScript', accept: { 'text/javascript': ['.js'] } }]
-      });
-      const w = await h.createWritable();
-      await w.write(text);
-      await w.close();
-      status.textContent = 'Saved.';
-    } else {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
-      a.download = 'miscategorisations.js';
-      document.body.append(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(a.href);
-      status.textContent = 'Downloaded. Replace the file in this folder with it.';
-    }
+    const h = await writableHandle();
+    const w = await h.createWritable();
+    await w.write(miscategorisationsText());
+    await w.close();
     unsaved = false;
+    message = 'Updated ' + FILE_NAME + '.';
   } catch (err) {
     if (err && err.name === 'AbortError') return;      // the picker was cancelled
-    status.textContent = 'Could not save: ' + err.message;
+    fileHandle = null;                                  // ask again next time
+    rememberHandle(null);
+    message = 'Could not update ' + FILE_NAME + ': ' + err.message;
+    failed = true;
   }
   paintBar();
+  const status = document.getElementById('miscat-status');
+  status.textContent = message;
+  status.className = failed ? 'dirty' : '';
 }
 
 function paintBar() {
   document.getElementById('miscat-count').textContent =
     flagged.size + ' flagged as miscategorised';
   const d = document.getElementById('miscat-status');
-  if (unsaved) { d.textContent = 'not saved'; d.className = 'dirty'; }
-  else if (d.className === 'dirty') { d.textContent = ''; d.className = ''; }
-  document.getElementById('miscat-save').disabled = !unsaved;
+  if (unsaved) { d.textContent = 'not yet in ' + FILE_NAME; d.className = 'dirty'; }
+  const save = document.getElementById('miscat-save');
+  save.disabled = !unsaved || !CAN_WRITE;
+  save.title = CAN_WRITE ? 'Write the flags into ' + FILE_NAME + ' in this folder'
+                         : 'Updating the file needs Chrome or Edge; this browser cannot write to a file on disk';
 }
 
 function buildBar() {
@@ -892,7 +927,7 @@ function buildBar() {
   count.id = 'miscat-count';
   const status = el('span');
   status.id = 'miscat-status';
-  const save = el('button', null, 'Save miscategorisations.js');
+  const save = el('button', null, 'Update miscategorisations.js');
   save.id = 'miscat-save';
   save.type = 'button';
   save.addEventListener('click', saveFlags);

@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    Examples in immediate-inference-examples.js that a reader has flagged as
-   miscategorised. Written by immediate-inferences.html ("Save
+   miscategorised. Written by immediate-inferences.html ("Update
    miscategorisations.js"), which also reads this file back on load, so the
    flags it holds show on the cards. It can be edited by hand.
 
