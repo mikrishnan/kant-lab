@@ -278,7 +278,7 @@ const JF_FORMS = [
     def: 'One judgment is related to another as ground to consequence — “If … then …”.',
     term: new RegExp(B + '(?:hypothetisch\\p{L}*|hypothetic\\p{L}*)', 'iu') },
   { id: 'disjunctive', group: 'Relation', axis: 3, de: 'disjunktive', la: 'disjunctivum', en: 'disjunctive',
-    def: 'Judgments related as parts of one divided sphere — “Either … or …”.',
+    def: 'Judgments related as parts of one divided sphere — “Either … or …”, and equally a divided predicate without it: “A is b or c”, “A is b or non-b”.',
     term: new RegExp(B + '(?:disjunctiv\\p{L}*|disjunkt\\p{L}*|disjunct\\p{L}*)', 'iu') },
   { id: 'problematic', group: 'Modality', axis: 4, de: 'problematische', la: 'problematicum', en: 'problematic',
     def: 'Affirmation or denial taken as merely possible.',
@@ -543,7 +543,9 @@ function isImplicitExample(t, labels) {
 function classify(t) {
   const labels = [];
   const hyp = /(?:^|[\s,;:])(?:wenn|wann|falls|si)(?![\p{L}])[^]*?(?:^|[\s,;:])(?:so|dann|ita|tum|ergo)(?![\p{L}])/iu.test(t);
-  const disj = /(?:^|[\s,;:])(?:entweder|aut)(?![\p{L}])[^]*?(?:oder|aut|vel)(?![\p{L}])/iu.test(t);
+  /* A divided sphere, however it is written: "entweder … oder", or a bare disjunct — "A ist b oder c",
+     "A ist b oder nicht-b" — which the lectures set down without "entweder" as often as with it. */
+  const disj = /(?<![\p{L}])(?:oder|vel|aut|sive|seu)(?![\p{L}])/iu.test(t);
   // quantity
   let quant = null;
   if (/(?<![\p{L}])(alle|aller|allen|alles|jeder|jede|jedes|jeden|jedem|omnis|omne|omnes|omnia|kein|keine|keiner|keines|keinen|keinem|nullus|nulla|nullum)(?![\p{L}])/iu.test(t)) quant = 'universal';
