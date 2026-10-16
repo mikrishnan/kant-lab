@@ -43,7 +43,8 @@ header h1 { font-family: 'Cinzel', serif; font-weight: 400; font-size: 16px; let
 .toggles label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
 /* ---------- comparison board ---------- */
-#board { border-bottom: 1px solid var(--rule); background: var(--parchment-dark); }
+/* the comparison takes what the reading panels leave; its card lists scroll inside it */
+#board { flex: 1 1 0; min-height: 210px; display: flex; flex-direction: column; border-bottom: 1px solid var(--rule); background: var(--parchment-dark); }
 #board[hidden] { display: none; }
 .b-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; padding: 8px 16px 4px; }
 .b-head h2 { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; color: var(--accent); margin: 0; }
@@ -52,12 +53,12 @@ header h1 { font-family: 'Cinzel', serif; font-weight: 400; font-size: 16px; let
 .b-head .how { margin-left: auto; font-size: 13px; color: var(--accent); font-style: italic; background: none; border: 0; cursor: pointer; text-decoration: underline; padding: 0; }
 #refline { padding: 0 16px 6px; font-size: 14.5px; }
 #refline b { color: var(--ref); font-weight: 500; }
-.b-cols { display: grid; grid-template-columns: repeat(3, 1fr); }
-.b-col { padding: 0 12px 10px; border-right: 1px solid var(--rule); min-width: 0; }
+.b-cols { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: minmax(0, 1fr); }
+.b-col { padding: 0 12px 8px; border-right: 1px solid var(--rule); min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 .b-col:last-child { border-right: 0; }
 .stat { font-size: 13.5px; color: var(--muted); margin: 0 0 4px; }
 .stat b { color: var(--ink); font-weight: 500; font-size: 15px; }
-.cards { max-height: 30vh; overflow-y: auto; padding-right: 3px; }
+.cards { flex: 1; min-height: 0; overflow-y: auto; padding-right: 3px; }
 .card { display: block; width: 100%; text-align: left; background: var(--parchment); border: 1px solid var(--rule); border-left: 4px solid var(--accent-soft); padding: 4px 8px 5px; margin-bottom: 5px; font-size: 14.5px; line-height: 1.35; color: var(--ink); cursor: pointer; }
 .card:hover { border-color: var(--accent-soft); }
 .card.ref { border-color: var(--ref); border-left-color: var(--ref); box-shadow: 0 0 0 1px var(--ref); }
@@ -75,7 +76,9 @@ header h1 { font-family: 'Cinzel', serif; font-weight: 400; font-size: 16px; let
 .none { color: var(--muted); font-style: italic; font-size: 14px; }
 
 /* ---------- three reading panels ---------- */
-main { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
+/* the three reading panels: 55% of the screen's height (a little less on a short screen, so that the
+   comparison keeps room for its cards), or all of what is left when the comparison is hidden */
+main { flex: 0 1 55vh; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
 .panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--rule); }
 .panel:last-child { border-right: 0; }
 .phead { padding: 6px 12px; background: var(--parchment-dark); border-bottom: 1px solid var(--rule); }
@@ -159,8 +162,10 @@ table.ov td.lead { font-size: 13.5px; color: var(--muted); }
 #tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--parchment); font-size: 13px; padding: 4px 8px; border-radius: 3px; z-index: 30; display: none; max-width: 320px; line-height: 1.35; }
 footer { font-size: 12px; color: var(--muted); padding: 4px 16px; border-top: 1px solid var(--rule); background: var(--parchment-dark); }
 footer p { margin: 0; }
-#about { margin-top: 3px; }
-#about summary { cursor: pointer; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: .06em; color: var(--accent); }
+#about summary { list-style-position: inside; }
+#about summary .src { color: var(--muted); font-family: 'EB Garamond', serif; font-size: 12.5px; letter-spacing: 0; }
+#about summary .more { margin-left: 6px; text-decoration: underline; }
+#about summary { cursor: pointer; font-size: 12.5px; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #about .body { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; max-height: 62vh; overflow-y: auto; font-size: 14.5px; line-height: 1.45; color: var(--ink); background: var(--parchment); border-top: 3px solid var(--accent); box-shadow: 0 -8px 30px #0003; padding: 14px 24px 18px; columns: 2 420px; column-gap: 36px; }
 #about .close { float: right; background: none; border: 1px solid var(--accent-soft); color: var(--accent); cursor: pointer; padding: 1px 10px; font-size: 14px; margin: 0 0 6px 12px; }
 #about h5 { font-family: 'Cinzel', serif; font-size: 11.5px; letter-spacing: .06em; color: var(--accent); margin: 0 0 3px; font-weight: 600; break-after: avoid; }
@@ -170,7 +175,11 @@ footer p { margin: 0; }
 #about .live { background: var(--parchment); border: 1px solid var(--rule); border-left: 3px solid var(--shared); padding: 4px 8px; }
 #about .live i { font-style: normal; color: var(--shared); }
 #about .live b { color: var(--ref); font-weight: 500; }
+body:has(#board[hidden]) main { flex: 1 1 auto; }
 @media (max-width: 900px) {
+  #board { flex: 0 0 auto; }
+  .cards { max-height: 40vh; }
+  main { flex: 1 0 auto; overflow: visible; grid-template-rows: none; }
   main { grid-template-columns: 1fr; grid-auto-rows: minmax(60vh, auto); overflow-y: auto; }
   .b-cols { grid-template-columns: 1fr; }
   .b-col { border-right: 0; border-bottom: 1px solid var(--rule); }
@@ -230,13 +239,16 @@ footer p { margin: 0; }
 <div id="tip"></div>
 
 <footer>
-  <p>Student transcripts of Kant's lectures on Meier's <i>Auszug aus der Vernunftlehre</i>, AA XXIV, in full, from <code>data/</code>, oldest on the left. Key passages are picked automatically: a paragraph with a sentence shaped like a definition (yellow), or one that keeps returning to the term, plus the paragraphs that carry it on. Choose one as the reference (red) and each lecture scrolls to the passage closest to it in wording (teal edge). Words shared with the reference are in teal. All of this is computed from the wording. It points you to the passages; comparing what they say is your reading.</p>
   <details id="about">
-    <summary>What the percentages measure, and what they are good for</summary>
+    <summary><span class="src">Student transcripts of Kant's lectures on Meier's <i>Auszug aus der Vernunftlehre</i>, AA XXIV, in full, from <code>data/</code>, oldest on the left.</span> <span class="more">How passages are chosen, and what the percentages measure</span></summary>
     <div class="body">
       <button class="close" id="aboutClose">Close</button>
       <div class="blk2">
-        <h5>In one sentence</h5>
+        <h5>How the key passages are chosen</h5>
+        Automatically, from the wording: a paragraph with a sentence shaped like a definition of the concept (shaded yellow: the term followed by <i>ist</i>, <i>heißt</i>, <i>nennt man</i>, <i>bestehet in</i>…), or one that keeps coming back to it, together with the paragraphs that carry the discussion on. Choose one as the reference (framed in red) and each lecture scrolls to the passage closest to it in wording (teal edge); words shared with the reference are in teal. A dashed rule at the left of a paragraph means the extractor joined it from two lines by inference. All of this points you to passages; comparing what they say is your reading.
+      </div>
+      <div class="blk2">
+        <h5>What the percentages measure, in one sentence</h5>
         The percentage on a passage says how much of the same <em>distinctive vocabulary</em> it uses as the reference passage (the one framed in red): 0% means the two have no telling word in common, 100% would mean they use exactly the same words in the same proportions. It is a count of words, not a judgement about ideas.
       </div>
       <div class="blk2">
