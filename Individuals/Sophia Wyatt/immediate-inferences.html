@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Immediate inferences in Kant's logic lectures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --parchment: #f6f0e2;
+  --card: #fffdf6;
+  --ink: #2a2118;
+  --muted: #6e5f4d;
+  --accent: #5c3d1e;
+  --rule: #d8cbb0;
+  --mark: #f4d06a;
+  --mark-rule: #dcc0a0;
+  --mark-ink: #2a2118;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--parchment); color: var(--ink); font: 19px/1.55 'EB Garamond', Georgia, serif; }
+header { padding: 28px 24px 16px; max-width: 880px; margin: 0 auto; }
+h1 { font: 600 24px/1.2 'Cinzel', serif; letter-spacing: .04em; color: var(--accent); margin: 0 0 8px; }
+.lede { margin: 0; color: var(--muted); font-size: 17px; }
+.key { margin: 10px 0 0; font-size: 15px; color: var(--muted); }
+.controls { position: sticky; top: 0; z-index: 5; background: var(--parchment); border-bottom: 1px solid var(--rule); padding: 10px 24px; }
+.controls-inner { max-width: 880px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 600 12px 'Cinzel', serif; letter-spacing: .05em; padding: 5px 11px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--parchment); }
+select, input[type=search] { font: 16px 'EB Garamond', serif; padding: 4px 8px; border: 1px solid var(--rule); background: var(--card); color: var(--ink); border-radius: 4px; }
+input[type=search] { flex: 1 1 160px; min-width: 140px; }
+#count { margin-left: auto; color: var(--muted); font-size: 16px; }
+main { max-width: 880px; margin: 0 auto; padding: 18px 24px 60px; }
+h2 { font: 600 17px/1.3 'Cinzel', serif; letter-spacing: .06em; color: var(--accent); margin: 26px 0 4px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+h2:first-child { margin-top: 4px; }
+.sub { margin: 0 0 14px; color: var(--muted); font-size: 16px; }
+.item { background: var(--card); border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 4px; padding: 14px 18px 12px; margin: 0 0 18px; }
+.item.rule { border-left-color: #a8895f; }
+.item-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.cite { font: 600 14px 'Cinzel', serif; letter-spacing: .04em; color: var(--accent); }
+.cite .pages { font-family: 'EB Garamond', serif; font-weight: 500; letter-spacing: 0; color: var(--ink); font-size: 17px; margin-left: 6px; }
+.kind { font-size: 14px; font-style: italic; color: var(--muted); }
+.para { max-height: 15em; overflow-y: auto; padding-right: 8px; hyphens: auto; }
+.para + .para { margin-top: 8px; padding-top: 8px; border-top: 1px dotted var(--rule); }
+.para-src { display: block; font: 600 11px 'Cinzel', serif; letter-spacing: .04em; color: var(--muted); margin-bottom: 2px; }
+mark { background: var(--mark); color: var(--mark-ink); padding: 1px 2px; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.item.rule mark { background: var(--mark-rule); }
+.pg { font: 600 11px 'Cinzel', serif; color: var(--muted); border: 1px solid var(--rule); border-radius: 3px; padding: 0 4px; margin: 0 3px; white-space: nowrap; vertical-align: 1px; background: var(--parchment); }
+.pg.ms { font-style: italic; font-family: 'EB Garamond', serif; font-weight: 400; }
+.note { margin: 8px 0 0; font-size: 15px; color: var(--muted); }
+.note b { font: 600 11px 'Cinzel', serif; letter-spacing: .06em; }
+.empty { text-align: center; color: var(--muted); padding: 40px 0; }
+footer { max-width: 880px; margin: 0 auto; padding: 0 24px 40px; color: var(--muted); font-size: 15px; }
+footer p { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Immediate inferences in Kant’s logic lectures</h1>
+  <p class="lede">What the Blomberg, Wiener and Busolt logic transcripts say about immediate inferences (<i>consequentiae immediatae</i>, <i>Verstandesschlüsse</i>): first Kant’s examples, then everything else he says about them. Each is shown in the paragraph it stands in, with its lecture and Academy Edition page.</p>
+  <p class="key"><mark>Highlighted</mark> text is the example; <mark style="background:var(--mark-rule)">this tint</mark> marks a rule or remark. A paragraph that holds both appears in both parts.</p>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="chips" id="parts" role="group" aria-label="Part"></div>
+    <div class="chips" id="works" role="group" aria-label="Lecture"></div>
+    <select id="kind" aria-label="Topic"><option value="">All topics</option></select>
+    <input id="q" type="search" placeholder="Search the paragraphs…" aria-label="Search">
+    <span id="count" aria-live="polite"></span>
+  </div>
+</div>
+
+<main id="list"></main>
+
+<footer>
+  <p><b>What is attested, what is not.</b> The paragraph text, the page numbers (Academy Edition, <i>AA</i> XXIV) and the manuscript page numbers are the transcriptions’, as <code>data/logik-*-24.js</code> carries them; a grey tag such as <span class="pg">AA 24:671</span> marks where a new page begins. Spelling, punctuation and the transcriptions’ oddities are kept as printed. <b>Which stretch counts as an example, which as a rule or remark, and the topic label on each, is the compiler’s reading, not the edition’s.</b> Short notes are the compiler’s, not Kant’s or his students’.</p>
+  <p>The list is a curated selection from a read of the three transcripts and aims to be complete for immediate inference proper (equipollence, subalternation, opposition, conversion, contraposition); the inferences by induction and analogy that Busolt also calls <i>Verstandesschlüsse</i> are a different use of the word and are left out, as are the mediate inferences, which are in their own list.</p>
+</footer>
+
+<!-- The three transcripts (generated; see data/README.md). Classic scripts, so this page opens from file://. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+// The lectures, oldest first. `key` is the prefix of each block id.
+const II_WORKS = [
+  { key: 'blomberg', label: 'Blomberg Logic', date: 'ca. 1771',    data: LOGIK_BLOMBERG },
+  { key: 'wiener',   label: 'Wiener Logic',   date: '1780ff.',     data: LOGIK_WIENER },
+  { key: 'busolt',   label: 'Busolt Logic',   date: 'ca. 1789/90', data: LOGIK_BUSOLT }
+];
+
+const II_PARTS = [
+  { key: 'example', label: 'Examples', title: 'Kant’s examples of immediate inferences',
+    sub: 'Instances of an inference from one judgment to another without a middle term, with the paragraph each stands in.' },
+  { key: 'rule', label: 'Rules & remarks', title: 'Rules for, and remarks on, immediate inference',
+    sub: 'What Kant says about the character of immediate inference, its kinds, and the rules that govern them.' }
+];
+
+// The curated passages. `part` is `example` or `rule`; `block` is a block id in the data
+// file; each of `spans` is copied verbatim from that block's text and highlighted wherever
+// it occurs. `more` lists blocks that follow it and are shown in the same card for
+// context: a block id, or { block, spans }. `note` is the compiler's gloss, shown as such.
+// Add a passage by adding a line.
+const II_ITEMS = [
+ // ── Blomberg ──
+ {"part":"rule","kind":"Immediate vs. mediate inference","block":"blomberg-s11-009","spans":["ich werde hernach zeigen, daß jeder Vernunft-Schluß außer der ersten Figur nicht einfach sey wie man doch aber fälschlich davor halt, sonderen aus der Consequentia immediata und einem Ratiocinio zusammen gesezet ist"],"note":"Anticipates the reduction of the later figures, which Busolt develops (see Busolt, AA 24:676–677)."},
+ {"part":"rule","kind":"Kinds of immediate inference","block":"blomberg-s11-019","spans":["Ein jeder Schluß ist überhaupt ein Urtheil, nur mit dem Unterschiede: ist das Urtheil Mittelb ar so ist es ein Vernunft-, oder ein mittelbarer Schluß. ist aber das Urtheil unmittelbahr, so ist der Schluß nur ein Verstandes Schluß es wird nemlich eins aus dem anderen geurtheilt absque medio Termino alsdenn ist das Urtheil, oder auch die Conclusio immediata","ist diese 5erley, denn entweder können sie entstehen"],"more":["blomberg-s11-020","blomberg-s11-021","blomberg-s11-022","blomberg-s11-023",{"block":"blomberg-s11-024","spans":["eigentlich gar keine Consequens, und also der so genannte Schluß per Judicia aequipollentia ist gar kein Schluß","Die Consequentia per Judicia Subalternata geschiehet ohne alle Veränderung der Stelle der Terminorum, die Qualitaet bleibt auch dieselbe, nur die Quantitaet wird darinn veränderet","Bey der consequentia per Conversionem Logicam muß gleichfals niemals die Qualität, sonderen nur die Quantitaet veränderet werden","Bey der conversio Logica aber muß in derselben sowohl die Lage der Terminorum als auch die Qualitaet veränderet werden"]}],"note":"The transcription says “mittelbahre Schlüße” just before the list, but the five ways are those of the Verstandesschlüsse, and the next section calls them “immediatas”. The last sentence, headed “conversio Logica” again, evidently concerns the fifth way, contraposition."},
+ {"part":"example","kind":"Opposition: contradictory","block":"blomberg-s11-025","spans":["alle Menschen sind sterblich, aber einige sind nicht sterblich"],"note":"Blomberg’s only worked example of an immediate inference in these paragraphs; conversion and contraposition are given as rules without one."},
+ {"part":"rule","kind":"Opposition: contradictory","block":"blomberg-s11-025","spans":["Contradictorie sind 2 Urtheile einander entgegen gesezt, wenn einem bejahenden Urtheile ein besonderes verneinendes Urtheil (oder umgekehrt) entgegenponirt wird"]},
+ {"part":"rule","kind":"Opposition: subcontrary","block":"blomberg-s11-026","spans":["Subcontraria sind Urtheile alsdenn, wenn in 2 Particular Urtheilen, die einerley Subject, und Praedicat haben, das eine bejahend, und das andere verneinend ist"]},
+ {"part":"rule","kind":"Opposition: subcontrary & contrary","block":"blomberg-s11-027","spans":["Judicia subcontraria, weil sie nicht genug enthalten, können 1) alle beyde wahr seyn, sie können aber 2) nicht alle beyde falsch seyn","giebt es noch eine Contrarietas Judicii, die findet denn statt, wenn in 2 Urtheilen das eine allgemein bejahend, und das andere allgemein verneinend ist"]},
+ {"part":"rule","kind":"Opposition & conversion","block":"blomberg-s11-028","spans":["Judicia Contraria können beyde falsch seyn, denn in beyden ist zu viel, und können eben in ihrem zu viel auch falsch seyn. von 2 reinen Oppositionen muß beständig dieses gelten können: posito uno tollitur alterum. et vice versa","Eine Conversio bey der die Qualitaet des Urtheils nicht gehindert wird, heißt Simplex, wo sie aber gehinderet wird, conversio per accidens. allgemein bejahende Urtheile laßen sich per accidens umkehren, alle verneinende Urtheile aber laßen sich Simpliciter umkehren, und endlich die particulare laßen sich alle Simpliciter umkehren, das ist die einzige Regel der logischen Conversion","Die Regel der Contraposition ist diese: allgemein bejahende Urtheile laßen sich nur contraponiren"]},
+ {"part":"rule","kind":"Immediate vs. mediate inference","block":"blomberg-s12-001","spans":["gewise Urtheilen, und Consequenzen, die wir immediatas genannt haben, diese waren indemonstrabel. wir nannten auch diese Folgen eines Urtheils aus anderen Urtheilen die unerweislich sind, nicht einen Vernunft-, sonderen einen Verstandes Schluß"]},
+ {"part":"rule","kind":"Immediate vs. mediate inference","block":"blomberg-s12-015","spans":["Hier redet der Autor von unmittelbahren Folgerungen, es schickt sich aber gar nicht, denn es sind ja gar keine Vernunft Schlüße sonderen nur Verstandes Schlüße. Denn sie haben keinen medium Terminum."],"note":"Kant’s comment on the textbook (Meier)."},
+
+ // ── Wiener ──
+ {"part":"example","kind":"Subalternation & equipollence","block":"wiener-s12-001","spans":["alle Körper theilbar folglich auch einige","alle Menschen sterblich folglich einige sterbliche Dinge Menschen oder kein Mensch unsterblich"]},
+ {"part":"rule","kind":"Immediate vs. mediate inference","block":"wiener-s12-001","spans":["consequentia immediata weil der Materie nach eins, nur Form verschieden","Hier conclusum und judicium concludens eines","Auch Verstandesschluß vom ratiocinio zu unterscheiden wo judicium Vernunft brauche weil materialiter unterschieden z.B. alle Menschen sterblich folglich auch Cajus"],"note":"The mediate counterpart, “folglich auch Cajus”, is given beside the immediate ones."},
+ {"part":"example","kind":"Equipollence, subalternation & opposition","block":"wiener-s12-002","spans":["einige Menschen sind nicht7 ° tugendhaft folglich sind nicht alle Menschen tugendhaft","nichts ist ohne Grund und alles hat seinen Grund","alle Menschen sind sterblich folglich einige","einige Menschen sind gelehrt einige nicht","einige Menschen nicht sterblich, alle Menschen sterblich"],"note":"The “7 °” inside the first example is in the transcription."},
+ {"part":"rule","kind":"Kinds of immediate inference","block":"wiener-s12-002","spans":["Judicia immediata sind 1) per judicia aequipollentia","sind Substitutionen","Subalternata auch nur Form nach verschieden","per judicia opposita","contradictoria wenn eins allgemein bejahet oder verneinet und das andere partikulär verneinet oder bejahet d.i. die eigentliche Opposition wo die Bejahung des einen das andere aufhebt affirmando unum negat alterum und umgekehrt","So Beweise apagogisch indirecte nur sehe man ob wirklich contradictoria opposita, in Metaphysik stößt man immer bei Gegentheil"],"note":"The paragraph breaks off at the page and continues in the next."},
+ {"part":"example","kind":"Opposition: subcontrary & contrary","block":"wiener-s12-003","spans":["einige Menschen sind gelehrt, einige nicht","alle Menschen gelehrt kein Mensch gelehrt"]},
+ {"part":"rule","kind":"Opposition","block":"wiener-s12-003","spans":["auf Ungereimtheiten). Manche beweisen weil gegentheil auf Ungereimtheit führt und triumphiren aber opponent kan oft das nämliche","Subcontrarie opposita","Beide vielleicht wahr. Qualität verschieden, Quantität eins. Hier kan nicht indirecte geschlossen werden. Hier können beide wahr nicht beide falsch seyn also richtig der Schluß wenn das eine falsch ist das andere wahr nicht umgekehrt","contrarie opposita beide allgemein nur Qualität verschieden","beide können falsch nicht wahr seyn sind das Gegentheil vom vorigen"]},
+ {"part":"example","kind":"Conversion","block":"wiener-s12-004","spans":["alle Menschen sterblich folglich einige Sterbliche Menschen","kein Mensch ist ohne Feinde etc.","einige Menschen sind gelehrt etc."]},
+ {"part":"rule","kind":"Conversion","block":"wiener-s12-004","spans":["per conversionem judiciorum","Quantitat muß verloren gehen, denn heißts conversio per accidens bleibt Quantitat heißts simpliciter talis","allgemein bejahende nur per accidens convertiren aber 2 verneinende auch stricte talis – alle Partikulare bejahend oder verneinend lassen sich simpliciter umkehren"]},
+ {"part":"example","kind":"Contraposition","block":"wiener-s12-005","spans":["alle Menschen sind sterblich einiges Sterbliche ist nicht Mensch","alle M. sind sterblich, nichts was nicht sterblich ist, ist ein Mensch","alle Menschen sind sterblich wenn wahr nothwendig was nicht sterblich ist nicht Mensch"],"note":"Two statements of the contrapositum stand in this paragraph; the transcription’s wording is kept."},
+ {"part":"rule","kind":"Contraposition & the character of immediate inference","block":"wiener-s12-005","spans":["consequentia immediata per contrapositionem wo Qualität auch geandert","Alle Bejahende lassen sich contraponiren","Also bei immediatis betrift Veränderung nur Form b ist quoad qualitatem c quoad relationem","contraoppositio zeigt bloß Modalität der Urtheile die Nothwendigkeit eines bejahenden Urtheils"]},
+
+ // ── Busolt ──
+ {"part":"example","kind":"Counter-example: not an immediate inference","block":"busolt-s26-035","spans":["Alle Menschen sind Sterblich, also ist auch Caius sterblich"],"note":"Kant says this is wrongly drawn as an immediate inference: “Caius” is a concept not given before, so the inference must be mediate."},
+ {"part":"rule","kind":"Immediate vs. mediate inference; kinds","block":"busolt-s26-035","spans":["Wird ein Urtheil aus einem andern gefolgert, ohne ein zwischen Urtheil, so ist dies ein Verstandesschluß, per iudicium intermedium ein Vernunftschluß","es ist also falsch geschloßen, und ich muß nur mittelbar schließen, dadurch, daß ich mir einen Begriff von Caius mache","Zur consequentia immediata muß iudicium praeuium und exclusio einen Begriff erhalten. Sie sind nicht anders unterschieden als nur in der Qualitaet, Quantitaet und Relation"],"more":["busolt-s26-036","busolt-s26-037","busolt-s26-038","busolt-s26-039","busolt-s26-040",{"block":"busolt-s26-041","spans":["Die erste Art kann wegfallen, sie ist leer, weil es so viel als nichts ist, eines aus dem andern zu folgern, was dem erstern einerley ist, es bleibt immer dasselbe Urtheil","Auf die Zweyte Art schließe ich vom allgemeinen aufs besondere","Auf die Dritte Art ist per iudicia opposita unmittelbar zu schließen"]}]},
+ {"part":"example","kind":"Opposition: contradictory","block":"busolt-s26-042","spans":["Alle Menschen sind Sterblich, einige sind nicht sterblich. Keine Substanz ist einfach, einige sind einfach"]},
+ {"part":"rule","kind":"Opposition: contradictory","block":"busolt-s26-042","spans":["hier kann von zwey Urtheilen nur eins wahr seyn, und ich schließe also: ist eins wahr; so ist das andere falsch und umgekehrt. Hiezu wird erfordert, daß eins allgemein bejahend das andere particulair verneinend, oder daß eins allgemein verneinend, das andere particulair bejahend ist"]},
+ {"part":"example","kind":"Opposition: subcontrary","block":"busolt-s26-043","spans":["Einige Menschen sind böse, – einige sind nicht böse"]},
+ {"part":"rule","kind":"Opposition: subcontrary","block":"busolt-s26-043","spans":["Subcontraire, da ein Urtheil particulair bejahend das andere particulaer verneinend ist"]},
+ {"part":"example","kind":"Opposition: contrary; conversion; contraposition","block":"busolt-s26-044","spans":["Alle Menschen sind Lasterhafte. Ueber einen solchen Saz kann der andere so entsezt werden, daß er sagt: Kein Mensch ist Lasterhaft","Alle Menschen sind Sterblich einige Sterbliche sind also Menschen, d.i. durch die Conversion","Was nicht sterblich ist, ist kein Mensch d.i. durch die contraposition"]},
+ {"part":"rule","kind":"Opposition, conversion & contraposition","block":"busolt-s26-044","spans":["Judicia contraria opposita können beide falsch seyn, weil darin mehr verneint wird als es nöthig ist. Die Falschheit steckt also in der Allgemeinheit","Bei den folgenden Arten ändert man das Subiect und Praedicat, aber bei der conversion kann man die Quantitaet ändern, nicht aber die Qualitaet. Man nennt die Versezzung der Terminen metathesis terminorum. Durch diese entsteht ein unmittelbarer Schluß durch die conversion der Urtheile wo versezt wird die Quantitaet und nicht die Qualitaet und durch die contraposition der Urtheile, wo versezt wird die Qualitaet und nicht die Quantitaet","Bei der conversion der Urtheile heißt das Urtheil was umgekehrt werden soll: Judicium conversum das wodurch die Umkehrung entspringt iudicium convertens. Die Umkehrung geschieht entweder per accidens oder simpliciter"]},
+ {"part":"example","kind":"Conversion & contraposition","block":"busolt-s26-046","spans":["von diesen kann ich nun umgekehrt sagen einige sterbliche sind Menschen","Alle Figuren in drei geraden Linien eingeschloßen, sind Triangel, alle Triangel sind Figuren in drei geraden Linien eingeschloßen","kein Triangel ist ohne Winkel keine Figur ohne Winkel ist ein Triangel","Alle Menschen sind Sterblich, Nichtsterbliche sind nicht Menschen"],"note":"The first pair of examples is of simple conversion of a universal affirmative, where the spheres are equal (“eine Subtilitaet”)."},
+ {"part":"rule","kind":"Conversion & contraposition","block":"busolt-s26-046","spans":["Allgemeine bejahende Säzze lassen sich nur per accidens, allgemein verneinende Sazze nur simpliciter und drittens particulaer bejahende oder verneinende Säzze auch simpliciter umkehren","Ich denke mir nemlich sterbliche unter denen auch die Menschen sind, d.i. das Subiect Mensch ist unter der Sphäre der Sterblichen, als des Praedicats. Das Praedicat muß also großer seyn als das Subiect, ich kann also einige Sterbliche für Menschen annehmen","Es giebt allgemein bejahende Säzze, die sich simpliciter umkehren lassen, bei welchen die Sphäre des Subiects und Praedicats gleich ist","Dieser Unterschied aber ist euanescens","Alle verneinende Urtheile, die einen Wiederstreit enthalten laßen sich simpliciter umkehren","alle Particular bejahende oder verneinende Säzze laßen sich simpliciter umkehren, d.i. daß die Quantitaet nicht verändert wird","Die Contraposition will soviel sagen: ein jeder allgemeine Saz laßt sich contraponiren"],"note":"The paragraph then turns to mediate inference (“Wie wird nach den Judiciis mediatis geschloßen?”), which is not highlighted."},
+ {"part":"rule","kind":"Immediate vs. mediate inference","block":"busolt-s27-009","spans":["Es giebt also nur drey Principien der Vernunftschlüße denn die Consequentiae immediatae sind eigentlich keine Vernunftschlüße; sie sind nur Folgerungen und bedürfen keiner Regel"]},
+ {"part":"rule","kind":"Immediate inference in the figures","block":"busolt-s29-014","spans":["Ratiocinium impurum seu hybridum, da zu den 3 propositionen auch eine consequentia immediata muß gedacht werden. Es ist also Begattung eines ratiocinii mit einer consequentia immediata, diese findet bey den drey lezten Figuren statt","ich bringe also die zweyte Figur per conuersionem maioris in die erste"]},
+ {"part":"example","kind":"Immediate inference in the figures: conversion","block":"busolt-s29-014","spans":["Hier denke ich mir bey Erwägung des Maioris per conversionem: nichts Zusammengeseztes ist eine denkende Substanz"],"note":"The simple conversion of the major, “kein denkendes Wesen ist zusammengesezt”, which reduces the second figure to the first."},
+ {"part":"example","kind":"Immediate inference in the figures: conversion","block":"busolt-s29-015","spans":["Aus einige Tugendhafte sind Menschen, folgt, einige Menschen sind tugendhaft"],"note":"The conversion of the minor that reduces the third figure to the first."},
+ {"part":"rule","kind":"Immediate inference in the figures","block":"busolt-s29-015","spans":["In reductione igitur tertiae Figurae metathesis Terminorum efficit minorem quae quidem per consequentiam immediatam","daß da immer particulaere Säzze per conseqventiam immediatam können simpliciter conuertirt werden"]},
+ {"part":"rule","kind":"Immediate inference in the figures","block":"busolt-s29-018","spans":["S vult simpliciter verti, P vero accidens. M vult transponi, dies geschieht per Metathesin, per migrationem"],"note":"The rule behind the letters of the mnemonic words: S, P, M, C stand for the conversions used in reducing a figure."},
+ {"part":"rule","kind":"Immediate inference in the figures","block":"busolt-s29-019","spans":["C per impossibili duci, per contrapositionem"]}
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let partFilter = '';
+let workFilter = '';
+let kindFilter = '';
+let query = '';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+// Index every block of the three lectures by id, and remember document order.
+const BLOCKS = {};
+const ORDER = {};
+II_WORKS.forEach(w => {
+  let n = 0;
+  w.data.sections.forEach(s => s.blocks.forEach(b => { BLOCKS[b.id] = { b, w }; ORDER[b.id] = n++; }));
+});
+
+// Highlight ranges for one block, from verbatim spans.
+function rangesFor(b, spans) {
+  const ranges = [];
+  (spans || []).forEach(sp => {
+    const i = b.text.indexOf(sp);
+    if (i < 0) { console.warn('Span not found in', b.id, sp); return; }
+    ranges.push([i, i + sp.length]);
+  });
+  return ranges.sort((a, c) => a[0] - c[0]);
+}
+
+// Resolve the curated list against the data once: blocks, work, highlight ranges.
+const ITEMS = II_ITEMS.map((it, k) => {
+  const hit = BLOCKS[it.block];
+  if (!hit) { console.warn('Unknown block', it.block); return null; }
+  const blocks = [{ b: hit.b, ranges: rangesFor(hit.b, it.spans) }];
+  (it.more || []).forEach(m => {
+    const id = typeof m === 'string' ? m : m.block;
+    const h = BLOCKS[id];
+    if (!h) { console.warn('Unknown block', id); return; }
+    blocks.push({ b: h.b, ranges: rangesFor(h.b, m.spans) });
+  });
+  return { k, it, blocks, b: hit.b, w: hit.w };
+}).filter(Boolean);
+const WORK_ORDER = {}; II_WORKS.forEach((w, i) => WORK_ORDER[w.key] = i);
+ITEMS.sort((a, b) => WORK_ORDER[a.w.key] - WORK_ORDER[b.w.key] || ORDER[a.b.id] - ORDER[b.b.id] || a.k - b.k);
+
+// ── Rendering ─────────────────────────────────────────────────────────────────
+function pageLabel(item) {
+  const first = item.blocks[0].b, last = item.blocks[item.blocks.length - 1].b;
+  const end = last.aaEnd || last.aa;
+  return 'AA 24:' + first.aa + (end !== first.aa ? '–' + end : '');
+}
+
+// One paragraph, with the AA page markers and manuscript pages put back at the
+// offsets the extractor recorded, and the passage in <mark>.
+function renderParagraph(b, ranges, curPage) {
+  const text = b.text;
+  const cuts = new Set([0, text.length]);
+  ranges.forEach(r => { cuts.add(r[0]); cuts.add(r[1]); });
+  const pageAt = {}, msAt = {};
+  (b.pages || []).forEach(p => { if (p.i > 0 && p.i < text.length) { (pageAt[p.i] = pageAt[p.i] || []).push(p.p); cuts.add(p.i); } });
+  (b.ms || []).forEach(m => { if (m.i > 0 && m.i < text.length) { (msAt[m.i] = msAt[m.i] || []).push(m.p); cuts.add(m.i); } });
+  const pts = [...cuts].sort((a, c) => a - c);
+  const p = el('div', 'para');
+  for (let n = 0; n < pts.length - 1; n++) {
+    const s = pts[n], e = pts[n + 1];
+    (pageAt[s] || []).forEach(pg => {
+      if (pg !== curPage) { p.appendChild(el('span', 'pg', 'AA 24:' + pg)); curPage = pg; }
+    });
+    (msAt[s] || []).forEach(m => p.appendChild(el('span', 'pg ms', 'ms. ' + m)));
+    const inside = ranges.some(r => s >= r[0] && e <= r[1]);
+    p.appendChild(inside ? el('mark', null, text.slice(s, e)) : document.createTextNode(text.slice(s, e)));
+  }
+  return p;
+}
+
+function renderItem(item) {
+  const card = el('article', 'item ' + item.it.part);
+  const head = el('div', 'item-head');
+  const cite = el('div', 'cite', item.w.label);
+  cite.appendChild(el('span', 'pages', pageLabel(item)));
+  head.appendChild(cite);
+  head.appendChild(el('div', 'kind', item.it.kind));
+  card.appendChild(head);
+  item.paras = item.blocks.map(x => {
+    const para = renderParagraph(x.b, x.ranges, x.b.aa);
+    // A card holding several paragraphs says where each begins.
+    if (item.blocks.length > 1 && x.b.aa !== item.blocks[0].b.aa) {
+      para.insertBefore(el('span', 'pg', 'AA 24:' + x.b.aa), para.firstChild);
+    }
+    card.appendChild(para);
+    return para;
+  });
+  if (item.it.note) {
+    const n = el('p', 'note');
+    n.appendChild(el('b', null, 'NOTE '));
+    n.appendChild(document.createTextNode(item.it.note));
+    card.appendChild(n);
+  }
+  return card;
+}
+
+function matches(item) {
+  if (partFilter && item.it.part !== partFilter) return false;
+  if (workFilter && item.w.key !== workFilter) return false;
+  if (kindFilter && item.it.kind !== kindFilter) return false;
+  if (query && !item.blocks.some(x => x.b.text.toLowerCase().includes(query))) return false;
+  return true;
+}
+
+function render() {
+  const list = $('list');
+  list.textContent = '';
+  const shown = ITEMS.filter(matches);
+  II_PARTS.forEach(part => {
+    const rows = shown.filter(i => i.it.part === part.key);
+    if (!rows.length) return;
+    list.appendChild(el('h2', null, part.title + ' (' + rows.length + ')'));
+    list.appendChild(el('p', 'sub', part.sub));
+    rows.forEach(item => list.appendChild(renderItem(item)));
+  });
+  if (!shown.length) list.appendChild(el('p', 'empty', 'Nothing matches.'));
+  // Long paragraphs scroll inside the card; start at the first highlight.
+  shown.forEach(item => item.paras.forEach(para => {
+    const m = para.querySelector('mark');
+    if (m && para.scrollHeight > para.clientHeight) para.scrollTop = Math.max(0, m.offsetTop - para.offsetTop - 36);
+  }));
+  $('count').textContent = shown.length + ' of ' + ITEMS.length + ' passages';
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+function chipRow(box, defs, count, get, set) {
+  defs.forEach(d => {
+    const c = el('button', 'chip', d.label + ' ' + count(d.key));
+    c.type = 'button';
+    c.setAttribute('aria-pressed', d.key === get() ? 'true' : 'false');
+    c.addEventListener('click', () => {
+      set(d.key);
+      box.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === c ? 'true' : 'false'));
+      render();
+    });
+    box.appendChild(c);
+  });
+}
+
+function buildControls() {
+  chipRow($('parts'), [{ key: '', label: 'Both' }].concat(II_PARTS),
+    k => k ? ITEMS.filter(i => i.it.part === k).length : ITEMS.length,
+    () => partFilter, k => partFilter = k);
+  chipRow($('works'), [{ key: '', label: 'All lectures' }].concat(II_WORKS.map(w => ({ key: w.key, label: w.label.replace(' Logic', '') }))),
+    k => k ? ITEMS.filter(i => i.w.key === k).length : ITEMS.length,
+    () => workFilter, k => workFilter = k);
+  const kinds = [...new Set(ITEMS.map(i => i.it.kind))].sort();
+  kinds.forEach(k => { const o = el('option', null, k); o.value = k; $('kind').appendChild(o); });
+  $('kind').addEventListener('change', e => { kindFilter = e.target.value; render(); });
+  $('q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); render(); });
+}
+
+function init() { buildControls(); render(); }
+init();
+</script>
+</body>
+</html>
