@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kant, Logik Busolt — German / English facing translation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #ffffff;
+  --ink: #1a1a1a;
+  --muted: #6b6b6b;
+  --rule: #cfcfcf;
+  --accent: #5c3d1e;
+}
+* { box-sizing: border-box; }
+html { background: var(--paper); }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 18px/1.55 "EB Garamond", Garamond, "Times New Roman", serif;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+/* title page */
+.titlepage { text-align: center; padding: 2rem 0 2.5rem; border-bottom: 1px solid var(--rule); margin-bottom: 2rem; }
+.titlepage h1 { font: 600 1.7rem/1.3 "Cinzel", serif; letter-spacing: .08em; margin: 0 0 .4rem; }
+.titlepage .sub { font-style: italic; color: var(--muted); }
+.titlepage .note { max-width: 46rem; margin: 1.2rem auto 0; font-size: .92rem; color: var(--muted); text-align: left; }
+
+/* contents */
+details.toc { margin: 0 0 2.5rem; border-bottom: 1px solid var(--rule); padding-bottom: 1rem; }
+details.toc summary { cursor: pointer; font: 600 .85rem "Cinzel", serif; letter-spacing: .1em; }
+details.toc ol { columns: 2; column-gap: 3rem; margin: 1rem 0 0; padding-left: 1.6rem; font-size: .95rem; }
+details.toc li { break-inside: avoid; margin-bottom: .15rem; }
+details.toc a { color: inherit; text-decoration: none; }
+details.toc a:hover { text-decoration: underline; }
+details.toc .pp { color: var(--muted); font-size: .82rem; }
+
+/* facing pages */
+.langs, .row { display: grid; grid-template-columns: 1fr 1fr; column-gap: 0; }
+.langs { position: sticky; top: 0; background: var(--paper); z-index: 2; border-bottom: 1px solid var(--ink); }
+.langs div { font: 600 .8rem "Cinzel", serif; letter-spacing: .14em; padding: .5rem 1.4rem; color: var(--muted); }
+.langs div:first-child { border-right: 1px solid var(--rule); }
+.row > div { padding: .35rem 1.4rem; text-align: justify; hyphens: auto; }
+.row > .de { border-right: 1px solid var(--rule); }
+.row.shead > div { font: 600 1rem/1.35 "Cinzel", serif; letter-spacing: .05em; text-align: left; hyphens: none; padding-top: 2rem; padding-bottom: .4rem; }
+.row.shead .alt { display: block; margin-top: .25rem; font: italic 400 .85rem "EB Garamond", serif; letter-spacing: 0; color: var(--muted); }
+.row.shead.first > div { padding-top: .8rem; }
+.row.rule > div { padding: .2rem 1.4rem; }
+.row.rule hr { border: 0; border-top: 1px solid var(--rule); margin: .4rem 0; }
+.row.toc-entry > div { text-align: left; hyphens: none; padding-top: .1rem; padding-bottom: .1rem; }
+.row.toc-entry .lead { display: flex; gap: .5rem; align-items: baseline; }
+.row.toc-entry .lead .dots { flex: 1; border-bottom: 1px dotted var(--muted); transform: translateY(-.25em); }
+.row.toc-entry .lead .pp { color: var(--muted); font-variant-numeric: oldstyle-nums; }
+.row.front > div { text-align: center; }
+
+/* page markers: the Academy Edition's page numbers */
+.pg { font: 600 .72rem "Cinzel", serif; letter-spacing: .06em; color: var(--accent); margin: 0 .25em; white-space: nowrap; }
+.pg::before { content: "["; } .pg::after { content: "]"; }
+.ms { font-size: .68rem; color: var(--muted); vertical-align: super; line-height: 0; margin: 0 .15em; }
+.tr { color: var(--muted); }
+
+/* German side states what the extractor inferred */
+.row.inferred .de { border-left: 2px dashed var(--accent); }
+.tag { display: inline-block; font: 400 .68rem "Cinzel", serif; letter-spacing: .08em; color: var(--accent); border: 1px dashed var(--accent); padding: 0 .35em; margin-left: .4em; vertical-align: middle; }
+.missing { color: #a33; font-style: italic; }
+
+.foot { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule); font-size: .88rem; color: var(--muted); }
+
+@media (max-width: 760px) {
+  .langs { display: none; }
+  .row { grid-template-columns: 1fr; }
+  .row > .de { border-right: 0; border-bottom: 1px dotted var(--rule); }
+  details.toc ol { columns: 1; }
+}
+@media print {
+  body { font-size: 11pt; }
+  .wrap { max-width: none; padding: 0; }
+  .langs { position: static; }
+  details.toc { display: none; }
+  .row { break-inside: avoid; }
+  .row.shead { break-after: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="titlepage">
+    <h1>Logik Busolt</h1>
+    <div class="sub">Immanuel Kant, lectures on logic, as taken down by G. C. W. Busolt, Königsberg 1790<br>
+      <i>Akademie-Ausgabe</i> XXIV, 603–686 &middot; German with facing English translation</div>
+    <p class="note">The German is the repository's transcription of AA XXIV, with the Academy
+      Edition's page numbers in <span class="pg">brackets</span> where each page begins, and the
+      manuscript's own pagination as <span class="ms">small raised numerals</span> (German side only). The
+      student's spelling and slips are kept. In the English, each bracketed page number
+      stands where the corresponding German page break falls; its position is the translator's
+      alignment, not the edition's. A paragraph with a dashed rule beside it was joined by the extractor on its
+      own judgement, with no marker in the transcription. Bracketed notes marked "tr." are the translator's.</p>
+  </header>
+
+  <details class="toc" id="toc"><summary>CONTENTS</summary><ol id="toc-list"></ol></details>
+
+  <div class="langs"><div>DEUTSCH</div><div>ENGLISH</div></div>
+  <main id="text"></main>
+
+  <div class="foot">German: <code>data/logik-busolt-24.js</code>, extracted from <code>Textfiles/Vol24logikBusolt.rtf</code>.
+    English: <code>busolt-en.js</code> in this folder, keyed to the German blocks by id.</div>
+</div>
+
+<!-- The German text (shared data) and the English, keyed by block id. -->
+<script src="../../../data/logik-busolt-24.js"></script>
+<script src="busolt-en.js"></script>
+<script>
+// ── state ───────────────────────────────────────────────────────────────
+const TEXT = document.getElementById('text');
+const TOCL = document.getElementById('toc-list');
+let lastPage = null;          // the AA page the previous block ended on
+
+// ── helpers ─────────────────────────────────────────────────────────────
+function el(tag, cls, txt) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (txt != null) e.textContent = txt;
+  return e;
+}
+function pgSpan(p) { return el('span', 'pg', p); }
+
+// German: the text with page breaks (and manuscript pages) put back at their offsets.
+function renderDe(b, into) {
+  const marks = [];
+  (b.pages || []).forEach(x => { if (x.i > 0) marks.push({ i: x.i, k: 'pg', p: x.p }); });
+  (b.ms || []).forEach(x => marks.push({ i: x.i, k: 'ms', p: x.p }));
+  marks.sort((a, c) => a.i - c.i);
+  let at = 0;
+  for (const m of marks) {
+    if (m.i > at) into.appendChild(document.createTextNode(b.text.slice(at, m.i)));
+    at = Math.max(at, m.i);
+    into.appendChild(m.k === 'pg' ? pgSpan(m.p) : el('span', 'ms', m.p));
+  }
+  into.appendChild(document.createTextNode(b.text.slice(at)));
+}
+
+// English: the translator's text, with ‹N› where page N begins.
+function renderEn(t, into) {
+  const parts = t.split(/‹(\d+)›/);
+  parts.forEach((s, i) => {
+    if (i % 2) into.appendChild(pgSpan(s));
+    else if (s) into.appendChild(document.createTextNode(s));
+  });
+}
+
+function leadMark(b) {        // the page this block opens, when it opens a new one
+  return b.aa !== lastPage ? b.aa : null;
+}
+function endPage(b) { return b.aaEnd || b.aa; }
+
+function row(cls) { const r = el('div', 'row ' + (cls || '')); return r; }
+
+// ── build ───────────────────────────────────────────────────────────────
+function sectionHead(s, first) {
+  const r = row('shead' + (first ? ' first' : ''));
+  r.id = s.id;
+  const de = el('div', 'de'), en = el('div', 'en');
+  const enTitle = BUSOLT_EN['title:' + s.id];
+  de.appendChild(document.createTextNode(s.title));
+  en.appendChild(document.createTextNode(enTitle || ''));
+  s.headings.forEach((h, i) => {
+    if (h === s.title) return;
+    de.appendChild(el('span', 'alt', 'ms. heading: ' + h));
+    const e = BUSOLT_EN['heading:' + s.id + ':' + i];
+    if (e) en.appendChild(el('span', 'alt', 'ms. heading: ' + e));
+  });
+  r.append(de, en);
+  return r;
+}
+
+function textRow(b, extra) {
+  const r = row(extra);
+  const de = el('div', 'de'), en = el('div', 'en');
+  const lead = leadMark(b);
+  if (lead != null) { de.appendChild(pgSpan(lead)); en.appendChild(pgSpan(lead)); }
+  renderDe(b, de);
+  const t = BUSOLT_EN[b.id];
+  if (t == null) en.appendChild(el('span', 'missing', '[not yet translated]'));
+  else renderEn(t, en);
+  if (b.joined && b.joined.includes('inferred')) {
+    r.classList.add('inferred');
+    de.appendChild(el('span', 'tag', 'joined by inference'));
+  }
+  r.append(de, en);
+  lastPage = endPage(b);
+  return r;
+}
+
+// The Inhaltsverzeichnis: a title, then (usually) its page.
+function buildFront(s) {
+  const frag = document.createDocumentFragment();
+  let inContents = false, cur = null;
+  for (const b of s.blocks) {
+    if (/^\[Logik Busolt\] Inhaltsverzeichnis/.test(b.text)) {
+      inContents = true;
+      const r = textRow(b, 'front');
+      frag.appendChild(r);
+      continue;
+    }
+    if (!inContents) { frag.appendChild(textRow(b, 'front')); continue; }
+    lastPage = endPage(b);
+    if (/^[\d\s\-–.]+$/.test(b.text)) {            // a page number: closes the entry before it
+      if (cur) { cur.de.pp.textContent = b.text; cur.en.pp.textContent = b.text; cur = null; }
+      continue;
+    }
+    const r = row('toc-entry');
+    const mk = () => { const d = el('div'); const l = el('div', 'lead'); const t = el('span'); const dots = el('span', 'dots'); const pp = el('span', 'pp'); l.append(t, dots, pp); d.appendChild(l); return { d, t, pp }; };
+    const de = mk(), en = mk();
+    de.d.classList.add('de'); en.d.classList.add('en');
+    de.t.textContent = b.text;
+    const tr = BUSOLT_EN[b.id];
+    if (tr == null) en.t.appendChild(el('span', 'missing', '[not yet translated]')); else en.t.textContent = tr;
+    r.append(de.d, en.d);
+    frag.appendChild(r);
+    cur = { de, en };
+  }
+  return frag;
+}
+
+function build() {
+  const first = LOGIK_BUSOLT.sections[0];
+  LOGIK_BUSOLT.sections.forEach((s, si) => {
+    if (si === 0) {                                   // title page and contents
+      const h = row('shead first'); h.id = s.id;
+      h.append(el('div', 'de', 'Titelei'), el('div', 'en', 'Title page and contents'));
+      TEXT.appendChild(h);
+      TEXT.appendChild(buildFront(s));
+      return;
+    }
+    TEXT.appendChild(sectionHead(s, false));
+    const li = el('li'); const a = el('a', null, s.title); a.href = '#' + s.id;
+    li.appendChild(a);
+    const e = BUSOLT_EN['title:' + s.id];
+    if (e) li.appendChild(el('span', 'tr', ' — ' + e));
+    li.appendChild(el('span', 'pp', '  ' + s.blocks[0].aa));
+    TOCL.appendChild(li);
+    for (const b of s.blocks) {
+      if (b.kind === 'rule') {
+        const r = row('rule');
+        const d = el('div', 'de'), e2 = el('div', 'en');
+        d.appendChild(el('hr')); e2.appendChild(el('hr'));
+        r.append(d, e2); TEXT.appendChild(r);
+        continue;
+      }
+      TEXT.appendChild(textRow(b));
+    }
+  });
+}
+build();
+</script>
+</body>
+</html>
