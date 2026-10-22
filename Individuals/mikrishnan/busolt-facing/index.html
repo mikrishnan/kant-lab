@@ -212,6 +212,12 @@ function buildFront(s) {
       if (cur) { cur.de.pp.textContent = b.text; cur.en.pp.textContent = b.text; cur = null; }
       continue;
     }
+    if (/^_+$/.test(b.text)) {                      // the rule the transcription sets under the contents
+      const rr = row('rule'), d = el('div', 'de'), e2 = el('div', 'en');
+      d.appendChild(el('hr')); e2.appendChild(el('hr'));
+      rr.append(d, e2); frag.appendChild(rr); cur = null;
+      continue;
+    }
     const r = row('toc-entry');
     const mk = () => { const d = el('div'); const l = el('div', 'lead'); const t = el('span'); const dots = el('span', 'dots'); const pp = el('span', 'pp'); l.append(t, dots, pp); d.appendChild(l); return { d, t, pp }; };
     const de = mk(), en = mk();
@@ -223,6 +229,7 @@ function buildFront(s) {
     frag.appendChild(r);
     cur = { de, en };
   }
+  frag.querySelectorAll('.toc-entry .pp:empty').forEach(pp => pp.previousSibling.remove());  // no page: no leader dots
   return frag;
 }
 
