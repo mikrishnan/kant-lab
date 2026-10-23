@@ -106,6 +106,10 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
 .sent { cursor: pointer; border-radius: 2px; }
 .sent:hover { background: var(--parch-dark); }
 .sent.on { background: var(--hit); box-shadow: 0 0 0 2px var(--hit); }
+.sent:hover .ph { border-bottom: 1px dotted var(--accent-lt); }
+.ph.hot { background: var(--parch-deep); border-bottom: 1px solid var(--accent) !important; border-radius: 2px; }
+#pop .g { font-size: 1.05rem; }
+#pop .g + .s { margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(244,237,224,.3); font-size: .82rem; opacity: .78; }
 #pop {
   position: fixed; z-index: 20; max-width: 34em; padding: 8px 12px;
   background: #2e1a00; color: var(--parchment); border-radius: 5px; box-shadow: 0 3px 12px rgba(0,0,0,.35);
@@ -164,6 +168,7 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
 <script src="../../data/logik-blomberg-24.js"></script>
 <script src="meier-auszug.js"></script>
 <script src="translations/meier-aligned.js"></script>
+<script src="translations/meier-phrases.js"></script>
 <script>
 /* ── data ──
    LOGIK_BUSOLT and LOGIK_BLOMBERG come from ../../data/; MEIER_AUSZUG from meier-auszug.js.
@@ -313,10 +318,22 @@ function renderSentences(tx, b) {
     if (g.o[0] > at) tx.appendChild(document.createTextNode(b.text.slice(at, g.o[0])));
     const sp = el('span', 'sent');
     sp.dataset.n = b.n; sp.dataset.k = k;
-    addText(sp, b.text.slice(g.o[0], g.o[1]));
+    // the sentence cut into its divisions (MEIER_PHRASES), each hoverable for its own English
+    let pa = g.o[0];
+    MEIER_PHRASES[b.n][k].forEach((ph, pi) => {
+      if (ph[0] > pa) sp.appendChild(document.createTextNode(b.text.slice(pa, ph[0])));
+      const span = el('span', 'ph');
+      span.dataset.p = pi;
+      addText(span, b.text.slice(ph[0], ph[1]));
+      span.onmouseenter = () => { hovPh = span; refreshPop(); };
+      span.onmouseleave = () => { hovPh = null; refreshPop(); };
+      sp.appendChild(span);
+      pa = ph[1];
+    });
+    if (pa < g.o[1]) sp.appendChild(document.createTextNode(b.text.slice(pa, g.o[1])));
     sp.onclick = e => { e.stopPropagation(); if (!String(getSelection())) selectSentence(b.n, k); };
     sp.onmouseenter = () => { hov = sp; refreshPop(); };
-    sp.onmouseleave = () => { hov = null; refreshPop(); };
+    sp.onmouseleave = () => { hov = null; hovPh = null; refreshPop(); };
     tx.appendChild(sp);
     at = g.o[1];
   });
@@ -435,21 +452,26 @@ function goTo(n) {
 }
 
 /* ── sentence units (Meier) ──
-   Hovering a sentence floats its English over it; clicking pins the sentence (and the window)
-   until Esc or a click elsewhere. */
+   Hovering a division (phrase) of a sentence floats that division's English over it, with the whole
+   sentence's English beneath; hovering elsewhere in the sentence shows the sentence alone. Clicking pins
+   the sentence (and the window) until Esc or a click elsewhere. */
 let sel = null;          // { n, k } — the pinned sentence, or null
 let hov = null;          // the sentence span under the pointer
+let hovPh = null;        // the division under the pointer, if any
 
 function englishOf(sp) { return MEIER_ALIGNED[sp.dataset.n][sp.dataset.k].en; }
-function showPop(sp) {
+function glossOf(sp, ph) { return MEIER_PHRASES[sp.dataset.n][sp.dataset.k][ph.dataset.p][2]; }
+function showPop(sp, ph) {
   const pop = document.getElementById('pop');
   const box = document.getElementById('left').getBoundingClientRect();   // never leave the text side
-  pop.textContent = englishOf(sp);
+  pop.textContent = '';
+  if (ph) pop.appendChild(el('div', 'g', glossOf(sp, ph)));
+  pop.appendChild(el('div', ph ? 's' : 'g', englishOf(sp)));
   pop.style.maxWidth = Math.min(34 * 16, box.width - 8) + 'px';
   pop.hidden = false;
-  const rects = sp.getClientRects(), r0 = rects[0], gap = 6;
-  const pw = pop.offsetWidth, ph = pop.offsetHeight;
-  let top = r0.top - ph - gap;
+  const rects = (ph || sp).getClientRects(), r0 = rects[0], gap = 6;
+  const pw = pop.offsetWidth, phh = pop.offsetHeight;
+  let top = r0.top - phh - gap;
   if (top < box.top + 4) top = rects[rects.length - 1].bottom + gap;  // no room above: below the last line
   let left = Math.min(Math.max(box.left + 4, r0.left), box.right - pw - 4);
   pop.style.top = top + 'px';
@@ -458,15 +480,17 @@ function showPop(sp) {
 function pinnedSpan() {
   return sel && document.querySelector('.sent[data-n="' + sel.n + '"][data-k="' + sel.k + '"]');
 }
-function refreshPop() {                  // show the hovered sentence's English, else the pinned one's, else nothing
+function refreshPop() {                  // the hovered division's English, else the hovered/pinned sentence's, else nothing
+  document.querySelectorAll('.ph.hot').forEach(x => x.classList.remove('hot'));
   const sp = hov || pinnedSpan();
-  if (sp && W().key === 'meier') showPop(sp); else document.getElementById('pop').hidden = true;
+  if (hov && hovPh) hovPh.classList.add('hot');
+  if (sp && W().key === 'meier') showPop(sp, hov ? hovPh : null); else document.getElementById('pop').hidden = true;
 }
 function markSelected() {
   document.querySelectorAll('.sent.on').forEach(x => x.classList.remove('on'));
   const sp = pinnedSpan();
   if (sp && W().key === 'meier') sp.classList.add('on');
-  hov = null;
+  hov = null; hovPh = null;
   refreshPop();
 }
 function selectSentence(n, k) {
@@ -565,7 +589,7 @@ document.getElementById('allw').onchange = runSearch;
 document.getElementById('clr').onclick = () => { document.getElementById('q').value = ''; runSearch(); document.getElementById('q').focus(); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && sel) { sel = null; markSelected(); } });
 document.addEventListener('click', () => { if (sel) { sel = null; markSelected(); } });
-document.getElementById('reader').addEventListener('scroll', () => { hov = null; refreshPop(); });
+document.getElementById('reader').addEventListener('scroll', () => { hov = null; hovPh = null; refreshPop(); });
 window.addEventListener('resize', refreshPop);
 document.getElementById('goaa').addEventListener('change', e => {
   const n = +e.target.value, w = W();
