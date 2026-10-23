@@ -202,10 +202,18 @@ over.
 
 ## 5. The search tool
 
-[principle-search-1016.html](principle-search-1016.html) searches the principles
-listed in [principles-lexicon.js](principles-lexicon.js), and shows the English from
+[principle-search.html](principle-search.html) searches the principles listed in
+[principles-lexicon.js](principles-lexicon.js), and shows the English from
 [principles-translations.js](principles-translations.js). It is a working tool, a
 means to the research, not the product of it.
+
+- **One name, revised in place.** The tool keeps its name through every revision:
+  no dates or version numbers go into file names, because git's history already
+  records each revision, and a rename breaks shared links. A revision is described
+  by its pull request's title. A version that has to be found again, such as the one
+  a paper draft used, is recorded in `notes/` by its commit.
+- `principle-search-1016.html` is the tool's old name. It is now a redirect to the
+  new one, kept so that shared links keep working. Leave it in place.
 
 - A form goes into the lexicon only once it has been found in the texts, with one
   passage named where it occurs. Declined and inflected forms count as forms

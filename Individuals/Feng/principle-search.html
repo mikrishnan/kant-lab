@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logical Principles · Search and Compare across the Texts · Kant Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5efe3;
+    --parchment-2: #ebe2cf;
+    --panel: #faf6ee;
+    --ink: #2a2118;
+    --ink-2: #5a4c3c;
+    --muted: #8a7a66;
+    --rule: #d6c9b1;
+    --accent: #5c3d1e;
+    --accent-2: #8b5a2b;
+    --accent-soft: #e9dcc6;
+    --hit: #f1d58a;
+    --hit-para: #e6cfe0;
+    --body: "EB Garamond", Garamond, "Times New Roman", serif;
+    --display: "Cinzel", "Trajan Pro", serif;
+    --head-h: 0px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--parchment); color: var(--ink);
+    font-family: var(--body); font-size: 17px; line-height: 1.5;
+  }
+  button { font-family: var(--body); font-size: 15px; cursor: pointer; }
+  button:disabled { cursor: default; opacity: .45; }
+
+  /* ── Header: title, search, forms, views ── */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--panel); border-bottom: 1px solid var(--rule);
+    padding: 10px 18px 8px;
+  }
+  .title-row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  h1 { font-family: var(--display); font-weight: 600; font-size: 19px; letter-spacing: .06em; margin: 0; color: var(--accent); }
+  .subtitle { color: var(--muted); font-style: italic; font-size: 15px; }
+  #status { margin-left: auto; color: var(--muted); font-size: 14px; }
+
+  .search-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+  .search-box { position: relative; flex: 1 1 380px; max-width: 620px; }
+  #q {
+    width: 100%; font-family: var(--body); font-size: 17px;
+    padding: 6px 10px; border: 1px solid var(--rule); border-radius: 4px; background: #fff;
+  }
+  #q:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent-2); }
+  #suggest {
+    position: absolute; left: 0; right: 0; top: 100%; margin-top: 2px; z-index: 30;
+    background: #fff; border: 1px solid var(--rule); border-radius: 4px;
+    box-shadow: 0 4px 14px rgba(42,33,24,.15); max-height: 60vh; overflow: auto; display: none;
+  }
+  #suggest.open { display: block; }
+  .sg { padding: 5px 10px; cursor: pointer; display: flex; gap: 8px; align-items: baseline; }
+  .sg:hover, .sg.on { background: var(--accent-soft); }
+  .sg .t { font-weight: 600; }
+  .sg .p { color: var(--muted); font-size: 14px; margin-left: auto; text-align: right; }
+  .sg.free .t { font-weight: 400; font-style: italic; }
+
+  .lang {
+    font-family: var(--display); font-size: 10px; letter-spacing: .08em;
+    border: 1px solid var(--rule); border-radius: 3px; padding: 0 4px; color: var(--ink-2); background: var(--panel);
+    white-space: nowrap;
+  }
+  .lang.de { border-color: #b9a27c; }
+  .lang.la { border-color: #9c8a6c; background: #f1ead9; }
+  .lang.en { border-color: #c9bda6; color: var(--muted); }
+
+  .seg { display: inline-flex; border: 1px solid var(--accent-2); border-radius: 4px; overflow: hidden; }
+  .seg button { border: 0; background: #fff; color: var(--accent); padding: 4px 11px; }
+  .seg button + button { border-left: 1px solid var(--accent-2); }
+  .seg button.on { background: var(--accent); color: #fff; }
+  .scope-note { color: var(--muted); font-size: 14px; font-style: italic; }
+
+  #forms-row { margin-top: 7px; display: none; }
+  #forms-row.open { display: block; }
+  .forms-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .forms-head .pname { font-family: var(--display); font-size: 14px; letter-spacing: .05em; color: var(--accent); }
+  .linkish { background: none; border: 0; color: var(--accent-2); text-decoration: underline; padding: 0; font-size: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+  .chip {
+    border: 1px solid var(--rule); border-radius: 12px; background: #fff; color: var(--ink-2);
+    padding: 1px 9px 1px 6px; font-size: 14.5px; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .chip.on { background: var(--accent-soft); border-color: var(--accent-2); color: var(--ink); }
+  .chip .k { font-size: 11px; color: var(--muted); font-style: italic; }
+  .chip .n { font-size: 12px; color: var(--muted); }
+  .chip.none { opacity: .55; }
+
+  .views-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+  #summary { color: var(--ink-2); font-size: 15px; }
+
+  /* ── Layout ── */
+  .layout { display: flex; align-items: flex-start; }
+  #browse {
+    flex: 0 0 270px; position: sticky; top: var(--head-h);
+    height: calc(100vh - var(--head-h)); overflow: auto;
+    border-right: 1px solid var(--rule); background: var(--parchment-2); padding: 10px 12px 30px;
+  }
+  #browse h2 { font-family: var(--display); font-size: 12.5px; letter-spacing: .08em; color: var(--accent); margin: 14px 0 4px; font-weight: 600; }
+  #browse h2:first-child { margin-top: 0; }
+  .pl { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 3px 6px; border-radius: 3px; line-height: 1.3; color: var(--ink); }
+  .pl:hover { background: var(--accent-soft); }
+  .pl.on { background: var(--accent); color: #fff; }
+  .pl .c { color: var(--muted); font-size: 13px; }
+  .pl.on .c { color: #f1e6d3; }
+  .browse-note { font-size: 13.5px; color: var(--muted); margin-top: 18px; line-height: 1.4; }
+  #main { flex: 1 1 auto; min-width: 0; padding: 14px 18px 40px; }
+
+  .empty { color: var(--muted); font-style: italic; padding: 30px 10px; max-width: 46em; }
+  .empty p { margin: 0 0 10px; }
+
+  /* ── Passage cards ── */
+  .card {
+    background: #fff; border: 1px solid var(--rule); border-radius: 5px;
+    padding: 9px 13px 10px; margin-bottom: 10px;
+  }
+  .card-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .card-head .lbl { font-weight: 600; color: var(--accent); }
+  .card-head .cite { color: var(--ink-2); font-size: 15px; }
+  .card-head .meta { color: var(--muted); font-size: 14px; }
+  .card-head .tools { margin-left: auto; display: flex; gap: 6px; }
+  .tag {
+    font-size: 12px; border-radius: 3px; padding: 0 5px; background: var(--parchment-2); color: var(--ink-2);
+    border: 1px solid var(--rule); white-space: nowrap;
+  }
+  .tag.inferred { border-style: dashed; border-color: var(--accent-2); background: #fff; }
+  .card.inferred { border-style: dashed; }
+  .matched { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .matched .tag { background: #fbf3dc; border-color: #e3cf96; }
+  .matched .tag.paraphrase { border-style: dashed; }
+  .ptext { margin-top: 6px; text-align: justify; hyphens: auto; overflow-wrap: anywhere; }
+  .ptext mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2px; }
+  .ptext .bar { color: #c2b293; }
+  .ptext .gloss { font-style: italic; color: var(--accent-2); font-size: .9em; }
+  .ptext .gloss::before { content: "["; } .ptext .gloss::after { content: "]"; }
+  .ptext .ell { color: var(--muted); }
+  .trans {
+    margin-top: 8px; padding: 7px 10px 8px; border-left: 3px solid var(--accent-soft);
+    background: var(--panel); border-radius: 0 4px 4px 0;
+  }
+  .trans-head { font-size: 12.5px; color: var(--muted); font-style: italic; margin-bottom: 3px; }
+  .trans-head b { font-style: normal; font-family: var(--display); font-size: 11px; letter-spacing: .07em; color: var(--accent-2); font-weight: 600; }
+  .trans-text { text-align: left; }
+  .trans.none { color: var(--muted); font-style: italic; font-size: 15px; }
+  .trans.none a { color: var(--accent-2); }
+  .toggle { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-2); font-size: 15px; cursor: pointer; }
+  .toggle input { accent-color: var(--accent); }
+  .sec { color: var(--muted); font-size: 14px; font-style: italic; margin-top: 2px; }
+  .btn-sm { border: 1px solid var(--rule); background: var(--panel); color: var(--accent); border-radius: 3px; padding: 0 7px; font-size: 13.5px; }
+  .btn-sm.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── View A: reading list ── */
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; align-items: center; }
+  .filters .lab { color: var(--muted); font-size: 14px; margin-right: 4px; }
+  .work-head {
+    font-family: var(--display); font-size: 15px; letter-spacing: .06em; color: var(--accent);
+    border-bottom: 1px solid var(--rule); margin: 22px 0 10px; padding-bottom: 3px;
+    display: flex; gap: 10px; align-items: baseline;
+  }
+  .work-head:first-of-type { margin-top: 4px; }
+  .work-head .wd { font-family: var(--body); font-size: 14px; color: var(--muted); letter-spacing: 0; }
+  .list-wrap { max-width: 900px; }
+
+  /* ── Views B and C: columns ── */
+  .cols-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+  .cols-bar .lab { color: var(--muted); font-size: 14px; margin-right: 4px; }
+  .one-layout { display: flex; gap: 12px; align-items: stretch; }
+  .one-list {
+    flex: 0 0 250px; overflow: auto; border: 1px solid var(--rule); border-radius: 5px; background: var(--panel);
+    height: calc(100vh - var(--head-h) - 110px);
+  }
+  .oi { padding: 6px 9px; border-bottom: 1px solid var(--rule); cursor: pointer; font-size: 15px; line-height: 1.35; }
+  .oi:hover { background: var(--accent-soft); }
+  .oi.on { background: var(--accent-soft); box-shadow: inset 4px 0 0 var(--accent); }
+  .oi .lbl { font-weight: 600; color: var(--accent); }
+  .oi .cite { color: var(--muted); font-size: 13px; }
+  .oi .sn { color: var(--ink-2); font-size: 14px; }
+  .oi .sn mark { background: var(--hit); color: inherit; }
+  .cols { flex: 1 1 auto; display: grid; gap: 12px; min-width: 0; }
+  .col {
+    display: flex; flex-direction: column; min-width: 0;
+    height: calc(100vh - var(--head-h) - 110px);
+    border: 1px solid var(--rule); border-radius: 5px; background: var(--panel);
+  }
+  .col-head {
+    padding: 7px 10px; border-bottom: 1px solid var(--rule); background: var(--parchment-2);
+    font-family: var(--display); font-size: 13.5px; letter-spacing: .05em; color: var(--accent);
+    display: flex; gap: 8px; align-items: baseline;
+  }
+  .col-head .wd { font-family: var(--body); font-size: 13.5px; color: var(--muted); letter-spacing: 0; }
+  .col-head .x { margin-left: auto; }
+  .col-body { overflow: auto; padding: 9px; flex: 1 1 auto; }
+  .col-body .card { margin-bottom: 9px; }
+  .col .ptext { text-align: left; hyphens: manual; }
+  .col.slot { align-items: center; justify-content: center; color: var(--muted); font-style: italic; text-align: center; padding: 20px; }
+  .notice { color: var(--accent-2); font-size: 14px; font-style: italic; margin-left: 8px; }
+
+  #toast {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 40;
+    background: var(--accent); color: #fff; padding: 7px 16px; border-radius: 5px; font-size: 15px;
+    box-shadow: 0 4px 14px rgba(42,33,24,.25); opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  #toast.open { opacity: 1; }
+
+  @media (max-width: 1100px) {
+    #browse { display: none; }
+  }
+  @media (max-width: 760px) {
+    .one-layout { flex-direction: column; }
+    .one-list { flex: none; height: 30vh; }
+    .col { height: 70vh; }
+  }
+</style>
+</head>
+<body>
+
+<header id="head">
+  <div class="title-row">
+    <h1>Logical Principles</h1>
+    <span class="subtitle">search and compare them across Baumgarten, Meier, the Reflexionen and the Logik transcripts</span>
+    <span id="status">Loading the texts…</span>
+  </div>
+
+  <div class="search-row">
+    <div class="search-box">
+      <input id="q" type="search" autocomplete="off" spellcheck="false"
+             placeholder="Search in English, German or Latin: excluded middle, Satz des Wiederspruchs, principium rationis…">
+      <div id="suggest" role="listbox"></div>
+    </div>
+    <div class="seg" id="scope" title="Exact: only the form you chose. All forms: every German and Latin form of the principle.">
+      <button data-scope="exact">Exact form</button>
+      <button data-scope="all" class="on">All forms</button>
+    </div>
+    <span class="scope-note" id="scope-note"></span>
+  </div>
+
+  <div id="forms-row">
+    <div class="forms-head">
+      <span class="pname" id="pname"></span>
+      <button class="linkish" id="forms-all">all forms</button>
+      <button class="linkish" id="forms-de">German only</button>
+      <button class="linkish" id="forms-la">Latin only</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="views-row">
+    <div class="seg" id="views">
+      <button data-view="list" class="on">Reading list</button>
+      <button data-view="one">Passages in one text</button>
+      <button data-view="texts">Texts side by side</button>
+    </div>
+    <label class="toggle" title="Show the English beneath every passage. Each passage also has its own EN button.">
+      <input type="checkbox" id="en-all"> English beneath every passage
+    </label>
+    <span id="summary"></span>
+  </div>
+</header>
+
+<div id="toast" role="status"></div>
+
+<div class="layout">
+  <nav id="browse"></nav>
+  <main id="main"></main>
+</div>
+
+<!-- Shared data, before the tool's own script, as plain script includes, so the
+     page still opens from a file:// URL. data/README.md lists their globals. -->
+<script src="../../data/metaphysica-17.js"></script>
+<script src="../../data/reflexionen-16-meier.js"></script>
+<script src="../../data/reflexionen-17-18-baumgarten.js"></script>
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<!-- The principles and their forms, hand-curated, beside this page. -->
+<script src="principles-lexicon.js"></script>
+<!-- English translations of the passages the principles find: machine-made, unreviewed. -->
+<script src="principles-translations.js"></script>
+
+<script>
+'use strict';
+
+/* ═════════════ Data ═════════════ */
+
+// The texts, in the order the page lists them: the two handbooks, Kant's notes in
+// his copies of them, then the lecture transcripts by date.
+const PS_WORKS = {
+  met:      { label: 'Baumgarten, Metaphysica', date: 'ed. IV 1757',  vol: 'AA XVII',      short: 'Metaphysica' },
+  meier:    { label: 'Meier, Auszug',           date: '1752',         vol: 'AA XVI',       short: 'Auszug' },
+  reflm:    { label: 'Reflexionen on Baumgarten', date: 'Kant’s notes', vol: 'AA XVII–XVIII', short: 'Refl. (Baumgarten)' },
+  refl:     { label: 'Reflexionen on Meier',    date: 'Kant’s notes', vol: 'AA XVI',       short: 'Refl. (Meier)' },
+  blomberg: { label: 'Logik Blomberg',          date: 'ca. 1771',     vol: 'AA XXIV',      short: 'Blomberg' },
+  wiener:   { label: 'Wiener Logik',            date: '1780ff.',      vol: 'AA XXIV',      short: 'Wiener Logik' },
+  busolt:   { label: 'Logik Busolt',            date: 'ca. 1789/90',  vol: 'AA XXIV',      short: 'Busolt' },
+};
+const PS_ORDER = ['met', 'meier', 'reflm', 'refl', 'blomberg', 'wiener', 'busolt'];
+
+// Meier's text lives in the Meier reader, not in data/, and is read from there.
+const MEIER_SRC = '../../meier-reader/meier-reading-guide.html';
+
+const MAX_COLS = 4;          // the most passages, or texts, shown side by side
+const SNIP = 320;            // characters of context either side of the first match
+const KIND_LABEL = { name: 'name', formula: 'formula', paraphrase: 'paraphrase' };
+const LANG_LABEL = { de: 'DE', la: 'LA', en: 'EN' };
+
+// How each Reflexion got its §, as the data files record it. Only 'locus' is the
+// AA's own statement about this entry; the others are flagged.
+const SRC_NOTE = {
+  group: '§ from the AA’s block heading',
+  block: '§ from the AA’s block heading',
+  page:  '§§ from the handbook page',
+  none:  'no § stated',
+};
+
+/* ═════════════ State ═════════════ */
+
+let UNITS = [];              // every passage of every text: { id, work, raw, norm, ... }
+let BY_WORK = {};            // work → [unit index], in page order
+let meierError = null;
+
+let principle = null;        // the PRINCIPLE_LEXICON entry being searched, or null
+let chosenForm = null;       // index into principle.forms the user picked, or null
+let active = new Set();      // indices of principle.forms switched on
+let freeText = null;         // a literal search outside the lexicon, or null
+let scope = 'all';           // 'exact' | 'all'
+let view = 'list';           // 'list' | 'one' | 'texts'
+
+let HITS = [];               // [{ u: unit index, spans: [{s, e, f}] }] in text order
+let HITS_BY_WORK = {};       // work → [hit]
+let listFilter = new Set(PS_ORDER);
+let oneWork = null;          // the text shown in "Passages in one text"
+let pins = {};               // work → [unit index], at most MAX_COLS each
+let textsSel = [];           // the texts shown side by side
+let textsManual = false;     // whether the user chose them, or the page did
+let expanded = new Set();    // unit indices whose whole text is shown in a card
+let notice = '';
+let enAll = false;           // English beneath every passage
+let enFlip = new Set();      // unit indices whose English the user switched against enAll
+
+/* ═════════════ Corpus ═════════════ */
+
+function addUnit(u) { u.id = UNITS.length; UNITS.push(u); (BY_WORK[u.work] = BY_WORK[u.work] || []).push(u.id); return u.id; }
+
+function paraRange(ps) {
+  if (!ps || !ps.length) return '';
+  const out = []; let a = ps[0], b = ps[0];
+  for (let i = 1; i <= ps.length; i++) {
+    if (ps[i] === b + 1) { b = ps[i]; continue; }
+    out.push(a === b ? String(a) : `${a}–${b}`);
+    a = b = ps[i];
+  }
+  return (ps.length > 1 ? '§§ ' : '§ ') + out.join(', ');
+}
+
+function pageCite(vol, a, z) { return a ? `AA ${vol}:${a}${z && z !== a ? '–' + z : ''}` : `AA ${vol}`; }
+
+// Baumgarten's German glosses stand at the @@N@@ markers. They are part of the
+// page, so they are put back in place, between private-use delimiters the
+// renderer turns into a bracketed gloss.
+function buildMet() {
+  MET_PARAGRAPHS.forEach(p => {
+    const raw = p.text.replace(/@@(\d+)@@/g, (m, n) => {
+      const g = (p.glosses || [])[n - 1];
+      return g ? '' + g + '' : '';
+    });
+    addUnit({ work: 'met', key: 'met:' + p.num, raw, label: 'Met. § ' + p.num, cite: p.aa ? pageCite(17, p.aa, p.aaEnd) : '', order: p.num });
+  });
+}
+
+function buildMeier(M, CIT) {
+  M.nav.forEach(nv => {
+    const sec = nv.sec_title_de || nv.part_title_de || '';
+    (nv.paras || []).forEach(n => {
+      const raw = M.paras[String(n)];
+      if (raw == null) return;
+      addUnit({ work: 'meier', key: 'meier:' + n, raw, label: 'Meier § ' + n, cite: (CIT && CIT[n]) || '', sec });
+    });
+  });
+}
+
+function reflTags(e) {
+  const tags = [];
+  if (e.src && e.src !== 'locus' && SRC_NOTE[e.src]) tags.push({ t: SRC_NOTE[e.src], inferred: e.src === 'none' });
+  if (e.interp) tags.push({ t: 'interpolated §', inferred: true });
+  if (e.front) tags.push({ t: 'on the front matter' });
+  if (e.blatt) tags.push({ t: 'loose sheet' });
+  return tags;
+}
+
+function buildRefl() {
+  REFL_ENTRIES.forEach(e => {
+    if (e.vacat || !e.text) return;
+    addUnit({
+      work: 'refl', key: 'refl:' + e.r, raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(16, e.aa || e.aaEnd, e.aaEnd),
+      on: e.paras && e.paras.length ? 'on Meier ' + paraRange(e.paras) : '',
+      phase: e.phRaw || '', tags: reflTags(e), inferred: !!e.interp,
+    });
+  });
+}
+
+function buildReflM() {
+  REFLM_ENTRIES.forEach(e => {
+    if (!e.text) return;
+    const tags = reflTags(e);
+    if (e.part === 'erl') tags.unshift({ t: 'Erläuterung' });
+    addUnit({
+      work: 'reflm', key: 'reflm:' + e.r, raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(e.vol, e.aa || e.aaEnd, e.aaEnd),
+      on: e.paras && e.paras.length ? 'on Met. ' + paraRange(e.paras) : '',
+      phase: e.phRaw || '', tags, inferred: !!e.interp,
+    });
+  });
+}
+
+function buildLogik(work, L) {
+  L.sections.forEach(s => {
+    s.blocks.forEach(b => {
+      if (b.kind === 'rule' || !b.text) return;
+      const tags = [];
+      if (b.kind === 'note') tags.push({ t: 'AA cross-reference' });
+      if (b.joined && b.joined.includes('inferred')) tags.push({ t: 'paragraph joined by inference', inferred: true });
+      addUnit({
+        work, key: work + ':' + b.id, raw: b.text, label: b.aa ? 'AA 24:' + b.aa : (s.title || 'Titelei'),
+        cite: b.aa ? pageCite(24, b.aa, b.aaEnd) : '',
+        on: b.para ? 'on Meier ' + b.para.raw : '',
+        sec: s.title || '', tags,
+      });
+    });
+  });
+}
+
+function buildCorpus(meier) {
+  UNITS = []; BY_WORK = {};
+  buildMet();
+  if (meier) buildMeier(meier.M, meier.CIT);
+  buildReflM();
+  buildRefl();
+  buildLogik('blomberg', LOGIK_BLOMBERG);
+  buildLogik('wiener', LOGIK_WIENER);
+  buildLogik('busolt', LOGIK_BUSOLT);
+  UNITS.forEach(u => { u.norm = normalize(u.raw).norm; });
+}
+
+// Meier's MEIER and CITATIONS are single-line JSON literals in the Meier reader.
+// Browsers refuse this fetch from a file:// page, so it can fail; the page then
+// searches the other six texts and says why the Auszug is missing.
+async function loadMeier() {
+  try {
+    const r = await fetch(MEIER_SRC);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const html = await r.text();
+    const grab = name => {
+      const at = html.indexOf('\nconst ' + name + ' = ');
+      if (at < 0) return null;
+      const start = at + ('\nconst ' + name + ' = ').length;
+      return JSON.parse(html.slice(start, html.indexOf('\n', start)).trim().replace(/;$/, ''));
+    };
+    const M = grab('MEIER');
+    if (!M || !M.paras) throw new Error('MEIER not found in the Meier reader');
+    return { M, CIT: grab('CITATIONS') || {} };
+  } catch (err) {
+    meierError = String(err && err.message || err);
+    return null;
+  }
+}
+
+/* ═════════════ Text: normalising for search ═════════════ */
+
+// The transcriptions break lines with `|` and newlines. For searching, a `|`
+// tight against a letter rejoins the word it split (Wieder|spruchs), a free-
+// standing one is a space, and all whitespace collapses to one space. `map`
+// gives, for each character of `norm`, where it stood in `raw`, so that matches
+// are highlighted in the text as printed.
+function normalize(raw, wantMap) {
+  let norm = '', map = wantMap ? [] : null, space = true;
+  for (let i = 0; i < raw.length; i++) {
+    const c = raw[i];
+    if (c === '|') {
+      const prev = raw[i - 1];
+      if (prev && !/\s/.test(prev)) {            // rejoin: drop the bar and the break after it
+        while (i + 1 < raw.length && /\s/.test(raw[i + 1])) i++;
+        continue;
+      }
+      if (!space) { norm += ' '; if (map) map.push(i); space = true; }
+      continue;
+    }
+    if (/\s/.test(c) || c === '' || c === '') {
+      if (!space) { norm += ' '; if (map) map.push(i); space = true; }
+      continue;
+    }
+    norm += c.toLowerCase(); if (map) map.push(i); space = false;
+  }
+  return { norm, map };
+}
+
+/* ═════════════ Search ═════════════ */
+
+function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+// One form → a whole-word, case-insensitive pattern, tolerant of line breaks.
+function formPattern(t, not) {
+  let p = escRe(t.toLowerCase().trim()).replace(/\s+/g, '\\s+');
+  p = '(?<![\\p{L}\\p{N}])' + p + '(?![\\p{L}\\p{N}])';
+  if (not) p += '(?!\\s+(?:' + not.split('|').map(escRe).join('|') + '))';
+  return p;
+}
+
+// A free-text query: literal, whole words, `*` at a word's end for any ending.
+function freePattern(q) {
+  const words = q.toLowerCase().trim().split(/\s+/).map(w => {
+    const star = w.endsWith('*');
+    return escRe(w.replace(/\*+$/, '')) + (star ? '[\\p{L}\\p{N}]*' : '');
+  });
+  return '(?<![\\p{L}\\p{N}])' + words.join('\\s+') + '(?![\\p{L}\\p{N}])';
+}
+
+// Runs one pattern per form, all at once, over every unit. Returns hits in text
+// order; each span says which form (f) matched. Overlapping spans are merged,
+// the longer form winning, so "principium rationis sufficientis" is one match.
+function runSearch(pats) {
+  if (!pats.length) return [];
+  const re = new RegExp(pats.map(p => '(' + p + ')').join('|'), 'gu');
+  const hits = [];
+  for (const work of PS_ORDER) {
+    for (const ui of (BY_WORK[work] || [])) {
+      const u = UNITS[ui];
+      re.lastIndex = 0;
+      let m, spans = [];
+      while ((m = re.exec(u.norm))) {
+        let f = 0; while (f < pats.length && m[f + 1] === undefined) f++;
+        const s = m.index, e = s + m[0].length;
+        const last = spans[spans.length - 1];
+        if (last && s < last.e) { if (e - s > last.e - last.s) spans[spans.length - 1] = { s, e, f }; }
+        else spans.push({ s, e, f });
+        if (m[0].length === 0) re.lastIndex++;
+      }
+      if (spans.length) hits.push({ u: ui, spans });
+    }
+  }
+  return hits;
+}
+
+function currentPatterns() {
+  if (freeText) return { pats: [freePattern(freeText)], forms: [{ t: freeText, lang: '', kind: 'free' }] };
+  if (!principle) return { pats: [], forms: [] };
+  const idx = [...active];
+  // Longer forms first, so that an alternation prefers them.
+  idx.sort((a, b) => principle.forms[b].t.length - principle.forms[a].t.length);
+  return { pats: idx.map(i => formPattern(principle.forms[i].t, principle.forms[i].not)), forms: idx.map(i => principle.forms[i]) };
+}
+
+let CUR_FORMS = [];
+
+function search() {
+  const { pats, forms } = currentPatterns();
+  CUR_FORMS = forms;
+  HITS = runSearch(pats);
+  HITS_BY_WORK = {};
+  HITS.forEach(h => (HITS_BY_WORK[UNITS[h.u].work] = HITS_BY_WORK[UNITS[h.u].work] || []).push(h));
+  // Keep the column views pointing at texts that have results.
+  const withHits = PS_ORDER.filter(w => HITS_BY_WORK[w]);
+  if (!oneWork || !HITS_BY_WORK[oneWork]) oneWork = withHits[0] || null;
+  if (textsManual) textsSel = textsSel.filter(w => HITS_BY_WORK[w]);
+  if (!textsManual || !textsSel.length) { textsSel = withHits.slice(0, MAX_COLS); textsManual = false; }
+  Object.keys(pins).forEach(w => {
+    const ok = new Set((HITS_BY_WORK[w] || []).map(h => h.u));
+    pins[w] = pins[w].filter(u => ok.has(u));
+  });
+}
+
+// Per-form passage counts for the chips, and per-principle counts for the
+// sidebar: how many passages each would find.
+let FORM_COUNTS = {};
+let PRINCIPLE_COUNTS = {};
+function countAll() {
+  PRINCIPLE_LEXICON.forEach(p => {
+    // Longest first, as in currentPatterns(), so that counts agree with searches.
+    const idx = p.forms.map((f, i) => i).sort((a, b) => p.forms[b].t.length - p.forms[a].t.length);
+    const hits = runSearch(idx.map(i => formPattern(p.forms[i].t, p.forms[i].not)));
+    PRINCIPLE_COUNTS[p.id] = hits.length;
+    const fc = p.forms.map(() => new Set());
+    hits.forEach(h => h.spans.forEach(s => fc[idx[s.f]].add(h.u)));
+    FORM_COUNTS[p.id] = fc.map(s => s.size);
+  });
+}
+
+/* ═════════════ Suggestions ═════════════ */
+
+function fold(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss').replace(/[()]/g, '').replace(/\s+/g, ' ').trim();
+}
+
+let SUGGEST_INDEX = [];
+function buildSuggestIndex() {
+  SUGGEST_INDEX = [];
+  PRINCIPLE_LEXICON.forEach(p => {
+    SUGGEST_INDEX.push({ p, f: null, t: p.en, lang: 'en', k: fold(p.en) });
+    (p.enAlt || []).forEach(t => SUGGEST_INDEX.push({ p, f: null, t, lang: 'en', k: fold(t), alt: true }));
+    p.forms.forEach((f, i) => SUGGEST_INDEX.push({ p, f: i, t: f.t, lang: f.lang, k: fold(f.t) }));
+  });
+}
+
+let sgItems = [], sgOn = -1;
+function suggest(q) {
+  const k = fold(q);
+  const box = document.getElementById('suggest');
+  if (!k) { box.classList.remove('open'); sgItems = []; return; }
+  const scored = [];
+  SUGGEST_INDEX.forEach(it => {
+    const at = it.k.indexOf(k);
+    if (at < 0) return;
+    const wordStart = at === 0 || it.k[at - 1] === ' ';
+    scored.push({ it, score: (at === 0 ? 0 : wordStart ? 1 : 2) + (it.alt ? .5 : 0) + it.k.length / 1000 });
+  });
+  scored.sort((a, b) => a.score - b.score);
+  // Several English names of one principle need not all be listed.
+  const seen = new Set();
+  sgItems = [];
+  for (const { it } of scored) {
+    const key = it.lang === 'en' ? 'en:' + it.p.id : it.p.id + ':' + it.f;
+    if (seen.has(key)) continue;
+    seen.add(key); sgItems.push(it);
+    if (sgItems.length >= 14) break;
+  }
+  sgItems.push({ free: true, t: q.trim() });
+  sgOn = sgItems.length > 1 ? 0 : -1;
+  renderSuggest();
+}
+
+function renderSuggest() {
+  const box = document.getElementById('suggest');
+  box.innerHTML = '';
+  sgItems.forEach((it, i) => {
+    const d = document.createElement('div');
+    d.className = 'sg' + (it.free ? ' free' : '') + (i === sgOn ? ' on' : '');
+    if (it.free) {
+      d.innerHTML = `<span class="t">Search the words “${esc(it.t)}” as typed</span><span class="p">free text, not in the list of principles</span>`;
+    } else {
+      const n = it.f == null ? PRINCIPLE_COUNTS[it.p.id] : FORM_COUNTS[it.p.id][it.f];
+      d.innerHTML = `<span class="lang ${it.lang}">${LANG_LABEL[it.lang]}</span><span class="t">${esc(it.t)}</span>` +
+        `<span class="p">${it.f == null ? (it.t === it.p.en ? 'principle' : esc(it.p.en)) : esc(it.p.en)}${n != null ? ' · ' + n + (n === 1 ? ' passage' : ' passages') : ''}</span>`;
+    }
+    d.addEventListener('mousedown', ev => { ev.preventDefault(); pick(it); });
+    box.appendChild(d);
+  });
+  box.classList.toggle('open', sgItems.length > 0);
+}
+
+function pick(it) {
+  document.getElementById('suggest').classList.remove('open');
+  const q = document.getElementById('q');
+  if (it.free) {
+    if (it.t.replace(/\*/g, '').length < 2) return;
+    principle = null; chosenForm = null; freeText = it.t; q.value = it.t;
+  } else {
+    freeText = null; principle = it.p; chosenForm = it.f; q.value = it.t;
+  }
+  applyScope();
+  update();
+}
+
+/* ═════════════ Scope: the exact form or every form ═════════════ */
+
+function applyScope() {
+  if (!principle) { active = new Set(); return; }
+  if (scope === 'exact' && chosenForm != null) active = new Set([chosenForm]);
+  else active = new Set(principle.forms.map((f, i) => i));
+}
+
+function setScope(s) {
+  scope = s;
+  applyScope();
+  update();
+}
+
+/* ═════════════ Rendering: one passage ═════════════ */
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+
+// The passage as printed, from raw index a to b, with the matches highlighted.
+// `spans` are in normalised coordinates and are mapped back onto the raw text.
+function textHTML(u, spans, a, b) {
+  const { map } = normalize(u.raw, true);
+  const hl = new Int16Array(u.raw.length).fill(-1);
+  spans.forEach((sp, k) => {
+    const from = map[sp.s], to = map[sp.e - 1] + 1;
+    for (let i = from; i < to; i++) hl[i] = k;
+  });
+  let out = '', cur = -1, inGloss = false;
+  const close = () => { if (cur >= 0) { out += '</mark>'; cur = -1; } };
+  for (let i = a; i < b; i++) {
+    const c = u.raw[i];
+    if (c === '') { close(); out += ' <span class="gloss">'; inGloss = true; continue; }
+    if (c === '') { close(); if (inGloss) out += '</span>'; inGloss = false; continue; }
+    const k = hl[i];
+    if (k !== cur) {
+      close();
+      if (k >= 0) { const f = CUR_FORMS[spans[k].f]; out += `<mark title="${esc(f ? f.t : '')}">`; cur = k; }
+    }
+    if (c === '|') out += '<span class="bar">|</span>';
+    else if (c === '\n' || c === ' ') out += ' ';
+    else out += esc(c);
+  }
+  close();
+  if (inGloss) out += '</span>';
+  return out;
+}
+
+// The stretch of raw text a card shows: all of it if short or expanded, else the
+// sentences around the first match.
+function windowFor(u, spans, full) {
+  const L = u.raw.length;
+  if (full || L <= SNIP * 2.4) return [0, L];
+  const { map } = normalize(u.raw, true);
+  const s = map[spans[0].s], e = map[spans[0].e - 1] + 1;
+  let a = Math.max(0, s - SNIP), b = Math.min(L, e + SNIP);
+  // Widen to whole words, and keep gloss delimiters paired.
+  while (a > 0 && !/\s/.test(u.raw[a - 1])) a--;
+  while (b < L && !/\s/.test(u.raw[b])) b++;
+  const gOpen = u.raw.lastIndexOf('', a), gClose = u.raw.lastIndexOf('', a);
+  if (gOpen > gClose) a = gOpen;
+  const nOpen = u.raw.indexOf('', b), nClose = u.raw.indexOf('', b);
+  if (nClose >= 0 && (nOpen < 0 || nClose < nOpen)) b = nClose + 1;
+  return [a, b];
+}
+
+function matchedTags(spans) {
+  const fs = [...new Set(spans.map(s => s.f))];
+  return fs.map(f => {
+    const form = CUR_FORMS[f];
+    if (!form) return '';
+    if (form.kind === 'free') return `<span class="tag">matched: “${esc(form.t)}”</span>`;
+    return `<span class="tag ${form.kind}" title="${KIND_LABEL[form.kind]}${form.kind === 'paraphrase' ? ': states the principle without naming it' : ''}">` +
+      `<span class="lang ${form.lang}">${LANG_LABEL[form.lang]}</span> ${esc(form.t)}${form.kind !== 'name' ? ' · ' + form.kind : ''}</span>`;
+  }).join('');
+}
+
+// A passage card. opts: { full, pin, close, sec }
+function cardHTML(h, opts = {}) {
+  const u = UNITS[h.u];
+  const full = opts.full || expanded.has(h.u);
+  const [a, b] = windowFor(u, h.spans, full);
+  const shortened = a > 0 || b < u.raw.length;
+  const tags = (u.tags || []).map(t => `<span class="tag${t.inferred ? ' inferred' : ''}">${esc(t.t)}</span>`).join(' ');
+  const pinned = (pins[u.work] || []).includes(h.u);
+  const tools = [];
+  if (!opts.full && (shortened || expanded.has(h.u))) tools.push(`<button class="btn-sm" data-act="expand" data-u="${h.u}">${expanded.has(h.u) ? 'shorten' : 'whole passage'}</button>`);
+  if (opts.pin) tools.push(`<button class="btn-sm${pinned ? ' on' : ''}" data-act="pin" data-u="${h.u}" title="Pin to compare it with other passages of this text">${pinned ? 'pinned' : 'pin'}</button>`);
+  if (opts.close) tools.push(`<button class="btn-sm" data-act="unpin" data-u="${h.u}" title="Take it out of the comparison">×</button>`);
+  const enOn = enAll !== enFlip.has(h.u);
+  tools.unshift(`<button class="btn-sm${enOn ? ' on' : ''}" data-act="en" data-u="${h.u}" title="${enOn ? 'Hide' : 'Show'} the English translation">EN</button>`);
+  return `<div class="card${u.inferred ? ' inferred' : ''}" data-u="${h.u}">
+    <div class="card-head">
+      <span class="lbl">${esc(u.label)}</span>
+      ${u.cite && u.cite !== u.label ? `<span class="cite">${esc(u.cite)}</span>` : ''}
+      ${u.on ? `<span class="meta">${esc(u.on)}</span>` : ''}
+      ${u.phase ? `<span class="meta" title="Adickes’ phase of Kant’s hand, as the AA prints it">phase ${esc(u.phase)}</span>` : ''}
+      ${tags}
+      <span class="tools">${tools.join('')}</span>
+    </div>
+    ${opts.sec !== false && u.sec ? `<div class="sec">${esc(u.sec)}</div>` : ''}
+    <div class="matched">${matchedTags(h.spans)}</div>
+    <div class="ptext">${a > 0 ? '<span class="ell">… </span>' : ''}${textHTML(u, h.spans, a, b)}${b < u.raw.length ? '<span class="ell"> …</span>' : ''}</div>
+    ${enOn ? transHTML(u, shortened) : ''}
+  </div>`;
+}
+
+/* ═════════════ Translation ═════════════ */
+
+// The English is looked up by the passage's key. It is a machine translation,
+// made once and stored beside this page, and is labelled as such wherever it
+// shows: it is the page's reading of the text, not the edition's.
+const TR = (typeof PRINCIPLE_TRANSLATIONS !== 'undefined') ? PRINCIPLE_TRANSLATIONS : { meta: {}, en: {} };
+
+function transHTML(u, shortened) {
+  const en = TR.en[u.key];
+  if (en) {
+    return `<div class="trans"><div class="trans-head"><b>English</b> · ${esc(TR.meta.label || 'machine translation, unreviewed')}${shortened ? ' · of the whole passage' : ''}</div>
+      <div class="trans-text">${esc(en)}</div></div>`;
+  }
+  // No stored English: say so, and offer the passage to an outside translator,
+  // which only happens if the user follows the link.
+  const plain = u.raw.replace(/(\S)\|\s*/g, '$1').replace(/\|/g, ' ').replace(/[\uE000\uE001]/g, ' ').replace(/\s+/g, ' ').trim();
+  const url = 'https://translate.google.com/?sl=auto&tl=en&op=translate&text=' + encodeURIComponent(plain.slice(0, 4500));
+  return `<div class="trans none">No stored translation for this passage. <a href="${url}" target="_blank" rel="noopener">Open it in Google Translate</a> (sends the text to Google; quality is poor on 18th-century German and Latin).</div>`;
+}
+
+/* ═════════════ Rendering: header ═════════════ */
+
+function renderHeader() {
+  document.querySelectorAll('#scope button').forEach(b => b.classList.toggle('on', b.dataset.scope === scope));
+  const exactBtn = document.querySelector('#scope [data-scope="exact"]');
+  const note = document.getElementById('scope-note');
+  const canExact = principle && chosenForm != null;
+  exactBtn.disabled = !canExact;
+  if (freeText) note.textContent = 'Free text: only these words, as typed.';
+  else if (principle && chosenForm == null) note.textContent = 'English names are not in the texts, so every German and Latin form is searched.';
+  else note.textContent = '';
+
+  const row = document.getElementById('forms-row');
+  row.classList.toggle('open', !!principle);
+  if (principle) {
+    document.getElementById('pname').textContent = principle.en;
+    const chips = document.getElementById('chips');
+    chips.innerHTML = '';
+    principle.forms.forEach((f, i) => {
+      const n = FORM_COUNTS[principle.id][i];
+      const b = document.createElement('button');
+      b.className = 'chip' + (active.has(i) ? ' on' : '') + (n ? '' : ' none');
+      b.title = (active.has(i) ? 'Searched. Click to leave this form out.' : 'Not searched. Click to add this form.') + (f.kind !== 'name' ? ` (${f.kind})` : '');
+      b.innerHTML = `<span class="lang ${f.lang}">${LANG_LABEL[f.lang]}</span>${esc(f.t)}${f.kind !== 'name' ? `<span class="k">${f.kind}</span>` : ''}<span class="n">${n}</span>`;
+      b.addEventListener('click', () => {
+        if (active.has(i)) active.delete(i); else active.add(i);
+        scope = active.size === 1 && chosenForm === i ? 'exact' : 'all';
+        update();
+      });
+      chips.appendChild(b);
+    });
+  }
+
+  document.querySelectorAll('#views button').forEach(b => b.classList.toggle('on', b.dataset.view === view));
+  const sum = document.getElementById('summary');
+  if (!principle && !freeText) sum.textContent = '';
+  else {
+    const works = PS_ORDER.filter(w => HITS_BY_WORK[w]).length;
+    sum.textContent = HITS.length ? `${HITS.length} ${HITS.length === 1 ? 'passage' : 'passages'} in ${works} ${works === 1 ? 'text' : 'texts'}` : 'No passages found';
+  }
+}
+
+function renderBrowse() {
+  const nav = document.getElementById('browse');
+  let h = '';
+  Object.entries(PRINCIPLE_GROUPS).forEach(([g, title]) => {
+    h += `<h2>${g}. ${esc(title)}</h2>`;
+    PRINCIPLE_LEXICON.filter(p => p.group === g).forEach(p => {
+      h += `<button class="pl${principle === p ? ' on' : ''}" data-p="${p.id}">${esc(p.en)} <span class="c">${PRINCIPLE_COUNTS[p.id] || 0}</span></button>`;
+    });
+  });
+  h += `<div class="browse-note">Numbers are passages found with all forms switched on. A match is found by the page, not marked by the edition: the tag under each passage says which form matched, and a dashed tag means a paraphrase, not the principle’s name.<br><br><b>EN</b> on a passage shows an English translation beneath it. These are machine translations by Claude, made once for the passages the principles find, and not yet checked by a scholar: check the original before quoting.${meierError ? `<br><br><b>Meier’s Auszug is not searched:</b> it is read from the Meier reader, and the browser refused that (${esc(meierError)}). Opened from disk, most browsers do; open the page on the website, or through a local server, to include it.` : ''}</div>`;
+  nav.innerHTML = h;
+  nav.querySelectorAll('.pl').forEach(b => b.addEventListener('click', () => {
+    const p = PRINCIPLE_LEXICON.find(x => x.id === b.dataset.p);
+    pick({ p, f: null, t: p.en, lang: 'en' });
+  }));
+}
+
+/* ═════════════ Rendering: the three views ═════════════ */
+
+function renderMain() {
+  const main = document.getElementById('main');
+  if (!principle && !freeText) {
+    main.innerHTML = `<div class="empty">
+      <p>Type a principle above, in English, German or Latin, and pick it from the list, or choose one from the left.</p>
+      <p><b>Exact form</b> finds only the spelling you picked; <b>All forms</b> finds every German and Latin form of that principle. The forms appear as switches under the search box, to fine-tune.</p>
+      <p><b>Reading list</b> shows every passage in turn. <b>Passages in one text</b> puts up to four passages of one text side by side. <b>Texts side by side</b> puts up to four texts in columns, each with its own passages.</p>
+    </div>`;
+    return;
+  }
+  if (!HITS.length) {
+    main.innerHTML = `<div class="empty"><p>No passage matches${principle && !active.size ? ': every form is switched off' : ''}.</p></div>`;
+    return;
+  }
+  if (view === 'list') renderList(main);
+  else if (view === 'one') renderOne(main);
+  else renderTexts(main);
+}
+
+function workChip(w, on, act, extra = '') {
+  const n = (HITS_BY_WORK[w] || []).length;
+  return `<button class="chip${on ? ' on' : ''}${n ? '' : ' none'}" data-act="${act}" data-w="${w}" ${n ? '' : 'disabled'}>${esc(PS_WORKS[w].short)} <span class="n">${n}</span>${extra}</button>`;
+}
+
+function renderList(main) {
+  let h = `<div class="list-wrap"><div class="filters"><span class="lab">Texts:</span>` +
+    PS_ORDER.map(w => workChip(w, listFilter.has(w), 'filter')).join('') +
+    `<button class="linkish" data-act="filter-all">all</button></div>`;
+  let shown = 0;
+  PS_ORDER.forEach(w => {
+    const hs = HITS_BY_WORK[w];
+    if (!hs || !listFilter.has(w)) return;
+    const W = PS_WORKS[w];
+    h += `<div class="work-head">${esc(W.label)} <span class="wd">${esc(W.date)} · ${esc(W.vol)} · ${hs.length} ${hs.length === 1 ? 'passage' : 'passages'}</span></div>`;
+    hs.forEach(x => { h += cardHTML(x, { pin: true }); shown++; });
+  });
+  if (!shown) h += `<div class="empty"><p>Every text with results is filtered out.</p></div>`;
+  main.innerHTML = h + '</div>';
+}
+
+function gridCols(n) { return `grid-template-columns: repeat(${Math.max(1, n)}, minmax(0, 1fr))`; }
+
+function renderOne(main) {
+  const withHits = PS_ORDER.filter(w => HITS_BY_WORK[w]);
+  let h = `<div class="cols-bar"><span class="lab">Text:</span>` + withHits.map(w => workChip(w, w === oneWork, 'one')).join('') +
+    `<span class="notice">${esc(notice)}</span></div>`;
+  const hs = HITS_BY_WORK[oneWork] || [];
+  const ps = pins[oneWork] || [];
+  h += `<div class="one-layout"><div class="one-list" data-sk="one-list:${oneWork}">`;
+  hs.forEach(x => {
+    const u = UNITS[x.u];
+    const [a, b] = snippetRange(u, x.spans);
+    h += `<div class="oi${ps.includes(x.u) ? ' on' : ''}" data-act="toggle-pin" data-u="${x.u}">
+      <span class="lbl">${esc(u.label)}</span> <span class="cite">${esc(u.cite && u.cite !== u.label ? u.cite : '')}</span>
+      <div class="sn">${a > 0 ? '… ' : ''}${textHTML(u, x.spans, a, b)}${b < u.raw.length ? ' …' : ''}</div></div>`;
+  });
+  h += `</div><div class="cols" style="${gridCols(Math.max(ps.length, 1))}">`;
+  if (!ps.length) h += `<div class="col slot">Pick up to ${MAX_COLS} passages from the list on the left, and they stand here side by side.</div>`;
+  ps.forEach(ui => {
+    const x = hs.find(y => y.u === ui);
+    const u = UNITS[ui];
+    h += `<div class="col"><div class="col-head">${esc(u.label)} <span class="wd">${esc(u.cite && u.cite !== u.label ? u.cite : '')}</span>
+      <button class="btn-sm x" data-act="unpin" data-u="${ui}" title="Take it out of the comparison">×</button></div>
+      <div class="col-body" data-sk="pin:${ui}">${cardHTML(x, { full: true })}</div></div>`;
+  });
+  main.innerHTML = h + '</div></div>';
+}
+
+// A short stretch around the first match, for the list in "Passages in one text".
+function snippetRange(u, spans) {
+  const { map } = normalize(u.raw, true);
+  const L = u.raw.length, s = map[spans[0].s], e = map[spans[0].e - 1] + 1;
+  let a = Math.max(0, s - 70), b = Math.min(L, e + 70);
+  while (a > 0 && !/\s/.test(u.raw[a - 1])) a--;
+  while (b < L && !/\s/.test(u.raw[b])) b++;
+  const gOpen = u.raw.lastIndexOf('', a), gClose = u.raw.lastIndexOf('', a);
+  if (gOpen > gClose) a = gOpen;
+  const nOpen = u.raw.indexOf('', b), nClose = u.raw.indexOf('', b);
+  if (nClose >= 0 && (nOpen < 0 || nClose < nOpen)) b = nClose + 1;
+  return [a, b];
+}
+
+function renderTexts(main) {
+  const withHits = PS_ORDER.filter(w => HITS_BY_WORK[w]);
+  let h = `<div class="cols-bar"><span class="lab">Texts, up to ${MAX_COLS}:</span>` +
+    PS_ORDER.map(w => workChip(w, textsSel.includes(w), 'text')).join('') +
+    `<span class="notice">${esc(notice)}</span></div>`;
+  const sel = PS_ORDER.filter(w => textsSel.includes(w));   // columns in page order of the list
+  h += `<div class="cols" style="${gridCols(sel.length)}">`;
+  if (!sel.length) h += `<div class="col slot">Choose up to ${MAX_COLS} texts above.</div>`;
+  sel.forEach(w => {
+    const W = PS_WORKS[w], hs = HITS_BY_WORK[w] || [];
+    h += `<div class="col"><div class="col-head">${esc(W.short)} <span class="wd">${esc(W.date)} · ${hs.length}</span>
+      <button class="btn-sm x" data-act="text" data-w="${w}" title="Take this text out">×</button></div>
+      <div class="col-body" data-sk="text:${w}">${hs.map(x => cardHTML(x, { pin: false })).join('')}</div></div>`;
+  });
+  main.innerHTML = h + '</div>';
+}
+
+/* ═════════════ Update ═════════════ */
+
+function update(keepScroll) {
+  search();
+  renderHeader();
+  renderBrowse();
+  renderMain();
+  writeHash();
+  measureHead();
+  if (!keepScroll) window.scrollTo(0, 0);
+}
+
+// Redraws in place, keeping where each scrolling list and column had got to.
+function rerender() {
+  const keep = {};
+  document.querySelectorAll('[data-sk]').forEach(el => { keep[el.dataset.sk] = el.scrollTop; });
+  renderHeader(); renderMain(); measureHead();
+  document.querySelectorAll('[data-sk]').forEach(el => { if (keep[el.dataset.sk] != null) el.scrollTop = keep[el.dataset.sk]; });
+}
+
+function measureHead() {
+  document.documentElement.style.setProperty('--head-h', document.getElementById('head').offsetHeight + 'px');
+}
+
+// The principle and view in the URL, so a search can be shared or bookmarked.
+function writeHash() {
+  const parts = [];
+  if (principle) {
+    parts.push('p=' + principle.id);
+    if (scope === 'exact' && chosenForm != null) parts.push('f=' + chosenForm);
+  } else if (freeText) parts.push('q=' + encodeURIComponent(freeText));
+  parts.push('v=' + view);
+  history.replaceState(null, '', '#' + parts.join('&'));
+}
+
+function readHash() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (['list', 'one', 'texts'].includes(h.get('v'))) view = h.get('v');
+  const p = PRINCIPLE_LEXICON.find(x => x.id === h.get('p'));
+  if (p) {
+    principle = p;
+    const f = h.get('f');
+    chosenForm = f != null && p.forms[+f] ? +f : null;
+    scope = chosenForm != null ? 'exact' : 'all';
+    document.getElementById('q').value = chosenForm != null ? p.forms[chosenForm].t : p.en;
+    applyScope();
+  } else if (h.get('q')) {
+    freeText = h.get('q');
+    document.getElementById('q').value = freeText;
+  }
+}
+
+/* ═════════════ Events ═════════════ */
+
+function wire() {
+  const q = document.getElementById('q');
+  q.addEventListener('input', () => suggest(q.value));
+  q.addEventListener('focus', () => { if (q.value) suggest(q.value); });
+  q.addEventListener('blur', () => document.getElementById('suggest').classList.remove('open'));
+  q.addEventListener('keydown', ev => {
+    if (!sgItems.length) { if (ev.key === 'Enter' && q.value.trim()) { suggest(q.value); } else return; }
+    if (ev.key === 'ArrowDown') { sgOn = Math.min(sgItems.length - 1, sgOn + 1); renderSuggest(); ev.preventDefault(); }
+    else if (ev.key === 'ArrowUp') { sgOn = Math.max(0, sgOn - 1); renderSuggest(); ev.preventDefault(); }
+    else if (ev.key === 'Enter') { pick(sgItems[sgOn >= 0 ? sgOn : sgItems.length - 1]); ev.preventDefault(); }
+    else if (ev.key === 'Escape') { document.getElementById('suggest').classList.remove('open'); }
+  });
+
+  document.querySelectorAll('#scope button').forEach(b => b.addEventListener('click', () => setScope(b.dataset.scope)));
+  document.getElementById('en-all').addEventListener('change', ev => { enAll = ev.target.checked; enFlip = new Set(); rerender(); });
+  document.querySelectorAll('#views button').forEach(b => b.addEventListener('click', () => { view = b.dataset.view; notice = ''; update(); }));
+  document.getElementById('forms-all').addEventListener('click', () => { scope = 'all'; applyScope(); update(); });
+  const byLang = lang => { active = new Set(principle.forms.map((f, i) => f.lang === lang ? i : -1).filter(i => i >= 0)); scope = 'all'; update(); };
+  document.getElementById('forms-de').addEventListener('click', () => byLang('de'));
+  document.getElementById('forms-la').addEventListener('click', () => byLang('la'));
+
+  document.getElementById('main').addEventListener('click', ev => {
+    const t = ev.target.closest('[data-act]');
+    if (!t) return;
+    const act = t.dataset.act, ui = t.dataset.u != null ? +t.dataset.u : null, w = t.dataset.w;
+    notice = '';
+    if (act === 'en') { enFlip.has(ui) ? enFlip.delete(ui) : enFlip.add(ui); rerender(); return; }
+    if (act === 'expand') { expanded.has(ui) ? expanded.delete(ui) : expanded.add(ui); rerender(); return; }
+    if (act === 'pin' || act === 'toggle-pin') { togglePin(ui); return; }
+    if (act === 'unpin') { const wk = UNITS[ui].work; pins[wk] = (pins[wk] || []).filter(x => x !== ui); rerender(); return; }
+    if (act === 'filter') { listFilter.has(w) ? listFilter.delete(w) : listFilter.add(w); rerender(); return; }
+    if (act === 'filter-all') { listFilter = new Set(PS_ORDER); rerender(); return; }
+    if (act === 'one') { oneWork = w; rerender(); return; }
+    if (act === 'text') {
+      if (textsSel.includes(w)) textsSel = textsSel.filter(x => x !== w);
+      else if (textsSel.length >= MAX_COLS) notice = `At most ${MAX_COLS} texts at once: take one out first.`;
+      else textsSel.push(w);
+      textsManual = true;
+      rerender(); return;
+    }
+  });
+}
+
+function togglePin(ui) {
+  const w = UNITS[ui].work;
+  const ps = pins[w] = pins[w] || [];
+  if (ps.includes(ui)) pins[w] = ps.filter(x => x !== ui);
+  else if (ps.length >= MAX_COLS) notice = `At most ${MAX_COLS} passages side by side: take one out first.`;
+  else { ps.push(ui); if (view === 'list') notice = ''; }
+  if (view === 'list') {
+    // Stay in the reading list, and say where the pinned passages are.
+    const btn = document.querySelector(`.card[data-u="${ui}"] [data-act="pin"]`);
+    const on = (pins[w] || []).includes(ui);
+    if (btn) { btn.classList.toggle('on', on); btn.textContent = on ? 'pinned' : 'pin'; }
+    oneWork = w;
+    const n = (pins[w] || []).length;
+    toast(notice || (n ? `${n} of ${MAX_COLS} passages of the ${PS_WORKS[w].label} pinned: see “Passages in one text”.` : 'Unpinned.'));
+    notice = '';
+    return;
+  }
+  rerender();
+}
+
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('open');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('open'), 3200);
+}
+
+/* ═════════════ Init ═════════════ */
+
+async function init() {
+  wire();
+  buildSuggestIndex();
+  const meier = await loadMeier();
+  buildCorpus(meier);
+  countAll();
+  readHash();
+  document.getElementById('status').textContent = meier ? '' : 'Meier’s Auszug could not be loaded; see the note on the left.';
+  window.addEventListener('resize', measureHead);
+  update(true);
+}
+
+init();
+</script>
+</body>
+</html>
