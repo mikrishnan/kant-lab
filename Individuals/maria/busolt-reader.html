@@ -106,9 +106,11 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
 .sent { cursor: pointer; border-radius: 2px; }
 .sent:hover { background: var(--parch-dark); }
 .sent.on { background: var(--hit); box-shadow: 0 0 0 2px var(--hit); }
+.sent.enhit { background: rgba(243, 217, 138, .45); border-bottom: 2px solid var(--hit); }
 .sent:hover .ph { border-bottom: 1px dotted var(--accent-lt); }
 .ph.hot { background: var(--parch-deep); border-bottom: 1px solid var(--accent) !important; border-radius: 2px; }
 #pop .g { font-size: 1.05rem; }
+#pop mark { color: var(--ink); }
 #pop .g + .s { margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(244,237,224,.3); font-size: .82rem; opacity: .78; }
 #pop {
   position: fixed; z-index: 20; max-width: 34em; padding: 8px 12px;
@@ -318,6 +320,7 @@ function renderSentences(tx, b) {
     if (g.o[0] > at) tx.appendChild(document.createTextNode(b.text.slice(at, g.o[0])));
     const sp = el('span', 'sent');
     sp.dataset.n = b.n; sp.dataset.k = k;
+    if (queryRe) { queryRe.lastIndex = 0; if (queryRe.test(g.en)) { sp.classList.add('enhit'); sp.title = 'The English translation of this sentence matches the search'; } }
     // the sentence cut into its divisions (MEIER_PHRASES), each hoverable for its own English
     let pa = g.o[0];
     MEIER_PHRASES[b.n][k].forEach((ph, pi) => {
@@ -466,7 +469,9 @@ function showPop(sp, ph) {
   const box = document.getElementById('left').getBoundingClientRect();   // never leave the text side
   pop.textContent = '';
   if (ph) pop.appendChild(el('div', 'g', glossOf(sp, ph)));
-  pop.appendChild(el('div', ph ? 's' : 'g', englishOf(sp)));
+  const full = el('div', ph ? 's' : 'g');
+  addText(full, englishOf(sp));                                           // the search term marked in the English too
+  pop.appendChild(full);
   pop.style.maxWidth = Math.min(34 * 16, box.width - 8) + 'px';
   pop.hidden = false;
   const rects = (ph || sp).getClientRects(), r0 = rects[0], gap = 6;
@@ -516,7 +521,7 @@ function runSearch() {
   document.querySelectorAll('#works .n').forEach(n => n.remove());
   if (!queryRe) {
     hitCount = null;
-    count.textContent = 'Type at least two letters. ß and ss are treated alike; case is ignored.';
+    count.textContent = 'Type at least two letters. ß and ss are treated alike; case is ignored. In Meier, the English translation is searched too and leads to its German sentence.';
     if (cur >= 0) show(cur);
     return;
   }
@@ -537,6 +542,20 @@ function runSearch() {
         rows.push({ b, k: first.index, len: first[0].length });
         total += n; passages++; perWork[k] += n; hitCount[k][i] += n;
       });
+      s.blocks.forEach(b => {          // Meier's English, sentence by sentence: a hit belongs to its German sentence
+        if (w.logik || !MEIER_ALIGNED[b.n]) return;
+        MEIER_ALIGNED[b.n].forEach((g, si) => {
+          queryRe.lastIndex = 0;
+          const first = queryRe.exec(g.en);
+          if (!first) return;
+          let n = 1;
+          while (queryRe.exec(g.en)) n++;
+          rows.push({ b, k: first.index, len: first[0].length, en: g.en, si });
+          total += n; passages++; perWork[k] += n; hitCount[k][i] += n;
+        });
+      });
+      const order = new Map(s.blocks.map((b, ix) => [b, ix]));          // German row first, then the English rows of the same block
+      rows.sort((a, b2) => order.get(a.b) - order.get(b2.b) || (a.en === undefined ? 0 : 1) - (b2.en === undefined ? 0 : 1) || (a.si || 0) - (b2.si || 0));
       if (rows.length) groups.push({ k, i, rows });
     });
   });
@@ -553,17 +572,17 @@ function runSearch() {
     if (shown >= 400) return;
     const w = WORKS[g.k], s = w.sections[g.i];
     const h = el('div', 'g', w.label + ' · ' + (s.tabNo || g.i + 1) + ' ' + s.label + ' · ' + g.rows.length);
-    h.onclick = () => showWork(g.k, g.i, g.rows[0].b.id);
+    h.onclick = () => { if (g.rows[0].en !== undefined) sel = { n: g.rows[0].b.n, k: g.rows[0].si }; showWork(g.k, g.i, g.rows[0].b.id); };
     box.appendChild(h);
     g.rows.forEach(x => {
       if (shown++ >= 400) return;
       const r = el('div', 'r');
-      r.appendChild(el('span', 'w', blockWhere(w, x.b)));
-      const t = x.b.text, from = Math.max(0, x.k - 50);
+      r.appendChild(el('span', 'w', blockWhere(w, x.b) + (x.en !== undefined ? ' · English → its German sentence' : '')));
+      const t = x.en !== undefined ? x.en : x.b.text, from = Math.max(0, x.k - 50);
       r.appendChild(document.createTextNode((from ? '…' : '') + t.slice(from, x.k)));
       r.appendChild(el('mark', null, t.slice(x.k, x.k + x.len)));
       r.appendChild(document.createTextNode(t.slice(x.k + x.len, x.k + x.len + 70) + '…'));
-      r.onclick = () => showWork(g.k, g.i, x.b.id);
+      r.onclick = () => { if (x.en !== undefined) sel = { n: x.b.n, k: x.si }; showWork(g.k, g.i, x.b.id); };
       box.appendChild(r);
     });
   });
@@ -572,7 +591,7 @@ function runSearch() {
   if (groups.some(g => g.k === wi && g.i === cur)) show(cur);
   else {
     const first = groups.find(g => g.k === wi) || groups[0];
-    if (first) showWork(first.k, first.i, first.rows[0].b.id);
+    if (first) { if (first.rows[0].en !== undefined) sel = { n: first.rows[0].b.n, k: first.rows[0].si }; showWork(first.k, first.i, first.rows[0].b.id); }
     else if (cur >= 0) show(cur);
   }
 }
