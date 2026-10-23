@@ -142,6 +142,17 @@
   .ptext .gloss { font-style: italic; color: var(--accent-2); font-size: .9em; }
   .ptext .gloss::before { content: "["; } .ptext .gloss::after { content: "]"; }
   .ptext .ell { color: var(--muted); }
+  .trans {
+    margin-top: 8px; padding: 7px 10px 8px; border-left: 3px solid var(--accent-soft);
+    background: var(--panel); border-radius: 0 4px 4px 0;
+  }
+  .trans-head { font-size: 12.5px; color: var(--muted); font-style: italic; margin-bottom: 3px; }
+  .trans-head b { font-style: normal; font-family: var(--display); font-size: 11px; letter-spacing: .07em; color: var(--accent-2); font-weight: 600; }
+  .trans-text { text-align: left; }
+  .trans.none { color: var(--muted); font-style: italic; font-size: 15px; }
+  .trans.none a { color: var(--accent-2); }
+  .toggle { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-2); font-size: 15px; cursor: pointer; }
+  .toggle input { accent-color: var(--accent); }
   .sec { color: var(--muted); font-size: 14px; font-style: italic; margin-top: 2px; }
   .btn-sm { border: 1px solid var(--rule); background: var(--panel); color: var(--accent); border-radius: 3px; padding: 0 7px; font-size: 13.5px; }
   .btn-sm.on { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -247,6 +258,9 @@
       <button data-view="one">Passages in one text</button>
       <button data-view="texts">Texts side by side</button>
     </div>
+    <label class="toggle" title="Show the English beneath every passage. Each passage also has its own EN button.">
+      <input type="checkbox" id="en-all"> English beneath every passage
+    </label>
     <span id="summary"></span>
   </div>
 </header>
@@ -268,6 +282,8 @@
 <script src="../../data/logik-wiener-24.js"></script>
 <!-- The principles and their forms, hand-curated, beside this page. -->
 <script src="principles-lexicon.js"></script>
+<!-- English translations of the passages the principles find: machine-made, unreviewed. -->
+<script src="principles-translations.js"></script>
 
 <script>
 'use strict';
@@ -326,6 +342,8 @@ let textsSel = [];           // the texts shown side by side
 let textsManual = false;     // whether the user chose them, or the page did
 let expanded = new Set();    // unit indices whose whole text is shown in a card
 let notice = '';
+let enAll = false;           // English beneath every passage
+let enFlip = new Set();      // unit indices whose English the user switched against enAll
 
 /* ═════════════ Corpus ═════════════ */
 
@@ -353,7 +371,7 @@ function buildMet() {
       const g = (p.glosses || [])[n - 1];
       return g ? '' + g + '' : '';
     });
-    addUnit({ work: 'met', raw, label: 'Met. § ' + p.num, cite: p.aa ? pageCite(17, p.aa, p.aaEnd) : '', order: p.num });
+    addUnit({ work: 'met', key: 'met:' + p.num, raw, label: 'Met. § ' + p.num, cite: p.aa ? pageCite(17, p.aa, p.aaEnd) : '', order: p.num });
   });
 }
 
@@ -363,7 +381,7 @@ function buildMeier(M, CIT) {
     (nv.paras || []).forEach(n => {
       const raw = M.paras[String(n)];
       if (raw == null) return;
-      addUnit({ work: 'meier', raw, label: 'Meier § ' + n, cite: (CIT && CIT[n]) || '', sec });
+      addUnit({ work: 'meier', key: 'meier:' + n, raw, label: 'Meier § ' + n, cite: (CIT && CIT[n]) || '', sec });
     });
   });
 }
@@ -381,7 +399,7 @@ function buildRefl() {
   REFL_ENTRIES.forEach(e => {
     if (e.vacat || !e.text) return;
     addUnit({
-      work: 'refl', raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(16, e.aa || e.aaEnd, e.aaEnd),
+      work: 'refl', key: 'refl:' + e.r, raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(16, e.aa || e.aaEnd, e.aaEnd),
       on: e.paras && e.paras.length ? 'on Meier ' + paraRange(e.paras) : '',
       phase: e.phRaw || '', tags: reflTags(e), inferred: !!e.interp,
     });
@@ -394,7 +412,7 @@ function buildReflM() {
     const tags = reflTags(e);
     if (e.part === 'erl') tags.unshift({ t: 'Erläuterung' });
     addUnit({
-      work: 'reflm', raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(e.vol, e.aa || e.aaEnd, e.aaEnd),
+      work: 'reflm', key: 'reflm:' + e.r, raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(e.vol, e.aa || e.aaEnd, e.aaEnd),
       on: e.paras && e.paras.length ? 'on Met. ' + paraRange(e.paras) : '',
       phase: e.phRaw || '', tags, inferred: !!e.interp,
     });
@@ -409,7 +427,7 @@ function buildLogik(work, L) {
       if (b.kind === 'note') tags.push({ t: 'AA cross-reference' });
       if (b.joined && b.joined.includes('inferred')) tags.push({ t: 'paragraph joined by inference', inferred: true });
       addUnit({
-        work, raw: b.text, label: b.aa ? 'AA 24:' + b.aa : (s.title || 'Titelei'),
+        work, key: work + ':' + b.id, raw: b.text, label: b.aa ? 'AA 24:' + b.aa : (s.title || 'Titelei'),
         cite: b.aa ? pageCite(24, b.aa, b.aaEnd) : '',
         on: b.para ? 'on Meier ' + b.para.raw : '',
         sec: s.title || '', tags,
@@ -736,6 +754,8 @@ function cardHTML(h, opts = {}) {
   if (!opts.full && (shortened || expanded.has(h.u))) tools.push(`<button class="btn-sm" data-act="expand" data-u="${h.u}">${expanded.has(h.u) ? 'shorten' : 'whole passage'}</button>`);
   if (opts.pin) tools.push(`<button class="btn-sm${pinned ? ' on' : ''}" data-act="pin" data-u="${h.u}" title="Pin to compare it with other passages of this text">${pinned ? 'pinned' : 'pin'}</button>`);
   if (opts.close) tools.push(`<button class="btn-sm" data-act="unpin" data-u="${h.u}" title="Take it out of the comparison">×</button>`);
+  const enOn = enAll !== enFlip.has(h.u);
+  tools.unshift(`<button class="btn-sm${enOn ? ' on' : ''}" data-act="en" data-u="${h.u}" title="${enOn ? 'Hide' : 'Show'} the English translation">EN</button>`);
   return `<div class="card${u.inferred ? ' inferred' : ''}" data-u="${h.u}">
     <div class="card-head">
       <span class="lbl">${esc(u.label)}</span>
@@ -748,7 +768,28 @@ function cardHTML(h, opts = {}) {
     ${opts.sec !== false && u.sec ? `<div class="sec">${esc(u.sec)}</div>` : ''}
     <div class="matched">${matchedTags(h.spans)}</div>
     <div class="ptext">${a > 0 ? '<span class="ell">… </span>' : ''}${textHTML(u, h.spans, a, b)}${b < u.raw.length ? '<span class="ell"> …</span>' : ''}</div>
+    ${enOn ? transHTML(u, shortened) : ''}
   </div>`;
+}
+
+/* ═════════════ Translation ═════════════ */
+
+// The English is looked up by the passage's key. It is a machine translation,
+// made once and stored beside this page, and is labelled as such wherever it
+// shows: it is the page's reading of the text, not the edition's.
+const TR = (typeof PRINCIPLE_TRANSLATIONS !== 'undefined') ? PRINCIPLE_TRANSLATIONS : { meta: {}, en: {} };
+
+function transHTML(u, shortened) {
+  const en = TR.en[u.key];
+  if (en) {
+    return `<div class="trans"><div class="trans-head"><b>English</b> · ${esc(TR.meta.label || 'machine translation, unreviewed')}${shortened ? ' · of the whole passage' : ''}</div>
+      <div class="trans-text">${esc(en)}</div></div>`;
+  }
+  // No stored English: say so, and offer the passage to an outside translator,
+  // which only happens if the user follows the link.
+  const plain = u.raw.replace(/(\S)\|\s*/g, '$1').replace(/\|/g, ' ').replace(/[\uE000\uE001]/g, ' ').replace(/\s+/g, ' ').trim();
+  const url = 'https://translate.google.com/?sl=auto&tl=en&op=translate&text=' + encodeURIComponent(plain.slice(0, 4500));
+  return `<div class="trans none">No stored translation for this passage. <a href="${url}" target="_blank" rel="noopener">Open it in Google Translate</a> (sends the text to Google; quality is poor on 18th-century German and Latin).</div>`;
 }
 
 /* ═════════════ Rendering: header ═════════════ */
@@ -802,7 +843,7 @@ function renderBrowse() {
       h += `<button class="pl${principle === p ? ' on' : ''}" data-p="${p.id}">${esc(p.en)} <span class="c">${PRINCIPLE_COUNTS[p.id] || 0}</span></button>`;
     });
   });
-  h += `<div class="browse-note">Numbers are passages found with all forms switched on. A match is found by the page, not marked by the edition: the tag under each passage says which form matched, and a dashed tag means a paraphrase, not the principle’s name.${meierError ? `<br><br><b>Meier’s Auszug is not searched:</b> it is read from the Meier reader, and the browser refused that (${esc(meierError)}). Opened from disk, most browsers do; open the page on the website, or through a local server, to include it.` : ''}</div>`;
+  h += `<div class="browse-note">Numbers are passages found with all forms switched on. A match is found by the page, not marked by the edition: the tag under each passage says which form matched, and a dashed tag means a paraphrase, not the principle’s name.<br><br><b>EN</b> on a passage shows an English translation beneath it. These are machine translations by Claude, made once for the passages the principles find, and not yet checked by a scholar: check the original before quoting.${meierError ? `<br><br><b>Meier’s Auszug is not searched:</b> it is read from the Meier reader, and the browser refused that (${esc(meierError)}). Opened from disk, most browsers do; open the page on the website, or through a local server, to include it.` : ''}</div>`;
   nav.innerHTML = h;
   nav.querySelectorAll('.pl').forEach(b => b.addEventListener('click', () => {
     const p = PRINCIPLE_LEXICON.find(x => x.id === b.dataset.p);
@@ -979,6 +1020,7 @@ function wire() {
   });
 
   document.querySelectorAll('#scope button').forEach(b => b.addEventListener('click', () => setScope(b.dataset.scope)));
+  document.getElementById('en-all').addEventListener('change', ev => { enAll = ev.target.checked; enFlip = new Set(); rerender(); });
   document.querySelectorAll('#views button').forEach(b => b.addEventListener('click', () => { view = b.dataset.view; notice = ''; update(); }));
   document.getElementById('forms-all').addEventListener('click', () => { scope = 'all'; applyScope(); update(); });
   const byLang = lang => { active = new Set(principle.forms.map((f, i) => f.lang === lang ? i : -1).filter(i => i >= 0)); scope = 'all'; update(); };
@@ -990,6 +1032,7 @@ function wire() {
     if (!t) return;
     const act = t.dataset.act, ui = t.dataset.u != null ? +t.dataset.u : null, w = t.dataset.w;
     notice = '';
+    if (act === 'en') { enFlip.has(ui) ? enFlip.delete(ui) : enFlip.add(ui); rerender(); return; }
     if (act === 'expand') { expanded.has(ui) ? expanded.delete(ui) : expanded.add(ui); rerender(); return; }
     if (act === 'pin' || act === 'toggle-pin') { togglePin(ui); return; }
     if (act === 'unpin') { const wk = UNITS[ui].work; pins[wk] = (pins[wk] || []).filter(x => x !== ui); rerender(); return; }
