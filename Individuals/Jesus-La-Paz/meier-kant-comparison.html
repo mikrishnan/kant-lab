@@ -166,6 +166,47 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 .tcard .tt { font-size: .95rem; line-height: 1.45; }
 .full { background: #fffdf6; border: 1px solid var(--accent-lt); border-top: none; border-radius: 0 0 3px 3px; padding: 8px 11px; margin: -6px 0 8px; font-size: .98rem; line-height: 1.5; }
 
+/* ── evidence marks and the Connections view ────────── */
+.ev { display: inline-block; font-size: .62rem; line-height: 1.3; border-radius: 7px; padding: 0 5px; margin-top: 3px; border: 1px solid; font-family: 'EB Garamond', serif; letter-spacing: .02em; cursor: help; white-space: nowrap; }
+.ev-S, .ev-A, .ev-R { color: #2f5a2f; border-color: #8aaa8a; background: #eef5ee; }
+.ev-1 { color: #2f4a6b; border-color: #9db4cf; background: #eaf0f7; }
+.ev-2 { color: #7a4a00; border-color: #c8a055; background: #fff6e0; }
+.ev-3, .ev-Ri { color: var(--faded); border-color: var(--line); border-style: dashed; background: #faf7f0; }
+.gut .ev { display: block; margin-left: auto; width: max-content; }
+.gut .atn { display: block; font-size: .65rem; color: var(--accent-lt); margin-top: 2px; }
+.kblock.nearby { opacity: .72; }
+.nearctl { display: block; font-size: .82rem; color: var(--faded); margin: 0 0 8px; }
+.howbtn { margin-left: auto; font-size: .82rem; background: none; border: 1px solid rgba(244,237,224,.6); color: var(--parchment); border-radius: 12px; padding: 1px 12px; cursor: pointer; }
+.howbtn:hover { background: rgba(244,237,224,.15); }
+#connPane { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 24px 60px; }
+.conn-intro { max-width: 900px; line-height: 1.5; }
+.conn-intro p { margin: 0 0 10px; }
+.connbar { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font-size: .85rem; color: var(--faded); margin: 4px 0 12px; }
+.connbar label { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; }
+.csum { font-size: .95rem; margin: 0 0 6px; } .csum b { color: var(--accent); }
+.ccard { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); border: 1px solid var(--parch-deep); border-radius: 5px; background: #fff; margin: 0 0 14px; overflow: hidden; }
+.ccard .cm { background: #fbfcfe; border-right: 1px solid var(--parch-deep); padding: 10px 14px; }
+.ccard .ck { padding: 10px 14px; }
+.ccard .ch { font-family: 'Cinzel', serif; font-size: .8rem; letter-spacing: .05em; color: var(--meier); margin-bottom: 3px; }
+.ccard .ch small { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-size: .8rem; }
+.ccard .ct { font-size: 1rem; line-height: 1.5; }
+.ccard .wk { font-family: 'Cinzel', serif; font-size: .72rem; letter-spacing: .05em; color: var(--accent); margin: 6px 0 2px; }
+.ccard .wk:first-child { margin-top: 0; }
+.kp { font-size: .95rem; line-height: 1.45; margin: 0 0 7px; padding-left: 8px; border-left: 2px solid var(--parch-deep); }
+.kp .kr { display: block; font-size: .72rem; color: var(--aa-ink); }
+.kp .kr .ev { margin: 0 0 0 6px; }
+.ccard .acts { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+.ccard .none { font-size: .88rem; color: var(--faded); font-style: italic; }
+#methodVeil { position: fixed; inset: 0; background: rgba(30,20,5,.45); z-index: 60; display: none; align-items: center; justify-content: center; }
+#methodVeil.on { display: flex; }
+.method { background: var(--parchment); border: 2px solid var(--accent); border-radius: 6px; width: min(920px, 94vw); max-height: 88vh; overflow-y: auto; padding: 16px 24px 22px; line-height: 1.5; box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+.method h2 { font-family: 'Cinzel', serif; font-size: .95rem; letter-spacing: .07em; color: var(--accent); margin: 0 0 8px; }
+.method h3 { font-family: 'Cinzel', serif; font-size: .8rem; letter-spacing: .06em; color: var(--accent); margin: 16px 0 4px; }
+.method table { border-collapse: collapse; font-size: .9rem; margin: 6px 0; }
+.method td, .method th { border: 1px solid var(--parch-deep); padding: 3px 9px; text-align: left; vertical-align: top; background: #fff; }
+.method th { background: var(--parch-dark); font-size: .78rem; }
+@media (max-width: 900px) { .ccard { grid-template-columns: 1fr; } .ccard .cm { border-right: none; border-bottom: 1px solid var(--parch-deep); } }
+
 /* ── term mode result lists ────────────────────────────── */
 .summary { font-size: .92rem; margin: 0 0 8px; }
 .summary b { color: var(--accent); }
@@ -192,11 +233,13 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 
 <header>
   <h1>Meier–Kant Comparison</h1>
-  <span class="sub">Meier's <i>Auszug aus der Vernunftlehre</i> against Kant: lectures, Jäsche, Reflexionen, Baumgarten</span>
+  <span class="sub">which passage of Meier's <i>Auszug aus der Vernunftlehre</i> Kant is lecturing on, across the Blomberg, Wiener and Busolt transcripts, the Jäsche <i>Logik</i> and his Reflexionen</span>
+  <button class="howbtn" id="howBtn" type="button">How the connections are made</button>
 </header>
 
 <div class="bar">
   <div class="seg" id="modeSeg">
+    <button data-mode="conn">Connections</button>
     <button data-mode="para">By §</button>
     <button data-mode="term">By term</button>
   </div>
@@ -232,6 +275,8 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
     <div class="scroll" id="kantPane"></div>
   </section>
 </main>
+<section id="connPane" hidden></section>
+<div id="methodVeil"><div class="method" id="methodBox" role="dialog" aria-label="How the connections are made"></div></div>
 
 <!-- Shared data, loaded and never copied. Two exceptions, both in this folder because data/ has no file for them yet:
      meier-auszug-data.js (Meier's text) and jaesche-logik-data.js (the Jäsche Logik); their headers say how they were made. -->
@@ -241,6 +286,7 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 <script src="../../data/logik-busolt-24.js"></script>
 <script src="../../data/logik-wiener-24.js"></script>
 <script src="jaesche-logik-data.js"></script>
+<script src="meier-kant-concordance.js"></script>
 <script src="../../data/metaphysica-17.js"></script>
 <script src="../../data/reflexionen-17-18-baumgarten.js"></script>
 <script src="../../data/tradition-meier.js"></script>
@@ -272,7 +318,34 @@ LOGIK_BLOMBERG.sections.forEach((sec, si) => sec.blocks.forEach(b => {
 // Kant's own Reflexionen, filed under § by the extractor, with provenance on every entry.
 function reflFor(n) { return (REFL_BY_PARA[n] || []).map(i => REFL_ENTRIES[i]); }
 
-function hasKant(n) { return !!(BLOMBERG_BY_PARA[n] || REFL_BY_PARA[n]); }
+/* ── the concordance: which § of Meier each lecture passage is lecturing on (meier-kant-concordance.js) ── */
+const CW = ['blomberg', 'jaesche', 'busolt', 'wiener'];
+const CW_LABEL = { blomberg: 'Blomberg', jaesche: 'Jäsche', busolt: 'Busolt', wiener: 'Wiener' };
+const CW_FULL = { blomberg: 'Logik Blomberg (ca. 1771)', jaesche: 'Jäsche, Logik (1800)', busolt: 'Logik Busolt (ca. 1789/90)', wiener: 'Wiener Logik (1780ff.)' };
+const CW_DATA = { blomberg: LOGIK_BLOMBERG, jaesche: JAESCHE, busolt: LOGIK_BUSOLT, wiener: LOGIK_WIENER };
+const CW_VOL = { blomberg: 24, jaesche: 9, busolt: 24, wiener: 24 };
+const EV = { ...CONCORDANCE.meta.tiers, R: 'stated: Kant wrote this Reflexion in his own copy of Meier at this §, as the AA’s locus note or header records', Ri: 'the AA gives no § for this Reflexion; its place is inferred from the Reflexionen around it' };
+const EV_SHORT = { S: 'stated', A: 'AA', R: 'AA', Ri: 'interpolated', 1: 'strong', 2: 'probable', 3: 'tentative' };
+const LINK = {}, AT = {};          // LINK[work][blockId] = { n, code };  AT[work][§] = [{ b, si, ord, code }]
+CW.forEach(w => {
+  LINK[w] = {}; AT[w] = {}; let ord = 0;
+  CW_DATA[w].sections.forEach((sec, si) => sec.blocks.forEach(b => {
+    const l = CONCORDANCE.links[w][b.id];
+    if (!l) return;
+    const lo = l[2] || l[0], hi = l[3] || l[0], o = ord++;
+    LINK[w][b.id] = { n: l[0], code: l[1], lo, hi };
+    // A stated range (Blomberg's own "§ 341- 346") files the passage under every § it names; an inferred link only under its own §.
+    const homes = l[1] === 'S' ? Array.from({ length: hi - lo + 1 }, (_, i) => lo + i) : [l[0]];
+    homes.forEach(k => (AT[w][k] = AT[w][k] || []).push({ b, si, ord: o, code: l[1], lo, hi }));
+  }));
+});
+function linkedTo(w, n, near) {
+  const out = [];
+  for (let k = n - (near || 0); k <= n + (near || 0); k++) (AT[w][k] || []).forEach(x => out.push({ ...x, at: k }));
+  return out.sort((a, c) => a.ord - c.ord);
+}
+function evBadge(code) { const s = el('span', 'ev ev-' + code, EV_SHORT[code]); s.title = EV[code]; return s; }
+function hasKant(n) { return !!(REFL_BY_PARA[n] || CW.some(w => AT[w][n])); }
 
 // Baumgarten's own German glosses on a § of the Metaphysica (MET_PARAGRAPHS[].glosses).
 function glossesOf(m) { return (m.glosses || []).map(g => typeof g === 'string' ? g : (g.de || g.text || g.t || '')).filter(Boolean); }
@@ -329,7 +402,7 @@ MEIER_AUSZUG.hierarchy.forEach(part => {
 
 /* ── state ────────────────────────────────────────────────────────────── */
 const state = {
-  mode: 'para',
+  mode: 'conn',
   n: 1,
   ktab: 'blomberg',
   query: '',
@@ -338,6 +411,8 @@ const state = {
   start: false,               // match only words that begin with the query (set by the glossary)
   fromEn: null,               // { en, entry } while the German query came from the English box
   skip: false,
+  near: false,                // By §: also show passages linked to the neighbouring §§ (±2)
+  connShown: 15, connFilter: 'any', connSort: 'order',
   focus: null,                // { kind: 'block' | 'refl', id }
   hits: null,                 // term mode: { corpus: [hit] }
   shown: {},                  // term mode: how many of each list are visible
@@ -354,13 +429,14 @@ const escRe = c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // query is widened to match all of them: an optional h after a vowel or t, ß = ss, ey = ei, and a doubled consonant
 // (nn, tt, …) allowed to be single.
 function variantPattern(q) {
-  const t = q.trim().toLowerCase();
+  const t = q.trim().toLowerCase().replace(/wider/g, '\u0001');   // Widerspruch / Wiederspruch
   let out = '', afterOptH = false;
   for (let i = 0; i < t.length; i++) {
     const c = t[i];
     if (c === 'h' && afterOptH) continue;             // the optional h is already there
     afterOptH = false;
-    if (c === 'ß' || (c === 's' && t[i + 1] === 's')) { out += '(?:ß|ss)'; if (c === 's') i++; }
+    if (c === '\u0001') out += 'wie?h?der';
+    else if (c === 'ß' || (c === 's' && t[i + 1] === 's')) { out += '(?:ß|ss)'; if (c === 's') i++; }
     else if (c === 'e' && (t[i + 1] === 'y' || t[i + 1] === 'i')) { out += 'e[yi]h?'; i++; afterOptH = true; }
     else if (c === t[i + 1] && /[bdfgklmnprt]/.test(c)) {  // doubled consonant: Erkenntniß/Erkentniß
       out += escRe(c) + escRe(c) + '?' + (c === 't' ? 'h?' : ''); i++; afterOptH = c === 't';
@@ -476,8 +552,7 @@ function vocabPanel(meierText, kantTexts, kantLabel) {
 /* ── By §: Meier column ──────────────────────────────────────────────── */
 function kantTextsFor(n) {
   if (state.ktab === 'reflexionen') return reflFor(n).filter(e => e.text).map(e => e.text);
-  if (state.ktab === 'jaesche') return jaescheRangesFor(n).flatMap(r => jaescheBlocksIn(r).map(x => x.b.text));
-  return (BLOMBERG_BY_PARA[n] || []).map(x => x.b.text);
+  return linkedTo(state.ktab, n, 0).map(x => x.b.text);
 }
 
 function renderMeierPara() {
@@ -489,12 +564,10 @@ function renderMeierPara() {
   if (MEIER_AUSZUG.citations[n]) h.append(el('span', 'cite', MEIER_AUSZUG.citations[n]));
   wrap.append(h);
 
-  const bl = BLOMBERG_BY_PARA[n], rf = reflFor(n);
+  const rf = reflFor(n);
   const badges = el('div', 'badges');
-  badges.append(el('span', 'badge' + (bl ? '' : ' none'), bl ? `Blomberg: ${bl.length} paragraph${bl.length === 1 ? '' : 's'}` : 'Blomberg: nothing keyed here'));
-  badges.append(el('span', 'badge' + (rf.length ? '' : ' none'), rf.length ? `Reflexionen: ${rf.length}` : 'Reflexionen: none filed here'));
-  const jr = jaescheRangesFor(n);
-  badges.append(el('span', 'badge' + (jr.length ? '' : ' none'), jr.length ? 'Jäsche: ' + jr.map(r => r[0] === r[1] ? `AA 9:${r[0]}` : `AA 9:${r[0]}–${r[1]}`).join(', ') : 'Jäsche: no page named'));
+  CW.forEach(w => { const k = linkedTo(w, n, 0).length; badges.append(el('span', 'badge' + (k ? '' : ' none'), `${CW_LABEL[w]}: ${k ? k + ' passage' + (k === 1 ? '' : 's') : 'none'}`)); });
+  badges.append(el('span', 'badge' + (rf.length ? '' : ' none'), rf.length ? `Reflexionen: ${rf.length}` : 'Reflexionen: none'));
   wrap.append(badges);
 
   const t = el('div', 'mtext');
@@ -523,7 +596,7 @@ function renderMeierPara() {
     wrap.append(box);
   }
 
-  const kl = state.ktab === 'reflexionen' ? 'the Reflexionen on this §' : state.ktab === 'jaesche' ? 'the Jäsche pages tied to this §' : 'Blomberg on this §';
+  const kl = state.ktab === 'reflexionen' ? 'the Reflexionen on this §' : `${CW_LABEL[state.ktab]} on this §`;
   wrap.append(vocabPanel(PARAS[n], kantTextsFor(n), kl));
   pane.replaceChildren(wrap);
 }
@@ -534,67 +607,36 @@ function renderKantPara() {
   const pane = $('kantPane');
   const wrap = el('div');
 
-  if (state.ktab === 'blomberg') {
-    const items = BLOMBERG_BY_PARA[n];
-    if (!items) {
-      wrap.append(el('div', 'empty', `The Blomberg transcript has no passage keyed to § ${n}. Blomberg is keyed to ${Object.keys(BLOMBERG_BY_PARA).length} of Meier's 563 §§; the Busolt and Wiener transcripts carry no § apparatus at all, so use By term to compare them with Meier.`));
-    } else {
-      let lastAA = null, lastHead = null;
-      items.forEach(({ b, si, range }) => {
-        const raw = b.para.raw;
-        if (raw !== lastHead) {
-          const sh = el('div', 'shead', `LOGIK BLOMBERG · ${raw.toUpperCase()} `);
-          sh.append(el('span', null, LOGIK_BLOMBERG.sections[si].title.slice(0, 60)));
-          wrap.append(sh);
-          if (range) wrap.append(el('div', 'rangenote', `Keyed to the whole range §§ ${range[0]}–${range[1]}, not to § ${n} alone.`));
-          else if (b.para.nums.length > 1) wrap.append(el('div', 'rangenote', `The transcript heads this passage with §§ ${b.para.nums.join(', ')} together.`));
-          lastHead = raw; lastAA = null;
-        }
-        const inferred = (b.joined || []).includes('inferred');
-        const d = el('div', 'kblock' + (b.kind === 'note' ? ' note' : '') + (inferred ? ' inferred' : ''));
-        d.dataset.id = b.id;
-        const g = el('div', 'gut');
-        if (b.aa !== lastAA) g.append(el('span', 'aa', `24:${b.aa}`));
-        lastAA = b.aaEnd || b.aa;
-        d.append(g);
-        const focusK = state.focus && state.focus.kind === 'block' && state.focus.id === b.id ? (state.focus.k || 0) : -1;
-        d.append(highlighted(b.text, re, focusK));
-        wrap.append(d);
-      });
-    }
-  } else if (state.ktab === 'jaesche') {
-    const ranges = jaescheRangesFor(n);
-    if (!ranges.length) {
-      wrap.append(el('div', 'empty', `The AA's headers over the Reflexionen on Meier's § ${n} name no Jäsche pages, and Jäsche's own §§ are not numbered like Meier's, so this page cannot place any Jäsche text against § ${n}. Use By term to search the Jäsche Logik.`));
-    } else {
-      const CAP = 60;
-      ranges.forEach(r => {
-        const items = jaescheBlocksIn(r);
-        const sh = el('div', 'shead', `JÄSCHE LOGIK · AA 9:${r[0] === r[1] ? r[0] : r[0] + '–' + r[1]} `);
-        sh.append(el('span', null, `${items.length} paragraph${items.length === 1 ? '' : 's'}`));
-        wrap.append(sh);
-        wrap.append(el('div', 'rangenote', `Named by the AA’s header over the Reflexionen on Meier § ${n} (“IX ${r[0] === r[1] ? r[0] : r[0] + '-' + r[1]}”). Jäsche’s § numbers (J §) are his own, not Meier’s.`));
-        let lastAA = null;
-        const draw = list => list.forEach(({ b }) => {
-          const d = el('div', 'kblock' + (b.kind === 'heading' ? ' note' : ''));
-          d.dataset.id = b.id;
-          const g = el('div', 'gut');
-          if (b.aa !== lastAA) g.append(el('span', 'aa', `9:${b.aa}`));
-          if (b.para && b.kind === 'heading') g.append(el('span', 'para', `J § ${b.para}`));
-          lastAA = b.aaEnd || b.aa;
-          d.append(g);
-          const focusK = state.focus && state.focus.kind === 'block' && state.focus.id === b.id ? (state.focus.k || 0) : -1;
-          d.append(highlighted(b.text, re, focusK));
-          wrap.append(d);
-        });
-        draw(items.slice(0, CAP));
-        if (items.length > CAP) {
-          const m = el('button', 'more', `Show the other ${items.length - CAP} paragraphs of this range`);
-          m.addEventListener('click', () => { m.remove(); draw(items.slice(CAP)); });
-          wrap.append(m);
-        }
-      });
-    }
+  if (state.ktab !== 'reflexionen') {
+    const w = state.ktab, items = linkedTo(w, n, state.near ? 2 : 0);
+    const nc = el('label', 'nearctl'), cb = el('input'); cb.type = 'checkbox'; cb.checked = state.near;
+    cb.addEventListener('change', () => { state.near = cb.checked; renderAll(); });
+    nc.append(cb, ' also show passages linked to the two §§ on either side (an inferred link is within ±2 §§ about 80% of the time)');
+    wrap.append(nc);
+    if (!items.length) wrap.append(el('div', 'empty', `No passage of the ${CW_FULL[w]} is linked to § ${n}${state.near ? ' or the §§ beside it' : ''}. Kant did not lecture on every § in every year; try another text, or the neighbouring §§.`));
+    let lastSi = null, lastAA = null;
+    items.forEach(({ b, si, code, at }) => {
+      if (si !== lastSi) {
+        const sh = el('div', 'shead', `${CW_FULL[w].toUpperCase()} `);
+        sh.append(el('span', null, (CW_DATA[w].sections[si].title || '').slice(0, 70)));
+        wrap.append(sh); lastSi = si; lastAA = null;
+      }
+      const inferredJoin = (b.joined || []).includes('inferred');
+      const d = el('div', 'kblock' + (b.kind === 'note' || b.kind === 'heading' ? ' note' : '') + (inferredJoin ? ' inferred' : '') + (at !== n ? ' nearby' : ''));
+      d.dataset.id = b.id;
+      const g = el('div', 'gut');
+      if (b.aa !== lastAA) g.append(el('span', 'aa', `${CW_VOL[w]}:${b.aa}`));
+      lastAA = b.aaEnd || b.aa;
+      if (w === 'blomberg' && b.para) g.append(el('span', 'para', b.para.raw));
+      if (w === 'jaesche' && b.para && b.kind === 'heading') g.append(el('span', 'para', `J § ${b.para}`));
+      g.append(evBadge(code));
+      if (at !== n) g.append(el('span', 'atn', `linked to § ${at}`));
+      const lk = LINK[w][b.id]; if (lk && lk.hi > lk.lo) g.append(el('span', 'atn', `runs over §§ ${lk.lo}–${lk.hi}`));
+      d.append(g);
+      const focusK = state.focus && state.focus.kind === 'block' && state.focus.id === b.id ? (state.focus.k || 0) : -1;
+      d.append(highlighted(b.text, re, focusK));
+      wrap.append(d);
+    });
   } else {
     const items = reflFor(n);
     if (!items.length) {
@@ -658,8 +700,7 @@ function datingLine(e) {
 
 function paraTabs() {
   return [
-    { id: 'blomberg', label: 'Blomberg lecture', n: (BLOMBERG_BY_PARA[state.n] || []).length },
-    { id: 'jaesche', label: 'Jäsche Logik', n: jaescheRangesFor(state.n).reduce((t, r) => t + jaescheBlocksIn(r).length, 0) },
+    ...CW.map(w => ({ id: w, label: CW_LABEL[w], n: linkedTo(w, state.n, state.near ? 2 : 0).length })),
     { id: 'reflexionen', label: 'Reflexionen', n: reflFor(state.n).length },
   ];
 }
@@ -754,7 +795,7 @@ function renderMeierTerm() {
   const shown = state.shown.meier || PER_PAGE;
   hs.slice(0, shown).forEach(h => {
     wrap.append(exButton(h, [`MEIER § ${h.row.n}`, ' ', Object.assign(el('i'), { textContent: MEIER_AUSZUG.citations[h.row.n] ? '· ' + MEIER_AUSZUG.citations[h.row.n] : '' })],
-      () => openAt(h.row.n, hasKant(h.row.n) && !BLOMBERG_BY_PARA[h.row.n] ? 'reflexionen' : 'blomberg')));
+      () => openAt(h.row.n, bestTab(h.row.n))));
   });
   const m = moreBtn('meier', hs.length, renderMeierTerm); if (m) wrap.append(m);
 
@@ -765,7 +806,7 @@ function renderMeierTerm() {
     wrap.append(sh);
     th.slice(0, state.shown.tradition || 8).forEach(h => wrap.append(exButton(h,
       [`TRADITION · on Meier § ${h.row.n} · ${h.row.t.author}`, Object.assign(el('i'), { textContent: ' · ' + h.row.t.relation })],
-      () => openAt(h.row.n, hasKant(h.row.n) && !BLOMBERG_BY_PARA[h.row.n] ? 'reflexionen' : 'blomberg'))));
+      () => openAt(h.row.n, bestTab(h.row.n)))));
     const mt = moreBtn('tradition', th.length, renderMeierTerm); if (mt) wrap.append(mt);
   }
   pane.replaceChildren(wrap);
@@ -780,9 +821,10 @@ const TERM_LABEL = {
   reflexionen: 'Kant’s Reflexionen on Meier (AA 16)', reflm: 'Kant’s Reflexionen and Erläuterungen on Baumgarten’s Metaphysica (AA 17–18)', metaphysica: 'Baumgarten, Metaphysica (AA 17, Latin)',
 };
 const TERM_NOTE = {
-  busolt: 'This transcript carries no § apparatus, so its hits cannot be placed against a § of Meier’s; they are shown with their AA page. Click a hit to read the whole paragraph.',
-  wiener: 'This transcript carries no § apparatus, so its hits cannot be placed against a § of Meier’s; they are shown with their AA page. Click a hit to read the whole paragraph.',
-  jaesche: 'Jäsche’s §§ are his own, not Meier’s. Where the AA’s headers over the Reflexionen on Meier name this page as a parallel, the hit says which Meier §§; that link is the AA’s, not this page’s. Click a hit to read the whole paragraph.',
+  busolt: 'Each hit names the § of Meier this passage is lecturing on. The transcript has no § headings, so every link is inferred, and marked with how strong it is. Click a hit to read it beside Meier’s §.',
+  wiener: 'Each hit names the § of Meier this passage is lecturing on. The transcript has no § headings, so every link is inferred, and marked with how strong it is. Click a hit to read it beside Meier’s §.',
+  jaesche: 'Each hit names the § of Meier this passage corresponds to: “AA” where the Academy Edition’s own header names the page, otherwise inferred. Jäsche’s § numbers are his own. Click a hit to read it beside Meier’s §.',
+  blomberg: 'Each hit names the § of Meier it is lecturing on: “stated” where the transcript’s own § heading says so. Click a hit to read it beside Meier’s §.',
   reflm: 'These are Kant’s notes in Baumgarten’s book, filed under Baumgarten’s §§, not Meier’s, so they are shown in place. Click a hit to read the whole note.',
   metaphysica: 'Baumgarten’s text is Latin. A German word will rarely match; the English box also searches the Latin equivalent, or type Latin here. Click a hit to read the whole paragraph with Baumgarten’s own German glosses.',
 };
@@ -809,11 +851,11 @@ function renderKantTerm() {
       const e = h.row.e, n0 = e.paras[0];
       wrap.append(exButton(h, [`REFL. ${e.r}`, ` · AA 16${e.aa ? ':' + e.aa : ''} · on § ${e.paras.slice(0, 4).join(', ')}${e.paras.length > 4 ? '…' : ''}`, e.src === 'locus' ? '' : ' · § not stated by Kant’s locus note'],
         n0 ? () => openAt(n0, 'reflexionen', { kind: 'refl', id: e.r, k: h.i }) : null));
-    } else if (k === 'blomberg') {
-      const b = h.row.b, n0 = b.para && (b.para.from != null ? b.para.from : b.para.nums[0]);
-      wrap.append(exButton(h, [`AA 24:${b.aa}`, b.para ? ` · ${b.para.raw}` : '', secI],
-        n0 ? () => openAt(n0, 'blomberg', { kind: 'block', id: b.id, k: h.i }) : null));
-    } else if (k === 'jaesche') {
+    } else if (CW.includes(k)) {
+      const b = h.row.b, l = LINK[k][b.id];
+      wrap.append(exButton(h, [`AA ${CW_VOL[k]}:${aaRange(b)}`, k === 'jaesche' && b.para ? ` · Jäsche § ${b.para}` : '', secI, l ? ` · on Meier § ${l.n} ` : '', l ? evBadge(l.code) : ''],
+        l ? () => openAt(l.n, k, { kind: 'block', id: b.id, k: h.i }) : null));
+    } else if (k === 'jaesche_old') {
       const b = h.row.b, ps = meierParasForPage(b.aa);
       const link = ps.length ? el('i', null, ` · the AA’s headers tie this page to Meier § ${ps.slice(0, 4).join(', ')}${ps.length > 4 ? '…' : ''}`) : '';
       wrap.append(exButton(h, [`AA 9:${aaRange(b)}`, b.para ? ` · Jäsche § ${b.para}` : '', secI, link || ''],
@@ -1013,9 +1055,8 @@ function renderEnBar() {
 function copyComparison(btn) {
   const n = state.n, out = [];
   out.push(`Meier, Auszug aus der Vernunftlehre, § ${n}${MEIER_AUSZUG.citations[n] ? ' (' + MEIER_AUSZUG.citations[n] + ')' : ''}:\n${PARAS[n]}`);
-  (BLOMBERG_BY_PARA[n] || []).forEach(({ b }) => out.push(`Kant, Logik Blomberg, AA 24:${aaRange(b)}, ${b.para.raw}:\n${b.text}`));
+  CW.forEach(w => linkedTo(w, n, 0).forEach(({ b, code }) => out.push(`Kant, ${CW_FULL[w]}, AA ${CW_VOL[w]}:${aaRange(b)}${b.para && w === 'blomberg' ? ', ' + b.para.raw : ''} [link to § ${n}: ${EV[code]}]:\n${b.text}`)));
   reflFor(n).forEach(e => { if (e.text) out.push(`Kant, Reflexion ${e.r}${e.aa ? ', AA 16:' + e.aa : ''}${e.phRaw ? ', phase ' + e.phRaw : ''}${e.src === 'locus' ? '' : ' [§ placement not from Kant’s own locus note]'}:\n${e.text}`); });
-  jaescheRangesFor(n).forEach(r => out.push(`Jäsche, Logik, AA 9:${r[0] === r[1] ? r[0] : r[0] + '–' + r[1]} (pages the AA's headers over the Reflexionen on this § name as parallel; Jäsche's § numbers are his own)`));
   (TRADITION[n] || []).forEach(t => out.push(`[Lab's hand-curated note, not a text] ${t.author}, ${t.source} (${t.relation}): ${t.text}`));
   const text = out.join('\n\n');
   const done = () => { btn.textContent = 'Copied'; setTimeout(() => { btn.textContent = 'Copy this comparison with citations'; }, 1600); };
@@ -1023,11 +1064,158 @@ function copyComparison(btn) {
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
 }
 
+/* ── Connections: a word, and the Meier §§ and Kant passages it connects ─────────── */
+function bestTab(n) { const w = CW.find(x => AT[x][n] && AT[x][n].some(y => y.code === 'S' || y.code === 'A')) || CW.find(x => AT[x][n]); return w || 'reflexionen'; }
+function connRegex() { return makeRegex(state.query, state.whole, state.variants, state.start); }
+function clip(text, re, max) {
+  if (text.length <= max) return highlighted(text, re);
+  const m = matchesIn(text, re)[0], a = m ? Math.max(0, m.start - Math.floor(max / 2)) : 0;
+  const f = document.createDocumentFragment();
+  if (a > 0) f.append('… ');
+  f.append(highlighted(text.slice(a, a + max), re), ' …');
+  return f;
+}
+function renderConn() {
+  const pane = $('connPane'); pane.replaceChildren();
+  const re = connRegex();
+  if (!re) {
+    const box = el('div', 'conn-intro');
+    box.append(el('h2', null, 'CONNECTIONS'));
+    const p1 = el('p'); p1.append('Kant lectured on logic from G. F. Meier’s ', el('i', null, 'Auszug aus der Vernunftlehre'), ' for some forty years. Every passage of the lecture transcripts here (Blomberg, Wiener, Busolt), of the Jäsche ', el('i', null, 'Logik'), ', and of Kant’s own Reflexionen in his copy of the book is linked to the § of Meier it is lecturing on. Search a word to see, for every § where it matters, Meier’s text beside the passages of Kant on that same §.');
+    const p2 = el('p'); p2.append('Each link says how it is known: ', evBadge('S'), ' the transcript’s own § heading; ', evBadge('A'), ' the Academy Edition names the page; ', evBadge('1'), ' ', evBadge('2'), ' ', evBadge('3'), ' inferred by this page, from the order of the lecture and its wording against Meier’s. ');
+    const how = el('button', 'copy', 'How the connections are made'); how.addEventListener('click', showMethod); p2.append(how);
+    box.append(p1, p2, el('p', 'small', 'Type a German word in the box above, or an English word in the ENGLISH box to be offered Kant’s German for it.'));
+    const ch = el('div', 'chips suggest');
+    ['Widerspruch', 'Urtheil', 'Merkmal', 'Wahrheit', 'Begriff', 'Vernunftschluß', 'Gewißheit', 'conversio'].forEach(t => { const c = el('button', 'chip s', t); c.addEventListener('click', () => setQuery(t)); ch.append(c); });
+    box.append(ch); pane.append(box); return;
+  }
+  // gather, per Meier §
+  const rows = [];
+  let mTot = 0, kTot = 0;
+  PARA_NUMS.forEach(n => {
+    const mh = matchesIn(PARAS[n], re).length;
+    const kh = {}; let kc = 0;
+    CW.forEach(w => { const xs = linkedTo(w, n, 0).filter(x => matchesIn(x.b.text, re).length); if (xs.length) { kh[w] = xs; kc += xs.length; } });
+    const rh = reflFor(n).filter(e => e.text && matchesIn(e.text, re).length); kc += rh.length;
+    if (mh) mTot++; if (kc) kTot++;
+    const f = state.connFilter;
+    if ((f === 'both' && mh && kc) || (f === 'any' && (mh || kc)) || (f === 'meier' && mh) || (f === 'kant' && kc)) rows.push({ n, mh, kh, rh, kc });
+  });
+  const both = rows.filter(r => r.mh && r.kc).length;
+  if (state.connSort === 'count') rows.sort((a, b) => (b.mh + b.kc) - (a.mh + a.kc) || a.n - b.n);
+  const sum = el('div', 'csum');
+  const pp = k => `${k} §${k === 1 ? '' : '§'}`;
+  const nb = PARA_NUMS.filter(n => matchesIn(PARAS[n], re).length && (CW.some(w => linkedTo(w, n, 0).some(x => matchesIn(x.b.text, re).length)) || reflFor(n).some(e => e.text && matchesIn(e.text, re).length))).length;
+  sum.append('“', el('b', null, state.query.trim()), `” is in Meier’s text in ${pp(mTot)}, and in Kant’s passages on ${pp(kTot)}. `);
+  sum.append(el('b', null, pp(nb)), ` where both Meier and Kant use it.`);
+  pane.append(sum);
+  const bar = el('div', 'connbar');
+  bar.append('Show:');
+  [['any', 'every § where either uses it'], ['both', 'only where both do'], ['meier', 'where Meier does'], ['kant', 'where Kant does']].forEach(([v, t]) => {
+    const l = el('label'), r = el('input'); r.type = 'radio'; r.name = 'cf'; r.checked = state.connFilter === v;
+    r.addEventListener('change', () => { state.connFilter = v; state.connShown = 15; renderConn(); }); l.append(r, t); bar.append(l);
+  });
+  bar.append(' · Order:');
+  [['order', 'Meier’s order'], ['count', 'most occurrences']].forEach(([v, t]) => {
+    const l = el('label'), r = el('input'); r.type = 'radio'; r.name = 'cs'; r.checked = state.connSort === v;
+    r.addEventListener('change', () => { state.connSort = v; renderConn(); }); l.append(r, t); bar.append(l);
+  });
+  pane.append(bar);
+  if (!rows.length) { pane.append(el('div', 'empty', 'Nothing here. Try “every § where either uses it”, a shorter stem, or switch off whole word.')); return; }
+  rows.slice(0, state.connShown).forEach(r => pane.append(connCard(r, re)));
+  if (rows.length > state.connShown) {
+    const m = el('button', 'more', `Show ${Math.min(15, rows.length - state.connShown)} more §§ of ${rows.length - state.connShown} remaining`);
+    m.addEventListener('click', () => { state.connShown += 15; renderConn(); }); pane.append(m);
+  }
+}
+function connCard({ n, mh, kh, rh, kc }, re) {
+  const c = el('div', 'ccard');
+  const left = el('div', 'cm');
+  const h = el('div', 'ch', `MEIER § ${n} `); h.append(el('small', null, `${MEIER_AUSZUG.citations[n] || ''} · ${whereIs(n).replace(/^.*Abschnitt \d+: /, '')}`));
+  left.append(h);
+  const t = el('div', 'ct'); t.append(highlighted(PARAS[n], re)); left.append(t);
+  if (!mh) left.append(el('div', 'none', 'Meier does not use the word in this §; Kant does, in a passage on it.'));
+  const right = el('div', 'ck');
+  if (!kc) {
+    const total = CW.reduce((s, w) => s + linkedTo(w, n, 0).length, 0) + reflFor(n).length;
+    right.append(el('div', 'none', total ? `Kant does not use the word in the ${total} passage${total === 1 ? '' : 's'} on this §.` : 'No passage of Kant’s is linked to this §.'));
+  }
+  CW.forEach(w => {
+    const xs = kh[w]; if (!xs) return;
+    right.append(el('div', 'wk', `${CW_FULL[w].toUpperCase()} · ${xs.length}`));
+    xs.slice(0, 2).forEach(x => right.append(kantPassage(w, x, re)));
+    if (xs.length > 2) { const more = el('button', 'more', `${xs.length - 2} more in ${CW_LABEL[w]}`); more.addEventListener('click', () => { more.replaceWith(...xs.slice(2).map(y => kantPassage(w, y, re))); }); right.append(more); }
+  });
+  if (rh.length) {
+    right.append(el('div', 'wk', `KANT’S REFLEXIONEN ON THIS § · ${rh.length}`));
+    rh.slice(0, 2).forEach(e => { const d = el('div', 'kp'); const r = el('span', 'kr', `Refl. ${e.r}${e.aa ? ', AA 16:' + e.aa : ''}${e.phRaw ? ' · phase ' + e.phRaw : ''} `); r.append(evBadge(e.src === 'locus' || e.src === 'group' ? 'R' : 'Ri')); d.append(r, clip(e.text.replace(/\n/g, ' '), re, 420)); right.append(d); });
+    if (rh.length > 2) right.append(el('div', 'small', `and ${rh.length - 2} more Reflexionen`));
+  }
+  const acts = el('div', 'acts');
+  const o = el('button', 'copy', `Read § ${n} side by side`); o.addEventListener('click', () => openAt(n, bestTab(n)));
+  acts.append(o); right.append(acts);
+  c.append(left, right);
+  return c;
+}
+function kantPassage(w, x, re) {
+  const d = el('div', 'kp');
+  const r = el('span', 'kr', `${CW_LABEL[w]}, AA ${CW_VOL[w]}:${aaRange(x.b)}${w === 'blomberg' && x.b.para ? ' · ' + x.b.para.raw : ''}${w === 'jaesche' && x.b.para ? ' · Jäsche § ' + x.b.para : ''} `);
+  r.append(evBadge(x.code));
+  if (x.hi > x.lo) r.append(el('span', null, ` · runs over §§ ${x.lo}–${x.hi}`));
+  d.append(r, clip(x.b.text, re, 420));
+  d.style.cursor = 'pointer'; d.title = 'Read it beside Meier’s §';
+  d.addEventListener('click', () => openAt(x.at, w, { kind: 'block', id: x.b.id }));
+  return d;
+}
+function showMethod() {
+  const box = $('methodBox'); box.replaceChildren();
+  const M = CONCORDANCE.meta, acc = M.accuracy;
+  const P = (...xs) => { const p = el('p'); xs.forEach(x => p.append(x)); return p; };
+  box.append(el('h2', null, 'HOW THE CONNECTIONS ARE MADE'));
+  box.append(P('Every passage of a lecture text is linked to the one § of Meier’s ', el('i', null, 'Auszug'), ' it is lecturing on. Two kinds of link are ', el('b', null, 'stated'), ' by the texts themselves, and the rest are ', el('b', null, 'inferred'), ' by this page; the page always says which.'));
+  box.append(el('h3', null, 'STATED'));
+  box.append(P(evBadge('S'), ' The Blomberg transcript heads its paragraphs with Meier’s § numbers. Those headings are used as they stand. ', evBadge('A'), ' The Academy Edition prints, over each group of Reflexionen on Meier, the pages of the Jäsche ', el('i', null, 'Logik'), ' that run parallel (“IX 21-33”). A Jäsche passage on such a page, aligned to one of the §§ the header names, is marked “AA”. Kant’s Reflexionen are written in his own copy of Meier, so their § is given by where he wrote them (the AA’s locus notes).'));
+  box.append(el('h3', null, 'INFERRED: THE RULE'));
+  const ol = el('ol');
+  ['Order. Kant lectured through Meier’s book from front to back, so a lecture is read in sequence against Meier’s §§: moving forward through the book is cheap, going back is costly. (In Blomberg, 1,658 of 1,837 consecutive keyed paragraphs stay on the same §, 177 move forward, and 2 go back.)',
+   'Section titles. Each lecture section is held to the Meier Abschnitt its own title names (Busolt’s “Von der Wahrheit” to Meier’s fourth Abschnitt, “Von der Wahrheit der gelehrten Erkenntniss”, §§ 92–114). The table below is that concordance of titles, read off both texts. Where Meier’s order differs from the obvious one, the table follows Meier: immediate inference (“Verstandesschlüsse”) goes to §§ 341–352, at the close of his ninth Abschnitt on judgments, not to the tenth on inferences of reason.',
+   'Wording. Within that, each passage is matched on its vocabulary against Meier’s § and against Kant’s own Reflexionen on that §, after evening out the period’s spelling (Warheit and Wahrheit, Urtheil and Urteil).',
+   'Runs of §§. Where a passage’s wording fits the neighbouring §§ of the same section nearly as well as its own (at least four-fifths as well, up to six §§ away), it is said to run over them, as Blomberg’s own headings sometimes do (“§ 66–91”).'].forEach(t => ol.append(el('li', null, t)));
+  box.append(ol);
+  box.append(P('No outside concordance was used to build or tune the rule. It was tuned on half of Blomberg and tested on the other half against Blomberg’s own § headings, which the rule never sees, and tested on Jäsche against the Academy Edition’s headers. Afterwards it was tested once more, against the concordance in J. Michael Young’s Cambridge translation of the ', el('i', null, 'Lectures on Logic'), ' (1992, Appendix D), for a sample of Meier’s §§ (1–31, 167–211, 347–391). That test led to one correction, the place of immediate inference in the table of titles; no link was taken from it.'));
+  box.append(el('h3', null, 'HOW OFTEN IT IS RIGHT'));
+  const t = el('table'); const hr = el('tr'); ['Test', 'Exact §', 'Within ±2 §§', 'Right Meier section'].forEach(x => hr.append(el('th', null, x))); t.append(hr);
+  const row = (a, b, c, d) => { const r = el('tr'); [a, b, c, d].forEach(x => r.append(el('td', null, x))); t.append(r); };
+  const pct = x => Math.round(x * 100) + '%';
+  row('Blomberg, held-out half, against its own § headings', pct(acc.blomberg_heldout.exact), pct(acc.blomberg_heldout.within2), pct(acc.blomberg_heldout.section));
+  row('Jäsche, against the AA’s headers', pct(acc.jaesche_vs_AA.exact), pct(acc.jaesche_vs_AA.within2), pct(acc.jaesche_vs_AA.section));
+  row('Wiener Logik, against the Cambridge concordance (sample)', '–', pct(acc.wiener_vs_cambridge_sample.within2), '–');
+  box.append(t);
+  const t2 = el('table'); const h2 = el('tr'); ['Mark', 'Meaning', 'Within ±2 §§: Blomberg', 'Wiener'].forEach(x => h2.append(el('th', null, x))); t2.append(h2);
+  ['1', '2', '3'].forEach(k => { const r = el('tr'); const c1 = el('td'); c1.append(evBadge(k)); r.append(c1, el('td', null, EV[k]), el('td', null, pct(acc.by_tier_within2.blomberg[k])), el('td', null, pct(acc.by_tier_within2.wiener[k]))); t2.append(r); });
+  box.append(t2);
+  box.append(P(el('b', null, 'Read with care. '), `Every passage gets one home, so a long passage that treats several §§ in turn is filed under one of them: in the Wiener test, only ${pct(acc.wiener_vs_cambridge_sample.paras_recovered)} of the §§ the Cambridge concordance finds on a page are found there by this page. Tick “also show passages linked to the two §§ on either side” in By § to widen the net. Busolt could not be tested at all: no concordance covers it. A “tentative” link is placed by its position in the lecture only. Kant did not always follow Meier: digressions, examples of his own and later doctrine sit where the lecture put them, and the nearest § is the best this page can say.`));
+  box.append(el('h3', null, 'THE CONCORDANCE OF TITLES'));
+  const t3 = el('table'); const h3 = el('tr'); ['Text', 'Section (its own title)', 'Meier §§'].forEach(x => h3.append(el('th', null, x))); t3.append(h3);
+  ['blomberg', 'busolt', 'wiener'].forEach(w => Object.keys(CONCORDANCE.headings[w]).forEach(si => {
+    const r = el('tr'), rg = CONCORDANCE.headings[w][si];
+    r.append(el('td', null, CW_LABEL[w]), el('td', null, CW_DATA[w].sections[+si].title || '(untitled)'), el('td', null, `${rg[0]}–${rg[1]}`)); t3.append(r);
+  }));
+  Object.entries(CONCORDANCE.headings.jaesche_einleitung).forEach(([k, rg]) => { const r = el('tr'); r.append(el('td', null, 'Jäsche'), el('td', null, `Einleitung ${k}`), el('td', null, `${rg[0]}–${rg[1]}`)); t3.append(r); });
+  [['Jäsche §§ 1–16', '249–291'], ['Jäsche §§ 17–40', '292–352'], ['Jäsche §§ 41–43', '341–360'], ['Jäsche §§ 44–55', '341–353'], ['Jäsche §§ 56–93', '353–413'], ['Jäsche §§ 94–98, 114–120', '414–438'], ['Jäsche §§ 99–113', '249–291']].forEach(([a, b]) => { const r = el('tr'); r.append(el('td', null, 'Jäsche'), el('td', null, a), el('td', null, b)); t3.append(r); });
+  box.append(t3);
+  box.append(P(el('span', 'small', `Built ${M.generated} by build-concordance.py in this folder, from the texts in the repository. Rebuild it after any of those texts changes.`)));
+  const x = el('button', 'copy', 'Close'); x.addEventListener('click', () => $('methodVeil').classList.remove('on')); box.append(x);
+  $('methodVeil').classList.add('on');
+}
+
 /* ── render shell ─────────────────────────────────────────────────────── */
 function renderBar() {
   renderEnBar();
   document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === state.mode));
   $('paraCtl').style.display = state.mode === 'para' ? '' : 'none';
+  document.querySelector('main').style.display = state.mode === 'conn' ? 'none' : '';
+  $('connPane').hidden = state.mode !== 'conn';
   if (state.mode === 'para') {
     const i = OUTLINE.findIndex(o => state.n >= o.from && state.n <= o.to);
     $('secSel').value = i;
@@ -1047,7 +1235,9 @@ function renderTabs() {
   });
 }
 function renderAll() {
-  renderBar(); renderTabs();
+  renderBar();
+  if (state.mode === 'conn') { renderConn(); return; }
+  renderTabs();
   if (state.mode === 'para') { renderMeierPara(); renderKantPara(); } else { renderMeierTerm(); renderKantTerm(); }
 }
 
@@ -1059,13 +1249,16 @@ function step(d) {
 }
 function goPara(n) { if (n == null || !PARAS[n]) return; state.n = n; state.focus = null; state.vocabTerm = null; renderAll(); $('meierPane').scrollTop = 0; $('kantPane').scrollTop = 0; }
 function setQuery(q) {
-  $('q').value = q; state.query = q; state.vocabTerm = null; state.focus = null; state.shown = {};
+  $('q').value = q; state.query = q; state.vocabTerm = null; state.focus = null; state.shown = {}; state.connShown = 15;
   runSearch(); renderAll();
 }
 
 /* ── events ───────────────────────────────────────────────────────────── */
 OUTLINE.forEach((o, i) => { const op = el('option', null, `${o.label} (§§ ${o.from}–${o.to})`); op.value = i; $('secSel').append(op); });
 document.querySelectorAll('#modeSeg button').forEach(b => b.addEventListener('click', () => { state.mode = b.dataset.mode; state.focus = null; if (state.mode === 'term' && state.ktab === 'reflexionen' && !state.hits) state.ktab = 'blomberg'; renderAll(); }));
+$('howBtn').addEventListener('click', showMethod);
+$('methodVeil').addEventListener('click', e => { if (e.target === $('methodVeil')) $('methodVeil').classList.remove('on'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('methodVeil').classList.remove('on'); });
 $('secSel').addEventListener('change', e => goPara(OUTLINE[+e.target.value].from));
 $('nInput').addEventListener('change', e => { const n = +e.target.value; if (PARAS[n]) goPara(n); else e.target.value = state.n; });
 $('prev').addEventListener('click', () => goPara(step(-1)));
