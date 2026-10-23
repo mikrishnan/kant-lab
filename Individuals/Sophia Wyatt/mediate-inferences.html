@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mediate inferences in Kant's logic lectures</title>
+<title>Mediate inferences in Kant's logic lectures and Reflexionen</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
@@ -35,8 +35,10 @@ main { max-width: 880px; margin: 0 auto; padding: 18px 24px 60px; }
 .item-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
 .cite { font: 600 14px 'Cinzel', serif; letter-spacing: .04em; color: var(--accent); }
 .cite .pages { font-family: 'EB Garamond', serif; font-weight: 500; letter-spacing: 0; color: var(--ink); font-size: 17px; margin-left: 6px; }
+.sub { flex-basis: 100%; font-size: 15px; color: var(--muted); margin-top: -2px; }
+.sub i { font-size: 14px; }
 .kind { font-size: 14px; font-style: italic; color: var(--muted); }
-.para { max-height: 15em; overflow-y: auto; padding-right: 8px; hyphens: auto; }
+.para { white-space: pre-line; max-height: 15em; overflow-y: auto; padding-right: 8px; hyphens: auto; }
 mark { background: var(--mark); color: var(--mark-ink); padding: 1px 2px; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .pg { font: 600 11px 'Cinzel', serif; color: var(--muted); border: 1px solid var(--rule); border-radius: 3px; padding: 0 4px; margin: 0 3px; white-space: nowrap; vertical-align: 1px; background: var(--parchment); }
 .pg.ms { font-style: italic; font-family: 'EB Garamond', serif; font-weight: 400; }
@@ -49,8 +51,8 @@ footer p { margin: 0 0 8px; }
 </head>
 <body>
 <header>
-  <h1>Mediate inferences in Kant’s logic lectures</h1>
-  <p class="lede">Examples of mediate inferences (<i>Vernunftschlüsse</i>) in the Blomberg, Busolt and Wiener logic transcripts, each in its paragraph with the inference highlighted.</p>
+  <h1>Mediate inferences in Kant’s logic lectures and Reflexionen</h1>
+  <p class="lede">Examples of mediate inferences (<i>Vernunftschlüsse</i>) in the Blomberg, Busolt and Wiener logic transcripts and in Kant’s Reflexionen on Meier’s <i>Auszug</i> and Baumgarten’s <i>Metaphysica</i>, each in its paragraph or Reflexion with the inference highlighted.</p>
 </header>
 
 <div class="controls">
@@ -65,7 +67,7 @@ footer p { margin: 0 0 8px; }
 <main id="list"></main>
 
 <footer>
-  <p><b>What is attested, what is not.</b> The paragraph text, the page numbers (Academy Edition, <i>AA</i> XXIV) and the manuscript page numbers are the transcriptions’, as <code>data/logik-*-24.js</code> carries them; a grey tag such as <span class="pg">AA 24:673</span> marks where a new page begins. <b>Which stretch counts as a mediate inference, and the label on each, is the compiler’s reading, not the edition’s.</b> The list is a curated selection from a read of the three transcripts, not an exhaustive census. Short notes are the compiler’s, not Kant’s or his students’.</p>
+  <p><b>What is attested, what is not.</b> The paragraph and Reflexion texts, the Reflexion numbers (Adickes’ numbering), the Academy Edition page numbers and the manuscript page numbers are the transcriptions’, as <code>data/logik-*-24.js</code>, <code>data/reflexionen-16-meier.js</code> and <code>data/reflexionen-17-18-baumgarten.js</code> carry them; a grey tag such as <span class="pg">AA 24:673</span> marks where a new page begins. For a Reflexion the § of Meier or Baumgarten comes in one of three ways, and the card says which: from the Academy Edition’s own locus note (shown verbatim), from the heading of the block it stands in, or, for the Baumgarten Reflexionen, from the handbook page it is written on. Where the edition names no § the card says so. <b>Which stretch counts as a mediate inference, and the label on each, is the compiler’s reading, not the edition’s.</b> The list is a curated selection from a read of the texts, not an exhaustive census. Short notes are the compiler’s, not Kant’s or his students’.</p>
   <p>Immediate inferences (<i>Verstandesschlüsse</i>: conversion, contraposition, subalternation and the like) are left out.</p>
 </footer>
 
@@ -73,18 +75,14 @@ footer p { margin: 0 0 8px; }
 <script src="../../data/logik-blomberg-24.js"></script>
 <script src="../../data/logik-busolt-24.js"></script>
 <script src="../../data/logik-wiener-24.js"></script>
+<!-- Kant's Reflexionen on Meier (AA XVI) and on Baumgarten (AA XVII-XVIII); large files, loaded as they are. -->
+<script src="../../data/reflexionen-16-meier.js"></script>
+<script src="../../data/reflexionen-17-18-baumgarten.js"></script>
 <script>
 // ── Data ──────────────────────────────────────────────────────────────────────
-// The lectures, oldest first. `key` is the prefix of each block id.
-const MI_WORKS = [
-  { key: 'blomberg', label: 'Blomberg Logic', date: 'ca. 1771',    data: LOGIK_BLOMBERG },
-  { key: 'wiener',   label: 'Wiener Logic',   date: '1780ff.',     data: LOGIK_WIENER },
-  { key: 'busolt',   label: 'Busolt Logic',   date: 'ca. 1789/90', data: LOGIK_BUSOLT }
-];
-
-// The curated examples. `block` is a block id in the data file; each of `spans` is
-// copied verbatim from that block's text and is highlighted wherever it occurs.
-// `note` is the compiler's gloss, shown as such. Add an example by adding a line.
+// The curated examples from the lectures. `block` is a block id in the data file; each
+// of `spans` is copied verbatim from that block's text and is highlighted wherever it
+// occurs. `note` is the compiler's gloss, shown as such. Add an example by adding a line.
 const MI_ITEMS = [
  {"block":"blomberg-s03-017","kind":"Informal inference","spans":["daß der Mond Einwohner habe, weil in demselben Berge und Thäler befindlich sind"],"note":"Kant calls the ground insufficient: it shows only that inhabitants are possible."},
  {"block":"blomberg-s06-006","kind":"Fallacy / sophism","spans":["Etwas ist wahr, wenn es mit dem Gegenstande übereinstimmet. nun aber kann ich dieses nicht einsehen, ohne den Gegenstand vorhero zu betrachten, und zu erkennen. Es ist also nichts anders, als daß die Wahrheit darinn bestehen wird, daß die Erkenntniß vom Gegenstand übereinstimmet mit der Erkenntniß vom Gegenstand."],"note":"The sceptics’ “diallele”: truth defined as agreement with the object, which can be known only through knowledge of it."},
@@ -126,6 +124,117 @@ const MI_ITEMS = [
  {"block":"wiener-s13-001","kind":"Categorical syllogism","spans":["Cajus sterblich weil Mensch"],"note":"Here the nota intermedia is “Mensch”."}
 ];
 
+// The curated examples from the Reflexionen. `r` is Adickes' Reflexion number; `w` is
+// `meier` (Reflexionen on the Auszug, AA 16) or `baum` (on the Metaphysica, AA 17-18).
+// `spans` and `note` as above; the Reflexion's text keeps its line breaks.
+const MI_REFL_ITEMS = [
+ {"r":2033,"w":"meier","kind":"Analogy","spans":["Einer, der die musick erlernet, vergißt diejenige Stücke, die er anfänglich gelernet hat, aber er behält die fertigkeit zu spielen. Also nachdem man die besondere Stücke der Erkenntniß aus dem Gedächtniße verlohren: so bleibt eine fertigkeit übrig, nach der Art des einmal erlangten Erkentnißes ferner zu denken."]},
+ {"r":2146,"w":"meier","kind":"Informal inference","spans":["Wenn sie mit einem nicht stimmen, so stellen sie ein Anderes vor. Es kan also keine Falschheit darin seyn."]},
+ {"r":2691,"w":"meier","kind":"Hypothetical syllogism","spans":["Wenn es an sich nothwendig ist, daß etwas geschehen soll, welches aber ohne eine Voraussetzung nicht moglich ist, so ist diese nothwendig. Nun ist nicht an sich nothwendig, das Daseyn der Welt zu erklaren, aber wohl: das hochste Gut moralisch zu befördern."]},
+ {"r":2726,"w":"meier","kind":"Fallacy / sophism","spans":["Baculus stat in angulo, ergo pluit."],"note":"In square brackets in the AA transcription."},
+ {"r":3019,"w":"meier","kind":"Informal inference","spans":["Alle Figuren sind entweder geradlinigte oder krummlinigte oder Vermischtlinigte, also ein Cirkel.","Alle Menschen sind entweder tugendhaft oder lasterhaft, also auch Socrates."],"note":"Inferences from a division (Eintheilung)."},
+ {"r":3070,"w":"meier","kind":"Categorical syllogism","spans":["Eine jede Substanz, die nicht theilbar ist, ist nicht verweslich. Atqui die Seele ist [ein] nicht eine theilbare Substanz etc etc."],"note":"Offered to show that the minor is affirmative: “anima est nondiuisibilis”."},
+ {"r":3143,"w":"meier","kind":"Induction","spans":["Triangel hat 3 Winkel, die 360° halten; also alle."]},
+ {"r":3147,"w":"meier","kind":"Informal inference","spans":["Corollarium I. also kan kein triangel mehr als 1 rechten Winkel haben.\nII. Also wenn zwey Winkel gegeben worden, wird der 3te gegeben."],"note":"Corollaries drawn from a theorem about triangles."},
+ {"r":3190,"w":"meier","kind":"Hypothetical syllogism","spans":["Wenn mein Herr den Stok sucht, so will er schlagen; atqvi: ergo."],"note":"Illustrates that animals draw inferences (“Alle Thiere Schließen”)."},
+ {"r":3209,"w":"meier","kind":"Categorical syllogism","spans":["Alle Seelen der Menschen sind unsterblich;\n— Enkel sind Seelen der Menschen;\nErgo ..."],"note":"Kant: nothing true follows correctly from false premises, only from their partial truth."},
+ {"r":3215,"w":"meier","kind":"Categorical syllogism","spans":["Alle C sind B; Alle A sind C; folglich alle A sind B. 1. Figur.","Alle A sind C; alle C sind B; folglich einige B sind A. 4te Figur.","Alle C sind B; einige A sind C. Ergo: einige A sind B."],"note":"Schematic, in letters."},
+ {"r":3223,"w":"meier","kind":"Categorical syllogism","spans":["Alle Menschen konnen irren;\nLeibnitz war ein Mensch;\nAlso konte Leibnitz irren."]},
+ {"r":3226,"w":"meier","kind":"Categorical syllogism","spans":["Keine denkende substantz ist zusammengesetzt.\nAlle Korper sind zusammengesetzt.\nAlso ist kein Korper eine denkende [wesen] Substanz."]},
+ {"r":3227,"w":"meier","kind":"Categorical syllogism","spans":["Alle [gefallene] natürliche Menschen sündigen.\nEinige natürliche Menschen sind [gelehrt vernünft] klug.\nAlso [sündigen] einige kluge sündigen.","Kein triangel hat [4] mehr als 3 Winkel.\neinige triangel sind [rechtwinklichte Figuren] gleichseitige Figuren.\nAlso haben einige gleichseitige Figuren nicht mehr als 3 Winkel.","Alle Menschen sind [fehlerhaft] unvollkomen.\nEinige Menschen sind tugendhaft.\nEinige tugendhafte sind unvollkomen."],"note":"Third-figure examples."},
+ {"r":3228,"w":"meier","kind":"Categorical syllogism","spans":["Omnis spiritus est substantia.\nOmnis substantia habet vim agendi.\nQvoddam, qvod habet vim agendi, est spiritus.","Omnis substantia habet vim agendi.\nOmnis spiritus est substantia.\nErgo: Omnis spiritus habet vim agendi.\nErgo: Qvoddam, qvod habet vim agendi, est spiritus.","Qvaedam substantia est spiritus.\n[Omnis substantia habet] Omne, qvod vim agendi habet, est substantia.\nErgo: so würde nichts folgen.","Qvicqvid non est substantia, non est spiritus.\nQvicqvid non habet vim agendi, est non substantia.\nErgo qvicqvid non habet vim etc etc., non est spiritus."],"note":"A fourth-figure syllogism and its reductions."},
+ {"r":3241,"w":"meier","kind":"Fallacy / sophism","spans":["Ein Fuchs ist ein 4füßig thier.\nHerodes war ein Fuchs.\nErgo ...","Der Ort, darin ich bin, darin ist kein anderer.\n(g Diese Stube ist) Der Ort darin, ich bin. [ist die Stube.]\nAlso ist in dieser Stube kein anderer."],"note":"Kant on the fox example: “In prima propositione proprie, in secunda improprie.”"},
+ {"r":3243,"w":"meier","kind":"Fallacy / sophism","spans":["Kein Mensch ist ein [Vieh] unvernünftig Thier.\nKein Ochs ist ein Mensch.\nAlso ist kein Ochs ein unvernünftig Thier."],"note":"Offered to show that nothing follows from two negative premises."},
+ {"r":3244,"w":"meier","kind":"Categorical syllogism","spans":["Was nicht zusammengesetzt ist, ist nicht korperlich.\nDie Seele ist nicht zusammengesetzt.\nAlso ist sie nicht Korper."],"note":"Kant’s example of an infinite judgment."},
+ {"r":3245,"w":"meier","kind":"Fallacy / sophism","spans":["Einige empfindende Wesen sind Menschen.\nEinige unvernünftige Thiere sind empfindende Wesen.\nAlso sind einige unvernünftige Thiere Menschen."],"note":"Offered to show that nothing follows from two particular premises."},
+ {"r":3246,"w":"meier","kind":"Categorical syllogism","spans":["Nach der Regel: was von einem Begriffe allgemein verneinet wird, wird auch von dem darunter gehörigen verneinet.\nNun gehört dieses [Begriff] Ding unter den Begriff; also wird es von ihm verneinet."]},
+ {"r":3247,"w":"meier","kind":"Categorical syllogism","spans":["Allen, die unter [diesen] einen Begriff gehören, kommt dieses oder das Gegentheil zu.\nNun gehören einige Dinge unter den Begriff, also ...","Alle beharrlich Gläubige werden seelig.\nEinige Menschen sind — — —\nErgo ..."],"note":"The conclusions are left unwritten."},
+ {"r":3248,"w":"meier","kind":"Categorical syllogism","spans":["Alle 4 Eckigte rechtwinkliche Figuren sind parallelogramme.\nEine Figur, die 4 gleiche Winkel hat, ist eine 4 Eckigte rechtwinklichte Figur.\nFolglich ist eine Figur, die 4 Winkel hat, ein parallelogramm."]},
+ {"r":3249,"w":"meier","kind":"Categorical syllogism","spans":["Alle Tugenden machen mich glüklich.\nDie Philosophischen Tugenden sind tugenden.\nFolglich machen sie mich glüklich."]},
+ {"r":3250,"w":"meier","kind":"Fallacy / sophism","spans":["alle Engel sind [Geister] Vernünftig; die Menschen sind nicht Engel, also nicht vernünftig."],"note":"The negation of the minor does not yield a negative conclusion."},
+ {"r":3250,"w":"meier","kind":"Enthymeme","spans":["Wer nicht tugendhaft ist, wird nicht glükseelig.\nNun ist kein lasterhafter tugendhaft."],"note":"The conclusion is left unwritten."},
+ {"r":3251,"w":"meier","kind":"Fallacy / sophism","spans":["Einige Menschen sind Gottloß.\nAlle Glaubige sind Menschen,\nfolglich alle Gottloß."]},
+ {"r":3253,"w":"meier","kind":"Categorical syllogism","spans":["Kein zusammengesetzt wesen ist unvergänglich.\nAlle Materie ist ein zusammengesetzt wesen.\nAlso ist\nKeine Materie [ist] unvergänglich."]},
+ {"r":3255,"w":"meier","kind":"Categorical syllogism","spans":["Was rechtfertiget, gefällt Gott.\nAlle gute Werke [rechtfertigen] gefallen Gott.\nergo — —","Aller Geist ist Substantz.\nKein Geist ist ein Korper.\nAlso sind einige Korper nicht substantzen.","Ein jeder Geist ist einfach.\nEin jeder Geist ist Substantz.\nAlso ist eine jede Substantz einfach.","Omnis spiritus est substantia.\nQvaedam substantia est corpus.\nQvoddam corpus est [subst] spiritus."],"note":"Examples for the second, third and fourth figures."},
+ {"r":3257,"w":"meier","kind":"Categorical syllogism","spans":["Was (nicht wahr) ist, steht nicht in der Bibel.\nAlles ungereimte ist (nicht wahr).\nNichts ungereimtes steht in der Bibel."],"note":"Second figure, brought into the first by converting the conclusion."},
+ {"r":3260,"w":"meier","kind":"Hypothetical syllogism","spans":["Wenn die Welt einen Anfang hat, so ist sie nicht Gott.\natqvi — — —"],"note":"The minor is left unwritten."},
+ {"r":3261,"w":"meier","kind":"Hypothetical syllogism","spans":["Wenn die Thiere denken, so haben sie vernunft.\nNun haben sie keine Vernunft, also denken sie nicht."],"note":"Modus tollens."},
+ {"r":3262,"w":"meier","kind":"Fallacy / sophism","spans":["Wenn die Welt Gott ist, so ist sie die beste Welt; atqvi non: ergo.","Wenn die Erde ein thier ist, so hat sie Bewegung; nun hat sie Bewegung ...."],"note":"Invalid forms, set under the rules that one may not infer from the removal of the antecedent or from the positing of the consequent."},
+ {"r":3268,"w":"meier","kind":"Disjunctive syllogism","spans":["Die heilige Schrift ist entweder ein gottlich Buch, oder es stehen Unwarheiten drein.\nAtqvi es ist ein Gottlich Buch.","Gott hat entweder die welt gemacht, oder sie ist ewig.\nNun ist sie nicht ewig; also hat er sie gemacht."]},
+ {"r":3268,"w":"meier","kind":"Copulative syllogism","spans":["Niemand dient Gott und dem teufel zugleich; atqvi die americaner dienen dem teufel, also nicht Gott."],"note":"Kant: the major of a copulative syllogism is always negative."},
+ {"r":3270,"w":"meier","kind":"Dilemma","spans":["Wenn Gott die (g beharrlich) Bosen nicht straft, so muß er entweder ihre Bosheit gutheißen oder nicht die macht haben zu strafen.\natqvi das letztere ist falsch, also auch das erstere.","Die Zeugen der Auferstehung [haben] entweder die Warheit sagen können und nicht wollen, oder gewolt und nicht gekonnt."]},
+ {"r":3275,"w":"meier","kind":"Induction","spans":["Das Gesicht stellt mir gegenwärtige Dinge vor Das Gehör gleichfalls Geruch — — — — — — — }\n}\n} also stellen mir alle Sinne gegenwartige Dinge vor.","Die Planeten ziehen einander an, also alle Himmelskorper.","Leibnitz kann irren, folglich können alle Philosophen irren."]},
+ {"r":3275,"w":"meier","kind":"Enthymeme","spans":["Wer seinen Feind liebt, ist tugendhaft. Nun thut Cajus seinem Verläumder Guts, also ist er tugendhaft."],"note":"Introduced by Kant as one of the “verstekte Schlüße”, with a logical variant put in place of a main concept."},
+ {"r":3298,"w":"meier","kind":"Sorites / polysyllogism","spans":["Qvi bene bibit, bene dormit; qvi bene dormit, non peccat (g dum dormit); qvi non peccat, salvatur; ergo qvi bene bibit, salvatur."],"note":"Kant’s remark on the example in Meier § 404: the major is stated without, the minor with a closer qualification."},
+ {"r":3305,"w":"meier","kind":"Fallacy / sophism","spans":["Si dicis te mentiri, verumqve (s obiective) dicis, mentiris (s subiective). ergo mentiris te mentiri, i.e. non mentiris.","Epimenides ait omnes Cretenses esse mendaces; ipse vero Cretensis est, igitur mentitur, et Cretenses sunt veraces; ipse vero Cretensis est, ergo (s et cum verax sit) ipsi credendum, et Cretenses sunt mendaces.","Nosti tuum Patrem? Ita. At si obvelatum prope te statuam? Nostin hunc? Minime. At ille ipse est pater tuus; ergo nosti et simul non nosti.","Num vnum granum facit acervum. Num duo, num tria? ergo qvod tandem acervus fiat, unicum granum efficit.","Atqvi cornua non perdidisti, ergo habes."],"note":"From Kant’s list of the Megarian sophistic modes of reasoning (liar, Epimenides, veiled man, heap, horned man)."},
+ {"r":3307,"w":"meier","kind":"Sorites / polysyllogism","spans":["Alles, was theilbar ist, nimt einen Raum ein.\nDie Seele nimt keinen Raum ein.\nAlso ist sie nicht theilbar.\nWas nicht theilbar ist, ist unvergänglich."]},
+ {"r":3308,"w":"meier","kind":"Categorical syllogism","spans":["Was mich vollkommener macht, dazu bin ich verbunden; denn daß ist [die] (g die Regel der) Natur des freyen Willens. Nun macht mich die Tugend vollkommener, weil sie den gesetzen der Natur gemäß ist. Also bin ich zur Tugend verbunden."]},
+ {"r":3310,"w":"meier","kind":"Sorites / polysyllogism","spans":["Ein geist, der gar keine dunkele Vorstellungen hat, hat auch keine verworrene. wer keine verworrenen, hat lauter deutliche. wer lauter deutliche — — —, hat die deutlichste. wer die deutlichste Erkenntnis —: der kennt alle möglichen Dinge. Wer diese, der ist allwißend. wer allwißend ist, ist unendlich. wer unendlich ist, ist Gott. ergo."],"note":"A chain syllogism (Kettenschluß)."},
+ {"r":3339,"w":"meier","kind":"Categorical syllogism","spans":["Alles, was zufellig ist, ist veranderlich; das Glük der Menschen ist zufellig, also veränderlich."]},
+ {"r":3467,"w":"meier","kind":"Categorical syllogism","spans":["Gott wählet das Beste, das moglich.\n[Das Beste] Alles mogliche Beste ist: darin kein Boses.\nAlso ist in dem, was Gott wählet, kein Boses.","In welcher welt die meisten Vollkommenheiten anzutreffen sind, die ist die beste. Nun sind in dieser die meisten anzutreffen."]},
+ {"r":3567,"w":"baum","kind":"Informal inference","spans":["nam qvod est nihilo majus, illius pars nihilo aequale; ergo nihilum est pars alicujus, qvod repugnat."]},
+ {"r":3697,"w":"baum","kind":"Enthymeme","spans":["Decretum est voluntas consequens, ergo respectu individui.","Decretum [nullum] de condendo hoc mundo est decretum individui, ergo non est universale."]},
+ {"r":3710,"w":"baum","kind":"Categorical syllogism","spans":["Alles Zusammengesetzte ist veränderlich, ein Körper ist zusammengesetzt, also ist er etc etc."],"note":"Kant’s example of a material first principle containing the medius terminus."},
+ {"r":3762,"w":"baum","kind":"Informal inference","spans":["Positio respectiva praedicatorum entis erga se invicem conformiter principio contradictionis minus in se continet qvam positio simul eorundem absoluta; ergo ab illa ad hanc non valet conseqventia."]},
+ {"r":3802,"w":"baum","kind":"Informal inference","spans":["Causa et causatum non pertinent ad idem totum, qvia tum causa a se ipsa externe pateretur; ergo causa mundi est ens extramundanum."]},
+ {"r":3822,"w":"baum","kind":"Disjunctive syllogism","spans":["mundus est ens ab alio, sed non a pluribus, sed ab uno; non per naturam, sed per libertatem; ergo causa mundi est auctor et Deus"]},
+ {"r":3823,"w":"baum","kind":"Informal inference","spans":["nam non datur |\nsubiectio naturalis, nisi sub voluntate eius, qvi non potest obligari, ergo non sub creatura."]},
+ {"r":3850,"w":"baum","kind":"Categorical syllogism","spans":["Denn das Wesentliche der Sache kan nur durch Vernunft erkannt werden; nun aber muß alle Materie der Erkentnis durch Sinne gegeben seyn; also ist das Wesen der Sachen [blos], so fern sie durch Vernunft erkannt werden, die Form."]},
+ {"r":3874,"w":"baum","kind":"Informal inference","spans":["Raum und Zeit sind blosse Moglichkeiten, deren Gegentheil, d.i. kein Raum und keine Zeit, unmöglich ist. (Es ist kein Raum, es ist keine Zeit). Nun gründen sich Raum und Zeit auf etwas wirkliches, also ist etwas wirkliches absolut nothwendig."]},
+ {"r":3974,"w":"baum","kind":"Fallacy / sophism","spans":["Alles (singuli) hat einen Grund; aber alles zusammengenommen kan nicht einen Grund haben, also etwas ist ohne Grund."],"note":"Kant: a confusion of two senses of “all”."},
+ {"r":4032,"w":"baum","kind":"Informal inference","spans":["Alles, was geschieht, ist zufällig an sich selbst; weil es doch aber nothwendig seyn muß vermöge des obigen, so ist es nothwendig durch einen fremden Grund."]},
+ {"r":4066,"w":"baum","kind":"Informal inference","spans":["Qvoniam enim partes sunt substantiae, [possu] existentia earum est subsistentia, et possunt existere, etiamsi non sint invicem compositae; ergo compositio omnis potest abrogari, ita ut tamen omnes partes talis compositi supersint. Abrogata autem omni compositione superstites partes sunt simplices."]},
+ {"r":4125,"w":"baum","kind":"Enthymeme","spans":["Ein nothwendig Wesen kan von zufelligen nur die Ursache seyn durch Freyheit, denn aus der nothwendigkeit seiner Natur würde nur das [entstehen] daseyn, was in ihm ist."]},
+ {"r":4134,"w":"baum","kind":"Informal inference","spans":["Die Ewigkeit ist ein uneingeschränktes Daseyn eines Dinges. [Zuf] Also nur das nothwendige Wesen ist ewig."]},
+ {"r":4185,"w":"baum","kind":"Categorical syllogism","spans":["Plura coniuncta faciunt compositum. Omnia coniuncta totum. Ergo non omne compositum (e.g. aeternitas) est totum, qvanquam omne totum est compositum."]},
+ {"r":4187,"w":"baum","kind":"Informal inference","spans":["Qvae simul sunt, pariter sunt connexa per tempus ac (g ea), qvae sunt post se invicem. tempus autem est unicum; ergo est possibilitas coordinationis plurium pendens ab uno."]},
+ {"r":4215,"w":"baum","kind":"Informal inference","spans":["dato spatio datur possibilitas compraesentiae plurium, ast non possibilis est plurium compraesentia nisi posito existente principio communi; ergo dato spatio concludi potest ad ens aliqvod primum. sed est unicum spatium; ergo concluditur ad causam primam unicam. itidem est necessarium, qvatenus est mera possibilitas; ergo concluditur ad necessariam."]},
+ {"r":4217,"w":"baum","kind":"Informal inference","spans":["Causa substantiae est creatrix, causa formae architectonica. Ergo [causa ent] ens extramundanum non solum est architectus, sed creator mundi."]},
+ {"r":4223,"w":"baum","kind":"Informal inference","spans":["practisch ist dasienige Nichts, was ich gar nicht warnehmen kan*. Nun kan die transscendentale necessitation von mir nicht wargenommen werden, sondern ich fühle nichts als das Gesetz, eine dazu hinreichende Kraft und das Belieben; also ist das practische niemals"]},
+ {"r":4348,"w":"baum","kind":"Categorical syllogism","spans":["Nun ist das Gute dasjenige, was sich nothwendig auf ihn selbst oder das innere analogischer Wesen bezieht, also hat er davon erkentniße a priori. Gott erkennet aber obiecte an sich selbst a priori. Mithin müßen sie durch ihn gegeben seyn, sein Verstand ist also archetypus."]},
+ {"r":4422,"w":"baum","kind":"Informal inference","spans":["Qvia spatium est phaenomenon, corpora sunt [action] praesentiae externae plurium substantiarum phaenomena. Ergo qvanqvam omnis compositio in toto substantiali, tamen non ideo in externae praesentiae phaenomeno tolli potest."]},
+ {"r":4486,"w":"baum","kind":"Informal inference","spans":["Die opposita nacheinander contradiciren sich nicht. mithin ist das succedens kein contradictorie oppositum des antecedentis, mithin sind die Veränderungen kein Beweis der Moglichkeit des contradictorie oppositi, also auch nicht der Zufälligkeit."]},
+ {"r":4500,"w":"baum","kind":"Informal inference","spans":["Si cognitio sensitiva extendatur in sua specie in infinitum, tamen manet sensitiva, et corpora nunqvam deprehendentur empirice constare simplicibus; ergo monades in physica nullius sunt vsus, et in metaphysica sunt usus negativi, ut caveatur, ne habendo phaenomena pro reali constitutione obiectorum axiomata sentitiva fiant qvasi intellectualia."]},
+ {"r":4547,"w":"baum","kind":"Enthymeme","spans":["Spontaneitas arbitrii simpliciter talis in ente originario est necessitas actuum arbitrii independens ab omni externo, ergo est libertas."]},
+ {"r":4604,"w":"baum","kind":"Informal inference","spans":["wenn wir aber die Bedingungen der Sinnlichkeit weglassen, so fallt alle Erkenntnis in concreto weg; demnach können wir Gott niemals durch erkenntnis, die von der Natur entlehnt ist, proprie, sondern nur secundum analogiam denken."]},
+ {"r":4618,"w":"baum","kind":"Informal inference","spans":["Wenn wir in die Welt als sinnenwelt hineinschauen, so werden wir im regressu der Erscheinungen keinen Anfang finden. Nun sind aber diese Erscheinungen nicht wirkliche Dinge; also heißt es eigentlich nicht: die Welt ist (g an sich) ohne Anfang, sondern: die Erscheinung (in Beziehung auf uns) hat keinen Anfang."]},
+ {"r":4661,"w":"baum","kind":"Informal inference","spans":["Nur die Moglichkeit eines nothwendigen Wesens darf dargethan werden, so ist sein Daseyn auch bewiesen. Denn ein nothwendiges Wesen |\nist (nothwendig) da, das ist die definition desselben."]},
+ {"r":4726,"w":"baum","kind":"Informal inference","spans":["Wovon der Grund (und sein Verhaltnis zur Folge) durch die Sinne |\ngar nicht gegeben werden kann, d.i. Unbegreiflich. Nun ist der Grund der obern Begierde nicht sinnlich, also kann er nicht eingesehen [werden] werden"]},
+ {"r":4734,"w":"baum","kind":"Analogy","spans":["Wir erkenen doch die Ursache nur aus der caussalitaet und der Wirkung. Also, wenn sich das, was in Gott ist, eben so verhält zum Elend der Menschen als die Barmherzigkeit, so könen wir Gott barmherzig, zornig, eifersüchtig etc: nennen, aber nur per analogiam"],"note":"About how we may name God’s attributes."},
+ {"r":4778,"w":"baum","kind":"Informal inference","spans":["existentia denotat: 1. accidens esse reale; 2. non pertinere ad pos|sibilitatem\nut praedicatum logicum, ergo non poni per identitatem nec intelligi per analysin."]},
+ {"r":4784,"w":"baum","kind":"Informal inference","spans":["Wenn etwas geschieht, so muß es eine Ursache haben. Allein die causalitaet der Ursache ist [als wied] auch etwas, was geschieht; sie muß also wiederum eine Ursache haben, und so ins unendliche."]},
+ {"r":5118,"w":"baum","kind":"Informal inference","spans":["Denn der Anfang ist eine Grentze der Erscheinung ab antecedenti. Aber eine solche Anschauung setzt selbst ein sinnlich subiect Voraus, was selbst zur Welt gehört und also niemals einen ersten Anfang anschauen kan. Sie hat also keinen Anfang."]},
+ {"r":5215,"w":"baum","kind":"Enthymeme","spans":["Laße ich im winter einen Storch fliegen, so wird es nicht warm. Also ists nicht die Ursach."]},
+ {"r":5329,"w":"baum","kind":"Informal inference","spans":["Wenn der Raum was obiectives und nothwendiges wäre, woher würden wir das erkennen. Von der Erfahrung können wir kein Urtheil ableiten, welches zugleich als schlechthin nothwendig erkant würde, und a priori ist er nicht erkannt und nicht erkennbar. Es müste die Vorstellung anerschaffen seyn, aber dann wäre sie auch nicht nothwendig. Sie muß also in Gott angeschaut werden."]},
+ {"r":5369,"w":"baum","kind":"Informal inference","spans":["Alle Erscheinungen sind in der Natur, aber die Ursache der Erscheinungen ist nicht in der Erscheinung enthalten, also auch nicht natur."]},
+ {"r":5376,"w":"baum","kind":"Informal inference","spans":["Zwischen zwey Zuständen ist eine Zeit. In dieser, wenn die Zustande verschieden seyn, ist das Ding weder im einen noch in dem andern. Also ist entweder dazwischen eine leere Zeit (saltus) oder mit kleineren Zwischengraden der Zustände Erfüllete Zeit."]},
+ {"r":5386,"w":"baum","kind":"Informal inference","spans":["Non datur simplex phaenomenon; erit enim pars definita omnis phaenomeni, ergo occuparet partem spatii atqve temporis, qvae iterum est spatium atqve tempus."]},
+ {"r":5419,"w":"baum","kind":"Enthymeme","spans":["Principium commercii debet esse omnibus commune. Ergo causa communis."]},
+ {"r":5456,"w":"baum","kind":"Categorical syllogism","spans":["Denken und wollen kann gar nicht eine äußere Erscheinung seyn. Nun kenne ich mich selbst als seele nur nach dem Denken, Gefühl und Wollen. Also können wir uns die Seele gar nicht als einen Gegenstand äußerer Sinne vorstellen."]},
+ {"r":5458,"w":"baum","kind":"Informal inference","spans":["Der Beweis, daß die Seele immaterial sey, [ist] würde dieser seyn: 1. sie ist nicht materie (materialismus in sensu crassiori), also einfach; 2. sie ist kein einfacher Theil der materie, denn die materie besteht nicht aus einfachen Theilen."]},
+ {"r":5553,"w":"baum","kind":"Hypothetical syllogism","spans":["Wenn ich annehme: Ich bin keine Erscheinung des inneren Sinnes, sondern eine Sache an sich selbst und noumenon, so müssen meine inhaerirende accidentia auch noumena seyn. atqvi: Ich stelle mir die Reihen der Bedingungen in der Erscheinung vor; also müssen sie in mir an sich selbst gegeben seyn.","Wenn alle Erscheinungen in Einem an sich selbst gegeben seyn, so ist die Idee [von der durchga], welche die Dinge an sich selbst bestimmt, in irgend einer Intelligenz gegeben."],"note":"A dialectical inference, set out with “atqvi”; its conclusion is then made the minor of an episyllogism."},
+ {"r":5575,"w":"baum","kind":"Informal inference","spans":["Nulla mutatio est absolute necessaria, sie hat iederzeit eine andere Ursache. Also kan kein absolute necessarium mutabile seyn."]},
+ {"r":5631,"w":"baum","kind":"Informal inference","spans":["Nur so viel, als wir von dieser Weltvollkomenheit kennen, können wir von Gott beweisen. Also ist der Begrif von Gott [imgleichen] ganz unbestandig und veranderlich."]},
+ {"r":5653,"w":"baum","kind":"Informal inference","spans":["Denn im Raume allein setzen wir das Beharrliche, in der Zeit ist unaufhorlicher Wechsel. Nun aber ist die Bestimmung des Daseyns eines Dinges in der Zeit, d.i. in einem solchen Wechsel, unmöglich, ohne ihrer Anschauung auch das Beharrliche zu verbinden. Dieses muß also ausser uns als Gegenstand des äußeren Sinnes [gegeben] angeschauet werden.","Nun kan das Beharrliche nicht [eine Bestimmung] in der Bestimmung der Zeit blos gedacht werden und zur Spontaneität der Selbstbestimmung gehören, denn alsdenn würde es nicht der Zeitbestimmung zum Grunde liegen. Folglich muß es in Beziehung auf die bloße Receptivitaet des Gemüths, d.i. in Beziehung auf etwas afficirendes, was von mir unterschieden ist, vorgestellt werden"],"note":"Part of Kant’s argument against idealism."},
+ {"r":5845,"w":"baum","kind":"Informal inference","spans":["Qvantum, cuius partes omnes possibiles sunt qvanta, est continuum. ergo quod non constat simplicibus. Ergo in qvo, qvot sint partes, per se est indeterminatum. Ergo qvodlibet phaenomenon."]},
+ {"r":5847,"w":"baum","kind":"Informal inference","spans":["Ein jedes Qvantum ist ein compositum,[welches] dessen Theile alle ihm gleichartig sind; folglich ist es continuum und besteht nicht aus einfachen Theilen."]},
+ {"r":5869,"w":"baum","kind":"Enthymeme","spans":["reale, cuius partes sunt in commercio. Ergo relatio causae ad causatum non est compositio."]},
+ {"r":5871,"w":"baum","kind":"Informal inference","spans":["Wir können nur an dem, was beharrt, das wechseln bemerken. Wenn alles fließt, so kan selbst das fließen nicht wargenommen werden. Die Erfahrung also vom entstehen und Vergehen ist nur durch das, was beharrt, möglich. Also [Subst] ist etwas in der Natur, was bleibt (weder entsteht, noch vergeht)"]},
+ {"r":5873,"w":"baum","kind":"Categorical syllogism","spans":["Wir können Dinge nur durch praedicate erkennen, also entstehen und vergehen nur als praedicate; nun kan man von etwas als praedicat keinen Begrif haben ohne subiect, also muß das Subiect bleiben bey allem, was vergeht; sonst können wir das Vergehen selbst nicht durch Erfahrung erkennen."]},
+ {"r":5948,"w":"baum","kind":"Informal inference","spans":["Alles Zufallige ist einmal nicht gewesen (denn das ist das Merkmal, worann die Zufalligkeit erkannt wird), also ist es eine Folge eines Vorhergehenden, also hat es eine Ursache."]},
+ {"r":5963,"w":"baum","kind":"Disjunctive syllogism","spans":["Gott ist entweder im Raum ruhig oder bewegt oder beydes zugleich (wie Korper auf der Erde) oder keines von beydem. Nun ist das letzte wahr; also sind alle andern, mithin der disiunctive satz aus beyden ersten falsch.","Die Materie (g an sich) besteht entweder aus unendlich viel Theilen oder aus einer bestimmten Menge von Theilen. Keines von beydem ist wahr, denn es setzt die totalitaet der division des Raumes und diese die absolute realitaet desselben voraus."]},
+ {"r":6036,"w":"baum","kind":"Informal inference","spans":["Gott ist unveranderlich, weil er gar nicht in der Zeit ist. Er fangt also nicht eine Handlung an oder hört mit einer auf."]},
+ {"r":6157,"w":"baum","kind":"Informal inference","spans":["Zum Zweke Gottes gehört, daß das Vernünftige Geschopf dem Willen derselben (durch Heiligkeit) vollig adäqvat sey; das erreicht aber kein Geschopf. Also ist es der progressus dazu ins unendliche"]},
+ {"r":6217,"w":"baum","kind":"Informal inference","spans":["Nun kan das erste dieser Reihe weder durch Vernunft noch auf dem Wege der Erfahrungsschlüsse [bewiesen] als bestimter gegenstand bewiesen werden. Also ist der Vernunftglaube zum Vollstandigen Erfahrungsgebrauch (worunter ich die Ableitung der an Gegenstanden der Erfahrung ausgeübten Maximen der Vernunft verstehe) unumganglich nothwendig."]},
+ {"r":6311,"w":"baum","kind":"Informal inference","spans":["In unserm innern Sinn wird unser Daseyn in der Zeit bestimmt und setzt also die Vorstellung der Zeit selbst voraus; in der Zeit aber ist die Vorstellung des Wechsels enthalten; Wechsel setzt etwas Beharrliches voraus, woran es wechselt und welches macht, daß der Wechsel wahrgenommen wird. Die Zeit selbst ist zwar beharrlich, aber sie kann allein nicht wahrgenommen werden, folglich muß es ein Beharrliches geben, woran man den Wechsel in der Zeit wahrnehmen kann. Dies Beharrliche können wir selbst nicht seyn, denn wir sind eben als Gegenstand des innern Sinnes durch die Zeit bestimmt; es kann also das Beharrliche blos in dem, was durch den äußern Sinn gegeben wird, gesetzt werden. So setzt also Möglichkeit der innern Erfahrung Realität des äußern Sinnes voraus."],"note":"Kant’s refutation of problematic idealism."},
+ {"r":6325,"w":"baum","kind":"Informal inference","spans":["Ein nothwendig Wesen muß alle Realitaet haben.\nDenn wenn ihm eine fehlte, so würde er doch diese (g als ein Ding überhaupt) haben können; es war also nicht nothwendig, so wie es ist."]},
+ {"r":6397,"w":"baum","kind":"Enthymeme","spans":["Absolute minimum non foret quantum; ergo est im|possibile.","Absolute maximum non foret dabile qvoad quantitatem; ergo vt obiectum intuitus est impossibile."]},
+ {"r":6408,"w":"baum","kind":"Informal inference","spans":["Denn da wir die Unmoglichkeit nur durch einen Widerspruch erkennen, das Nichtseyn aber einer Sache sich selbst nie wiederspricht, so würde alles zufallig seyn."]},
+ {"r":6410,"w":"baum","kind":"Categorical syllogism","spans":["Zufallig ist nicht das, dessen Nichtseyn sich nicht wiederspricht, sondern ungegründet ist.\nNun ist alles, was existirt, gegründet; folglich nichts existierendes ist zufallig."]},
+ {"r":6453,"w":"baum","kind":"Informal inference","spans":["Weisheit aber ist die Gütigkeit, welche ihre Ausübung der Bedingung der obiecte, ihrer Würdig zu seyn, unterordnet. Also hat Gott die Welt zu seiner Ehre, nicht um geliebt zu werden, geschaffen."]},
+ {"r":6455,"w":"baum","kind":"Informal inference","spans":["Denn nur derjenige kan obligiren, dessen Wille zu dem, was die wesentliche Eigenschaft des Willens anderer ist, übereinstimt. Dieses ist nur die Begierde eines endlichen wesens nach Glükseeligkeit. Also muß er gütig, aber auch allmächtig, allwissend etc etc. seyn."]}
+];
+
 // ── State ─────────────────────────────────────────────────────────────────────
 let workFilter = '';
 let kindFilter = '';
@@ -140,48 +249,107 @@ function el(tag, cls, text) {
   return e;
 }
 
-// Index every block of the three lectures by id, and remember document order.
+// The sources, in the order the list runs: the lectures by date, then the Reflexionen.
+const MI_SOURCES = [
+  { key: 'blomberg', label: 'Blomberg Logic', chip: 'Blomberg' },
+  { key: 'wiener',   label: 'Wiener Logic',   chip: 'Wiener' },
+  { key: 'busolt',   label: 'Busolt Logic',   chip: 'Busolt' },
+  { key: 'meier',    label: 'Reflexion', chip: 'Meier Refl.' },
+  { key: 'baum',     label: 'Reflexion', chip: 'Baumgarten Refl.' }
+];
+const SRC_ORDER = {}; MI_SOURCES.forEach((s, i) => SRC_ORDER[s.key] = i);
+const SRC_LABEL = {}; MI_SOURCES.forEach(s => SRC_LABEL[s.key] = s.label);
+
+// Index every lecture block by id, remembering document order.
 const BLOCKS = {};
 const ORDER = {};
-MI_WORKS.forEach(w => {
+[[LOGIK_BLOMBERG, 'blomberg'], [LOGIK_WIENER, 'wiener'], [LOGIK_BUSOLT, 'busolt']].forEach(pair => {
   let n = 0;
-  w.data.sections.forEach(s => s.blocks.forEach(b => { BLOCKS[b.id] = { b, w }; ORDER[b.id] = n++; }));
+  pair[0].sections.forEach(s => s.blocks.forEach(b => { BLOCKS[b.id] = { b, key: pair[1] }; ORDER[b.id] = n++; }));
 });
 
-// Resolve the curated list against the data once: block, work, highlight ranges.
-const ITEMS = MI_ITEMS.map((it, k) => {
-  const hit = BLOCKS[it.block];
-  if (!hit) { console.warn('Unknown block', it.block); return null; }
+// Index the Reflexionen by number.
+const REFL = {};
+REFL_ENTRIES.forEach(e => { REFL[e.r] = { e, key: 'meier' }; });
+REFLM_ENTRIES.forEach(e => { REFL[e.r] = { e, key: 'baum' }; });
+
+function rangesIn(text, spans, id) {
   const ranges = [];
-  it.spans.forEach(sp => {
-    const i = hit.b.text.indexOf(sp);
-    if (i < 0) { console.warn('Span not found in', it.block, sp); return; }
+  spans.forEach(sp => {
+    const i = text.indexOf(sp);
+    if (i < 0) { console.warn('Span not found in', id, sp); return; }
     ranges.push([i, i + sp.length]);
   });
-  ranges.sort((a, b) => a[0] - b[0]);
-  return { k, it, b: hit.b, w: hit.w, ranges };
-}).filter(Boolean);
-const WORK_ORDER = {}; MI_WORKS.forEach((w, i) => WORK_ORDER[w.key] = i);
-ITEMS.sort((a, b) => WORK_ORDER[a.w.key] - WORK_ORDER[b.w.key] || ORDER[a.b.id] - ORDER[b.b.id] || a.k - b.k);
-
-// ── Rendering ─────────────────────────────────────────────────────────────────
-function pageLabel(b) {
-  const end = b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '';
-  return 'AA 24:' + b.aa + end;
+  return ranges.sort((a, b) => a[0] - b[0]);
 }
 
-// The paragraph, with the AA page markers and manuscript pages put back at the
-// offsets the extractor recorded, and the inference in <mark>.
+// "§ 363", "§§ 369–373", "§§ 7, 9"
+function sectionList(paras) {
+  const runs = [];
+  paras.forEach(n => {
+    const last = runs[runs.length - 1];
+    if (last && n === last[1] + 1) last[1] = n; else runs.push([n, n]);
+  });
+  const parts = runs.map(r => r[0] === r[1] ? String(r[0]) : r[0] + '–' + r[1]);
+  return (paras.length > 1 ? '§§ ' : '§ ') + parts.join(', ');
+}
+
+// What the item says about where it comes from, for the card's header.
+function lectureCite(b, key) {
+  const end = b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '';
+  return { title: SRC_LABEL[key], pages: 'AA 24:' + b.aa + end, sub: null };
+}
+function reflexionCite(e, key) {
+  const vol = key === 'meier' ? 16 : e.vol;
+  const end = e.aaEnd && e.aaEnd !== e.aa ? '–' + e.aaEnd : '';
+  const work = key === 'meier' ? 'on Meier, Auszug' : 'on Baumgarten, Metaphysica';
+  const paras = e.paras || [];
+  let where = paras.length ? work + ' ' + sectionList(paras) : work + ': no § stated';
+  // The § is attested (the edition's own locus note), or inferred from a heading or page.
+  const how = { group: ' (from the heading of its block)', block: ' (from the heading of its block)',
+                page: ' (from the handbook page it is written on)' }[e.src];
+  if (how) where += how;
+  if (paras.length && e.src === 'none') where += ' (interpolated)';
+  const extra = [];
+  if (e.loc && e.loc.raw) extra.push('AA locus note: ' + e.loc.raw);
+  if (e.part === 'erl') extra.push('Erläuterung in Kant’s own copy');
+  if (e.blatt) extra.push('loose sheet');
+  return { title: 'Reflexion ' + e.r, pages: 'AA ' + vol + ':' + e.aa + end, sub: where, extra: extra.join(' · ') };
+}
+
+// Normalise the curated lists against the data into one list of items.
+const ITEMS = [];
+MI_ITEMS.forEach((it, k) => {
+  const hit = BLOCKS[it.block];
+  if (!hit) { console.warn('Unknown block', it.block); return; }
+  ITEMS.push({ k, key: hit.key, kind: it.kind, note: it.note, text: hit.b.text, b: hit.b,
+               ranges: rangesIn(hit.b.text, it.spans, it.block), cite: lectureCite(hit.b, hit.key),
+               sort: ORDER[hit.b.id] });
+});
+MI_REFL_ITEMS.forEach((it, k) => {
+  const hit = REFL[it.r];
+  if (!hit || hit.key !== it.w) { console.warn('Unknown Reflexion', it.r); return; }
+  ITEMS.push({ k: 1000 + k, key: hit.key, kind: it.kind, note: it.note, text: hit.e.text, b: null,
+               ranges: rangesIn(hit.e.text, it.spans, 'R' + it.r), cite: reflexionCite(hit.e, hit.key),
+               sort: it.r });
+});
+ITEMS.sort((a, b) => SRC_ORDER[a.key] - SRC_ORDER[b.key] || a.sort - b.sort || a.k - b.k);
+
+// ── Rendering ─────────────────────────────────────────────────────────────────
+// The text, with the AA page markers and manuscript pages put back at the offsets the
+// extractor recorded (lectures only), and the inference in <mark>.
 function renderParagraph(item) {
-  const b = item.b, text = b.text;
+  const b = item.b, text = item.text;
   const cuts = new Set([0, text.length]);
   item.ranges.forEach(r => { cuts.add(r[0]); cuts.add(r[1]); });
   const pageAt = {}, msAt = {};
-  (b.pages || []).forEach(p => { if (p.i > 0 && p.i < text.length) { (pageAt[p.i] = pageAt[p.i] || []).push(p.p); cuts.add(p.i); } });
-  (b.ms || []).forEach(m => { if (m.i > 0 && m.i < text.length) { (msAt[m.i] = msAt[m.i] || []).push(m.p); cuts.add(m.i); } });
+  if (b) {
+    (b.pages || []).forEach(p => { if (p.i > 0 && p.i < text.length) { (pageAt[p.i] = pageAt[p.i] || []).push(p.p); cuts.add(p.i); } });
+    (b.ms || []).forEach(m => { if (m.i > 0 && m.i < text.length) { (msAt[m.i] = msAt[m.i] || []).push(m.p); cuts.add(m.i); } });
+  }
   const pts = [...cuts].sort((a, c) => a - c);
   const p = el('div', 'para');
-  let curPage = b.aa;
+  let curPage = b ? b.aa : null;
   for (let n = 0; n < pts.length - 1; n++) {
     const s = pts[n], e = pts[n + 1];
     (pageAt[s] || []).forEach(pg => {
@@ -197,28 +365,33 @@ function renderParagraph(item) {
 function renderItem(item) {
   const card = el('article', 'item');
   const head = el('div', 'item-head');
-  const cite = el('div', 'cite', item.w.label);
-  cite.appendChild(el('span', 'pages', pageLabel(item.b)));
+  const cite = el('div', 'cite', item.cite.title);
+  cite.appendChild(el('span', 'pages', item.cite.pages));
   head.appendChild(cite);
-  head.appendChild(el('div', 'kind', item.it.kind));
+  head.appendChild(el('div', 'kind', item.kind));
+  if (item.cite.sub) {
+    const sub = el('div', 'sub', item.cite.sub);
+    if (item.cite.extra) sub.appendChild(el('i', null, ' — ' + item.cite.extra));
+    head.appendChild(sub);
+  }
   card.appendChild(head);
   const para = renderParagraph(item);
   card.appendChild(para);
-  if (item.it.note) {
+  if (item.note) {
     const n = el('p', 'note');
     n.appendChild(el('b', null, 'NOTE '));
-    n.appendChild(document.createTextNode(item.it.note));
+    n.appendChild(document.createTextNode(item.note));
     card.appendChild(n);
   }
-  // Long paragraphs scroll inside the card; start at the first highlight.
+  // Long texts scroll inside the card; start at the first highlight.
   item.para = para;
   return card;
 }
 
 function matches(item) {
-  if (workFilter && item.w.key !== workFilter) return false;
-  if (kindFilter && item.it.kind !== kindFilter) return false;
-  if (query && !item.b.text.toLowerCase().includes(query)) return false;
+  if (workFilter && item.key !== workFilter) return false;
+  if (kindFilter && item.kind !== kindFilter) return false;
+  if (query && !item.text.toLowerCase().includes(query)) return false;
   return true;
 }
 
@@ -238,9 +411,9 @@ function render() {
 // ── Controls ──────────────────────────────────────────────────────────────────
 function buildControls() {
   const box = $('works');
-  const defs = [{ key: '', label: 'All' }].concat(MI_WORKS.map(w => ({ key: w.key, label: w.label.replace(' Logic', '') })));
+  const defs = [{ key: '', label: 'All' }].concat(MI_SOURCES.map(s => ({ key: s.key, label: s.chip })));
   defs.forEach(d => {
-    const n = d.key ? ITEMS.filter(i => i.w.key === d.key).length : ITEMS.length;
+    const n = d.key ? ITEMS.filter(i => i.key === d.key).length : ITEMS.length;
     const c = el('button', 'chip', d.label + ' ' + n);
     c.type = 'button';
     c.setAttribute('aria-pressed', d.key === workFilter ? 'true' : 'false');
@@ -251,7 +424,7 @@ function buildControls() {
     });
     box.appendChild(c);
   });
-  const kinds = [...new Set(ITEMS.map(i => i.it.kind))].sort();
+  const kinds = [...new Set(ITEMS.map(i => i.kind))].sort();
   kinds.forEach(k => { const o = el('option', null, k); o.value = k; $('kind').appendChild(o); });
   $('kind').addEventListener('change', e => { kindFilter = e.target.value; render(); });
   $('q').addEventListener('input', e => { query = e.target.value.trim().toLowerCase(); render(); });
