@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kant's Logic Lectures: Parallel Passage Comparison — Blomberg, Wiener, Busolt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --parchment: #f6efe0;
+  --parchment-dark: #ebe1cb;
+  --ink: #2a2118;
+  --muted: #6f604f;
+  --accent: #5c3d1e;
+  --accent-soft: #c9ac84;
+  --rule: #d8c9aa;
+  --passage: #efe2c6;          /* a key passage */
+  --ref: #b04a12;              /* the reference passage */
+  --shared: #008aa0;           /* words shared with the reference */
+  --f0: #b04a12; --f1: #008aa0; --f2: #7748c0;   /* the wordings of a term (validated against --parchment) */
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: 'EB Garamond', Georgia, serif; font-size: 16.5px; line-height: 1.5;
+  background: var(--parchment); color: var(--ink);
+  display: flex; flex-direction: column;
+}
+button, select, input { font: inherit; }
+
+/* ---------- header ---------- */
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 9px 16px; background: var(--accent); color: var(--parchment); }
+header h1 { font-family: 'Cinzel', serif; font-weight: 400; font-size: 16px; letter-spacing: .08em; margin: 0; }
+.picker { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.picker label { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: .08em; }
+.picker select { font-size: 15.5px; padding: 3px 6px; min-width: 280px; max-width: 42vw; background: var(--parchment); color: var(--ink); border: 0; }
+.hbtn { background: transparent; color: var(--parchment); border: 1px solid var(--accent-soft); padding: 3px 11px; cursor: pointer; font-size: 14.5px; }
+.hbtn:hover { background: var(--parchment); color: var(--accent); }
+#custom { display: flex; gap: 4px; }
+#custom input { width: 150px; padding: 3px 7px; border: 0; background: var(--parchment); color: var(--ink); font-size: 14.5px; }
+.toggles { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13.5px; margin-left: auto; }
+.toggles label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+/* ---------- comparison board ---------- */
+/* the comparison takes what the reading panels leave; its card lists scroll inside it */
+#board { flex: 1 1 0; min-height: 210px; display: flex; flex-direction: column; border-bottom: 1px solid var(--rule); background: var(--parchment-dark); }
+#board[hidden] { display: none; }
+.b-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; padding: 8px 16px 4px; }
+.b-head h2 { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; color: var(--accent); margin: 0; }
+.b-head .ctl { font-size: 13.5px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.b-head select { font-size: 13.5px; padding: 1px 4px; background: var(--parchment); border: 1px solid var(--accent-soft); color: var(--ink); }
+.b-head .how { margin-left: auto; font-size: 13px; color: var(--accent); font-style: italic; background: none; border: 0; cursor: pointer; text-decoration: underline; padding: 0; }
+#refline { padding: 0 16px 6px; font-size: 14.5px; }
+#refline b { color: var(--ref); font-weight: 500; }
+.b-cols { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: minmax(0, 1fr); }
+.b-col { padding: 0 12px 8px; border-right: 1px solid var(--rule); min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.b-col:last-child { border-right: 0; }
+.stat { font-size: 13.5px; color: var(--muted); margin: 0 0 4px; }
+.stat b { color: var(--ink); font-weight: 500; font-size: 15px; }
+.cards { flex: 1; min-height: 0; overflow-y: auto; padding-right: 3px; }
+.card { display: block; width: 100%; text-align: left; background: var(--parchment); border: 1px solid var(--rule); border-left: 4px solid var(--accent-soft); padding: 4px 8px 5px; margin-bottom: 5px; font-size: 14.5px; line-height: 1.35; color: var(--ink); cursor: pointer; }
+.card:hover { border-color: var(--accent-soft); }
+.card.ref { border-color: var(--ref); border-left-color: var(--ref); box-shadow: 0 0 0 1px var(--ref); }
+.card .top { display: flex; align-items: center; gap: 6px; font-family: 'Cinzel', serif; font-size: 10px; color: var(--muted); letter-spacing: .03em; }
+.card .lbl { font-weight: 600; color: var(--accent); font-size: 11.5px; }
+.card.ref .lbl { color: var(--ref); }
+.card .where { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.card .gist { display: block; margin-top: 2px; }
+.card .words { display: block; font-size: 13px; color: var(--muted); margin-top: 3px; }
+.card .words i { font-style: normal; color: var(--shared); }
+.card .words u { text-decoration: none; color: var(--ink); }
+.sim { display: inline-flex; align-items: center; gap: 4px; font-family: 'EB Garamond', serif; font-size: 13px; color: var(--ink); white-space: nowrap; }
+.simbar { width: 46px; height: 7px; background: var(--rule); border-radius: 0 4px 4px 0; position: relative; }
+.simbar div { position: absolute; left: 0; top: 0; bottom: 0; background: var(--shared); border-radius: 0 4px 4px 0; }
+.none { color: var(--muted); font-style: italic; font-size: 14px; }
+
+/* ---------- three reading panels ---------- */
+/* the three reading panels: 55% of the screen's height (a little less on a short screen, so that the
+   comparison keeps room for its cards), or all of what is left when the comparison is hidden */
+main { flex: 0 1 55vh; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: minmax(0, 1fr); overflow: hidden; }
+.panel { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--rule); }
+.panel:last-child { border-right: 0; }
+.phead { padding: 6px 12px; background: var(--parchment-dark); border-bottom: 1px solid var(--rule); }
+.phead .row1 { display: flex; align-items: baseline; gap: 8px; }
+.phead h3 { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; color: var(--accent); margin: 0; letter-spacing: .05em; }
+.phead .date { color: var(--muted); font-size: 13.5px; }
+.phead .row2 { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 13.5px; }
+.phead select { flex: 1; min-width: 0; font-size: 13.5px; padding: 1px 4px; background: var(--parchment); border: 1px solid var(--accent-soft); color: var(--ink); }
+.pnav { display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+.pnav button, .jump button { background: var(--parchment); border: 1px solid var(--accent-soft); color: var(--accent); cursor: pointer; padding: 0 8px; font-size: 13.5px; }
+.pnav button:disabled { opacity: .35; cursor: default; }
+.pnav span { min-width: 82px; text-align: center; color: var(--muted); }
+.jump { display: flex; align-items: center; gap: 3px; color: var(--muted); }
+.jump input { width: 48px; font-size: 13.5px; padding: 0 3px; border: 1px solid var(--accent-soft); background: var(--parchment); }
+.ptext { flex: 1; overflow-y: auto; padding: 12px 16px 70px; position: relative; }
+.sec-title { font-family: 'Cinzel', serif; font-weight: 600; font-size: 16px; color: var(--accent); margin: 30px 0 2px; border-top: 2px solid var(--rule); padding-top: 12px; }
+.sec-title.first { margin-top: 0; border-top: 0; padding-top: 0; }
+.pmeta { color: var(--muted); font-size: 13.5px; font-style: italic; margin-bottom: 10px; }
+.badge { font-style: normal; font-family: 'Cinzel', serif; font-size: 9.5px; border: 1px solid var(--accent-soft); padding: 0 5px; margin-left: 5px; }
+.front { text-align: center; margin: 0 0 16px; }
+.front p { margin: .15em 0; }
+.blk { margin: 0 0 .65em; padding: 1px 0 1px 8px; border-left: 3px solid transparent; white-space: pre-wrap; }
+.blk .cite { display: block; font-family: 'Cinzel', serif; font-size: 9.5px; color: var(--muted); letter-spacing: .03em; user-select: none; white-space: normal; }
+.blk.inferred { border-left: 3px dashed var(--accent-soft); }
+.blk.note { font-style: italic; color: var(--muted); }
+.blk.rule { border-top: 1px solid var(--rule); height: 0; margin: 14px 0; }
+body.dim-on .ptext > .blk, body.dim-on .ptext > .sec-par { color: #9a8c7b; }
+.sec-par { font-family: 'Cinzel', serif; color: var(--accent); font-size: 12.5px; letter-spacing: .05em; margin: 1.2em 0 .3em; border-bottom: 1px solid var(--rule); }
+.aa, .ms { font-family: 'Cinzel', serif; font-size: 9.5px; vertical-align: super; line-height: 0; padding: 1px 3px; margin: 0 2px; white-space: nowrap; font-style: normal; }
+.aa { background: var(--accent); color: var(--parchment); }
+.ms { border: 1px solid var(--accent-soft); color: var(--muted); }
+body.hide-aa .aa, body.hide-ms .ms { display: none; }
+
+/* a key passage: the whole stretch, tinted, with a header saying how it compares */
+.passage { background: var(--passage); border: 1px solid var(--accent-soft); border-left: 5px solid var(--accent); border-radius: 3px; padding: 0 10px 2px 6px; margin: 10px 0 14px -6px; }
+.passage.ref { border-color: var(--ref); border-left-color: var(--ref); box-shadow: 0 0 0 1px var(--ref); background: #f3dcc8; }
+.passage.closest { border-left-color: var(--shared); }
+.passage .blk { padding-left: 4px; }
+.phd { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-family: 'Cinzel', serif; font-size: 10.5px; letter-spacing: .03em; color: var(--muted); padding: 5px 0 4px; border-bottom: 1px solid var(--accent-soft); margin-bottom: 6px; cursor: pointer; }
+.phd .lbl { font-weight: 600; font-size: 12.5px; color: var(--accent); }
+.passage.ref .phd .lbl { color: var(--ref); }
+.phd .kind { font-family: 'EB Garamond', serif; font-style: italic; font-size: 13.5px; letter-spacing: 0; }
+.phd .act { margin-left: auto; font-family: 'EB Garamond', serif; font-size: 13px; letter-spacing: 0; color: var(--accent); text-decoration: underline; }
+.passage.ref .phd .act { display: none; }
+.phd .reftag { background: var(--ref); color: var(--parchment); padding: 0 6px; border-radius: 2px; font-size: 10px; }
+.flash { animation: flash 1.6s ease-out; }
+@keyframes flash { from { box-shadow: 0 0 0 4px #fff0a6; } to { box-shadow: none; } }
+
+/* inside the text */
+.defs { background: #fff4c7; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.term { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.term.f0 { text-decoration-color: var(--f0); }
+.term.f1 { text-decoration-color: var(--f1); text-decoration-style: dashed; }
+.term.f2 { text-decoration-color: var(--f2); text-decoration-style: dotted; }
+body.hide-term .term { text-decoration: none; }
+.sh { color: #00606f; font-weight: 500; border-bottom: 1.5px dotted var(--shared); }
+body.hide-sh .sh { color: inherit; font-weight: inherit; border-bottom: 0; }
+
+/* ---------- overview of all concepts ---------- */
+#overview { position: fixed; inset: 0; background: #2a211866; display: none; align-items: flex-start; justify-content: center; padding: 40px 16px; z-index: 20; }
+#overview.on { display: flex; }
+.ov-box { background: var(--parchment); max-width: 1050px; width: 100%; max-height: calc(100vh - 80px); display: flex; flex-direction: column; box-shadow: 0 8px 40px #0004; }
+.ov-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 18px; border-bottom: 1px solid var(--rule); }
+.ov-head h2 { font-family: 'Cinzel', serif; font-size: 17px; color: var(--accent); margin: 0; font-weight: 600; }
+.ov-head p { margin: 0; flex-basis: 100%; color: var(--muted); font-size: 14px; }
+.ov-head select { font-size: 14px; padding: 2px 5px; background: var(--parchment); border: 1px solid var(--accent-soft); }
+.ov-head .x { margin-left: auto; background: none; border: 1px solid var(--accent-soft); color: var(--accent); cursor: pointer; padding: 2px 10px; }
+.ov-scroll { overflow-y: auto; }
+table.ov { border-collapse: separate; border-spacing: 2px; width: 100%; font-size: 14.5px; padding: 6px 12px 16px; }
+table.ov th { font-family: 'Cinzel', serif; font-size: 10.5px; letter-spacing: .05em; color: var(--muted); font-weight: 400; text-align: left; padding: 4px 6px; position: sticky; top: 0; background: var(--parchment); }
+table.ov th.num { text-align: center; }
+table.ov td { padding: 3px 6px; vertical-align: middle; }
+table.ov tr.row { cursor: pointer; }
+table.ov tr.row:hover td { outline: 1px solid var(--accent-soft); }
+table.ov td.heat { text-align: center; font-variant-numeric: tabular-nums; width: 92px; border-radius: 3px; }
+table.ov td.c-name { font-weight: 500; }
+table.ov td.c-grp { color: var(--muted); font-size: 13px; }
+table.ov td.lead { font-size: 13.5px; color: var(--muted); }
+.tag { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .05em; border: 1px solid var(--accent-soft); color: var(--accent); background: var(--parchment); padding: 1px 7px; border-radius: 9px; white-space: nowrap; display: inline-block; margin: 1px 2px; }
+
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--parchment); font-size: 13px; padding: 4px 8px; border-radius: 3px; z-index: 30; display: none; max-width: 320px; line-height: 1.35; }
+footer { font-size: 12px; color: var(--muted); padding: 4px 16px; border-top: 1px solid var(--rule); background: var(--parchment-dark); }
+footer p { margin: 0; }
+#about summary { list-style-position: inside; }
+#about summary .src { color: var(--muted); font-family: 'EB Garamond', serif; font-size: 12.5px; letter-spacing: 0; }
+#about summary .more { margin-left: 6px; text-decoration: underline; }
+#about summary { cursor: pointer; font-size: 12.5px; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#about .body { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; max-height: 62vh; overflow-y: auto; font-size: 14.5px; line-height: 1.45; color: var(--ink); background: var(--parchment); border-top: 3px solid var(--accent); box-shadow: 0 -8px 30px #0003; padding: 14px 24px 18px; columns: 2 420px; column-gap: 36px; }
+#about .close { float: right; background: none; border: 1px solid var(--accent-soft); color: var(--accent); cursor: pointer; padding: 1px 10px; font-size: 14px; margin: 0 0 6px 12px; }
+#about h5 { font-family: 'Cinzel', serif; font-size: 11.5px; letter-spacing: .06em; color: var(--accent); margin: 0 0 3px; font-weight: 600; break-after: avoid; }
+#about .blk2 { break-inside: avoid; margin-bottom: 10px; }
+#about ol, #about ul { margin: 2px 0 0; padding-left: 20px; }
+#about li { margin-bottom: 2px; }
+#about .live { background: var(--parchment); border: 1px solid var(--rule); border-left: 3px solid var(--shared); padding: 4px 8px; }
+#about .live i { font-style: normal; color: var(--shared); }
+#about .live b { color: var(--ref); font-weight: 500; }
+body:has(#board[hidden]) main { flex: 1 1 auto; }
+@media (max-width: 900px) {
+  #board { flex: 0 0 auto; }
+  .cards { max-height: 40vh; }
+  main { flex: 1 0 auto; overflow: visible; grid-template-rows: none; }
+  main { grid-template-columns: 1fr; grid-auto-rows: minmax(60vh, auto); overflow-y: auto; }
+  .b-cols { grid-template-columns: 1fr; }
+  .b-col { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .picker select { min-width: 0; max-width: 90vw; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Kant's Logic Lectures: Parallel Passage Comparison</h1>
+  <div class="picker">
+    <label for="concept">Concept</label>
+    <button class="hbtn" id="prevC" title="Previous concept" aria-label="Previous concept">‹</button>
+    <select id="concept"></select>
+    <button class="hbtn" id="nextC" title="Next concept" aria-label="Next concept">›</button>
+    <button class="hbtn" id="openOv">All concepts…</button>
+    <form id="custom"><input type="search" id="cterm" placeholder="or your own term" aria-label="Your own term"><button class="hbtn">Show</button></form>
+  </div>
+  <div class="toggles">
+    <label><input type="checkbox" id="t-board" checked> Comparison</label>
+    <label><input type="checkbox" id="t-sh" checked> Shared words</label>
+    <label><input type="checkbox" id="t-term" checked> Underline term</label>
+    <label><input type="checkbox" id="t-dim"> Dim the rest</label>
+    <label><input type="checkbox" id="t-aa" checked> AA pages</label>
+    <label><input type="checkbox" id="t-ms" checked> MS pages</label>
+  </div>
+</header>
+
+<section id="board">
+  <div class="b-head">
+    <h2 id="bTitle"></h2>
+    <span class="ctl">Key passages per lecture <select id="nPass"><option>4</option><option selected>6</option><option>10</option></select></span>
+    <span class="ctl">Order <select id="order"><option value="lecture">as in the lecture</option><option value="sim">most similar first</option></select></span>
+    <button class="how" id="howBtn">What the percentages measure ⓘ</button>
+  </div>
+  <div id="refline"></div>
+  <div class="b-cols" id="bCols"></div>
+</section>
+
+<main id="panels"></main>
+
+<div id="overview" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="ov-box">
+    <div class="ov-head">
+      <h2 id="ovTitle">All concepts across the three lectures</h2>
+      <label>Sort by <select id="ovSort">
+        <option value="change">most change over time</option>
+        <option value="freq">most discussed</option>
+        <option value="topic">topic</option>
+      </select></label>
+      <button class="x" id="closeOv">Close</button>
+      <p>Mentions per 10,000 words in each transcript, darker = more frequent. "Leading term" is the wording each lecture uses most. The tags are computed from these counts and nothing else; they say where to look, not what Kant meant. Click a row to open it.</p>
+    </div>
+    <div class="ov-scroll"><table class="ov" id="ovTable"></table></div>
+  </div>
+</div>
+<div id="tip"></div>
+
+<footer>
+  <details id="about">
+    <summary><span class="src">Student transcripts of Kant's lectures on Meier's <i>Auszug aus der Vernunftlehre</i>, AA XXIV, in full, from <code>data/</code>, oldest on the left.</span> <span class="more">How passages are chosen, and what the percentages measure</span></summary>
+    <div class="body">
+      <button class="close" id="aboutClose">Close</button>
+      <div class="blk2">
+        <h5>How the key passages are chosen</h5>
+        Automatically, from the wording: a paragraph with a sentence shaped like a definition of the concept (shaded yellow: the term followed by <i>ist</i>, <i>heißt</i>, <i>nennt man</i>, <i>bestehet in</i>…), or one that keeps coming back to it, together with the paragraphs that carry the discussion on. Choose one as the reference (framed in red) and each lecture scrolls to the passage closest to it in wording (teal edge); words shared with the reference are in teal. A dashed rule at the left of a paragraph means the extractor joined it from two lines by inference. All of this points you to passages; comparing what they say is your reading.
+      </div>
+      <div class="blk2">
+        <h5>What the percentages measure, in one sentence</h5>
+        The percentage on a passage says how much of the same <em>distinctive vocabulary</em> it uses as the reference passage (the one framed in red): 0% means the two have no telling word in common, 100% would mean they use exactly the same words in the same proportions. It is a count of words, not a judgement about ideas.
+      </div>
+      <div class="blk2">
+        <h5>How it is worked out</h5>
+        <ol>
+          <li><b>Collect the words</b> of each passage, and leave out two kinds: small words that carry no content (<i>der, und, ist, nicht, also</i>…), and the concept's own word. Every key passage on <i>Wahrheit</i> contains "Wahrheit", so counting it would make them all look alike.</li>
+          <li><b>Even out the spelling</b>, so that <i>Urtheil</i> and <i>Urteil</i>, <i>Obiect</i> and <i>Object</i>, <i>Merckmahl</i> and <i>Merkmal</i> count as one word, and trim the endings, so that <i>Erkenntniß</i> and <i>Erkenntnißes</i> do too. The text on screen is never changed; this is only for counting.</li>
+          <li><b>Weigh each word by how rare it is</b> across all three lectures. A word the lecturer uses everywhere (<i>Erkenntniß</i>, <i>Verstand</i>) counts for little, since sharing it says nothing; a word he uses seldom (<i>Übereinstimmung</i>, <i>Object</i>, <i>Kriterium</i>) counts for a lot. The words of the passage's definition-like sentence (shaded yellow) count three times, so that what weighs most is how each passage says what the concept <em>is</em>.</li>
+          <li><b>Compare the two weighted word lists.</b> The more of their heavy words two passages share, and the more of their weight lies in those shared words, the higher the score (cosine similarity, shown ×100).</li>
+        </ol>
+      </div>
+      <div class="blk2">
+        <h5>On the passages now on screen</h5>
+        <div class="live" id="aboutLive"></div>
+      </div>
+      <div class="blk2">
+        <h5>How to read the numbers</h5>
+        <ul>
+          <li>Real passages seldom go above about 40%, because even close parallels differ in most of their words. Roughly: <b>20% and up</b> means the same formulation recurs; <b>10–20%</b> some shared terms; <b>under 5%</b> next to nothing in common. The bars are full at 50%.</li>
+          <li>Compare the numbers <em>with each other</em>, for the same reference: which passage in each lecture is closest, and by how much. Change the reference and every number changes.</li>
+          <li>Long passages score lower simply because they contain more that the reference lacks.</li>
+        </ul>
+      </div>
+      <div class="blk2">
+        <h5>What it is good for</h5>
+        <ul>
+          <li><b>Finding the parallel passage.</b> The three transcripts are notes from the same course on the same textbook, years apart, so the lecturer often comes back to the same point. The highest score in each lecture is the best place to look for where he did.</li>
+          <li><b>Seeing whether a formulation was kept or replaced.</b> Two passages that both define the concept, one scoring high and one low against the same reference, are a pointer that the definition was worded differently in one of them. That is often where a change of view shows, though it is not proof of one.</li>
+        </ul>
+      </div>
+      <div class="blk2">
+        <h5>What it cannot tell you</h5>
+        <ul>
+          <li><b>Whether two passages agree.</b> The same thought in other words scores low: synonyms are not matched, nor Latin with German (<i>conceptus</i> and <i>Begriff</i>). Opposite claims in the same words score high, since <i>nicht</i> is one of the words left out.</li>
+          <li><b>What a passage means.</b> A low score says "worded differently", which is a reason to read both passages side by side, not a finding about Kant. The finding is yours to make from the texts.</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+</footer>
+
+<!-- Shared data, generated from Textfiles/ — see data/README.md. Plain <script src> so the page also works from file:// -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script>
+/* ---------- data ---------- */
+// The three transcripts, oldest first, so that left to right reads as time.
+const WORKS = [
+  { key: 'blomberg', short: 'Blomberg', tag: 'Bl', data: LOGIK_BLOMBERG },
+  { key: 'wiener',   short: 'Wiener',   tag: 'Wi', data: LOGIK_WIENER },
+  { key: 'busolt',   short: 'Busolt',   tag: 'Bu', data: LOGIK_BUSOLT },
+];
+
+/* The concepts. Each has one or more wordings ("forms"), each a regular-expression
+   stem matched at the start of a word, in any case. Spellings follow the transcripts
+   (Urtheil, Merckmahl, Gelahrtsamkeit, obiectiv), and Latin terms are a wording of
+   their own. Add a concept by adding a line here. */
+const L = '\\p{L}*';   // "and any further letters": a stem
+const CONCEPTS = [
+  { id: 'kanon',      group: 'What logic is',            label: 'Kanon / Organon', forms: [['Kanon', '[ck]anon' + L], ['Organon', 'organon' + L]] },
+  { id: 'gelehrsamkeit', group: 'What logic is',         label: 'Gelehrsamkeit', forms: [['Gelehrsamkeit', 'gel(?:eh|ah)rt?samkeit' + L], ['eruditio', 'erudit' + L]] },
+  { id: 'popularitaet', group: 'What logic is',          label: 'Popularität', forms: [['Popularität', 'popul(?:[aä]|ai)r' + L]] },
+  { id: 'horizont',   group: 'What logic is',            label: 'Horizont der Erkenntniß', forms: [['Horizont', 'horizont' + L]] },
+  { id: 'aesthetik',  group: 'What logic is',            label: 'Geschmack / Ästhetik', forms: [['Geschmack', 'geschmack' + L], ['ästhetisch', '(?:ae|ä)sthet' + L]] },
+  { id: 'verstand',   group: 'Faculties and sources',    label: 'Verstand', forms: [['Verstand', 'verstand(?!en(?!\\p{L}))' + L], ['intellectus', 'intellect' + L]] },
+  { id: 'vernunft',   group: 'Faculties and sources',    label: 'Vernunft', forms: [['Vernunft', 'vernunft' + L]] },
+  { id: 'sinnlichkeit', group: 'Faculties and sources',  label: 'Sinnlichkeit', forms: [['Sinnlichkeit', 'sinnlichkeit' + L], ['sinnlich', 'sinnlich(?!keit)' + L]] },
+  { id: 'anschauung', group: 'Faculties and sources',    label: 'Anschauung', forms: [['Anschauung, anschauend', 'anschau' + L], ['intuitus', 'intuit' + L]] },
+  { id: 'erfahrung',  group: 'Faculties and sources',    label: 'Erfahrung', forms: [['Erfahrung', 'erfahrung' + L], ['experientia', 'experien' + L]] },
+  { id: 'apriori',    group: 'Faculties and sources',    label: 'a priori / a posteriori', forms: [['a priori', 'a\\s+priori'], ['a posteriori', 'a\\s+posteriori']] },
+  { id: 'wahrheit',   group: 'Perfections of cognition', label: 'Wahrheit', forms: [['Wahrheit', 'wahrheit' + L], ['veritas', 'verit' + L]] },
+  { id: 'irrthum',    group: 'Perfections of cognition', label: 'Irrthum', forms: [['Irrthum', 'irr?th[uü]m' + L], ['error', 'error' + L]] },
+  { id: 'klarheit',   group: 'Perfections of cognition', label: 'Klarheit', forms: [['klar', 'klar' + L], ['clarus', 'clar' + L]] },
+  { id: 'deutlichkeit', group: 'Perfections of cognition', label: 'Deutlichkeit', forms: [['deutlich', 'deutlich' + L], ['distinctus', 'distinct' + L]] },
+  { id: 'gewissheit', group: 'Perfections of cognition', label: 'Gewißheit', forms: [['Gewißheit', 'gewi(?:ß|ss|s)heit' + L], ['certitudo', 'certitud' + L]] },
+  { id: 'wahrscheinlichkeit', group: 'Perfections of cognition', label: 'Wahrscheinlichkeit', forms: [['wahrscheinlich', 'wahrscheinlich' + L], ['probabilis', 'probab' + L]] },
+  { id: 'meinen',     group: 'Holding-true',             label: 'Meinen, Glauben, Wissen', forms: [['Meinung', 'me[iy]nung' + L], ['Glaube(n)', 'glaube(?:n|ns)?(?!\\p{L})'], ['Wissen', 'wi(?:ß|ss)ens?(?!\\p{L})']] },
+  { id: 'beyfall',    group: 'Holding-true',             label: 'Beyfall', forms: [['Beyfall', 'be[iy]fall' + L], ['assensus', 'assens' + L]] },
+  { id: 'vorurtheil', group: 'Holding-true',             label: 'Vorurtheil', forms: [['Vorurtheil', 'vorurt?h?eil' + L], ['praejudicium', 'pr(?:ae|ä)judic' + L]] },
+  { id: 'zweifel',    group: 'Holding-true',             label: 'Zweifel / Skepsis', forms: [['Zweifel', 'zweifel' + L], ['Scepticismus', '(?:sc|sk)epti' + L]] },
+  { id: 'hypothese',  group: 'Holding-true',             label: 'Hypothese', forms: [['Hypothese', 'hypothes' + L]] },
+  { id: 'zeugniss',   group: 'Holding-true',             label: 'Zeugniß', forms: [['Zeugniß', 'zeugni(?:ß|ss|s)' + L], ['testimonium', 'testimon' + L]] },
+  { id: 'begriff',    group: 'Concepts',                 label: 'Begriff', forms: [['Begriff', 'begrie?f' + L], ['conceptus', 'concept' + L]] },
+  { id: 'merkmal',    group: 'Concepts',                 label: 'Merkmal', forms: [['Merkmahl, Merckmahl', 'merc?km[aä]h?l' + L], ['nota', 'not(?:a|ae|am|is)(?!\\p{L})'], ['Kennzeichen', 'kennzeichen' + L]] },
+  { id: 'abstraction', group: 'Concepts',                label: 'Abstraction', forms: [['abstrahiren', 'abstra[hck]' + L]] },
+  { id: 'reflexion',  group: 'Concepts',                 label: 'Reflexion', forms: [['Reflexion', 'refle[xc]' + L], ['Überlegung', 'überlegung' + L]] },
+  { id: 'definition', group: 'Concepts',                 label: 'Definition', forms: [['Definition, definiren', 'defini(?:t|z|r)' + L], ['Erklärung', 'erklärung' + L]] },
+  { id: 'urtheil',    group: 'Judgements and inferences', label: 'Urtheil', forms: [['Urtheil', 'urt?h?eil' + L], ['judicium', '[ij]udic' + L]] },
+  { id: 'analytisch', group: 'Judgements and inferences', label: 'analytisch / synthetisch', forms: [['analytisch', 'analyt' + L], ['synthetisch', 'synthet' + L]] },
+  { id: 'vernunftschluss', group: 'Judgements and inferences', label: 'Vernunftschluß', forms: [['Vernunftschluß', 'vernunft-?\\s?schl[uü]' + L], ['Schluß (any)', 'schl[uü](?:ß|ss)(?!el)' + L], ['syllogismus, ratiocinium', '(?:syllogis|ratiocin)' + L]] },
+  { id: 'objectiv',   group: 'Judgements and inferences', label: 'objectiv / subjectiv', forms: [['objectiv, obiectiv', 'ob[ij]e[ck]ti[vu]' + L], ['subjectiv, subiectiv', 'sub[ij]e[ck]ti[vu]' + L]] },
+  { id: 'methode',    group: 'Method',                   label: 'Methode', forms: [['Methode', 'method' + L]] },
+  { id: 'beweis',     group: 'Method',                   label: 'Beweis / Demonstration', forms: [['Beweis, Beweiß', 'bewei[sß]' + L], ['Demonstration', 'demonstr' + L]] },
+  { id: 'philmath',   group: 'Method',                   label: 'Philosophie / Mathematik', forms: [['Philosophie', 'philosoph' + L], ['Mathematik', 'mathemati' + L]] },
+  { id: 'genie',      group: 'Method',                   label: 'Genie', forms: [['Genie', 'genie(?:s)?(?!\\p{L})']] },
+];
+
+// A sentence "looks like a definition" when the term stands near its start and is
+// followed, within a few words, by one of these verbs, or when it opens "Unter X versteht man".
+const DEF_AFTER = /^[^.;:!?]{0,18}?(?<!\p{L})(ist|sind|heißt|heisst|heißen|heisset|nennt man|nennet man|nennen wir|bestehet|besteht|bedeutet|wird genannt|definirt|definiret)(?!\p{L})/iu;
+const DEF_BEFORE = /(?<!\p{L})unter\s+(?:\p{L}+\s+){0,3}$/iu;
+
+// Words left out of the similarity measure: they carry no content.
+const STOP_RAW = ('der die das den dem des ein eine einer eines einem einen und oder aber auch als wie so daß dass da wenn wo was wer ist sind war waren wird werden worden wurde seyn sein seyen hat haben hatte nicht nur noch schon sehr mehr man sich ich du er sie es wir ihr mich mir uns ihm ihn ihnen ihre ihrer ihren seine seiner seinen seinem in im an am auf aus bey bei mit nach von vom zu zum zur um über unter vor durch für gegen ohne also dieser diese dieses diesen diesem jene jener alle aller alles allen allem jede jeder jedes jeden etwas nichts kann können kan muß müssen soll sollen will wollen mag denn doch nun ja nein dann daher darum dadurch dazu daran darin darauf hier dort wol wohl immer gar ganz viel viele vieles einige andere andern anderen anders selbst eben gleich weil ob indem sondern weder sowohl nemlich nämlich est non ad cum per quod sive vel aut sed ut dieselbe derselbe dasselbe welche welcher welches welchen welchem solche solcher solches heißt heißen nennt nennet bestehet besteht bedeutet giebt gibt wenig weniger gewiße gewisse gewißen andre unsere unser unsrer unserer unsern').split(' ');
+
+/* ---------- state ---------- */
+let concept = null;     // the concept on show
+let panels = [];
+let stats = {};         // concept id -> counts per work, for the overview and the picker
+let ref = null;         // { wi, k }: the reference passage
+let nPass = 6;
+let order = 'lecture';
+
+/* ---------- helpers ---------- */
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function sectionLabel(s) { return s.title || (s.titleSrc === 'none' ? 'Titelei' : s.id); }
+function fmt(n) { return n >= 10 ? Math.round(n).toString() : n.toFixed(1); }
+const tip = document.getElementById('tip');
+function showTip(e, html) { tip.innerHTML = html; tip.style.display = 'block'; tip.style.left = Math.min(e.clientX + 14, innerWidth - 330) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; }
+function hideTip() { tip.style.display = 'none'; }
+
+/* ---------- words, with the spelling evened out ---------- */
+// The transcripts spell freely (Urtheil/Urteil, Obiect/Object, Merckmahl/Merkmal,
+// Erkänntniß/Erkenntniß), so words are compared in a normalised form. This form is
+// used for measuring only; the text is always shown as the AA prints it.
+const normCache = new Map();
+function norm(w) {
+  const lw = w.toLowerCase();
+  let n = normCache.get(lw);
+  if (n !== undefined) return n;
+  n = lw.replace(/ß/g, 'ss').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
+    .replace(/ck/g, 'k').replace(/c(?!h)/g, 'k').replace(/ph/g, 'f').replace(/th/g, 't')
+    .replace(/y/g, 'i').replace(/j/g, 'i').replace(/([aeiou])h(?![aeiou])/g, '$1')
+    .replace(/(.)\1+/g, '$1');
+  if (n.length > 5) n = n.replace(/(?:ungen|ung|en|em|er|es|e|n|s)$/, '');
+  normCache.set(lw, n);
+  return n;
+}
+const STOP = new Set(STOP_RAW.map(norm));
+
+// Flatten each work once: its blocks in order, their section, their words.
+const DF = new Map();
+let NDOCS = 0;
+WORKS.forEach(w => {
+  w.blocks = [];
+  w.data.sections.forEach((s, si) => s.blocks.forEach(b => w.blocks.push({ b, s, si })));
+  w.words = 0;
+  w.blocks.forEach(x => {
+    x.toks = [];
+    if (x.b.kind === 'rule') return;
+    const re = /\p{L}+/gu;
+    let m;
+    const seen = new Set();
+    while ((m = re.exec(x.b.text))) {
+      w.words++;
+      const t = norm(m[0]);
+      if (t.length < 3 || STOP.has(t)) continue;
+      x.toks.push({ s: m.index, e: m.index + m[0].length, t, w: m[0] });
+      seen.add(t);
+    }
+    seen.forEach(t => DF.set(t, (DF.get(t) || 0) + 1));
+    NDOCS++;
+  });
+});
+const idf = t => Math.log(NDOCS / (1 + (DF.get(t) || 0)));
+
+/* ---------- finding the concept ---------- */
+function conceptRegex(c) {
+  return new RegExp('(?<!\\p{L})(?:' + c.forms.map(f => '(' + f[1] + ')').join('|') + ')', 'giu');
+}
+
+/* Every mention of a concept in a work: { bi, s, e, form } in reading order. */
+function findAll(c, w) {
+  const re = conceptRegex(c), out = [];
+  w.blocks.forEach((x, bi) => {
+    if (x.b.kind === 'rule') return;
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(x.b.text))) {
+      if (!m[0]) { re.lastIndex++; continue; }
+      out.push({ bi, s: m.index, e: m.index + m[0].length, form: m.slice(1).findIndex(g => g !== undefined) });
+    }
+  });
+  return out;
+}
+
+/* The sentence around t[s..e]. A full stop ends a sentence only where the next word
+   follows a space and begins in capitals, and not after a numeral or a lone letter,
+   so that "1." and "a." in the lecturer's enumerations do not cut it short. */
+function sentenceAround(t, s, e) {
+  const isEnd = i => {
+    if (!/[.;!?]/.test(t[i])) return false;
+    if (t[i] === '.' && /(?:^|[\s(])(?:\d+|\p{L})$/u.test(t.slice(Math.max(0, i - 6), i))) return false;
+    return i + 1 >= t.length || /^\s+[\p{Lu}„"(\d]/u.test(t.slice(i + 1, i + 4));
+  };
+  let a = s; while (a > 0 && !isEnd(a - 1)) a--;
+  while (a < s && /\s/.test(t[a])) a++;
+  let z = e; while (z < t.length && !isEnd(z)) z++;
+  return [a, Math.min(z + 1, t.length)];
+}
+
+/* Sentences that read like a definition of the concept: the term at the start, its
+   verb right behind it. Lower score is better: the term at the very start, a sentence
+   of middling length, one inside a section whose title names the concept. */
+function findDefs(w, occ) {
+  const out = [], re = conceptRegex(concept), secHit = new Map();
+  occ.forEach(o => {
+    const x = w.blocks[o.bi], t = x.b.text;
+    const [a, z] = sentenceAround(t, o.s, o.e);
+    const lead = o.s - a;
+    if (lead > 30) return;
+    const after = DEF_AFTER.exec(t.slice(o.e, Math.min(z, o.e + 40)));
+    const before = DEF_BEFORE.test(t.slice(a, o.s)) && /versteh/i.test(t.slice(o.e, z));
+    if (!after && !before) return;
+    if (!secHit.has(x.si)) { re.lastIndex = 0; secHit.set(x.si, re.test(sectionLabel(x.s) + ' ' + (x.s.headings || []).join(' '))); }
+    const len = z - a, gap = after ? after.index : 0;
+    // "X ist nichts anders als …", "X ist die/eine …", "X heißt …" define; "Jede/Alle/Einige X sind …" assert
+    const formula = /^\s*(?:(?:ist|sind)\s+(?:nichts\s+anders\s+als|also|eigentlich)?\s*(?:die|der|das|eine?|nichts)(?!\p{L})|hei(?:ß|ss)t|bestehet\s+in|besteht\s+in|bedeutet)/iu.test(t.slice(o.e, o.e + 40));
+    const quantified = /^(?:jede[rsnm]?|alle[rsnm]?|einige[rsnm]?|solche[rsnm]?|viele|manche[rsnm]?|keine?)\s/iu.test(t.slice(a, o.s));
+    const score = lead + gap * 1.5 + Math.abs(len - 160) / 20 + (len < 40 ? 40 : 0) + (/^\s*,/.test(t.slice(o.e)) ? 15 : 0) - (secHit.get(x.si) ? 25 : 0) - (formula ? 12 : 0) + (quantified ? 10 : 0);
+    out.push({ bi: o.bi, a, z, score });
+  });
+  return out;
+}
+
+/* ---------- key passages ---------- */
+/* A key passage starts at a paragraph that defines the concept, or that comes back
+   to it three times or more, and runs on through the paragraphs that carry the
+   discussion: those that mention it again, and the short numbered points
+   ("1.) …", "a) …") in which the lecturer lays out its kinds. At most five
+   paragraphs, never across a section. The best of them, by how definitional and
+   how dense they are, are kept, then shown in the order of the lecture. */
+function buildPassages(p) {
+  const w = p.w, perBlock = new Map();
+  p.occ.forEach(o => perBlock.set(o.bi, (perBlock.get(o.bi) || 0) + 1));
+  const defsBy = new Map();
+  findDefs(w, p.occ).forEach(d => { if (!defsBy.has(d.bi)) defsBy.set(d.bi, []); defsBy.get(d.bi).push(d); });
+  const seeds = [];
+  perBlock.forEach((n, bi) => {
+    const ds = defsBy.get(bi);
+    if (ds) seeds.push({ bi, score: Math.min(...ds.map(d => d.score)) - 2 * Math.min(n, 4) });
+    else if (n >= 3) seeds.push({ bi, score: 60 - 5 * n });
+  });
+  seeds.sort((a, b) => a.bi - b.bi);
+  const out = [];
+  seeds.forEach(sd => {
+    const last = out[out.length - 1];
+    if (last && sd.bi <= last.b1) { last.score = Math.min(last.score, sd.score); return; }
+    let b1 = sd.bi;
+    while (b1 + 1 < w.blocks.length && b1 - sd.bi < 4) {
+      const nx = w.blocks[b1 + 1];
+      if (nx.si !== w.blocks[sd.bi].si || nx.b.kind !== 'text') break;
+      const enumer = nx.b.text.length < 260 && /^\s*(?:\d+|[a-z]|[IVX]+)\s*\.?\s*\)|^\s*\d+\s*\./.test(nx.b.text);
+      if (!perBlock.has(b1 + 1) && !enumer) break;
+      b1++;
+    }
+    out.push({ b0: sd.bi, b1, score: sd.score });
+  });
+  out.forEach(ps => {
+    ps.mentions = 0; ps.defs = [];
+    for (let bi = ps.b0; bi <= ps.b1; bi++) { ps.mentions += perBlock.get(bi) || 0; (defsBy.get(bi) || []).forEach(d => ps.defs.push(d)); }
+    ps.defs.sort((a, b) => a.score - b.score);
+    ps.score -= Math.min(ps.mentions, 8);
+  });
+  const keep = out.sort((a, b) => a.score - b.score).slice(0, nPass).sort((a, b) => a.b0 - b.b0);
+  keep.forEach((ps, k) => { ps.k = k; ps.label = w.tag + (k + 1); ps.vec = passageVec(w, ps); });
+  return keep;
+}
+
+/* A passage's words as weights (rarer words count for more), the concept's own
+   words left out, since every key passage shares those by construction. The words
+   of its two best definition-like sentences count three times over, so that what
+   is compared is first of all how each passage says what the concept is. */
+function passageVec(w, ps) {
+  const termRe = new RegExp('^(?:' + concept.forms.map(f => f[1]).join('|') + ')$', 'iu');
+  const tf = new Map(), surf = new Map();
+  const core = ps.defs.slice(0, 2);
+  for (let bi = ps.b0; bi <= ps.b1; bi++) w.blocks[bi].toks.forEach(tk => {
+    if (termRe.test(tk.w)) return;
+    const inCore = core.some(d => d.bi === bi && tk.s >= d.a && tk.e <= d.z);
+    tf.set(tk.t, (tf.get(tk.t) || 0) + (inCore ? 3 : 1));
+    if (!surf.has(tk.t)) surf.set(tk.t, tk.w);
+  });
+  const v = new Map();
+  let len = 0;
+  tf.forEach((n, t) => { const x = (1 + Math.log(n)) * idf(t); v.set(t, x); len += x * x; });
+  return { v, len: Math.sqrt(len) || 1, surf };
+}
+function cosine(a, b) {
+  let dot = 0;
+  const [s, l] = a.v.size < b.v.size ? [a, b] : [b, a];
+  s.v.forEach((x, t) => { const y = l.v.get(t); if (y) dot += x * y; });
+  return dot / (a.len * b.len);
+}
+/* What two passages share, and what one has that the other lacks, strongest first. */
+function sharedWords(a, b, n) {
+  const out = [];
+  a.v.forEach((x, t) => { const y = b.v.get(t); if (y) out.push([t, x * y]); });
+  return out.sort((p, q) => q[1] - p[1]).slice(0, n).map(e => e[0]);
+}
+function ownWords(a, b, n) {
+  return [...a.v].filter(([t]) => !b.v.has(t)).sort((p, q) => q[1] - p[1]).slice(0, n).map(e => e[0]);
+}
+
+/* ---------- counts, for the picker and the overview ---------- */
+function computeStats(c) {
+  const per = WORKS.map(w => {
+    const occ = findAll(c, w), forms = c.forms.map(() => 0);
+    occ.forEach(o => forms[o.form]++);
+    return { n: occ.length, rate: occ.length / w.words * 10000, forms, lead: occ.length ? forms.indexOf(Math.max(...forms)) : -1 };
+  });
+  const rates = per.map(p => p.rate), max = Math.max(...rates), min = Math.min(...rates);
+  const tags = [];
+  per.forEach((p, i) => { if (p.n === 0 && Math.max(...per.map(q => q.n)) >= 5) tags.push('absent in ' + WORKS[i].short); });
+  const shift = new Set(per.filter(p => p.n >= 5).map(p => p.lead)).size > 1;
+  if (shift) tags.push('wording changes');
+  if (max > 0 && (max + 1) / (min + 1) >= 2) {
+    if (rates[0] <= rates[1] && rates[1] <= rates[2]) tags.push('rises over time');
+    else if (rates[0] >= rates[1] && rates[1] >= rates[2]) tags.push('falls over time');
+    else tags.push('uneven');
+  }
+  const score = Math.log((max + 1) / (min + 1)) + (shift ? 0.7 : 0) + (tags.some(t => t.startsWith('absent')) ? 0.5 : 0);
+  return { per, tags, score, total: per.reduce((n, p) => n + p.n, 0) };
+}
+
+/* ---------- comparison against the reference ---------- */
+function refPassage() { return ref ? panels[ref.wi].passages[ref.k] : null; }
+/* For every passage: its similarity to the reference, and which of its words to
+   colour as shared. For each lecture, which passage is closest. */
+function compare() {
+  const R = refPassage();
+  panels.forEach(p => p.passages.forEach(ps => { ps.sim = null; ps.shared = null; }));
+  panels.forEach(p => { p.closest = -1; });
+  if (!R) return;
+  panels.forEach((p, wi) => {
+    let best = -1;
+    p.passages.forEach((ps, k) => {
+      if (wi === ref.wi && k === ref.k) return;
+      ps.sim = cosine(R.vec, ps.vec);
+      ps.shared = new Set(sharedWords(ps.vec, R.vec, 12));
+      if (best < 0 || ps.sim > p.passages[best].sim) best = k;
+    });
+    p.closest = best;
+  });
+  // the reference shows the words it shares with its closest passage in each lecture
+  R.shared = new Set();
+  panels.forEach(p => { if (p.closest >= 0) p.passages[p.closest].shared.forEach(t => R.shared.add(t)); });
+}
+
+/* ---------- rendering text ---------- */
+/* A block's html: its text with page marks put back where the transcription had them,
+   and any number of possibly overlapping ranges ({ s, e, cls }) applied as classes. */
+function blockHtml(b, ranges) {
+  const marks = [];
+  (b.pages || []).forEach(p => marks.push({ i: p.i, html: '<span class="aa">AA ' + p.p + '</span>' }));
+  (b.ms || []).forEach(p => marks.push({ i: p.i, html: '<span class="ms">[' + p.p + ']</span>' }));
+  marks.sort((x, y) => x.i - y.i);
+  const t = b.text;
+  if (!ranges.length && !marks.length) return esc(t);
+  const pts = new Set([0, t.length]);
+  ranges.forEach(r => { pts.add(r.s); pts.add(r.e); });
+  marks.forEach(m => pts.add(m.i));
+  const P = [...pts].sort((x, y) => x - y);
+  let out = '', mi = 0;
+  for (let k = 0; k < P.length; k++) {
+    const x = P[k];
+    while (mi < marks.length && marks[mi].i === x) out += marks[mi++].html;
+    if (k === P.length - 1) break;
+    const y = P[k + 1], seg = esc(t.slice(x, y));
+    const cls = ranges.filter(r => r.s <= x && r.e >= y).map(r => r.cls);
+    out += cls.length ? '<span class="' + cls.join(' ') + '">' + seg + '</span>' : seg;
+  }
+  return out;
+}
+
+function passageHead(p, wi, ps) {
+  const isRef = ref && ref.wi === wi && ref.k === ps.k;
+  const x = p.w.blocks[ps.b0];
+  let h = '<div class="phd" data-wi="' + wi + '" data-k="' + ps.k + '"><span class="lbl">' + ps.label + '</span>';
+  h += '<span class="kind">' + (ps.defs.length ? 'defines' : 'discusses') + ' ' + esc(concept.label) + '</span>';
+  h += '<span>AA 24:' + x.b.aa + (x.b.para ? ' · Meier ' + esc(x.b.para.raw) : '') + '</span>';
+  if (isRef) h += '<span class="reftag">reference</span>';
+  else if (ps.sim != null) h += '<span class="sim"><span class="simbar"><div style="width:' + Math.min(100, ps.sim * 200) + '%"></div></span>' + Math.round(ps.sim * 100) + '% shared wording with ' + refPassage().label + (p.closest === ps.k ? ' · closest in ' + esc(p.w.short) : '') + '</span>';
+  h += '<span class="act">compare from here</span></div>';
+  return h;
+}
+
+function renderPanel(p, wi) {
+  const w = p.w, d = w.data;
+  const occBy = new Map();
+  p.occ.forEach(o => { if (!occBy.has(o.bi)) occBy.set(o.bi, []); occBy.get(o.bi).push(o); });
+  const start = new Map(), end = new Map(), inPas = new Map();
+  p.passages.forEach(ps => { start.set(ps.b0, ps); end.set(ps.b1, ps); for (let bi = ps.b0; bi <= ps.b1; bi++) inPas.set(bi, ps); });
+  let html = '';
+  if (d.front && d.front.length) html += '<div class="front">' + d.front.map(l => '<p>' + esc(typeof l === 'string' ? l : (l.text || '')) + '</p>').join('') + '</div>';
+  let lastSec = -1, lastPara = null;
+  w.blocks.forEach((x, bi) => {
+    const { b, s, si } = x;
+    if (si !== lastSec) {
+      html += '<h4 class="sec-title' + (lastSec < 0 && !html ? ' first' : '') + '" id="' + w.key + '-sec-' + si + '">' + esc(sectionLabel(s)) + '</h4>';
+      let m = s.provenance || '';
+      if (s.headings && s.headings.length) m += (m ? ' — ' : '') + 'MS heading: ' + s.headings.join(' / ');
+      html += '<div class="pmeta">' + esc(m) + (s.titleSrc ? '<span class="badge">title: ' + esc(s.titleSrc) + '</span>' : '') + '</div>';
+      lastSec = si; lastPara = null;
+    }
+    const ps = start.get(bi);
+    if (ps) {
+      const cls = 'passage' + (ref && ref.wi === wi && ref.k === ps.k ? ' ref' : '') + (p.closest === ps.k ? ' closest' : '');
+      html += '<div class="' + cls + '" id="' + w.key + '-pas-' + ps.k + '">' + passageHead(p, wi, ps);
+    }
+    const pr = b.para ? b.para.raw : null;
+    if (pr && pr !== lastPara) html += '<div class="sec-par" data-nums="' + (b.para.nums || []).join(',') + '">Meier ' + esc(pr) + '</div>';
+    lastPara = pr;
+    if (b.kind === 'rule') html += '<div class="blk rule"></div>';
+    else {
+      const ranges = (occBy.get(bi) || []).map(o => ({ s: o.s, e: o.e, cls: 'term f' + o.form }));
+      const in_ = inPas.get(bi);
+      if (in_) {
+        in_.defs.filter(dd => dd.bi === bi).forEach(dd => ranges.push({ s: dd.a, e: dd.z, cls: 'defs' }));
+        if (in_.shared) x.toks.forEach(tk => { if (in_.shared.has(tk.t)) ranges.push({ s: tk.s, e: tk.e, cls: 'sh' }); });
+      }
+      const inferred = b.joined && b.joined.includes('inferred');
+      const cite = b.aa != null ? 'AA 24:' + b.aa + (b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '') : '';
+      html += '<div class="blk ' + b.kind + (inferred ? ' inferred' : '') + '" id="' + w.key + '-b' + bi + '"><span class="cite"' + (inferred ? ' title="Paragraph break removed by the extractor\'s inference"' : '') + '>' + cite + '</span>' + blockHtml(b, ranges) + '</div>';
+    }
+    if (end.get(bi)) html += '</div>';
+  });
+  p.text.innerHTML = html;
+  p.heads = [...p.text.querySelectorAll('.sec-title')];
+  updateNav(p);
+}
+
+/* ---------- the comparison board ---------- */
+function wordList(vec, toks) { return toks.map(t => esc(vec.surf.get(t) || t)).join(', '); }
+
+function renderBoard() {
+  document.getElementById('bTitle').textContent = concept.label;
+  const R = refPassage(), rl = document.getElementById('refline');
+  if (!R) rl.innerHTML = '<span class="none">No key passages found for this term. Try another, or a different spelling.</span>';
+  else {
+    const parts = panels.map((p, wi) => {
+      if (p.closest < 0) return wi === ref.wi ? null : esc(p.w.short) + ': no key passage';
+      const c = p.passages[p.closest];
+      return (wi === ref.wi ? 'elsewhere in ' : '') + esc(p.w.short) + ' <b>' + c.label + '</b> ' + Math.round(c.sim * 100) + '%';
+    }).filter(Boolean);
+    rl.innerHTML = 'Reference <b>' + R.label + '</b> (' + esc(panels[ref.wi].w.short) + ', AA 24:' + panels[ref.wi].w.blocks[R.b0].b.aa + '). Closest in wording: ' + parts.join(' · ') + '. <span class="none">Click any passage to compare from it.</span>';
+  }
+  renderAbout();
+  const cols = document.getElementById('bCols');
+  cols.innerHTML = '';
+  panels.forEach((p, wi) => {
+    const st = stats[concept.id] ? stats[concept.id].per[wi] : null;
+    const col = el('div', 'b-col');
+    const n = p.occ.length, rate = n / p.w.words * 10000;
+    const stat = el('div', 'stat');
+    stat.innerHTML = '<b>' + esc(p.w.short) + '</b> · ' + n + ' mentions, ' + fmt(rate) + ' per 10,000 words' + (concept.forms.length > 1 && n ? ' · ' + concept.forms.map((f, i) => esc(f[0].split(',')[0]) + ' ' + p.occ.filter(o => o.form === i).length).join(', ') : '');
+    col.appendChild(stat);
+    const cards = el('div', 'cards');
+    let list = p.passages.slice();
+    if (order === 'sim' && R) list.sort((a, b) => (b.sim == null ? 2 : b.sim) - (a.sim == null ? 2 : a.sim));
+    if (!list.length) cards.appendChild(el('div', 'none', n ? 'No passage defines it or dwells on it; it is only mentioned in passing.' : 'Not mentioned in this lecture.'));
+    list.forEach(ps => {
+      const isRef = ref && ref.wi === wi && ref.k === ps.k;
+      const card = el('button', 'card' + (isRef ? ' ref' : ''));
+      const x = p.w.blocks[ps.b0];
+      const top = el('span', 'top');
+      top.innerHTML = '<span class="lbl">' + ps.label + '</span><span class="where">' + esc(sectionLabel(x.s)) + ' · AA 24:' + x.b.aa + (x.b.para ? ' · Meier ' + esc(x.b.para.raw) : '') + '</span>' +
+        (isRef ? '<span class="sim">reference</span>' : ps.sim != null ? '<span class="sim"><span class="simbar"><div style="width:' + Math.min(100, ps.sim * 200) + '%"></div></span>' + Math.round(ps.sim * 100) + '%</span>' : '');
+      card.appendChild(top);
+      const dd = ps.defs[0];
+      let gist = dd ? p.w.blocks[dd.bi].b.text.slice(dd.a, dd.z) : x.b.text.slice(0, 200);
+      if (gist.length > 210) gist = gist.slice(0, 210) + '…';
+      card.appendChild(el('span', 'gist', gist));
+      if (R && !isRef) {
+        const wd = el('span', 'words');
+        const sh = sharedWords(ps.vec, R.vec, 5), own = ownWords(ps.vec, R.vec, 4);
+        wd.innerHTML = (sh.length ? 'shares <i>' + wordList(ps.vec, sh) + '</i>' : 'shares no distinctive words') + (own.length ? '; only here <u>' + wordList(ps.vec, own) + '</u>' : '');
+        card.appendChild(wd);
+      }
+      card.onclick = () => setRef(wi, ps.k);
+      cards.appendChild(card);
+    });
+    col.appendChild(cards);
+    cols.appendChild(col);
+  });
+}
+
+/* The worked example in the footnote: why the closest passages score what they score. */
+function renderAbout() {
+  const box = document.getElementById('aboutLive'), R = refPassage();
+  if (!R) { box.innerHTML = 'No key passages are on screen for this term, so there is nothing to compare.'; return; }
+  const rw = panels[ref.wi].w;
+  const lines = panels.map((p, wi) => {
+    if (p.closest < 0) return null;
+    const c = p.passages[p.closest];
+    const sh = sharedWords(c.vec, R.vec, 3), own = ownWords(c.vec, R.vec, 3);
+    return '<li><b>' + c.label + '</b> (' + esc(p.w.short) + ') scores <b>' + Math.round(c.sim * 100) + '%</b>' +
+      (sh.length ? ': most of that comes from sharing <i>' + wordList(c.vec, sh) + '</i>' : ': it shares no distinctive word') +
+      (own.length ? '; what pulls it down is its own <u>' + wordList(c.vec, own) + '</u>, which ' + R.label + ' does not use.' : '.') + '</li>';
+  }).filter(Boolean);
+  box.innerHTML = 'The reference is <b>' + R.label + '</b> (' + esc(rw.short) + ', AA 24:' + rw.blocks[R.b0].b.aa + ') on <em>' + esc(concept.label) + '</em>. The closest passage in each lecture:' +
+    '<ul>' + lines.join('') + '</ul>';
+}
+
+/* ---------- navigation ---------- */
+function updateNav(p) {
+  const n = p.passages.length;
+  p.count.textContent = n ? (p.cur >= 0 ? 'passage ' + (p.cur + 1) + ' / ' + n : n + ' passages') : 'no passages';
+  p.prev.disabled = !n || p.cur <= 0;
+  p.next.disabled = !n || p.cur >= n - 1;
+}
+function goPassage(p, k, flash) {
+  if (k < 0 || k >= p.passages.length) return;
+  const e = document.getElementById(p.w.key + '-pas-' + k);
+  if (!e) return;
+  p.text.scrollTop = e.offsetTop - 8;
+  if (flash) { e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); }
+  p.cur = k;
+  updateNav(p);
+}
+
+/* Make a passage the reference, and line the three lectures up on it: its own panel
+   on it, each of the others on the passage closest to it in wording. */
+function setRef(wi, k) {
+  ref = { wi, k };
+  compare();
+  panels.forEach(renderPanel);
+  renderBoard();
+  panels.forEach((p, i) => goPassage(p, i === wi ? k : p.closest, true));
+}
+
+function makePanel(w, wi) {
+  const p = { w, occ: [], passages: [], cur: -1, closest: -1, root: el('section', 'panel') };
+  const head = el('div', 'phead');
+  const r1 = el('div', 'row1');
+  r1.append(el('h3', null, w.data.meta.work), el('span', 'date', w.data.meta.date + ' · AA 24:' + w.data.meta.aa[0] + '–' + w.data.meta.aa[1]));
+  const r2 = el('div', 'row2');
+  const sel = el('select');
+  sel.setAttribute('aria-label', w.data.meta.work + ': go to section');
+  w.data.sections.forEach((s, i) => { const o = el('option', null, sectionLabel(s)); o.value = i; sel.appendChild(o); });
+  sel.onchange = () => { const h = p.text.querySelector('#' + w.key + '-sec-' + sel.value); if (h) p.text.scrollTop = h.offsetTop; };
+  const nav = el('div', 'pnav');
+  p.prev = el('button', null, '‹'); p.next = el('button', null, '›'); p.count = el('span');
+  p.prev.title = 'Previous key passage'; p.next.title = 'Next key passage';
+  p.prev.onclick = () => goPassage(p, p.cur - 1, true);
+  p.next.onclick = () => goPassage(p, p.cur + 1, true);
+  nav.append(p.prev, p.count, p.next);
+  r2.append(sel, nav);
+  // Only Blomberg keys its lecture to Meier's §§.
+  if (w.blocks.some(x => x.b.para)) {
+    const j = el('form', 'jump');
+    j.innerHTML = '§ <input type="number" min="1" aria-label="Meier section"><button>Go</button>';
+    j.title = "Jump to Meier's §";
+    j.onsubmit = e => {
+      e.preventDefault();
+      const n = j.querySelector('input').value;
+      const hit = [...p.text.querySelectorAll('.sec-par')].find(x => x.dataset.nums.split(',').includes(n));
+      if (hit) hit.scrollIntoView({ block: 'start' });
+    };
+    r2.appendChild(j);
+  }
+  head.append(r1, r2);
+  p.text = el('div', 'ptext');
+  // keep the section menu on the section being read
+  let ticking = false;
+  p.text.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      const y = p.text.scrollTop + 40;
+      let i = 0;
+      for (let k = 0; k < (p.heads || []).length; k++) { if (p.heads[k].offsetTop <= y) i = k; else break; }
+      if (p.heads && p.heads[i]) sel.value = p.heads[i].id.split('-sec-')[1];
+    });
+  });
+  // a passage's header makes it the reference
+  p.text.addEventListener('click', e => {
+    const h = e.target.closest('.phd');
+    if (h) setRef(+h.dataset.wi, +h.dataset.k);
+  });
+  p.root.append(head, p.text);
+  return p;
+}
+
+/* ---------- choosing a concept ---------- */
+function setConcept(c) {
+  concept = c;
+  panels.forEach(p => { p.occ = findAll(c, p.w); p.passages = buildPassages(p); p.cur = -1; });
+  // Start from the earliest lecture's most definitional passage.
+  ref = null;
+  for (let wi = 0; wi < panels.length && !ref; wi++) {
+    const ps = panels[wi].passages;
+    if (ps.length) ref = { wi, k: ps.slice().sort((a, b) => a.score - b.score)[0].k };
+  }
+  const sel = document.getElementById('concept');
+  if (!c.custom) { sel.value = c.id; history.replaceState(null, '', '#' + c.id); }
+  else { sel.value = ''; history.replaceState(null, '', '#term=' + encodeURIComponent(c.label)); }
+  if (ref) setRef(ref.wi, ref.k);
+  else { compare(); panels.forEach(renderPanel); renderBoard(); panels.forEach(p => { p.text.scrollTop = 0; }); }
+}
+
+function customConcept(term) {
+  const safe = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+  return { id: 'custom', custom: true, group: 'Your term', label: term, forms: [[term, safe + L]] };
+}
+
+function fillPicker() {
+  const sel = document.getElementById('concept');
+  sel.innerHTML = '';
+  const blank = el('option', null, '— your own term —'); blank.value = ''; blank.hidden = true; sel.appendChild(blank);
+  let grp = null, og = null;
+  CONCEPTS.forEach(c => {
+    if (c.group !== grp) { og = document.createElement('optgroup'); og.label = c.group; sel.appendChild(og); grp = c.group; }
+    const st = stats[c.id];
+    const o = el('option', null, c.label + '  (' + st.per.map(p => p.n).join(' · ') + ')' + (st.tags.length ? '  · ' + st.tags.join(', ') : ''));
+    o.value = c.id;
+    og.appendChild(o);
+  });
+}
+
+/* ---------- overview ---------- */
+function renderOverview() {
+  const how = document.getElementById('ovSort').value;
+  const rows = CONCEPTS.slice();
+  if (how === 'change') rows.sort((a, b) => stats[b.id].score - stats[a.id].score);
+  if (how === 'freq') rows.sort((a, b) => stats[b.id].total - stats[a.id].total);
+  const maxRate = Math.max(...CONCEPTS.flatMap(c => stats[c.id].per.map(p => p.rate)));
+  const t = document.getElementById('ovTable');
+  t.innerHTML = '<thead><tr><th>Concept</th><th>Topic</th>' + WORKS.map(w => '<th class="num">' + esc(w.short) + '<br>' + esc(w.data.meta.date) + '</th>').join('') + '<th>Leading term</th><th>Computed signals</th></tr></thead>';
+  const tb = el('tbody');
+  rows.forEach(c => {
+    const st = stats[c.id], tr = el('tr', 'row');
+    tr.appendChild(el('td', 'c-name', c.label));
+    tr.appendChild(el('td', 'c-grp', c.group));
+    st.per.forEach((p, wi) => {
+      const td = el('td', 'heat', p.n ? fmt(p.rate) : '—');
+      // one hue, light to dark, on a square-root scale so the rarer terms still show
+      const v = Math.sqrt(p.rate / maxRate);
+      td.style.background = p.n ? 'rgba(92,61,30,' + (0.08 + v * 0.82).toFixed(2) + ')' : 'transparent';
+      td.style.color = v > 0.5 ? 'var(--parchment)' : 'var(--ink)';
+      td.onmousemove = e => showTip(e, esc(WORKS[wi].data.meta.work) + ': <b>' + p.n + '</b> mentions, ' + fmt(p.rate) + ' per 10,000 words' + (c.forms.length > 1 ? '<br>' + c.forms.map((f, i) => esc(f[0]) + ' ' + p.forms[i]).join(' · ') : ''));
+      td.onmouseleave = hideTip;
+      tr.appendChild(td);
+    });
+    const leads = st.per.map(p => p.lead >= 0 ? c.forms[p.lead][0].split(',')[0] : '—');
+    tr.appendChild(el('td', 'lead', new Set(leads).size === 1 ? leads[0] + ' throughout' : leads.join(' → ')));
+    const tg = el('td'); st.tags.forEach(x => tg.appendChild(el('span', 'tag', x))); tr.appendChild(tg);
+    tr.onclick = () => { closeOverview(); setConcept(c); };
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+}
+function openOverview() { renderOverview(); document.getElementById('overview').classList.add('on'); }
+function closeOverview() { document.getElementById('overview').classList.remove('on'); hideTip(); }
+
+/* ---------- wiring ---------- */
+const main = document.getElementById('panels');
+panels = WORKS.map(makePanel);
+panels.forEach(p => main.appendChild(p.root));
+CONCEPTS.forEach(c => { stats[c.id] = computeStats(c); });
+fillPicker();
+
+document.getElementById('concept').onchange = e => { const c = CONCEPTS.find(x => x.id === e.target.value); if (c) setConcept(c); };
+function stepConcept(d) {
+  const i = concept && !concept.custom ? CONCEPTS.indexOf(concept) : -1;
+  setConcept(CONCEPTS[(i + d + CONCEPTS.length) % CONCEPTS.length]);
+}
+document.getElementById('prevC').onclick = () => stepConcept(-1);
+document.getElementById('nextC').onclick = () => stepConcept(1);
+document.getElementById('custom').onsubmit = e => {
+  e.preventDefault();
+  const term = document.getElementById('cterm').value.trim();
+  if (term) setConcept(customConcept(term));
+};
+document.getElementById('nPass').onchange = e => { nPass = +e.target.value; setConcept(concept); };
+document.getElementById('order').onchange = e => { order = e.target.value; renderBoard(); };
+document.getElementById('openOv').onclick = openOverview;
+document.getElementById('howBtn').onclick = () => { const d = document.getElementById('about'); d.open = !d.open; };
+document.getElementById('aboutClose').onclick = () => { document.getElementById('about').open = false; };
+document.getElementById('closeOv').onclick = closeOverview;
+document.getElementById('ovSort').onchange = renderOverview;
+document.getElementById('overview').onclick = e => { if (e.target.id === 'overview') closeOverview(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeOverview(); document.getElementById('about').open = false; } });
+document.getElementById('t-board').onchange = e => { document.getElementById('board').hidden = !e.target.checked; };
+document.getElementById('t-sh').onchange = e => document.body.classList.toggle('hide-sh', !e.target.checked);
+document.getElementById('t-term').onchange = e => document.body.classList.toggle('hide-term', !e.target.checked);
+document.getElementById('t-dim').onchange = e => document.body.classList.toggle('dim-on', e.target.checked);
+document.getElementById('t-aa').onchange = e => document.body.classList.toggle('hide-aa', !e.target.checked);
+document.getElementById('t-ms').onchange = e => document.body.classList.toggle('hide-ms', !e.target.checked);
+
+// Start on the concept in the link (#wahrheit, #term=Gemüth), else on Wahrheit.
+(function init() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (h.startsWith('term=') && h.length > 5) { document.getElementById('cterm').value = h.slice(5); setConcept(customConcept(h.slice(5))); return; }
+  setConcept(CONCEPTS.find(c => c.id === h) || CONCEPTS.find(c => c.id === 'wahrheit'));
+})();
+</script>
+</body>
+</html>

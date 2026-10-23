@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kant's Forms of Judgment — Logik Blomberg, Busolt, Wiener</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --parchment: #f6f0e2;
+  --parchment-deep: #ebe2cc;
+  --ink: #2a2118;
+  --ink-soft: #6b5d4a;
+  --accent: #5c3d1e;
+  --accent-soft: #8a6a45;
+  --rule: #d4c7a9;
+  --mark: #f3d98a;
+  --mark-form: #dfe9d3;
+  --flash: #fff1b8;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 17px;
+  color: var(--ink);
+  background: var(--parchment);
+  display: flex;
+  flex-direction: column;
+}
+header {
+  padding: 10px 18px 0;
+  border-bottom: 1px solid var(--rule);
+  background: var(--parchment-deep);
+}
+header h1 {
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: .08em;
+  margin: 0 0 8px;
+  color: var(--accent);
+}
+main { flex: 1; display: flex; min-height: 0; }
+
+/* ── left: the text ─────────────────────────────── */
+#reader { flex: 1 1 58%; display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--rule); }
+#tabs { display: flex; gap: 2px; }
+.tab {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: .06em;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+}
+.tab:hover { color: var(--accent); }
+.tab[aria-selected="true"] {
+  background: var(--parchment);
+  border-color: var(--rule);
+  color: var(--accent);
+  position: relative;
+  top: 1px;
+}
+.tab small { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--ink-soft); margin-left: 6px; }
+#toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 18px; border-bottom: 1px solid var(--rule); font-size: 15px;
+}
+#toolbar select { flex: 1; min-width: 0; font: inherit; padding: 3px 6px; background: #fffdf6; border: 1px solid var(--rule); color: var(--ink); }
+#toolbar button { font: inherit; padding: 2px 10px; background: #fffdf6; border: 1px solid var(--rule); color: var(--accent); cursor: pointer; }
+#toolbar button:disabled { opacity: .35; cursor: default; }
+#meta { padding: 6px 18px; font-size: 14px; color: var(--ink-soft); font-style: italic; border-bottom: 1px dotted var(--rule); }
+#text { flex: 1; overflow-y: auto; padding: 14px 22px 60px; }
+.blk { position: relative; margin: 0 0 .85em; padding-left: 64px; line-height: 1.55; border-radius: 3px; transition: background .6s; }
+.blk .gutter {
+  position: absolute; left: 0; top: .15em; width: 56px; text-align: right;
+  font-family: 'Cinzel', serif; font-size: 11px; color: var(--accent-soft); line-height: 1.5;
+}
+.blk .gutter .para { display: block; color: var(--accent); }
+.blk.note { color: var(--ink-soft); font-style: italic; }
+.blk.rule { border-top: 1px solid var(--rule); height: 1px; padding: 0; margin: 1em 0; }
+.blk.flash { background: var(--flash); }
+.pg, .ms {
+  font-family: 'Cinzel', serif; font-size: 10px; color: var(--accent-soft);
+  vertical-align: super; padding: 0 3px; margin: 0 1px; border: 1px solid var(--rule); border-radius: 3px; background: var(--parchment-deep);
+  white-space: nowrap;
+}
+.ms { border-style: dashed; }
+.sent { cursor: pointer; border-radius: 2px; }
+.sent:hover { background: #efe6cf; }
+.sent.sel { background: var(--flash); box-shadow: 0 0 0 1px var(--accent-soft); }
+.inspect { margin: -.4em 0 1em 64px; padding: 6px 10px 8px; background: #fffdf6; border: 1px solid var(--accent-soft); border-radius: 3px; }
+.ihead { display: flex; justify-content: space-between; align-items: baseline; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .07em; color: var(--accent); }
+.iclose { font: inherit; font-size: 14px; line-height: 1; background: none; border: none; color: var(--ink-soft); cursor: pointer; padding: 0 2px; }
+.iquote { margin-top: 4px; font-size: 15px; }
+.iwhy { margin-top: 5px; font-size: 13.5px; font-style: italic; color: var(--ink-soft); }
+mark { background: var(--mark); color: inherit; padding: 0 1px; border-radius: 2px; }
+mark.form { background: var(--mark-form); box-shadow: 0 0 0 1px #b9cfa6; }
+.sect-title { font-family: 'Cinzel', serif; font-size: 16px; color: var(--accent); margin: 0 0 4px; }
+.sect-prov { font-size: 14px; color: var(--ink-soft); font-style: italic; margin: 0 0 14px; }
+
+/* ── right: the panel ───────────────────────────── */
+#panel { flex: 1 1 42%; min-width: 360px; max-width: 600px; display: flex; flex-direction: column; background: #faf5e8; }
+#panel-head { padding: 12px 16px 10px; border-bottom: 1px solid var(--rule); }
+#modes { display: flex; margin-bottom: 10px; border: 1px solid var(--accent-soft); border-radius: 4px; overflow: hidden; }
+#modes button {
+  flex: 1; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: .06em; padding: 7px 6px;
+  background: #fffdf6; border: none; color: var(--accent); cursor: pointer;
+}
+#modes button + button { border-left: 1px solid var(--accent-soft); }
+#modes button[aria-pressed="true"] { background: var(--accent); color: #fffdf6; }
+#q-wrap { position: relative; }
+#q {
+  width: 100%; font: inherit; padding: 7px 10px; border: 1px solid var(--accent-soft);
+  background: #fffdf6; color: var(--ink); border-radius: 3px;
+}
+#q:focus { outline: 2px solid var(--mark); }
+#suggest {
+  position: absolute; z-index: 5; left: 0; right: 0; top: 100%; background: #fffdf6;
+  border: 1px solid var(--accent-soft); border-top: none; max-height: 260px; overflow-y: auto; display: none;
+}
+#suggest div { padding: 5px 10px; cursor: pointer; font-size: 15px; display: flex; justify-content: space-between; gap: 8px; }
+#suggest div small { color: var(--ink-soft); }
+#suggest div.on, #suggest div:hover { background: var(--parchment-deep); }
+#table { margin-top: 10px; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: baseline; font-size: 14px; }
+#table[hidden], #kwhint[hidden], .opts[hidden] { display: none; }
+#table .grp { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .08em; color: var(--ink-soft); text-transform: uppercase; }
+#table .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  font: inherit; font-size: 14px; padding: 1px 9px; background: #fffdf6; border: 1px solid var(--rule);
+  border-radius: 12px; color: var(--accent); cursor: pointer;
+}
+.chip:hover { border-color: var(--accent-soft); }
+.chip.on { background: var(--accent); color: #fffdf6; border-color: var(--accent); }
+#thint { margin-top: 6px; font-size: 13px; color: var(--ink-soft); font-style: italic; }
+#thint[hidden] { display: none; }
+#kwhint { margin-top: 8px; font-size: 14px; color: var(--ink-soft); font-style: italic; }
+.opts { margin-top: 10px; font-size: 14px; color: var(--ink-soft); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.opts label { cursor: pointer; }
+.opts label.off { opacity: .45; cursor: default; }
+#summary { padding: 8px 16px; border-bottom: 1px solid var(--rule); font-size: 14px; color: var(--ink-soft); min-height: 2.3em; }
+#summary b { color: var(--ink); font-weight: 500; }
+#summary .def { display: block; margin-top: 3px; font-style: italic; }
+#results { flex: 1; overflow-y: auto; padding: 8px 16px 40px; }
+.rw { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: .06em; color: var(--accent); margin: 14px 0 4px; padding-bottom: 2px; border-bottom: 1px solid var(--rule); }
+.ex {
+  background: #fffdf6; border: 1px solid var(--rule); border-radius: 3px; padding: 7px 10px 8px; margin: 0 0 8px;
+}
+.ex:hover { border-color: var(--accent-soft); }
+.ex .loc { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--ink-soft); margin-bottom: 3px; }
+.ex .loc i { font-style: normal; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: .05em; }
+.ex .de { display: block; width: 100%; text-align: left; font: inherit; font-size: 16px; line-height: 1.4; background: none; border: none; padding: 0; color: var(--ink); cursor: pointer; }
+.ex .en { margin-top: 5px; padding-top: 5px; border-top: 1px dotted var(--rule); font-size: 15px; line-height: 1.38; color: #3b4a5c; font-style: italic; }
+.ex .en[hidden] { display: none; }
+.ex .en .src { display: inline-block; font-style: normal; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: .06em; padding: 0 5px; margin-right: 6px; border-radius: 3px; background: #dde6ef; color: #3b4a5c; vertical-align: 1px; }
+.ex .en.wait { color: var(--ink-soft); }
+.ex .en.err { color: #8b2f1f; font-style: normal; font-size: 13px; }
+.ex .en a { color: inherit; }
+.labs { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.lab {
+  font: inherit; font-size: 12px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--rule);
+  background: var(--parchment-deep); color: var(--accent); cursor: pointer;
+}
+.lab:hover { border-color: var(--accent-soft); }
+.lab.q1 { background: #f1e3c4; } .lab.q2 { background: #e7dcc6; } .lab.q3 { background: #e3e8d4; } .lab.q4 { background: #dfe6ea; }
+.labs .inf { font-size: 10px; font-family: 'Cinzel', serif; letter-spacing: .06em; color: var(--ink-soft); margin-right: 2px; }
+.tag { display: inline-block; font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: .06em; padding: 0 5px; border-radius: 3px; margin-left: 4px; vertical-align: 1px; background: var(--parchment-deep); }
+.tag.mk { background: var(--mark); }
+.tag.inf { background: var(--mark-form); }
+.lab.att { border-color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+.lab.req { border-color: var(--accent-soft); box-shadow: inset 0 -2px 0 var(--mark-form); }
+.lab.spec { border-style: dashed; }
+.tag.spec { border: 1px dashed var(--accent-soft); }
+.empty { color: var(--ink-soft); font-style: italic; padding: 16px 0; }
+.more { font: inherit; margin: 4px 0 10px; padding: 3px 12px; background: transparent; border: 1px solid var(--rule); color: var(--accent); cursor: pointer; }
+#note { font-size: 12.5px; color: var(--ink-soft); padding: 8px 16px; border-top: 1px solid var(--rule); background: var(--parchment-deep); }
+
+@media (max-width: 860px) {
+  main { flex-direction: column; }
+  #reader { flex: 1 1 50%; border-right: none; border-bottom: 1px solid var(--rule); }
+  #panel { flex: 1 1 50%; max-width: none; min-width: 0; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>KANT'S FORMS OF JUDGMENT IN THE LOGIC LECTURES</h1>
+  <div id="tabs" role="tablist"></div>
+</header>
+
+<main>
+  <section id="reader" aria-label="Transcript">
+    <div id="toolbar">
+      <button id="prev" title="Previous section">‹</button>
+      <select id="sect" aria-label="Section"></select>
+      <button id="next" title="Next section">›</button>
+    </div>
+    <div id="meta"></div>
+    <div id="text" tabindex="0"></div>
+  </section>
+
+  <aside id="panel" aria-label="Judgment search">
+    <div id="panel-head">
+      <div id="modes">
+        <button id="m-form" aria-pressed="true">FORM → EXAMPLES</button>
+        <button id="m-kw" aria-pressed="false">KEYWORD → FORMS</button>
+      </div>
+      <div id="q-wrap">
+        <input id="q" type="text" autocomplete="off" spellcheck="false">
+        <div id="suggest" role="listbox"></div>
+      </div>
+      <div id="table"></div>
+      <div id="thint">Pick one in each row — an example must have every form you pick. Click a pick again to drop it.</div>
+      <div id="kwhint" hidden>Type words that occur in a judgment (German, any spelling). Each example found is labelled with its forms.</div>
+      <div class="opts" id="opts-form">
+        <label><input type="checkbox" id="o-ev-named" checked> named: the text calls it this form</label>
+        <label><input type="checkbox" id="o-ev-inf" checked> inference: a syllogism fixes its form</label>
+        <label><input type="checkbox" id="o-ev-spec" checked> speculated: form read off its wording</label>
+      </div>
+      <div class="opts" id="opts-kw" hidden>
+        <label><input type="checkbox" id="o-all"> search every sentence, not only the examples</label>
+      </div>
+      <div class="opts">
+        <label><input type="checkbox" id="o-tr" checked> show English translation</label>
+      </div>
+    </div>
+    <div id="summary"></div>
+    <div id="results"></div>
+    <div id="note">An <b>example</b> is a <b>simple sentence</b> — one subject and predicate, no subordinate clause (only a hypothetical or disjunctive may have two, for ground–consequence or division) — whose content carries no weight in the lecture — it is about men, bodies, souls, God, gold, triangles, Caius, not about cognition, reason or truth — so that it shows a form rather than making a point. What its form rests on is then one of three things: <b>named</b>, the text calls it that form; <b>premise / conclusion</b>, it stands in a syllogism that goes through, which fixes its quantity and quality; or <b>speculated</b>, nothing says what it is and the form is read off the wording alone. A label <u>underlined</u> is named in the text, one with a green foot is required by the inference, a <i>dashed</i> one is speculated and can be wrong. <b>Click any sentence on the left</b> to read it the same way. The German is the transcription's, the English is machine translation.</div>
+  </aside>
+</main>
+
+<!-- The three transcripts (generated; see data/README.md). Classic scripts, so this page opens from file://. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script>
+/* ── data: the works and Kant's table of judgments ───────────────────────── */
+const JF_WORKS = [
+  { key: 'blomberg', label: 'Blomberg', year: 'ca. 1771',   data: LOGIK_BLOMBERG },
+  { key: 'busolt',   label: 'Busolt',   year: 'ca. 1789/90', data: LOGIK_BUSOLT },
+  { key: 'wiener',   label: 'Wiener',   year: '1780ff.',    data: LOGIK_WIENER }
+];
+
+const B = '(?<![\\p{L}])';
+/* The table of judgments (KrV A70/B95). */
+const JF_FORMS = [
+  { id: 'universal', group: 'Quantity', axis: 1, de: 'allgemeine', la: 'universale', en: 'universal',
+    def: 'The predicate holds of the whole sphere of the subject — “All men are mortal.”',
+    term: new RegExp(B + '(?:allgemein\\p{L}*|universal\\p{L}*|generalia)', 'iu') },
+  { id: 'particular', group: 'Quantity', axis: 1, de: 'besondere', la: 'particulare', en: 'particular',
+    def: 'The predicate holds of part of the sphere — “Some men are learned.”',
+    term: new RegExp(B + '(?:besonder\\p{L}*|particul\\p{L}*|partikular\\p{L}*|specialia)', 'iu') },
+  { id: 'singular', group: 'Quantity', axis: 1, de: 'einzelne', la: 'singulare', en: 'singular',
+    def: 'The subject is a single thing — “Caius is mortal.”',
+    term: new RegExp(B + '(?:singular\\p{L}*|einzel\\p{L}*|individual\\p{L}*)', 'iu') },
+  { id: 'affirmative', group: 'Quality', axis: 2, de: 'bejahende', la: 'affirmativum', en: 'affirmative',
+    def: 'The predicate is attributed to the subject — “The soul is mortal.”',
+    term: new RegExp(B + '(?:bejah\\p{L}*|affirmat\\p{L}*)', 'iu') },
+  { id: 'negative', group: 'Quality', axis: 2, de: 'verneinende', la: 'negativum', en: 'negative',
+    def: 'The predicate is denied of the subject — “The soul is not mortal.”',
+    term: new RegExp(B + '(?:verneinen\\p{L}*|verneinung\\p{L}*|negativ\\p{L}*|negat\\p{L}*)', 'iu') },
+  { id: 'infinite', group: 'Quality', axis: 2, de: 'unendliche', la: 'infinitum', en: 'infinite',
+    def: 'An affirmation with a negated predicate — “The soul is non-mortal.”',
+    term: new RegExp(B + '(?:unendlich\\p{L}*|infinit\\p{L}*|limitativ\\p{L}*)', 'iu') },
+  { id: 'categorical', group: 'Relation', axis: 3, de: 'kategorische', la: 'categoricum', en: 'categorical',
+    def: 'A predicate is related to a subject, unconditionally.',
+    term: new RegExp(B + '(?:kategorisch\\p{L}*|categorisch\\p{L}*|categoric\\p{L}*)', 'iu') },
+  { id: 'hypothetical', group: 'Relation', axis: 3, de: 'hypothetische', la: 'hypotheticum', en: 'hypothetical',
+    def: 'One judgment is related to another as ground to consequence — “If … then …”.',
+    term: new RegExp(B + '(?:hypothetisch\\p{L}*|hypothetic\\p{L}*)', 'iu') },
+  { id: 'disjunctive', group: 'Relation', axis: 3, de: 'disjunktive', la: 'disjunctivum', en: 'disjunctive',
+    def: 'Judgments related as parts of one divided sphere — “Either … or …”, and equally a divided predicate without it: “A is b or c”, “A is b or non-b”.',
+    term: new RegExp(B + '(?:disjunctiv\\p{L}*|disjunkt\\p{L}*|disjunct\\p{L}*)', 'iu') },
+  { id: 'problematic', group: 'Modality', axis: 4, de: 'problematische', la: 'problematicum', en: 'problematic',
+    def: 'Affirmation or denial taken as merely possible.',
+    term: new RegExp(B + '(?:problematisch\\p{L}*|problematic\\p{L}*)', 'iu') },
+  { id: 'assertoric', group: 'Modality', axis: 4, de: 'assertorische', la: 'assertoricum', en: 'assertoric',
+    def: 'Affirmation or denial taken as actual.',
+    term: new RegExp(B + '(?:assertorisch\\p{L}*|assertoric\\p{L}*|assertor\\p{L}*)', 'iu') },
+  { id: 'apodictic', group: 'Modality', axis: 4, de: 'apodiktische', la: 'apodicticum', en: 'apodictic',
+    def: 'Affirmation or denial taken as necessary.',
+    term: new RegExp(B + '(?:apodictisch\\p{L}*|apodiktisch\\p{L}*|apodict\\p{L}*|apodikt\\p{L}*)', 'iu') }
+];
+const JF_BY_ID = Object.fromEntries(JF_FORMS.map(f => [f.id, f]));
+const JF_GROUPS = ['Quantity', 'Quality', 'Relation', 'Modality'];
+
+/* Names a reader might type, beyond the German, Latin and English above. */
+const JF_ALIASES = {
+  universal: ['allgemein', 'general', 'universalis'],   particular: ['besonder', 'partikular', 'particularis', 'some'],
+  singular: ['einzeln', 'individual', 'singularis'],     affirmative: ['bejahend', 'affirmativ'],
+  negative: ['verneinend', 'negativ'],                   infinite: ['unendlich', 'limitativ', 'limitative', 'infinitum'],
+  categorical: ['kategorisch', 'categorisch'],           hypothetical: ['hypothetisch', 'conditional', 'wenn so', 'if then'],
+  disjunctive: ['disjunktiv', 'disjunctiv', 'entweder oder', 'either or'],
+  problematic: ['problematisch', 'possible', 'moeglich', 'möglich'], assertoric: ['assertorisch', 'actual'],
+  apodictic: ['apodiktisch', 'apodictisch', 'necessary', 'notwendig', 'nothwendig']
+};
+
+/* ── finding the examples ──────────────────────────────────────────────────────
+   Marker: the lecturer's own signal that an example follows. */
+const EX_MARK = new RegExp(B + '(?:[zZ]\\.\\s?[EeBb]\\.?|[zZ]um\\s+(?:Beyspiel|Beispiel|Exempel)|exempli\\s+gratia|e\\.\\s?g\\.)(?![\\p{L}])', 'gu');
+/* A clause counts as a judgment only if it has a finite verb we know. */
+const VERB = new RegExp(B + '(ist|sind|war|waren|seyn|sey|sei|bin|bist|hat|haben|hatte|ists|kann|können|könnte|kan|muß|müßen|müssen|muss|soll|sollen|wird|werden|wurde|mag|darf|gilt|steht|stehet|liegt|folgt|nennt|nennen|heißt|heißen|bedeutet|bedeuten|macht|machen|giebt|gibt|geschieht|bleibt|bleiben|läßt|laßen|lassen|besteht|bestehet|enthält|enthalten|kommt|kommen|gehört|gehören|entspringt|hängt|wirkt|gelten|dient|dienen|fordert|erfordert|braucht|brauchen|zeigt|zeigen|sagt|sagen|bezieht|beziehen|gründet|lebt|leben|stirbt|sterben|denkt|denken|erkennt|erkennen|urtheilt|schließt|schließen|est|sunt|sit|sint|esse|erat|potest|possunt|habet|habent|debet)(?![\\p{L}])', 'iu');
+const MAX_EX_CHARS = 320;
+
+function sentencesOf(text) {
+  // Split after . ! ? ; : — but not after the abbreviations the lectures lean on (z.E., z.B., d.i.)
+  const out = [];
+  let start = 0;
+  const re = /[.!?;:»](?=\s+[\p{Lu}„"“(]|\s*$)/gu;
+  let m;
+  while ((m = re.exec(text))) {
+    const before = text.slice(Math.max(0, m.index - 4), m.index + 1);
+    if (/(?:z\.[EeBb]|d\.i|u\.s|\bz)\.$/.test(before) || /(?<![\p{L}])\p{L}\.$/u.test(before)) continue;
+    out.push({ s: start, e: m.index + 1 });
+    start = m.index + 1;
+  }
+  if (start < text.length) out.push({ s: start, e: text.length });
+  return out;
+}
+
+/* Trim a span of `text` (leading space, quotes, a framing "ich sage:") and return it, or null. */
+function tidy(text, s, e) {
+  let t = text.slice(s, e);
+  const lead = t.match(/^[\s:,„"“»«(]+/);
+  if (lead) s += lead[0].length;
+  t = text.slice(s, e);
+  const bars = t.match(/^\|\|\s*\S\s+/);   // the Wiener Logik's "|| V"
+  if (bars) { s += bars[0].length; t = text.slice(s, e); }
+  const frame = t.match(/^.{0,40}?\b(?:ich sage|sage ich|man sagt|sagt man|heißt es|spricht man)\s*[:,]\s*/i);
+  if (frame) { s += frame[0].length; t = text.slice(s, e); }
+  const trail = t.match(/[\s"“”«»),]+$/);
+  if (trail) e -= trail[0].length;
+  return e > s ? { s, e } : null;
+}
+
+/* A span can hold a whole syllogism ("Alle Menschen sind sterblich, Caius ist ein Mensch, also …").
+   Split it into its judgments at a comma before a new capitalised subject + verb, or before a conclusion
+   word, and record which parts the text itself draws as a conclusion. */
+const CONCL = new RegExp('^(?:also|folglich|mithin|demnach|ergo|igitur)(?![\\p{L}])', 'iu');
+function splitJudgments(text, s, e) {
+  const seg = text.slice(s, e);
+  const cut = [0];
+  const re = /[,;]\s+(?=(?:\p{Lu}\p{L}+\s+(?:ist|sind|hat|haben|kann|muß|est|sunt)(?![\p{L}]))|(?:also|folglich|mithin|demnach|ergo|igitur)(?![\p{L}]))/gu;
+  let m;
+  while ((m = re.exec(seg))) cut.push(m.index + m[0].length);
+  cut.push(seg.length);
+  const parts = [];
+  for (let i = 0; i < cut.length - 1; i++) {
+    const t = tidy(text, s + cut[i], s + cut[i + 1]);
+    if (t) parts.push({ ...t, concl: CONCL.test(text.slice(t.s, t.e)) });
+  }
+  return parts;
+}
+
+function isJudgment(t) {
+  const words = t.split(/\s+/).length;
+  return words >= 3 && words <= 45 && VERB.test(t);
+}
+
+/* ── does the sentence function as an example? ────────────────────────────────
+   A sentence is an example of a form when its content carries no weight of its own in the lecture: Kant
+   is not telling us that men are mortal, he is showing what a universal judgment looks like. So a
+   sentence whose subject matter IS the lecture's — cognition, reason, judgment, truth, science, proof,
+   method — is making the point, not illustrating it, however neatly it fits a form. Expounding voices
+   ("man nennt", "wir sehen", "ich sage") go the same way. */
+const DOCTRINE = new RegExp(B + '(?:erkenntni\\p{L}*|erkenn\\p{L}*|vernunft\\p{L}*|vernünftig\\p{L}*|verstand\\p{L}*|verstandes\\p{L}*|urthei\\p{L}*|urtei\\p{L}*|judic\\p{L}*|begrif\\p{L}*|satz|sätze|säzze|sazze|saz|proposition\\p{L}*|wahrheit\\p{L}*|irrthum\\p{L}*|irrtum\\p{L}*|wißenschaft\\p{L}*|wissenschaft\\p{L}*|logi[ck]\\p{L}*|philosoph\\p{L}*|gelehrsamkeit\\p{L}*|gelahrtsamkeit\\p{L}*|gelehrt\\p{L}*|vorstellung\\p{L}*|merkmahl\\p{L}*|merkmal\\p{L}*|merckmahl\\p{L}*|definition\\p{L}*|erklärung\\p{L}*|beweis\\p{L}*|beweisen|regel\\p{L}*|reguln|methode\\p{L}*|schluß\\p{L}*|schlüße\\p{L}*|schließ\\p{L}*|gewißheit\\p{L}*|gewissheit\\p{L}*|meinung\\p{L}*|zweifel\\p{L}*|deutlich\\p{L}*|klarheit\\p{L}*|verworren\\p{L}*|anschauung\\p{L}*|hypothes\\p{L}*|wahrscheinlich\\p{L}*|vollkommenheit\\p{L}*|eintheilung\\p{L}*|sphaer\\p{L}*|subject\\p{L}*|subiect\\p{L}*|praedicat\\p{L}*|prädicat\\p{L}*|terminus|termin\\p{L}*|kenntni\\p{L}*|lehre\\p{L}*|autor|verfasser|dogma\\p{L}*|kritik\\p{L}*|skeptisch\\p{L}*|critic\\p{L}*|analytisch\\p{L}*|synthetisch\\p{L}*)', 'iu');
+const EXPOUNDING = new RegExp('^(?:man|wir|ich|uns|unser\\p{L}*|du|hier|dieses|dies|daher|deswegen)(?![\\p{L}])|' +
+  B + '(?:nennt|nennen|nennet|heißt|heißen|bedeutet|bedeuten|sagt|sagen|verstehet|versteht|erklär\\p{L}*)(?![\\p{L}])', 'iu');
+/* The furniture of school-logic examples: men and bodies, souls and God, gold, iron, triangles, Caius.
+   The list is the subjects of the text's OWN marked examples (Mensch 18×, Triangel, Körper, Gott, Eisen,
+   Tugend, Seele, Metall, Caius, Künstler, Haus, Buch, Welt …) with the rest of the stock joined to them.
+   A sentence about one of these is not telling us anything the lecture needs: it is showing a form. */
+const EXAMPLE_SUBJECT = new RegExp(B + '(?:' + [
+  'mensch',
+  'körper',
+  'seele',
+  'geist',
+  'engel',
+  'teufel',
+  'triangel',
+  'zirkel',
+  'quadrat',
+  'linie',
+  'zahl',
+  'gold',
+  'eisen',
+  'metall',
+  'stein',
+  'silber',
+  'holz',
+  'baum',
+  'birnbaum',
+  'pflanze',
+  'blume',
+  'rose',
+  'gras',
+  'thier',
+  'tier',
+  'vogel',
+  'fisch',
+  'pferd',
+  'hund',
+  'löwe',
+  'wurm',
+  'wasser',
+  'feuer',
+  'luft',
+  'erde',
+  'sonne',
+  'mond',
+  'stern',
+  'himmel',
+  'welt',
+  'haus',
+  'kleid',
+  'uhr',
+  'schiff',
+  'vestung',
+  'barometer',
+  'tugend',
+  'laster',
+  'reichthum',
+  'reichtum',
+  'nothlüge',
+  'notlüge',
+  'künstler',
+  'medicus',
+  'richter',
+  'könig',
+  'fürst',
+  'einwohner',
+  'nichtsterbliche',
+  'jemand',
+  'niemand',
+  'caius',
+  'cajus',
+  'socrates',
+  'sokrates',
+  'titius',
+  'sempronius',
+  'petrus',
+  'alexander',
+  'cäsar',
+  'caesar'
+].join('|') + ')(?:e|en|es|er|n|s|ne|nen)?(?![\\p{L}])', 'iu');
+
+/* The subject phrase: what stands before the finite verb. */
+function subjectOf(t) {
+  const i = t.search(VERB);
+  return (i > 0 ? t.slice(0, i) : t).trim();
+}
+function functionsAsExample(t, setOff) {
+  const head = subjectOf(t);
+  if (EXPOUNDING.test(t) || DOCTRINE.test(head)) return false;
+  return setOff || EXAMPLE_SUBJECT.test(head);
+}
+
+/* Which forms the text itself names, in the run-up to an example: the sentence before it in the block,
+   and the block before that. A form counts only if the example's own wording agrees — where Kant names
+   two ("einem allgemein bejahenden ein allgemein verneinendes") only the one that fits is kept. */
+const NAME_BEFORE = 500, NAME_AFTER = 260;
+function namedForms(sec, bi, b, start, labels, end) {
+  const prev = (sec.blocks[bi - 1] && sec.blocks[bi - 1].text) || '';
+  const win = (prev + ' ' + b.text.slice(0, start)).slice(-NAME_BEFORE) + ' ‖ ' +
+    b.text.slice(end == null ? start : end, (end == null ? start : end) + NAME_AFTER);
+  return labels.filter(id => JF_BY_ID[id].term.test(win));
+}
+
+/* Does the inference go through? Only then is a premise's form fixed by its place in it. The classical
+   rules for quantity and quality, with Kant's own proviso that a singular judgment counts as universal
+   ("Die Judicia singularia können betrachtet werden als Judicia vniversalia", Logik Busolt, AA 24:665).
+   Relation and modality are not settled by these rules, so they stay inferred from the wording. */
+function inferenceHolds(parts) {
+  const n = parts.length;
+  if (n < 2 || n > 3 || !parts[n - 1].concl || parts.slice(0, -1).some(p => p.concl)) return false;
+  const uni = p => p.labels.includes('universal') || p.labels.includes('singular');
+  const par = p => p.labels.includes('particular');
+  const neg = p => p.labels.includes('negative');
+  const prem = parts.slice(0, -1), con = parts[n - 1];
+  if (prem.filter(neg).length > 1) return false;                 // two negative premises prove nothing
+  if (neg(con) !== (prem.filter(neg).length === 1)) return false; // the conclusion follows the weaker part
+  if (prem.length === 2) {
+    if (!prem.some(uni)) return false;                            // two particular premises prove nothing
+    if (prem.some(par) && !par(con)) return false;
+  } else if (!uni(prem[0]) && uni(con)) return false;             // an enthymeme cannot widen its premise
+  return true;
+}
+const FIXED_BY_INFERENCE = ['universal', 'particular', 'singular', 'affirmative', 'negative', 'infinite'];
+
+/* A passage "concerns a judgment" if it, or the block before or after it, says so. */
+const JF_JUDGMENT = new RegExp(B + '(Urtheil\\p{L}*|Urteil\\p{L}*|judic\\p{L}*|Satz|Sätze|Säzze|Sazze|Saz|propositio\\p{L}*|proposition\\p{L}*|Subject\\p{L}*|Subiect\\p{L}*|Praedicat\\p{L}*|Prädicat\\p{L}*)', 'iu');
+const VERB_G = new RegExp(VERB.source, 'giu');
+const SUBORD = new RegExp(B + '(daß|dass|weil|ob|indem|damit|obgleich|obwohl|obschon|wiewohl|nachdem|bevor|sobald|solange|welche|welcher|welches|welchen|welchem|welch|dessen|deren|wobei|wodurch|womit|denn|quod|quia|cum|qui|quae|quo)(?![\\p{L}])|,\\s+(da|wo|wie|als)\\s', 'iu');
+
+/* A simple sentence: one subject and predicate, no subordinate clause, no heading debris or enumeration.
+   Only a hypothetical (ground–consequence) or disjunctive (division) may have two clauses. */
+function isSimple(t, labels) {
+  if (/[\[\]<>?\d:;]|Abschnitt|etc\.|(?<![\p{L}])[zZ]\.\s?[EeBb]\b/u.test(t)) return false;
+  if (/(?<![\p{L}])(entweder|nehmlich|und|oder|als|aber|auch|so|wenn)\s*[,.]?$/iu.test(t)) return false;   // cut off mid-sentence
+  const compound = labels.includes('hypothetical') || labels.includes('disjunctive');
+  if (/^(wenn|wann|falls|si)(?![\p{L}])/iu.test(t) && !labels.includes('hypothetical')) return false;   // a wenn-clause with no consequence
+  if (!/^(?:\p{Lu}|alle|aller|allen|alles|jeder|jede|jedes|jeden|kein|keine|keiner|keines|einige|etliche|manche|wenn|wann|falls|si|entweder|also|folglich|mithin|demnach|ergo|der|die|das|den|ein|eine|einer|ein\s)/u.test(t)) return false;   // begins mid-clause
+  if (/^(wie|als|wo|nicht|von|vom|zwischen|mit|durch|für|in|auf|an|zu|bey|bei|aus|nach|über|unter|ohne|um)\s/iu.test(t)) return false;   // starts mid-sentence
+  if (!compound && VERB.test(t.split(/\s+/).pop().replace(/[.!,]+$/, ''))) return false;   // verb-final: a subordinate clause, not a simple sentence
+  const words = t.split(/\s+/).length;
+  if (words < 3 || words > (compound ? 30 : 14)) return false;
+  const verbs = (t.match(VERB_G) || []).length;
+  if (verbs < 1 || verbs > (compound ? 2 : 1)) return false;
+  if ((t.match(/,/g) || []).length > 2) return false;
+  if (/,\s+(und|aber|doch|deshalb|daher|also|folglich|mithin|sondern|denn|weswegen)(?![\p{L}])/iu.test(t)) return false;
+  const sub = SUBORD.exec(t);
+  if (sub) {
+    const w = (sub[1] || sub[2] || '').toLowerCase();
+    // a ground–consequence "weil … so" is allowed, but not when it is nested inside a wenn-clause
+    if (!(compound && (w === 'weil' || w === 'da') && !/(?<![\p{L}])(wenn|wann|falls|si)(?![\p{L}])/iu.test(t))) return false;
+  }
+  return true;
+}
+
+/* The wording that makes an unmarked sentence read as a demonstration of a form: a quantifier or an
+   individual's name opening the sentence, a wenn…so, an entweder…oder, a negated predicate. */
+const IMPLICIT_START = new RegExp('^(?:' + [
+  '(?:Alle|Aller|Jeder|Jede|Jedes|Jeden|Ein jeder|Omnis|Omne|Omnes|Omnia|Kein|Keine|Keiner|Keines|Nullus|Nulla|Nullum)\\s+\\p{L}+',
+  '(?:Einige|Etliche|Manche|Mancher|Manches|Quidam|Quaedam|Quoddam|Aliqui|Aliquis|Aliquod|Nonnulli)\\s+\\p{L}+',
+  '(?:Caius|Cajus|Socrates|Sokrates|Titius|Petrus|Sempronius)\\s+(?:ist|sind|war|hat|est)',
+  '(?:Wenn|Wann|Falls|Si)\\s'
+].join('|') + ')', 'iu');
+function isImplicitExample(t, labels) {
+  return IMPLICIT_START.test(t) || labels.includes('disjunctive') || labels.includes('infinite');
+}
+
+/* ── labelling a judgment with its forms ──────────────────────────────────────
+   Inferred from wording alone, on Kant's four heads. Returns form ids. */
+function classify(t) {
+  const labels = [];
+  const hyp = /(?:^|[\s,;:])(?:wenn|wann|falls|si)(?![\p{L}])[^]*?(?:^|[\s,;:])(?:so|dann|ita|tum|ergo)(?![\p{L}])/iu.test(t);
+  /* A divided sphere, however it is written: "entweder … oder", or a bare disjunct — "A ist b oder c",
+     "A ist b oder nicht-b" — which the lectures set down without "entweder" as often as with it. */
+  const disj = /(?<![\p{L}])(?:oder|vel|aut|sive|seu)(?![\p{L}])/iu.test(t);
+  // quantity
+  let quant = null;
+  if (/(?<![\p{L}])(alle|aller|allen|alles|jeder|jede|jedes|jeden|jedem|omnis|omne|omnes|omnia|kein|keine|keiner|keines|keinen|keinem|nullus|nulla|nullum)(?![\p{L}])/iu.test(t)) quant = 'universal';
+  else if (/(?<![\p{L}])(einige|einiger|etliche|manche|mancher|manches|quidam|quaedam|quoddam|aliqui|aliquis|aliquod|nonnulli|ein\s+theil)(?![\p{L}])/iu.test(t)) quant = 'particular';
+  else if (/(?<![\p{L}])(caius|cajus|socrates|sokrates|titius|petrus|sempronius|hic|haec|hoc)(?![\p{L}])|^(dieser|diese|dieses|dies)(?![\p{L}])/iu.test(t)) quant = 'singular';
+  if (quant) labels.push(quant);
+  // quality
+  const infinite = /(?<![\p{L}])(ist|sind|sey|seyn|est|sunt)\s+(nicht-?(?!s(?![\p{L}]))\p{L}{4,}|un(?!ser|ter|mittel|d(?![\p{L}]))\p{L}{4,}|non-\p{L}+)/iu.test(t);
+  const neg = /(?<![\p{L}])(nicht|kein\p{L}*|nullus|nulla|nullum|non|nie|niemals|nichts|niemand|nimmermehr)(?![\p{L}-])/iu.test(t);
+  if (infinite && !neg) labels.push('infinite');
+  else if (neg) labels.push('negative');
+  else labels.push('affirmative');
+  // relation
+  labels.push(hyp ? 'hypothetical' : disj ? 'disjunctive' : 'categorical');
+  // modality
+  if (/(?<![\p{L}])(muß|müßen|müssen|muss|nothwendig\p{L}*|notwendig\p{L}*|unmöglich\p{L}*|schlechterdings|necesse|necessario|apodic\p{L}*)(?![\p{L}])/iu.test(t)) labels.push('apodictic');
+  else if (/(?<![\p{L}])(kann|kan|können|könnte|mag|möchte|möglich\p{L}*|vielleicht|potest|possunt|problematisch\p{L}*)(?![\p{L}])/iu.test(t)) labels.push('problematic');
+  else labels.push('assertoric');
+  return labels;
+}
+
+/* Every example in the three works. A sentence is an example when it works as one (above) and is simple;
+   what it is worth as evidence of a form is a further question, and gets one of three answers:
+     named       the text names that form within a few lines of it;
+     premise /
+     conclusion  it stands in a syllogism that goes through, which is what fixes its quantity and quality;
+     speculated  neither — the form is read off its wording alone, and may be wrong.
+   Built once, on first use. */
+let EXAMPLES = null;
+function buildExamples() {
+  if (EXAMPLES) return EXAMPLES;
+  const found = new Map();                       // block id + offset → the example
+  const add = x => {
+    const k = x.b.id + ':' + x.s, old = found.get(k);
+    if (!old) { found.set(k, x); return; }
+    if (!old.named.length) old.named = x.named;
+    old.inferred = old.inferred || x.inferred;
+    old.role = old.role || x.role;
+    old.marker = old.marker || x.marker;
+  };
+
+  JF_WORKS.forEach((w, wi) => w.data.sections.forEach((sec, si) => sec.blocks.forEach((b, bi) => {
+    const text = b.text;
+    if (!text) return;
+    const sents = sentencesOf(text);
+
+    /* The spans a judgment may be cut from: what follows an example marker, every sentence on its own,
+       and a conclusion joined to the sentence before it, where its premises stand there. */
+    const spans = [];
+    EX_MARK.lastIndex = 0;
+    let m;
+    while ((m = EX_MARK.exec(text))) {
+      const i = m.index + m[0].length;
+      const se = sents.find(x => i >= x.s && i < x.e);
+      if (se) spans.push({ s: i, e: se.e, marker: m[0].replace(/\s+/g, '') });
+    }
+    sents.forEach((se, i) => {
+      const own = splitJudgments(text, se.s, se.e);
+      if (own.length && own[0].concl && i > 0) spans.push({ s: sents[i - 1].s, e: se.e, marker: '' });
+      spans.push({ s: se.s, e: se.e, marker: '' });
+    });
+
+    spans.forEach(sp => {
+      if (sp.e - sp.s > MAX_EX_CHARS) return;
+      const parts = splitJudgments(text, sp.s, sp.e).map(p => {
+        const t = text.slice(p.s, p.e), labels = classify(t);
+        return { ...p, text: t, labels, simple: isJudgment(t) && isSimple(t, labels) };
+      });
+      /* A syllogism's premises are examples whatever they are about — only their form is at work. */
+      const holds = parts.length > 1 && parts.every(p => p.simple && !EXPOUNDING.test(p.text)) && inferenceHolds(parts);
+      parts.forEach(p => {
+        if (!p.simple || !functionsAsExample(p.text, !!sp.marker || holds)) return;
+        add({ wi, si, bi, b, s: p.s, e: p.e, text: p.text, labels: p.labels, marker: sp.marker,
+              named: namedForms(sec, bi, b, p.s, p.labels, p.e),
+              inferred: holds, role: holds ? (p.concl ? 'conclusion' : 'premise') : '' });
+      });
+    });
+  })));
+
+  EXAMPLES = [...found.values()].sort((a, c) => a.wi - c.wi || a.si - c.si || a.bi - c.bi || a.s - c.s);
+  return EXAMPLES;
+}
+
+/* Why a sentence in the transcript is, or is not, among the examples. */
+function exampleStatus(sec, bi, b, s, e) {
+  const text = b.text.slice(s, e);
+  if (!VERB.test(text)) return { labels: null, why: 'Not a judgment: no finite verb in it.' };
+  const labels = classify(text);
+  const hit = buildExamples().find(x => x.b.id === b.id && x.s < e && x.e > s);
+  if (hit) return { labels: hit.labels, hit, why: '' };
+  if (!isSimple(text, labels)) return { labels, why: 'Not an example: not a simple sentence — a subordinate clause, a second verb, or too long.' };
+  if (!functionsAsExample(text, EX_MARK.test(b.text.slice(Math.max(0, s - 6), s)))) return { labels, why: 'Not an example: its content carries the point Kant is making, rather than illustrating a form. The lecture is not out to tell us this.' };
+  return { labels, why: 'It works as an example, but it is part of a longer judgment that is shown instead.' };
+}
+
+/* Every sentence that could be a judgment, marker or none. Scanned on demand; classified only if kept. */
+function* allSentences() {
+  for (let wi = 0; wi < JF_WORKS.length; wi++) {
+    const secs = JF_WORKS[wi].data.sections;
+    for (let si = 0; si < secs.length; si++) for (let bi = 0; bi < secs[si].blocks.length; bi++) {
+      const b = secs[si].blocks[bi];
+      if (!b.text) continue;
+      for (const se of sentencesOf(b.text)) {
+        const t = tidy(b.text, se.s, se.e);
+        if (!t) continue;
+        const text = b.text.slice(t.s, t.e);
+        if (isJudgment(text)) yield { wi, si, bi, sec: secs[si], b, s: t.s, e: t.e, text };
+      }
+    }
+  }
+}
+
+/* ── state ─────────────────────────────────────────────────────────────────── */
+let curWork = 0, curSect = 0;
+let mode = 'form';              // 'form' (form → examples) or 'kw' (keywords → forms)
+let curForms = {};              // group → chosen form: at most one per head of the table
+let curWords = [];              // the keywords of the current keyword search
+let results = null;             // [ [hit,…] per work ]
+let hlMap = new Map();          // block id → [{ s, e, cls }]
+let suggestIdx = -1;
+const shown = {};
+const PAGE = 30;
+
+/* ── helpers ───────────────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+/* Fold case, ß and umlauts, and the old th/y spellings (Urtheil/Urteil, seyn/sein), so a modern spelling still finds the transcription's. */
+function fold(s) {
+  return s.toLowerCase().replace(/ß/g, 'ss').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u')
+    .replace(/th/g, 't').replace(/y/g, 'i').replace(/\s+/g, ' ').trim();
+}
+/* Same idea, but length-preserving, so offsets still point into the original text. */
+function foldKeep(s) {
+  return s.toLowerCase().replace(/ß/g, 's').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/y/g, 'i');
+}
+function formsFor(q) {
+  const n = fold(q);
+  if (!n) return [];
+  return JF_FORMS.filter(f => {
+    const names = [f.id, f.de, f.la, f.en].concat(JF_ALIASES[f.id] || []).map(fold);
+    return names.some(x => x.startsWith(n) || (n.length > 3 && x.includes(n)));
+  });
+}
+
+/* ── the reading pane ──────────────────────────────────────────────────────── */
+function buildTabs() {
+  const tabs = $('tabs');
+  JF_WORKS.forEach((w, i) => {
+    const b = el('button', 'tab');
+    b.setAttribute('role', 'tab');
+    b.append(w.label, el('small', null, w.year));
+    b.addEventListener('click', () => openWork(i, 0));
+    tabs.append(b);
+    w.tab = b;
+  });
+}
+
+function openWork(wi, si, blockId) {
+  curWork = wi; curSect = si;
+  JF_WORKS.forEach((w, i) => w.tab.setAttribute('aria-selected', i === wi ? 'true' : 'false'));
+  const sel = $('sect');
+  sel.textContent = '';
+  JF_WORKS[wi].data.sections.forEach((s, i) => {
+    const first = s.blocks.find(b => b.aa);
+    const o = el('option', null, (s.title || '(untitled)') + (first ? '  · AA 24:' + first.aa : ''));
+    o.value = i;
+    sel.append(o);
+  });
+  sel.value = si;
+  renderSection(blockId);
+}
+
+function renderSection(blockId) {
+  const w = JF_WORKS[curWork], s = w.data.sections[curSect];
+  $('sect').value = curSect;
+  $('prev').disabled = curSect === 0;
+  $('next').disabled = curSect === w.data.sections.length - 1;
+  const aas = s.blocks.map(b => b.aa).filter(Boolean);
+  $('meta').textContent = w.data.meta.work + ' — section ' + (curSect + 1) + ' of ' + w.data.sections.length +
+    (aas.length ? ' · AA 24:' + aas[0] + (aas[aas.length - 1] !== aas[0] ? '–' + aas[aas.length - 1] : '') : '');
+
+  const box = $('text');
+  box.textContent = '';
+  box.append(el('div', 'sect-title', s.title || ''));
+  if (s.provenance) box.append(el('div', 'sect-prov', s.provenance));
+  const frag = document.createDocumentFragment();
+  s.blocks.forEach(b => frag.append(renderBlock(b)));
+  box.append(frag);
+
+  if (blockId) {
+    const t = document.getElementById(blockId);
+    if (t) {
+      t.scrollIntoView({ block: 'center' });
+      t.classList.add('flash');
+      setTimeout(() => t.classList.remove('flash'), 1600);
+    }
+  } else {
+    box.scrollTop = 0;
+  }
+}
+
+/* One block: gutter (AA page, §), then the prose with page markers and highlights spliced in. */
+function renderBlock(b) {
+  const d = el('div', 'blk' + (b.kind === 'note' ? ' note' : '') + (b.kind === 'rule' ? ' rule' : ''));
+  d.id = b.id;
+  if (b.kind === 'rule') return d;
+  const g = el('div', 'gutter');
+  if (b.aa) g.append('AA ' + b.aa);
+  if (b.para && b.para.raw) g.append(el('span', 'para', b.para.raw));
+  d.append(g);
+
+  const text = b.text || '';
+  const marks = [];
+  (b.pages || []).forEach(p => { if (p.i > 0) marks.push({ i: p.i, node: () => el('span', 'pg', 'AA ' + p.p) }); });
+  (b.ms || []).forEach(m => marks.push({ i: m.i, node: () => el('span', 'ms', '[' + m.p + ']') }));
+  const merged = mergeRanges(hlMap.get(b.id) || []);
+
+  const sents = sentencesOf(text);
+  const cuts = new Set([0, text.length]);
+  marks.forEach(m => cuts.add(Math.min(m.i, text.length)));
+  merged.forEach(r => { cuts.add(r.s); cuts.add(r.e); });
+  sents.forEach(x => cuts.add(x.s));
+  const pts = [...cuts].sort((a, c) => a - c);
+  let host = d, at = -1;
+  for (let k = 0; k < pts.length - 1; k++) {
+    const a = pts[k], z = pts[k + 1];
+    const si = sents.findIndex(x => a >= x.s && a < x.e);
+    if (si !== at) {
+      at = si;
+      host = si < 0 ? d : el('span', 'sent');
+      if (si >= 0) { host.dataset.s = sents[si].s; host.dataset.e = sents[si].e; d.append(host); }
+    }
+    marks.filter(m => Math.min(m.i, text.length) === a && a > 0).forEach(m => host.append(m.node()));
+    if (z > a) {
+      const r = merged.find(x => x.s <= a && x.e >= z);
+      if (r) host.append(el('mark', r.cls === 'form' ? 'form' : '', text.slice(a, z)));
+      else host.append(text.slice(a, z));
+    }
+  }
+  return d;
+}
+
+/* Clicking a sentence in the transcript reads it exactly as the panel would: the same labels, and
+   whether it is one of the examples — and if not, what it wants. */
+function inspectSentence(span) {
+  document.querySelectorAll('#text .sent.sel').forEach(n => n.classList.remove('sel'));
+  document.querySelectorAll('#text .inspect').forEach(n => n.remove());
+  span.classList.add('sel');
+  const blk = span.closest('.blk'), sec = JF_WORKS[curWork].data.sections[curSect];
+  const bi = sec.blocks.findIndex(x => x.id === blk.id);
+  const b = sec.blocks[bi];
+  const s = +span.dataset.s, e = +span.dataset.e;
+  const st = exampleStatus(sec, bi, b, s, e);
+
+  const box = el('div', 'inspect');
+  const head = el('div', 'ihead');
+  head.append(el('span', null, 'THIS SENTENCE' + (st.hit ? ' · AN EXAMPLE' : '')));
+  const x = el('button', 'iclose', '×');
+  x.title = 'Close';
+  x.addEventListener('click', () => { box.remove(); span.classList.remove('sel'); });
+  head.append(x);
+  box.append(head);
+  if (st.hit && st.hit.text !== b.text.slice(s, e).trim()) box.append(el('div', 'iquote', '“' + st.hit.text + '”'));
+  if (st.labels) {
+    const labs = el('div', 'labs');
+    st.labels.forEach(id => labs.append(labelChip(id, st.hit || { named: namedForms(sec, bi, b, s, st.labels, e), inferred: false })));
+    box.append(labs);
+  }
+  if (st.why) box.append(el('div', 'iwhy', st.why));
+  else {
+    const st2 = standingOf(st.hit);
+    box.append(el('div', 'iwhy', 'Shown on the right. ' + (st2 === 'named'
+      ? 'The text names this form.'
+      : st2 === 'inference'
+        ? 'It is the ' + st.hit.role + ' of an inference that goes through, which fixes its quantity and quality.'
+        : 'Nothing says what form it is, so the labels are speculated from its wording.')));
+  }
+  blk.after(box);
+}
+function mergeRanges(list) {
+  const rs = list.slice().sort((a, c) => a.s - c.s);
+  const out = [];
+  rs.forEach(r => {
+    const last = out[out.length - 1];
+    if (last && r.s < last.e) { last.e = Math.max(last.e, r.e); if (r.cls === 'term') last.cls = 'term'; }
+    else out.push({ ...r });
+  });
+  return out;
+}
+
+/* ── searching ─────────────────────────────────────────────────────────────── */
+function groupByWork(hits) {
+  const by = JF_WORKS.map(() => []);
+  hits.forEach(h => by[h.wi].push(h));
+  return by;
+}
+
+function standingOf(x) { return x.named.length ? 'named' : x.inferred ? 'inference' : 'speculated'; }
+function evidenceOK(x) {
+  const st = standingOf(x);
+  return $(st === 'named' ? 'o-ev-named' : st === 'inference' ? 'o-ev-inf' : 'o-ev-spec').checked;
+}
+function searchForms(forms) {
+  return buildExamples().filter(x => evidenceOK(x) && forms.every(f => x.labels.includes(f.id)));
+}
+
+function keywordRanges(text, words) {
+  const f = foldKeep(text), out = [];
+  words.forEach(w => {
+    let i = 0;
+    while ((i = f.indexOf(w, i)) > -1) { out.push({ s: i, e: i + w.length, cls: 'term' }); i += w.length; }
+  });
+  return out;
+}
+
+function searchKeywords(words) {
+  const ws = words.map(foldKeep);
+  const has = t => { const f = foldKeep(t); return ws.every(w => f.includes(w)); };
+  if (!$('o-all').checked) return buildExamples().filter(x => evidenceOK(x) && has(x.text));
+  const hits = [];
+  const marked = new Map(buildExamples().filter(evidenceOK).map(x => [x.b.id + ':' + x.s, x]));
+  for (const x of allSentences()) {
+    if (!has(x.text)) continue;
+    hits.push(marked.get(x.b.id + ':' + x.s) || { ...x, marker: '', named: [], inferred: false, labels: classify(x.text) });
+  }
+  return hits;
+}
+
+function runSearch() {
+  let hits = null, label = '';
+  hlMap = new Map();
+  if (mode === 'form' && chosen().length) {
+    hits = searchForms(chosen());
+    label = chosen().map(f => f.en).join(' + ');
+  } else if (mode === 'kw' && curWords.length) {
+    hits = searchKeywords(curWords);
+    label = curWords.join(' + ');
+  }
+  results = hits ? groupByWork(hits) : null;
+  if (hits) hits.forEach(h => {
+    const list = hlMap.get(h.b.id) || [];
+    list.push({ s: h.s, e: h.e, cls: 'form' });
+    if (mode === 'kw') keywordRanges(h.text, curWords.map(foldKeep)).forEach(r => list.push({ s: h.s + r.s, e: h.s + r.e, cls: 'term' }));
+    hlMap.set(h.b.id, list);
+  });
+  JF_WORKS.forEach(w => { shown[w.key] = PAGE; });
+  renderSummary(label);
+  renderResults();
+  renderSection();
+}
+
+function renderSummary(label) {
+  const s = $('summary');
+  s.textContent = '';
+  if (!results) {
+    s.textContent = mode === 'form'
+      ? 'Choose forms from Kant’s table — one in each row, or any fewer — or type one in German, Latin or English. You get the examples that have all of them, from all three transcripts.'
+      : 'Type keywords: you get the examples that contain them, each labelled with the forms of judgment it appears to have.';
+    return;
+  }
+  const total = results.reduce((n, h) => n + h.length, 0);
+  s.append(el('b', null, label), ' — ' + total + ' example' + (total === 1 ? '' : 's') + ': ' +
+    JF_WORKS.map((w, i) => w.label + ' ' + results[i].length).join(' · '));
+  if (mode === 'form') {
+    chosen().forEach(f => s.append(el('span', 'def', f.en + ' (' + f.de + ' · ' + f.la + ') — ' + f.def)));
+    const clr = el('button', 'more', 'clear selection');
+    clr.addEventListener('click', () => { curForms = {}; $('q').value = ''; syncChips(); runSearch(); });
+    s.append(clr);
+  }
+}
+
+function renderResults() {
+  const box = $('results');
+  box.textContent = '';
+  if (!results) return;
+  const total = results.reduce((n, h) => n + h.length, 0);
+  if (!total) {
+    box.append(el('div', 'empty', mode === 'form'
+      ? 'No example of this on either ground. The lectures name a form, or work it into a sound inference, only so often — try one form rather than several.'
+      : 'No example contains all those words. Try fewer words, or “search every sentence”.'));
+    return;
+  }
+  JF_WORKS.forEach((w, wi) => {
+    const hits = results[wi];
+    if (!hits.length) return;
+    box.append(el('div', 'rw', w.label.toUpperCase() + ' · ' + hits.length));
+    const n = shown[w.key];
+    hits.slice(0, n).forEach(h => box.append(renderExample(h)));
+    if (hits.length > n) {
+      const more = el('button', 'more', 'Show ' + Math.min(PAGE, hits.length - n) + ' more of ' + (hits.length - n));
+      more.addEventListener('click', () => { shown[w.key] += PAGE; renderResults(); });
+      box.append(more);
+    }
+  });
+  observeTranslations();
+}
+
+function renderExample(h) {
+  const card = el('div', 'ex');
+  const sec = JF_WORKS[h.wi].data.sections[h.si];
+  const loc = el('div', 'loc');
+  const left = el('span', null, (h.b.aa ? 'AA 24:' + h.b.aa : '') + (h.b.para && h.b.para.raw ? ' · ' + h.b.para.raw : ''));
+  if (h.named && h.named.length) left.append(el('span', 'tag mk', (h.marker && h.marker !== ':' ? h.marker + ' · ' : '') + 'NAMED'));
+  if (h.inferred) left.append(el('span', 'tag inf', h.role === 'conclusion' ? 'CONCLUSION' : 'PREMISE'));
+  if (!(h.named && h.named.length) && !h.inferred) left.append(el('span', 'tag spec', h.marker ? h.marker + ' · SPECULATED' : 'SPECULATED'));
+  loc.append(left, el('i', null, (sec.title || '').slice(0, 30)));
+  card.append(loc);
+
+  // the German, as transcribed; keywords marked
+  const de = el('button', 'de');
+  de.title = 'Read this in the transcript';
+  const ranges = mode === 'kw' ? mergeRanges(keywordRanges(h.text, curWords.map(foldKeep))) : [];
+  let pos = 0;
+  ranges.forEach(r => {
+    de.append(h.text.slice(pos, r.s));
+    de.append(el('mark', '', h.text.slice(r.s, r.e)));
+    pos = r.e;
+  });
+  de.append(h.text.slice(pos));
+  de.addEventListener('click', () => openWork(h.wi, h.si, h.b.id));
+  card.append(de);
+
+  // the English, filled in when the card scrolls into view
+  const en = el('div', 'en wait');
+  en.dataset.src = h.text.replace(/\s+/g, ' ');
+  en.hidden = !$('o-tr').checked;
+  en.textContent = 'translating…';
+  card.append(en);
+
+  // the inferred labels; click one to see its examples
+  const labs = el('div', 'labs');
+  labs.append(el('span', 'inf', 'FORMS'));
+  h.labels.forEach(id => labs.append(labelChip(id, h)));
+  card.append(labs);
+  return card;
+}
+
+/* A form label. How it is founded is on the chip itself: named by the text, required by the inference,
+   or merely read off the wording — the repository's attested/inferred rule. */
+function labelChip(id, h) {
+  const f = JF_BY_ID[id];
+  const named = h.named && h.named.includes(id);
+  const required = h.inferred && FIXED_BY_INFERENCE.includes(id);
+  const how = named ? 'named in the text' : required ? 'required for the inference to go through' : 'speculated from the wording';
+  const b = el('button', 'lab q' + f.axis + (named ? ' att' : required ? ' req' : ' spec'), f.en);
+  b.title = f.de + ' · ' + f.la + ' — ' + how + '. Click for its examples.';
+  b.addEventListener('click', () => { curForms = {}; setMode('form'); chooseForm(f); });
+  return b;
+}
+
+/* ── German → English, shown under every example ──────────────────────────────
+   In order: the browser's own on-device Translator (Chrome), then Google's public web endpoint, then
+   MyMemory. A result is remembered in this browser (localStorage) so a sentence is translated once. */
+const TR_STORE = 'jf-translations-v1';
+const trCache = new Map();
+try { Object.entries(JSON.parse(localStorage.getItem(TR_STORE) || '{}')).forEach(([k, v]) => trCache.set(k, v)); } catch (e) { /* no storage */ }
+function trSave() {
+  try { localStorage.setItem(TR_STORE, JSON.stringify(Object.fromEntries([...trCache].slice(-1500)))); } catch (e) { /* full or disabled */ }
+}
+let deviceTr = null;
+function deviceTranslator() {
+  if (!('Translator' in self)) return Promise.reject(new Error('none'));
+  if (!deviceTr) deviceTr = Translator.availability({ sourceLanguage: 'de', targetLanguage: 'en' })
+    .then(a => { if (a === 'unavailable') throw new Error('unavailable'); return Translator.create({ sourceLanguage: 'de', targetLanguage: 'en' }); });
+  return deviceTr;
+}
+async function fetchJson(url) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 12000);
+  try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }
+  finally { clearTimeout(t); }
+}
+const TR_ENGINES = [
+  { name: 'ON-DEVICE', run: async s => (await deviceTranslator()).translate(s) },
+  { name: 'GOOGLE', run: async s => {
+      const j = await fetchJson('https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=en&dt=t&q=' + encodeURIComponent(s));
+      return j[0].map(x => x[0]).join('');
+  } },
+  { name: 'MYMEMORY', run: async s => {
+      const j = await fetchJson('https://api.mymemory.translated.net/get?langpair=de|en&q=' + encodeURIComponent(s.slice(0, 480)));
+      if (!j.responseData || !j.responseData.translatedText || /QUERY LENGTH|MYMEMORY WARNING/i.test(j.responseData.translatedText)) throw new Error('no result');
+      return j.responseData.translatedText;
+  } }
+];
+async function translate(src) {
+  if (trCache.has(src)) return trCache.get(src);
+  for (const eng of TR_ENGINES) {
+    try {
+      const out = (await eng.run(src) || '').trim();
+      if (out) { const v = { text: out, by: eng.name }; trCache.set(src, v); trSave(); return v; }
+    } catch (e) { /* try the next engine */ }
+  }
+  throw new Error('all engines failed');
+}
+
+function showTranslation(node, v) {
+  node.dataset.done = '1';
+  node.className = 'en';
+  node.textContent = '';
+  node.append(el('span', 'src', 'MACHINE TRANSLATION · ' + v.by), v.text);
+}
+const trQueue = [];
+let trActive = 0;
+function trPump() {
+  while (trActive < 2 && trQueue.length) {
+    const node = trQueue.shift();
+    if (!node.isConnected || node.dataset.done) continue;
+    trActive++;
+    translate(node.dataset.src).then(v => showTranslation(node, v)).catch(() => {
+      node.className = 'en err';
+      node.textContent = '';
+      const a = el('a', null, 'Open in Google Translate ↗');
+      a.href = 'https://translate.google.com/?sl=de&tl=en&op=translate&text=' + encodeURIComponent(node.dataset.src);
+      a.target = '_blank'; a.rel = 'noopener';
+      node.append('No translation service answered from this browser. ', a);
+    }).finally(() => { trActive--; trPump(); });
+  }
+}
+let trObserver = null;
+function observeTranslations() {
+  if (trObserver) trObserver.disconnect();
+  trObserver = new IntersectionObserver(entries => entries.forEach(en => {
+    if (!en.isIntersecting) return;
+    trObserver.unobserve(en.target);
+    if (!en.target.dataset.done && !en.target.hidden) { trQueue.push(en.target); trPump(); }
+  }), { root: $('results'), rootMargin: '300px' });
+  document.querySelectorAll('#results .en').forEach(n => {
+    const hit = trCache.get(n.dataset.src);
+    if (hit) showTranslation(n, hit);
+    else trObserver.observe(n);
+  });
+}
+
+/* ── the table of forms, the modes, and the type-ahead ─────────────────────── */
+function buildTable() {
+  const t = $('table');
+  JF_GROUPS.forEach(g => {
+    t.append(el('div', 'grp', g));
+    const chips = el('div', 'chips');
+    JF_FORMS.filter(f => f.group === g).forEach(f => {
+      const c = el('button', 'chip', f.en);
+      c.dataset.id = f.id;
+      c.addEventListener('click', () => chooseForm(f, true));
+      chips.append(c);
+    });
+    t.append(chips);
+  });
+}
+
+function setMode(m) {
+  mode = m;
+  $('m-form').setAttribute('aria-pressed', m === 'form');
+  $('m-kw').setAttribute('aria-pressed', m === 'kw');
+  $('table').hidden = m !== 'form';
+  $('thint').hidden = m !== 'form';
+  $('opts-form').hidden = m !== 'form';
+  $('kwhint').hidden = m !== 'kw';
+  $('opts-kw').hidden = m !== 'kw';
+  $('q').placeholder = m === 'form' ? 'a form: universal, hypothetisch, apodictisch, particulare…' : 'keywords: Mensch sterblich, Seele, Gott…';
+  $('q').value = m === 'form' ? '' : curWords.join(' ');
+  hideSuggest();
+  syncChips();
+  runSearch();
+}
+
+/* The forms picked so far, in table order. */
+function chosen() { return JF_GROUPS.map(g => curForms[g]).filter(Boolean); }
+
+/* Pick a form. One per head of the table: choosing another in the same head replaces it, and a chip
+   clicked again (toggle) lets go. Examples must then have every form that is picked. */
+function chooseForm(f, toggle) {
+  if (toggle && curForms[f.group] === f) delete curForms[f.group];
+  else curForms[f.group] = f;
+  $('q').value = '';
+  hideSuggest();
+  syncChips();
+  runSearch();
+}
+function syncChips() {
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', mode === 'form' && chosen().some(f => f.id === c.dataset.id)));
+}
+function showSuggest(list) {
+  const s = $('suggest');
+  s.textContent = '';
+  suggestIdx = -1;
+  if (!list.length) { s.style.display = 'none'; return; }
+  list.forEach(f => {
+    const d = el('div');
+    d.append(el('span', null, f.en), el('small', null, f.de + ' · ' + f.la));
+    d.addEventListener('mousedown', e => { e.preventDefault(); chooseForm(f); });
+    s.append(d);
+  });
+  s.style.display = 'block';
+}
+function hideSuggest() { $('suggest').style.display = 'none'; suggestIdx = -1; }
+
+function wordsOf(q) { return q.split(/[\s,;]+/).filter(w => w.length >= 2); }
+let kwTimer = null;
+function onType() {
+  const q = $('q').value;
+  if (mode === 'form') {
+    const list = formsFor(q);
+    showSuggest(list);
+    if (list.length === 1 && [list[0].id, list[0].de, list[0].la, list[0].en].map(fold).includes(fold(q))) chooseForm(list[0]);
+    return;
+  }
+  clearTimeout(kwTimer);
+  kwTimer = setTimeout(() => { curWords = wordsOf(q); runSearch(); }, 250);
+}
+
+/* ── wiring ────────────────────────────────────────────────────────────────── */
+function init() {
+  buildTabs();
+  buildTable();
+
+  $('sect').addEventListener('change', e => { curSect = +e.target.value; renderSection(); });
+  $('prev').addEventListener('click', () => { if (curSect > 0) { curSect--; renderSection(); } });
+  $('next').addEventListener('click', () => { if (curSect < JF_WORKS[curWork].data.sections.length - 1) { curSect++; renderSection(); } });
+
+  $('text').addEventListener('click', e => {
+    if (e.target.closest('.inspect')) return;
+    const sp = e.target.closest('.sent');
+    if (sp) inspectSentence(sp);
+  });
+
+  $('m-form').addEventListener('click', () => setMode('form'));
+  $('m-kw').addEventListener('click', () => setMode('kw'));
+
+  const q = $('q');
+  q.addEventListener('input', onType);
+  q.addEventListener('blur', () => setTimeout(hideSuggest, 120));
+  q.addEventListener('keydown', e => {
+    const items = $('suggest').children;
+    if (e.key === 'ArrowDown' && items.length) { e.preventDefault(); suggestIdx = (suggestIdx + 1) % items.length; }
+    else if (e.key === 'ArrowUp' && items.length) { e.preventDefault(); suggestIdx = (suggestIdx - 1 + items.length) % items.length; }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (mode === 'form') {
+        const list = formsFor(q.value);
+        if (suggestIdx >= 0 && list[suggestIdx]) chooseForm(list[suggestIdx]);
+        else if (list.length) chooseForm(list[0]);
+      } else { clearTimeout(kwTimer); curWords = wordsOf(q.value); runSearch(); }
+      return;
+    } else if (e.key === 'Escape') { hideSuggest(); return; }
+    else return;
+    [...items].forEach((n, i) => n.classList.toggle('on', i === suggestIdx));
+  });
+
+  ['o-ev-named', 'o-ev-inf', 'o-ev-spec', 'o-all'].forEach(id => $(id).addEventListener('change', runSearch));
+  $('o-tr').addEventListener('change', () => {
+    document.querySelectorAll('#results .en').forEach(n => { n.hidden = !$('o-tr').checked; });
+    observeTranslations();
+  });
+
+  setMode('form');
+  openWork(0, 0);
+}
+init();
+</script>
+</body>
+</html>
