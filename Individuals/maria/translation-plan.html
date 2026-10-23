@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Translating the Kant Lab corpus — a plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1208; --parchment: #f4ede0; --parch-dark: #e8dcc8; --parch-deep: #d8ccb4;
+  --accent: #5c3d1e; --accent-lt: #8b5e3c; --faded: #7a6a52; --line: #b8a88a;
+  --aa-ink: #3a5a3a; --aa-bg: #eef5ee; --aa-bd: #8aaa8a; --panel: #faf7f0;
+  --en-ink: #2b3a52; --hit: #f3d98a; --warn-bg: #fbeee4; --warn-bd: #d9a27a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--parchment); color: var(--ink); font-family: 'EB Garamond', Georgia, serif; font-size: 19px; line-height: 1.55; }
+header.hero { background: var(--accent); color: var(--parchment); padding: 46px 24px 38px; }
+.hero .in, main { max-width: 60rem; margin: 0 auto; }
+.kicker { font-family: 'Cinzel', serif; letter-spacing: .14em; font-size: .78rem; text-transform: uppercase; opacity: .8; }
+h1 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 2.1rem; letter-spacing: .04em; margin: .25em 0 .3em; line-height: 1.2; }
+.hero p { font-size: 1.15rem; max-width: 46rem; margin: 0; opacity: .95; }
+main { padding: 10px 24px 90px; }
+h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.3rem; letter-spacing: .05em; color: #2e1a00; margin: 2.4em 0 .5em; padding-bottom: .25em; border-bottom: 1px solid var(--line); }
+h2 .n { color: var(--accent-lt); margin-right: .45em; }
+h3 { font-family: 'Cinzel', serif; font-weight: 600; font-size: .98rem; letter-spacing: .05em; color: var(--accent); margin: 1.5em 0 .3em; }
+p { margin: .55em 0; }
+.lead { font-size: 1.12rem; }
+.muted { color: var(--faded); }
+.small { font-size: .88rem; }
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8em; background: var(--parch-dark); padding: 0 .3em; border-radius: 3px; }
+.tldr { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--accent); border-radius: 6px; padding: 18px 24px; margin: 28px 0 8px; }
+.tldr h2 { border: 0; margin: 0 0 .4em; padding: 0; font-size: 1.05rem; }
+.tldr ol { margin: .2em 0 0; padding-left: 1.3em; }
+.tldr li { margin: .35em 0; }
+.grid { display: grid; gap: 14px; }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 18px; }
+.card h3 { margin-top: .1em; }
+.card.good { border-top: 4px solid var(--aa-ink); }
+.card.bad { border-top: 4px solid var(--warn-bd); }
+.card ul { margin: .3em 0 0; padding-left: 1.1em; }
+.card li { margin: .25em 0; }
+/* pipeline */
+.pipe { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin: 18px 0 6px; }
+.stage { flex: 1 1 8.5rem; min-width: 8.5rem; background: var(--aa-bg); border: 1px solid var(--aa-bd); border-radius: 6px; padding: 10px 12px; position: relative; margin: 0 16px 12px 0; }
+.stage:not(:last-child)::after { content: '→'; position: absolute; right: -15px; top: 38%; color: var(--accent-lt); font-size: 1.1rem; }
+.stage.llm { background: #fff4dc; border-color: #c8a055; }
+.stage b { font-family: 'Cinzel', serif; font-size: .78rem; letter-spacing: .05em; display: block; color: #2e1a00; }
+.stage span { font-size: .82rem; line-height: 1.3; display: block; margin-top: 3px; }
+.stage .tag { position: absolute; top: -9px; right: 8px; font-family: 'Cinzel', serif; font-size: .58rem; letter-spacing: .08em; padding: 1px 6px; border-radius: 8px; background: var(--aa-ink); color: #fff; }
+.stage.llm .tag { background: #a0701c; }
+.legend { font-size: .85rem; color: var(--faded); }
+.legend i { display: inline-block; width: .9em; height: .9em; border-radius: 2px; vertical-align: -1px; margin: 0 .3em 0 .8em; border: 1px solid; }
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: .9rem; margin: .6em 0; background: var(--panel); }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--parch-deep); vertical-align: top; }
+th { font-family: 'Cinzel', serif; font-weight: 400; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faded); background: var(--parch-dark); }
+td.de { font-weight: 600; }
+td.la { font-style: italic; color: var(--accent-lt); }
+td.en { color: var(--en-ink); font-weight: 500; }
+tr.sense td { background: #fff8e8; }
+.scroll { overflow-x: auto; }
+/* demo */
+.demo { background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 22px 26px 16px; margin: 14px 0; box-shadow: 0 2px 10px rgba(60,40,20,.07); }
+.demo .de-line { color: var(--faded); font-size: .92rem; margin-top: .6em; }
+.t { position: relative; border-bottom: 2px dotted var(--accent-lt); cursor: help; }
+.t:hover { background: var(--parch-dark); }
+.t .tip { visibility: hidden; opacity: 0; transition: opacity .12s; position: absolute; left: 0; bottom: 135%; z-index: 5; width: max-content; max-width: 19rem; background: #2e1a00; color: var(--parchment); border-radius: 6px; padding: 8px 11px; font-size: .82rem; line-height: 1.35; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+.t:hover .tip { visibility: visible; opacity: 1; }
+.tip b { font-size: .95rem; color: #fff; }
+.tip .k { display: block; font-family: 'Cinzel', serif; font-size: .58rem; letter-spacing: .1em; opacity: .7; margin-top: 4px; }
+.tip .warn { color: #f3c58a; }
+.inline-de { color: var(--accent-lt); font-size: .85em; }
+.modes { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 10px; }
+.modes span { font-family: 'Cinzel', serif; font-size: .66rem; letter-spacing: .08em; padding: 3px 9px; border: 1px solid var(--line); border-radius: 12px; color: var(--accent); background: var(--parch-dark); }
+pre { background: #2e2418; color: #f1e6d2; border-radius: 6px; padding: 12px 16px; overflow-x: auto; font-size: .78rem; line-height: 1.45; }
+pre .c { color: #b9a786; }
+.callout { background: var(--warn-bg); border: 1px solid var(--warn-bd); border-radius: 6px; padding: 10px 16px; margin: 14px 0; font-size: .95rem; }
+.num { font-family: 'Cinzel', serif; font-size: 1.7rem; color: var(--accent); line-height: 1; }
+.stat { text-align: center; }
+.stat .lbl { font-size: .8rem; color: var(--faded); margin-top: 4px; line-height: 1.3; }
+.phase { display: grid; grid-template-columns: 6.5rem 1fr; gap: 0 18px; padding: 12px 0; border-bottom: 1px solid var(--parch-deep); }
+.phase .when { font-family: 'Cinzel', serif; font-size: .75rem; letter-spacing: .06em; color: var(--accent); padding-top: 3px; }
+.phase .cost { font-size: .8rem; color: var(--faded); }
+.phase h3 { margin: 0 0 .15em; }
+.q { margin: .7em 0; padding-left: 14px; border-left: 3px solid var(--parch-deep); }
+.q b { color: #2e1a00; }
+footer { max-width: 60rem; margin: 0 auto; padding: 0 24px 50px; font-size: .82rem; color: var(--faded); }
+@media (max-width: 640px) { h1 { font-size: 1.6rem; } .phase { grid-template-columns: 1fr; } .stage:not(:last-child)::after { display: none; } }
+</style>
+</head>
+<body>
+
+<header class="hero"><div class="in">
+  <div class="kicker">Kant Lab · Executive summary · October 2026</div>
+  <h1>An English Kant you can always see through to the German</h1>
+  <p>How to build a consistent, scholarly-conventional English layer over the whole corpus in this repository — Meier, Baumgarten, the Logik transcripts, the Reflexionen — so readers get fluent English while every key term stays one hover away from its German original, and so it costs tokens once rather than every time.</p>
+</div></header>
+
+<main>
+
+<section class="tldr">
+  <h2>The short version</h2>
+  <ol>
+    <li><b>Make the glossary the product, not the translation.</b> A hand-curated <em>termbase</em> of ~200–300 Kantian terms with fixed, conventional English renderings (<em>Erkenntnis → cognition</em>, <em>Vorstellung → representation</em>), their Latin equivalents and their period spellings is what makes a machine translation consistent and citable. Everything else is replaceable; the termbase is the scholarly asset.</li>
+    <li><b>Do everything you can without a language model.</b> Cutting the text into sentences, normalising 18th-century spelling, finding termbase terms, and checking the result are all deterministic scripts that cost nothing and can be re-run forever.</li>
+    <li><b>Spend tokens in exactly one place, exactly once.</b> The model translates each sentence a single time, sees only the termbase entries that sentence actually contains, returns structured output already aligned to the German, and the result is cached against a hash of the German. Change one glossary entry and you re-translate only the sentences that contain that term.</li>
+    <li><b>Ship static files; the reader never calls an API.</b> That fits how this repository already works (no server, no build, one HTML file per tool) and means reading costs zero tokens.</li>
+    <li><b>Show the German at the level of the term, not only the sentence.</b> In the reader, every termbase term in the English is a quiet link back to the exact German word on the page — its period spelling, its lemma, its Latin, the glossary note, and every other place it occurs.</li>
+  </ol>
+</section>
+
+<h2><span class="n">I</span>What the prototypes already taught us</h2>
+<p class="lead">Over the last weeks we translated Busolt, Blomberg and Meier into English, aligned Meier sentence by sentence, broke its sentences into glossed phrases, and wired a hover translation into the reader. That was the right way to find out what matters. It is not yet the right way to translate the corpus.</p>
+<div class="grid g2">
+  <div class="card good"><h3>What worked</h3>
+    <ul>
+      <li><b>Keying everything to the source's own IDs and character offsets.</b> The German never gets retyped or "cleaned"; the reader cuts it out of <code>data/</code> itself.</li>
+      <li><b>Mechanical checks that can't be argued with.</b> "The German phrases concatenated reproduce the sentence exactly" was verified for all 1,697 Meier units; editorial brackets <code>[AA: …]</code> were checked on every block.</li>
+      <li><b>Translating at the sentence, glossing at the phrase.</b> Readers liked a phrase-level hover; it is the natural unit for cross-referencing.</li>
+      <li><b>Parallel, batched work.</b> ~1.1 M characters were translated in under two hours.</li>
+    </ul>
+  </div>
+  <div class="card bad"><h3>What we'd change</h3>
+    <ul>
+      <li><b>No shared glossary.</b> 29 independent agents each got a short list of renderings and improvised the rest, so the same German term can come out differently in different chunks.</li>
+      <li><b>Wrong unit.</b> Logik blocks are sometimes page fragments, so we translated half-sentences. Sentences should be rebuilt <em>before</em> translation.</li>
+      <li><b>Alignment after the fact.</b> We had to infer which English sentence matched which German one (559 of 563 §§ matched cleanly, the rest needed merging). If the translator returns English keyed to German sentence IDs, alignment is free and exact.</li>
+      <li><b>Glosses that disagree with the sentence.</b> The phrase pass ran separately from the sentence pass, so a gloss can contradict its own sentence (<em>wenn man nach und nach</em> → "that one one after another"). One pass should produce both.</li>
+      <li><b>Expensive per character.</b> Interactive agents spend most of their tokens reading files and calling tools — roughly 2.2 M tokens for 1.1 M characters. A batch pipeline sends only text.</li>
+    </ul>
+  </div>
+</div>
+<p class="muted small">The existing files (<code>translations/*-en.json</code>, <code>meier-aligned</code>, <code>meier-phrases</code>) stay useful as a baseline: once the pipeline exists, we can measure how much more consistent its output is than the prototype's.</p>
+
+<h2><span class="n">II</span>The architecture: one model step, everything else a script</h2>
+<div class="pipe">
+  <div class="stage"><span class="tag">FREE</span><b>1 · Segment</b><span>Rebuild sentences from <code>data/</code> blocks; give each a stable ID and its character offsets into the source. Round-trip check.</span></div>
+  <div class="stage"><span class="tag">FREE</span><b>2 · Normalise</b><span>Map period spellings to a modern lemma — <em>Urtheil → Urteil</em>, <em>Erkenntniß → Erkenntnis</em>, <em>seyn → sein</em> — for matching only. The display keeps the original.</span></div>
+  <div class="stage"><span class="tag">FREE</span><b>3 · Tag terms</b><span>Find every termbase term in every sentence, with offsets. Pick each term's sense where the termbase says how.</span></div>
+  <div class="stage llm"><span class="tag">TOKENS</span><b>4 · Translate</b><span>Per batch of sentences: style guide (cached) + only the glossary entries present + the sentences. Returns JSON keyed by sentence ID, with term and phrase alignment.</span></div>
+  <div class="stage"><span class="tag">FREE</span><b>5 · Validate</b><span>Coverage, brackets, § and page refs, numbers, required term renderings, length outliers. Prints a report ending in <em>clean</em>.</span></div>
+  <div class="stage"><span class="tag">FREE</span><b>6 · Publish</b><span>Static <code>.js</code> files beside the data, loaded by <code>&lt;script src&gt;</code> so they work from <code>file://</code> and on Pages.</span></div>
+</div>
+<p class="legend"><i style="background:var(--aa-bg);border-color:var(--aa-bd)"></i>deterministic, re-runnable, zero tokens <i style="background:#fff4dc;border-color:#c8a055"></i>the only step that calls a model</p>
+<p>This is the same shape as the repository's existing extractors (<code>parse_refl.py</code>, <code>parse_logik.py</code>): a script that reads <code>data/</code>, writes generated files that are never hand-edited, and prints a report you read before you trust the output. Human corrections go in a separate <b>overrides</b> file keyed by sentence ID and German hash, so a regeneration never wipes them.</p>
+
+<h2><span class="n">III</span>The termbase is the heart of it</h2>
+<p class="lead">Consistency doesn't come from a better prompt. It comes from deciding, once and in writing, how each term is rendered, and then having a script check that the translation obeyed.</p>
+
+<div class="grid g3">
+  <div class="card"><h3>One entry per sense</h3><p class="small"><em>Achtung</em> is "respect" in the moral writings, but <em>Achtung geben</em> is "pay attention" — the second appears in our own Meier phrase data. <em>Satz</em> is "proposition" in logic and "sentence" elsewhere. <em>Erklärung</em> in Meier often means "definition". Entries split by sense and say how to tell them apart.</p></div>
+  <div class="card"><h3>Every period spelling</h3><p class="small">The transcripts spell freely: <em>Erkenntniß, Erkentniß, Erkenntniss</em>; <em>Urtheil</em>; <em>Vernunftschlüße, Vernunft Schlüße</em>; <em>Definizion</em>; <em>Saz, Säzze</em>; <em>Logic</em>; <em>Qvelle</em>. Rules (th→t, ß↔ss, z↔tz, c↔k) cover most of them; each entry lists the exceptions.</p></div>
+  <div class="card"><h3>Compounds and Latin</h3><p class="small"><em>Vernunfterkenntnis</em>, <em>Verbindungsbegriff</em>, <em>Mittelbegriff</em> need entries of their own. The texts gloss themselves in Latin (<em>Urteil (iudicium)</em>), so each entry carries its Latin side too. That side also serves Baumgarten's Latin <em>Metaphysica</em>.</p></div>
+</div>
+
+<h3>A starting list: proposed renderings to verify</h3>
+<p class="small muted">These follow the usage most English-language Kant scholarship now cites, the Cambridge Edition. They are a proposal for a person to check against the Cambridge glossaries (Young's <em>Lectures on Logic</em>; Guyer and Wood's first <em>Critique</em>; Fugate and Hymers' Baumgarten for the Latin) before anything is generated. Where translators genuinely differ, the termbase records the choice and the reason in a decisions log.</p>
+<div class="scroll"><table>
+<tr><th>German</th><th>Latin</th><th>English</th><th>Note</th></tr>
+<tr><td class="de">Erkenntnis</td><td class="la">cognitio</td><td class="en">cognition</td><td>Not "knowledge" (that is <em>Wissen</em>). Kemp Smith's "knowledge" is the classic false friend.</td></tr>
+<tr><td class="de">Vorstellung</td><td class="la">repraesentatio</td><td class="en">representation</td><td></td></tr>
+<tr><td class="de">Begriff</td><td class="la">conceptus, notio</td><td class="en">concept</td><td></td></tr>
+<tr><td class="de">Anschauung</td><td class="la">intuitus</td><td class="en">intuition</td><td></td></tr>
+<tr><td class="de">Urteil</td><td class="la">iudicium</td><td class="en">judgment</td><td>Spelled <em>judgment</em> throughout.</td></tr>
+<tr><td class="de">Vernunftschluss</td><td class="la">ratiocinium</td><td class="en">inference of reason</td><td>"syllogism" only where the text means the form.</td></tr>
+<tr><td class="de">Verstand / Vernunft</td><td class="la">intellectus / ratio</td><td class="en">understanding / reason</td><td></td></tr>
+<tr><td class="de">Urteilskraft</td><td class="la">—</td><td class="en">power of judgment</td><td></td></tr>
+<tr><td class="de">Sinnlichkeit · Empfindung · Wahrnehmung</td><td class="la">sensualitas · sensatio · perceptio</td><td class="en">sensibility · sensation · perception</td><td></td></tr>
+<tr><td class="de">Erscheinung · Gegenstand / Objekt</td><td class="la">phaenomenon · obiectum</td><td class="en">appearance · object</td><td>Both German words → "object"; the hover keeps which one it was.</td></tr>
+<tr><td class="de">Merkmal</td><td class="la">nota</td><td class="en">mark</td><td></td></tr>
+<tr><td class="de">Klarheit · Deutlichkeit</td><td class="la">claritas · distinctio</td><td class="en">clarity · distinctness</td><td></td></tr>
+<tr><td class="de">Gewissheit · Wahrheit · Irrtum</td><td class="la">certitudo · veritas · error</td><td class="en">certainty · truth · error</td><td></td></tr>
+<tr><td class="de">Fürwahrhalten</td><td class="la">assensus</td><td class="en">holding-to-be-true</td><td>Translators differ ("taking to be true"). Decide once.</td></tr>
+<tr><td class="de">Meinen · Glauben · Wissen</td><td class="la">opinio · fides · scientia</td><td class="en">opining · believing · knowing</td><td></td></tr>
+<tr><td class="de">Grund · Folge</td><td class="la">ratio · rationatum</td><td class="en">ground · consequence</td><td><em>Grund</em> is not "reason" here.</td></tr>
+<tr><td class="de">Einteilung · Glied der Einteilung</td><td class="la">divisio · membrum dividens</td><td class="en">division · member of the division</td><td></td></tr>
+<tr><td class="de">Obersatz · Untersatz · Schlusssatz · Mittelbegriff</td><td class="la">maior · minor · conclusio · terminus medius</td><td class="en">major premise · minor premise · conclusion · middle term</td><td></td></tr>
+<tr><td class="de">gelehrte Erkenntnis · Vernunftlehre</td><td class="la">cognitio erudita · logica</td><td class="en">learned cognition · doctrine of reason</td><td>Meier's own vocabulary.</td></tr>
+<tr><td class="de">Vollkommenheit · Vermögen · Gemüt</td><td class="la">perfectio · facultas · animus</td><td class="en">perfection · faculty · mind</td><td></td></tr>
+<tr class="sense"><td class="de">Achtung</td><td class="la">reverentia</td><td class="en">respect</td><td><b>Sense split:</b> <em>Achtung geben</em> = "pay attention".</td></tr>
+<tr class="sense"><td class="de">Satz</td><td class="la">propositio</td><td class="en">proposition</td><td><b>Sense split:</b> "sentence" outside logic; <em>Grundsatz</em> = "principle", <em>Lehrsatz</em> = "theorem".</td></tr>
+<tr class="sense"><td class="de">Bestimmung</td><td class="la">determinatio</td><td class="en">determination</td><td><b>Sense split:</b> "vocation" in the anthropological sense.</td></tr>
+</table></div>
+<p class="small">The full list doesn't have to be dreamed up: a script can rank every lemma in the corpus by frequency in a few seconds, at no cost, and a person decides on the top few hundred. The rest is ordinary vocabulary that needs no fixed rendering.</p>
+
+<h2><span class="n">IV</span>What the reader could feel like</h2>
+<p>Hover over the dotted words. This is a static mock, but every piece of it comes from data the pipeline produces.</p>
+<div class="modes"><span>English with German on hover</span><span>German + English side by side</span><span>Interlinear phrases</span><span>English, key terms in brackets</span></div>
+<div class="demo">
+  <p style="margin:0"><span class="t">In the truth<span class="tip"><b>Bei der Wahrheit</b><span class="k">Wahrheit · veritas</span>termbase: truth</span></span> of impure <span class="t">judgments<span class="tip"><b>der unreinen Urtheile</b><span class="k">Urteil · iudicium · as printed: “Urtheile”</span>termbase: judgment · 1 of many occurrences — click for the concordance</span></span> one must <span class="t">pay particular attention<span class="tip"><b>muss man sonderlich … Achtung geben</b><span class="k">Achtung geben · idiom</span><span class="warn">Sense rule: here “pay attention”, not the moral “respect”.</span></span></span> to the <span class="t">determination<span class="tip"><b>auf die Bestimmung</b><span class="k">Bestimmung · determinatio</span>termbase: determination (not “vocation”)</span></span> of the <span class="t">concept of connection<span class="tip"><b>des Verbindungsbegriffs</b><span class="k">Verbindungsbegriff · copula</span>termbase compound: concept of connection</span></span> and of its <span class="t">negation<span class="tip"><b>und der Verneinung desselben</b><span class="k">Verneinung · negatio</span>termbase: negation</span></span>.</p>
+  <p class="de-line">Meier, <em>Auszug</em> § 309 · Bei der Wahrheit der unreinen Urtheile muss man sonderlich, auf die Bestimmung des Verbindungsbegriffs und der Verneinung desselben, Achtung geben.</p>
+  <p class="de-line" style="margin-top:.9em">Bracketed mode: In the truth of impure judgments <span class="inline-de">[Urtheile]</span> one must pay particular attention <span class="inline-de">[Achtung geben]</span> to the determination <span class="inline-de">[Bestimmung]</span> of the concept of connection <span class="inline-de">[Verbindungsbegriff]</span>…</p>
+</div>
+<div class="grid g2">
+  <div class="card"><h3>For scholars</h3><ul class="small">
+    <li><b>Term concordance:</b> click any term to see every passage across Meier, Baumgarten, the lectures and the Reflexionen where that German lemma occurs, with its English beside it. Because the lectures are keyed to Meier's §§, this lines Kant up against his textbook.</li>
+    <li><b>Provenance on every sentence:</b> <em>machine</em>, <em>checked</em> or <em>revised by a person</em>, the termbase version, and the AA citation.</li>
+    <li><b>Deviation flags:</b> where the model departed from the termbase and why.</li>
+  </ul></div>
+  <div class="card"><h3>For German learners</h3><ul class="small">
+    <li><b>Modern-spelling toggle</b> (<em>Urtheil</em> → <em>Urteil</em>), visibly marked as normalised.</li>
+    <li><b>Phrase-by-phrase interlinear view</b>, the same alignment data as the hover.</li>
+    <li><b>Per-section vocabulary list and flashcards</b> straight from the termbase, ordered by how often each word appears in what you're reading.</li>
+    <li><b>Search in English that finds the German</b>, as the Meier tab already does.</li>
+  </ul></div>
+</div>
+
+<h2><span class="n">V</span>The data, concretely</h2>
+<p>Three kinds of file, all keyed to IDs that already exist in <code>data/</code>.</p>
+<pre><span class="c">// termbase.json — hand-curated, versioned, edited directly (like tradition-meier.js)</span>
+{ "id": "erkenntnis", "lemma": "Erkenntnis", "pos": "noun",
+  "variants": ["Erkenntniß", "Erkentniß", "Erkenntniss", "Erkänntniß"],
+  "latin": ["cognitio"],
+  "senses": [ { "en": "cognition", "default": true } ],
+  "forbid": ["knowledge"],
+  "note": "Wissen = knowing/knowledge; keep the two apart.",
+  "source": "Cambridge Edition usage", "decided": "2026-11 · see decisions.md" }
+
+<span class="c">// segments — generated: sentences rebuilt from data/ blocks, offsets into the source text</span>
+{ "id": "meier:312:1", "src": "meier-auszug", "para": 312, "start": 0, "end": 141,
+  "hash": "sha1:9c1e…", "terms": [ ["urteil", 21, 30], ["achtung", 128, 140, "idiom:achtung-geben"] ] }
+
+<span class="c">// translations — generated by the model step, never hand-edited (overrides live elsewhere)</span>
+{ "id": "meier:312:1", "en": "In the truth of impure judgments one must pay …",
+  "phrases": [ [0, 16, 0, 12], [17, 39, 13, 34] ],   <span class="c">// [deStart, deEnd, enStart, enEnd]</span>
+  "terms": [ ["urteil", "judgments"], ["achtung", "pay particular attention"] ],
+  "status": "machine", "model": "claude-opus-5-5", "termbase": "v1.3", "hash": "sha1:9c1e…" }</pre>
+<p class="small">The <code>hash</code> is what saves money. If the German hash and the termbase version of every term in the sentence are unchanged, the stored translation is still valid and nobody pays to redo it.</p>
+
+<h2><span class="n">VI</span>What it costs</h2>
+<div class="grid g3" style="margin:14px 0">
+  <div class="card stat"><div class="num">≈ 4.2 M</div><div class="lbl">characters of German and Latin text in the repository today, measured</div></div>
+  <div class="card stat"><div class="num">≈ 1.3 M</div><div class="lbl">input tokens to translate it all once (estimate, ~3.2 characters per token)</div></div>
+  <div class="card stat"><div class="num">$20–50</div><div class="lbl">for the whole corpus, once, on Claude Opus 5.5 via the Batch API (estimate)</div></div>
+</div>
+<div class="scroll"><table>
+<tr><th>Text</th><th>Characters</th><th>Language</th></tr>
+<tr><td>Reflexionen on Baumgarten (AA XVII–XVIII, 2,967 entries)</td><td>1,707,000</td><td>German / Latin</td></tr>
+<tr><td>Logik Blomberg</td><td>633,000</td><td>German</td></tr>
+<tr><td>Reflexionen on Meier (AA XVI, 1,870 entries)</td><td>621,000</td><td>German / Latin</td></tr>
+<tr><td>Baumgarten, <em>Metaphysica</em> (804 §§, with glosses)</td><td>≈ 378,000</td><td>Latin</td></tr>
+<tr><td>Wiener Logik</td><td>377,000</td><td>German</td></tr>
+<tr><td>Meier, <em>Auszug</em> (563 §§)</td><td>271,000</td><td>German</td></tr>
+<tr><td>Logik Busolt</td><td>182,000</td><td>German</td></tr>
+</table></div>
+<h3>Where the savings come from</h3>
+<div class="grid g2">
+  <div class="card"><ul class="small">
+    <li><b>Batch API:</b> half price for work that can wait (results within about a day). Translation can always wait.</li>
+    <li><b>Prompt caching:</b> the style guide and fixed instructions are identical on every request, so they're read from cache at a small fraction of the input price.</li>
+    <li><b>Glossary slicing:</b> each batch sees the ~20 termbase entries it contains, not all 300.</li>
+  </ul></div>
+  <div class="card"><ul class="small">
+    <li><b>Hash cache and targeted re-runs:</b> change the rendering of <em>Fürwahrhalten</em> and only the few hundred sentences containing it are re-translated.</li>
+    <li><b>Structured output in one pass:</b> sentence, term and phrase alignment all come back together, so there's no separate alignment or gloss run.</li>
+    <li><b>Zero tokens at reading time:</b> the reader loads static files.</li>
+  </ul></div>
+</div>
+<p class="small muted">Prices from Anthropic's published list as of 6 October 2026: Claude Opus 5.5 $4 / $20 per million input / output tokens; Claude Sonnet 5.5 $2 / $10. The range above allows for JSON and alignment overhead and some thinking. The pilot should measure the real figure before the full run; Sonnet 5.5 would roughly halve it, and is worth testing on the pilot against Opus 5.5 for quality. Check current pricing before committing.</p>
+
+<h2><span class="n">VII</span>Quality, and being honest about it</h2>
+<p>The repository has a hard rule: anything a tool worked out for itself must be visibly marked, and anything the Academy Edition says must survive. A machine translation is the clearest possible case of "worked out for itself". So:</p>
+<div class="grid g2">
+  <div class="card"><h3>Checked by script, every run</h3><ul class="small">
+    <li>Every sentence has English; nothing silently dropped.</li>
+    <li>Editorial brackets, § references, AA page numbers and numerals carried through exactly.</li>
+    <li>Every tagged term rendered as the termbase says, or flagged as a reasoned deviation.</li>
+    <li>Phrase alignment covers the German exactly (the check we already run on Meier).</li>
+    <li>Length-ratio outliers listed for a person to look at.</li>
+  </ul></div>
+  <div class="card"><h3>Checked by people, gradually</h3><ul class="small">
+    <li>A review queue per text: <em>machine → checked → revised</em>, shown on every sentence.</li>
+    <li>A small random sample graded each run (a second model can pre-screen, but a person signs off).</li>
+    <li>Corrections in an overrides file that survives regeneration; recurring corrections become termbase changes.</li>
+    <li>A decisions log for disputed renderings, with references.</li>
+  </ul></div>
+</div>
+<div class="callout"><b>What this cannot promise:</b> literary quality, or correctness in garbled passages of the transcripts. It aims at a consistent, terminologically disciplined working translation, explicitly labelled as such, that sends the reader to the German at every term that matters. Published translations (Cambridge and others) stay under copyright: we take their <em>terminology decisions</em> as reference, not their sentences.</div>
+
+<h2><span class="n">VIII</span>A sensible order of work</h2>
+<div class="phase"><div class="when">Week 1<br><span class="cost">no tokens</span></div><div><h3>Segmenter, normaliser, frequency list</h3><p class="small">Scripts that rebuild sentences for every text in <code>data/</code> with round-trip checks; a spelling normaliser; a ranked list of lemmas. Everything else stands on this.</p></div></div>
+<div class="phase"><div class="when">Weeks 1–3<br><span class="cost">scholar time</span></div><div><h3>Termbase v1</h3><p class="small">~200–300 entries decided by a person with the Cambridge glossaries open, beginning with logic (Meier and the three Logik transcripts share one vocabulary). Sense splits and compounds included. This is the one step that can't be automated, and the one that makes the rest worth having.</p></div></div>
+<div class="phase"><div class="when">Week 3<br><span class="cost">a few dollars</span></div><div><h3>Pilot: Meier §§ 1–60 and one Busolt section</h3><p class="small">Run the full pipeline, compare with the prototype translations, read the validation report, tune the style guide. Measure real tokens per character and term compliance.</p></div></div>
+<div class="phase"><div class="when">Week 4<br><span class="cost">$20–50</span></div><div><h3>Full corpus via the Batch API</h3><p class="small">Meier first (it's the hub every lecture is keyed to), then the Logik transcripts, then the Reflexionen, then the Latin <em>Metaphysica</em> with the termbase's Latin side.</p></div></div>
+<div class="phase"><div class="when">Weeks 4–6<br><span class="cost">no tokens</span></div><div><h3>Reader v2</h3><p class="small">Term hover, concordance, the four display modes, provenance badges, learner tools. Built on what <code>busolt-reader.html</code> already does.</p></div></div>
+<div class="phase"><div class="when">Ongoing<br><span class="cost">pennies per change</span></div><div><h3>Review and refine</h3><p class="small">People check and correct; termbase changes trigger targeted re-runs; the decisions log grows.</p></div></div>
+
+<h2><span class="n">IX</span>Decisions that are yours to make</h2>
+<div class="q"><b>Which convention?</b> I'd propose the Cambridge Edition's renderings as the default, with deviations recorded. The alternative is a house style of our own, which means more decisions and less recognisability for readers who know the published translations.</div>
+<div class="q"><b>Where does it live?</b> Pilot it in <code>Individuals/maria/</code>. Once it works, the termbase, segments and translations belong in <code>data/</code>, since every tool could use them, and <code>data/</code> is co-owned by you and Sophia. The pipeline commands would then go into the root <code>CLAUDE.md</code>, as the repository's rules require for extractors.</div>
+<div class="q"><b>Who decides the termbase?</b> It needs a person who reads Kant in German. A few focused sessions, perhaps split between you and Sophia by text, are enough for v1.</div>
+<div class="q"><b>What happens to the prototype translations?</b> Keep them as the baseline to measure against, and retire them from the reader once the pipeline's output replaces them.</div>
+<div class="q"><b>Which model?</b> Claude Opus 5.5 by default for the translation step, with Sonnet 5.5 tested on the pilot. Whether a cheaper model is good enough is a quality call you should make from the pilot's output, not something to assume.</div>
+
+<h2><span class="n">X</span>The first concrete step</h2>
+<p class="lead">Write the segmenter for Meier and the three Logik transcripts, and generate the lemma frequency list. It costs nothing, takes a day, and turns "what should be in the termbase?" from a guess into a ranked list you can work through. Say the word and I'll start there.</p>
+
+</main>
+<footer>Prepared for the Kant Lab, October 2026. Corpus figures are measured from <code>data/</code> and <code>Individuals/maria/meier-auszug.js</code> on this branch. Token and cost figures are estimates to be replaced by the pilot's measurements. Proposed renderings are to be verified against the Cambridge Edition glossaries before use.</footer>
+</body>
+</html>
