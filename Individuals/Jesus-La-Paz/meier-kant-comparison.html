@@ -232,6 +232,14 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 .fb .btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 @media (max-width: 900px) { .trbox { grid-template-columns: 1fr; } }
 
+#wordPop { position: fixed; z-index: 80; display: none; max-width: 340px; background: #fffdf6; border: 1px solid var(--accent-lt); border-radius: 5px; box-shadow: 0 6px 18px rgba(40,25,5,.3); padding: 8px 11px; font-size: .9rem; line-height: 1.35; }
+#wordPop b { color: var(--accent); } #wordPop .la { font-style: italic; color: var(--faded); }
+#wordPop .en { font-size: 1rem; margin: 2px 0; }
+.meier .mtext, .kblock, .kp, .rcard .rt, .ccard .ct { cursor: text; }
+.tl-h { font-family: 'Cinzel', serif; font-size: .78rem; letter-spacing: .05em; color: var(--accent); margin: 14px 0 4px; padding-bottom: 2px; border-bottom: 1px solid var(--parch-deep); }
+.tl-h span { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); }
+.guide ol { margin: 6px 0 6px 20px; padding: 0; } .guide li { margin: 6px 0; }
+
 /* ── term mode result lists ────────────────────────────── */
 .summary { font-size: .92rem; margin: 0 0 8px; }
 .summary b { color: var(--accent); }
@@ -259,7 +267,8 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 <header>
   <h1>Meier–Kant Comparison</h1>
   <span class="sub">which passage of Meier's <i>Auszug aus der Vernunftlehre</i> Kant is lecturing on, across the Blomberg, Wiener and Busolt transcripts, the Jäsche <i>Logik</i> and his Reflexionen</span>
-  <button class="howbtn" id="linkBtn" type="button" title="Copy a link to exactly what you are looking at, to send to students">Copy link</button>
+  <button class="howbtn" id="guideBtn" type="button">Guide</button>
+  <button class="howbtn" id="linkBtn" style="margin-left:6px" type="button" title="Copy a link to exactly what you are looking at, to send to students">Copy link</button>
   <button class="howbtn" id="nbBtn" type="button" style="margin-left:6px">Notebook (0)</button>
   <button class="howbtn" id="howBtn" type="button" style="margin-left:6px">How the connections are made</button>
 </header>
@@ -278,13 +287,13 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
     <label><input type="checkbox" id="skip"> only §§ with Kant material</label>
   </div>
   <span class="spacer"></span>
-  <div class="group en">
+  <div class="group en" style="display:none">
     <span class="tag">ENGLISH →</span>
     <input type="search" id="en" placeholder="knowledge, truth, concept …" autocomplete="off" spellcheck="false" aria-label="English word to look up in Kant's German">
     <div class="enlist" id="enList" hidden></div>
   </div>
   <div class="group">
-    <input type="search" id="q" placeholder="Term, e.g. Wahrheit" autocomplete="off" spellcheck="false" aria-label="Term">
+    <input type="search" id="q" placeholder="Search in English or German: contradiction, Widerspruch …" autocomplete="off" spellcheck="false" aria-label="Term">
     <label><input type="checkbox" id="whole"> whole word</label>
     <label title="Match th/t, h after a vowel, ß/ss, ey/ei and doubled/single consonants alike, so Meier's Wahrheit finds Kant's Warheit"><input type="checkbox" id="variants" checked> spelling variants</label>
   </div>
@@ -305,6 +314,8 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 <section id="connPane" hidden></section>
 <div id="fbVeil"><div class="fb" id="fbBox" role="dialog" aria-label="Question this connection"></div></div>
 <div id="nbVeil" class="nbv"><div class="fb" id="nbBox" role="dialog" aria-label="Notebook"></div></div>
+<div id="wordPop"></div>
+<div id="guideVeil" class="nbv"><div class="fb guide" id="guideBox"></div></div>
 <div id="methodVeil"><div class="method" id="methodBox" role="dialog" aria-label="How the connections are made"></div></div>
 
 <!-- Shared data, loaded and never copied. Two exceptions, both in this folder because data/ has no file for them yet:
@@ -590,6 +601,7 @@ function vocabPanel(meierText, kantTexts, kantLabel) {
 /* ── By §: Meier column ──────────────────────────────────────────────── */
 function kantTextsFor(n) {
   if (state.ktab === 'reflexionen') return reflFor(n).filter(e => e.text).map(e => e.text);
+  if (state.ktab === 'time') return CW.flatMap(w => linkedTo(w, n, 0).map(x => x.b.text)).concat(reflFor(n).filter(e => e.text).map(e => e.text));
   return linkedTo(state.ktab, n, 0).map(x => x.b.text);
 }
 
@@ -646,7 +658,27 @@ function renderKantPara() {
   const pane = $('kantPane');
   const wrap = el('div');
 
-  if (state.ktab !== 'reflexionen') {
+  if (state.ktab === 'time') {
+    // Kant on this § in date order: the Reflexionen by Adickes' dating, the lectures by their dates.
+    const year = e => { const m = /(1[78]\d\d)/.exec(e.ph && e.ph.length ? phaseYears(e.ph[0]) : ''); return m ? +m[1] : null; };
+    const entries = [];
+    reflFor(n).filter(e => e.text).forEach(e => entries.push({ y: year(e), kind: 'refl', e }));
+    [['blomberg', 1771], ['wiener', 1781], ['busolt', 1789], ['jaesche', 1800]].forEach(([w, y]) => { const xs = linkedTo(w, n, 0); if (xs.length) entries.push({ y, kind: 'lect', w, xs }); });
+    entries.sort((a, b) => (a.y || 9999) - (b.y || 9999));
+    wrap.append(el('div', 'rangenote', `Everything Kant says on Meier § ${n}, earliest first. Lectures by their dates; Reflexionen by Adickes’ dating of the hand (undated ones last).`));
+    if (!entries.length) wrap.append(el('div', 'empty', `Nothing of Kant’s is linked to § ${n}.`));
+    entries.forEach(en => {
+      if (en.kind === 'lect') {
+        const h = el('div', 'tl-h', `${en.y === 1781 ? '1780s' : en.y === 1789 ? '1789/90' : en.y === 1771 ? 'ca. 1771' : en.y} · ${CW_FULL[en.w].toUpperCase()} `); h.append(el('span', null, `${en.xs.length} passage${en.xs.length === 1 ? '' : 's'}`)); wrap.append(h);
+        en.xs.slice(0, 3).forEach(x => wrap.append(kantPassage(en.w, x, re)));
+        if (en.xs.length > 3) { const m = el('button', 'more', `${en.xs.length - 3} more from ${CW_LABEL[en.w]}`); m.addEventListener('click', () => m.replaceWith(...en.xs.slice(3).map(x => kantPassage(en.w, x, re)))); wrap.append(m); }
+      } else {
+        const e = en.e, h = el('div', 'tl-h', `${en.y ? 'c. ' + en.y : 'undated'} · REFLEXION ${e.r} `); h.append(el('span', null, e.phRaw ? `phase ${e.phRaw}${e.ph && e.ph.length ? ' · ' + phaseYears(e.ph[0]) : ''}` : '')); wrap.append(h);
+        const d = el('div', 'kp'); d.append(highlighted(e.text.replace(/\n/g, ' '), re));
+        d.append(passageActions('refl', 'refl:' + e.r, { work: 'refl', id: 'refl:' + e.r, n, code: e.src === 'locus' || e.src === 'group' ? 'R' : 'Ri', cite: `Kant, Reflexion ${e.r}${e.aa ? ', AA 16:' + e.aa : ''}`, text: e.text })); wrap.append(d);
+      }
+    });
+  } else if (state.ktab !== 'reflexionen') {
     const w = state.ktab, items = linkedTo(w, n, state.near ? 2 : 0);
     const nc = el('label', 'nearctl'), cb = el('input'); cb.type = 'checkbox'; cb.checked = state.near;
     cb.addEventListener('change', () => { state.near = cb.checked; renderAll(); });
@@ -744,6 +776,7 @@ function paraTabs() {
   return [
     ...CW.map(w => ({ id: w, label: CW_LABEL[w], n: linkedTo(w, state.n, state.near ? 2 : 0).length })),
     { id: 'reflexionen', label: 'Reflexionen', n: reflFor(state.n).length },
+    { id: 'time', label: 'Kant over time', n: CW.reduce((t, w) => t + linkedTo(w, state.n, 0).length, 0) + reflFor(state.n).length },
   ];
 }
 
@@ -1024,6 +1057,48 @@ const GLOSSARY = [
   { en: ['rational', 'rational cognition'], de: 'Vernunfterkenntniß', q: 'Vernunfterkenntni', note: 'cognition from reason, as against historical cognition.' },
 ];
 
+// ── additions for the logic of judgment and inference (this tool only) ──────────────
+// Same status as the entries above: hand-compiled orientation, not drawn from the texts. The
+// counts beside each option are computed from them and are the check.
+GLOSSARY.push(
+  { en: ['negation', 'denial', 'to deny', 'negating'], de: 'Verneinung', q: 'Verneinung', la: 'negatio', note: 'negation or denial; verneinen is to deny, verneinend is negative.' },
+  { en: ['affirmation', 'affirm', 'affirmative'], de: 'Bejahung', q: 'Bejahung', la: 'affirmatio', note: 'affirmation; bejahend is affirmative.' },
+  { en: ['negative judgment', 'negative', 'denying judgment'], de: 'verneinend (Urtheil)', q: 'verneinend', start: true, note: 'negative, as the quality of a judgment; searches the word verneinend.' },
+  { en: ['infinite judgment', 'limitative judgment', 'indefinite judgment'], de: 'unendliches Urtheil', q: 'unendliche', start: true, la: 'iudicium infinitum', note: 'infinite judgment: the third moment of quality in Kant’s table, beside affirmative and negative. The search finds unendliche and so also unrelated “infinite”; check the hits.' },
+  { en: ['limitative judgment', 'limitation', 'infinite judgment'], de: 'limitativ', q: 'limitativ', note: 'limitative, the other name for the infinite judgment in the school logic.' },
+  { en: ['quality', 'quality of judgment'], de: 'Qualität', q: 'Qualit', start: true, la: 'qualitas', note: 'quality: whether a judgment affirms or denies (and, in Kant’s table, also limits).' },
+  { en: ['quantity', 'quantity of judgment'], de: 'Quantität', q: 'Quantit', start: true, la: 'quantitas', note: 'quantity: whether a judgment is universal, particular or singular.' },
+  { en: ['relation', 'relation of judgment'], de: 'Relation', q: 'Relation', la: 'relatio', note: 'relation: categorical, hypothetical or disjunctive. Verhältniß is the German word.' },
+  { en: ['modality', 'modal'], de: 'Modalität', q: 'Modalit', start: true, la: 'modalitas', note: 'modality: problematic, assertoric or apodictic.' },
+  { en: ['particular', 'particular judgment', 'some'], de: 'particulär', q: 'particul', start: true, la: 'particularis', note: 'particular, as a quantity of judgment (“some”). Also spelled particulair.' },
+  { en: ['singular', 'singular judgment', 'individual'], de: 'einzeln', q: 'einzeln', start: true, la: 'singularis', note: 'singular or individual (a judgment about one thing).' },
+  { en: ['immediate inference', 'inference of the understanding', 'consequence', 'immediate consequence'], de: 'Verstandesschluß', q: 'Verstandesschl', la: 'consequentia immediata', note: 'inference of the understanding: drawing one judgment from another with no third judgment between. Busolt 24:670.' },
+  { en: ['mediate inference', 'inference of reason', 'syllogism'], de: 'Vernunftschluß', q: 'Vernunftschl', la: 'ratiocinium', note: 'inference of reason: one judgment from another through a middle judgment (the major premise).' },
+  { en: ['conversion', 'to convert', 'converse'], de: 'conversio / Umkehrung', q: 'conversi', la: 'conversio', note: 'conversion: transposing subject and predicate. Umkehrung and umkehren are the German words.' },
+  { en: ['contraposition', 'contrapose'], de: 'contrapositio', q: 'contraposit', la: 'contrapositio', note: 'contraposition: the school logic’s transposition of the terms with a change of quality.' },
+  { en: ['equipollence', 'equipollent', 'equivalent judgments'], de: 'aequipollentia', q: 'aequipollent', la: 'aequipollentia', note: 'equipollence: judgments equal in force, the first kind of immediate inference.' },
+  { en: ['subalternation', 'subaltern', 'subalternate'], de: 'subalternata', q: 'subaltern', la: 'subalternatio', note: 'subalternation: from the universal to the particular judgment.' },
+  { en: ['opposition', 'opposed judgments', 'opposite'], de: 'iudicia opposita', q: 'opposit', la: 'oppositio', note: 'opposition of judgments: contradictory, contrary and subcontrary.' },
+  { en: ['contradictory', 'contradictory opposition'], de: 'contradictorisch', q: 'contradictor', la: 'contradictoria', note: 'contradictory opposition: of two such judgments only one can be true. Busolt 24:670.' },
+  { en: ['contrary', 'contrary opposition'], de: 'contrair', q: 'contrair', la: 'contraria', note: 'contrary opposition: universal affirmative against universal negative; both can be false. Busolt 24:671.' },
+  { en: ['subcontrary', 'subcontrary opposition'], de: 'subcontrair', q: 'subcontrair', la: 'subcontraria', note: 'subcontrary opposition: particular affirmative against particular negative. Busolt 24:670.' },
+  { en: ['intension', 'content of a concept', 'logical intension'], de: 'Inhalt (of a concept)', q: 'Inhalt', start: true, note: 'the content of a concept, its marks: what the logic books call its intension.' },
+  { en: ['extension', 'sphere', 'logical extension', 'scope of a concept'], de: 'Sphäre / Umfang', q: 'Sphäre', la: 'sphaera', note: 'the sphere of a concept: what stands under it, its extension. Umfang is the other word.' },
+  { en: ['copula', 'is'], de: 'Copula', q: 'copula', note: 'copula: the “is” connecting subject and predicate; a negative copula is where the negation is placed.' },
+  { en: ['middle term', 'medius terminus', 'mediating concept'], de: 'terminus medius', q: 'medius', la: 'terminus medius', note: 'middle term, present in both premises of a categorical inference of reason.' },
+  { en: ['major', 'minor', 'major premise', 'minor premise', 'premise'], de: 'Maior / Minor', q: 'Maior', note: 'major and minor (premise): the general rule and the subsumption under it.' },
+  { en: ['principle of contradiction', 'law of non-contradiction', 'non-contradiction'], de: 'Satz des Widerspruchs', q: 'Widerspruchs', la: 'principium contradictionis', note: 'the principle of contradiction. Transcripts spell it Wiederspruch.' },
+  { en: ['self-contradictory', 'self-contradictory concept', 'contradiction in a concept', 'impossible concept'], de: 'widersprechen', q: 'widerspr', note: 'to contradict; a concept that contradicts itself. Broad: it finds every form of Widerspruch.' },
+  { en: ['nothing', 'nihil'], de: 'Nichts', q: 'Nichts', whole: true, la: 'nihil', note: 'nothing; nihil negativum is the “nothing” of an impossible object. Whole word, so check the hits.' },
+  { en: ['impossible', 'impossibility'], de: 'unmöglich', q: 'unmöglich', la: 'impossibilis', note: 'impossible.' },
+  { en: ['tautology', 'tautological', 'identical'], de: 'Tautologie', q: 'Tautolog', note: 'tautology, an empty repetition of the same.' },
+  { en: ['analytic', 'analytical'], de: 'analytisch', q: 'analytisch', la: 'analyticus', note: 'analytic.' },
+  { en: ['categorical', 'hypothetical', 'disjunctive'], de: 'kategorisch / hypothetisch / disjunctiv', q: 'kategorisch', note: 'categorical; hypothetisch and disjunctiv are the other two relations.' },
+  { en: ['act', 'action', 'cognitive act', 'act of the understanding'], de: 'Handlung / Actus', q: 'Handlung', la: 'actus', note: 'act, as in an act of the understanding; Jäsche § 6 speaks of the logical acts of comparison, reflection and abstraction.' },
+  { en: ['comparison', 'to compare'], de: 'Vergleichung / Comparation', q: 'Vergleich', start: true, la: 'comparatio', note: 'comparison, the first of the logical acts in Jäsche § 6.' },
+  { en: ['ground of inference', 'inference', 'consequence'], de: 'Folgerung', q: 'Folgerung', la: 'consequentia', note: 'drawing a consequence; Folge is the consequence itself.' }
+);
+
 const glossCounts = new Map();
 function countsFor(g) {
   if (glossCounts.has(g)) return glossCounts.get(g);
@@ -1088,8 +1163,10 @@ function renderEnBar() {
   bar.hidden = false;
   bar.replaceChildren();
   bar.append(`“${en}” → ${entry.de}${entry.la ? ' (' + entry.la + ')' : ''}. Searching German “${entry.q}”${entry.start ? ' at the start of a word' : ''}${entry.whole ? ' as a whole word' : ''}, with spelling variants.${entry.la ? ` In Baumgarten’s Latin the stem “${latinStem(entry.la)}…” is also searched.` : ''} `);
+  const alts = lookupEnglish(en).filter(g => g !== entry).slice(0, 5);
+  if (alts.length) { bar.append(' Other German words for it: '); alts.forEach(g => { const c = el('button', null, g.de); c.addEventListener('click', () => { state.fromEn = { en, entry: g }; state.start = !!g.start; state.whole = !!g.whole; state.query = g.q; runSearch(); renderAll(); }); bar.append(c, ' '); }); }
   const x = el('button', null, 'clear');
-  x.addEventListener('click', () => { state.fromEn = null; state.start = false; $('en').value = ''; setQuery(''); });
+  x.addEventListener('click', () => { state.fromEn = null; state.start = false; $('q').value = ''; setQuery(''); });
   bar.append(x);
 }
 
@@ -1272,7 +1349,18 @@ function pinButton(src) {
   b.addEventListener('click', ev => { ev.stopPropagation(); NB.push({ cite: src.cite, text: src.text, note: '' }); saveNB(); b.textContent = 'Pinned'; });
   return b;
 }
-function nbText() { return NB.map((p, i) => `[${i + 1}] ${p.cite}\n${p.text}${p.note ? '\nMy note: ' + p.note : ''}`).join('\n\n'); }
+function citation(src) {
+  let c = src.cite.replace(/\s*\((?:ca\.\s*)?\d{4}[^)]*\)/g, '');
+  if (/^Meier/.test(c) || /^G\. F\. Meier/.test(c)) c = c.replace(/^(G\. F\. )?Meier, Auszug aus der Vernunftlehre/, 'G. F. Meier, Auszug aus der Vernunftlehre (Halle, 1752)') + (/§ (\d+)/.test(c) && MEIER_AUSZUG.citations[+c.match(/§ (\d+)/)[1]] && !/AA 16/.test(c) ? `, ${MEIER_AUSZUG.citations[+c.match(/§ (\d+)/)[1]]}` : '');
+  else if (!/^Kant/.test(c)) c = 'Kant, ' + c;
+  return c.replace(/Jäsche, Logik/, 'Logik, ed. Jäsche') + '.';
+}
+function citeButton(src) {
+  const b = el('button', 'pbtn', 'Cite'); b.type = 'button'; b.title = 'Copy a citation of this passage';
+  b.addEventListener('click', ev => { ev.stopPropagation(); const t = el('textarea'); t.value = citation(src); document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); b.textContent = 'Citation copied'; setTimeout(() => { b.textContent = 'Cite'; }, 1500); });
+  return b;
+}
+function nbText() { return NB.map((p, i) => `[${i + 1}] ${citation(p)}\n${p.text}${p.note ? '\nMy note: ' + p.note : ''}`).join('\n\n'); }
 function showNB() {
   const box = $('nbBox'); box.replaceChildren(); box.append(el('h2', null, 'NOTEBOOK'));
   box.append(el('div', 'small', 'Passages you pinned, with their citations. Kept in this browser on this computer. Copy them into your assignment.'));
@@ -1293,7 +1381,7 @@ function showNB() {
 function passageActions(text, id, info, src) {
   const a = el('div', 'pacts');
   a.append(trButton(text, id, a, src || info));
-  if (src || info) a.append(pinButton(src || info));
+  if (src || info) a.append(citeButton(src || info), pinButton(src || info));
   if (info) a.append(questionButtons(info));
   return a;
 }
@@ -1320,7 +1408,7 @@ function renderConn() {
     const how = el('button', 'copy', 'How the connections are made'); how.addEventListener('click', showMethod); p2.append(how);
     box.append(p1, p2, el('p', 'small', 'Type a German word in the box above, or an English word in the ENGLISH box to be offered Kant’s German for it.'));
     const ch = el('div', 'chips suggest');
-    ['Widerspruch', 'Urtheil', 'Merkmal', 'Wahrheit', 'Begriff', 'Vernunftschluß', 'Gewißheit', 'conversio'].forEach(t => { const c = el('button', 'chip s', t); c.addEventListener('click', () => setQuery(t)); ch.append(c); });
+    ['contradiction', 'judgment', 'Merkmal', 'truth', 'concept', 'Vernunftschluß', 'certainty', 'conversio'].forEach(t => { const c = el('button', 'chip s', t); c.addEventListener('click', () => { $('q').value = t; smartQuery(t); }); ch.append(c); });
     box.append(ch); pane.append(box); return;
   }
   // gather, per Meier §
@@ -1399,8 +1487,7 @@ function kantPassage(w, x, re) {
   if (x.hi > x.lo) r.append(el('span', null, ` · runs over §§ ${x.lo}–${x.hi}`));
   d.append(r, clip(x.b.text, re, 420));
   d.append(passageActions(w, x.b.id, { work: w, id: x.b.id, n: x.at, code: x.code, cite: `${CW_FULL[w]}, AA ${CW_VOL[w]}:${aaRange(x.b)}`, text: x.b.text }));
-  d.style.cursor = 'pointer'; d.title = 'Click the text to read it beside Meier’s §';
-  d.addEventListener('click', () => openAt(x.at, w, { kind: 'block', id: x.b.id }));
+  const rb = el('button', 'pbtn', `Read beside Meier § ${x.at}`); rb.addEventListener('click', ev => { ev.stopPropagation(); openAt(x.at, w, { kind: 'block', id: x.b.id }); }); d.querySelector('.pacts').prepend(rb);
   return d;
 }
 function showMethod() {
@@ -1483,7 +1570,7 @@ function readHash() {
   if (['conn', 'para', 'term'].includes(h.get('mode'))) state.mode = h.get('mode');
   if (h.get('n') && PARAS[+h.get('n')]) state.n = +h.get('n');
   if (h.get('tab')) state.ktab = h.get('tab');
-  if (h.get('q')) { state.query = h.get('q'); $('q').value = state.query; runSearch(); }
+  if (h.get('q')) { $('q').value = h.get('q'); state.query = h.get('q'); runSearch(); }
 }
 function renderAll() {
   askReports(); writeHash();
@@ -1509,6 +1596,45 @@ function setQuery(q) {
 OUTLINE.forEach((o, i) => { const op = el('option', null, `${o.label} (§§ ${o.from}–${o.to})`); op.value = i; $('secSel').append(op); });
 document.querySelectorAll('#modeSeg button').forEach(b => b.addEventListener('click', () => { state.mode = b.dataset.mode; state.focus = null; if (state.mode === 'term' && state.ktab === 'reflexionen' && !state.hits) state.ktab = 'blomberg'; renderAll(); }));
 $('howBtn').addEventListener('click', showMethod);
+// Click a word in any text to see what it means (from the glossary) and to search it.
+function glossFor(word) {
+  let best = null;
+  GLOSSARY.forEach(g => { const re = makeRegex(g.q, !!g.whole, true, true); re.lastIndex = 0; const m = re.exec(word); if (m && m.index === 0 && (!best || g.q.length > best.q.length)) best = g; });
+  return best;
+}
+document.addEventListener('click', ev => {
+  const pop = $('wordPop');
+  if (pop.contains(ev.target)) return;
+  pop.style.display = 'none';
+  if (ev.target.closest('button, a, input, textarea, select, .trbox')) return;
+  if (!ev.target.closest('#meierPane, #kantPane, #connPane') || !window.getSelection().isCollapsed) return;
+  const r = document.caretRangeFromPoint && document.caretRangeFromPoint(ev.clientX, ev.clientY);
+  if (!r || r.startContainer.nodeType !== 3) return;
+  const t = r.startContainer.textContent; let a = r.startOffset, z = r.startOffset;
+  while (a > 0 && /[\p{L}]/u.test(t[a - 1])) a--; while (z < t.length && /[\p{L}]/u.test(t[z])) z++;
+  const word = t.slice(a, z); if (word.length < 3) return;
+  const g = glossFor(word); pop.replaceChildren();
+  if (g) { pop.append(el('b', null, word), ' ', g.la ? el('span', 'la', `(${g.la})`) : ''); pop.append(el('div', 'en', `≈ ${g.en[0]}`), el('div', 'small', `${g.de}: ${g.note}`)); }
+  else pop.append(el('b', null, word), el('div', 'small', 'Not in the glossary. The English button under the passage translates it in context.'));
+  const s_ = el('button', 'pbtn', `Search “${g ? g.de.split(' / ')[0] : word}”`); s_.addEventListener('click', () => { pop.style.display = 'none'; state.mode = state.mode === 'para' ? 'conn' : state.mode; $('q').value = word; smartQuery(g ? g.q : word); });
+  pop.append(el('div', null, '')); pop.append(s_);
+  pop.style.left = Math.min(window.innerWidth - 360, ev.clientX + 8) + 'px'; pop.style.top = Math.min(window.innerHeight - 160, ev.clientY + 14) + 'px'; pop.style.display = 'block';
+});
+function showGuide() {
+  const box = $('guideBox'); box.replaceChildren(); box.append(el('h2', null, 'HOW TO USE THIS IN ONE MINUTE'));
+  const ol = el('ol');
+  [['Search', ' a word in English or German in the box at the top right (try “contradiction” or “Merkmal”). Each result shows a § of Meier’s book beside what Kant says about it.'],
+   ['Read side by side:', ' “Read beside Meier §” opens the § with all of Kant’s texts in tabs. “Kant over time” lines them up from 1771 to 1800.'],
+   ['English:', ' press it under any passage for two translations (literal, Guyer–Wood; smoother, Kemp Smith). Click any German word for its meaning.'],
+   ['How sure is a link?', ' “stated” means the text itself says so; a percentage says how often links like it were right when checked.'],
+   ['For your assignment:', ' “Cite” copies a citation; “Pin” keeps a passage in your Notebook (top right), which you can copy or save. “Copy link” shares exactly what you see.']].forEach(([b, t]) => { const li = el('li'); li.append(el('b', null, b), t); ol.append(li); });
+  box.append(ol);
+  const ok = el('button', 'btn pri', 'Got it'); ok.addEventListener('click', () => { $('guideVeil').classList.remove('on'); try { localStorage.setItem('meierKantGuideSeen', '1'); } catch (e) {} });
+  box.append(ok); $('guideVeil').classList.add('on');
+}
+$('guideBtn').addEventListener('click', showGuide);
+$('guideVeil').addEventListener('click', e => { if (e.target === $('guideVeil')) $('guideVeil').classList.remove('on'); });
+try { if (!localStorage.getItem('meierKantGuideSeen')) setTimeout(showGuide, 400); } catch (e) {}
 $('nbBtn').addEventListener('click', showNB); saveNB();
 $('nbVeil').addEventListener('click', e => { if (e.target === $('nbVeil')) $('nbVeil').classList.remove('on'); });
 $('linkBtn').addEventListener('click', () => { const t = el('textarea'); t.value = location.href; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); $('linkBtn').textContent = 'Link copied'; setTimeout(() => { $('linkBtn').textContent = 'Copy link'; }, 1500); });
@@ -1521,7 +1647,16 @@ $('prev').addEventListener('click', () => goPara(step(-1)));
 $('next').addEventListener('click', () => goPara(step(1)));
 $('skip').addEventListener('change', e => { state.skip = e.target.checked; renderBar(); });
 let timer;
-$('q').addEventListener('input', e => { state.fromEn = null; state.start = false; clearTimeout(timer); timer = setTimeout(() => setQuery(e.target.value), 150); });
+// One box: an English word that names a term in the glossary is searched as Kant's German for it.
+function smartQuery(text) {
+  const t = text.trim().toLowerCase();
+  const g = t.length > 2 && GLOSSARY.find(x => x.en.includes(t));
+  if (g) { state.fromEn = { en: text.trim(), entry: g }; state.start = !!g.start; state.whole = !!g.whole; state.variants = true; }
+  else { state.fromEn = null; state.start = false; }
+  state.query = g ? g.q : text; state.vocabTerm = null; state.focus = null; state.shown = {}; state.connShown = 15;
+  runSearch(); renderAll();
+}
+$('q').addEventListener('input', e => { clearTimeout(timer); timer = setTimeout(() => smartQuery(e.target.value), 200); });
 $('whole').addEventListener('change', e => { state.whole = e.target.checked; state.fromEn = null; state.start = false; setQuery($('q').value); });
 $('variants').addEventListener('change', e => { state.variants = e.target.checked; setQuery($('q').value); });
 $('en').addEventListener('input', () => { enSel = 0; renderEnList(); });
