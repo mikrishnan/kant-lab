@@ -197,6 +197,15 @@ with their own Claude API key.
 
 - **Copy link** gives an address that opens exactly the current view, for example
   `#mode=para&n=343&tab=busolt` or `#mode=conn&q=Widerspruch`.
+- **One search box** takes English or German. An English word that names a glossary term
+  ("contradiction") is searched as Kant's German for it (*Widerspruch*), with the other German words
+  offered beside it.
+- **Kant over time**, a tab in By §, lines up everything Kant says on a § in date order: the
+  Reflexionen by Adickes' dating, then Blomberg (ca. 1771), Wiener (1780s), Busolt (1789/90) and
+  Jäsche (1800).
+- **Click any German word** to see its English and a note from the glossary.
+- **Cite** copies a citation such as "Kant, Logik Busolt, AA 24:670."
+- **Guide** (top right) is a one-minute introduction. It opens by itself on a reader's first visit.
 - **Pin** keeps a passage with its citation in a **Notebook**, which stays in the browser and can be
   copied or saved for an assignment.
 
