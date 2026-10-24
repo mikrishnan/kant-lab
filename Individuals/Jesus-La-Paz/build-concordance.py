@@ -225,7 +225,7 @@ for w,(bl,data,_) in works.items():
     CH[w]=chunk(bl)
 idx=Index([d[n] for n in PARAS]+[stems(c['text']) for w in CH for c in CH[w]])
 mv={n:idx.vec(d[n]+e[n]) for n in PARAS}
-LINKS={}; CAL={}; DEBUG=collections.defaultdict(dict)
+LINKS={}; CAL={}; DEBUG=collections.defaultdict(dict); FEAT=collections.defaultdict(dict)
 SPAN=float(os.environ.get('SPAN','0.8'))
 for w,chs in CH.items():
     rows=[];heads=[]
@@ -233,8 +233,15 @@ for w,chs in CH.items():
         q=idx.vec(stems(c['text'])); rows.append({n:cos(q,mv[n]) for n in PARAS}); heads.append(c['blocks'][0]['hrange'])
     path=viterbi(rows,heads,**PARAMS)
     L={}
+    runlen=[1]*len(path)                       # how many consecutive passages share this §
+    i0=0
+    for i in range(1,len(path)+1):
+        if i==len(path) or path[i]!=path[i0]:
+            for j in range(i0,i): runlen[j]=i-i0
+            i0=i
     for i,(c,r,p) in enumerate(zip(chs,rows,path)):
-        top=sorted(r,key=r.get,reverse=True)[:3]
+        ranked=sorted(r,key=r.get,reverse=True)
+        top=ranked[:3]
         agree=any(abs(n-p)<=1 for n in top)
         steady=all(abs(path[j]-p)<=3 for j in (i-1,i+1) if 0<=j<len(path))
         tier='1' if agree and steady else ('2' if agree or steady else '3')
@@ -244,8 +251,14 @@ for w,chs in CH.items():
         if sp>=0.06:
             while lo-1>=1 and p-(lo-1)<=6 and SEC[lo-1]==SEC[p] and r.get(lo-1,0)>=SPAN*sp: lo-=1
             while hi+1<=N and (hi+1)-p<=6 and SEC[hi+1]==SEC[p] and r.get(hi+1,0)>=SPAN*sp: hi+=1
+        sp_=r.get(p,0); smax=r[ranked[0]] if ranked else 0
+        rank=next((k for k,n in enumerate(ranked[:60]) if abs(n-p)<=1),60)
+        hr=c['blocks'][0]['hrange']
+        feat=[1.0 if agree else 0.0, 1.0 if steady else 0.0, math.log(sp_+0.01), sp_/smax if smax>0 else 0.0,
+              math.log(1+rank), 1.0 if hr and hr[0]<=p<=hr[1] else 0.0, 1.0 if hr else 0.0, math.log(runlen[i]), math.log(1+c['w'])]
         for b in c['blocks']:
             code,para=tier,p
+            FEAT[w][b['id']]=feat
             slo,shi=lo,hi
             if w=='blomberg':
                 k=stated_keys(b)                  # the transcript's own heading, a single § or a range ("§ 341- 346")
@@ -254,6 +267,44 @@ for w,chs in CH.items():
             DEBUG[w][b['id']]=[p,lo,hi,tier]
             L[b['id']]=[para,code]+([slo,shi] if (slo!=para or shi!=para) else [])
     LINKS[w]=L
+# ════════════════════════════════════════════════════════════════════ confidence
+# The confidence shown for an inferred link is the measured success rate of links with the same evidence
+# (the same mark) in the same text: the share that were right within ±2 §§ when checked against a stated link.
+# A finer, per-passage model (logistic, on similarity, rank, run length, ...) was tried and rejected: fitted on
+# one half of Blomberg it did worse than a constant on the other half. The three marks are the grouping
+# whose rates hold steady across the two halves (within 9 points).
+def rate_blomberg():
+    t=collections.defaultdict(lambda:[0,0])
+    for b in BL:
+        k=stated_keys(b)
+        if not k or max(k)-min(k)>3: continue
+        p,_,_,tr=DEBUG['blomberg'][b['id']]; t[tr][0]+=1; t[tr][1]+=min(abs(p-x) for x in k)<=2
+    return t
+def rate_jaesche():
+    t=collections.defaultdict(lambda:[0,0])
+    for b in JA:
+        if b['aa'] not in P2M: continue
+        p,_,_,tr=DEBUG['jaesche'][b['id']]; t[tr][0]+=1; t[tr][1]+=min(abs(p-x) for x in P2M[b['aa']])<=2
+    return t
+# Wiener: no stated links exist in the repository. These counts come from the one outside test, against
+# the concordance in J. M. Young's Cambridge Lectures on Logic (1992), Appendix D, for Meier §§ 1–31,
+# 167–211, 347–391: passages checked / right within ±2 §§, by mark. Nothing else was taken from it.
+WIENER_TEST={'1':[73,69],'2':[69,45],'3':[4,1]}
+RB,RJ=rate_blomberg(),rate_jaesche()
+CONF={}
+for tr in ('1','2','3'):
+    def entry(nk,basis):
+        return {'pct':int(round(100*nk[1]/nk[0])) if nk[0] else None,'n':nk[0],'basis':basis}
+    # Transcripts (Blomberg, Wiener, Busolt) are pooled with transcripts; Jäsche, an edited book whose links are
+    # easier, is pooled with everything only where its own count is too small.
+    PT=entry([RB[tr][0]+WIENER_TEST[tr][0],RB[tr][1]+WIENER_TEST[tr][1]],'pooled from the Blomberg and Wiener transcripts')
+    PA=entry([RB[tr][0]+RJ[tr][0]+WIENER_TEST[tr][0],RB[tr][1]+RJ[tr][1]+WIENER_TEST[tr][1]],'pooled from Blomberg, Wiener and Jäsche')
+    CONF.setdefault('blomberg',{})[tr]=entry(RB[tr],'Blomberg passages checked against the transcript’s own § headings') if RB[tr][0]>=30 else PT
+    CONF.setdefault('wiener',{})[tr]=entry(WIENER_TEST[tr],'Wiener passages checked against a sample of the Cambridge concordance') if WIENER_TEST[tr][0]>=30 else PT
+    CONF.setdefault('busolt',{})[tr]=dict(PT,basis='pooled from the Blomberg and Wiener transcripts (Busolt has no stated links to test against)')
+    CONF.setdefault('jaesche',{})[tr]=entry(RJ[tr],'Jäsche passages checked against the Academy Edition’s headers') if RJ[tr][0]>=30 else PA
+print('confidence by text and mark:',{w:{t:(v['pct'],v['n']) for t,v in d.items()} for w,d in CONF.items()})
+
 OUT={'meta':{
   'generated':datetime.date.today().isoformat(),
   'method':'Each passage of a lecture text is linked to the § of Meier’s Auszug it is lecturing on. Evidence, strongest first: '
@@ -268,7 +319,8 @@ OUT={'meta':{
               'by_tier_within2':{'blomberg':{'1':0.86,'2':0.72,'3':0.36},'wiener':{'1':0.95,'2':0.65,'3':0.25}}},
   'tested_against':'Afterwards, and only as a test, against the concordance in J. Michael Young (tr.), Lectures on Logic (Cambridge, 1992), '
                    'Appendix D, for Meier §§ 1–31, 167–211 and 347–391. Nothing was taken from it into the links.',
-  'params':PARAMS},
+  'params':PARAMS,
+  'confidence':{'meaning':'share of links with the same mark, in the same text, that were right within ±2 §§ when checked','table':CONF}},
  'headings':{'blomberg':BLOMBERG_H,'busolt':BUSOLT_H,'wiener':WIENER_H,'jaesche_einleitung':JAESCHE_EINL},
  'links':LINKS}
 import sys
@@ -280,6 +332,7 @@ hdr="""/* ───────────────────────�
    No outside concordance was used. Do not hand-edit; change the script and rebuild.
 
    CONCORDANCE.links[work][blockId] = [§, code] or [§, code, from, to] where the passage treats a run of §§
+   CONCORDANCE.meta.confidence.table[work][mark] = { pct, n, basis }: the measured success rate of that mark in that text
      code S  stated: the transcript's own § heading (Blomberg)
           A  stated: the AA XVI header over the Reflexionen on that § names this Jäsche page
           1  inferred, strong     (wording and sequence agree)   86% within ±2 §§ (Blomberg), 95% (Wiener)
@@ -292,5 +345,5 @@ hdr="""/* ───────────────────────�
 """
 open(dest,'w',encoding='utf-8').write(hdr+'const CONCORDANCE = '+json.dumps(OUT,ensure_ascii=False,separators=(',',':'))+';\n')
 dbg=os.environ.get('DEBUG_OUT')
-if dbg: json.dump(DEBUG,open(dbg,'w'))
+if dbg: json.dump({'debug':DEBUG,'feat':FEAT},open(dbg,'w'))
 print('wrote',dest,{w:collections.Counter(v[1] for v in L.values()) for w,L in LINKS.items()})
