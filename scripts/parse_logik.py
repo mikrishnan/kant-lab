@@ -285,6 +285,7 @@ def resolve(raw):
 
 def flush(buf, state, section, work, report):
     """Resolve one assembled paragraph into text plus its two paginations."""
+    start = state.pop("start", state["page"])
     raw = "".join(buf).strip()
     if not raw:
         return
@@ -294,7 +295,7 @@ def flush(buf, state, section, work, report):
     block = {
         "id": "%s-%s-%03d" % (work, section.id, len(section.blocks) + 1),
         "kind": state.pop("kind", "text"),
-        "aa": state["page"] if not pages or pages[0]["i"] > 0 else pages[0]["p"],
+        "aa": start if not pages or pages[0]["i"] > 0 else pages[0]["p"],
         "text": body,
     }
     if pages:
@@ -393,6 +394,9 @@ def emit_body(lines, section, key, work, report):
             if buf and state["open"]:
                 buf.append(PAGE_MARK + str(page) + PAGE_MARK)
                 state.setdefault("joins", set()).add("mark")
+                # The paragraph began on the page now ending. Keep it, since
+                # `state["page"]` is about to move on to the one it runs into.
+                state.setdefault("start", state["page"])
             else:
                 flush(buf, state, section, key, report)
                 buf = []
@@ -493,11 +497,14 @@ HEADER = """/* ─────────────────────�
      kind    text | note | rule. `note` is an AA cross-reference standing in
              the text (`Vgl. Logik Philippi § 428-544, xxiv 484ff.`); `rule`
              is a horizontal rule the transcription sets.
-     aa      the AA XXIV page the block starts on — cite as `AA 24:<aa>`
+     aa      the AA XXIV page the block starts on — cite as `AA 24:<aa>`.
+             For a block that runs over a page, that is the page before the
+             first entry in `pages`, and text from that entry on is on the
+             later page: cite the page the quoted words stand on
      aaEnd   the page it ends on, where it runs over one
      pages   where the block crosses a page: {{ p, i }}, page `p` beginning at
-             character `i` of `text`. The first entry is at i=0 when the block
-             itself begins a page. Re-inserting these restores the
+             character `i` of `text`. A block that begins at the top of a page
+             has no entry for it; `aa` names the page. Re-inserting these restores the
              transcription's own lineation exactly; the extractor checks that
              on every run.
      ms      the manuscript's own pagination, the same way: {{ p, i }} for the

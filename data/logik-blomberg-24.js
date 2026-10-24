@@ -40,11 +40,14 @@
      kind    text | note | rule. `note` is an AA cross-reference standing in
              the text (`Vgl. Logik Philippi § 428-544, xxiv 484ff.`); `rule`
              is a horizontal rule the transcription sets.
-     aa      the AA XXIV page the block starts on — cite as `AA 24:<aa>`
+     aa      the AA XXIV page the block starts on — cite as `AA 24:<aa>`.
+             For a block that runs over a page, that is the page before the
+             first entry in `pages`, and text from that entry on is on the
+             later page: cite the page the quoted words stand on
      aaEnd   the page it ends on, where it runs over one
      pages   where the block crosses a page: { p, i }, page `p` beginning at
-             character `i` of `text`. The first entry is at i=0 when the block
-             itself begins a page. Re-inserting these restores the
+             character `i` of `text`. A block that begins at the top of a page
+             has no entry for it; `aa` names the page. Re-inserting these restores the
              transcription's own lineation exactly; the extractor checks that
              on every run.
      ms      the manuscript's own pagination, the same way: { p, i } for the
@@ -1039,7 +1042,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s01-012",
      "kind": "text",
-     "aa": 17,
+     "aa": 16,
      "text": "Außer denen Natürlichen Gesetzen giebt es noch Vorschriften welche vor den gekünstelten Verstand sind. Das erste ist ganz ohne gesetze zu verfahren, und sich weder der Natürlichen [ ... ] Gesetze, noch der Vorschriften zu bedienen. Wenn man hierauf seine eigene Vernunft Excoliren will, so bedienet man sich erst der natürlichen Gesetzen der Vernunft. Dieses geschiehet, wenn man oft dencket, oder durch Uebungen, und öfteren Versuche, wenn man einen Gegenstand so wohl nach Besonderen, als Allgemeinen Gesetzen Betrachtet.",
      "pages": [
       {
@@ -1187,7 +1190,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s01-029",
      "kind": "text",
-     "aa": 19,
+     "aa": 18,
      "text": "Der gemeine Verstand ist der Verstand nach Gesezen der Erfahrung zu urtheilen; die gemeine Vernunft aber die Vernunft nach Gesezen der Erfahrung zu schlüßen. man nennet diese Vernunft gemein, weil sie der geringste Grad ist, bey allen Gegenständen, die uns also vorkommen. Bey Gelegenheit der Erfahrung haben wir immer einen Maaß-Staab womit wir die größen mit einander vergleichen. So Verfahren wir, wan wir die mitlere größe finden wollen; wir nehmen nemlich das, wovon wir die mitlere Größe finden wollen, Z.E. den Menschen: wir zählen eines jeden Menschen größe nach dem Maaß-Staabe, addiren dieselbe zusammen, und dividiren sie durch die Anzahl der Menschen, die wir niemahls in unßerem Leben gesehen haben, als denn komm et die mitlere Größe heraus, die jedem Menschen angemeßen ist. So wird auch die mitlere Größe des Verstandes herausgebracht ,aus dem Verstande, den man durch die gemeine Erfahrung kennet. Der gemeine Verstand ist das Maaß. Der gemeine und gesunde Verstand ist ein kleiner, aber richtiger Verstand, und seine Erkenntniß hat eine große Brauchbahrkeit. in einem Land-Striche von Bauren finden sich Lang nicht so viele Irrthümeren, alß in einem Bezirk von gelahrten, der eben so groß ist. Denn der Bauer gehet immer nach dem Leith-Faden der Erfahrung: er urtheilet über wenig, aber über das wenige richtig. Die Ausübungen der gemeinen und gesunden Vernunft sind auch leicht, alle Erkenntniß aus Erfahrung hat mehr Leben, und mehr anschauendes, als diejenige, so aus allgemeinen Begriffen entsprungen ist. Der erste Vorzug der gemeinen Vernunft ist die Einfalt. Der 2te ist die Richtigkeit. Der 3te die Brauchbahrkeit. Der 4te die Leichtigkeit und der 5te die Klahrheit, und Lebhaftigkeit. Denn die Erkenntniße entspringen mit dem Lichte, mit dem die Erfahrungs Vorstellungen begabet sind. Die gesunde Vernunft wird demnach zu schönen Wißenschaften hinreichend seyn.",
      "pages": [
       {
@@ -1235,7 +1238,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s01-032",
      "kind": "text",
-     "aa": 20,
+     "aa": 19,
      "text": "Der Gebrauch aller Erkenntnißen derer Gelahrten und die Anwendung derselben ist nur möglich durch die gesunde Vernunft. zwar kan jemand auch ein Gelahrter ohne einen gesunden Verstand seyn, aber das ist ein Lächerlicher Pedant. Alle Gelahrtsamkeit ist entweder Historisch, oder Rational. Historisch ist die Erkenntniß, die der Form nach aus der Gemeinen Vernunft, der Materie nach aber aus gemeinen Erfahrungen entlehnet ist. Die Historische Gelahrtsamkeit enthalt Geschichte, Geographie u.s.w. ein Historisch Gelahrter kan auch Reflexiones machen, allein dieselbe gehören schon zu der Rationalen Gelahrtsamkeit. Die Materie in der rationalen Gelahrtsamkeit kan auch durch die gemeine Vernunft und Erfahrung gefaßet werden. Die Form aber ist gantz anders. Die Menschen finden an dem Vermögen im Stande zu seyn sich irgend ein Vergnügen zu machen, mehr Belustigung, als an dem Vergnügen selbst. Wenn ich vom Allgemeinen das Besondere abziehe, brauche ich Verstand, wenn ich aber aus besonderen Fällen das allgemeine schlüße, alsdenn habe ich eine andere Methode nöthig. Der Verstand erkennet alles a priori, die gesunde Vernunft a posteriori. wir haben Erkenntniße, die Empyrisch sind, da wir von unten herauf steigen, und in rationalen steigen wir von oben herunter. Die Logic, die ein Organon der rationalen Gelahrtsamkeit ist, geht nicht auf Historische, sonderen rationalische Erkenntniße. Die Logic, die ein Organon ist, kan Reguln vorschreiben , auf eine schon vorhandene Gelahrtsamkeit, und denn heißt sie Logica Critica oder aber Reguln, wodurch man zur Gelahrtsamkeit gelangen kan, und denn heißt sie Logica Dogmatica alle Logiken sind nicht Dogmatisch, sonderen Critisch. zur Philosophie gehöret mehr Genie, als Nachahmung.",
      "pages": [
       {
@@ -1310,7 +1313,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s01-037",
      "kind": "text",
-     "aa": 22,
+     "aa": 21,
      "text": "Es giebt gewise Mittelarten von Vollkommenheiten, die Schönheit eines Frauenzimmers z.E. ist gleichsahm ein Verdienst, die Häßlichkeit mißfällt, das leidliche Ausschauen aber ist gleichsam das Mittelding, das man gleichsam von einem Menschen forderet. Schönheit, und Häßlichkeit zeichnet die Menschen besonders aus. so ist es auch mit der größe der Menschen. unsere Augen machen sich eine gewisse Ideam vom Mittelmaaß, und was besonders ist, so kommen die Menschen mehrentheils in derselben übereins. So z.E. redet man von dem Vermögen eines Menschen. das Mittelmaaß zwischen Reichthum, und Armuth, nennen wir das Wohlhabende wir machen also in allen unseren Begriffen immer ein Mittelmaaß zum Maaß-Staabe. So ist auch der gesunde Verstand das Mittelmaaß unter denen Fähigkeiten der Menschen. Die gesunde Vernunft soll nicht einen Schritt weiter gehen, als die Erfahrung ihn führet. Der gesunde Verstand erkennet, und urtheilet nicht in Abstracto, sonderen in Concreto, er ziehet seine Urtheile aus denen Erfahrungen. jedoch kan er auch vieles, was die Erfahrung uns lehret, auch allgemein a priori und in abstracto erkennen. Der gesunde Verstand ist also das Vermögen, richtig in concreto zu urtheilen. oft können sehr Vernünftige Leuthe gar nicht in abstracto urtheilen, da sie doch in Concreto eben so oft den cken, so ist es in Moralischen Fällen, z.E. durch ein beyspiel in einem Vorfalle erkennet man Dinge in concreto. Der Verstand, der in Abstracto urtheilen kan, heißt der feinere Wißenschaftliche Verstand. Das Natürliche Vermögen zum Urtheilen ist der Verstand, das Vermögen zu schlüßen ist die Vernunft. durch die Erfahrung wird man klug, aber nicht gelahrt. die Klugheit bestehet nicht in der Wißenschaft, man kann klug seyn, und werden, ohne alle gelahrtsamkeit. Der gesunde Verstand, und Vernunft zeigen in der Praxi besonders ihren Nutzen. einen gewisen Mangel des gesunden Verstandes und der Anwendung in concreto kan keine Wißenschaft im geringsten nicht ersezen, oder compensiren, ob sie gleich sonst manches ersetzen kan. unsere allgemeinen Urtheile können uns allein nicht helfen. Bey allen Reguln muß ich wißen, ob sie sich auf den Fall anwenden Laßen",
      "pages": [
       {
@@ -1346,7 +1349,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s01-039",
      "kind": "text",
-     "aa": 23,
+     "aa": 22,
      "text": "Durch eine gar zu große Fülle der Gelahrtsamkeit werden oft leute desto abgeschmackter, und gantz untüchtig in Concreto zu urtheilen. zum gesunden Verstande der klein aber richtig ist, gehöret 1. Einfalt. er halt sich an dem boden der Erfahrung, und liebet nicht chimärische Ideale. eben diese Einfalt macht den Verstand desto richtiger, sicherer, und zuverläßiger, als die wißenschaft. Eine Ac cademie der Wißenschaften zu Paris hecket 1000 mahl mehrer Irrthümer aus, als ein Dorf voller Bauren. 2. seine Kenntniße sind anschaulich durch Beyspiele, und Exempel. er stellet uns die Objecta in Natura vor, da der feinere Verstand nur den Schatten der Dinge zeiget. Der gesunde Verstand ist der Controlleur der Gelahrtsamkeit. Der gemeine gesunde Verstand wächst ohne Unterweisung. so sind die gemeinen lebenden Sprachen unterschieden von den gelahrten Todten Sprachen.",
      "pages": [
       {
@@ -1454,7 +1457,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s01-050",
      "kind": "text",
-     "aa": 25,
+     "aa": 24,
      "text": "Die Logic heißt mit einem besonderen und ihr eigentlich zukommenden Nahmen die Vernunft-Wißenschaft, weil diese ihr Object ist. Die übrige vielen Scientias rationales solte man Wißenschaften der Vernunft nennen.",
      "pages": [
       {
@@ -1589,7 +1592,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s02-001",
      "kind": "text",
-     "aa": 27,
+     "aa": 26,
      "text": "Es giebt viele Reguln der Bewegung, und des Verstandes, ein jedes Schiff, ein jeder Fisch richtet sich nach denen Reguln der Bewegung. wir selbst sind diesen Gesezen unterworfen. wir beobachten sie im gehen und in anderen Bewegungen. Die natur hat Menschen und Thieren diese Geseze eingepflanzet. wir thuen aber bey denselben nichts mehr, als daß wir sie gleich unwißend den Thieren erfüllen.",
      "pages": [
       {
@@ -1899,7 +1902,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s02-022",
      "kind": "text",
-     "aa": 30,
+     "aa": 29,
      "text": "Hierin wird von der Weltweisheit geredet. Das Object derselben sind die allgemeine Qualitäten und Beschaffenheiten der Dinge. es ist aber wohl zu mercken, daß die Philosophie nicht darauf siehet, quotiens aliquid positum sit? sonderen nur quod positum sit? sie betrachtet nur die Qualitäten, sie erwegt nur, was gesezet ist. Die Mathese hingegen untersucht, wie vielmahl die Sache gesezet sey, und untersucht die Quantitates der Dinge, wie groß sie seyn. Die Philosophie betrachtet ferners nicht die gantze Qualitäten, nicht die ganze Beschaffenheit der Dinge, und alle, sonderen nur diejenige, welche bey vielen Dingen angetroffen werden, und deswegen allgemein heißen.",
      "pages": [
       {
@@ -2009,7 +2012,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s02-029",
      "kind": "text",
-     "aa": 31,
+     "aa": 30,
      "text": "3. durch den Glauben an eines anderen Zeugniß. auf diese leztere Art wißen wir, daß Paris, London etc. in der Welt [43a] sind, ob wir gleich keine von diesen gesehen haben. wir zweifelen auch gar nicht daran. da wir uns auf das Zeugniß anderer verlaßen, die da gewesen sind. in der Philosophie findet kein Glaube statt, hier muß sich niemand auf anderer Zeugniß verlaßen, wenn uns auch jemand die Unsterblichkeit der Seele zuschwören wolte, so würden wir ihm doch ohne Beweise nicht glauben, und zu trauen, weil in der Philosophie kein Glaube statt findet. wie komt also dem der Name eines Philosophi zu, der ein blinder Nachfolger des anderen ist? Pythagoras Schüler nahmen nur 5 Jahre hindurch alles an, was ihnen ihr Lehrer sagte, und diese vermeinte Philosophi thuen es ihr ganzes Leben hindurch, und sagen immerαὐτος ἔφα.",
      "pages": [
       {
@@ -2169,7 +2172,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s02-039",
      "kind": "text",
-     "aa": 32,
+     "aa": 31,
      "text": "Was die Historie der Philosophie anbetrifft, so ist dabey folgendes zu mercken: die Chaldäer hatten einen Philosophen an dem Zoroaster, und unter den Persern ist gleichfa ls ein Zoroaster bekanndt, der aber von dem chaldäischen gantz unterschieden ist. Die Philosophia der Chaldäer war sehr dun ckel und ungewiß. (Die Theologie hat also zuerst die Weltweisheit erweiteret, ad pag. 44) sie steiget bis in das höchste Alterthum hinauf, und das, was man von derselben heraus bringen kann, rührt von sehr verdachtigen Nachrichten her. Man muß also sehr behutsam seyn, wenn man die Lehren der Alten, nicht mit denen in den späteren Zeiten ausge breiteten Erdichtungen vermischen will. die Religion dieser Völcker war eine G emenge des wider sinngsten Aberglaubens, eine grobe, und Abscheuliche Abgötterey. Die Priester betrogen das Dumme Volck durch allerhand Kunst-Griffe . Wahrsagungen, Bezauberungen, Traum-Deutungen , Kindische, und ausschweifende Ceremonien machten das gantze aus. Lag ja noch was gutes unter dieser groben Rinde, so ist es unmöglich es jezt herauszuklauben. Diese Weltweisheit hat also das Ansehen der Vollkommensten Thorheit, es muß aber auch eine gefährliche Thorheit gewesen seyn; denn von den ersten Zeiten der Römischen Monarchie an wurden die Künste der Chaldäer als verd ächtig, und Gottlos verbannet. Aber solcher Dun ckelheit der Chaldäischen Philosophie ohnerachtet, ist sie doch im ganzen Alterthum sehr berühmt gewesen. ihre Anhänger haben sich in mancherley Secten vertheilet, dergleichen waren: Hipparener, Babylonier, Orchenier, Marsyper Borsippener etc. Zoroaster wird vor den Urheber der Magie d.i. vor den Vater des gröbsten, unter allen Betrügereyen , und des schändlichsten Aberglaubens ausgegeben. man sagt: er sey durch Feuer vom Himmel getödtet worden. Die Priester soll Belus in der Astronomia, und Physica unterrichtet haben. Berosus, Marmaridius , Zabrat es, und Teucrus sind uns bloß allein nur ihrem Namen nach bekanndt.",
      "pages": [
       {
@@ -2223,7 +2226,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s02-041",
      "kind": "text",
-     "aa": 33,
+     "aa": 32,
      "text": "Der Urheber der Persischen Philosophiae war Zerdusch oder Zoroaster. er lebte zur Zeit der Babylonischen Gefangenschaft; er war das Haupt der Religion. seine Lehre brachte er in einem wercke, Zendavesta genannt, zusammen. sein Orakel ist ein von den neuen Platonicern unterschobenes Buch. Die Priester der Perser hießen Magi, und ihr Oberhaupt Archimagus. Die Lehren ihrer Philosophiae waren folgende. Der Oberste Gott ist das intellectualische Feuer: aus diesem sind, um die Welt hervorzubringen, zwey einanderw idrige Grund-Weesen oder Principia ausgegangen. Das vornehmste weesen, von dem alle anderen ausgehen, von dem auch das Gesez der Emanationen abhängt, heißet Mithra. Die 2 Grund-weesen sind Oromasdes, ein sehr reines thätiges, und g eistiges Licht, und Arimanius, die Leidende, und Materialische Finsterniß, die aus der Einschränkung des Lichtes gebohren, und mit ih m als eine nothwendige Folge verbunden ist. aus dieser 2 Grundweesen Vermischung sind alle Dinge unter dem Monde ausgegangen, und so muß man den Ursprung des Bösen auf der Erde erklären. es wird aber eine Zeit kommen, da die Finsterniß vom Lichte überwunden und vernichtet werden wird. Die Seele kam ihrer Meinung nach von denen Götteren her, und war, wie sie, unsterblich. Ihre Sittenlehren empfahlen die Keuschheit, Rechtschaffenheit, Billigkeit, Entfliehung der Wollüste. Dieses drückten sie so aus: Ihr müßt dem Lichte folgen, und euch vor der Pest der Finsterniß oder der Zeugung der Materie hüten.",
      "pages": [
       {
@@ -2499,7 +2502,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s02-059",
      "kind": "text",
-     "aa": 36,
+     "aa": 35,
      "text": "Democritus verdienet der erste Philosoph zu heißen. er war der Lehr Meister des großen, und berühmten Epicuri, welcher das unter den alten ist, was Car tesius unter den neueren vorstellet, und die vorige Methode zu philosoph iren verbesserete. in dem Lucretio findet man Sätze von der Epicureischen Philosophie. Doch da Lucretius, wie bekanndt, zuweilen unsinnig gewesen ist, so kan er wohl freylich die Sätze verunstaltet haben.",
      "pages": [
       {
@@ -2941,7 +2944,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s02-091",
      "kind": "text",
-     "aa": 39,
+     "aa": 38,
      "text": "In diesem Paragrapho redet der Autor von dem Nutzen der Vernunft-Lehre. sie beforderet 1 mo die Erlernung der Wißenschaften überhaupt. Dieses aber ist nur von der Logic im objectiven Verstand zu verstehen, von derjenigen nemlich, die wür cklich so beschaffen ist, als sie billig seyn solte. Eine Logica aber , die so dun ckel und übermäßig verfeineret ist, als des Crusii seine, kann diesen Nutzen nicht haben.",
      "pages": [
       {
@@ -3023,7 +3026,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-002",
      "kind": "text",
-     "aa": 40,
+     "aa": 39,
      "text": "Der Autor hat in diesem Paragrapho eine Definition von der Vorstellung geben wollen, weil er es aber nicht hat thuen können, so hat er sich mit einem rednerischen Schwunge ausgeholfen, wie es wohl gemeiniglich zu geschehen pflegt, wenn man nichts gewisses sagen kann. er sagt zu dem Ende, daß sich eine Vorstellung wie ein Bild verhalte, welches die mahlerische Geschicklichkeit der Seele in ihrem innwendigen zeichnet. was die Vorstellung sey, kan eigentlich gar nicht erkläret werden. es ist einer von den einfachen Begriffen, die wir nothwendig haben müßen. ein jeder Mensch weiß unmittelbahr, was Vorstellung ist. Erkenntniße und Vorstellungen sind einerley. Begriffe aber unterscheiden sich in etwas von ihnen, wie wir in der Folge sehen werden. Erkenntniß, und Vorstellung werden in der Logic als einerley genommen. jede Vorstellung ist etwas in uns, das aber sich beziehet auf etwas anderes, welches das Object ist. gewiße Dinge stellen etwas vor, wir aber stellen uns Dinge vor. Die Logic lehret uns gar nicht, wie wir uns etwas durch Bewußtseyn vorstellen sollen, sonderen sie sezt vielmehr das Bewußtseyn von etwas als eine Sache der Psychologie schon voraus.",
      "pages": [
       {
@@ -3105,7 +3108,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-006",
      "kind": "text",
-     "aa": 41,
+     "aa": 40,
      "text": "Doch sind wir uns der mehresten, der mächtigsten und kräftigsten Vorstellungen nicht bewußt. wer sollte sich das vorstellen? nur denen vorstellungen, deren wir uns bewußt sind, können wir Reguln vorschreiben. Ausführlicher kann hier nicht von dem Bewust seyn geredet werden. es gehoret davon die Lehre eigentlich in die Metaphysicam. und wird um einen richtigen Begriff davon zu haben, vieles aus der Metaphysica zum Grunde geleget.",
      "pages": [
       {
@@ -3179,7 +3182,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-010",
      "kind": "text",
-     "aa": 42,
+     "aa": 41,
      "text": "Der Deutlichkeit wird die Undeutlichkeit, der Ordnung aber die Verwirrung entgegengesetzt. es kann etwas verworren seyn, ungeachtet ich mir der Theil-Vorstellungen bewust bin, und es wohl Deutlichkeit hat. eine deutliche Vorstellung ist noch nicht immer Ordentlich. je mehr wir unsere Vorstellungen zu einfachen bringen, desto mehr heben wir die Verwirrung auf.",
      "pages": [
       {
@@ -3291,7 +3294,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-017",
      "kind": "text",
-     "aa": 43,
+     "aa": 42,
      "text": "Ein Grund ist das woraus etwas erkanndt werden kann und eine Folge ist, was aus dem Grund erkanndt werden kann. mit dieser Definition können wir uns hier behelfen. in der Metaphysica aber werden wir damit nicht zufrieden seyn. Ein Grund, woraus in der Folge alles verstanden werden kann, dem also nichts fehlet, ist ein zureichender, und ein solcher, wo nur etwas erkanndt wird, ist ein unzureichender Grund. Z.E. wenn wir sagen: daß der Mond Einwohner habe, weil in demselben Berge und Thäler befindlich sind, so ist dieses ein unzureichender Grund. man sieht daraus nur, daß es möglich, und wahrscheinlich ist, daß im Monde Einwohner sind. wenn aber z.E. ein Kaufmann 100000 Rthl. in Vermögen hat, und man sagt: 50000 Rthl. hat er sich durch die Handlung erworben, und 5000 0 Rthl. hat er geerbet, so ist dieses ein zureichender Grund. Die Beziehung des Grundes, und der Folgen ist der zusammenhang z.E. der Baum hängt mit seinen Früchten zusammen, der Baum ist der Grund, und die Früchte sind die Folge.",
      "pages": [
       {
@@ -3668,7 +3671,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-041",
      "kind": "text",
-     "aa": 47,
+     "aa": 46,
      "text": "Genie, und Geschmack ist gar sehr von einander zu unterscheiden. Das Genie arbeitet so zu sagen im Groben, jedoch bey vortreflichen Sachen. Es wäre zu wünschen, daß die Schul-unterweisungen so geschehen",
      "pages": [
       {
@@ -3819,7 +3822,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-050",
      "kind": "text",
-     "aa": 49,
+     "aa": 48,
      "text": "Wir haben schon zu Erst von der Aesthetischen Vollkommenheit einer Erkenntniß geredet, und gesagt, daß sie in der Wirkung auf unser Gefühl bestehet. Hieraus können wir leichtlich abnehmen, was eine Aesthetische Erkenntniß sey, nemlich eine solche, die auf unser Gefühl (durch Lust, oder Unlust) wircket. Eine Erkenntniß, die nicht vernünftig ist, ist die Historische. Z.E. wenn jemand große Kenntniß der Natur-Geschichte hat, und er sie nicht im Zusammenhange mit ihren Gründen erkennet, so hat er keine vernünftige, sondern nur eine Historische Erkenntniß. sonst bedeutet eine Historische Erkenntniß eine solche, die nur auf einzelne Dinge gehet, und der Dogmatischen entgegen gesezet ist. in diesem Verstande aber wird sie hier nicht genommen. Der Autor halt eine jede vollkommene Historische Erkenntniß vor eine schöne. es kann aber eine Erkenntniß Historisch seyn, ohne daß sie schön ist. wir können aus dem Homero alles Mythologische auch alle Reisen des Ulysses, etc. und mehr wißen, so daß wir eine recht vollkommene Historische Erkenntniß haben, und dennoch wird sie nicht schön seyn, wenn sie keine wirckung auf unser Gefühl hat, wenn wir alles kalt ansehen, und nichts dabey empfinden. eine solche Erkenntniß, wie wir schon oben gesagt haben, ist nur schön, und Aesthetisch, welche auf unser Gefühl von Lust oder Unlust einen Einfluß hat. Das Schöne wird bey einer Erkenntniß verminderet, wenn das vernünftige und Deutliche bey ihr beförderet wird. so wie die Schonheit des Frauenzimmers schwindet, wenn man sie durch ein Microscopium betrachtet. Die besten Ausdrücke, die uns am meisten rühren, verliehren ihre Kraft, wenn man sie zergliederet, und durch den Verstand deutlicher erkennet. unser Verstand verwirft oft etwas, z.E. verschiedene arten von Kleider, was doch nach unserem Geschmack ist, und unser Gefühl rühret. Die Ungarischen Kleider sind dem Verstand viel gemäßer als die Frantzösischen, sie wären beßer, bequemer etc. item es ist dem Verstand gemäßer, daß die Thüre nicht in der Mitte des Hauses stehet, und dadurch kleine Stuben machet: aber unser Gefühl erforderet es nothwendig, daß alles Symetrisch ist, und die Thüre z.E. nicht auf der Ecke des Hauses stehet. Das Gefühl wird durch verworrene Erkenntniß gerühret, weswegen es sehr schwer zu beobachten ist, so daß überhaupt eine Wißenschaft davon d.i. die Aesthetica sehr viele Schwierigkeiten hat. Baumgarten hat zuerst eine Wißenschaft daraus gemacht.",
      "pages": [
       {
@@ -4036,7 +4039,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-064",
      "kind": "text",
-     "aa": 51,
+     "aa": 50,
      "text": "Bey aller Vollkommenheit komt es imer darauf an, daß man eine Absicht, ein Muster, ein Vor- und Urbild vor Augen habe. in Ansehung dieser kann man eigentlich urtheilen, und sagen ob ein, und welches Ding vollkommener sey, als das andere. so ist es schon überhaupt mit der Natur des Menschen beschaffen. Ein jeder der viele gesehen hat, macht sich ein Urbild, ein Muster der Größe, der Schönheit eines Menschen, die in allen Stücken, und Arten der Menschlichen Gestalt das Mittel hält. Z.E. zwischen vielen fehlerhaften Copien eines Menschen macht, und hält das Original mehrentheils das Mittel",
      "pages": [
       {
@@ -4118,7 +4121,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-069",
      "kind": "text",
-     "aa": 52,
+     "aa": 51,
      "text": "In der Mathematic haben die Satze, und Theses Logische Vollkommenheiten, die Begriffe sind dabey deutlich. wenn mir der Poet die besten, rührendesten, und lebhaftesten Vorstellungen des Frühlings gemacht hat, wenn er von blökenden, graßenden Heerden, sanft säußelenden Zephiren, duftenden Auen etc. etc. geredet hat, so ist meine Erkenntniß Aesthetisch vollkommen. sie ist schön, aber nicht deutlich. ich habe dadurch keine deutliche Einsicht von dem Grunde und denen Ursachen des Frühlinges erlanget. Dieses aber kann und muß mir der Astronomus aus der Bahn der Sonne erklären. Die Frantzosen beobachten mehrentheils nur die Aesthetische Vollkommenheit. Wenn sie Gründe von etwas untersuchen, und von einer Sache deutliche Begriffe haben wollen, so laßen sie sich in das schöne, rührende, und gefallende ein, und dadurch thuen sie der Logischen Vollkommenheit großen Schaden. Es giebt Gelahrte, die sind eigentlich nichts als Vernunft-Künstler, und dergleichen nachahmende Philosophen sind gemeinhin sehr hartnäckig auf Beybehaltung ihrer einmahl gefaßten Meinungen. Andere Gelahrte aber hingegen sind wiederum gleichsahm s o zu sagen die Meister und Gesetzgeber der Vernunft.",
      "pages": [
       {
@@ -4240,7 +4243,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-077",
      "kind": "text",
-     "aa": 53,
+     "aa": 52,
      "text": "Ferner heißt die Wißenschaft eines anderen nachahmen, copiren. Es gibt Wißenschaften, die da gelernet werden können, die der Form nach historisch, der Materie aber nach rational sind. so sind manche Vernunft-Wißenschaften. so ists z.E. mit der Mathematic. So können Wißenschaften erworben werden, ja selbst in dem Grad der Vollkommenheit, der ihrer Natur gemäs ist, mitgetheilet werden. Es giebt Wißenschaften der Nachahmung der Erlernung, aber auch andere Wißenschaften des Genies, die nicht erlernet werden können.",
      "pages": [
       {
@@ -4442,7 +4445,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-090",
      "kind": "text",
-     "aa": 55,
+     "aa": 54,
      "text": "Das Materiale, als z.E. die Deutlichkeit, und Richtigkeit der Erkenntniß kan bey dem einen eben so beschaffen seyn, als bey dem anderen. Das Formale aber das rührende, ergötzende, und unserem Gefühl schmeichelende ist unterschieden. Die Deutlichkeit also, und Richtigkeit betrifft das Materiale, und gehört folglich auch zur logischen Vollkommenheit, als eine Eigenschaft derselben. Die Rührung aber, und Ergötzung, die sogleich auf einmahl gefält, betrifft das Formale, und gehöret folglich auch als eine Eigenschaft zur Aesthetischen Vollkommenheit.",
      "pages": [
       {
@@ -4505,7 +4508,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-093",
      "kind": "text",
-     "aa": 56,
+     "aa": 55,
      "text": "Im 26 ten § pho redet der Autor von der größe der Erkenntniß als gleichfals einer Vollkommenheit. Bey jedweder Größe ist auch allemahl eine Menge aber bey jeder Menge ist noch keine Größe. ich kann bey einer jeden Größe das Extensive, und intensive betrachten. im ersten Fall, wenn ich das Extensive einer Größe betrachte, sehe ich auf die Menge der Einheiten auf die Zahl derselben, wie viel derer sind. Im anderen Fall aber, wenn ich nemlich die intensive größe betrachte, sehe ich besonders auf die Größe einer jeden Einheit. und so ist es auch bey der Erkenntniß. betrachte ich nemlich nur die Menge der Objecten, die ich erkenne, so sehe ich bloß auf die Extensive Größe der Erkenntniß. wenn ich aber ein einziges Object gantz, und recht vollkommen erkenne, so ist die Erkenntniß intensive gewiß. bey der lezteren komt es eigentlich auf den Grad an, wie ich jede Einheit erkenne.",
      "pages": [
       {
@@ -4556,7 +4559,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-095",
      "kind": "text",
-     "aa": 57,
+     "aa": 56,
      "text": "Die Deutlichkeit ferner ist auch eine Vollkommenheit der Erkenntniß, und zwar hat sie das besondere an sich, daß sie sowohl zur logischen, als auch zur Aesthetischen Vollkommenheit als eine nothwendige Eigenschaft gehöret. Eine Extensive Deutlichkeit, die man bey dem schönen Verstand antrifft, ist eine Aesthetisch reine, intensive, Deutlichkeit aber, die man beym tiefen Verstande findet, diese gehöret zur Logischen Vollkommenheit. Der Dichter beschreibet mir den Frühling extensive deutlich. Er häuft viele Merckmahle auf einander. Der Philosoph aber beschreibet mir denselben intensive deutlich, er sieht nemlich nicht auf die Menge der Merckmahle, sonderen er suchet vielmehr nur einige wenige, ja wo nicht anders, auch nur ein einziges Merckmahl recht klar und deutlich vorzustellen.",
      "pages": [
       {
@@ -4809,7 +4812,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-112",
      "kind": "text",
-     "aa": 59,
+     "aa": 58,
      "text": "Denn bey einer Aesthetischen Vollkommenheit ist die Erkenntniß nicht deutlich, sonderen verworren. jedoch kan freylich die Wahrheit wegen des verworrenen, und gehäuften in der Erkenntniß nicht eben in einem hohen Grade bey der Aesthetischen Vollkommenheit angetroffen werden. Denn es beschaftiget ja dieselbe nicht eigentlich meinen Willen, sonderen vielmehr nur meinen Geschmack, und eben also ist es auch mit der Gewißheit. nicht eine jede sinnliche Gewißheit ist schon Aesthetisch vollkommen, sonderen eigentlich nur diejenige, welche unser Gefühl rühret, und demselben schmeichelet. Man kann z.E. die größte Kenntniß von der Geographie etc. haben, welche, obwohl sie vollkommen, dennoch nicht aesthetisch vollkommen ist, und zwar weil sie nicht unser Gefühl rühret.",
      "pages": [
       {
@@ -4855,7 +4858,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-114",
      "kind": "text",
-     "aa": 60,
+     "aa": 59,
      "text": "Viele Theologische Sätze verbinden doch nicht unsere Willkühr gleich. wir konnen also vieles von der logischen, und aesthetischen Vollkommenheit weglaßen, ohne daß der Mensch davon einen Schaden hätte. So wie ein weiser Lehrer vieles Schönes, was er weiß, verbirgt, sich deßen entäußeret, wenn er weiß, daß der Zuhörer ihre Gemüther also beschaffen sind, daß sie an die Speculationen gewöhnt, und dadurch vom practischen abgewendet werden möchten, und eben also muß man wiederum in gewißen Fällen oft vom practischen abstrahiren bey einer, oder der anderen Sache. Viele Sachen können wahr, und doch dem Menschen schädlich seyn. Nicht alle Wahrheit ist nützlich. Indeßen ist es doch auch gewiß, daß alle Schadlichkeit, die vielleicht eine Wahrheit jemahls haben kann, jederzeit nur zufällig ist. So giebt es gewiß Empfehlungen gewißer Erkenntniße, und Urtheile, die endlich zu Bestechungen ausschlagen können, und wieder Miß-Empfehlungen, Verachtungen, Tadel anderer Erkenntnißen, oder Urtheile, ohne doch zu untersuchen, wie denn diese Erkenntniße beschaffen seyn. Man nehme also um diese beiderseitigen Fehler zu vermeiden, bey jedweder Untersuchung einer Erkenntniß dieselbe gantz allein abgesondert von allen frembden Qu aestionen des Nutzens, oder des Schadens, und besonders wenn uns dieser Nutzen, oder Schaden selbst interessiret, denn sonst spricht gleich die Partheylichkeit das Urtheil, und betäubet alle kalte Überlegungen des Verstandes.",
      "pages": [
       {
@@ -5027,7 +5030,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-124",
      "kind": "text",
-     "aa": 62,
+     "aa": 61,
      "text": "nicht aber muß man sie, wie es doch gemeinhin in der Schule geschieht, ehe sie oft noch dencken können, zu einer Oratorie zwingen, die ihnen doch nachhero gar nichts nutzet, als daß sie dieselbe vergeßen; denn was man ungern, oder gar noch durch Zwangs-Mittel hat erlernen müßen, das vergißt man gar bald, und von selbst. Trockene Erkenntniße, die doch so sehr beliebt werden, als die Namen der Örter, Kayser, die Jahres-Zahlen etc. herzusagen, verderben die Jugend aufs ärgste. Das Kind lernt dieselbe mit Verdruß, und behält sie nicht sonderen sucht nur aus Furcht vor der Strafe seine Lection fertig herzusagen etc. Daß das, was es einmahl gelernet hat, immer in seinem Gedächtniß bleibe, das ist gar nicht seine Absicht. Wenn man ihm auch sagt, es könne sonst nicht glücklich seyn, und werden, so achtet es das doch gar nicht, es ist noch völlig uneigennützig, und zufrieden nur auf sein gegenwärtiges Vergnügen. verabscheuet also alles, was ihm dasselbe verminderen will. Es wird daher natürlicher Weise nur das behalten, und zu behalten suchen, was ihm gefällt, und sein Gefühl rühret. wird nun alles auf solche Art vorgetragen, so würde es auch alles gerne, und mit Vergnügen behalten können.",
      "pages": [
       {
@@ -5195,7 +5198,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-134",
      "kind": "text",
-     "aa": 64,
+     "aa": 63,
      "text": "Das Gegentheil von einer jedweden Vollkommenheit ist allemahl zwiefach, nemlich entweder das Contradictorische Gegentheil, wenn die Vollkommenheit nur mangelt, oder zweitens das reale Gegentheil, welches die Vollkommenheit gantz aufhebt, welche etwa aus einem anderen Grunde da seyn möchte. Ein Beyspiel hievon vom Ersten wäre z.E. dergleichen Medicamenta, die gar nichts helfen, aber auch nichts schaden, dergleichen oft verschrieben werden können, wird füglich mit dem Contradictorischen Gegentheil der Heilung verglichen, diejenigen Arzneyen aber, die nicht allein nichts nützen, sonderen auch noch gar schaden, haben das reale Gegentheil der Heilung. Und eben also verhält es sich auch mit denen Erkenntnißen.",
      "pages": [
       {
@@ -5277,7 +5280,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-138",
      "kind": "text",
-     "aa": 65,
+     "aa": 64,
      "text": "Ein Mathematicus, der sonst viele Erkenntniß besizet, wird dennoch in der Praxi mit seiner Ingenieur-Wißenschaft nicht so weit kommen, als ein anderer, der nicht die Theorie studiret, sich aber eine blos Historische Erkenntniß von der Praxi selbst erworben hat.",
      "pages": [
       {
@@ -5367,7 +5370,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s03-143",
      "kind": "text",
-     "aa": 66,
+     "aa": 65,
      "text": "Wenn die gelahrte Erkenntniß zugleich schön ist, so ist sie die nützlichste und brauchbahreste, besonders in der Praxi. Man weiß, die Erkenntniß der Scholasticer, dieser trockener, und an eine sehr gezwungene Methode sich bindenden Philosophen, wie sie die Moralischen Eigenschaften, und Fähigkeiten der Menschen gleichsam vernichtet, und bis zum Aberglauben erniedriget haben. Ein unersetzlicher Verlust! Dieses alles aber könnte freylich nicht anders seyn, und kam alles blos daher, weil ihre Erkenntniße, und folglich auch ihre Vorträge der Moral etc. blos gelahrt, und nicht auch zugleich schön, sonderen vielmehr gantz trocken waren. So schädlich ist also eine schöne, aber nicht gelahrte, und eine gelahrte, aber trockene Erkenntniß.",
      "pages": [
       {
@@ -5480,7 +5483,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s04-006",
      "kind": "text",
-     "aa": 67,
+     "aa": 66,
      "text": "Wo uns keine Data gegeben sind, um etwas auszumachen, ist die Unwißenheit nothwendig. z.E. auszumachen, wo die menschliche Seele nach dem Tode des Körpers seyn wird. item von der Erzeugungs-Kraft der Thiere, und Menschen.",
      "pages": [
       {
@@ -5602,7 +5605,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s04-014",
      "kind": "text",
-     "aa": 68,
+     "aa": 67,
      "text": "Viel mehr Dinge sind über dem gelahrten, als über dem Historischen Horizont. es ist also der erstere weit kleiner, als der leztere. vieles, was ich Historisch erkenne, kann ich nicht allemahl gelahrt, und schön erkennen. z.E. von dem commercio animae et corporis habe ich wohl eine Historische, aber nicht gelährte Erkenntniß. Wir müßen uns daher nicht auf alle Objecten einlaßen, sonderen jederzeit daran dencken, daß wir einen Horizont in der Erkenntniß haben. Also ist es auch nicht nöthig sich über den Zustand der Seele nach dem Tode, der über unseren Horizont ist, in Nachforschung einzulaßen.",
      "pages": [
       {
@@ -5867,7 +5870,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s04-032",
      "kind": "text",
-     "aa": 70,
+     "aa": 69,
      "text": "Unter dem Horizonte der gelahrten Erkenntniß sind Dinge alsdenn erniedriget, wenn sie unserer Gelahrten Erkenntniß unwürdig sind. Einige ungereimte Meinungen der alten Philosophen sind nicht einma hl unserer Historischen Erkenntniß würdig, daß wir uns dieselben bekanndt machen sollten.",
      "pages": [
       {
@@ -6740,7 +6743,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s05-011",
      "kind": "text",
-     "aa": 78,
+     "aa": 77,
      "text": "Es giebt aber noch eine andere Erkenntniß, durch welche man an wenigen Dingen vieles erkennet. Der vorige Fehler entstehet mehrentheils daraus, daß man immer in abstracto dencket, und daraus entstehen viele andere. Baumgarten sagt: die Schönheit ist eine Perfectio Ph aenomenon, die Vollkommenheit in der Erscheinung. allein kan man aus dieser Erklärung wohl schon wircklich die Schönheit an Objecten, an Erke nntnißen bemercken? Dadurch, daß eine Erken ntniß viel unter sich faßt, faßt sie desto weniger in sich. Der Mangel einer Erkenntniß ist nicht allemahl tadelhaft, wenn derselbe nur nicht einem vorgesezten Zwecke wiederspricht. So bald aber als dieses ist, so entstehet aus diesem Mangel ein Irrthum. Daraus folgt denn von selbst, daß diejenige, die da versprechen, eine Definition von einer Sache zu geben, sich selbst in die Gefahr verwickelen, daß man ihnen auch das geringste nur fehlende Mer ckmahl sogleich imputiret, welches man ihnen doch nicht würde gethan haben, wenn sie angezeiget hätten, wie sie eigentlich die Sache nicht gantz entwickelen, sonderen nur einer gewißen Betrachtung gemäs erklären wollten. Eben also ist es mit den Demonstrationes, und denen Beweisen.",
      "pages": [
       {
@@ -6883,7 +6886,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s05-018",
      "kind": "text",
-     "aa": 79,
+     "aa": 78,
      "text": "So hat z.E. Voltaire den Gedancken des Maupertuis lächerlich gemacht, wenn dieser der Meinung ist, die Egyptier hätten um sich einen unsterblichen Namen zu machen, lieber statt der Pyramiden Bücher in die Erde graben sollen, also daß er gantz lächerlich wird, da er doch vielleicht einer von den größten Männeren seiner Zeit war.",
      "pages": [
       {
@@ -7155,7 +7158,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s06-003",
      "kind": "text",
-     "aa": 81,
+     "aa": 80,
      "text": "So ist es schon immer gegangen, keiner der alten Römischen Juristen z.E. hat eigentlich sagen können, was recht, und nicht recht sey (quid sit jus) und nichts destoweniger ist der Begriff, den man davon hat, zum Gebrauch vollständig, und hinlänglich gut genung.",
      "pages": [
       {
@@ -7267,7 +7270,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s06-009",
      "kind": "text",
-     "aa": 82,
+     "aa": 81,
      "text": "Man bildet sich alsdenn ein von der Sache einen wircklichen Grund gegeben zu haben, und sagt doch nichts mehr, als das, was man wircklich gefraget hat, und wißen will, aber doch mit anderen Worten.",
      "pages": [
       {
@@ -7611,7 +7614,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s06-031",
      "kind": "text",
-     "aa": 84,
+     "aa": 83,
      "text": "So lange unsre Erkenntniße nur Speculationen sind, können wir es wohl noch wagen zu irren, so bald aber ein Irrthum nachtheilig wird, und dieses geschieht so bald, als er ins practische einschlägt, so ist es sehr gefährlich, denselben beyzubehalten",
      "pages": [
       {
@@ -8097,7 +8100,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s06-063",
      "kind": "text",
-     "aa": 87,
+     "aa": 86,
      "text": "Manchmahl ist der Verstand gleichsam in gewißer Art verlegen. Sein Horizont ist gantz benebelt, da aber dem Verstande die Begriffe immer fourniret, und zur Wahl vorgeleget werden müßen, so sehen wir wohl ein, die Sinnlichkeit muß dem Verstande allemahl assistiren. nur aber geschieht dieses oftmahl nicht zur gnüge. [217a]",
      "pages": [
       {
@@ -8563,7 +8566,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s06-094",
      "kind": "text",
-     "aa": 90,
+     "aa": 89,
      "text": "Mit einigem Grunde können wir zwar immer hieraus auf das Central-Feuer der Erde schlüßen, denn diese Feuerspeyende Berge, warme Bader etc. können mit vieler Mutmaßung ja selbst Wahrscheinlichkeit als Folgen eines dergleichen Central-Feuers angesehen werden, und aus den Folgen kann man sehr öfters richtig auf den Grund schlüßen.",
      "pages": [
       {
@@ -8695,7 +8698,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s06-102",
      "kind": "text",
-     "aa": 91,
+     "aa": 90,
      "text": "Allein die erste Möglichkeit der Ursachen, und Wirckungen erhellet allein durch die Sinne aus der Erfahrung. Daher giebt die Vernunft auch keinen Einwurf wieder die Unmöglichkeit eines Dinges, deßen Möglichkeit, oder wirckliche Existence wir durch die Erfahrung klar einsehen. Die Erfahrung nemlich belehret uns durch die wircklichkeit eines Dinges auch natürlich von der Möglichkeit desselbigen.",
      "pages": [
       {
@@ -10294,7 +10297,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s06-212",
      "kind": "text",
-     "aa": 102,
+     "aa": 101,
      "text": "Gesezt aber, er fühlte sich auch nicht unvermögendt, und dächte, er wüßte viel, wolte also über viel urtheilen, so würde daraus doch nichts mehr entspringen, er würde seine Bemühung zu urtheilen Vergeblich anwenden.",
      "pages": [
       {
@@ -10841,7 +10844,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s06-252",
      "kind": "text",
-     "aa": 106,
+     "aa": 105,
      "text": "Thöricht also ist es, wenn gelehrte sich selbst ungereimt nennen, und doch nachher mit einander disputiren wollen, ob das, was sie geschrieben, wahr oder falsch sey. Denn dadurch, daß sie sich einander ungereimt nennen, so sprechen sie ja einer dem anderen dadurch alle wahre Erkenntniß auf einmahl ab, und wenn ich dieses Supponire, daß 282] jemand gantz und gar keine Erkenntniß besitze, und zu besitzen im Stande sey, wie kann er denn meine Gründe von der Falschheit seiner Erkenntniß einsehen, oder gar sich einer wahren Erkenntniß rühmen, und dieselbe zu besitzen glauben? aber wie bin ich im Stande alsdenn zu disputiren?",
      "pages": [
       {
@@ -11144,7 +11147,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-020",
      "kind": "text",
-     "aa": 108,
+     "aa": 107,
      "text": "Im Anfang ist es mehrentheils also, daß die mehresten Dinge wo vor nicht gantz einerley, so doch nur gantz wenig unterschieden gehalten werden, mit der Zeit entdecken sich denn wohl allmählich die Unterschiede, und nachdem man immer mehr auf die Dinge attendiret, so werden auch der Merckmahlen immer mehr und mehr gefunden. Allein zu dieser Allmähligen Aufsuchung der Merckmahlen eines Dinges gehöret auch viel Feinheit des Verstandes eben also wie dazu, unter Dingen, wo die größesten Unterschiede zu seyn scheinen, oder auch wircklich da sind, dennoch eine gewiße Ähnlichkeit, eine Einerleiheit, und Übereinstimmung antreffen zu können.",
      "pages": [
       {
@@ -11484,7 +11487,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-042",
      "kind": "text",
-     "aa": 111,
+     "aa": 110,
      "text": "Je weniger Mittel wir an der Hand haben zu wahren Erkenntnißen zu gelangen, desto mehr verneinende Merckmahle werden wir nöthig haben, um in der Erkenntniß der Sache nicht zu irren. So ist z.E. in keiner Wißenschaft mehrere Menge von verneinenden Merckmahlen, als in der vernünftigen Gottes-Gelahrtheit, in der natürlichen Theologia. Denn wir haben in derselben gar keine Mittel zur Hand zu ausgebreiteten Erkenntnißen zu gelangen. So sind wir z.E. alle Augenblick geneigt in dem Begriff, Idea, und vorstellung vom göttlichen Wesen und überhaupt von Gott selbst zu irren, weil wir denselben sehr gerne mit den Dingen, die wir auf der Erde gewahr werden, sinnlich vergleichen mögen, diese aber gar kein Maaß-Stab von Gott seyn können. Gott kann ja von uns durch die Sinne nicht erkanndt werden, und folglich wird unsre gantze Kenntniß von ihm gar sehr eingeschränckt nur seyn können.",
      "pages": [
       {
@@ -11584,7 +11587,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-048",
      "kind": "text",
-     "aa": 112,
+     "aa": 111,
      "text": "Ein Merckmahl ist extensive groß, wenn ich viele Folgen von einem Dinge erkennen kann. intensive aber ist ein Merckmahl alsdenn groß, wenn ich nicht so viel viele, als große und wichtige Folgen aus einem Dinge Erkennen kann. jenes Merckmahl wird fruchtbahr, dieses aber richtig genanndt.",
      "pages": [
       {
@@ -11684,7 +11687,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-054",
      "kind": "text",
-     "aa": 113,
+     "aa": 112,
      "text": "Dinge, die in unsere Sinne fallen, können nur durch Merckmahle erkennet und unterschieden werden, die Verhaltniß Weise zu reichend sind, nicht aber vermittelst solcher Merckmahle, die absolute zu reichen.",
      "pages": [
       {
@@ -12241,7 +12244,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-093",
      "kind": "text",
-     "aa": 116,
+     "aa": 115,
      "text": "Alle Merckmahle eines Dinges gehören entweder zum Wesen eines Dinges, Essentialia oder nicht Essentialia: ad Essentiam pertinentia sunt vel Essentialia, vel attributa. Extraessentialia autem sunt vel notae, sive notae internae, vel relationes, sive Notae Externae, quarum Possibilitas tantum per essentiam determinatur.",
      "pages": [
       {
@@ -12659,7 +12662,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-121",
      "kind": "text",
-     "aa": 119,
+     "aa": 118,
      "text": "Responsio der Begrif von der klaren und dunckeln Erkenntniß ist bey dem Anfang der Logick so etwas, das ohne Beweis kann angenommen, und also voraus gesezet, und zum Grunde geleget werden muß. Hier aber kann man sie schon aus dem zum voraus abgehandeleten wiederum herleiten.",
      "pages": [
       {
@@ -12874,7 +12877,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-135",
      "kind": "text",
-     "aa": 121,
+     "aa": 120,
      "text": "Diese leztere Dunckelheit aber gründet sich eigentlich gar nicht in der Natur der Erkenntniß selbst, oder gar, wie einige davor halten, aller Menschen, und ihres Verstandes. Denn wenn dieses statt finden solte, so kann die Erkenntniß ja vor keinen einzigen Menschen klar erkanndt werden, sonderen es liegt blos entweder in der Unfähigkeit, und Unwißenheit, oder in der Nachläßigkeit dieses oder jenes Individuellen Subjects.",
      "pages": [
       {
@@ -13529,7 +13532,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-179",
      "kind": "text",
-     "aa": 126,
+     "aa": 125,
      "text": "Zu den ersteren gehören die reine Vernunft Begriffe, zu den lezteren aber hingegen die Erfahrungs-Begriffe. Jene können gantz klar seyn, dieselbe aber im Gegentheil sind niemahls gantz, sonderen immer nur zum Theil klar. Wenn ich z.E. vor mir ein Hauß sehe, und nicht darum herumgehen kann, so ist mir das Hauß nur zum Theil klar, nemlich in Absicht der Seite, die ich gesehen; das übrige ist gantz dunckel.",
      "pages": [
       {
@@ -13635,7 +13638,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-185",
      "kind": "text",
-     "aa": 127,
+     "aa": 126,
      "text": "Hiedurch erreichet mann die aesthetische Vollkommenheit in einer Erkenntniß. Der Philosoph aber, der sich eine sache durch eine tiefe Deutlichkeit vorstellet, hebt nur ein Merckmahl der Sache vor, und läßt die übrigen weg, suchet aber Merckmahlen, und die Gründe der Merckmahlen vor, die er sich von der Sache dencket. Seine Vernunft also ist hiebey vornehmlich beschäftiget.",
      "pages": [
       {
@@ -13948,7 +13951,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-206",
      "kind": "text",
-     "aa": 129,
+     "aa": 128,
      "text": "Claritas extensiva dienet zur Beschreibung eines Gegenstandes. Claritas intensiva aber untersuchet die gründe der Sache. sie suchet aus einem dem Dinge zukommenden Merckmahle daß dem Dinge auch ein anderes Merckmahl zukommen müße. sie suchet also die Ursache der Dinge aufzufinden, und fragt immer nach dem Warum? warum dieses, warum auch jenes, ja warum es nicht anders sey?",
      "pages": [
       {
@@ -14282,7 +14285,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-229",
      "kind": "text",
-     "aa": 131,
+     "aa": 130,
      "text": "Alle durch die Vernunft fingirte Begriffe sind zugleich deutlich, aber nur per Synthesin. Wenn ein Begrif per Analysin deutlich gemacht werden soll, so muß derselbe schon gegeben seyn, man beschäftiget sich also damit, das verworrene und dunckele in diesem gegebenen Begrif klar, und deutlich zu machen, es zu entwickeln, aus einander zu setzen, und so zu erleuchten. Hieher gehören z.E. alle, und jede Begriffe der Metaphysic.",
      "pages": [
       {
@@ -15281,7 +15284,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-299",
      "kind": "text",
-     "aa": 137,
+     "aa": 136,
      "text": "Endlich aber komt noch hinzu die Abstractio Notarum, oder diejenige Handelung, in welcher ich alle solche Merckmahle eines Dinges außer acht laße, welche mich in der Deutlichmachung der Vorstellung behinderen und stören könnten, oder mir wenigstens nichts nützen und also dazu überflüßig sind.",
      "pages": [
       {
@@ -15453,7 +15456,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-311",
      "kind": "text",
-     "aa": 138,
+     "aa": 137,
      "text": "Wenn die Merckmahle eines Dinges völlig deutlich erkanndt werden, so ist dieses die intensive Klarheit der Erkenntniß vom ersteren grade; wenn ich aber die Unmittelbahren Merckmahle eines Dinges deutlich erkenne, aber aus denselben andere mittelbahre Merckmahle ableite, so ist diese Deutlichkeit der Erkenntniß die intensive Klarheit des 2ten Grades, und nach den Ausdrücken des Wolffs, die Vollständigkeit der Erkenntniß z.E. wenn ich sage: das Laster ist eine Fertigkeit zum sündigen.",
      "pages": [
       {
@@ -15905,7 +15908,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s07-340",
      "kind": "text",
-     "aa": 141,
+     "aa": 140,
      "text": "Es gibt auch eine gewiße Art von Praecision, in Beweisen, nach welcher nicht ein einziger Satz zu viel, noch zu wenig ist, als zur überzeugung dienet. Dergleichen vortrefliche Praecision in den Beweisen findet man gleichfals in der Mathematica. Diese schöne Wißenschaft ist also, wie wir sehen, ein Muster in vielen Stücken, und man hat sich von jeher immer bemühet diese ihre Eigenschaften, und darunter auch besonders die Praecision auch in der Philosophie anzubringen.",
      "pages": [
       {
@@ -16450,7 +16453,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-022",
      "kind": "text",
-     "aa": 145,
+     "aa": 144,
      "text": "Sind die Erkenntniß-gründe die ich habe, nicht gleich mit dem gantzen zureichenden Grunde, so ist meine Erkenntniß ungewiß. Es ist wahr, es ist eine gewiße Ungleichartigkeit in den Gegenständen, und Begriffen, jedennoch können Begriffe gleichartig werden, wenn man das Mannigfaltige unter einen allgemeinen Begriff bringet.",
      "pages": [
       {
@@ -17031,7 +17034,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-062",
      "kind": "text",
-     "aa": 149,
+     "aa": 148,
      "text": "Eine practische gewisheit würde seyn der feste Glaube, und dieser wird sowohl seiner Überzeugung nach, als nach der Kraft, alle zweifel zu zerstreuen eben so starck seyn, als jemals der Glaube nach Logischen Gesetzen seyn kann. Dieser Glaube ist öfters stärcker als manche apodictische Gewisheit von einer Erkenntniß. Diese aber findet blos statt bey denen allgemeinen Kenntnißen",
      "pages": [
       {
@@ -17221,7 +17224,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-075",
      "kind": "text",
-     "aa": 150,
+     "aa": 149,
      "text": "Der Glaube nach practischen, besonders aber nach moralischen gesezen aber hat die vollige Kraft, das Subject, das ihn hat, mit einer völligen Zuversicht zu stärcken, und es dahin zu bringen, daß es trotz allen gefahren und Unglück selbst denn, wenn es die Entscheidung alles dessen was sein Wohl oder Weh angeht, betrift demselben dennoch immer anzuhängen.",
      "pages": [
       {
@@ -17351,7 +17354,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-083",
      "kind": "text",
-     "aa": 151,
+     "aa": 150,
      "text": "Die Freyheit der Mittheilung seiner Gedancken, Urtheile, Kenntniße aber ist gewiß das einzige sichereste Mittel seine Kenntniße recht zu prüfen, und zu verificiren. und wer diese Freyheit wegnimmt, der ist als der argeste Feind der Ausbreitung der menschlichen Erkenntniße, ja der Menschen selbst anzusehen. Denn er nimmt eben dadurch den Menschen das eine wahre Mittel, das sie noch besitzen, weg, den öfteren Betrug ihres eigenen Verstandes und deßen Fehltritte jemals aufzudecken, gewahr zu werden, und zu verbeßeren.",
      "pages": [
       {
@@ -18233,7 +18236,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-143",
      "kind": "text",
-     "aa": 158,
+     "aa": 157,
      "text": "Dieses freye Arbitrium aber in Ansehung des Beyfalls möchte Etwa unter die Glückseligkeiten der Alten Poeten gehören. es fallt gäntzlich hinweg, und bey der Gegenwart gewißer Grade der Gründe ist es allemahl sehr schwer, ja gantz und gar unmöglich seinen Beyfall zurück zu halten.",
      "pages": [
       {
@@ -18433,7 +18436,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-155",
      "kind": "text",
-     "aa": 160,
+     "aa": 159,
      "text": "Die unersättliche, und bey manchem so genanndten Philosophen, oder Dogmaticer herschende Begierde alle und jede Erkenntniß sogleich beym ersten Anblick ohne die geringste Untersuchung zu entscheiden, das ist entweder anzunehmen, oder zu verwerfen, hat so manchen verführet, und ist allemahl der sicherste weeg zu unendlichen Irrthümeren.",
      "pages": [
       {
@@ -18671,7 +18674,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-170",
      "kind": "text",
-     "aa": 162,
+     "aa": 161,
      "text": "Dieses Vorläuftige Urtheil nemlich ist kein grund etwas schon vor gewiß zu halten, noch gar nicht im geringsten. indeßen aber ist doch so viel gewiß, daß in dem gegenwärtigen Zustand mehr Gründe zur Annehmung der Sache, als zur Verwerfung derselben, und zur Behauptung des Gegentheils von dieser Sache vorhanden sind. Man lobet dahero leicht ein Buch, welches von einem Gelehrten, berühmten, und bekannten Mann herstammen soll, selbst noch ehe man es erst gelesen hat, blos darum, weil man sich vorstellet, ein gantz berühmter Mann müße Lauter seinen Ruhm würdige sachen schreiben, es werde also auch dieses Buch ebenfals gut geschrieben seyn.",
      "pages": [
       {
@@ -18801,7 +18804,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-178",
      "kind": "text",
-     "aa": 163,
+     "aa": 162,
      "text": "Der Nachahmungs-Geist ist unter allem, was dem Philosophischen Geist nur schaden und entgegen seyn kann, allemahl wircklich der ärgste. Die Nachahmung ist die Bildung seines Verstandes, seines willens, ja seiner willkühr nach dem Beyspiel, und Exempel anderer; wenn man nemlich selbst zu dencken nicht geschickt ist, so nimt man seine zuflucht zu ihnen, und abcopiret man sie gantz getreulich, wie der Mahler das Originale, außer daß diese abbildung ofters sehr unpaßend, ja poßierlich wird.",
      "pages": [
       {
@@ -19309,7 +19312,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-212",
      "kind": "text",
-     "aa": 167,
+     "aa": 166,
      "text": "Sich modisch (jedennoch nach seinem Stande) zu kleiden, ist löblich, und gut, denn es ist doch allemahl noch immer eher zu erdulden, und beßer ein Narr innerhalb, als einer außerhalb der Mode zu seyn. Allein nach der Mode gleichsam wiederum zu Urtheilen, zu schlüßen, zu dencken, zu schreiben, ist allemahl lappisch, und ein Beweis von gar keiner Überlegung. Ceremonien, Kleidungs-Arten, Complimenten, wohl, nicht aber der Verstand laßt sich unter eine Mode bringen.",
      "pages": [
       {
@@ -19649,7 +19652,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-233",
      "kind": "text",
-     "aa": 170,
+     "aa": 169,
      "text": "Ohne allen Zweifel sind sehr viele unnützliche Vorurtheile anzutreffen, ob aber deswegen unser Verfahren schon billig und rechtmäßig sey, blos deswegen, und aus der Absicht, weil einem anderen vielleicht ein Vorurtheil in einem gewißen Fall nützlich, zuträglich, oder auch nur nicht schädlich ist, deshalb in demselben das Vorurtheil nicht allein nicht zu dämpfen, sondern gar zu generiren, zu erzeugen, zu erhalten, zu vermehren. Dieses ist eine andere und gantz verschiedene Frage. Es ist dieses wircklich eine Art von Betrug, und ein Bruch der Treue, und Redlichkeit, in Absicht, daß Vorurtheile in diesem oder jenem Fall nützlich sind, sie in anderen zu generiren, und zu unterhalten.",
      "pages": [
       {
@@ -19749,7 +19752,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-239",
      "kind": "text",
-     "aa": 171,
+     "aa": 170,
      "text": "Es giebt würcklich recht commode Vorurtheile, wobey der Mensch sich recht wohl befindet, und es wäre daher eine große Thorheit, einem anderen dergleichen Vorurtheile zu entreißen, welche doch zu seinem Wohlbefinden so sehr viel beyzutragen im Stande seyn würden, und oftmahls würcklich sind.",
      "pages": [
       {
@@ -19969,7 +19972,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-253",
      "kind": "text",
-     "aa": 173,
+     "aa": 172,
      "text": "Bald herschet in der Schreib-Art ein großer Pomp aufgeblaßener worte. bald herschen ängstliche Contorsionen des Witzes, bald herschet wiederum eine gantz seichte Schreib-Art, welche man natürlich zu nennen beliebet, darum weil sie Leicht ist, wenig, oder keine Mühe kostet, und ohne Kunst hervorgebracht werden kann. Bald liebet man wiederum in allen Dingen eine solche Schreib-Art, als man eigentlich in allen Briefen zu gebrauchen gewohnet war. Bald liebet man wiederum vor allem eine schwere, dunckele, rätzelhafte, und aenigmatische Schreibart, welche man der leichten, vollständigen, und deutlichen vorziehet, welche einen gewisen Tiefsinn, und eine Tiefdenckende Gelahrtsamkeit der Autoren verrathen soll, weil man dabey lange zeit rathen muß, und gleichsam ein Rätzel aufzulosen hat, bis man dahin komt, das zu errathen, was der Autor dabey vermeynet hat, den eigentlichen Sinn, und Verstand des Autors entdecken zu können, und das zu finden, was der Autor dabey gedencket hat.",
      "pages": [
       {
@@ -20085,7 +20088,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-259",
      "kind": "text",
-     "aa": 174,
+     "aa": 173,
      "text": "Da hingegen Länder, Staaten, in welchen eine Monarchische Regierungs-Form eingeführet ist, und herschet, natürlicher Weise keine solche, oder doch nicht lange so viele Originalia hervorzubringen im Stande sind, denn hier richtet man sich gemeiniglich sehr nach denen Beyspielen, welche oftm als zur Norm im Dencken, im Handeln, und Urtheilen werden, und zwar sind gewöhnlicher maßen die Magnaten des Reichs, die Großen des Reichs, und am Hofe mehrentheils die Originalia, die Muster, nach welchen man sich zu bilden, und sie nachzuahmen, zu suchen pfleget.",
      "pages": [
       {
@@ -20279,7 +20282,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-270",
      "kind": "text",
-     "aa": 176,
+     "aa": 175,
      "text": "Das, was Gut, und in der That vortreflich ist, was richtige aber neue Wahrheiten hervorbringet, das findet gemeinhin allemal im Anfang sehr großen wiederspruch, und dieses währet so lange, biß man nach näherer Prüfung, und Untersuchung nach Erforschung und Entdeckung der rechten Eigenschaften, und des Unterscheides von anderen Erkenntnißen, auch die Schonheiten desselben, und das besonders Vorzügliche vor anderen Schriften darinn entdecket, und dieselben hoch zu schätzen anfängt.",
      "pages": [
       {
@@ -20461,7 +20464,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-281",
      "kind": "text",
-     "aa": 178,
+     "aa": 177,
      "text": "Eben also kommt es z.E. daher, daß die mehresten stoltzen Leute, die nicht gerne mehreren unterworfen seyn, und gehorchen wollen; oder ihren Mitbürgeren eine, oder die andere Gewalt beneiden, am liebsten in einem Staate die unumschrenckte Regierungs-Art eines Monarchen haben mögen, auch dieselbe zu beförderen helfen, und zwar um alsdenn einander gleich zu seyn, und sich vor keinem ihrer Mitbürgeren fürchten zu dürfen, und dieses ist in der That der wahre Ursprung aller Monarchien. Es ist aber dem Menschlichen Geschlechte wircklich nichts schädlicheres, als andere immer zum unerlanglichen Beyspiele vorzustellen, und sie sich gleichsam zum Muster der Nachahmung zu nehmen. Dadurch copiret man mehr die Fehler, als die guten Eigenschaften des vorgesezten Originals, weil doch alles in der Welt unvollkommen ist, und also auch diese Muster davon nicht völlig ausgeschloßen seyn können. Die Heilige Schrift selbst sagt: wir sollen uns nie jemand anders zum Muster erwählen, als Gott, dieses in allen Stücken allervollkommenste Weesen. sich aber nach anderen, und eben so, als wir, höchst unvollkommenen Menschen stets zu richten, und zu bilden, dieses bringt mehr schaden, als Nutzen zu wege.",
      "pages": [
       {
@@ -20547,7 +20550,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-285",
      "kind": "text",
-     "aa": 179,
+     "aa": 178,
      "text": "Dieser Neigung der menschlichen Vernunft, ihre Urtheile anderen mitzutheilen ist entgegen gesezet der Logische Egoismus, von welchem wir auch oben schon etwas geredet haben. da man nemlich glaubet, und sich völlig überredet, man brauche in einem Verstandes Urtheile gantz und gar nicht die Hilfe des Urtheils anderer. Es ist zwar freylich wahr, Frembder Urtheil in Sachen des Verstandes urtheilet nichts. allein es ist aber doch deswegen noch gar nicht überflüßig, noch nicht entbehrlich. Der Verstand des Menschen ist schon aus Instinct communicatio. wenn er also mittheilend ist, so muß er ja auch mit Recht theilnehmend seyn, und sich auch das angehen laßen, was andere von ihm urtheilen.",
      "pages": [
       {
@@ -20639,7 +20642,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-290",
      "kind": "text",
-     "aa": 180,
+     "aa": 179,
      "text": "Zum neuen aber Genie, Lebhaftigkeit, und Witz ohne Stätigkeit. wir sehen freylich die Individuen der Natur zerfallen, und vergehen, alle Wercke der Kunst vergehen. Rom selbst stürzt ein, Felsen Spalten etc. – Der Mensch vergeht, und stirbt in jedem Alter. bis zum Alter von 15 Jahren stirbt die Helfte der Menschen, im 16½ keiner, im 50 ten unter 100 Einer. Ferner hält man dafür, daß die Vollkommenheiten der Welt selbst in allen Dingen nach und nach abnehmen. Horaz sagt: »unsere Nachkommenschaft wird noch ärgere Bruth hervorbringen, als wir sind.«",
      "pages": [
       {
@@ -20757,7 +20760,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-297",
      "kind": "text",
-     "aa": 181,
+     "aa": 180,
      "text": "Unsere iezige Sprachen möchten wohl nie todte werden, denn nur die Heilige Schrift, und die Religion machen eine Sprache todt. so sind also die Theologen die rechten Aufbewahrer der Gelahrtsamkeit, und mit ihnen würden viele Sprachen gantz und gar aufhören.",
      "pages": [
       {
@@ -21131,7 +21134,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-319",
      "kind": "text",
-     "aa": 185,
+     "aa": 184,
      "text": "Gantze Nationen sind öfters vor das Alte, und andere wieder vor das neue sehr inkliniert. Der Spannier, und Portugesier liebet das Alte, der Franzos hingegen das Neue. Träge, Langsame, Schwermüthige, und nachdenckende Gemüther lieben sehr das alte. hingegen lebhafte, und muntere lieben das neue. Jene sind Feinde, diese aber Freunde von neuen Moden. Der Franzos ist modisch in Kleideren, in Systemen, in Medicamenten etc. Der Franzos ist der erste Urheber, und Stifter aller, und jeder Moden, auch der einzige, der es immer bleiben wird. er allein hat die dazu nothwendige Erforderliche Flatterigkeit, und Leichtigkeit. Die Frantzosen sind also dem VorUrtheil der Neuigkeit zu sehr ergeben, welches entspringet",
      "pages": [
       {
@@ -21220,7 +21223,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-323",
      "kind": "text",
-     "aa": 186,
+     "aa": 185,
      "text": "Mit Verdruß, und Wiederwillen ließt man allemal solche Bücher, wo der Ruhm, und die Ehre mit den guten Eigenschaften des Menschlichen Geschlechts untergraben wird. Der menschlichen durch kein böses Hertz verdorbenen Natur ist es schon eigen, bey einer jeden Schrift, bey jeder Handlung, immer das Beste anzunehmen, und zu vermuthen, und man profitiret auch wircklich allemahl eher dabey, als daß man Schaden davon hätte.",
      "pages": [
       {
@@ -21320,7 +21323,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-329",
      "kind": "text",
-     "aa": 187,
+     "aa": 186,
      "text": "Zwar kann der Mensch dieses unterscheiden lernen, was aus Triebfederen, und Was aus dem Verstande entspringe, das ist wircklich schon sehr viel, und er kann alsdenn freylich nicht mehr, und nicht so häufig, als bishero, getäuscht, und betrogen werden, obgleich freylich der Hang darzu noch jeden Augenblick da ist, aber gantz und völlig sich deßen zu entledigen, und davon los zu machen, dieses scheint unmöglich zu seyn, und würde niemals angehen. Dennoch aber ist aller, und jeder frommer Betrug so, wie im gemeinen Leben in der Moral, als auch hier in der Logic bey der Anwendung der Kräfte des Verstandes gantz unverzeihlich, d.i. die Absicht, und das Bemühen durch Hilfe der Vorurtheile etwas wahres hervorbringen zu wollen, diese, verfolgt die Philosophie allemal.",
      "pages": [
       {
@@ -21506,7 +21509,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-340",
      "kind": "text",
-     "aa": 189,
+     "aa": 188,
      "text": "Nichts ist schädlicher als in der Philosophie nachzuahmen. nichts ist vor den Verstand elender, und verderblicher, als z.E. etwa einen Wolffium, oder einen Crusium, oder andere vorzunehmen, sich die Definitiones derselben Strictißime, und nach denen Worten auswendig zu lernen, und einzuprägen, und sie als Sterne erster Größe, sich selbst aber als nichts zu schätzen, sonderen man muß selbst dencken, selbst urtheilen lernen, über Gegenstände selbst reflectiren, und um ein Philosoph werden zu können, und zu seyn, Philosophiren lernen. Die Weltweißheit aber läßt sich nicht im geringsten durch Bücher, sonderen blos durch eigenes nachdencken, und eigenes Meditiren erlernen.",
      "pages": [
       {
@@ -21600,7 +21603,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-345",
      "kind": "text",
-     "aa": 190,
+     "aa": 189,
      "text": "Ein Lehr Gebäude unterscheidet sich durch nichts anders als dadurch, daß darinn eine Einheit ist. Der Menschliche Verstand aber ist so beschaffen, daß er alles dasjenige billiget, worinnen eine Einheit angetroffen werden kann. und daraus entstehet denn freylich das Vorurtheil vor die Einheit.",
      "pages": [
       {
@@ -21736,7 +21739,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-353",
      "kind": "text",
-     "aa": 191,
+     "aa": 190,
      "text": "Z.E. wenn man eine, oder andere Vermuthung hegt, daß dieser oder jener Mensch ein Dieb sey, so schließt man öfters blos aus den Folgen, ob diese Vermuthung wohl wahr, oder nicht, sonderen falsch seyn konne. Findet man z.E. daß dieser oder jener mit uns in Verbindung stehet, zu erst gar nichts gehabt, und Besessen habe, nachhero aber plötzlich sehr viel Geld verschwendet, und daß das zu derselben Zeit geschiehet, da mir dieses oder jenes Geld weggekommen, und vermuthlich gestohlen ist, so glaubt man sicherlich, daß er der Diebe unseres Geldes seyn müße. obgleich diese Vermuthung sehr öfters falsch und unrichtig, ja so gar Beleidigend, und sündlich seyn kann. aus diesem vorläufigen Urtheil entstehet das Vorurtheil der Einheit, wenn man nemlich einen Grund von einer Sache findet, welche sehr viele Folgen, und Bestimmungen hat, so Leitet man alle übrige Folgen, und Bestimmungen daraus her. so gieng es um ein Beyspiel davon zu geben z.E. ganz im Anfang mit der Electricitaet. man erklärte nemlich damahls alles und jedes nur einiger maßen wunderbahre aus derselben, ja es gab so gar einige feine Geister, welche so weit giengen, daß sie so gar Behaupten wollten, die Electricitaet hätte einen Einfluß auf die Religion, indem sie nemlich z.E. sogar die Heilung des Blutflüßigen Weibes von Christo aus den Kräften der Electricitaet zu erklären sich bemühen wollten.",
      "pages": [
       {
@@ -22286,7 +22289,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-388",
      "kind": "text",
-     "aa": 196,
+     "aa": 195,
      "text": "Gründe der Vermuthung sind bey denenselben oftmals Ursachen der Nachforschung, und Ursachen der Entdeckungen gewesen. So ist die neue Welt etc. entdecket, und so kann noch viel mehr entdecket werden. Haben wir einige solcher unzureichender Gründe der Wahrheit vor uns, so haben wir entweder eine Scheinbahrkeit, (und dieses ist nur der geringste Grad), die Probabilitas, oder die Wahrscheinlichkeit, die Verisimilitudinem, als einen größeren Grad. Der zureichende Grund des Vorwahrhaltens, die Einheit, ist das jenige, wodurch eine Sache gesezet wird.",
      "pages": [
       {
@@ -22416,7 +22419,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-396",
      "kind": "text",
-     "aa": 197,
+     "aa": 196,
      "text": "Diese Erkenntniß von dem Mond war also sehr veränderlich, und eben deswegen nicht einmahl wahrscheinlich, sonderen nur scheinbahr, denn das übrige, was wahrscheinlich ist, kann gantz und gar nicht wandelbahr seyn, sonderen bleibet immer ein und dasselbe. sinte mahlen alle Wahrscheinlichkeit nicht Subjectiv, sonderen objectiv ist.",
      "pages": [
       {
@@ -22758,7 +22761,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-418",
      "kind": "text",
-     "aa": 200,
+     "aa": 199,
      "text": "Man kann leicht beweisen, daß der Historicus nicht wahre Geschichten eigentlich, sonderen nur Fabeln, und Fictiones erzehlet habe. Es giebt auch würcklich viele solche Leute, die sich damit Beschäftigen, die völlige Gewisheit der Historie zu schwächen, welches auch keine Kunst ist, sonderen Leichtlich angehet, weil dasjenige, was zur practischen Gewisheit nöthig, und zu reichend ist, nicht Sufficient ist vor die Speculation, und logische Gewisheit. Eine practische Gewisheit ist diejenige, die in Absicht auf gewiße Handlungen eben das zu wege bringet, als eine völlige Gewisheit. z.E. wenn etwas in meinem Hauße von Werth verschwindet, und es bleibet gerade zu derselben Zeit mein Diener weg, so ist meine practische Gewisheit da, daß dieser Fehlende Diener das mir Fehlende entwendet habe. obgleich noch gar keine Logische Gewisheit da ist, und der Knecht aus gantz anderen Ursachen und auf andere Weise weggegangen, weggekommen seyn kann.",
      "pages": [
       {
@@ -22895,7 +22898,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-426",
      "kind": "text",
-     "aa": 201,
+     "aa": 200,
      "text": "Die mehresten, und fast alle Autores kennen die moralische Gewisheit gantz und gar nicht, sonderen sie halten sie vor eine jedwede Wahrscheinlichkeit z.E. Es ist ungewiß, ob Einwohner im Monde seyn, dennoch aber ist es immer in etwas wahrscheinlich. Dieses nehmen einige vor ein moralisches Urtheil an, allein dieses findet nicht statt, denn ein solches Judicium hat gar keinen Einfluß auf ein verhalten. Es ist eine Logische wahrscheinlichkeit, und blose Speculation.",
      "pages": [
       {
@@ -23043,7 +23046,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-436",
      "kind": "text",
-     "aa": 202,
+     "aa": 201,
      "text": "Es giebt aber Scrupel Subjectiv, welche in demjenigen Liegen, welcher eine oder andere Erkenntniß hat, und diese muß man nicht achten. Die Objective Scrupel aber die in der Erkenntniß selbst Liegen, muß man klar zu machen suchen. wenn mir jemand Lauter scheinbahre Sätze vorträgt, so habe ich einen Scrupel, und gebe demselben noch nicht gleich meinen Beyfall. z.E. ich überlege den Satz: daß alle moralischen Urtheile in einem besonderen Gefühl, und Empfindung Liegen sollen, ich gebe ihm Beyfall, dennoch aber bleibt mir noch ein Scrupel übrig, ich kann den Satz nicht wiederlegen, und jedennoch kann ich der Erkenntniß nicht trauen.",
      "pages": [
       {
@@ -23143,7 +23146,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-442",
      "kind": "text",
-     "aa": 203,
+     "aa": 202,
      "text": "Die Entwickelung der Scrupel ist eine sehr schöne Wißenschaft. Es wird dadurch ein Scrupel gleichsam aus dem Finstern gezogen, und alsdenn muß er als ein Bedeutlicher Einwurf förmlich wiederleget werden, nachdem er recht ans Licht gestellet ist.",
      "pages": [
       {
@@ -23273,7 +23276,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-450",
      "kind": "text",
-     "aa": 204,
+     "aa": 203,
      "text": "Alle und jede Neue Wahrheiten finden im Anfang immer mehr sehr viel gegner, sehr viel Wiederstand, es muß da eine gewiße Zeit dazu nöthig, und erforderlich seyn, um sie auszumachen, nachdem man sie beßer untersuchet hat. So z.E. gieng es im Anfang mit den Schriften des Cartesii. sie fanden im Anfang sehr vielen wiederspruch, und es Verfloßen 30, und mehrere Jahre, ohne daß die Wahrheit derselben ausgemacht ware.",
      "pages": [
       {
@@ -23449,7 +23452,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-461",
      "kind": "text",
-     "aa": 206,
+     "aa": 205,
      "text": "Bey dem Dogmatischen Zweifel verwerfen wir alle Nachforschung, und nehmen etwas nicht an, gegen welches wir einen gegründeten Zweifel haben, oder zu haben glauben. Wir entscheiden also alsdenn kurtz, und sagen: In dieser Sache gehet es gar nicht an, irgendt eine Gewisheit zu erlangen. Der Dogmatische Zweifel also siehet sehr viele Erkenntnißen also an, als ob von denenselbigen gantz und gar nichts festgesezet, und ausgemacht werden könnte. Ein Dogmaticus folglich heißt derjenige Philosoph, welcher von allgemeinen Vernunft-Wahrheiten das Urtheil fället, daß man sie zur völligen Gewisheit und Zuverläßigkeit Bringen könne: sich aber in die Betrachtung solcher Vernunft-Wahrheiten, die noch einem, oder dem anderen Zweifel ausgesezet sind, oder seyn können, gantz, und gar nicht einläßt. Der Mathematicus z.E. ist also Beschaffen; alle seine Beweise sind auf einmahl entscheidend, er Tragt einen Satz positiv vor, beweiset ihn so gleich decisive, daß es ganz unmöglich ist, daß das Urtheil nicht statt finden kann.",
      "pages": [
       {
@@ -23541,7 +23544,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-466",
      "kind": "text",
-     "aa": 207,
+     "aa": 206,
      "text": "Bey Erfahrungs-Erkenntnißen aber kann gantz und gar keine apodictische gewisheit statt finden. Es ist keine pure Unmöglichkeit, daß alle diejenige, welche uns viel von der Praxi im dencken, handelen, Urtheilen, Schließen, vorreden, uns dennoch trügen, ohne dennoch deswegen böse gesinnet seyn zu dürfen. Alles das, was apodictisch gewiß ist, ist fähig einer Dogmatischen, alles übrige aber nur eigentlich einer Dialectischen Erkenntniß Art.",
      "pages": [
       {
@@ -23635,7 +23638,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-472",
      "kind": "text",
-     "aa": 208,
+     "aa": 207,
      "text": "Weder das Intellectuale, noch das Sensitive hat gewisheit. alles ist im menschlichen Verstand nichts als Verwirrung «. Und daraus entstand denn der förmliche Scepticismus, der sich von einem so berühmten, und überaus hochzuschätzenden Manne als Socrates ist, zu originiren scheinet. Wenn sich nemlich die Dogmaticer entweder unter einander Zanckten, oder auch mit aller Gravitaet, und Gewisheit einen, oder anderen Satz Behaupteten, so hörte er ihnen anfangs ganz demüthig zu, aber bald fieng er an, gleichsam als ein lehrbegieriger Zuhörer und Schüler der hitzigen und pathetischen Dogmaticer sie um Rath zu fragen, in dem sie mit einander Disputirten, und dadurch konnte er sie alsdenn mit ihren eigenen Reden so fangen, und wuste sie dergestalt zu verwirren, daß sie sich zu lezt gantz selbst wiedersprachen, und also oft gantzen Versamlungen Lächerlich werden musten. Dieses tath er so oft, und zu rechter Zeit, daß die Feinde der stoltzen Dogmaticer sich schon voraus freueten, wenn Socrates ihre Hörsaale Besuchte, und diese fürchteten sich vor ihm schon, wenn er zu fragen anfing, in dem sie ihm wohl antworten musten, da er sich als ein Wißbegieriger Schüler von ihnen anzustellen wuste. Hieraus entstand endlich ein verderblicher Hang seiner Nachfolger, an allen, und jeden Dogmatischen Erkenntnißen, und deren Gewisheit gänzlich zu zweifeln. Pyrrho aber kann als der eigentliche Stifter, und Verbreiter der Sceptischen Secte mit recht angesehen werden. Sein Non Liquet das er denen stolzen Behauptungen der Dogmaticer gleichgültig entgegen rief, und sie dadurch wenigstens oftmahls sehr stutzen machte, wie auch seine sorgfältige und unermüde te Bemühungen alle Sätze der Dogmaticer sorgfältig zu untersuchen, sind allenthalben Bekanndt.",
      "pages": [
       {
@@ -23877,7 +23880,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-487",
      "kind": "text",
-     "aa": 210,
+     "aa": 209,
      "text": "Der Sceptische Zweifel aber hingegen Bestehet wiederum darinn, daß man sich der Ungewisheit bey einer Erkenntniß Bewust ist, und dahero angetrieben wird, derselben immer mehr, und mehr nachzuforschen; damit man endlich dennoch durch Hilfe sorgfältiger Untersuchungen zur Gewisheit gelangen möge. Jener also der Dogmaticer verwirft die gewisheit gänzlich auf einmahl. Dieser, der Scepticer aber suchet dieselbe nach, und nach. Der Ursprung des Ausdruckes Scepticismus ist eigentlich folgenderσκέπτεσθαι. Dieses wort heißet im griechischen: Nachforschen, Scrutari, investigare, indagare. Der Scepticus Forschet also stets nach, er prüfet und untersuchet, er sezet in alles ein Mißtrauen, aber niemals ohne Grund. Er gleichet also hierinn einem Richter, der die gründe so wohl vor, als wieder die Sache erweget, und so wohl den Kläger, als auch den Beklagten anhöret, ehe, und Bevor er die Sache decidiret, und ein Urtheil fället. Er schiebet sein Endurtheil sehr Lang auf bis er es wagt, etwas völlig auszumachen. Dieses waren die alten, und reinen Eigenschaften des Scepticismi, und eines unverfälschten Scepticers.",
      "pages": [
       {
@@ -23987,7 +23990,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-493",
      "kind": "text",
-     "aa": 211,
+     "aa": 210,
      "text": "Alle Sceptische Methode ist ein wahres Untersuchen der Wahrheit durch Aufschub, indem man nichts sogleich nennet, oder verwirft, sonderen zu erst darüber disputiren Läßt. Wir sind zum Aufschub eigentlich unserer Natur nach gar nicht geneigt. zu unseren Zeiten nennet man Scepticer, theils solche Leute, welche nicht den Namen der Philosophen im geringsten verdienen (z.E. ein Voltaire) theils solche Leute, welche nicht wirckliche Academici, sonderen blos eine Sceptische Methode an sich haben, und gleichsam affectiren, z.E. ein Hume. unter denen neuen Scepticern aber kann man rechnen Bayle etc.",
      "pages": [
       {
@@ -24067,7 +24070,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-497",
      "kind": "text",
-     "aa": 212,
+     "aa": 211,
      "text": "Die menschliche Natur ist wircklich weit geneigter zu entscheiden, als immer zu prüfen und aus zu machen, als immer zu forschen. Denn wir sind damit gar nicht zu frieden, wenn wir etwas, und Besonderes in unserer Erkenntniß unvollendet Laßen müßen, sonderen wir wollen gerne alles ausmachen, damit wir dahin als zu einer völlig gewisen, und zuverläßigen Erkenntniß, in einem vorkommenden Nothfall recurriren können.",
      "pages": [
       {
@@ -24191,7 +24194,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-504",
      "kind": "text",
-     "aa": 213,
+     "aa": 212,
      "text": "Wenn dahero jemand geneigt war etwas sogleich zu decidiren, so zeigete er ihm die Gegen Gründe, und Schwierigkeiten, die ihn nöthigen würden sein Urtheil zu Suspendiren. Diese Neigung nichts ohne prüfung zu decidiren, rührte Bey ihm aus keinem Stoltz, sonderen aus einem hohen grade der bescheidenheit her, da er sich nicht gar zu viel zu trauete, sonderen in seine Erkenntniße wircklich eine Art von Mißtrauen sezte. und diese Bescheidenheit prägte er auch vorzüglich allen seinen Schüleren ein, doch aber Blieb dieselbe nicht Lang bey ihnen, denn sein unmittelbahrer Schüler Plato fieng schon an etwas dogmatischer zu werden, und von ihm entstand, und originirte also sich die Secte der Ac cademicer, die der Secte der Scepticer entgegen gesezt war.",
      "pages": [
       {
@@ -24333,7 +24336,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-513",
      "kind": "text",
-     "aa": 214,
+     "aa": 213,
      "text": "Daß Pyrrho viele Dogmata geleugnet, und in sie ein gerechtes, und wohl überlegtes Mistrauen gesezet, Ferner daß er ins Besondere viele rationale Urtheile verworfen, ist unstrittig, und nicht zu leugnen, daß er aber alle, und jede Dogmata geleugnet, das ist grundfalsch. Derjenige, der gar keine Dogmata annimt, kann gar keine Sittlichkeit lehren. Es giebt aller dings gewiße, so zu sagen, ewige Grund Sätze, unserer Vernunft, welche gar nicht Bestritten werden können. Man gab aber dem Pyrrho auch noch übe r dem Schuld, daß er an der Wahrheit aller Empirischen Urtheile gezweifelet, und denen selben nicht getrauet habe. Dieses aber ist nichts als eine Erdichtung, die gar keinen Grund hat. Pyrrho war ein gar weiser Mann, er würde aber gewis ein Thor gewesen seyn, wenn er alle Empirische Urtheile hätte verwerfen wollen, welche sie auch seyn möchten; ein Pyrrhonist that also im Anfang nichts, als daß er sein Urtheil mäßigte, nachher aber suchten die Scepticer freylich alles in Ungewisheit zu sezen, sie Bemüheten sich darzuthuen, daß in allen unseren Erkenntnißen gantz und gar keine Gewisheit statt finden könne. und eben daher entstand der Scepticismus problematicus, et Dogmaticus. Jener zweifelete zwar, aber er untersuchte doch zu vor, und wollte also vermittelst dieser Untersuchung zur Gewisheit gelangen. Dieser decidirte hingegen, und nahm an, daß in keiner Sache eine völlige gewisheit zu erlangen wäre.",
      "pages": [
       {
@@ -24477,7 +24480,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-521",
      "kind": "text",
-     "aa": 216,
+     "aa": 215,
      "text": "Sie schloßen also hier blos durch die Vernunft ohne auf die Erfahrung zu recurriren, denn alsdenn würden sie gefunden haben, daß Achilles die Schildtkrötte in 1¼ Meile nothwendig einhohlen müße, wofern er nur 1000 mahl geschwinder, als die Schildtkrötte Laufen könnte. Der Scepticismus war ferner vel moralis, und dieser Bestand darinn, daß man alle Reguln der Tugend, vor Moden, oder Gewohnheiten, und gebräuchen in Handlungen, die die Menschen unternehmen, ausgab. So waren z.E. die nahen Heyraten in Egypten gar nicht, so wie jezt bey uns verbotten, bey einigen Negers z.E. ist ferner der gröste vorzüglichste, und lezte Liebes Dienst den Kinder en, die ihre Elteren zärtlich Lieben, denselben erweisen können, daß sie dieselben bey zu nehmendem Alter erwürgen. bey den Spartanern z.E. ferner wurde der Diebstahl, wo fern er nur geschehen konnte, daß er nicht offentlich auffiel, gar nicht bestraft, und es war so gar erlaubt zu stehlen, wofern es nur im geheim geschahe.",
      "pages": [
       {
@@ -24603,7 +24606,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-527",
      "kind": "text",
-     "aa": 218,
+     "aa": 217,
      "text": "Voltaire ist der Scepticus der neueren Scepticer unserer Zeiten. sein Scepticismus aber ist weit mehr schädlich, als er nützlich ist. Er bringet weder Gründe vor, noch wieder die Sache vor. er forschet, und prüfet gar nichts, sonderen zweifelet ohne allen Beweis, daß einer Erkenntniß gar nicht zu trauen seye. seine Gründe sind dahero auch nichts anders als schein Gründe, die zwar einen einfältigen, niemals aber einen scharfsinnigen und nachdenckenden gelahrten Mann betrügen können. und eben daher ist Voltaire vor den großen Haufen, und besonders vor den gemeinen Mann gar sehr gefährlich. Denn er Suppedit irt demselben gantz falsche gründe, an der wahrheit dieser oder jener Sache zu zweifelen. Will man aber einen naheren Unterricht vom Scepticismo der neueren Zeiten haben, so kann man die Schrift, welche Haller unter dem Titulo: Prüfung der Secte, die an allem zweifelet, herausgegeben, mit großem Nutzen deshalb nachlesen. auch sind die obenerwehnte Schriften des Hume in gewißer Art wircklich zu empfehlen.",
      "pages": [
       {
@@ -24683,7 +24686,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-531",
      "kind": "text",
-     "aa": 219,
+     "aa": 218,
      "text": "Wir können immer viele Meynungen aufwerfen, wenn wir sie nur nicht vor Überredungen halten ohne dabey zu irren. Der Pöbel thut dieses sehr öfters. wenn gleich eine Erkenntniß gantz falsch ist, so kann dennoch die Meynung davon gantz gewiß seyn, und mit den Regeln des Verstandes, und der Vernunft übereinstimmen. Z.E. wenn sich jemand im gemeinen Leben einen Bedienten wählet, welcher von guten Elteren ist, und auch eine Gute Erziehung hat, so meynet er, er sey gut, man könne sich ihm vertrauen. Hier ist alle Vernunft vorhanden, und angewandt, obgleich das Gegentheil davon sehr öfters statt finden, und meine Erkenntniß Falsch seyn kann. Wolff hat eine gantz vernünftige Meynung, daß im Monde Einwohner wären, denn damals waren die Entdeckungen noch nicht so häufig, als jezt, da man gesehen, daß der Mond keine Atmosphera habe.",
      "pages": [
       {
@@ -25099,7 +25102,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-557",
      "kind": "text",
-     "aa": 223,
+     "aa": 222,
      "text": "Man findet durch Hypothesen nicht allemahl das, was man will, sonderen öfters etwas anders, man versucht, man probieret, nimt etwas an, und untersuchet, ob man daraus die Bekanndten Folgen erklären könne, oder nicht; findet das erste statt, so nimt man die Hypothesin an , findet das leztere statt, so verwirft man sie.",
      "pages": [
       {
@@ -25211,7 +25214,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-564",
      "kind": "text",
-     "aa": 224,
+     "aa": 223,
      "text": "Alles Vorwahrhalten rühret aus einer doppelten Verbindung her, nemlich entweder, weil der Grund hinreichend ist, daraus alle Folgen abzuleiten, oder weil er noch mit anderen Gründen, die eine ähnlichkeit mit ihm haben, übereinstimmet, und aequivoce so zu sagen, ist. Bey allen Hypothesen werden wir dahero zu erst zeigen, die Zulänglichkeit der Fiction is historicae zu denen Folgen, und auch die uebereinstimmung der Fiction mit anderen Gründen, so daß noch andere Gründe da sind, woraus einige Folgen abgeleitet werden können. Die Hypothesen müßen zu erst als schlüße wahrscheinlich seyn, aber auch noch zu gleicher zeit durch andere Gründe Bestätiget werden können. z.E. wer das Gewitter erklären will, nimt in der Luft eine electrische Art der Materie an, und zeiget hernach aus anderen Gründen, daß wircklich eine schwefelichte, und electrische Materie in der Luft sich befinden müße. Die Hypothesen haben von einer Seite etwas der Weltweisheit gar sehr nachtheiliges, in so ferne sie Erlaubniß geben zu Dichten. von der anderen Seite aber sind dieselben wiederum sehr vorteilhaft, wenn nemlich die Fictiones heuristisch sind, oder zum Zweck haben etwas zu erfinden.",
      "pages": [
       {
@@ -25624,7 +25627,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-590",
      "kind": "text",
-     "aa": 227,
+     "aa": 226,
      "text": "Man darf bey der Überredung nicht irren, dem Object nach, sonderen man irret der Form nach. Da man die Gründe zur Meynung zum Vorwahrhalten aus unzureichenden Gründen vor Gründe zur Gewisheit aus zu reichenden Gründen halt.",
      "pages": [
       {
@@ -25920,7 +25923,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-609",
      "kind": "text",
-     "aa": 230,
+     "aa": 229,
      "text": "5: die Rechtschaffenheit. denn die lezte Beiden Gründe sind die Ursachen des dritten Grundes, nemlich der Wahrhaftigkeit deßen, der es Behauptet. Nun aber läßt sich ja gar nicht aus den Folgen apodictisch schlüßen, weil es ja weit mehr als eine Folge von ein und eben derselben Sache geben kann. Gewiße historische Erkenntniße werden solche Gründe des Vorwahrhaltens haben, daß sie hinzu reichend sind zur practischen, obwohl freylich nicht zur Theoretischen Gewisheit. Die apodictische gewisheit ist folglich von der practischen Gewisheit nicht eigentlich in gradu, sonderen nur in specie unterschieden, wenn auch einige das erstere Behaupten wollten.",
      "pages": [
       {
@@ -26124,7 +26127,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-621",
      "kind": "text",
-     "aa": 232,
+     "aa": 231,
      "text": "Wenn ich aber allgemeine Urtheile aus Erfahrungen, oder Erfahrungs-Sätze festseze, so sind dieselbe allemal erweislich. alle rationale, und unerweisliche Erkenntniße sind Axiomata, und sie sind entweder Synthetisch oder Analytisch. in jedem Urtheil Concipiret man sich das Subject, als ein Merckmal von einem Dinge, das mir sonst unbekanndt seyn kann. man weiß also blos das Merckmal, dies ist einem Bekanndt. z.E. der Satz: Ein Cörper ist Theilbahr, ist Analytisch, denn dem Subject, dem ein Cörper zukommt, komt auch die Theilbahrkeit zu, und dem die Theilbahrkeit zukommt, dem Subject kommt auch ein Cörper zu. Ein Cörper aber hat eine anziehende Kraft, dieser Satz ist Synthetisch, denn die anziehende Kraft abgesonderet von aller Erfahrung, liegt nicht im Begriff eines Körpers.",
      "pages": [
       {
@@ -26152,7 +26155,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-622",
      "kind": "text",
-     "aa": 233,
+     "aa": 232,
      "text": "Alle analytische Satze, wo das Prädicat in der Notion des Subjectes liegt, gehören unter das Gesez in der Identitaet. Die synthetische Satze aber, deren Praedicat nicht in der Notion des Subjects, sonderen in einem Merckmahl lieget, das von dem Subject unterschieden ist, gehören nicht unter das Principium Identitatis, und Contradictionis. Dieses Principium beziehet sich nur auf die analytischen Sätze ; Bey denen Synthetischen Sätzen wird ein Praedicat zu der Notion des Subjects hinzugesezet, das in derselben nicht enthalten ist. und alle die Sätze, die diese Beschaffenheit haben, können nur anschauend, nicht durch die Vernunft erkanndt werden. Durch die Vernunft kann man gar keine Coordination erkennen, denn die Vernunft Subordinirt nur allein. alle Synthetische Sätze sind entweder unmittelbahre Erfahrungs-Sätze, oder anschauende Sätze, die durch den Verstand hervorgebracht sind, und nicht in der Notion des Subjects Liegen. Die analytischen Sätze aber können per analysin aus dem Begriffe des Subjects herausgezogen werden. Denn sie sind in der Notion des Subjects enthalten, und derselben Subordinirt. Hier kann sich die Vernunft Beschäftigen, und die Subordinirte Begriffe zergliederen, und aus einander Legen. z.E. das Gold rostet nicht. Dieses ist ein Synthetischer Satz, dieser erhellet blos aus der unmittelbahren Erfahrung, und kann eigentlich gar nicht aus der Notion des golds per analysin hergeleitet werden, wenn etwas postuliret werden soll, so muß es also beschaffen seyn, daß es schlechterdings jedermann überzeuget. In einem Beweise ist die Falschheit der Materie nach nur accidental, der Form nach aber essential. Die falsche Materie kann verbeßeret werden, hingegen aber ist die falsche Form ganz incorrigib ile. Ferner ist auch die Falschheit der Form noch weit ausgebreiteter, und allgemeiner, als die Falschheit der Materie. Das Proton pseudos, da jemand nach Ungereimtheit schlüßet, oder auch falsche Sätze annimt, liegt auch gleichfals in der Form, denn es ist Besonders, daß die Form nicht allein vielen, sonderen auch selbst unverbeßerlichen Fehleren unterworfen sey.",
      "pages": [
       {
@@ -26244,7 +26247,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-626",
      "kind": "text",
-     "aa": 234,
+     "aa": 233,
      "text": "Des apagogischen Beweises, so beliebt er auch ist, Bedienet man sich also doch nur so ad interim etc. Die rechte wahre Einsicht aber erhält man doch eigentlich nur durch den directen Genetischen Beweis. Directe wird eine Erkenntniß Bewiesen, wenn die Wahrheit derselben aus ihrem Verhaltniß zu den Gründen dargethan werden kann. Indirecte aber hingegen, wenn ihre Wahrheit aus dem Verhältniße zu denen Folgen fließet. Directe Beweise sind eigentlich genetisch, und werden geführt per rationes essendi, non vero Cognoscendi. indirecte Beweise aber werden geführet per rationes Cognoscendi, non essendi. aus denen Folgen auf die Gründe affirmative zu schlüßen gehet gar nicht, sonderen dieses muß allemahl negative geschehen",
      "pages": [
       {
@@ -26372,7 +26375,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-633",
      "kind": "text",
-     "aa": 236,
+     "aa": 235,
      "text": "Die Empfindung ist die Vorstellung unsers Gegenwärtigen Zustandes, in so fern derselbe von der Gegenwart eines gewißen Gegenstandes herrühret. bisweilen entspringen in uns Vorstellungen, deren Urheber wir selbst sind, deren Gegenwart aber wir aus dem Daseyn einer Sache herleiten. und alsdenn trägt es sich zu, daß wir öfters Fictionen mit Empfindungen verwechselen, und auf diese Art begehen wir einen Irrthum. wir können öfters uns etwas erdichten, allein dieses ist gar keine Empfindung. So z.E. ist die Furcht vor einem bevorstehenden Schmertze unterschieden von dem Schmertze, der da gegenwärtig ist. selbst die Furcht des Schmertzes nemlich ist eine Fiction. hingegen der Schmertz selbsten ist eine Empfindung. Von Empfindungen Läßt sich weiters nichts reden, oder raisoniren d.i. vernünftelen, denn sie sind das Principium materiale aller unserer Vorstellungen.",
      "pages": [
       {
@@ -26560,7 +26563,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-643",
      "kind": "text",
-     "aa": 238,
+     "aa": 237,
      "text": "Ein beweis aus der Vernunft aber, von dem der Autor im 204 ten Paragrapho redet, ist ein solcher beweis, der so wohl in Absicht des beweis-Grundes, oder der Materie nach, oder in Absicht des Formellen aus der Vernunft entspringet, und also keine Erfahrung nöthig hat. Die beweise aus der Vernunft haben zwar zum Beweisgrunde solche Sätze, die aus der Vernunft entspringen, allein zum Theil entspringen diese Sätze ihrem ersten Ursprunge nach aus der Erfahrung. Ein Beweis aus der Vernunft ist also nicht allemahl ein Beweis der reinen Vernunft ohne Anwendung der Erfahrung. Ein Beweis durch die reine Vernunft aber kann nur allein von solchen Erkenntnißen geführet werden, die gar nicht Gegenstände der Sinne sind. sind auch Erkenntniße nur zum Theil objecte der Sinne, so müßen sie schon ihrer ersten Principiorum nach aus der Erfahrung hergeleitet werden. Beweise der reinen Vernunft finden daher auch nur in der Mathematic, und Metaphysic platz. das was durch die reine Vernunft kann demonstriret werden, das bedarf nicht allein nicht eines Beweises aus der Erfahrung, sonderen verstattet denselben auch gar nicht. Es hat einige gegeben, die eine Experimental geometrie zu erfinden getrachtet haben, allein alle ihre Bemühungen sind nichts als Kinderspiele geworden.",
      "pages": [
       {
@@ -26786,7 +26789,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-656",
      "kind": "text",
-     "aa": 240,
+     "aa": 239,
      "text": "Der Begrif von etwas gilt von allem, und enthält nichts in sich, und so ist es immer. Ein jeder Conceptus Communis aber kann betrachtet werden, als ein Conceptus Superior ein oberer Begrif, dennoch aber nennet man denselben noch besonders also darum, in so ferne Derselbe wiederum andere Conceptus Communes in sich enthält. z.E. der Mensch den Mann. Es giebt also eine Unterordnung unserer Begrife. Ein Conceptus Communis heißt in Ansehung der begrife welche unter ihm enthalten sind, das Genus, die Gattung in Ansehung derer Begrife aber, in denen er enthalten ist, die species. So z.E. ist der Mensch das genus in Ansehung der Männer etc. in Ansehung eines Vernünftigen Wesens aber ist der Mensch wiederum die Species. Die Grentze derer einander Subordinirten Begrife aber ist der Conceptus Summus, d.i. derjenige Conceptus, der zwar ein Genus aber keine Species ist. Der Conceptus infimus aber hingegen wird eine Species seyn, welche kein Genus mehr hat. Ein Conceptus Singularis aber hat keine Sphaeram. Das Genus Summum also, und das Individuum sind die beiden Grentzen derer Logisch Subordinirten Begrife. Ein jedweder Conceptus hat einen umfang derer Begrife, auf welche er geht, die Sphaeram Notionis, und der Satz ist bekanndt: Quo major est Sphaera Conceptus, eo minus in illo est Contentum, et vice versa. Derjenige Conceptus, deßen Sphaera nur ein Theil von der Sphaera eines anderen Conceptus ist, heißt ein Conceptus angustior.",
      "pages": [
       {
@@ -26894,7 +26897,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-661",
      "kind": "text",
-     "aa": 242,
+     "aa": 241,
      "text": "Man kann etwas Meynen, ohne zu glauben, wenn man nemlich mehr Gründe vor, als wieder die Erkenntniß hat. hiebey halte ich etwas vor wahr, ohne daß es auf unsere Handlungen einen Einfluß hat. Etwas Wißen aber heißt nichts anders, als etwas mit Gewißheit erkennen. Bey dem Glauben aber ist ein großer Grad des Vorwahrhaltens, so daß man darauf wetten möchte, daß etwas wahr sey.",
      "pages": [
       {
@@ -26916,7 +26919,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-662",
      "kind": "text",
-     "aa": 243,
+     "aa": 242,
      "text": "Der Glaube ist entweder ein Glaube an Sachen, oder an eine Persohn. Man kann eine Sache unmittelbahr vorwahrhalten, blos darum, weil man Gründe vor die Sache hat, und alsdenn heißt es eine Sache glauben. im Gegentheil aber kann man auch eine Sache unmittelbahr glauben, weil eine Persohn dieselbe vor wahr ausgiebt, die man ansonst an sich selbst nicht vor wahr gehalten haben würde, und dan glaubet man an eine Persohn. Dieser Glaube aber, der sich auf eine gewiße Art Persohn beziehet, ist zweyfach. man glaubet zu weilen einem jeden, er sey, wer er wolle, blos weil er etwas sagt, ohne auf seine Persohn, oder seinen caractère oder Stande zu attendiren. wenn jemand z.E. sagt: es habe in seiner Gegend geschneyet, oder es waren viele Schiffe angekommen, so glaubet man dieses schlechthin, ohne doch viel zu untersuchen; man urtheilt also dabey über die Glaubwürdigkeit der Zeugen gar nicht. man glaubet aber wiederum in gewißen Sachen gar nicht einem jeden, sonderen es wird dazu eine besondere Glaubwürdigkeit desjenigen, der etwas vor wahr ausgiebt, von uns erforderet, damit man solches annehme, und vor wahr halte. Das glauben gegen eine Persohn aber ist entweder moralisch, oder Historisch. Das erstere bestehet in dem zutrauen zu der Rechtschaffenheit des anderen, ob er gleich keine Aussage der Erzählung gethan hat. Das andere aber bestehet in dem Vorwahrhalten deßen, was der andere aussaget, blos darum, weil er es affirmiret. Zum historischen Glauben braucht keine Besondere Sittlichkeit in dem anderen zu seyn, sonderen man hält etwas vor wahr, weil er etwas erzählet, was geschehen ist. Der moralische Glaube aber erforderet, daß man gegen eine Persohn ein besonderes zutrauen habe, daß sie gütig, und rechtschaffen seyn werde. z.E. wenn ein treuer Bedienter in Abwesenheit seines Herren bey einer entstehenden großen Gefahr seine eigene Sache im Stiche Läßt, und die Sache seines Herren rettet, in Hofnung, daß er ihm diese Dienste wohl belohnen werde, so ist dieses ein moralischer Glaube. Der historische Glaube n wird allein in der Theologie erforderet, daß man etwas einer Aussage wegen vor wahr hält. Diesen Glauben kann aber ein jeder selbst der Ruchloseste haben. Ohne Treue, und Glaube würde gar keine Republique, kein gemeines Wesen bestehen können, auch würden keine Pacta statt finden können. Die Treue wird allemahl erforderet in Ansehung deßen, der etwas verspricht, daß er das Versprochene auch hält, der glaube aber in Ansehung desjenigen, dem etwas versprochen wird, daß er nemlich vor wahr annehme, daß der andere sein Versprechen halten werde. Beydes muß mit einander verbunden seyn. Denn wenn auch jedermann Treue hielte, es glaubte aber keiner, so würden keine Verabredungen etc. statt finden können, und eben so wenig, wenn alle glauben, aber keiner Treue halten wollte. Der Glaube ist also im gemeinen Leben sehr nöthig, wenn niemand Creditiren möchte, würde es wircklich sehr oft schlecht aussehen, denn nicht allemahl kann man Baar gleich bezahlen. Es zeiget auch eine sehr schlechte Denckungs-Art an, wenn man niemand etwas zutrauet sonderen alles, was einem Versprochen, und zugesaget wird, gleich gegenwärtig, und erfüllt sehen will. Die Griechen waren von solcher Art, sie glaubten niemandem, sonderen wolten gleich alles Baar ausgezahlet haben. Daher denn auch das Sprichwort entstanden ist: graeca Fide mercari.",
      "pages": [
       {
@@ -26964,7 +26967,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-663",
      "kind": "text",
-     "aa": 244,
+     "aa": 243,
      "text": "Der Theologische Glaube trauet jemanden blos auf seine Aussage, und hält solche vor wahr. Bey dem Historischen Glauben ist das Object des Glaubens allemahl eine geschehene Sache, eine Erfahrung des Anderen, nicht aber ein Urtheil der Vernunft, daher z.E. wenn jemand zu mir mit Zuversicht sagte: Glaube mir, es sind Einwohner im Monde, werde ich ihm Natürlich Antworten können: bist du da gewesen? Hast du sie gesehen? Das, was du blos durch die Vernunft hervorgebracht hast, das kann ich dir nicht glauben. . mithin sind alle Urtheile, wo der andere Vernünftelet, keine Gegenstände des historischen Glaubens. Der Theologische Glaube ist also blos historisch. Der Religions-Glaube aber ist nicht blos historisch, sonderen moralisch, da man etwas vor wahr hält wegen eines Versprechens, und deswegen gewiße Handlungen unternimt, in der Hofnung, in der Zukunft einmahl gute Folgen davon einzuerndten. Durch diesen Glauben muß man hoffen, daß es eine künftige Welt, und künftige Belohnungen, oder Bestrafungen dieser Handlungen geben werde. Der natürliche, Moralische Glaube ist bey allen Tugendthaften, da man glaubet, daß die gute Handlungen schon vor sich werden belohnet werden, ohngeachtet man auch dabey kein besonderes Versprechen vor sich sähe. Ein solcher Tugendthafter ist mit einem Creditore zu vergleichen, er hofet das künftige Gute, gesezt daß er auch davon noch keine Spur hat. Hier aber reden wir gar nicht von diesem moralischen glauben, ohngeachtet derselbe der Betrachtungswürdigste, und vortreflichste ist, da man Credit erhält, und nicht blos dem Gegenwärtigen, sonderen dem künftigen trauet, da man nicht alles in der Welt, sonderen auch einiges in einem zukünftigen Leben bezahlet haben will.",
      "pages": [
       {
@@ -27030,7 +27033,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-666",
      "kind": "text",
-     "aa": 245,
+     "aa": 244,
      "text": "Was können wir also auf Glauben annehmen? auf glauben kann man nicht annehmen dogmatische Erkenntniße, die der andere aussagt, sonderen blos Erfahrung. allgemeine Vernunft-Erkenntniße kann man darum nicht auf Glauben annehmen, weil man sich bey denselben sehr leicht irren kann. Aussagen von Dogmatibus sind also keine zeugniße, sonderen Aussagen von Empirischen Erkenntnißen, von Erfahrungen sind Zeugniße. Ein Zeuge ist also eigentlich derjenige, der eine Erfahrung aussaget. Derjenige aber, welcher allgemeine Vernunft Urtheile vor wahr aussagt, der ist kein Zeuge, und der Beste Historische Glaube geht also auch nicht auf dogmata (als in so fern sie göttliche dogmata sind), sonderen blos auf Erfahrungen. Die Bedingungen aber, unter welchen einem Subject, das Erfahrungen angestellet hat, zu glauben ist, gründen sich theils in seinen eigenen Eigenschaften, theils in seinem Zustande. Die Eigenschaften des Subjects sind theils Logisch, da es fahig ist Erfahrungen zu haben, anzustellen, zu wißen, und auszusagen. Theils Moralisch, da es auch den Willen hat, die Wahrheit aus zu sagen, oder die Erfahrungen, so wie sie gewesen sind, zu declariren. Bey der Glaubenswürdigkeit in Absicht des Zustandes aber muß man den Zustand auch",
      "pages": [
       {
@@ -27107,7 +27110,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-670",
      "kind": "text",
-     "aa": 246,
+     "aa": 245,
      "text": "Wenn ein sehr großer Betrug der Sinne Statt fände, so würden wir denen Erfahrungen nicht trauen können, die andere angestellet haben, wenn ferner diejenige, die Erfahrungen anstellten, ein so mangelhaftes Gedächtniß hätten, daß sie sich derselben nicht erinneren könten, und die Phantasie ihnen andere Bilder vorbrächte, wenn Endlich unsere Sprache solche Fehler hätte, daß wir uns nicht recht ausdrücken, und unsere Erfahrungen mittheilen könnten, so würde die Mittheilung frembder Erfahrungen gantz unmöglich seyn. wenn aber dieses auch vorausgesezet wird, wie es auch wircklich wahr ist daß 1:) mo wir allemahl die Fähigkeit haben Erfahrungen anzustellen, und denn 2:) unser Gedächtniß auch treu genug ist, die gehabten Erfahrungen zu behalten, und aufzubewahren, ohne durch die Phantasie gestöret zu werden, 3) wir auch in unserer Sprache alle angestellte Erfahrungen anderen Bekanndt zu machen vermögendt sind, so wird doch zur Glaubwürdigkeit dieser, oder jener, die Erfahrungen angestellet haben, noch erforderet werden, daß sie ehrlich sind, und eine Neigung zur Wahrheit haben. Diese Neigung aber zur Wahrheit entspringet oftmals mehr aus der Ehrliebe, als aus der Ehrlichkeit. weil nemlich das Gantze Commercium der Menschen aufgehoben werden würde, wenn keiner die wahrheit aussagte, indem alsdenn keiner dem anderen trauen würde: weil auch die Lüge etwas schädliches ist, und die Aussage der Wahrheit der sicherste Weg ist, der Verachtung zu entgehen. z.E. die Geographie, die Physic, die Historie, und andere Wißenschaften setzen allemahl die Erfahrungen anderer voraus. im gemeinen Leben muß man dem gemeinen Mann in Ansehung solcher Erkenntniße, die nicht das interesse aller Menschen Betrefen, sonderen gleichgültig sind, nicht glauben. Denn in solchen Fällen ist es ihm gleich viel, ob etwas so, oder anders beschaffen sey, da er die Wichtigkeit der Erkenntniß nicht einsiehet. Der Gelahrte aber hat in dieser Art von Erkenntnißen schon viel mehr Glaubwürdigkeit, denn diesem wird in aller Erkenntniß auch das geringste von Wichtigkeit seyn, auch wird er aus Ehrliebe mehr geneigt seyn, alles so genau auszusagen als er es erfahren hat, indem er sonst seinen Credit verliehren würde.",
      "pages": [
       {
@@ -27283,7 +27286,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-680",
      "kind": "text",
-     "aa": 248,
+     "aa": 247,
      "text": "Es giebt also Gründe ein Zeugniß zu verwerfen, d ie nicht historisch oder von der beschaffenheit des Zeugen hergenommen, sonderen rational sind, und in der Beschaffenheit der Sache selbst Lieg en. Doch aber muß man dabey sehr behutsam seyn, und eine Erkenntniß nicht eher gleich verwerfen, als bis es Augenscheinlich ist, daß die Sache offenbahr falsch sey. Vieles scheinet bey dem ersten Anblick gantz falsch zu seyn, bey näherer Untersuchung aber findet man das Gegentheil davon. alle Empirische Urtheile von der Möglichkeit oder Unmöglichkeit eines Eventus berechtigen uns noch nicht die Erkenntniß sogleich zu verwerfen, ohne die Glaubwürdigkeit des Zeugen dabey zu untersuchen. Jemand bezeuget etwas, was sehr unwahrscheinlich ist, und denen Ordentlichen Begebenheiten in der Natur wiederspricht, so kann er noch nicht verlangen, daß man ihm gleich auf seine Aussage glauben soll, sonderen wenn er dieses haben will, so muß er den beweiß führen. so z.E. wenn Pontoppidan schreibet, daß es auf gewißen Meeren einen überaus großen Fisch gebe, der wie ein Stück Land aussiehet, und den er Crac nennet, so muß er, weilen ein solches Thier noch nie gesehen worden, solches beweisen. bezeuget aber jemand etwas, was mit der Erfahrung, und Vernunft augenscheinlich, und wohl übereinstimmet, so glaubet man ihm ohne beweis. wenn aber die Glaubwürdigkeit des Zeugen gar nicht wanckend gemacht werden kann, die Erzählung oder das Zeugniß aber, das er giebet, der Vernunft und Erfahrung im höchsten Grade wiederspricht, so fragt es sich, muß man in diesem Fall seiner Aussage Beyfall geben, und seine Vernunft gleichsam verleugnen, oder nicht?",
      "pages": [
       {
@@ -27341,7 +27344,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-682",
      "kind": "text",
-     "aa": 249,
+     "aa": 248,
      "text": "Der Glaube kann im moralischen Verstand genommen werden, wenn man einen Mangel alles Zutrauens zu der moralischen Beschaffenheit eines Zeugens hat. Derjenige, der einen solchen moralischen Unglauben hat, halt alle Menschen vor Lügner, er trauet keinem Menschen, er glaubet keinen Versprechungen, sonderen zweifelet immer an der Aufrichtigkeit anderer Leute. Ein moralischer Unglaube ist dem moralischen Fundament aller menschlichen Gesellschaft entgegen. ohne Treu und Glauben kann, wie schon oben angezeiget worden, kein Staat bestehen. Er ist aber gemeinhin bey denjenigen anzutreffen, die selbst eine moralische Pravitaet besitzen, so, daß man ihnen nicht viel Glauben beymeßen kann.",
      "pages": [
       {
@@ -27423,7 +27426,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s08-686",
      "kind": "text",
-     "aa": 250,
+     "aa": 249,
      "text": "Die Vereinbahrung aller dieser Dreyen Erkenntniß-Quellen beruhet darauf, daß sie nicht einen, sonderen viel beweise zum Grund haben. Der Glaube erforderet allemahl ein Connubium anderer Erkenntniß-Quellen, nemlich der Vernunft, und der Erfahrung, damit er Evident, und überzeugend werde. Wenn eine Erkenntniß-Quelle nicht im Stande ist einen zureichenden beweis von der Wahrheit einer Sache zu geben, so muß man die übrigen Fontes Cognitionis zu hilfe nehmen, und daraus eine größere Evidenz hervor zu bringen suchen. Ist aber eine Erkenntniß-Quelle zulänglich einen completten Beweis von einer Sache zu geben, so bedarf man der anderen nicht. Kann etwas vollständig und Evident durch die Vernunft dargethan werden, so braucht man nicht die Erfahrung, um den Beweis noch vollständiger zu machen. Ist die Erfahrung hinreichend einen completten Beweis von einer Sache zu geben, so darf man die vernunft nicht consultiren.",
      "pages": [
       {
@@ -27614,7 +27617,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-005",
      "kind": "text",
-     "aa": 253,
+     "aa": 252,
      "text": "Conceptus dati sunt porro dati a priori durch die reine Vernunft, vel dati a posteriori durch die Erfahrungen. alle conceptus a posteriori dati sind abgezogen ab Experientia. andere aber entspringen nicht durch die Erfahrungen, sonderen werden abgezogen von den Gesetzen der reinen Vernunft z.E. der Begrif vom Möglichen und Unmöglichen. Ein Conceptus abstractus aber bedeutet besonders eine Vorstellung, die von der Erfahrung abgezogen ist, und nicht eine von der Vernunft abgezogene Vorstellung.",
      "pages": [
       {
@@ -27692,7 +27695,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-009",
      "kind": "text",
-     "aa": 254,
+     "aa": 253,
      "text": "Der Stoische Weltweise hingegen ist ein solchesΠροτοτυπον ἀρχέτυπον. alle Definitionen der Mathematicer enthalten Lauter Ideas Prototypas z.E. der Begrif vom Achteck ist nicht aus der Erfahrung entlehnet, sonderen der Mathematicer dencket sich solches durch seine reine Vernunft. er stellet sich eine Figur vor, die 8 Linien hat, und von ihnen eingeschloßen ist.",
      "pages": [
       {
@@ -27798,7 +27801,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-015",
      "kind": "text",
-     "aa": 255,
+     "aa": 254,
      "text": "Dieses aber findet nie Statt. vieles ist recht, was keiner thut, und Unrecht, was alle thuen. Bey dem Begrif von Ursache und Würckung begehen viele das vitium Subreptionis, daß sie denselben aus der Erfahrung herleiten wollen, da er doch ein reiner Vernunft Begrif ist. Erfahrungs-Begrife beziehen sich alle auf Raum und Zeit. Vernunft Begrife aber auf das Fundament der Ursache, und Würckung. von der Möglichkeit, und Unmöglichkeit haben wir keine Erfahrung, sonderen nur von der Würcklichkeit. auch haben wir nur Erfahrungen von bejahenden, nicht aber von verneinenden Vorstellungen, das nicht seyn kann, kann nicht Empfindung werden. z.E. wenn wir ein Buch gelesen haben, so können wir unmittelbahr nicht erfahren, daß diese, oder jene Stelle nicht darinn enthalten sey, sonderen dieses müßen wir durch Schlüße herausbringen.",
      "pages": [
       {
@@ -27874,7 +27877,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-019",
      "kind": "text",
-     "aa": 256,
+     "aa": 255,
      "text": "Wenn viele Begrife ein Merckmahl gemeinschaftlich haben, so ist dieses Merckmahl in ihnen enthalten. Die Dinge sind unter dem Begrife enthalten, der von ihnen abgesonderet ist. Dieser Begrif ist ein gemeinschaftlicher Grund zu erkennen. er ist in allen Dingen enthalten, und alle Dinge, von denen er abstrahiret ist, sind unter ihm. Ein Begrif kann abstrahiret seyn von der Erfahrung, und auch von den Gesetzen der reinen Vernunft. Die lezteren sind nicht von Dingen abgesonderet, sonderen werden rational genennet.",
      "pages": [
       {
@@ -27932,7 +27935,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-022",
      "kind": "text",
-     "aa": 257,
+     "aa": 256,
      "text": "Das bey den Alten so berühmte, und von denen damaligen Poeten so sehr angestrichene Arcadische Schäferleben ist von dieser Art, es ist eine der angenehmsten Vorstellungen, die man nur je haben, oder sich vorstellen kann. es wird nemlich von demselben alles schöne, Anmuthige, und reizende gedacht, der größte Überfluß an allem, was reitzen kann, damit verbunden, und hingegen alle, und jede Wiederwärtigkeiten, Mißvergnügen, aller Mangel, der sich doch auch sehr öfters beym Schäferleben eingefunden, und einzufinden pflegt, davon abgesonderet, und entfernet, damit nur dadurch ein gantz vollkommenes Ideal der glückseeligkeit entworfen werden möchte.",
      "pages": [
       {
@@ -28025,7 +28028,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-027",
      "kind": "text",
-     "aa": 258,
+     "aa": 257,
      "text": "Die Merckmahle sind einem Dinge allemahl Coordinirt, und machen als Theile zusammen den gantzen Begriff des Dinges aus, das Ding aber ist denen Merckmahlen, die von ihm gegeben worden, subordiniret, und in denenselben enthalten. Die Sphaera notionis bedeutet eigentlich die Menge der Dinge, die unter einem Begrif, als eine Nota Communis begrifen sind. Durch eine Notam Communem kann ich mir also viele Dinge dencken. Die Sphaera Conceptus Communis aber kann groß, und kann klein seyn: eben derselbe Begrif, unter dem viele Dinge begrifen sind, ist in denen Dingen enthalten, die unter ihm sind.",
      "pages": [
       {
@@ -28053,7 +28056,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-028",
      "kind": "text",
-     "aa": 259,
+     "aa": 258,
      "text": "Je größere Sphaeram ein Conceptus Communis hat, und je mehr er unter sich halt, desto weniger ist in ihm enthalten. Ein Begrif, der viel unter sich enthält, entstehet dadurch, daß das abstrahirt worden, was vielen Dingen gemein ist. er ist also ein Merckmahl vom Merckmahl, hat also zwar viel unter sich, aber wenig in sich. Denn ein Merckmahl vom Merckmal enthält ja noch viel weniger, als das erste Merckmahl, davon es ein Merckmahl ist. Wenn ich mir etwas von vielen Dingen gedencke, so ist dieses, was ich von diesen vielen Dingen gedencke, sehr wenig. Jeweniger aber ein Begrif unter sich enthält, desto mehr halt er in sich, und ein einzler Begrif enthält am mehresten in sich, denn hier erkenne ich zwar nur einen Gegenstand, aber sehr viel an demselbigen. Jemehr ich in meinem Begrife dencke, desto weniger Dencke ich durch den Begrif. Ein Conceptus Communis entstehet nur dadurch, daß das Betrachtet wird, was vielen Gegenständen Gemein ist. Das aber, was sie Verschiedenes haben, wird weggelaßen, und nicht betrachtet. Dieser Conceptus enthalt zwar wenig in sich, ist aber ein Begrif von einer großen Sphaera z.E. Der Begrif vom Körper hat eine große Sphaeram, enthält aber wenig in sich. Ein Begrif kann niemahls von größerem Umfang werden, daß er mehr unter sich enthält, als dadurch, daß er weniger in sich enthält. Diese Betrachtung lehret uns besonders, den Werth unserer Erkenntniß schätzen. Durch die Vernunft erkennen wir Lauter Notas Communes, also wenig von viel Dingen, es ist viel unter, aber wenig in den Vernunft Erkenntnißen enthalten. Durch die Erfahrung erkennen wir wenig Gegenständen, aber sehr viel an denenselben. Die Erfahrungs-Begrife aber sind minores Sphaerae allein sie enthalten viel in sich. Ein Merckmahl vom Merckmahl hat immer eine großere Sphaeram, als ein nähres Merckmahl, oder enthält immer mehr unter sich, als eine Nota proprior. Die Nota eines Dinges überhaupt ist die Nota Remotißima eines Dinges. Nachhero komt die Nota remotior, remota, und denn kommen erst die näheren Merckmahle. Die Nota remotissima aber enthält das mehreste unter sich. Wenn mehrere Begrife in einem solchen Verhältniß stehen, daß einer unter dem anderen enthalten ist, so ist derjenige, der den anderen unter sich enthält, ein Conceptus Superior, und der Begrif, der unter dem anderen enthalten ist, der Conceptus inferior. Ein, und eben derselbe Begriff aber kann nach verschiedenen Verhältnißen, nachdem er nemlich andere Begrife unter sich enthält, und auch unter einem anderen steht, Bald ein Conceptus Superior, Bald ein Conceptus inferior seyn. Z.E. ich sage Menschen. alsdenn vergleiche ich mit den unvernünftigen Thieren den Menschen, und sage Thiere so enthalt der Begrif vom Menschen schon sehr viel unter sich. z.E. die Weißen Menschen, und die Negers, und allerley Nationen etc. und ist also in dieser Absicht ein Conceptus Superior. er ist aber ein Conceptus inferior, in so fern er unter dem Begrif Thiere enthalten ist. Der Conceptus nullo inferior aber ist der Conceptus Summus. Dahin gehöret der Begrif von einem Dinge, oder von einem möglichen. Dieser Conceptus Summus ist nicht blos relative, sonderen Absolute Superior. Der Conceptus infimus aber ist der, der nicht allein relative, sonderen absolute inferior ist. Die Conceptus Singulares sind infimi. Die conceptus universales aber sind Summi, und zwischen diesen conceptibus infimis, et Summis giebt es eine Longam Seriem von conceptibus inferioribus, und Superioribus.",
      "pages": [
       {
@@ -28101,7 +28104,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-029",
      "kind": "text",
-     "aa": 260,
+     "aa": 259,
      "text": "Ein jedes Merckmahl ist ein Erkenntniß Grund der Dinge, wir erkennen alle Dinge durch die Vernunft nur vermittelst der Merckmahle. Je mehr ein Begrif von dem unmittelbahren Merckmahle eines Dinges entfernet ist, desto höher ist derselbe, und desto mehr enthalt er unter sich. Eben derselbe Conceptus communis heißt in Absicht auf die Conceptus Communes, die er unter sich enthält, verhältniß weise ein Genus, aber in Absicht auf die Conceptus Communes, unter denen er enthalten ist, heißt er Verhältniß weise eine Species. Z.E. ungelährte sind ein Genus in Absicht derer Besonderen Arten von gelahrten, der Philosophen, Artzte, etc. Juristen. sie sind aber eine Species in Absicht des Begriffes von einem Menschen überhaupt. Ein conceptus communis heißt darum Species weil er 1 mo unter einem anderen Communi Superiori conceptu enthalten ist, aber auch 2: weil er selbst ein con ceptus communis ist. Denn ein Conceptus Singularis, wenn er gleich einem anderen Conceptui Communi Subordiniret ist, ist nicht eine Species z.E. wenn ich mir unter den Gelahrten den Herren von Wolff dencke, so ist dieses nicht mehr eine Species, sonderen ein Individuum. Eine jede Species ist infima, in so ferne unter ihr keine conceptus communes, sonderen blos Singulares enthalten sind. Species infima est, quae tantum individua sub se continet. sonst kann man sich eine Species immer wieder als ein Genus dencken, und ihm andere Begrife Subordiniren. Z.E. ein Philosoph ist eine Species von den Gelahrten. diese aber wird ein Genus, wenn ich mir darunter besonders die Wolffianer, Crusianer etc. dencke. alle Genera, die unter höheren Generibus enthalten sind, sind in Absicht dieser generum, Specierum, als Species anzusehen. Das Genus Summum aber ist das, was nicht mehr eine Species seyn kann. Die Species infima aber kann niemahl mehr ein genus seyn. im ersteren Fall ist er einem anderen, im zweiten Fall aber sind andere ihm Subordiniret. Eben also kann eben derselbe Begrif sowohl Genus, als auch Species in verschiedenen Absichten seyn. Die Subordination der Begrife aber kann so wohl Logice, als realiter geschehen. Die Logische Subordination bestehet darinn, daß ich das nehme, was vielen Begrifen mit einander gemein ist, und mir dadurch einen allgemeinen Begrif formire, worunter ich die einzeln Vorstellungen unterordnen kann. auf diese Art mache ich mir verschiedene Genera, und Subordinire denenselben die Species, und Individua. Die Real Subordination aber bestehet darinn, daß ich die Begrife wircklich mit einander verbinde, so, daß nicht nur einer unter dem anderen enthalten ist, sonderen sie auch als Ursachen, und Würkkungen cohaeriren.",
      "pages": [
       {
@@ -28271,7 +28274,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-038",
      "kind": "text",
-     "aa": 262,
+     "aa": 261,
      "text": "Die Materie wird niemals erdichtet werden können, wer kein Gesicht hat, kann sich keine Farbe, wer kein gehör hat, kann sich keinen Thon erdichten. alle Form aber wird erdichtet nach dem Verhältniß des Raumes, und der Zeit, und nach der allgemeinen Natur unserer Vernunft. Alle Begrife sind entweder empirische, oder transcendentale Vernunft-Begrife. Zu den lezteren Begrifen gehören die Vorstellungen vom möglichen und unmöglichen, vom Nothwendigen, und Zufälligen, diese entspringen keines weges aus der Erfahrung, und werden davon nicht Abstrahirt, sonderen sie sind durch die reine Vernunft hervorgebracht. Die Begrife sind also entweder gegeben, oder gemacht. gegeben sind sie entweder durch die Erfahrung, oder durch die reine Vernunft. Gemacht sind sie, wenn sie weder durch die Erfahrung, noch durch die reine Vernunft gegeben worden. Diese gemachte Begrife aber sind stets nur der Form nach erdichtet. Durch die Absonderung dencke ich an einen Theil des Begrifes, durch die Trennung aber verneine ich etwas von meinem Begrife. Absonderung, Abstraction, Trennung, Separation sind also von einander unterschieden. Durch die Trennung entspringen allein erdichtete Begrife, durch die Absonderung aber niemals. Zu einer Fictione Separando facta gehöret eine remotion des jenigen, was sonst mit einem Begrif verbunden zu seyn pfleget. man erdichtet viel Separando, alle Romanen entspringen durch diese Art der Fiction. auf eben diese Art muß man sich auch die Idee von Gott fingiren, indem man alle Unvollkommenheit davon absonderet, und also zum Begrif des höchsten Wesens gelanget. Durch die Verbindung aber fingiret man etwas, wenn man vieles zu sammen setzet, was in der Erfahrung niemals mit einander verknüpfet ist. Auf diese Art, wie schon oben angezeiget worden, entstehen die Romanen. Der Stoische Weise entstehet durch diese Fiction, man giebt demselben mehr Kraft, als dem Menschen eigen ist. Die Erdichtungen sind entweder Fictiones aestheticae, oder heuristicae. Jene dienen zum Vergnügen, diese zum Erfinden.",
      "pages": [
       {
@@ -28367,7 +28370,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-042",
      "kind": "text",
-     "aa": 264,
+     "aa": 263,
      "text": "2:) Frage man, ob die Definition als ein Begrif deutlich sey, ob ich sie klar erkennen kann. zu jeder Deutlichkeit aber wird erforderet, daß ein Merckmahl ein klarer Erkenntniß-Grund der Sache sey. alle Tavtologie in denen Definitionen also ist ein Mangel der Deutlichkeit, und eine solche definition ist nicht allein keine definition, sonderen auch kein deutlicher Begrif. alle leere Sätze sind Tavtologisch. Die Seele z.E. ist in einem Thiere eine herschende Monade, dieser Satz ist nicht leer, aber es wird in demselben ein comparative obscurum per aeque obscurum erkläret. Die unnützlichkeit dieses Satzes aber Läßt sich hier noch heben. Bey der Tavtologie aber gehet dieses gar nicht an. 3:) Frage man, ob die Definition als ein deutlicher Begrif ausführlich, das ist: deutlich seye. nam definire est fines conceptus alicuius ponere. D.i. die Definition ist eine Bestimmung alles desjenigen, was der Sache nur zu kommt.",
      "pages": [
       {
@@ -28475,7 +28478,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-047",
      "kind": "text",
-     "aa": 266,
+     "aa": 265,
      "text": "Das 2 te requisitum einer rechten Definition nun ist dieses, daß sie adaequat seye, oder daß sie weder mehr, noch weniger als im Definito enthalten, in sich faße. man kann es auch eigentlich die Completudo, oder Ausführlichkeit und Zulänglichkeit nennen. zur Completudine einer Definition nun gehöret, daß 1. die Merckmahle zureichend sind des Definiti von allen anderen. 2.) auch zureichend seyen zur Erkenntniß der Identitaet, deßelben mit anderen, oder kurtz gesagt, daß die Definition weder Latior, noch angustior sey, was heißt dies aber? in Vergleichung der Sache mit anderen ist ein jeder Erkenntniß-Grund auf zwiefache Weise zu gebrauchen.",
      "pages": [
       {
@@ -28652,7 +28655,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-057",
      "kind": "text",
-     "aa": 268,
+     "aa": 267,
      "text": "Von der Definition nun ist die Description unterschieden denn diese ist ein deutlicher Begrif, der aber nur blos comparative complet ist. Seine Ausführlichkeit ist nur zureichend bloß zu meinem Zwecke, obgleich es den Zwecken aller anderen gäntzlich zu wieder seyn kann. Die Description ist also nicht wie die Definition absolut complet, d.i. sie dienet nicht zu aller Absicht, sonderen nur zu meiner privat absicht, ist deswegen aber doch gar nicht zu verwerfen.",
      "pages": [
       {
@@ -28746,7 +28749,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-064",
      "kind": "text",
-     "aa": 269,
+     "aa": 268,
      "text": "Nun wollen wir dieses anmercken: Daß alle mathematischen Definitiones Definitiones willkührlicher Begrife sind. Die Mathematicker haben auch einige gegebene Begrife, die sie aber nicht definiren können, und dies muß auch der mathematicker nicht thuen, denn sonst Philosophiret er, und das ist alsdenn ein grober Fehler für einen Mathematicker, als in welchen Fehler Wolffius selbsten verfallen ist. Der Mathematicker bekümmeret sich gar nicht, was andere unter dem Begrif dencken, sonderen er sagt: dies will ich so nennen, und so soll es auch heißen. So bald also, als der Mathematicker den Begrif in der Definition sich als gegeben vorstellet, so philosophiret er, und alsdenn kann man erst mit ihm streiten, vorhero aber nicht, und alsdenn thut er dem Philosophen Eingrif der auf ihn alsdenn Anspruch machen kann, und aus diesem Grunde kann also ein Mathematicker keinen Ort, keine Richtung, keine gerade Linie u.s.w. definiren, denn dieses sind alles schon gegebene Begrife.",
      "pages": [
       {
@@ -28846,7 +28849,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-069",
      "kind": "text",
-     "aa": 271,
+     "aa": 270,
      "text": "Nun mehro fragen wir: Ist bey den Empirischen Begrifen wohl eine Definition möglich? O nein bey allen Empirischen Begrifen findet nur bloß eine description stat. Höchstens scheinet es nur daß nominal Definitionen möglich wären. Denn realiter definiren heist alle Merckmahle anzeigen, die zusammengenommen das gantze ausmachen. und eine real Definition ist also die completudo derer Merckmahle, die nur der Sache selbst zu kommen. allein bey den Empirischen Begrifen definire ich nicht das object, sonderen nur den Begrif, den man sich bey der Sache dencket. Die Merckmale der Erfahrung sind also veränderlich, und dienen nur bloß zur nominal Definition.",
      "pages": [
       {
@@ -28904,7 +28907,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s10-072",
      "kind": "text",
-     "aa": 272,
+     "aa": 271,
      "text": "Die Absicht dabey ist nicht die Erkenntniß des Definiti durch seine Zergliederung heraus zu bekommen, sonderen nur blos dem Definito eine Bedeutung zu geben. Es ist also dabey nur bloß die Vorbedeutung der Endzweck, damit diese nemlich nicht gänzlich aus der Sprache verlohren gehe. Denn z.E. auf dem Hartz gebürge nennt man schon die Fichten Tannen, und wieder die Tannen Fichten. Ich definire einen Empirischen Begrif, um hernach per Synthesin immer etwas hinzu zu setzen. allein niemals definire ich einen Erfahrungs-Begrif, damit ich durch die Zergliederung das Object kennen lerne. ich definire keinen Erfahrungsbegrif z.E. Gold, um daraus etwas zu schliessen, und aus dieser Definition Folgerungen herauszuziehen. sonderen nur blos um die Wortbedeutung des Definiti dadurch fest zu setzen, hierbey mercken wir dieses an: analytisch sind die definitiones der moral, und dienen dazu, damit ich aus diesem Begrife alle mögliche Folgen ziehe. Die definitiones der moral sind alle real, und ich darf sie dahero nur blos analysiren, so ist es also würcklich curieux, daß man aus dem Gebrauch der Definitionen auf ihre besondere Art schlüßen kann. Die Empirische Definitionen gehen nur auf den Verstand, aber gar nicht auf die Vernunft (denn nur bloß durch den Verstand sehe ich die Bedeutung ein) sie haben also auch gar keinen Philosophischen Gebrauch. Hieraus folgt also daß die Definitiones Empirischer Begrife gantz unnötig sind, denn wenn es auch würcklich einige geben könnte, so wären es doch bloß nur nominal definitiones. Denn ich sage bey denselben nicht: dieses alles zusammen genommen macht den ganzen Begrif der Sache aus, sonderen nur dieses ist alles was ich mir bey dem Begrif der Sache dencke. alle Empirische Begrife sind nur fähig der Description, alle willkührliche Begrife sind Synthetisch, und ihre Definition real. Endlich alle Vernunft begrife sind, weil sie gegeben sind, analytisch, und ihre Definitiones ebenfals real. nunmehro machen wir diese Anmerckungen: Bey allen gegebenen Vernunft Begrifen ist die Definition nicht das erste, sonderen der Verworrene Begrif des Definiti. Denn bey denen gegebenen Vernunft Begrifen soll ich nur durch die Definition den verworrenen Begrif deutlich machen, und also muß doch schon der verworrene Begrif des Definiti vor aller Definition vorhergehen, nur aber bey willkührlichen Begrifen gehet die Definition immer vorher, denn diese giebt ja eben den Begrifen alsdenn ihr esse. nunmehro kann alle Deutlichkeit der definitionen nur durch die Vernunft per analysin erlanget werden, und der Vernunft Begrif wird nur Successive complet. wenn ich nemlich ein klares Merckmal nach dem anderen erwege, und da nun jede Erkenntniß, wenn sie klare Merckmale hat, ein Urtheil ist, sind alle definitiones zugleich Urtheile. vor allen analytischen definitiones gehen viele Judicia Elementaria voraus, welche die Merckmahle Exponiren, die den Begrif des Definiti in sich enthalten. Es ist manigmal zu meiner absicht annehmlich etwas zu beweisen, wo blos ein Merckmal nothwendig, und die gantze Definition öfter überflüßig ist z.E. wenn ich sage: die Seele des Menschen ist uncörperlich, so bedarf ich nicht der gantzen Definition, sonderen ich nehme nur das eine Merckmal, nemlich die Theilbahrkeit heraus, und sage: jeder Körper ist Theilbahr, die Seele aber ist einfach, folglich kann sie nicht corperlich seyn.",
      "pages": [
       {
@@ -29085,7 +29088,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s11-001",
      "kind": "text",
-     "aa": 274,
+     "aa": 273,
      "text": "Eigentlich kennen wir schon aus der vorigen Section die Urtheile, weil wir von den deutlichen Begrifen gehandelt haben, welche aber nur durch ein Urtheil entstehen können, denn deutlich erkennen heißt alles durch Ein klares Merckmal erkennen. Durch ein klares Merckmal aber etwas erkennen heißt eben auch urtheilen. Wir können also auch sagen: deutliche Begrife sind solche, die durch ein Urtheil erkannt werden. nunmehro: die 2 Begrife, die mit einander verglichen werden, und zwar so, daß der eine die Merckmale, und der andere die Klarheit in sich enthält, machen die Materie des Urtheils aus. Derjenige Begrif nun, der durch die Vergleichung mit seinem Merckmale soll deutlich gemacht werden, heißt das Subject. hingegen derjenige Begrif, der zum Merckmale als ein Grund der Deutlichkeit hinzukommet, heißt das Praedicat.",
      "pages": [
       {
@@ -29161,7 +29164,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s11-005",
      "kind": "text",
-     "aa": 275,
+     "aa": 274,
      "text": "2 te Stück eines jeden Urtheils ist die Form desselben. Diese drückt nun immer die Copula est aus diese Copula wird nun Simpliciter gesezt, wenn sie das Verhaltniß zweier Begrife in ihrer Verknüpfung anzeigt drückt sie aber das Verhältniß im Wiederstreite derselben aus, so wird sie noch mit dem Worte non begleitet. Dieses non drücket nun die negation des Urtheils aus, aber NB: nur alsdenn, wenn es die Form des Urtheils, d.i. die copula afficiret.",
      "pages": [
       {
@@ -29261,7 +29264,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s11-011",
      "kind": "text",
-     "aa": 277,
+     "aa": 276,
      "text": "Alles Verhaltniß in den Urtheilen ist entweder ein Verhältniß der Verknüpfung, oder ein Verhältniß des Wiederstreits. Dasjenige Urtheil nun, wodurch das Verhältniß der Verknüpfung zweier Urtheile mit einander angezeiget wird, heißt ein Hypothetisches Urtheil. Dasjenige Urtheil aber, in welchem das Verhältniß des Wiederstreits zweier Urtheile angezeiget wird, heißt ein Disjunctives Urtheil. man nennt nemlich diejenige Urtheile, wo man sich das Verhältniß zweier Urtheile mit einander denckt, Verhaltniß Urtheile (relative), diese Urtheile nun betrachten das Verhältniß eines Urtheils zum anderen, entweder der Verknüpfung nach, und alsdenn sind sie Hypothetische Urtheile, oder dem Wiederstreit nach, und sie sind sodan disjunctive urtheile. bey den ersteren findet man immer das Verhältniß des Grundes zu den Folgen. in bedingten Urtheilen nun heißt das, was den Grund in sich enthält, antecedens oder auch prius. Das aber was die Folgen in sich enthält, heißt in denselben consequens oder posterius. was nun aber die disjunctive Urtheile anbelangt, so ist in denselben das Verhältniß des Wiederstreits wieder von zweierley Art, entweder ist selbes ein Verhältniß zweier oder mehrer Urtheile, die einander wiedersprechen, allein wir werden zeigen, daß ein wahres disjunctives Urtheil nur bey zwei, und gar nicht bey mehreren Urtheilen statt finde, denn kein wahrer und reiner wiederspruch kann anders statt finden, als nur bloß bey zwei Begrifen, die accurat einander entgegen in opposition stehen. Es heißt auch alsdenn bimembris propositio und da nun also die disjunctive Urtheile das Verhältniß eines wahren wiederspruchs in sich enthalten, so können sie nur 2 Urtheile in sich faßen. wenn wir bloß rational urtheilen, so muß die Propositio disjunctiva im Urtheil Bimembris seyn, diejenige disjunctive Urtheile aber alle, deren propositio disjunctiva nicht bimembris ist, sind aus der Induction entstanden, denn wie weiß ich anders, daß ich die Fälle auch recht enumerirt habe, als nur aus der Erfahrung, und also per inductionem. Ein Disjunctives Urtheil, wenn es ohne Induction soll gewiß werden, muß bimembris seyn. Ein disjunctives Urtheil ist nichts mehr als eine Vorstellung einer logischen Eintheilung, oder Repraesentatio Divisionis Logicae.",
      "pages": [
       {
@@ -29300,7 +29303,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s11-012",
      "kind": "text",
-     "aa": 278,
+     "aa": 277,
      "text": "Ein Exponibles urtheil ist ein solches, welches eigentlich auf eine versteckte Weise 2 urtheile hat, nicht so, daß es etwa 2 Subjecte, oder Praedicate hat, sonderen die Urtheile sind in demselbigen zweierley der Quantitaet, auch der Qualitaet nach, denn sie sind bejahend, auch verneinend. Die logic nun hat die Pflicht, sie muß die exponible urtheile exprimiren. was bedeuten die Fragen: Quae? Qualis? Quanta? 1. die Frage Qualis est propositio? zielt auf die Qualitaet, ob nemlich das Urtheil bejahend, oder verneinend war. 2. Quanta est propositio? hielte die Frage in sich, ob es ein allgemeines, oder ein besonderes urtheil ware? 3. quae est propositio? ist die Frage, ob das Judicium purum, oder modale sey. Modal aber heißt ein urtheil, welches eine Urtheils Bedingung beym Praedicato führet auf diese Fragen muß nun nach Beschaffenheit des Urtheils geantwortet werden. wenn nun ein leeres Urtheil vorkam, so pflegte man dahero zu sagen: Quae? qualis? Quanta? d.h. es ist auch nicht das geringste in dem Urtheile.",
      "pages": [
       {
@@ -29352,7 +29355,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s11-015",
      "kind": "text",
-     "aa": 279,
+     "aa": 278,
      "text": "Alle unerweisliche Urtheile, in so ferne sie sind der Grund aller Urtheile, heißen sie Grund Satze und sind sie entweder Theoretisch, oder practisch. ein practisch unerweislicher Satz heißt ein Postulatum. alle diese Principia sind entweder material, in so fern sie nemlich einen medium terminum haben, oder Formal, die keinen medium terminum haben. Diese haben gar kein determinirtes Praedicat, sonderen gehen nur blos auf das Verhältniß derer Praedicaten zu denen Subjecten überhaupt. zu diesen nun gehöret das Principium contradictionis, und das Principium Identitatis. zu diesen ist nemlich kein bestimtes Subject und Praedicat, oder kein bestimter Fall, sonderen es kann auf ein jedes Subject und Praedicat angewendet werden. wir haben nun in unseren Urtheilen eine zweifache Form, nemlich die Synthetische, und analytische Form, das Principium contradictionis nun ist nur analytisch.",
      "pages": [
       {
@@ -29442,7 +29445,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s11-019",
      "kind": "text",
-     "aa": 281,
+     "aa": 280,
      "text": "Ein jeder Schluß ist überhaupt ein Urtheil, nur mit dem Unterschiede: ist das Urtheil Mittelb ar so ist es ein Vernunft-, oder ein mittelbarer Schluß. ist aber das Urtheil unmittelbahr, so ist der Schluß nur ein Verstandes Schluß es wird nemlich eins aus dem anderen geurtheilt absque medio Termino alsdenn ist das Urtheil, oder auch die Conclusio immediata, oder eins wird aus dem anderen geschloßen per medium Terminum, und alsdenn ist der Schluß mediate, oder auch ein Vernunft Schluß. wir wollen nun nur allein mittelbahre Schlüße erwegen. was ihre Entstehungs Art anbelangt, so ist diese 5erley, denn entweder können sie entstehen",
      "pages": [
       {
@@ -29605,7 +29608,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s11-028",
      "kind": "text",
-     "aa": 282,
+     "aa": 281,
      "text": "Zweitens Judicia Contraria können beyde falsch seyn, denn in beyden ist zu viel, und können eben in ihrem zu viel auch falsch seyn. von 2 reinen Oppositionen muß beständig dieses gelten können: posito uno tollitur alterum. et vice versa Bey aller Logischen Conversion (vid. ant. § 346) der Urtheile heißt das urtheil, welches umgekehrt werden soll, conversum, das Urtheil, welches dieser Umkehrung entspringen soll, convertens. Eine Conversio bey der die Qualitaet des Urtheils nicht gehindert wird, heißt Simplex, wo sie aber gehinderet wird, conversio per accidens. allgemein bejahende Urtheile laßen sich per accidens umkehren, alle verneinende Urtheile aber laßen sich Simpliciter umkehren, und endlich die particulare laßen sich alle Simpliciter umkehren, das ist die einzige Regel der logischen Conversion. Die Regel der Contraposition ist diese: allgemein bejahende Urtheile laßen sich nur contraponiren.",
      "pages": [
       {
@@ -29665,7 +29668,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s12-002",
      "kind": "text",
-     "aa": 283,
+     "aa": 282,
      "text": "Wenn zwei Begrife zusammen gesezet werden, der eine das Merckmahl des anderen ist, so wird in diesen Begrifen ein gewißes Verhältniß gesezet. Dieses Verhältniß kann nun unmittelbar vorgestellet werden, und denn ist es ein Judicium. wenn es aber per notam intermediam geschieht, so ist es ein Ratiocinium. oder der Vernunft Schluß ist nichts anders, als die Vergleichung einer nota remota mit der Sache selbst, vermittelst einer Nota intermedia. Das mittelbare Verhältniß einer Nota remota ist immer remota in Absicht der Sache, aber auch nota proxima von der Nota intermedia, und also eine Nota rei ipsius, mit dem gegebenen Begrif, das ist ein Judicium medium, oder ein ratiocinium.",
      "pages": [
       {
@@ -29711,7 +29714,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s12-004",
      "kind": "text",
-     "aa": 284,
+     "aa": 283,
      "text": "Also zu schließen erforderet nur die Synthetische Art der Vernunft, diese erforderet nun immer, daß man vom allgemeinen zum besonderen herabgehen soll, verkehret man dieses um, so ists wieder die Vernunft, und es wird alsdenn gleich ein Sprung begangen. und dahero muß auch major propositio immer, oder das Praedicat der conclusion zu erst kommen, oder zu erst muß ich per notam remotam, zur nota proxima gehen, denn muß ich wieder von der Nota proxima zur Sache, und endlich von der Sache zur nota remota gehen. Das ist die Synthesis der Vernunft, und läßt man diese aus den Augen, so beobachtet man auch nicht die Ordnung. in Jedem Vernunft Schluße giebt es also gewiße Terminos, deren müßen nun nicht mehr als 3 vorhanden seyn, und es finden auch in jedem rechten Vernunft Schluße nicht mehr als 3 iudicia Statt. Die 2 ersten heißen die Praemißen, das 3 te Urtheil aber heißt die Conclusion. Die Praemißen nun machen die Materie, die Conclusion aber die Form der Vernunft Schlüße aus, mithin wird die richtige Form eines Vernunft-Schlußes einzig, und allein beruhen auf der richtigen Folge der Conclusion. in beiden Schlüßen nun komt immer der medius Terminus oder die Nota intermedia (aber gar nicht in der Consequens selbst) vor. Jeder Vernunft-Schluß ist nichts anders, als eine Vorstellung eines Merckmals vermittelst eines Termini medii. Zu einem Vernunft Schluß gehöret, daß ein Merckmal einem anderen Merckmale der Sache als einer Notae nota untergeordnet werde. ich vergleiche also in einem Vernunft Schluße die Nota remota mit der Nota proxima, denn die Sache mit der nota proxima, und endlich auch die nota remota mit der Sache selbst. Alle Form der Vernunft-Schlüße ist nur zweyfach, und mehrere finden auch nicht statt, denn entweder ist das Urtheil Unmittelbar, oder Mittelbar",
      "pages": [
       {
@@ -29833,7 +29836,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s12-012",
      "kind": "text",
-     "aa": 285,
+     "aa": 284,
      "text": "Wenn in einem Vernunft Schluß das Verhältniß zweier Urtheile (nicht zweier Begrife) erwogen wird, so heißt das ein Ratiocinium Extraordinarium oder wenn ein Vernunft Schluß angenommen wird, wo major propositio nicht ein Judicium ordinarium sonderen ein Judicium Extraordinarium ist, so heißt es alsdenn auch ratiocinium Extraordinarium. alle ratiocinia Extraordinaria sind entweder Hypothetica oder Disjunctiva. Denn entweder wird in denselben das Verhältniß der Verknüpfung, oder das Verhältniß des Wiederstreits angezeiget; ist das erste, so heißet er ein Hypothetischer, im anderen Fall aber ein Disjunctiver Vernunft Schluß. Das Judicium Hypotheticum bestehet nur aus 2 Sätzen, und kann also kein Judicium Hypotheticum ein ratiocinium hervor bringen. im Judicio Hypothetico darf nur die consequens bewiesen werden, denn es wird in demselben nichts enunciret, und behauptet. allein bey denen Judiciis Categoricis muß nicht allein die Consequens, sonderen auch die Assertion selbst aus richtigen Gründen bewiesen werden. Der bedingte Schluß ist kein Vernunft Schluß, sonderen nur das Substratum zum Vernunft Schluße, denn er muß noch erst per ratiocinium bewiesen werden. es ist erst die Quaestion selbsten, und das Datum, was noch bewiesen werden soll, es ist also eigentlich dadurch noch nichts bewiesen, sonderen nur ein Grund gesagt, von welchem man zugleich affirmiret, daß seine Folge richtig seye, wie sie aber richtig seye, das sehe ich dadurch gar nicht ein, es ist nur blos, soz u sagen, der Beweißgrund, nicht das Beweißthum das heißt: es ist dadurch nur bloß die materie aber nicht die Form des beweises gegeben. es ist diese Zergliederung gewiß gar nicht unnötig, und gantz richtig. Denn im Judicio conditionali ist gar kein Subject mit einem Praedicat, durch ein mittelbares Merckmal verknüpfet, und es ist in einem solchen Schluße gar keine major propositio drinnen, und also sind sie auch gar keine ordentliche Vernunft Schlüße, sonderen nur erst Substrata zu denenselben, man schlüßt nach denenselben nicht würcklich, sonderen man sagt nur bloß daselbst, was man schlüßen will. aller Beweiß geht entweder auf die Wahrheit des antecedentis, oder des consequentis. jeder Syllogismus Hypotheticus hat 2 modos, nemlich einen modum ponentem, wo eine Bejahung in der Conclusion geschloßen wird, und den modum tollentem, wo nemlich eine Verneinung geschloßen wird. Eine Bejahung wird hier nach der Regel geschloßen: atqui verum est prius, ergo quoque posterius. Die Verneinung aber aus der Falschheit des consequentis auf die Falschheit des antecedentis, und zwar nach der Regel: atqui falsum est prius, ergo quoque posterius remoto antecedente non tollitur consequens sed sublata consequentia tollitur antecedens. ich kann hier also niemahl a negatione antecedentis auf die negationem consequentis schließen, aber wohl umgekehrt.",
      "pages": [
       {
@@ -29995,7 +29998,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s12-020",
      "kind": "text",
-     "aa": 288,
+     "aa": 287,
      "text": "Ein jeder in der Form falscher Schluß ist ein Paralogismus. ein jeder falscher Schluß aber, der ein Mittel seyn soll, in dem anderen einen Irrthum hervorzubringen, heißt ein Sophisma. es giebt unterschiedene Sophismata, die mit vielen Nahmen könnten beleget werden, welches aber gar nicht nöthig ist. sonsten giebt es noch wohl einige Sophismata, die in der logica eine Stelle verdienen, denn einige von denenselben können wahrer, als die andere seyn. sonsten gedencket hier auch der Autor des Sophisma ignorationis elenchi. für uns aber ist nur dieses dabey zu bemercken: Derjenige, der beym Streit die Streitfrage vergißt, begehet ein Sophisma ignorationis elenchi.",
      "pages": [
       {
@@ -30472,7 +30475,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s13-023",
      "kind": "text",
-     "aa": 292,
+     "aa": 291,
      "text": "Die künstliche Lehrart wird contradistinguiret der Natürlichen, so wie ein Untersch eid zu machen ist zwischen einer vernünftigen Erkenntniß, d.i. einer solchen, die der Vernunft nicht wiederspricht, und einer Vernünftigen Erkenntniß, wenn man unter derselben nemlich eine solche Versteht, die aus der Vernunft entsteht. so heißt auch eine Erkenntniß im Zweifachen Verstand natürlich nemlich 1: wenn sie mit der Natur des Objects und des Subjects übereinstimmet, und denn 2: tens wenn sie aus der Natur entspringt. Die Lehrart muß nicht so wohl Subjectiv, als objectiv natürlich d.i. dem object angemeßen seyn.",
      "pages": [
       {
@@ -30801,7 +30804,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s15-002",
      "kind": "text",
-     "aa": 295,
+     "aa": 294,
      "text": "Styl bedeutet eigentlich das Werckzeug eines Bildhauers. Hier bedeutet es den Character seine Gedancken auszudrücken. jeder hat seinen besondern Styl, so wie jeder seine besondere Hand schreibet. Der Styl ist zu erwägen 1) in so fern er angemeßen ist seinem object. 2) der Person (Subject) und ihrem Stande. 3) denen für die man schreibt. Für jeden schickt sich ein besonderer Styl, und jeder kann nicht seine Gedancken in die Form eines anderen bringen.",
      "pages": [
       {
@@ -30871,7 +30874,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s16-005",
      "kind": "text",
-     "aa": 296,
+     "aa": 295,
      "text": "Es ist von einander zu unterscheiden: einem eine Meinung beybringen, und eines Meinung wiederlegen. im ersten Fall ist das Subject leer, in dem anderen aber muß ich es entleeren. Vor aller Belehrung muß ich erst die Data haben, worinn der andere irret. Jeder Irrthum ist als ein Phaenomenon anzusehen, welches einer Erklarung würdig ist. ich muß erst einsehen, wie er zu dem Irrthum hat kommen können. Da muß ich auch den Theil der Wahrheit in seinem Irrthum ausspühren.",
      "pages": [
       {
@@ -30949,7 +30952,7 @@ const LOGIK_BLOMBERG = {
     {
      "id": "blomberg-s17-002",
      "kind": "text",
-     "aa": 297,
+     "aa": 296,
      "text": "Alle gelahrte Schriften sind entweder Historische, oder Dogmatische. eine Schrift kann Historisch seyn sowohl der Materie nach, wenn sie etwas würcklich geschehenes oder Erkenntniß vom Individuo ist, als auch der Form nach. Die Form heist Historisch, die nicht rational ist, wo ich nicht durch allgemeine Erkenntniß der Gründe herleite.",
      "pages": [
       {

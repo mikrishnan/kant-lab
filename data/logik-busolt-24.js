@@ -40,11 +40,14 @@
      kind    text | note | rule. `note` is an AA cross-reference standing in
              the text (`Vgl. Logik Philippi § 428-544, xxiv 484ff.`); `rule`
              is a horizontal rule the transcription sets.
-     aa      the AA XXIV page the block starts on — cite as `AA 24:<aa>`
+     aa      the AA XXIV page the block starts on — cite as `AA 24:<aa>`.
+             For a block that runs over a page, that is the page before the
+             first entry in `pages`, and text from that entry on is on the
+             later page: cite the page the quoted words stand on
      aaEnd   the page it ends on, where it runs over one
      pages   where the block crosses a page: { p, i }, page `p` beginning at
-             character `i` of `text`. The first entry is at i=0 when the block
-             itself begins a page. Re-inserting these restores the
+             character `i` of `text`. A block that begins at the top of a page
+             has no entry for it; `aa` names the page. Re-inserting these restores the
              transcription's own lineation exactly; the extractor checks that
              on every run.
      ms      the manuscript's own pagination, the same way: { p, i } for the
@@ -592,7 +595,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s02-005",
      "kind": "text",
-     "aa": 609,
+     "aa": 608,
      "text": "Hinieden findet sich bei uns das Vermögen zu handeln, und daher entstehet die natürliche Logik. Denn die Logik ist die Wißenschaft der Regeln. Der Mensch handelt im Anfange nach Regeln, denen er sich nicht bewußt ist; also hat er so lange eine natürliche Logik; komt er zu reiferem Alter so berichtigt er diese durch Regeln, und so entsteht die künstliche Logik. So redet jemand deutsch und bringet sich nachher Regeln aus einer deutschen Grammatik bei. Die Gramatik ist aber nur eine Disciplin, die Logik eine Wißenschaft; Doktrin. Der Unterschied zwischen Disciplin und Wißenschaft oder Doktrin ist der; Bei der ersteren kann man nicht wißen, warum etwas so und nicht anders ist, bei der andern aber hat man einen inneren Beweiß davon. bei der erstern Consultiren wir die Erfahrung, bei der andern den Verstand allein, die erstere ist besonders die andere allgemein, die erste heißt Scientia empirica, die andere Scientia scientifica. Der Mensch hat Kräfte deren einige dazu dienen, Materialien zu schaffen andere sie zu ordnen. Das erste thut die Sinnlichkeit, das andere die Vernunft und die Urtheilskraft.",
      "pages": [
       {
@@ -614,7 +617,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s02-006",
      "kind": "text",
-     "aa": 610,
+     "aa": 609,
      "text": "Die künstliche Logik nun (denn von dieser ist hier die rede) gehet mit allgemeinen Regeln um, mithin mit solchen die in allen Wißenschaften, und bei Beurtheilung aller Gegenstände gebraucht werden müßen. Sie sondert demnach alles zufällige, alles besondere ab, und abstrahiret also auch vom Unterschiede der Gegenstände. Sie erwählt nur die Form nicht aber die Materie oder den Inhalt der Dinge. Bei jeder Erkenntniß ist zu unterscheiden Materiale z.E. Wenn die Körper schwer seyn; so werden sie von andern getrieben, und Formale z.E. Wenn Gott gerecht ist so bestraft er die bösen Handlungen. Materie ist der Gegenstand des Erkenntnißes, Form, die Art, wie wir die Gegenstände erkennen. Z.E. die Physik erkennt die Gegenstande des äußeren die Psychologie aber des innern Sinns. Beides erkennen wir empirisch, dieses ist die Form welche also bei Beiden gleich ist. Demnach ist die Logik, in dieser Betrachtung die Wißenschaft von der Verstandesform. Ihre Regeln sind also a priori d.i. ihre allgemeine Regeln haben demnach zu ihren Principien die Vernunft, da hingegen die Grammatik, und jede andere empirische Wißenschaft Regeln a posteriori haben, d.i. solche, die die Erfahrung zu ihren principien haben. Die Erfahrung lehret uns wie eine Sache wirklich ist, die Vernunft aber wie sie seyn muß, oder woher sie also sey. Daß z.E. das Wasser flüßig ist lehret die Erfahrung woher es aber flüßig sey lehret die Vernunft. Wie die Menschen sittlich handeln sehen wir aus der Erfahrung, wie sie handeln sollen sehen wir aus der Vernunft. Alle unsere Erkenntniße haben zwo Qvellen die Sinne und den Verstand; beide zusammen machen das Erkenntnißvermögen aus. Dieses erkennen heißt cognoscere. Die Sinne geben die Materie zum Denken der Verstand aber denkt. Die Sinne geben die Vorstellung, dieser die Regel. Die Regeln der Erkenntniß sind entweder",
      "pages": [
       {
@@ -684,7 +687,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s02-012",
      "kind": "text",
-     "aa": 612,
+     "aa": 611,
      "text": "In der Logic muß man keine fremde Wißenschaft einmischen, so gehört z.E. nicht in die Logic die empirische Psychologie: denn dieses ist die Lehre von den Phänomenen der menschlichen Seele, oder sie tragt allgemeine Regeln des wirklichen Verfahrens der menschlichen Seele vor. Vor allem die Logic lehrt nicht wie wir wirklich verfahren, sondern wie wir verfahren sollen Dies zeigt auch selbst schon das Wort Regel an: Denn eine Regel ist die Bedingung unter welcher etwas hervorgebracht werden soll. Wir teilen die Regeln des Verstandes ein, in subiective, vom wirklichen Verfahren des Verstandes. In Objective, von den richtigen Regeln nach denen man verfahren soll. Die Logik ist eine Lehre von den allgemeinen Gesezzen des Verstandes überhaupt. Sie sieht nur auf die Form des Verstandes bei einem Gegenstande, nicht auf den Inhalt desselben, z.E. ob ein Schluß nach Schluß Gesezzen gemacht sei. Der Logische Verstandesgebrauch ist entweder, allgemein, und der heißt sensus communis, sana ratio, bon sens, d.i. man kann dadurch etwas geradezu begreifen, und dieser gemeine Verstand, ist der so genannte Mittelverstand. Das heißt wenn jeder gleich viel Verstand hätte, so würde gerade so viel Verstand unter den Menschen seyn, als izzo ist, da derselbe so ungleich von der Natur verteilt wird jedoch hat jeder davon genung, und niemand beklagt sich über Mangel an Verstand denn nur mit seinem Verstande kann er die Gränzen des Verstandes meßen. Auf diesen Gesunden Verstand bezieht man sich in neuern Zeiten, gleichsam als eine Göttliche Offenbahrung, und man glaubt berechtigt zu seyn, sich im Nachdenken nicht weiter zu üben, und Mühe zu geben, weil es doch ein jeder leicht einsehen könnte. Oder 2. Speculatiuisch der Unterschied zwischen dem gemeinen und speculatiuen Verstande; es kommt darauf an, daß der Speculativische in abstracto der gemeine in Concreto die Dinge erkent, z.B. die Regel aus dem Naturrecht: Casum sentit dominus versteht der speculativische Verstand ohne Anwendung auf diese oder jene besondere Fälle des gemeinen Lebens. Der Gemeine Verstand muß aber erstlich Beispiele und Beweise haben. Anmerkung Man kann sich nur erst alsdann auf den Gesunden Verstand Beziehen, wenn etwas in Concreto erkannt werden kann. Der speculatiue Verstand muß sich dem Gemeinen zu beqvemen suchen, d.i. er muß das, was er in Abstracto erkannt hat in Concreto begreiflich machen, und dies heißt die Popularitaet. Eben diese ist ein Beweis, daß unsere spekulativische Erkenntniß klar und deutlich sei. Nach diesem doppelten Verstandesgebrauch wird die Logik in die Natürliche und spekulativische eingeteilt. Die eigentliche Logic ist die Lehre von dem spekulativischen Verstandesgebrauch: denn die Natürliche hat schon jeder selbst sie ist auch darum spekulativisch, weil sie Regeln in abstracto vorträgt.",
      "pages": [
       {
@@ -710,7 +713,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s02-013",
      "kind": "text",
-     "aa": 613,
+     "aa": 612,
      "text": "Bei den Aristotelicern wurde die Logic in Analytik und Dialektik d.i. nach des Autors Erklärung in die Logic 1. des gewissen und 2. des wahrscheinlichen Erkenntnißes unterschieden. Allein so kann man sie nicht vollkommen genung unterscheiden: denn beides hat solcher Gestalt wahrheit zum Objekt und es differirt nur in Ansehung der Gewißheit, indem man das eine durch unzulängliche, das andere durch zulängliche Gründe darstellt. Die gehörige Erklärung, der Analytic und Dialectic soll diese seyn: Die Analytic ist die Logic der Wahrheit Dialectic ist die Logic des Scheins was ist nun nach dieser Erklärung die Logic ist sie Analytik oder Dialectic? Als Kanon betrachtet ist sie eine Analytik, und als Organon eine Dialectic. Sieht man die Logik, als Organon betrachtet, für die Logic der Wahrheit an, so wird ein Advocat ein Rabulist ein Philosoph ein Sophist denn man urtheilt solcher Gestalt von Gegenständen nach allgemeinen Regeln, ohne den Gegenstand selbst zu kennen, wie z.B. vor kurzem Disputationen etc. etc. alles nach Mathematischer Ordnung vorgetragen wurde. Demnach war die Form gewahrt. Die Materie aber falsch vorgetragen Dennoch ist die Uebung in der Logik des Scheins nicht zu tadeln. Die Logic heißt Vernunftlehre, nicht aber in Ansehung der Ordnung ihres Vortrages: denn jede Wißenschaft muß Vernunftmäßig vorgetragen werden, weil sie die Vernunft zum Gegenstande hat. Statt Vernunftlehre könnte man sie auch Verstandeslehre nennen: denn den Verstand brauchen wir bei allen Gegenständen, die Vernunft aber nicht. Man darf in der Logic nicht ganz abstrahiren, sondern man kann auch Exkurse in die Psychologie und in die Regeln in Concreto machen: maaßen die Logic eigentlich die Lehre von der Gränznachbarschaft derer Vernunft mit der Sinnlichkeit, Psychologie und Geschichte ist. Logic ist der Kanon der Vernunft.",
      "pages": [
       {
@@ -782,7 +785,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s04-004",
      "kind": "text",
-     "aa": 614,
+     "aa": 613,
      "text": "Cognitio ex datis ist, wenn uns ein Objekt gegeben ist z.B. das wir aus der Erzählung anderer haben z.B. die Bewegung der Sterne, wer aber anzugeben weiß, warum eine Sonnenfinsterniß eben zu der zeit entstanden der Beweist ex principiis. cognitio a posteriori ist die Empirische cognitio a priori, ist die Speculative Vernunfterkenntniß. Diese haben wir entweder 1. aus Begriffen, d.i. die Philosophische Erkenntniß",
      "pages": [
       {
@@ -1077,7 +1080,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s05-030",
      "kind": "text",
-     "aa": 619,
+     "aa": 618,
      "text": "Hieraus entstehet die Mischung unserer Erkenntniße aus Empfindungen und Begriffen. Ist unsere Erkenntniß von allen Empfindungen abgesondert, so ist sie rein. Je reiner die Erkenntniß, destoweniger ist sie Empfindung. Je stärker die Empfindung ist; destoweniger und richtig rein ist die Erkenntniß. Demnach müßen wir uns nicht durch die blendende Zauber Kraft der Sinnen hinreißen laßen, sondern erst die Erkenntniß selbst gründen, und dann die Empfindung darauf bauen, und so entsteht die gehörige Erbauung. Empfindungen ueberraschen, Erkenntniß kommt nach und nach; jene sind etwas vorübergehendes, diese etwas Beständiges. Die General aesthetische Vollkommenheit besteht in Reiz und Rührung. (Delinementum est mentis concussio.) Attrahit delinementum, nos quoad contemplandum longius objectum detinent. Convolvit concussio animum nobisque quasi quendam horrorem infundit. Mens delinementa sentit, quandam animae voluptatem, atque in objectum quasi acquiescit. Concussio est tamquam animae aliqua actio. Delinemento, ne ob dulce animis condimentum fastidium moveat, concussionis atque commutationis aliquid admisceatur, conquassatio haec est, habitur quidam dolor, puncto temporis inquinatam voluptatem resolvitur.",
      "pages": [
       {
@@ -1099,7 +1102,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s05-031",
      "kind": "text",
-     "aa": 620,
+     "aa": 619,
      "text": "Von den mancherley Arten der Erkenntniße. Eine Vernünftige und eine Vernunft Erkenntniß sind sehr unterschieden. Eine Vernünftige Erkenntniß ist, wenn sie nur Vernunftmäßig ist, d.i. die der Mensch durch seine Vernunft einsehen kann, und Vernunfterkenntniße sind die, die aus der Vernunft hergeleitet sind; in jeder Wißenschaft erfordert man solche. Der Autor sagt, ein Gelehrtes Erkenntniß, und eine Philosophische Erkenntniß wäre einerley, aber sie sind sehr unterschieden. Denn alle unsere Erkenntniß ist entweder historisch oder vernunfts Erkenntniß, diese muß seyn speculativ aus Begriffen, wenn sie Philosophie seyn soll. Zum historischen Erkenntniß gehört die Litteratur, dieses kommt her von Litterator, d.i. einer der die Bücher kennt, dieser ist ein Philolog, wenn er ein Kritikus ist, und besonders die alten Sprachen kennt. Es ist schon ein großer Grad eines solchen gelehrten bis auf den Polyhistor, dieser ist gleichsam ein Gigant der Gelehrsamkeit. Er lernet nicht die Philosophie und Mathematik, sondern er weiß sie schon Historisch. Er hat eine Bücherkenntniß und beurteilt selbst die alten Philosophen. Sie sind nichts als Halbgelehrte, sie wißen Historisch, was große Männer gesagt haben. Aber der Grund fehlt ihnen. Durch den Weg der Nachahmung kann ich kein Philosoph werden, ich muß andern nichts zu Dank haben, sondern durch sie nur ihre Begriffe verbessern. Ein Philosoph ist kein Gelehrter, denn in der Philosophie braucht man nicht unterrichtet zu werden. Ein Gelehrter ist ein solcher, der gelehrt worden ist. Sie wißen nichts anders, als was ihnen gelehret worden. Philosophie und Mathematik kann ich aber aus mir selbst haben, nur die Historie kann ich lernen. Ein Gelehrter ist eruditus nicht Litteratus, der letzte ist der lesen und Schreiben kann. Mathematik ist keine Gelehrsamkeit, sondern eine Vernunft Erkenntniß, Philosophie ist auch eine Vernunft Erkenntniß; in der Philosophie läßt aber sich discursive, in der Mathematik intuitive reden. Einen Mathematischen Schwäzzer kann man sich nicht denken wohl aber einen Philosophen, wenn man nemlich die Ausdrücke lernt, die sie alle gebraucht haben und einiges Neue beifügt. Sie tragen Wißenschaften zur Schau. Die schöne Wißenschaften sind keine Gelehrsamkeit. Es ist gut wenn ein Poet, ein Redner, ein Gelehrter ist, aber was schön ist, was rühret muß er aus der Vernunft haben. Sie sind Künste und nicht Wißenschaften. Es kommt bei denselben nicht darauf an, was zu wißen, sondern was zu können. Es gehöret Wiz, Geschmack, Genie dazu. Die aesthetic ist eine Kritik der Kunst. Die Logische Vollkommenheit macht das besondere allgemein, geht von der Anschauung auf Begriffe. Die aesthetische Vollkommenheit hingegen umgekehrt. Die größte Vollkommenheit ist die Verbindung der Logischen Vollkommenheit mit der aesthetischen, indem man nur alsdann begreift und verständlich wird. Alle Erkenntniß die unsern Verstand angeht, bezieht sich aufs Obiect, alle Erkenntniß die unsere Sinnen angeht bezieht sich aufs Subiect, die Logic geht darauf, das besondere durch allgemeine Begriffe zu erkennen. Die aesthetic erkennt das allgemeine durchs besondere, sie füllt die Seele mit Anschauungen nur an. Die Logic sucht alle Erkenntniß auf Begriffe, die aesthetic alle auf Anschauungen, zu bringen. Beide müßen können vereinbart werden, wenn ich das allgemeine in Konkreto erkennen will. Nur der kann die Erkenntniß Sinnlich machen, der sie anschauend macht. Eine Erkenntniß die zwar Logisch vollkommen ist aber nicht aesthetisch, nennt man wohl gründlich, aber trocken. Auf der anderen Seite ist eine Erkenntniß schön, anregend, angenehm, einnehmend, es fehlt ihr aber an Logischer Vollkommenheit; so ist sie seicht. Das Unterhaltende macht zwar nicht das Wesentliche aus; aber unsere Erkenntniß verliert doch wenn es fehlt. Der Schönheit ist Mangel davon entgegengesezt und auf der anderen Seite Häßlichkeit. Das erste nennt man Trockenheit. Die Affektazion ist eine Häßlichkeit. Man kann die grausamsten Vorstellungen erzählen, und dieselbe doch Schön einkleiden; nur nicht den Ekel, dieser kann durch keine Kunst versteckt werden.",
      "pages": [
       {
@@ -1144,7 +1147,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s06-001",
      "kind": "text",
-     "aa": 621,
+     "aa": 620,
      "text": "Erkenntniß nennt man den ganzen Umfang des Begriffes den jemand von einer Sache erreicht und der alle ihm davon bekannt gewordene Säzze in sich begreift; je größer die Anzahl dieser Säzze ist, desto ausführlicher und vollstandiger, je schärfer man sie erweisen kann, desto gewißer und je öftere Anwendung auf vorkommende Fälle diese Säzze zulaßen, desto nüzlicher ist unsere Erkenntniß. Die Vollkommenheit der Erkenntniß spezificirt sich in die Qualitaet und die Quantitaet. Die Vollkommenheit der Erkenntniß in Ansehung der Qualitaet ist bei allen Erkenntnißen einerley; in Ansehung der Quantitaet kommts bei jedem Gegenstande auf die Menge und den Grad an. In Ansehung der Qualitaet ist die Vollkommenheit der Erkenntniß Theoretisch und Praktisch. Die erste bezieht sich auf den Verstand, die andere auf den Willen. Die erste wird nur in der Logik erwogen, die andere bestimmt Handlungen.",
      "pages": [
       {
@@ -1446,7 +1449,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s08-021",
      "kind": "text",
-     "aa": 625,
+     "aa": 624,
      "text": "Der Horizont der Gesunden Vernunft ist enger begränzt, als der der Speculatiuen. Alles steigt: Naturlehre, Naturgeschichte, Mathematik, Historie und man wird nothwendig alles in engere Form gießen müßen, damit die Wißenschaften nicht in Verfall gerathen, bloß weil sie so hoch gestiegen sind. Denn die Menschen müßten nothwendig decouragirt werden, wenn sie nicht den Namen eines Erfinders Glänzend machen mögten. Man hat also zu izzigen Zeiten viele Philosophie nöthig, um aus so vielen Wißenschaften die nöthigsten und nützlichsten zu wählen. Die Unwißenheit zu erkennen, muß man viel wißen, denn ein Unwißender erkennt nicht seine Unwißenheit. Er kann es nicht begreifen, wie ihm an Weltkenntniß so viel fehlen sollte. Der gemeine Mann z.B. hält die Sterne für Punkte und glaubt, daß sie ein anderer auch dafür halte. Je mehr wir erkennen; desto mehr sehen wir, daß wir noch Unwißend sind, daß wir noch vom großem Felde der möglichen und Nüzlichen Wißenschaften nur einen kleinen theil cultiviren. Um seine Unwißenheit zu kennen, muß man wenigstens einen Umriß der Wißenschaften kennen, damit wir erkennen, was wir wißen und was uns fehlt, wir müßen wenigstens extensiv die Wißenschaften kennen. Die Unwißenheit an und für sich selbst ist etwas tadelnswürdiges, nicht aber jede Unwißenheit ist zu bedauren denn derienige, der immer hinter die Handlungen der Menschen grabt und die Quelle derselben aufsucht, wird zulezt, wenn er nur ueberall eigennuzzig eigenes Beste und eigene Absichten als Bewegungsgründe zu Handlungen findet, Tugend für Chimäre, und Ausübung derselben für Thorheit halten. Vollkommene Tugend hat nie einer und kann auch nicht ausgeübt werden. Gelehrte die ihre Unwißenheit kennen, werden nicht selten wirr, z.B. Condamine der berühmte Französische Naturalist der bei erblickung des unerschöpflichen Vorraths der Natürlichen Dinge in Peru, alle Lust zur Erweiterung der Naturhistorie verlor. Sie werden uns immer mehr Problemata aufgeben die wir nicht auflösen können. Von der Weitläuftigkeit des Wißens",
      "pages": [
       {
@@ -1603,7 +1606,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s09-007",
      "kind": "text",
-     "aa": 627,
+     "aa": 626,
      "text": "Die Scholastische Kenntniß kann ihrem Grade nach groß der Anwendung nach klein seyn. Will man populair seyn, so muß man von der Gründlichkeit, Ausführlichkeit, bestimmtheit etwas abziehen. Die Scholastische Erkenntniß hat die Gründlichkeit zu ihrem Wesentlichen; die popularitaet zieret und schmükket, nur die Gründlichkeit Soliditaet wird mit dem Gangelwagen der Terminologie geleitet. Eine Predigt muß nicht allein Schulgerecht, sondern auch populair seyn, und es gehört dazu eine anhaltende Herablaßung. Ein Prediger kann kein Galanter Redner seyn. Denn je mehr Würde eine Sache selbst hat, desto weniger Schmuck bedarf sie. Ueberhaupt ist die Soliditaet immer der popularitaet vorzuziehen. Denn je mehr populair desto weniger solide. Die Geschicklichkeit sich aller Welt zu bequemen ist eine Weltkenntniß, und einen der diese besizt, nennt man einen Gelehrten von der Welt. Die Pedanterie ist also der Mangel der Popularitaet des Gelehrten Erkenntnißes.",
      "pages": [
       {
@@ -1659,7 +1662,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s11-001",
      "kind": "text",
-     "aa": 628,
+     "aa": 627,
      "text": "Wahrheit ist die Uebereinstimmung des Erkenntnißes mit dem Obiect. Der Wahrheit wird der Schein kontradiktorisch entgegen gesezt. An der Frage der allgemeinen Kriterien scheitert der Philosoph. Sie haben kein allgemeines Kriterium der Wahrheit finden können. Ein allgemeines Kriterium ist wo ein Merkmahl an die Hand gegeben wird, ohne betracht des Gegenstandes selbst; es muß gegen alle Gegenstände gleichgültig seyn, die Erklärung muß hier abstrahirt werden von allen unterschieden bestimmter Gegenstände; sie beschaftigt sich also bloß mit der Form. Es liegt also das allgemeine Kriterium der Wahrheit schon in der Frage. Er will Zeichen der Wahrheit haben, und dies ist die uebereinstimmung des Erkenntnißes mit dem Obiect. Er will allgemeine Kennzeichen haben d.i. er will ein Zeichen haben, welches allgemein auf alle Gegenstände geht, er will ein Zeichen von der Form haben. Das allgemeine Kriterium der Wahrheit ist hier also bloß Formale, die Uebereinstimmung des Erkenntnißes mit dem obiect. Die Logic kann also bloß Formale nicht Materiale allgemeine Kriteria der Wahrheit geben. Sie giebt bloß ein relatiues Kriterium an, allgemeine materiale Kriterien der Wahrheit kann die Logik nicht geben. Denn eine Erkenntniß kann beziehungsweise auf ein obiect falsch seyn auf ein anderes aber wahr. Ein jedes Obiect hat sein Materielles Kriterium. Das Materiale Kriterium kann nicht von allen obiecten gelten. Materielle Wahrheit besteht bloß in der Unterscheidung eines Gegenstandes von andern. Wer also von dem Logiker ein allgemeines Kriterium der Wahrheit verlangt, muß nicht eine Erkenntniß des Obiects, obs richtig ist, auch kein allgemeines Kriterium der Wahrheit verlangen. Das allgemeine Kriterium der Wahrheit in der Logic ist eine Uebereinstimmung der Erkenntniß mit sich selbst. Dies Merkmahl giebt indirecte einen Unterschied an, daß wenn eine Erkenntniß der Logischen Form zuwider ist, sie gewiß falsch ist, weil sie sich selbst widerspricht.",
      "pages": [
       {
@@ -1709,7 +1712,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s11-005",
      "kind": "text",
-     "aa": 629,
+     "aa": 628,
      "text": "Die Beurtheilung a posteriori, ob ein Saz, den ich nach allgemeinen Verstandes Regeln gemacht habe, auch bei jedermanns Verstande, Beifall findet kann man nicht entbehren. Sie ist die Probe ob ein Saz mit den gemeinen Verstandes Gesezzen stimme, oder nicht Merkmahle sind nicht obiectiv sondern subiectiv, sie sind von der Einstimmung anderer, besonderer subiecte hergenommen. Es giebt daher Obiective Kriteria der Wahrheit, diese bestehen in der Uebereinstimmung der Erkenntniß mit den Gesezzen des Verstandes und der Vernunft. Diese sind nicht hinreichend. Es giebt zwei subiectiue Kriteria der Wahrheit, welche zu den vorigen kommen müßen, und darin bestehen, daß man das Urtheil verschiedener Leute zusammennimmt. Ich bekümmere mich also hier um die Uebereinstimmung der subiecte. –",
      "pages": [
       {
@@ -1797,7 +1800,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s11-016",
      "kind": "text",
-     "aa": 630,
+     "aa": 629,
      "text": "Die Logische und aesthetische Wahrheit unterscheidet sich darin; aesthetische Wahrheit ist die, die mit den Zwecken der Sinnlichkeit übereinstimmt. Es kann eins von diesen beiden bei einer Erkenntniß statt finden, das andere aber nicht. Z.B. Man tadelt am Shakespeare, daß er die Geister erscheinen läßt. Es ist hiebei nicht zwar Logische Wahrheit, aber doch Aesthetische denn Shakespeare hat den Zweck dieses Recht den Sinnen zu imprimiren. Ferner ist es ja eben auch nichts unmögliches, daß Geister uns sinnlich erscheinen könnten, ob es gleich nicht ausgemacht ist. Zu diesen Absichten des Shakespears aber ist Aesthetische Wahrheit hinreichend Z.E. in Äsops Fabeln werden die Thiere redend vorgestellt. Wir können uns eine Erkenntniß die ganz wahr, auch eine, die ganz falsch, aber auch eine die weder wahr noch falsch ist denken. Ein jedes Urtheil, wenn es auch falsch ist, muß doch in einiger Absicht mit den Gesezzen des Verstandes stimmen, und auch etwas wahr seyn. Es ist also gewiß daß bei einem falschen Urtheil allemahl etwas weniges wahr sey, wenn es gleich gegen das Falsche unbeträchtlich ist. Der Autor giebt einen Unterschied zwischen einer genauen und groben Erkenntniß. Dieser Unterschied ist Unrichtig. Denn der Groben ist die subtile Erkenntniß entgegen gesezt. Eine genaue Erkenntniß ist eine solche, die mit dem Gegenstand in allen Stücken uebereinstimmt, und dem Zweck gemäß ist. Sie heißt eine praecise Erkenntniß. Eine subtile in welcher ein größerer Grad der Erkentniß ist, als der Zweck erfordert, eine grobe Erkentniß, in welcher ein kleinerer Grad der Erkentniß ist, als der Zweck erfordert. Z.E. Die Erkenntniß Gottes ist eine genaue, grobe auch subtile Erkentniß. Alle Menschen müßen eine richtige Erkentniß Gottes haben. Der Grad der Richtigkeit ist bei verschiedenen Menschen verschieden. Ein Lehrer Z.E. muß schon eine subtile Erkenntniß haben. Wenn er ihn aber sich als ein körperliches wesen dächte d.i. wenn er eine grobe Erkentniß hätte, so wäre er deswegen sehr zu tadeln. Wenn es gleich dem gemeinen Mann erlaubt ist. Die subtile Erkentniß fehlt im Extensiven. Es sind Wißenschaften, die alles praecise verlangen Z.E. Ich gehe spazieren; so ist beßer, wenn ich das Geld, welches ich dazu anwenden will, den Armen gebe, dadurch uebe ich meine Liebespflicht aus. Man sagt: es ist etwas tolerabiliter wahr d.i. wenn der Fehler in der Erkentniß nicht beträchtlich ist; oder wenn das unrichtige einer Erkentniß den Zweck derselben nicht hindert. Der Autor macht § 104 einen Unterschied, zwischen dogmatischen und Historischen Wahrheiten (ex datis) diese werden den Vernunft Erkentnißen (ex principiis) entgegengesezt; nicht aber die dogmatischen. Die Vernunft Erkentniß ist aus Begriffen, und ist ein apodictischer Grund, d.i. der mit dem bewußt seyn der Nothwendigkeit",
      "pages": [
       {
@@ -1857,7 +1860,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s11-021",
      "kind": "text",
-     "aa": 632,
+     "aa": 631,
      "text": "Ein Compendioeses Mittel nicht zu irren ist: gar nicht zu urtheilen. Dieses Mittel ist wohl nicht anzupreisen, dennoch aber ist es gut, wenn die Erkentniß der Sache über unsere Verstandes Erkentniß [nicht] zu sehr erhaben ist; weil daher sehr leicht ein Irrthum entsteht. Man kann urtheilen, und doch nicht irren, wenn man nehmlich nicht unterscheidend urtheilet, nicht Assertorisch; sondern Problematisch; wenn ich zu meinem Urtheil noch hinzufüge: non liquet, es ist nicht ausgemacht. Aber so zu urtheilen ist kein Gewinn für die Vernunft. Ich muß nur am Anfange die Erkentniß Problematisch, mit der Zeit Aßertorisch beurtheilen. Das Problematische urtheilen muß vor dem aßertorischen vorhergehen. Diejenige die Problematisch urtheilen nennt man Zweifler; beßer könnt man sie cunctatores nennen.",
      "pages": [
       {
@@ -1879,7 +1882,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s11-022",
      "kind": "text",
-     "aa": 633,
+     "aa": 632,
      "text": "Alle Urtheile sind Handlungen des Verstandes und der Vernunft ob sie zwar auch irrig sind, so können wir doch nicht sagen, daß der Verstand an sich selbst irre. Denn er ist der Probierstein der Wahrheit. Der Verstand handelt nach seinen Gesezzen jederzeit einstimmend, und die Einstimmung ist formale Wahrheit. Die Sinnen irren an sich selbst nicht. Denn sie urteilen nicht. Der Irrthum entspringt aus der Vermischung beider. Wir unterscheiden nehmlich nicht den Schluß der Sinne von den Wirkungen des Verstandes. Eine Kraft kann nur als denn von ihren Gesezzen abweichen; wenn sich eine andere einmengt. Z.E. Ich laße einen Stein vom Thurm fallen; so werde ich urtheilen, er werde gerade herunter fallen, er wird aber vom Winde zur Seite getrieben; so werde ich doch nicht denken, daß er von selbst abgewichen sey, sondern daß sich eine zweite Kraft untermengt habe, die ihn fortgestoßen. Eben so ist es mit dem Verstande und mit den Sinnen. Wir berufen uns beim Irrthum auf die Schranken der Vernunft und beschimpfen hiedurch nicht uns selbst; sondern die Natur. Dies ist aber Unrecht: denn die enge Schranken der Vernunft sind die Ursachen des Mangels und nicht des Irrthums Jeder Irrthum entsteht theils aus dem Verstande, teils aus den Sinnen, wir müßen also die Quellen desselben bei Beiden suchen. In sofern er nun aus dem Verstande entsprungen ist, ist er wahr. Der Irrthum entspringt auch bisweilen aus dem Verstande, also hat aller Irrthum, als ein Urtheil eine partiale Wahrheit. Wenn Subiectiue Gründe fälschlich für Obiectiue gehalten werden, so ist dies ein Irrthum wir vermengen das Subiectiue mit der Beschaffenheit des Obiects, und dann entsteht ein Irrthum, durch diese Vertauschung. Man vertauscht hier die Bedingungen des Verstandes mit den Bedingungen der Sinnlichkeit. Ein negatiues Kriterium der Wahrheit, ist also die Gewißheit, daß man nicht geirret, daß man die subiectiuen Gründe des führwahr haltens abgesondert habe. Man hat sich bloß des Verstandes mit Sistierung der Sinnlichkeit bedient. Das kommt aber selten vor. – Denn man kann es nicht bemerken, es ist wie eine Bezauberung, wenn man die Sinnlichkeit mit einmengt. Z.E. Wenn jemand ein abergläubisches Histörchen erzählt; so sagt er zuvor, ich bin nicht Abergläubisch, und finde doch das Histörchen wundersam. Indessen muß man sich auf alle mögliche Weise vor dem Einfluß des Verstandes auf die Sinnlichkeit hüten, Z.E. Alles lügen ist Schändlich, man sagt aber, Nothlügen sind erlaubt. Dies sind sie aber nicht. Denn mehrentheils geschieht dies aus Eigennuz; dieser ist ein Einfluß der Sinnlichkeit in den Gebrauch des Verstandes, und hier ist das Lügen eben so schimpflich, als sonst. In jeder Wißenschaft findet eine solche Einmischung statt, ausser in der Mathematik, wo ich alles intuitu einsehe. Der Autor redet von einem gewißen Unvermeidlichen Irrthum (error invincibilis) der so gewiß da eine gewiße Unwißenheit Unvermeidlich ist. Z.E. Wenn der jüngste Tag kommen wird. Ein Irrthum ist immer vermeidlich, das beßte Hülfsmittel ist, nicht urtheilen. Wenn ich aber etwas urteilen muß z.E. In den Dingen der Religion, so ist in diesem Fall zuweilen ein Irrthum unvermeidlich. In der Moral muß man urtheilen, da ist aber kein Irrthum Unvermeidlich: denn sie hat eine gewiße euidenz bei sich. Im Beurtheilen der Dinge der Natur z.E. ob im Mond Einwohner sind, kann ein unvermeidlicher Irrthum seyn, ich darf aber hier nicht urtheilen. Wir haben bei allen Dingen, wo man das absolut große nicht weiß ein Mittelsmaaß, was großer ist als dieses, wird bewundert, was kleiner ist, wird verachtet. Eben so ist es mit dem Verstande: Der gemeine Verstand ist das Mittelmaaß zwischen aller Menschen Verstande, und man nennt das ungereimt, was diesem Verstande wiederspricht. Den Menschen den gemeinen Verstand absprechen ist Beleidigung. Der Irrthum kann oft wiederlegt werden durch eine Probe. – Man muß aber suchen auf die Ursachen und Beschaffenheit des Irrthums zu kommen. Kein Irrthum wird dadurch geheilt, daß er wiederlegt wird: sondern daß er erklärt wird, da man die Ehre der Vernunft anderer sonst beleidigt. Alle Wahrheiten sind entweder nothwendig oder zufällig. – Die Nothwendige müßen durch die Vernunft a priori eingesehen werden, die Zufälligen aber durch die Erfahrung. – Beide werden von der Logic betrachtet, wenn gleich die Regeln der Logic nothwendige sind Mathematic hat nothwendige Wahrheiten, und urtheilet a priori. Die Ausübung und Probe aber bestätigt nicht den Saz; sondern dient zur Erklärung dieser nothwendigen Wahrheiten, welche man Apodictische Wahrheiten nennt.",
      "pages": [
       {
@@ -1924,7 +1927,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s12-001",
      "kind": "text",
-     "aa": 634,
+     "aa": 633,
      "text": "Ein Merkmahl bedeutet einen Teil Begrif einer ganzen Vorstellung. Es betrachtet nicht einen Theil der Sache. Unter dem Merkmahl versteht Wolff unrecht einen Unterscheidungs Begrif: denn 2 Dinge können ja auch eine Aehnlichkeit haben. Es giebt also ein Merkmahl der identitaet, und eins der Diuersitaet; die Identitaet zu erkennen, dazu ist unser Verstand von selbst schon aufgelegt; die diuersitaet zu erkennen muß er angetrieben werden. Die Merkmahle sind",
      "pages": [
       {
@@ -2010,7 +2013,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s12-010",
      "kind": "text",
-     "aa": 636,
+     "aa": 635,
      "text": "Der Autor redet § 125 von obiectiuer und speculatiuer Dunkelheit; Dunkel aber ist immer subiectiv; denn der Gegenstand meiner Betrachtung begreift weder Deutlichkeit noch Dunkelheit in sich, sondern diese entsteht bloß durch die Vorstellung oder die Begriffe irgend einer Sache den Dunkeln Vorstellungen haben wir sehr oft viel zu danken. Denn, indem wir durch die Speculative Vernunft in Künstliche Sophistische Irrthümer sehr oft wären gestürzet worden, wenn nicht einige Dunkele Vorstellungen uns noch zurückgehalten hätten; Dunkele Vorstellungen sind also nicht als gar keine anzusehen, sondern als solche, die nicht einen hinlänglichen Begrif uns von einem Obiect zurücklaßen. Completudo conceptus clari besteht in der totalitaet der Merkmahle, die zusammengenommen den Begrif von einer Sache formiren. Diese Begriffen treffen wir wenig in empirischen Dingen an. Totale Klarheit wird nur da seyn, wo wir das, was wir denken, auch mit der Anschauung verknüpfen können. Subiectiue Klarheit der Erkentniß ist stärke und Lebhaftigkeit des Verstandes. Alle Leidenschaften kann man wohl zum spaß erregen, nur nicht den Ekel dieser wird geschwind erregt, aber verschwindet nicht sobald: denn die andern Leidenschaften beleben die Gemüthskräfte, der Ekel schlägt sie aber nieder. Starke ist von Lebhaftigkeit darin unterschieden, daß sie eine Lebhaftigkeit von Praktischen Folgen ist. Lebhaftigkeit ist etwas, wenn uns eine Sache so zur Anschauung gebracht wird, als wenn die Sache sich wirklich vor mir befände. Es giebt aber auch eine Lebhaftigkeit, die nicht einmal Obiectiue Sinnlich ist. Wenn eine Sache lebhaft vorgetragen wird so muß sie",
      "pages": [
       {
@@ -2103,7 +2106,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s13-001",
      "kind": "text",
-     "aa": 637,
+     "aa": 636,
      "text": "Die extensiue Größe beruht auf der Deutlichkeit koordinirter Merkmahle, als ein aggregat; die intensiue größe beruht auf der Deutlichkeit der subordinirten Merkmahle oder der Merkmahlen von den Merkmalen. Die extensive Deutlichkeit ist completudo cognitionis, die intensiue Deutlichkeit ist Profunditas cognitionis. Profunditas oder Gründlichkeit ist die Reihe der Subordinirten Merkmahle, oder den Merkmalen von den Merkmahlen. Negativ seine Erkentniß vollkommen machen heißt nicht die Erkentniß aggregiren; sondern nur das abhalten, was der Erkentniß hinderlich wäre. Die Praecision ist, wenn die Merkmale der Sache substituirt sind. Wenn der Begriff weder zu wenig Merkmahle hat, oder complet ist, noch zuviel Merkmahle in sich begreift, oder praecise ist, so ist er conceptus, qui adaequat rem.",
      "pages": [
       {
@@ -2196,7 +2199,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s14-009",
      "kind": "text",
-     "aa": 639,
+     "aa": 638,
      "text": "3.) Wißen. Es ist ein subiectiv hinreichendes führwahrhalten, mit der Gewißheit, daß es auch obiectiv hinreichend ist. Das Glauben schränken wir auf ein anderes Zeugnis ein; hierauf können wir auch schon das Wißen Gründen. Wo nicht Urkunden sind, da glauben wir nur. Wenn ich aber auch ganz Deutliche Kennzeichen habe, so kann ich doch nicht sagen, ich weiß es gewiß: denn es kann doch etwas unzureichendes seyn. Am besten ist die Sprache der Bescheidenheit, daß man sagt: ich glaube es. Beym glauben läuft immer mit dem speculatiuen Erkentniß ein Praktisches intereße mit ein, das ist von der Art, daß es kein Mensch herausbringen kann. Der Grund des führwahrhaltens durch den Glauben ist oft hinreichender, als das Wißen. Anmerkung. Beim meinen, urtheile ich Problematisch, beim Glauben Aßertorisch, beim Wißen apodiktisch. Das obiectiue hinreichende führwahrhalten, obs gleich als Logisch unzureichend wird, ist dem Glauben beim Erkentniß ohne Rücksicht auf die Handlung des Logischen führwahrhaltens hinreichend. Hier ist die Rede vom Historischen Glauben. Es giebt auch einen Vernunftglauben. Wenn das Praktische Führwahrhalten, in gewißer Absicht nothwendig ist; so ist es ein Vernunftglaube. Es ist Wunderbar daß ein Rational glaube statt finden kann, aber durch die Vernunft kann ein Mensch schon glauben daß ein Gott sey. In speculatiuen oder Philosophischen Erkentnißen kann man Meinen, aber nur von empirischen Dingen. Wenn nun Dinge sind, die bloß die Vernunft betreffen; so kann ich nicht meinen, ich muß Gründe haben, entweder zu glauben oder zu wißen. Bei empirischen Dingen können wir Meinungen fällen, weil, wenn wir diesen nachgehen, wir an dem Leitfaden unzureichender Gründe fortgehen und auch wohl allmählich zur Gewißheit kommen, und es bestätigen können. Z.E. Vom Gewitter hat man anfangs geglaubt, daß es eine Aehnlichkeit mit der Elektrizitaet haben könnte, und nachher hat man es durch Erfahrung bestätigt.",
      "pages": [
       {
@@ -2249,7 +2252,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s14-013",
      "kind": "text",
-     "aa": 640,
+     "aa": 639,
      "text": "Sie scheinen sich auf den Willen zu beziehen, und beziehen sich auch wirklich auf ihn: Das annehmen gilt nur da, wo keine apodictische Gewißheit ist. Bin ich einer Sache gewiß, sind die Gründe hinreichend, so muß ich sie annehmen. Um etwas anzunehmen darf ich eben nicht gewiß seyn, und dann habe ichs mit einer Einschränkung angenommen. In der Philosophie sind solche Annehmungen sehr gut, und sind eine Aufschiebung suspension des Urtheils. Diese Suspension ist entweder Kritisch, oder Skeptisch. Eine Kritische Suspension ist: wenn ich meine Urtheile aufschiebe, um sie künftig zu fällen. Bei einer solchen Suspension sage ich: non liquet. Eine Skeptische Suspension ist; wenn ich die Sache immer in Dunkelheit laße.",
      "pages": [
       {
@@ -2367,7 +2370,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s14-027",
      "kind": "text",
-     "aa": 642,
+     "aa": 641,
      "text": "Uebereilung ist ein Mangel der Ueberlegung des Verstandes Vorurtheil geschieht durch einen Hang nicht durch Uebereilung. Der Hang, der aus der neuen Gewohnheit entstanden ist, macht die Vorurtheile zur Nothwendigkeit. Es giebt",
      "pages": [
       {
@@ -2437,7 +2440,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s14-035",
      "kind": "text",
-     "aa": 643,
+     "aa": 642,
      "text": "Anmerkung Das Günstige Vorurtheil des Alterthums herscht insonderheit unter den Literatoren, als welche sich eigentlich mit Lecture der alten Schriftsteller beschäftigen. – Diese glauben nun neue Entdekkungen bereits zu finden in den Schriften der Alten. Aber gemeinhin finden sie dieselbe nicht eher, als bis sie schon entdeckt sind. So soll Aristarch schon das Kopernikanische System gehabt haben, und auf gleiche Weise sucht man aus dem Wort versorum die Kentniß der Alten von der Magnetischen Kraft, erweislich zu machen.",
      "pages": [
       {
@@ -2513,7 +2516,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s14-043",
      "kind": "text",
-     "aa": 644,
+     "aa": 643,
      "text": "5.) Das Vorurtheil der Sinnlichkeit, d.i. eine Art der Faulheit: denn man giebt dem gemeinen Verstand einen Vorzug für alle Wißenschaften, man glaubt alles durch den gemeinen Verstand auszumachen. Man unterscheidet nicht gehörig den populairen Gebrauch des Verstandes vom scientifischen. Eine Wißenschaft geräth auch in Verdacht, wenn sie dem gemeinen Verstand ganz wiederspricht. Diese angeführte Vorurtheile, waren Vorurtheile des Zutrauens.",
      "pages": [
       {
@@ -2587,7 +2590,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s14-050",
      "kind": "text",
-     "aa": 646,
+     "aa": 645,
      "text": "b.) Wenn man ihn beantwortet. Man nennet einen Saz, der nicht bezweifelt worden, eine ausgemachte Wahrheit. Diese bleibt auch nach langen Zweifeln richtig und behalt eine Gewißheit. In der Menschen Vernunft können wir subiectiue Gründe haben um obiectiue eine Sache zu behaupten. Diese lezte sind Principien Skeptizismus streitet der Vernunft alle Gewißheit ab, und halt sie für ungewiß. Der Skeptiker sagt: Es giebt keine Obiectiue Behauptungen. Aber eben dadurch, daß er es sagt, wiederspricht er sich selbst. Nichts kann als Gewiß bestimmt werden, ist ihr allgemeiner Grundsaz. Nun bestimmen sie aber ja etwas, wenn sie sagen: daß ein jeder nur Subiectiue behauptungen habe. Man nennt einen gewißen Vorsaz Maxime, dies ist ein subiectiv praktischer Grundsaz der Vernunft d.i. eine Entschließung in Ansehung des obiects, sich seiner Vernunft auf eine gewiße Art zu bedienen Z.E. Ich will, niemals lügen wenn ich gleich sehr viel dadurch gewinnen könnte: Eine jede Methode erfordert gewiße subiectiue Regeln nach welchen man Erkenntnisse verbindet, und ein Mensch ohne Maximen hat gar keine Zuverläßigkeit. Die Maximen des Nachdenkens sind:",
      "pages": [
       {
@@ -2697,7 +2700,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s16-001",
      "kind": "text",
-     "aa": 648,
+     "aa": 647,
      "text": "Das komplette Führwahrhalten mit Bewußtseyn nennt man Ueberzeugung. Das Führwahrhalten aus subiectiuen Gründen, die in Praktischer Beziehung hinreichend sind, ist der Glaube. Das Führwahrhalten von dem man nicht weiß, ob es aus Subiectiuen oder Obiectiuen Gründen entsteht, ist Ueberredung. Ein Redner hat vornehmlich die Absicht zu ueberreden. Es soll Beyfall entspringen, wenn er gleich weder von obiectiuer, noch subiectiuer Zulänglichkeit weiß.",
      "pages": [
       {
@@ -2737,7 +2740,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s16-005",
      "kind": "text",
-     "aa": 649,
+     "aa": 648,
      "text": "Die Idee ist der Grund des Mannigfaltigen in Ansehung des Produkts der Köpfe. Der Künstler handelt nach einem System, der Handwerker durch Nachahmung. Der Künstler und der Gelehrte haben auch Aehnlichkeit. Rhapsodien von Erkentnißen können sehr Reichhaltig seyn, und doch kein System. Dies beruht auf Systematischer Einheit der Idee des Ganzen. Für Wißenschaften gehört ueberzeugende Kentniß der Totalitaet des Ganzen, und hiezu muß vorhergehen die Idee des Ganzen, die die Stelle vor jeden Theil voraus bestimmt. Z.E. Wie im Anfange der Logic geredet wurde, von Materie und Form, vom Kanon und Organon etc. etc. Eben so ists mit der Kunst, sie kommt von konnen her, und unterscheidet sich hierin von Handwerk. Eine Ausübung wozu Geschicklichkeit durch Nachahmung gehört, ist das Handwerk, durch Ideen aber die Kunst Z.E. Ist ein Baumeister ein Künstler? Wenn er gleich nach einem Riß arbeitet, so ist er nur ein Copist, er hat aber eine Ausübung nach der Idee des andern, die er faßen können muß. Diesen nennt man einen Virtuosen, der aber originalitaet der Ideen, d.i. der eigenes Genie hat, ist ein Künstler, und wenn er auf solche Art ein Haus bauet, ist er Baukünstler. Man handelt auch nach Ideen die sich nicht lehren laßen sie laßen sich nicht auseinandersezzen und wenn es auch anginge, so könnte der andere nicht zugleich nach diesen Regeln handeln. Dies sind auch Künste, und nicht Wißenschaften, z.E. die Rechenkunst, Dichtkunst etc. etc. Es giebt auch Künste, wo die Wißenschaften vorhergehen. Z.E. Die Glasschleiferey nach der Optic. Was Wißenschaften seyen? Der Inbegriff der Erkentniß ist entweder ein aggregat oder ein System; diese Erkentniße mögen historische oder vernunft Erkentniße seyn. Beides, so wohl aggregat als System ist ein ganzes. Ein System ist dasjenige ganze, dessen Verbindung auf einer Idee beruht. Beim aggregat gehen die Theile vor dem ganzen vorher; beim System aber geht die Idee des ganzes vor der Zusammensezzung der Theile. Ein jeder Inbegriff von Erkentnißen heißt eine Wißenschaft; in so fern die Erkentniße ein System ausmachen; alle historische Erkentniß sowohl, als alle Autodidaxie ist immer ein Aggregat und kein System.",
      "pages": [
       {
@@ -3066,7 +3069,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s19-009",
      "kind": "text",
-     "aa": 654,
+     "aa": 653,
      "text": "Ein Conceptus kann auch nur intellectualis seyn. Eben daraus entsteht die Logische Form. Ein solcher conceptus heißt notio, et oppositum huius est conceptus sensitiuus, seu potius empiricus. Diese notiones können in Concreto dargestellet werden. Begriffe a priori aber, von denen kein Gegenstand in Concreto kann gegeben werden, sind Ideen gehen über die Erfahrung hinweg, sind aber dennoch keine Chimären.",
      "pages": [
       {
@@ -3142,7 +3145,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s19-018",
      "kind": "text",
-     "aa": 655,
+     "aa": 654,
      "text": "Diese sind vom großen Nuzzen, und müßen vor dem andern vorhergehen: Denn wie kann ich mir z.E. einen Begrif von einem Könige machen, wenn ich mir nicht zuerst einen Begrif vom Menschen mache. Ob man gleich abstracten Begriffen den Vorwurf macht daß sie nicht verständlich und also unfruchtbar sind, so antwortet man hierauf: man nimmt nur von ihnen ein gemeinschaftliches Merkmahl vieler Dinge, durch welches man viel auseinandersezzen kan.",
      "pages": [
       {
@@ -3158,7 +3161,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s19-019",
      "kind": "text",
-     "aa": 656,
+     "aa": 655,
      "text": "Vom Begriff in abstracto muß ich allmahlich zum Begriff in concreto hinabsteigen, weil sonst keine Anwendung ist. Die Begriffe werden eingetheilt in Hohe und Niedrige. Die Materie ist das, was ich mir im Begriff vorstelle. Er kann also mehr auch weniger Vorstellung haben. Der Umfang besteht in dem, was unter dem Begriff stehet, und was allem Mannigfaltigen zukommt. Dieses begreift eine gewisse Grösse des Begrifs, oder des Umfangs. Ein Begrif kann also eine grössere Sphäre haben, eine größere Anwendung, als ein anderer, je mehr ich einen Begriff in abstracto denke, desto großer wird die Sphäre, und der Inhalt nimmt ab. Je mehr ich einen Begriff in concreto denke desto kleiner wird seine Sphäre er wachst aber im Inhalt. Conceptus singularis hat gar keine Sphäre. Ein Begrif heißt nur in Betrachtung, und Vergleichung der unter ihm stehenden Superior; der unter ihm stehende heißt inferior. Der Unterschied ist also relativ. Ein Conceptus muß eine Sphäre haben, conceptus der den andern in sich begreift heißt genus, der in andern enthalten ist, heißt species. Z.E. Eisen ist die Species von Metall. Ein Genus kann in einem andern betrachtet auch Species seyn. Z.E. Metall ist Species vom Körper. Ferner kann auch eine Species genus seyn. Z.E. Eisen ist das Genus vom Stangeneisen. Der Unterschied bestehet in der Relation; und so kommen wir allezeit vom Genus auf die Species um endlich bis aufs indiuiduum zu kommen. Je größer der Begriff in abstracto ist, desto größer ist die Sphäre. Der Conceptus summus der die groste Sphäre hat, hat das größte Genus, und von diesem ersten genere kommen wir gradatim bis aufs indiuiduum, das man conceptum singularem nennen könnte. Wir können nur durch die Sphäre vergleichen, wenn die Begriffe von einerley Art sind. Der Unterschied der Specierum die unter einerley Genus gehören, ist differentia specifica. Differentia numerica est, si res specie eadem sunt numero diuerso: Conceptus superior heißt Latior; inferior heißt angustior. Wenn aber die Sphäre der conceptuum gleich d.i. wenn der Unterschied der conceptuum unendlich klein ist, so sind dieses conceptus reciproci. Der Autor redet vom conceptu universali et particulari, aber nur der Gebrauch der Conceptuum ist entweder allgemein oder besonders. Vielleicht versteht er unter dem conceptui universali, conceptum communem; aber dies ist ein jeder Begriff.",
      "pages": [
       {
@@ -3261,7 +3264,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s20-010",
      "kind": "text",
-     "aa": 657,
+     "aa": 656,
      "text": "b.) Ein Ding woraus es folgt, und alsdenn definire ich z.E. a posteriori, wenn ich den Körper definire, so analysire ich die Eigenschaften desselben, und gebe eine vollkommene Definizion. Den Gegenstand des empirischen Begriffs kann man nicht erklären denn ein jeder hat schon einen vollkommenen Begrif davon. Z.E. was Erde ist, was das Waßer etc. Es geht nicht durch die analysis, weil es umsonst ist, das zu zergliedern, was durch die Erklährung deutlich gemacht werden kann. Auch nicht durch Synthesis: denn ich kann nur describiren und Begriffe sammlen. Wir haben empirisch gegebene und auch empirisch gemachte Begriffe. Empirisch gegebene Begriffe können und sollen nicht definirt werden: denn die Merkmale sind nicht hinlänglich der Definizion eine ausführliche Deutlichkeit zu geben, sie sind vielleicht nur unendlich kleine theile davon, wohl aber findet bei denselben die description statt. Z.E. Das Gold kann ich nicht definiren; sondern describiren. Bei den empirisch gemachten Begriffen werden uns die data aus der Erfahrung gegeben, und eben daraus bilden wir unsern Begriff. Diese finden sich da, wo die Natur verändert wird z.E. den Begrif von einem Hause, von einer Festung.",
      "pages": [
       {
@@ -3312,7 +3315,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s21-002",
      "kind": "text",
-     "aa": 658,
+     "aa": 657,
      "text": "Vom Philosophen hingegen kann ich sie nicht fordern. Denn er kann nicht bestimmen, ob die Analysis auch komplet sey. Aber ob er gleich keine komplete Analysis haben kann, so kann er doch eine Unkomplette haben, die ihm einige Merkmahle giebt. So lange eine solche Analysis Unkomplet ist, heißt sie nicht definizion. Die Materialien der Definizion heißen elementar Säzze d.i. Unkomplette Säzze zu einer Definizion. Definitio est conceptus, qui rem adaequat. Wenn ein Begriff zwar deutliche, aber zu wenig Merkmahle hat, so ist er Unkomplett, hat er zuviel Merkmahle, so ist er nicht Praecise. Ein Begriff welcher nicht zuwenig nicht zuviel Merkmahle hat, d.i. welcher der Sache angemeßen ist, conceptus qui adaequat rem, est definitio. Eine Definizion kann also completudinem haben, hat sie aber nicht Praecision, so ist sie doch fehlerhaft denn es ist etwas Ueberflüßiges, nicht etwas nettes praecises angegeben. Der Praecision ist entgegen die Tautologie, da dasselbe Merkmahl zweimahl, wiewohl besondere mahl versteckt vorkömmt. Z.E. Gott ist ein Unendliches, Ewiges, Allwißendes Wesen. Aus dem Begriff unendlich fließen schon alle andere Eigenschaften. Bei gemachten Begriffen geht die Definition vorher, bei gegebenen mache ich erst den Begriff deutlich, ich analysire ihn, und dann gebe ich eine Definizion.",
      "pages": [
       {
@@ -3350,7 +3353,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s21-004",
      "kind": "text",
-     "aa": 659,
+     "aa": 658,
      "text": "Description gilt bloß vom Empirischen. Definizionen welche nicht definirt werden können, in so fern sie obiective suffizient seyn sollen, sind selbst eine unkomplete exposition und dienen immer auch als Definizion ad instantem vsum. In intellectuellen Dingen geht es freylich nicht an, doch kann sie auch hier nominal seyn, und daneben incomplette exposition seyn. Denn sie ist doch immer Approximation zur Definizion. Denn ein unkompleter Begriff et hoc sensu definitione procedere potest descriptio.",
      "pages": [
       {
@@ -3579,7 +3582,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s24-006",
      "kind": "text",
-     "aa": 662,
+     "aa": 661,
      "text": "Jede von diesen hat drei modos. Die Urtheile der Qualitaet nach, sind entweder bejahende, oder verneinende oder unendliche Urtheile. Der Quantitaet nach, sind entweder allgemeine, oder besondere, oder einzelne. Der Relation nach, sind entweder Kategorisch, oder Hypothetisch, oder disjunctivisch. Und der Modalitaet nach, entweder problematisch, oder Assertorisch, oder Apodictisch. Z.E. Alle Menschen sind Sterblich. Dies Urtheil ist der Qualitaet nach bejahend, der Quantitaet nach allgemein, der Relation nach Kategorisch, der Modalitaet nach Aßertorisch. Die Urtheile der Beiden ersten Titul unterscheidet man wohl.",
      "pages": [
       {
@@ -3643,7 +3646,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s24-013",
      "kind": "text",
-     "aa": 663,
+     "aa": 662,
      "text": "Anmerkung Alle Verstandes Handlungen gehen auf Urtheile und jeder Gegenstand den wir erkennen, jeder Begriff ist gleichsam ein Praedikat zu einem möglichen Urtheil; so kann man den Verstand den man vorher als das Vermögen der Begriffe erklärt, als das Vermögen der Urtheile, oder Regeln erklären: Denn der Verstand ist die Qvelle der Regeln, weil jedes Urtheil eine Regel jede Regel ein Urtheil ist; z.E. Alle Menschen sind sterblich. So bald ich also einen Menschen sehe, so ist mir dieser Saz gleichsam eine Regel, auch dieser muß sterben. Eben diese Definizion des Verstandes stimmt mit der Definizion, die Wolff gegeben hat, überein, daß nehmlich der Verstand, das Vermögen der Deutlichen Vorstellungen, sey: Denn nur durch Urtheile entspringt die Logische Deutlichkeit der Vorstellungen. Demnach sollte von den Deutlichen Vorstellungen bei den Urtheilen geredet werden weil ein Deutlicher Begriff ein Urtheil schon voraussezt. Ein Deutlicher Begriff ist nehmlich möglich durch ein klares Merkmahl die Vorstellung aber ist eben so viel, als ein Praedikat eines Urtheils. Die Vorstellung des Gegenstandes selbst ist das Subiect, mithin habe ich Materiam sc. dati iudicii. Der Begriff ein Mensch ist klar, ein vernünftiger Mensch, deutlich: Denn hier stelle ich mir den Menschen vermittelst des Praedikats Vernünftig vor, und habe also ein Urtheil. Die Deutlichkeit ist zwiefach.",
      "pages": [
       {
@@ -3705,7 +3708,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s24-019",
      "kind": "text",
-     "aa": 664,
+     "aa": 663,
      "text": "Weil die Logic von aller Materie abstrahirt; so bleibt ihr bloß die Form übrig, und diese wird in vierfacher Absicht betrachtet, wie eben angeführt worden. Die wesentliche Form der Urtheile bestehet in der Relation, denn die Begriffe haben Sphäre, qualitaet modalitaet, allein die Relation ist dem Judicio eigen. Die Kategorische Urtheile liegen den andern zum Grunde: Denn die Hypothetischen bestehen aus zwey Kategorischen Urtheilen, von denen ich eins als den Grund, das andere als die Folge betrachte. Die Disiunctiuen bestehen aus mehreren Kategorischen Urtheilen. Die Disiunctiuen zusammengenommen sind dem conceptu diviso gleich.",
      "pages": [
       {
@@ -3909,7 +3912,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s26-005",
      "kind": "text",
-     "aa": 667,
+     "aa": 666,
      "text": "Eine der Form nach Theoretische Erkentniß, aus der viele Säzze können hergeleitet werden die ich thun soll, oder die viel imperatiuen enthält ist der Materie nach Praktisch. Z.E. Es ist ein einziger Weltrichter. Die Logic aber, die von allem Inhalt abstrahirt, weiß davon nichts, daß einige Erkentniße so fruchtbar sind. Die Praktische Säzze in der Logic müßen seyn, aus gegebenen Urtheilen, und einem Termino medio einen Schluß zu machen. Das Autor redet von erweislichen und unerweislichen Urtheilen. Erweisliche Urtheile sind solche, vor denen ein Urtheil voraus gehen muß, oder die zur bestätigung ihrer Wahrheit einen Beweis fordern. Unerweisliche Urtheile sind solche, die gar keinen Beweis nothig haben, sondern an sich selbst schon wahr sind. Die ersten sind Mittelbar gewiße die andern unmittelbar gewiße Urtheile. Oft sagen wir ein Saz ist unmittelbar gewiß, da er es doch nicht ist. Daher muß man zuerst ein Urtheil für mittelbar Gewiß annehmen; weil wir",
      "pages": [
       {
@@ -4069,7 +4072,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s26-025",
      "kind": "text",
-     "aa": 669,
+     "aa": 668,
      "text": "Es ist also eine sehr wichtige Regel ne sit tautologica problematis resolutio, i.e. ne resolutionem praedicamus in definitionem. In der Moral giebts also, wie gesagt, dergleichen problematische Auflösungen zu viel daraus kommts eben, daß Moral als Kanon schon wirklich da ist, d.i. daß wir wirklich Regeln haben, wornach wir die Verstandes Urtheile lenken, und Beurtheilungen der Moralischen Handlungen, allein als Organon nicht, d.i. die Moral ist noch nicht so vorgetragen, daß die Verstandes Begriffe auf meinen Willen und Neigung einfließen, daß die Tugend nicht allein gebilligt sondern auch geübt wird. Bei der Tautologischen resolution des Problems analysirt man die Definizion selbst, in der Moral darf die Abhandlung nicht eben praecise seyn, allein in der Mathematik kann keine abundanz stattfinden denn obgleich sonst die Praecision eine wesentliche Eigenschaft eines Systems ist; so sind doch einige Wißenschaften davon ausgenommen, und hiezu gehören nebst der Moral auch die Physischen Wißenschaften",
      "pages": [
       {
@@ -4145,7 +4148,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s26-034",
      "kind": "text",
-     "aa": 670,
+     "aa": 669,
      "text": "Anmerkung Qualitas occulta est Tautologica phaenomenorum explicatio et enim subiectum respicit, non Obiectum. Eiusmodi est ideosyncrasia Lamberti, cuius ait hominis sibi propinquam habitum cane et angue aversantem. Et vero ideosyncrasia quali, quae in hoc illudere indiuiduum influit. Von eben dieser Art ist das in neueren Zeiten sogenannte Wort bon sens (gesunder Verstand). Denn wer hat eine Definition von Sensu communi gegeben, es sey denn Tautologisch? selbst die Krusianische Philosophie beruhet auf einem Grundsaz der nichts anders als Qualitas occulta ist, nehmlich was ich nicht anders als Wahr befinde, das ist wahr. Die newtonianische Philosophie die sich auf den Grundsaz der Wechßelseitigen Sphäre im Zusammenhange des Weltlaufs gründet nimmt das Wort vis attractiva für qualitatem occultam im Physischen Sinn an, das heißt blos als ein Geständniß der Unwißenheit der wahren Ursachen, nicht aber für die wahre Ursache selbst.",
      "pages": [
       {
@@ -4233,7 +4236,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s26-044",
      "kind": "text",
-     "aa": 671,
+     "aa": 670,
      "text": "c.) Contraire, wenn einem allgemeinen bejahenden Urtheil ein allgemein verneinendes Urtheil entgegengesezt wird, oder umgekehrt, z.E. Alle Menschen sind Lasterhafte. Ueber einen solchen Saz kann der andere so entsezt werden, daß er sagt: Kein Mensch ist Lasterhaft. Hier thut er mehr als nothig ist, dem andern zu wiedersprechen Judicia contraria opposita können beide falsch seyn, weil darin mehr verneint wird als es nöthig ist. Die Falschheit steckt also in der Allgemeinheit. Bei den folgenden Arten ändert man das Subiect und Praedicat, aber bei der conversion kann man die Quantitaet ändern, nicht aber die Qualitaet. Man nennt die Versezzung der Terminen metathesis terminorum. Durch diese entsteht ein unmittelbarer Schluß durch die conversion der Urtheile wo versezt wird die Quantitaet und nicht die Qualitaet und durch die contraposition der Urtheile, wo versezt wird die Qualitaet und nicht die Quantitaet. Z.E. Alle Menschen sind Sterblich einige Sterbliche sind also Menschen, d.i. durch die Conversion Was nicht sterblich ist, ist kein Mensch d.i. durch die contraposition. Bei der conversion der Urtheile heißt das Urtheil was umgekehrt werden soll: Judicium conversum das wodurch die Umkehrung entspringt iudicium convertens. Die Umkehrung geschieht entweder per accidens oder simpliciter.",
      "pages": [
       {
@@ -4261,7 +4264,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s26-046",
      "kind": "text",
-     "aa": 672,
+     "aa": 671,
      "text": "a.) Allgemeine bejahende Säzze lassen sich nur per accidens, allgemein verneinende Sazze nur simpliciter und drittens particulaer bejahende oder verneinende Säzze auch simpliciter umkehren. Das erste heißt soviel iudicium conuersum est vniversale und von diesen kann ich nun umgekehrt sagen einige sterbliche sind Menschen Ich denke mir nemlich sterbliche unter denen auch die Menschen sind, d.i. das Subiect Mensch ist unter der Sphäre der Sterblichen, als des Praedicats. Das Praedicat muß also großer seyn als das Subiect, ich kann also einige Sterbliche für Menschen annehmen. Es giebt allgemein bejahende Säzze, die sich simpliciter umkehren lassen, bei welchen die Sphäre des Subiects und Praedicats gleich ist z.E. Alle Figuren in drei geraden Linien eingeschloßen, sind Triangel, alle Triangel sind Figuren in drei geraden Linien eingeschloßen sind Drei Ekke, d.i. eine Subtilitaet und ich überlaße es hier einem jedem, wieviel er aus einer unendlichen Menge Drei Ekke ausnehmen will. Dieser Unterschied aber ist euanescens. Alle verneinende Urtheile, die einen Wiederstreit enthalten laßen sich simpliciter umkehren, z.E. kein Triangel ist ohne Winkel keine Figur ohne Winkel ist ein Triangel alle Particular bejahende oder verneinende Säzze laßen sich simpliciter umkehren, d.i. daß die Quantitaet nicht verändert wird. Die Contraposition will soviel sagen: ein jeder allgemeine Saz laßt sich contraponiren. Z.B. Alle Menschen sind Sterblich, Nichtsterbliche sind nicht Menschen. Wie wird nach den Judiciis mediatis geschloßen? Wenn ein Begrif aus dem andern soll geschloßen werden, der im vorigen nicht enthalten ist; so muß man einen Begriff, der die Bedingung der Regeln enthält hinzufügen; der Begriff des Obiects enthalt nun die Bedingung der Regel, und also muß von dieser conclusion auch das Praedicat der Conclusion gelten. Z.E. Alle Menschen sind Sterblich, Caius ist ein Mensch, also ist Caius sterblich. Es gründet sich dieser Vernunftschluß auf den Grundsaz: einem jeden Dinge in so fern es unter die Bedingung subsumirt werden kann kommt das Praedikat zu ein Vernunftschluß aber ist cognitio a priori per subsumtionem conceptus sub conditione regulae cuiusdam generali.",
      "pages": [
       {
@@ -4418,7 +4421,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s27-009",
      "kind": "text",
-     "aa": 674,
+     "aa": 673,
      "text": "Das Principium der Hypothetischen und Disiunctiuen Schlüße erklärt der Autor im 364. und 365. §. Es giebt also nur drey Principien der Vernunftschlüße denn die Consequentiae immediatae sind eigentlich keine Vernunftschlüße; sie sind nur Folgerungen und bedürfen keiner Regel. Der Autor redet von ordentlichen und außerordentlichen Vernunftschlüßen. Es ist aber hierin kein anderer Unterschied, als daß die Schlüße in denen die Form versteckt ist außerordentliche sind.",
      "pages": [
       {
@@ -4552,7 +4555,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s29-010",
      "kind": "text",
-     "aa": 676,
+     "aa": 675,
      "text": "Diese Regeln scheinen die erste Figur einzuschränken allein sie zeigen uns vielmer derselben ausdehnung auf alle und jede Arten der Schlüße, der maior muß vermöge der Regel vniversal seyn, er kann aber auch affirmativ oder negativ seyn; minor soll affirmans seyn, er kann aber auch vniversal und particulaer seyn. Also sind in der ersten Figur Schlüße von aller Qualitaet und Quantitaet möglich, also von A, E, I, et O In den übrigen sind allemal nur einige derselben möglich; folglich ist die erste Figur die ächte, die einzig Natürliche und Reine. Anmerkung Obige Regeln gelten für alle und jede Vernunftschlüße: denn in jedem Vernunftschluß muß immer eine Regel seyn, eine Regel aber ist nichts anders, als eine allgemeine Wahrheit. Ferner, da ich in jedem Vernunftschluß einen Begriff subsumiren soll so muß ich ja behaupten, daß dieser Begriff unter eine allgemeine Regel gehöre; mithin affirmiren.",
      "pages": [
       {
@@ -4604,7 +4607,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s29-015",
      "kind": "text",
-     "aa": 677,
+     "aa": 676,
      "text": "Erklärung der Dritten Figur: Alle Menschen sind unvollkommen einige sind tugendhaft; also sind einige tugendhafte unvollkommen. Hier steht Terminus medius nicht an seiner geziemenden Stelle, und diese giebt ihm blos die Reduction in die erste Figur. Alle Menschen sind unvollkommen einige tugendhafte sind Menschen, also sind einige tugendhafte unvollkommen. In reductione igitur tertiae Figurae metathesis Terminorum efficit minorem quae quidem per consequentiam immediatam. Aus einige Tugendhafte sind Menschen, folgt, einige Menschen sind tugendhaft. Der Beweis der Dritten Figur, daß nehmlich bloß particulaere conclusionen darin statt finden liegt darin weil ich hier den minorem in die erste Figur muß reduciren können, dieser minor aber affirmans seyn muß, so ists nothwendig, daß da immer particulaere Säzze per conseqventiam immediatam können simpliciter conuertirt werden, auch ein particulaerer Saz in minori propositione seyn und dann nach diesem als parti debiliori richtig sey auf den Schluß, mithin muß die Conclusion in der Dritten Figur immer particulaer seyn.",
      "pages": [
       {
@@ -4680,7 +4683,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s29-023",
      "kind": "text",
-     "aa": 678,
+     "aa": 677,
      "text": "Sind die Körper theilbar, so sind sie veränderlich; atqui verum est prius, ergo posterius. Der maior propositionis sagt nichts mehr als wie ein Saz aus dem andern folgt. Ist die consequens Unrichtig; so sagt man es ist a baculo ad angulum geschloßen. Der modus tollens findet nur statt, a consequente ad antecedentem, nehmlich sublato consequente tollitur antecedens, aber a positione consequentis ad positionem antecedentis non valet modus ponens. Die Disiunctiuen Vernunftschlüße bestehen darinn, daß der maior in mehr theile getheilt wird, die einander opponirt sind.",
      "pages": [
       {
@@ -4750,7 +4753,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s29-031",
      "kind": "text",
-     "aa": 680,
+     "aa": 679,
      "text": "Die Schlüße durch die induction und durch die analogie. Die Vernunftschlüße sind entweder apodictisch oder nicht. Was ich durch die Vernunft erkenne ist apodictisch. Ich erkenne durch sie alles, was Nothwendig ist; was ich hingegen durch die Erfahrung erkenne ist nicht apodictisch Die Verstandesschlüße geben blos eine empirische Gewißheit, es kann doch aber eine empirische Gewißheit Nothwendigkeit heißen, wenn sie nehmlich zum Erfahrungsgebrauch so viel als eine Nothwendigkeit hilft. Jene sind strenge, diese nicht strenge Schlüsse. Bey vernunftschlüßen folgern wir aus dem allgemeinen das besondere; bey Verstandesschlüßen aus dem besonderen das allgemeine. Jenes ist Ratiocinium genuinum, dieses spurium welche der Autor ordinaire extraordinis nennt. Weil aber aus lauter besondern Säzzen nichts folgt; so ist der Verstand bemüht durch seine Wahrnehmungen hier Regeln d.i. allgemeine Säzze zu machen. So sehe ich z.E. blos durch die Erfahrung ein, daß alle Menschen sterben müßen, weil nemlich dieser, jener und alle Menschen, die gelebt haben, gestorben sind: Ich schließe hier also umgekehrt, als bey den ratiociniis. Was so vielen indiuiduen zukommt, die nur je gewesen, das kommt allen andern dieser Art zu d.i. was wir induction nennen. Dies ist der Weg, den der Verstand continuirlich geht. Indessen giebts hier keine apodictische Gewißheit: denn es können noch immer einzelne Fälle von unseren sogenannten Regeln Ausnamen machen, wie z.E. noch einige Menschliche Körper gefunden werden, wo das Herz an der rechten Seite schlägt, und ueberhaupt alles verkehrt liegt. Dem ohngeachtet ändert der Medicus seine Laudana. Eben so ists mit allen Sprachen und mit dem allgemeinen Charakter der Nazionen, wie man z.E. sagt: daß alle Leute in Frankreich höflich seyn, nur die Wirtsleute nicht, und umgekehrt in England alle Grob nur die Wirte aber höflich im ganzen gehört hieher die Regel nulla regula sine exceptione. Diese Ausnamen nennt man im disputiren Instanzen die Regel hat als denn nur eine Wirklichkeit, in der Erfahrung zu schließen und da kann eine Ausname seyn, wenn nur nicht die ganze Größe aufgehoben wird. Durch die Induction machen wir allgemeine Säzze, und dieser Schluß ist a particulaire ad vniversale. Sonst giebts auch eine Art von Inductionen aus Systematischen Säzzen d.i. wenn etwas einer Gattung praedicirt wird, weil es schon in der analysis des Begriffs selbst liegt. Z.E. der Mensch ist Vernünftig. Noch giebts eine Zweyte Art oblique zu schließen, nehmlich durch die Analogie. Diese Schlußart ist von der vorigen dadurch unterschieden, wenn zweyen Dingen so viel stükke als ich durch die scharfeste Untersuchung wahrgenommen habe, gemein sind, so können sie auch in allen Stükken übereinkommen, die ich noch nicht erforschen kann. Ich bringe also meinen Schluß nicht auf mehrere Urtheile sondern Eigenschaften eben dieser nemlichen Dinge. So schließen wir die circulation des Bluts bey thieren aus der sonstigen Aehnlichkeit des Menschlichen und thierischen Körpers in ihrer constitution. Eben so den innern Bau der Polypen, an denen wir doch sonst keine Eingeweide bemerken. Diese Schlüße durch die induction und analogie sind gleichsam die beiden Krükken der Menschlichen Ratiocination wahre Krükken, denn wir gehen sehr unsicher Daher, es ist ein bloßer Versuch. Sie sagen z.E. alle Jungen kommen entweder lebendig in die Welt oder werden aus den Eyern gebrütet. Demohngeachtet war immer bekannt. daß es bei den Polypen in jedem abgeschnittenen theil Junge giebt. Sophisma ist eine dialectische Schlußart, die blos den Schein der Wahrheit hat. Der Schein kann liegen",
      "pages": [
       {
@@ -4808,7 +4811,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s29-035",
      "kind": "text",
-     "aa": 681,
+     "aa": 680,
      "text": "Die ars Polysyllogistica ist, wenn wir viele Schlüße miteinander verketten, und es wird darin die conclusion des vorigen Schlußes die Praemisse des folgenden, und wir schließen hier immer in Episyllogismen, und so ist die Polysyllogistic progrediens; gehe ich aber auf die Deduction und beweise eine der Praemissen zurück so ist die Polysyllogistic regrediens. Diese scheint sonst Vortheilhaft angebracht zu werden. Besonders beim disputiren; allein es ist große Behutsamkeit dabei nöthig, denn räume ich bei der Polysyllogistic progrediens die erste praemisse ein, und untersuche ich nicht recht ihre Richtigkeit in der Materie und Form so können immer wahre Sachen gefolgert werden, die aber mit der Praemisse stehen sowohl, als fallen. Damit also kein Fehler im disputiren hierin ausfalle; so ist es Ratsam, daß die conclusion des Opponenten immer die Behauptung der Respondenten gebe. Erwähnter Fehler bei den progredienten Syllogismen hat sich nicht selten in Philosophische Systeme eingeschlichen. Die regrediente Syllogistic hat dagegen weit mehr Vorzüge vor der ersten: Denn ich kritisire hier, ob der Grund wahr und die Folge richtig sey. Sorites ist blos eine Folgerung des Ausdrucks. Daselbst häufe ich Conclusion auf Conclusion und laße die praemißen weg. Eine solche Verkettung von Schlüßen kann nun aus kategorischen, Hypothetischen Säzzen bestehen und so wird Sorites kategorikus Sorites Hypotheticus. Circulus in demonstrando, saltus in probando geschieht, wenn ich a ratione remota sogleich ad rationatum schließe. Es ist hier also die Folge nicht klar, und ich laße einen nöthigen zwischen schluß weg.",
      "pages": [
       {
@@ -5040,7 +5043,7 @@ const LOGIK_BUSOLT = {
     {
      "id": "busolt-s33-001",
      "kind": "text",
-     "aa": 686,
+     "aa": 685,
      "text": "Sprechen und reden sind unterschieden. Sprechen geschieht um sich verständlich zu machen; reden um zu seinem Zweck zu gelangen. Wie soll nun der Philosoph seine Sprache einrichten? Ueberhaupt sieht der Philosoph mehr auf die Bedeutung der Wörter, als auf den Styl. Das principium hiervon ist: Der Ausdruck muß dem Begrif angemeßen seyn. Er kann darum auch die Sprache der Gelehrten brauchen, das ist nicht allein todte Sprache, sondern auch Technische Termini. Doch sind diese nur so zu sagen ein Nothnagel, und er geht nicht ohne Bedacht und Not vom gemeinen Sprachgebrauch ab; allein für die Philosophischen Principien in Ansehung des Ausdrucks ist selten eine Sprache hinlänglich. Die Deutsche scheint nebst der Griechischen am meisten Philosophisch zu seyn; denn sie ist die aller richtigste, sie hat die meiste Synonyma. Demohngeachtet findet man doch selten Zwey Wörter in der ganzen Sprache, die einerley wären: Denn die Menge der Synonymen ist immer ein Beweis von Reichthum der Sprache. Denn man kann vermittelst der Synonymen die verschiedene Grade der Genauigkeit im Obiect bestimmen. Die Ursache des Reichtums der deutschen Sprache, leitet man füglich von ihren Missionaren her, die, als sie sie bekehren wollten viele ihrer schon erfundenen Wörter nach dem Griechischen und Lateinischen bildeten als aus compassio Mitleiden, misericordia Barmherzigkeit. Eben weil diese Missionare alle verbesserer der Deutschen Sprache, den Verstand der Deutschen aufklären wollten, so mußten sie auch wenig tropisch reden, und daher mußten sie aus Noth die Welsche Sprache mit ganz neueren Wörtern bereichern, da sonst auch eben diese tropi ein Beweis von der Armut einer Sprache sind. Eben wenn eine Sprache viel tropos hat; so giebt dies Anlaß zu Unterschiedenen Wortspielen und wizzigen Einfällen.",
      "pages": [
       {
