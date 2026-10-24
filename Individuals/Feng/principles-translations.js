@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   English translations of the passages principle-search-1016.html finds: every
+   English translations of the passages principle-search.html finds: every
    passage in which a form in principles-lexicon.js occurs, as of 23 October 2026.
 
    These are MACHINE TRANSLATIONS by Claude (Anthropic), made once, passage by
