@@ -94,11 +94,31 @@ Vorigen", are left free and placed by order and wording alone.
 
 ## 3. How confident each inferred connection is
 
-| Mark | Meaning | Right within ±2 §§: Blomberg | Wiener |
-|---|---|---|---|
-| **strong** | the wording points to this § (it is among the three best matches) *and* the passage sits in sequence with its neighbours | 86% | 95% |
-| **probable** | one of the two, not both | 72% | 65% |
-| **tentative** | neither: placed by its position in the lecture only | 36% | 25% |
+Every inferred connection shows a percentage. It is **measured, not modelled**: the share of links
+with the same mark, in the same text, that turned out right (within ±2 §§) when checked against a
+stated link.
+
+| Text | strong | probable | tentative | checked against |
+|---|---|---|---|---|
+| Blomberg | 89% (857) | 72% (891) | 48% (42) | the transcript's own § headings |
+| Wiener | 95% (73) | 65% (69) | 46%* | the Cambridge concordance sample |
+| Busolt | 89%* | 72%* | 46%* | none exists; pooled from the Blomberg and Wiener transcripts |
+| Jäsche | 97% (253) | 99% (181) | 60%* | the Academy Edition's headers |
+
+\* pooled, because fewer than 30 cases could be checked. Stated connections show "stated" and no
+percentage.
+
+The marks mean:
+
+- **strong**: the wording points to this § (it is among the three best matches), *and* the passage
+  sits in sequence with its neighbours.
+- **probable**: only one of the two holds.
+- **tentative**: neither holds, so the passage is placed by its position in the lecture only.
+
+**A finer, per-passage figure was tried and rejected.** It was a logistic model on similarity, rank,
+run length and passage length. Fitted on one half of Blomberg, it predicted the other half worse
+than a single constant. The three marks are the only grouping whose rates hold within 9 points
+across the two halves.
 
 ## 4. How the rule was tested
 
@@ -155,7 +175,32 @@ support it:
 - **Exact § versus neighbourhood.** Treat an inferred § as "this § or one beside it". Within ±2 §§ is
   the figure that matters for reading.
 
-## 6. Rebuilding
+## 6. Questioning a connection
+
+Every connection has a **Question this link** button. It asks why the link may be wrong, which §
+the passage is really lecturing on, a source, and how sure you are. It then opens the lab's own
+**Text error** form on GitHub, filled in, so the report is reviewed like any other. Passages already
+reported show a ⚑ link to their report. A correction is made in the title concordance or the build
+script, and every link is then rebuilt.
+
+## 7. English
+
+Every passage has an **English** button showing two translations side by side, one in the manner of
+Guyer and Wood (Cambridge Edition) and one in the manner of Kemp Smith (1929). Each follows that
+translator's stated principles, set out with page references in `translation-briefs.js`. All 6,317
+passages (Meier, Blomberg, Wiener, Busolt, Jäsche, the Reflexionen) were translated in advance and
+are stored in `translations/`. They are machine translations made for this page, not the
+translators' own work, so check them against the German. A reader can also re-translate a passage
+with their own Claude API key.
+
+**For class use:**
+
+- **Copy link** gives an address that opens exactly the current view, for example
+  `#mode=para&n=343&tab=busolt` or `#mode=conn&q=Widerspruch`.
+- **Pin** keeps a passage with its citation in a **Notebook**, which stays in the browser and can be
+  copied or saved for an assignment.
+
+## 8. Rebuilding
 
 From the repository root:
 
