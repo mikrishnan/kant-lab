@@ -3,11 +3,10 @@
 *The spec is the source of truth for this tool. When the tool's behaviour changes, this
 file changes in the same pull request.*
 
-**Status:** design stage. Nothing is built yet. [mockup.html](mockup.html) is a static visual
-preview of the interface (revision 2): one screen with numbered callouts, the other three
-tabs, and design notes with the decisions still open. Its texts, matches and counts are real,
-from the pilot run; the worked example is § 21 (AA 9:102–103). Behaviour items marked
-**(in the mockup)** are drawn there; the others are planned.
+**Status:** first version built. [index.html](index.html) is the tool, running on the data in
+the repository. [mockup.html](mockup.html) is the static design preview it was built from (revision
+2), kept for the design notes and the decisions still open. Behaviour items marked **(built)** work
+in index.html; the others are planned.
 
 ## Question
 
@@ -117,30 +116,30 @@ always on screen.
 
 **Reader (left)**
 
-1. **(in the mockup)** The left column shows the whole Jäsche text, with AA 9 page numbers in
+1. **(built)** The left column shows the whole Jäsche text, with AA 9 page numbers in
    the margin and page breaks inside paragraphs marked `‹N›`.
-2. **(in the mockup)** A contents tree beside the text lists the parts, sections and §§; clicking
+2. **(built)** A contents tree beside the text lists the parts, sections and §§; clicking
    an entry scrolls the text to it, and the entry for the section and § in view is highlighted.
-3. **(in the mockup)** A search box finds a term in Jäsche, with a hit count and previous/next; a
+3. **(built)** A search box finds a term in Jäsche, with a hit count and previous/next; a
    *spelling-tolerant* option lets one printed spelling find the others.
-4. **(in the mockup)** An **X-Ray mode** switch above the text. Off, Jäsche reads as a clean text.
+4. **(built)** An **X-Ray mode** switch above the text. Off, Jäsche reads as a clean text.
    On, every sentence traced to a Reflexion is tinted in the colour of its dating class (see
    Colour), with a solid underline for near-verbatim and a dashed one for close, and a small
    `R 3036` after it names the note.
-5. **(in the mockup)** In X-Ray mode, clicking a marked sentence opens it in the **Sources** tab.
+5. **(built)** In X-Ray mode, clicking a marked sentence opens it in the **Sources** tab.
 
 **Panel (right): four tabs**
 
-6. **(in the mockup)** **Overview.**
+6. **(built)** **Overview.**
    - a. A dating strip of the whole book: one column per AA 9 page, its height the number of
      traced sentences on that page, stacked by dating class. Section boundaries are marked
      above it. Clicking a column scrolls the text to that page.
    - b. The same as shares: a pie of the traced sentences by dating class, labelled with
      percentages and counts.
    - c. A bar of how much of Jäsche is traced at all, by strength: near-verbatim, close,
-     reworked, not traced (share of words).
+     reworked (50–70%, counted here but not marked in the text), not traced (share of words).
    - d. The totals by dating class, in sentences and in distinct Reflexionen.
-7. **(in the mockup)** **Sources.** Follows the § in view (or the sentence clicked). It shows:
+7. **(built)** **Sources.** Follows the § in view (or the sentence clicked). It shows:
    - a. the Meier §§ the passage rests on, from the AA concordance (attested) or from the
      matches (inferred), with the AA's topic heading;
    - b. a timeline, 1750–1805, of the Reflexionen filed under those §§, each placed by Adickes'
@@ -148,12 +147,12 @@ always on screen.
      at 1781;
    - c. each matched sentence beside its Reflexion, Jäsche's words that are not in the note
      marked, with the phase expression verbatim, its years, and AA 16 page.
-8. **(in the mockup)** **Transcript parallels** (formerly "Witnesses"). For the § in view, the
+8. **(built)** **Transcript parallels** (formerly "Witnesses"). For the § in view, the
    passages of Blomberg, the Wiener Logik and Busolt that deal with the same matter, oldest
    first, each with its date, strength and the shared concepts, so that one can see whether the
    doctrine was still being taught in the 1780s. The tab says plainly that these are not
    Jäsche's sources.
-9. **(in the mockup)** **Flags.** A list across the book of §§ and sections that meet a condition,
+9. **(built)** **Flags.** A list across the book of §§ and sections that meet a condition,
    each clickable:
    - *early only* — every Reflexion matched is in the "before 1770" class;
    - *sources from three or more decades* — the notes matched in one § or section fall in three
