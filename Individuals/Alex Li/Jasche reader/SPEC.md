@@ -176,9 +176,12 @@ always on screen.
 2. **(built)** A contents tree beside the text lists the parts, sections and §§; clicking
    an entry scrolls the text to it, and the entry for the section and § in view is highlighted.
    - a. **(rev. 3)** A *Titles · Dating* switch at the head of the contents. In Dating view every
-     part, section and § has a bar beneath its title. The bar is the entry's words, coloured by
-     dating class where they are traced to a Reflexion at ≥ 70%, with the traced share beside it.
-     Clicking still goes to the entry. This replaces the dating strip of item 6a.
+     part, section and § has a bar beneath its title, with no figures beside it. The bar is the
+     entry's words, coloured by dating class where they are traced to a Reflexion at ≥ 70%.
+     Hovering a bar opens a box giving, for each dating class present, the share of the entry's
+     words taken from notes of that class and the number of sentences, then the share not
+     traced, and the entry's sentences and distinct Reflexionen. Clicking still goes to the
+     entry. This replaces the dating strip of item 6a.
 3. **(built)** A search box finds a term in Jäsche, with a hit count and previous/next; a
    *spelling-tolerant* option lets one printed spelling find the others.
 4. **(built)** An **X-Ray mode** switch above the text. Off, Jäsche reads as a clean text.
@@ -237,13 +240,15 @@ always on screen.
 
 **Throughout (rev. 3)**
 
-14. A *Panels* menu in the header with a tick box for each tab. An unticked tab disappears; with
-    every tab unticked the panel closes and the text takes the full width. Like all the page's
-    state, the choice is lost on reload.
+14. Each side opens and closes from its own tab button, with no separate menu. On the left, a
+    *Contents* tab: clicking it folds the contents to a slim rail, clicking it again brings them
+    back. On the right, clicking the tab already open (marked ×) folds the panel to a rail of
+    the three tab names; clicking a name opens the panel at that tab. With both folded the text
+    takes the full width. Like all the page's state, the layout is lost on reload.
 15. *Go to* is a small box, not a long drop-down. Typing a § number or an AA 9 page offers the
     matches in a list of six rows at most.
-16. *(proposed, not agreed)* **Transcript matches**, a further tick box in Panels, off by
-    default. Sources then adds grey cards for the sentences of the § in view that have a close
+16. *(proposed, not agreed)* **Transcript matches**, a tick box in the Sources tab ("also show
+    transcript matches"), off by default. Sources then adds grey cards for the sentences of the § in view that have a close
     parallel in a transcript. A card gives the transcript, its date and AA 24 page, both texts,
     the strength, and the words "a parallel, not one of Jäsche's sources". The matching is done
     sentence by sentence (words in order, or most of the content words within one passage),
@@ -268,7 +273,7 @@ always on screen.
 - **Overview:** the strip is shown again as a pie. In rev. 3 the strip moves into the contents
   as bars (item 2a), and the pie shrinks.
 - **Sources:** follows the text always; pinning only by an explicit button (rev. 3).
-- **Every tab can be switched off** (rev. 3, item 14).
+- **Every side can be folded** from its own tab button, without a separate menu (rev. 3, item 14).
 
 ## Open questions
 
@@ -291,7 +296,7 @@ always on screen.
    Hinske (2000) read at first hand.
 8. *From the mockup's design notes:* should search also cover the Reflexionen? Should the
    timeline draw a mixed note's span as a bar? Should the strip have a column per page or per §?
-9. *From the revision 3 mockup:* keep *Hold here* (item 7), or drop pinning altogether? Remember
-   the Panels choice between visits (item 14)? It would be the first thing the app stores in the
+9. *From the revision 3 mockup:* keep *Hold here* (item 7), or drop pinning altogether? Reopen the
+   page with the sides open or folded as they were left (item 14)? It would be the first thing the app stores in the
    browser. Build item 16, and if so, should X-Ray mark those sentences too, say with a grey
    dotted underline? Bars per entry only (item 2a), or a per-page strip as well?
