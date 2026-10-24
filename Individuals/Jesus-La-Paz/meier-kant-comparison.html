@@ -1615,7 +1615,16 @@ document.addEventListener('click', ev => {
   const word = t.slice(a, z); if (word.length < 3) return;
   const g = glossFor(word); pop.replaceChildren();
   if (g) { pop.append(el('b', null, word), ' ', g.la ? el('span', 'la', `(${g.la})`) : ''); pop.append(el('div', 'en', `≈ ${g.en[0]}`), el('div', 'small', `${g.de}: ${g.note}`)); }
-  else pop.append(el('b', null, word), el('div', 'small', 'Not in the glossary. The English button under the passage translates it in context.'));
+  else {
+    pop.append(el('b', null, word)); const en = el('div', 'en', '…'); pop.append(en);
+    loadScriptOnce('wordlist.js').then(() => {
+      const W = window.KANT_WORDS || {}, k = word.toLowerCase();
+      const cands = [k, k.replace(/ß/g, 'ss'), k.replace(/ss/g, 'ß'), ...['en', 'es', 'er', 'em', 'e', 'n', 's'].filter(x => k.endsWith(x)).map(x => k.slice(0, -x.length))];
+      const hit = cands.find(c => W[c]);
+      en.textContent = hit ? `≈ ${W[hit]}${hit !== k ? ` (as “${hit}”)` : ''}` : 'Not in the word list. The English button under the passage translates it in context.';
+      if (hit) pop.append(el('div', 'small', 'From the page’s word list, made by machine: a guide, not a dictionary.'));
+    }).catch(() => { en.textContent = 'The English button under the passage translates it in context.'; });
+  }
   const s_ = el('button', 'pbtn', `Search “${g ? g.de.split(' / ')[0] : word}”`); s_.addEventListener('click', () => { pop.style.display = 'none'; state.mode = state.mode === 'para' ? 'conn' : state.mode; $('q').value = word; smartQuery(g ? g.q : word); });
   pop.append(el('div', null, '')); pop.append(s_);
   pop.style.left = Math.min(window.innerWidth - 360, ev.clientX + 8) + 'px'; pop.style.top = Math.min(window.innerHeight - 160, ev.clientY + 14) + 'px'; pop.style.display = 'block';
