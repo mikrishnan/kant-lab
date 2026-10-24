@@ -229,6 +229,24 @@ joins them back into running prose and keeps every page the prose crossed as a c
 offset into it, so that any stretch can still be cited as `AA 24:N` and the pagination
 put back exactly where it stood.
 
+**Without a Mac**, LibreOffice's conversion serves for these three, once its byte-order
+mark and its two InteLex link-image lines are removed. From those files the extractor
+reproduced the `textutil`-built data byte for byte (October 2026). That was checked for
+the Logik transcripts only, not for the other pipelines:
+
+```sh
+mkdir -p /tmp/rtf
+cp Textfiles/Vol24logikBlomberg.rtfd/TXT.rtf /tmp/rtf/blomberg.rtf
+cp Textfiles/Vol24logikBusolt.rtf            /tmp/rtf/busolt.rtf
+cp Textfiles/Vol24logikWien.rtf              /tmp/rtf/wiener.rtf
+soffice --headless --convert-to 'txt:Text (encoded):UTF8' --outdir /tmp/rtf /tmp/rtf/*.rtf
+for w in blomberg busolt wiener; do
+  sed -e '1s/^\xEF\xBB\xBF//' -e '/^\(previous\|next\)\.png ¬$/d' /tmp/rtf/$w.txt > /tmp/$w.txt
+done
+```
+
+and then the three `parse_logik.py` lines above.
+
 `parse_logik.py` prints a report per work — sections, blocks, words, the AA page range
 and any gap in it, how many paragraph joins were attested and how many inferred,
 manuscript pages, and, for Blomberg, the Meier §§ it found. **Read it.** It ends in
@@ -254,6 +272,11 @@ What the extractor knows about these transcriptions, which is easy to break:
   page-sized fragments or runs unrelated paragraphs together. Tight against the
   preceding character it rejoins a split word (`Gewiß|heit` → `Gewißheit`); with a space
   before it, it fell between two whole words and becomes a space.
+- A paragraph that runs on across a page marker **starts on the page before it**, and
+  that is its `aa`. Until October 2026 the extractor gave it the page it runs *into*,
+  because the current page had already moved on when the paragraph was written out.
+  That put 290 paragraphs (148 Blomberg, 47 Busolt, 95 Wiener) a page late, and every
+  quotation from their opening part was cited one page too high.
 - `||` is not that. In the Wiener Logik `|| V` marks 57 passages and is kept verbatim.
 - `[471]` is the manuscript's own pagination, lifted out of the text into `ms` with the
   offset it stood at, as the AA pages are. Every other bracket is editorial and stays:
