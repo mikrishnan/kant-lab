@@ -203,6 +203,39 @@
   .col.slot { align-items: center; justify-content: center; color: var(--muted); font-style: italic; text-align: center; padding: 20px; }
   .notice { color: var(--accent-2); font-size: 14px; font-style: italic; margin-left: 8px; }
 
+  /* ── The introduction: what a visitor sees first ── */
+  .intro { max-width: 1060px; }
+  .intro h2 { font-family: var(--display); font-weight: 600; font-size: 21px; letter-spacing: .04em; color: var(--accent); margin: 2px 0 8px; }
+  .intro h3 {
+    font-family: var(--display); font-weight: 600; font-size: 15px; letter-spacing: .07em; color: var(--accent);
+    border-bottom: 1px solid var(--rule); padding-bottom: 3px; margin: 26px 0 10px;
+  }
+  .intro h4 { font-family: var(--display); font-size: 13.5px; letter-spacing: .06em; color: var(--accent-2); margin: 18px 0 6px; font-weight: 600; }
+  .intro .lead { font-size: 18.5px; max-width: 48em; }
+  .intro p, .intro li { max-width: 50em; }
+  .intro ol, .intro ul { padding-left: 1.4em; margin: 6px 0; }
+  .intro li { margin-bottom: 5px; }
+  .intro .small { font-size: 14.5px; color: var(--ink-2); }
+  .intro a { color: var(--accent-2); }
+  .intro .groups { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0; list-style: none; max-width: none; }
+  .intro .groups li { background: #fff; border: 1px solid var(--rule); border-radius: 5px; padding: 9px 12px; max-width: none; margin: 0; }
+  .intro .groups b { font-family: var(--display); color: var(--accent); letter-spacing: .04em; }
+  .texts-list { list-style: none; padding: 0; }
+  .texts-list li { margin-bottom: 6px; }
+  .texts-list .ab { display: inline-block; min-width: 5.6em; font-weight: 600; color: var(--accent); }
+  table.chart { width: 100%; border-collapse: collapse; background: #fff; font-size: 15px; line-height: 1.4; margin-bottom: 6px; }
+  table.chart th { text-align: left; font-family: var(--display); font-weight: 600; font-size: 12px; letter-spacing: .07em; color: var(--accent); background: var(--parchment-2); padding: 6px 9px; border: 1px solid var(--rule); }
+  table.chart td { vertical-align: top; padding: 7px 9px; border: 1px solid var(--rule); }
+  table.chart td.pn { width: 21%; }
+  table.chart td.de, table.chart td.la { width: 22%; font-style: italic; }
+  table.chart td.where { font-size: 14px; color: var(--ink-2); }
+  table.chart .pnb { border: 0; background: none; padding: 0; text-align: left; font-weight: 600; color: var(--accent); font-size: 15.5px; line-height: 1.3; }
+  table.chart .pnb:hover { text-decoration: underline; }
+  table.chart .why { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; font-style: normal; }
+  table.chart .w { white-space: nowrap; font-weight: 600; color: var(--ink); }
+  #home { margin-left: 4px; }
+  #browse .gnote { font-size: 13px; color: var(--muted); font-style: italic; margin: -2px 0 4px 6px; line-height: 1.3; }
+
   #toast {
     position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 40;
     background: var(--accent); color: #fff; padding: 7px 16px; border-radius: 5px; font-size: 15px;
@@ -212,6 +245,9 @@
 
   @media (max-width: 1100px) {
     #browse { display: none; }
+  }
+  @media (max-width: 900px) {
+    .intro .groups { grid-template-columns: 1fr; }
   }
   @media (max-width: 760px) {
     .one-layout { flex-direction: column; }
@@ -225,7 +261,8 @@
 <header id="head">
   <div class="title-row">
     <h1>Logical Principles</h1>
-    <span class="subtitle">search and compare them across Baumgarten, Meier, the Reflexionen and the Logik transcripts</span>
+    <button class="linkish" id="home" title="What this page does, how to search it, its texts, and the chart of the principles">Introduction</button>
+    <span class="subtitle">search and compare them across Baumgarten, Meier, Kant’s notes, his logic lectures and the Jäsche Logik</span>
     <span id="status">Loading the texts…</span>
   </div>
 
@@ -280,6 +317,9 @@
 <script src="../../data/logik-blomberg-24.js"></script>
 <script src="../../data/logik-busolt-24.js"></script>
 <script src="../../data/logik-wiener-24.js"></script>
+<!-- The Jäsche Logik (AA IX), from Alex Li's dataset. If it ever moves, the page
+     searches the other texts and says that Jäsche is missing. -->
+<script src="../Alex%20Li/logik-jasche-9.js"></script>
 <!-- The principles and their forms, hand-curated, beside this page. -->
 <script src="principles-lexicon.js"></script>
 <!-- English translations of the passages the principles find: machine-made, unreviewed. -->
@@ -300,8 +340,9 @@ const PS_WORKS = {
   blomberg: { label: 'Logik Blomberg',          date: 'ca. 1771',     vol: 'AA XXIV',      short: 'Blomberg' },
   wiener:   { label: 'Wiener Logik',            date: '1780ff.',      vol: 'AA XXIV',      short: 'Wiener Logik' },
   busolt:   { label: 'Logik Busolt',            date: 'ca. 1789/90',  vol: 'AA XXIV',      short: 'Busolt' },
+  jasche:   { label: 'Jäsche, Logik',           date: '1800',         vol: 'AA IX',        short: 'Jäsche' },
 };
-const PS_ORDER = ['met', 'meier', 'reflm', 'refl', 'blomberg', 'wiener', 'busolt'];
+const PS_ORDER = ['met', 'meier', 'reflm', 'refl', 'blomberg', 'wiener', 'busolt', 'jasche'];
 
 // Meier's text lives in the Meier reader, not in data/, and is read from there.
 const MEIER_SRC = '../../meier-reader/meier-reading-guide.html';
@@ -371,7 +412,7 @@ function buildMet() {
       const g = (p.glosses || [])[n - 1];
       return g ? '' + g + '' : '';
     });
-    addUnit({ work: 'met', key: 'met:' + p.num, raw, label: 'Met. § ' + p.num, cite: p.aa ? pageCite(17, p.aa, p.aaEnd) : '', order: p.num });
+    addUnit({ work: 'met', key: 'met:' + p.num, loc: p.num, raw, label: 'Met. § ' + p.num, cite: p.aa ? pageCite(17, p.aa, p.aaEnd) : '', order: p.num });
   });
 }
 
@@ -381,7 +422,7 @@ function buildMeier(M, CIT) {
     (nv.paras || []).forEach(n => {
       const raw = M.paras[String(n)];
       if (raw == null) return;
-      addUnit({ work: 'meier', key: 'meier:' + n, raw, label: 'Meier § ' + n, cite: (CIT && CIT[n]) || '', sec });
+      addUnit({ work: 'meier', key: 'meier:' + n, loc: n, raw, label: 'Meier § ' + n, cite: (CIT && CIT[n]) || '', sec });
     });
   });
 }
@@ -399,7 +440,7 @@ function buildRefl() {
   REFL_ENTRIES.forEach(e => {
     if (e.vacat || !e.text) return;
     addUnit({
-      work: 'refl', key: 'refl:' + e.r, raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(16, e.aa || e.aaEnd, e.aaEnd),
+      work: 'refl', key: 'refl:' + e.r, loc: e.r, raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(16, e.aa || e.aaEnd, e.aaEnd),
       on: e.paras && e.paras.length ? 'on Meier ' + paraRange(e.paras) : '',
       phase: e.phRaw || '', tags: reflTags(e), inferred: !!e.interp,
     });
@@ -412,14 +453,14 @@ function buildReflM() {
     const tags = reflTags(e);
     if (e.part === 'erl') tags.unshift({ t: 'Erläuterung' });
     addUnit({
-      work: 'reflm', key: 'reflm:' + e.r, raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(e.vol, e.aa || e.aaEnd, e.aaEnd),
+      work: 'reflm', key: 'reflm:' + e.r, loc: e.r, raw: e.text, label: 'Refl. ' + e.r, cite: pageCite(e.vol, e.aa || e.aaEnd, e.aaEnd),
       on: e.paras && e.paras.length ? 'on Met. ' + paraRange(e.paras) : '',
       phase: e.phRaw || '', tags, inferred: !!e.interp,
     });
   });
 }
 
-function buildLogik(work, L) {
+function buildLogik(work, L, vol) {
   L.sections.forEach(s => {
     s.blocks.forEach(b => {
       if (b.kind === 'rule' || !b.text) return;
@@ -427,9 +468,10 @@ function buildLogik(work, L) {
       if (b.kind === 'note') tags.push({ t: 'AA cross-reference' });
       if (b.joined && b.joined.includes('inferred')) tags.push({ t: 'paragraph joined by inference', inferred: true });
       addUnit({
-        work, key: work + ':' + b.id, raw: b.text, label: b.aa ? 'AA 24:' + b.aa : (s.title || 'Titelei'),
-        cite: b.aa ? pageCite(24, b.aa, b.aaEnd) : '',
-        on: b.para ? 'on Meier ' + b.para.raw : '',
+        work, key: work + ':' + b.id, raw: b.text, label: b.aa ? `AA ${vol}:` + b.aa : (s.title || 'Titelei'),
+        cite: b.aa ? pageCite(vol, b.aa, b.aaEnd) : '', loc: b.aa,
+        // Blomberg keys its lecture to Meier's §§; the Jäsche Logik has §§ of its own.
+        on: b.para ? (work === 'jasche' ? '§ ' + b.para : 'on Meier ' + b.para.raw) : '',
         sec: s.title || '', tags,
       });
     });
@@ -442,9 +484,10 @@ function buildCorpus(meier) {
   if (meier) buildMeier(meier.M, meier.CIT);
   buildReflM();
   buildRefl();
-  buildLogik('blomberg', LOGIK_BLOMBERG);
-  buildLogik('wiener', LOGIK_WIENER);
-  buildLogik('busolt', LOGIK_BUSOLT);
+  buildLogik('blomberg', LOGIK_BLOMBERG, 24);
+  buildLogik('wiener', LOGIK_WIENER, 24);
+  buildLogik('busolt', LOGIK_BUSOLT, 24);
+  if (typeof LOGIK_JASCHE !== 'undefined') buildLogik('jasche', LOGIK_JASCHE, 9);
   UNITS.forEach(u => { u.norm = normalize(u.raw).norm; });
 }
 
@@ -508,7 +551,7 @@ function escRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 function formPattern(t, not) {
   let p = escRe(t.toLowerCase().trim()).replace(/\s+/g, '\\s+');
   p = '(?<![\\p{L}\\p{N}])' + p + '(?![\\p{L}\\p{N}])';
-  if (not) p += '(?!\\s+(?:' + not.split('|').map(escRe).join('|') + '))';
+  if (not) p += '(?!\\s+(?:' + not.toLowerCase().split('|').map(escRe).join('|') + '))';
   return p;
 }
 
@@ -579,12 +622,14 @@ function search() {
 // sidebar: how many passages each would find.
 let FORM_COUNTS = {};
 let PRINCIPLE_COUNTS = {};
+let PRINCIPLE_HITS = {};
 function countAll() {
   PRINCIPLE_LEXICON.forEach(p => {
     // Longest first, as in currentPatterns(), so that counts agree with searches.
     const idx = p.forms.map((f, i) => i).sort((a, b) => p.forms[b].t.length - p.forms[a].t.length);
     const hits = runSearch(idx.map(i => formPattern(p.forms[i].t, p.forms[i].not)));
     PRINCIPLE_COUNTS[p.id] = hits.length;
+    PRINCIPLE_HITS[p.id] = hits;
     const fc = p.forms.map(() => new Set());
     hits.forEach(h => h.spans.forEach(s => fc[idx[s.f]].add(h.u)));
     FORM_COUNTS[p.id] = fc.map(s => s.size);
@@ -838,12 +883,12 @@ function renderBrowse() {
   const nav = document.getElementById('browse');
   let h = '';
   Object.entries(PRINCIPLE_GROUPS).forEach(([g, title]) => {
-    h += `<h2>${g}. ${esc(title)}</h2>`;
+    h += `<h2>${g}. ${esc(title)}</h2><div class="gnote">${esc(PRINCIPLE_GROUP_NOTES[g] || '')}</div>`;
     PRINCIPLE_LEXICON.filter(p => p.group === g).forEach(p => {
       h += `<button class="pl${principle === p ? ' on' : ''}" data-p="${p.id}">${esc(p.en)} <span class="c">${PRINCIPLE_COUNTS[p.id] || 0}</span></button>`;
     });
   });
-  h += `<div class="browse-note">Numbers are passages found with all forms switched on. A match is found by the page, not marked by the edition: the tag under each passage says which form matched, and a dashed tag means a paraphrase, not the principle’s name.<br><br><b>EN</b> on a passage shows an English translation beneath it. These are machine translations by Claude, made once for the passages the principles find, and not yet checked by a scholar: check the original before quoting.${meierError ? `<br><br><b>Meier’s Auszug is not searched:</b> it is read from the Meier reader, and the browser refused that (${esc(meierError)}). Opened from disk, most browsers do; open the page on the website, or through a local server, to include it.` : ''}</div>`;
+  h += `<div class="browse-note">Numbers are passages found with all forms switched on. A match is found by the page, not marked by the edition. <b>EN</b> on a passage shows a machine translation, not reviewed by a scholar. <i>Introduction</i>, at the top, explains the texts and the three groups.${meierError ? `<br><br><b>Meier’s Auszug is not searched:</b> it is read from the Meier reader, and the browser refused that (${esc(meierError)}). Opened from disk, most browsers do; on the website it is included.` : ''}</div>`;
   nav.innerHTML = h;
   nav.querySelectorAll('.pl').forEach(b => b.addEventListener('click', () => {
     const p = PRINCIPLE_LEXICON.find(x => x.id === b.dataset.p);
@@ -855,14 +900,7 @@ function renderBrowse() {
 
 function renderMain() {
   const main = document.getElementById('main');
-  if (!principle && !freeText) {
-    main.innerHTML = `<div class="empty">
-      <p>Type a principle above, in English, German or Latin, and pick it from the list, or choose one from the left.</p>
-      <p><b>Exact form</b> finds only the spelling you picked; <b>All forms</b> finds every German and Latin form of that principle. The forms appear as switches under the search box, to fine-tune.</p>
-      <p><b>Reading list</b> shows every passage in turn. <b>Passages in one text</b> puts up to four passages of one text side by side. <b>Texts side by side</b> puts up to four texts in columns, each with its own passages.</p>
-    </div>`;
-    return;
-  }
+  if (!principle && !freeText) { renderIntro(main); return; }
   if (!HITS.length) {
     main.innerHTML = `<div class="empty"><p>No passage matches${principle && !active.size ? ': every form is switched off' : ''}.</p></div>`;
     return;
@@ -952,6 +990,119 @@ function renderTexts(main) {
   main.innerHTML = h + '</div>';
 }
 
+/* ═════════════ Rendering: the introduction ═════════════ */
+
+// What a visitor sees first: what the page does, how to search it, the texts,
+// how the principles are classified and why, and the chart of the principles.
+// The chart is built from PRINCIPLE_LEXICON and the texts each time, so that it
+// always agrees with what a search finds.
+
+const REPO = 'https://github.com/mikrishnan/kant-lab/blob/main/';
+
+// The chart's short names for the texts, and how each cites a passage.
+const CHART_TEXT = {
+  met:      { ab: 'Met.',     pre: n => n.length > 1 ? 'Met. §§ ' : 'Met. § ' },
+  meier:    { ab: 'Meier',    pre: n => n.length > 1 ? 'Meier §§ ' : 'Meier § ' },
+  reflm:    { ab: 'R-Baum',   pre: () => 'R-Baum ' },
+  refl:     { ab: 'R-Meier',  pre: () => 'R-Meier ' },
+  blomberg: { ab: 'Blomberg', pre: () => 'Blomberg AA 24:' },
+  wiener:   { ab: 'Wiener',   pre: () => 'Wiener AA 24:' },
+  busolt:   { ab: 'Busolt',   pre: () => 'Busolt AA 24:' },
+  jasche:   { ab: 'Jäsche',   pre: () => 'Jäsche AA 9:' },
+};
+
+// Where a principle appears: its passages, text by text, in page order.
+function chartWhere(p) {
+  const by = {};
+  (PRINCIPLE_HITS[p.id] || []).forEach(h => {
+    const u = UNITS[h.u];
+    if (u.loc == null) return;
+    const xs = by[u.work] = by[u.work] || [];
+    if (!xs.includes(u.loc)) xs.push(u.loc);
+  });
+  return PS_ORDER.filter(w => by[w]).map(w =>
+    `<span class="w">${esc(CHART_TEXT[w].pre(by[w]))}</span>${by[w].join(', ')}`).join(' · ') || '—';
+}
+
+function chartForms(p, lang) {
+  const fs = p.forms.filter(f => f.lang === lang).map(f => esc(f.t));
+  return fs.length ? fs.join(' · ') : '—';
+}
+
+function chartHTML() {
+  let h = '';
+  Object.entries(PRINCIPLE_GROUPS).forEach(([g, title]) => {
+    h += `<h4>${g}. ${esc(title)}: ${esc(PRINCIPLE_GROUP_NOTES[g] || '')}</h4>
+      <table class="chart"><thead><tr><th>Principle</th><th>German</th><th>Latin</th><th>Where it appears</th></tr></thead><tbody>`;
+    PRINCIPLE_LEXICON.filter(p => p.group === g).forEach(p => {
+      h += `<tr>
+        <td class="pn"><button class="pnb" data-p="${p.id}" title="Search for it">${esc(p.en)}</button>${p.note ? `<span class="why">${esc(p.note)}</span>` : ''}</td>
+        <td class="de">${chartForms(p, 'de')}</td>
+        <td class="la">${chartForms(p, 'la')}</td>
+        <td class="where">${chartWhere(p)}</td></tr>`;
+    });
+    h += '</tbody></table>';
+  });
+  return h;
+}
+
+function renderIntro(main) {
+  const missing = [];
+  if (meierError) missing.push(`Meier’s <i>Auszug</i> could not be loaded here (${esc(meierError)}). It is read from the Meier reader, which browsers refuse when the page is opened from disk; on the website it is included.`);
+  if (typeof LOGIK_JASCHE === 'undefined') missing.push('The Jäsche <i>Logik</i> could not be loaded here: the file it is read from has moved.');
+  main.innerHTML = `<div class="intro">
+    <h2>Kant’s logical principles, in the texts</h2>
+    <p class="lead">This page finds where the logical principles are named in the handbooks Kant taught from, in his own notes and in his logic lectures: the principle of contradiction, of sufficient reason, of excluded middle, the principles of the syllogism, and others. It shows the passages in the original, one after another or side by side, with an English translation on request.</p>
+    ${missing.length ? `<p class="small"><b>Not searched in this copy:</b> ${missing.join(' ')}</p>` : ''}
+
+    <h3>How to search</h3>
+    <ol>
+      <li><b>Choose a principle.</b> Type its name in the box at the top, in English, German or Latin (<i>excluded middle</i>, <i>Satz des Wiederspruchs</i>, <i>principium rationis</i>) and pick it from the list that opens. Or click it in the column on the left, or in the chart below.</li>
+      <li><b>Exact form or all forms.</b> <i>Exact form</i> finds only the spelling you picked. <i>All forms</i> finds every German and Latin form of the principle. The forms then appear as switches under the search box; click one to leave it out or put it back.</li>
+      <li><b>Any other words.</b> Words not in the list can be searched as typed: pick “Search the words … as typed”. A <code>*</code> at the end of a word allows any ending, as in <i>Grundsatz*</i>.</li>
+      <li><b>Three ways to read the results.</b> <i>Reading list</i> shows every passage in turn, text by text. <i>Passages in one text</i> puts up to four passages of one text side by side: pick them from the list on the left, or with <i>pin</i> in the reading list. <i>Texts side by side</i> puts up to four texts in columns, each with its own passages.</li>
+      <li><b>English.</b> <i>EN</i> on a passage shows an English translation beneath it; the checkbox <i>English beneath every passage</i> shows it everywhere.</li>
+      <li><b>Share a search.</b> The address in the browser changes as you search: copy it to send someone the same search. <i>Introduction</i>, at the top, brings you back here.</li>
+    </ol>
+
+    <h3>The texts</h3>
+    <ul class="texts-list">
+      <li><span class="ab">Met.</span> A. G. Baumgarten, <i>Metaphysica</i>, 4th ed. 1757 (AA XVII). Latin, with Baumgarten’s own German glosses. The handbook of Kant’s metaphysics lectures.</li>
+      <li><span class="ab">Meier</span> G. F. Meier, <i>Auszug aus der Vernunftlehre</i>, 1752 (AA XVI). The handbook of Kant’s logic lectures.</li>
+      <li><span class="ab">R-Baum</span> Kant’s notes (Reflexionen) in his copy of Baumgarten (AA XVII–XVIII), dated by Adickes’ phases of Kant’s hand.</li>
+      <li><span class="ab">R-Meier</span> Kant’s notes in his copy of Meier (AA XVI).</li>
+      <li><span class="ab">Blomberg</span> <i>Logik Blomberg</i>, ca. 1771; <span class="ab" style="min-width:0">Wiener</span> the <i>Wiener Logik</i>, 1780ff.; <span class="ab" style="min-width:0">Busolt</span> <i>Logik Busolt</i>, ca. 1789/90 (AA XXIV). Students’ transcripts of Kant’s logic lectures.</li>
+      <li><span class="ab">Jäsche</span> <i>Immanuel Kant’s Logik</i>, ed. G. B. Jäsche, 1800 (AA IX). Compiled by Jäsche from Kant’s notes.</li>
+    </ul>
+    <p class="small">The texts are the Academy Edition (AA), as transcribed in this repository: the <a href="${REPO}data/README.md">shared data files</a>, Meier’s text in the <a href="${REPO}meier-reader/meier-reading-guide.html">Meier reader</a>, and the Jäsche <i>Logik</i> in <a href="${REPO}Individuals/Alex%20Li/logik-jasche-9.js">Alex Li’s dataset</a>. They are not equal evidence for Kant’s own view: the Reflexionen are in his hand, the lectures are students’ notes, the Jäsche <i>Logik</i> is an editor’s compilation, and Baumgarten and Meier are the authors Kant taught from.</p>
+    <p class="small">A match is found by this page, not marked by the edition. Each passage says which form matched, and a dashed tag marks a paraphrase rather than the principle’s name. The English translations are machine translations by Claude, not reviewed by a scholar: check the original before quoting.</p>
+
+    <h3>How the principles are classified</h3>
+    <p>One question sorts every principle: <b>what does it govern?</b></p>
+    <ol class="groups">
+      <li><b>1. Judging</b><br>Whether a single judgement is true in its form. Kant’s three formal criteria of truth: contradiction (with identity), sufficient reason, excluded middle. Jäsche, AA 9:52–53; already in Kant’s hand in Refl. 2178, AA 16:260.</li>
+      <li><b>2. Inferring</b><br>Whether one judgement follows from another. One principle for each kind of syllogism: categorical, hypothetical, disjunctive. Jäsche, AA 9:122–130; Refl. 3218, AA 16:717.</li>
+      <li><b>3. Things</b><br>What holds of objects. Principles of Baumgarten’s ontology in the <i>Metaphysica</i>, outside logic.</li>
+    </ol>
+    <p><b>Why this way:</b></p>
+    <ul>
+      <li><b>One question for all.</b> Every principle is sorted by what it governs, so each stands in exactly one group.</li>
+      <li><b>The divisions are Kant’s.</b> Groups 1 and 2 are divisions Kant makes himself. The page follows them instead of inventing its own.</li>
+      <li><b>It shows where logic ends.</b> The principles of group 3 are about things, not about the form of thought. As the chart shows, they occur almost only in Baumgarten and in Kant’s notes on him.</li>
+      <li><b>The same principles work twice.</b> Sufficient reason is also the principle of the hypothetical syllogism (“der Satz des Grundes”, AA 9:129), and excluded middle that of the disjunctive (“der Grundsatz des ausschließenden Dritten”, AA 9:130). The principles of judging return as principles of inferring.</li>
+    </ul>
+    <p class="small">The reasons and the hard cases are set out in <a href="${REPO}Individuals/Feng/notes/classification.md">notes/classification.md</a>.</p>
+
+    <h3>The principles</h3>
+    <p class="small">Every German and Latin form the page searches for, and every passage where one occurs. Click a principle to search for it. Abbreviations as in <i>The texts</i> above: Refl. numbers are Adickes’, AA pages are the Academy Edition’s.</p>
+    ${chartHTML()}
+  </div>`;
+  main.querySelectorAll('.pnb').forEach(b => b.addEventListener('click', () => {
+    const p = PRINCIPLE_LEXICON.find(x => x.id === b.dataset.p);
+    pick({ p, f: null, t: p.en, lang: 'en' });
+  }));
+}
+
 /* ═════════════ Update ═════════════ */
 
 function update(keepScroll) {
@@ -990,7 +1141,7 @@ function writeHash() {
 function readHash() {
   const h = new URLSearchParams(location.hash.slice(1));
   if (['list', 'one', 'texts'].includes(h.get('v'))) view = h.get('v');
-  const p = PRINCIPLE_LEXICON.find(x => x.id === h.get('p'));
+  const p = PRINCIPLE_LEXICON.find(x => x.id === h.get('p')) || PRINCIPLE_LEXICON.find(x => (x.was || []).includes(h.get('p')));
   if (p) {
     principle = p;
     const f = h.get('f');
@@ -1020,6 +1171,11 @@ function wire() {
   });
 
   document.querySelectorAll('#scope button').forEach(b => b.addEventListener('click', () => setScope(b.dataset.scope)));
+  document.getElementById('home').addEventListener('click', () => {
+    principle = null; chosenForm = null; freeText = null; active = new Set();
+    document.getElementById('q').value = '';
+    update();
+  });
   document.getElementById('en-all').addEventListener('change', ev => { enAll = ev.target.checked; enFlip = new Set(); rerender(); });
   document.querySelectorAll('#views button').forEach(b => b.addEventListener('click', () => { view = b.dataset.view; notice = ''; update(); }));
   document.getElementById('forms-all').addEventListener('click', () => { scope = 'all'; applyScope(); update(); });
