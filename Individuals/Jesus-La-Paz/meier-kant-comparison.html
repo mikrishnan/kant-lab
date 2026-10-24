@@ -207,6 +207,31 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 .method th { background: var(--parch-dark); font-size: .78rem; }
 @media (max-width: 900px) { .ccard { grid-template-columns: 1fr; } .ccard .cm { border-right: none; border-bottom: 1px solid var(--parch-deep); } }
 
+/* ── passage actions: English, question this link ─────── */
+.pacts { display: flex; flex-wrap: wrap; gap: 5px; margin: 3px 0 2px; }
+.pbtn { font: inherit; font-size: .72rem; background: none; border: 1px solid var(--line); border-radius: 9px; padding: 0 8px; cursor: pointer; color: var(--accent); line-height: 1.5; }
+.pbtn:hover { background: var(--parch-dark); }
+.pbtn.rep { border-color: #c8908a; color: #9a2a1a; text-decoration: none; }
+.trbox { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 6px 0 10px; }
+.trcol { background: #fffdf6; border: 1px solid var(--parch-deep); border-radius: 4px; padding: 7px 10px; }
+.trcol h5 { margin: 0 0 3px; font-family: 'Cinzel', serif; font-size: .68rem; letter-spacing: .05em; color: var(--accent); font-weight: 600; }
+.trcol h5 small { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-weight: 400; display: block; font-size: .72rem; }
+.trcol .tt { font-size: .98rem; line-height: 1.5; white-space: pre-wrap; font-style: normal; color: var(--ink); }
+.trcol ul { margin: 5px 0 0 16px; padding: 0; font-size: .8rem; color: #3a2e1a; }
+.trwarn { grid-column: 1 / -1; font-size: .72rem; color: var(--faded); font-style: italic; }
+#fbVeil { position: fixed; inset: 0; background: rgba(30,20,5,.45); z-index: 70; display: none; align-items: center; justify-content: center; }
+#fbVeil.on, .nbv.on { display: flex; }
+.nbv { position: fixed; inset: 0; background: rgba(30,20,5,.45); z-index: 70; display: none; align-items: center; justify-content: center; }
+.pin { background:#fff; border:1px solid var(--parch-deep); border-radius:3px; padding:5px 9px; margin:6px 0; font-size:.9rem; }
+.pin .r { font-size:.72rem; color: var(--aa-ink); display:block; }
+.fb { background: var(--parchment); border: 2px solid var(--accent); border-radius: 6px; width: min(640px, 94vw); max-height: 90vh; overflow-y: auto; padding: 14px 20px 18px; line-height: 1.45; }
+.fb h2 { font-family: 'Cinzel', serif; font-size: .9rem; letter-spacing: .06em; color: var(--accent); margin: 0 0 6px; }
+.fb label { display: block; font-size: .85rem; color: var(--accent); margin: 10px 0 3px; }
+.fb textarea, .fb input[type=text], .fb input[type=number], .fb select { font: inherit; font-size: .95rem; width: 100%; padding: 5px 8px; border: 1px solid var(--line); border-radius: 3px; background: #fff; }
+.fb .what { font-size: .85rem; background: #fff; border: 1px solid var(--parch-deep); border-radius: 3px; padding: 6px 9px; }
+.fb .btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+@media (max-width: 900px) { .trbox { grid-template-columns: 1fr; } }
+
 /* ── term mode result lists ────────────────────────────── */
 .summary { font-size: .92rem; margin: 0 0 8px; }
 .summary b { color: var(--accent); }
@@ -234,7 +259,9 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 <header>
   <h1>Meier–Kant Comparison</h1>
   <span class="sub">which passage of Meier's <i>Auszug aus der Vernunftlehre</i> Kant is lecturing on, across the Blomberg, Wiener and Busolt transcripts, the Jäsche <i>Logik</i> and his Reflexionen</span>
-  <button class="howbtn" id="howBtn" type="button">How the connections are made</button>
+  <button class="howbtn" id="linkBtn" type="button" title="Copy a link to exactly what you are looking at, to send to students">Copy link</button>
+  <button class="howbtn" id="nbBtn" type="button" style="margin-left:6px">Notebook (0)</button>
+  <button class="howbtn" id="howBtn" type="button" style="margin-left:6px">How the connections are made</button>
 </header>
 
 <div class="bar">
@@ -276,6 +303,8 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
   </section>
 </main>
 <section id="connPane" hidden></section>
+<div id="fbVeil"><div class="fb" id="fbBox" role="dialog" aria-label="Question this connection"></div></div>
+<div id="nbVeil" class="nbv"><div class="fb" id="nbBox" role="dialog" aria-label="Notebook"></div></div>
 <div id="methodVeil"><div class="method" id="methodBox" role="dialog" aria-label="How the connections are made"></div></div>
 
 <!-- Shared data, loaded and never copied. Two exceptions, both in this folder because data/ has no file for them yet:
@@ -287,6 +316,7 @@ mark.hit.focus { background: var(--hit-focus); outline: 1px solid var(--accent);
 <script src="../../data/logik-wiener-24.js"></script>
 <script src="jaesche-logik-data.js"></script>
 <script src="meier-kant-concordance.js"></script>
+<script src="translation-briefs.js"></script>
 <script src="../../data/metaphysica-17.js"></script>
 <script src="../../data/reflexionen-17-18-baumgarten.js"></script>
 <script src="../../data/tradition-meier.js"></script>
@@ -344,7 +374,15 @@ function linkedTo(w, n, near) {
   for (let k = n - (near || 0); k <= n + (near || 0); k++) (AT[w][k] || []).forEach(x => out.push({ ...x, at: k }));
   return out.sort((a, c) => a.ord - c.ord);
 }
-function evBadge(code) { const s = el('span', 'ev ev-' + code, EV_SHORT[code]); s.title = EV[code]; return s; }
+// The confidence shown is measured, not modelled: the share of links with the same mark, in the same text,
+// that were right within ±2 §§ when checked against a stated link (CONCORDANCE.meta.confidence.table).
+function confOf(w, code) { const t = CONCORDANCE.meta.confidence && CONCORDANCE.meta.confidence.table; return t && t[w] && t[w][code]; }
+function evBadge(code, w) {
+  const c = w && '123'.includes(code) ? confOf(w, code) : null;
+  const s = el('span', 'ev ev-' + code, EV_SHORT[code] + (c && c.pct != null ? ` · ${c.pct}%` : ''));
+  s.title = EV[code] + (c ? `. ${c.pct}% of the ${c.n} links with this mark were right, within ±2 §§, when checked (${c.basis}).` : (code === 'S' || code === 'A' || code === 'R' ? '. Stated by the texts, not inferred.' : ''));
+  return s;
+}
 function hasKant(n) { return !!(REFL_BY_PARA[n] || CW.some(w => AT[w][n])); }
 
 // Baumgarten's own German glosses on a § of the Metaphysica (MET_PARAGRAPHS[].glosses).
@@ -574,6 +612,7 @@ function renderMeierPara() {
   t.append(highlighted(PARAS[n], re));
   wrap.append(t);
 
+  wrap.append(passageActions('meier', 'meier:' + n, null, { cite: `Meier, Auszug aus der Vernunftlehre, § ${n}`, text: PARAS[n] }));
   const tools = el('div', 'tools');
   const cp = el('button', 'copy', 'Copy this comparison with citations');
   cp.addEventListener('click', () => copyComparison(cp));
@@ -629,12 +668,14 @@ function renderKantPara() {
       lastAA = b.aaEnd || b.aa;
       if (w === 'blomberg' && b.para) g.append(el('span', 'para', b.para.raw));
       if (w === 'jaesche' && b.para && b.kind === 'heading') g.append(el('span', 'para', `J § ${b.para}`));
-      g.append(evBadge(code));
+      g.append(evBadge(code, w));
       if (at !== n) g.append(el('span', 'atn', `linked to § ${at}`));
       const lk = LINK[w][b.id]; if (lk && lk.hi > lk.lo) g.append(el('span', 'atn', `runs over §§ ${lk.lo}–${lk.hi}`));
       d.append(g);
       const focusK = state.focus && state.focus.kind === 'block' && state.focus.id === b.id ? (state.focus.k || 0) : -1;
       d.append(highlighted(b.text, re, focusK));
+      const lk2 = LINK[w][b.id];
+      d.append(passageActions(w, b.id, lk2 ? { work: w, id: b.id, n: lk2.n, code: lk2.code, cite: `${CW_FULL[w]}, AA ${CW_VOL[w]}:${aaRange(b)}`, text: b.text } : null));
       wrap.append(d);
     });
   } else {
@@ -681,6 +722,7 @@ function renderKantPara() {
           t.append(frag);
         }
         c.append(t);
+        c.append(passageActions('refl', 'refl:' + e.r, { work: 'refl', id: 'refl:' + e.r, n, code: e.src === 'locus' || e.src === 'group' ? 'R' : 'Ri', cite: `Kant, Reflexion ${e.r}${e.aa ? ', AA 16:' + e.aa : ''}`, text: e.text }));
         wrap.append(c);
       });
     }
@@ -853,7 +895,7 @@ function renderKantTerm() {
         n0 ? () => openAt(n0, 'reflexionen', { kind: 'refl', id: e.r, k: h.i }) : null));
     } else if (CW.includes(k)) {
       const b = h.row.b, l = LINK[k][b.id];
-      wrap.append(exButton(h, [`AA ${CW_VOL[k]}:${aaRange(b)}`, k === 'jaesche' && b.para ? ` · Jäsche § ${b.para}` : '', secI, l ? ` · on Meier § ${l.n} ` : '', l ? evBadge(l.code) : ''],
+      wrap.append(exButton(h, [`AA ${CW_VOL[k]}:${aaRange(b)}`, k === 'jaesche' && b.para ? ` · Jäsche § ${b.para}` : '', secI, l ? ` · on Meier § ${l.n} ` : '', l ? evBadge(l.code, k) : ''],
         l ? () => openAt(l.n, k, { kind: 'block', id: b.id, k: h.i }) : null));
     } else if (k === 'jaesche_old') {
       const b = h.row.b, ps = meierParasForPage(b.aa);
@@ -1064,6 +1106,198 @@ function copyComparison(btn) {
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
 }
 
+/* ── English: two machine translations of every passage, loaded per text when first wanted ───────── */
+// translations/<text>-guyer.js and -kemp.js set KANT_TR['<text>/<style>'] = { id: [translation, [notes]] }.
+window.KANT_TR = window.KANT_TR || {};
+const TR_STYLES = [
+  { k: 'guyer', label: 'Guyer–Wood principles', tag: 'literal; one English word per German term; sentences kept whole' },
+  { k: 'kemp', label: 'Kemp Smith principles', tag: 'faithful to the sense; readable English; tangled sentences resolved' },
+];
+const trLoading = {};
+function loadScriptOnce(src) {
+  if (!trLoading[src]) trLoading[src] = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error(src)); document.head.append(sc); });
+  return trLoading[src];
+}
+function richInto(node, text) {
+  text.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/).forEach(part => {
+    if (!part) return;
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) node.append(el('b', null, part.slice(2, -2)));
+    else if (part.startsWith('*') && part.endsWith('*') && part.length > 2) node.append(el('i', null, part.slice(1, -1)));
+    else node.append(part);
+  });
+}
+function trButton(text, id, host, src) {
+  const b = el('button', 'pbtn', 'English'); b.type = 'button'; b.title = 'Two English translations, in the manner of Guyer–Wood and of Kemp Smith';
+  let box = null;
+  b.addEventListener('click', ev => {
+    ev.stopPropagation();
+    if (box) { box.remove(); box = null; b.textContent = 'English'; return; }
+    box = el('div', 'trbox'); box.append(el('div', 'trwarn', 'Loading…'));
+    (host || b.parentElement).after(box); b.textContent = 'Hide English';
+    Promise.all(TR_STYLES.map(st => loadScriptOnce(`translations/${text}-${st.k}.js`).catch(() => null))).then(() => {
+      if (!box) return;
+      box.replaceChildren();
+      TR_STYLES.forEach(st => {
+        const c = el('div', 'trcol'), h = el('h5', null, st.label.toUpperCase());
+        h.append(el('small', null, st.tag)); c.append(h);
+        const tr = (KANT_TR[`${text}/${st.k}`] || {})[id];
+        const t = el('div', 'tt');
+        if (tr) { richInto(t, tr[0]); c.append(t); if (tr[1] && tr[1].length) { const ul = el('ul'); tr[1].forEach(n => { const li = el('li'); richInto(li, n); ul.append(li); }); c.append(ul); } }
+        else { c.append(el('div', 'trwarn', 'Not translated in advance.')); c.dataset.st = st.k; }
+        box.append(c);
+      });
+      if (box.querySelector('[data-st]') && src) box.prepend(onDemand(box, src));
+      box.append(el('div', 'trwarn', 'Machine translations made for this page, each following one translator’s stated principles (see “How the connections are made”). Neither Guyer and Wood nor Kemp Smith translated these texts, and these are not their work. Check against the German.'));
+    });
+  });
+  return b;
+}
+
+// On demand: the reader's own Claude API key, kept only in this tab's memory and sent only to api.anthropic.com.
+let TR_KEY = '';
+async function claudeTranslate(style, src, onText) {
+  const body = { model: 'claude-opus-5-5', max_tokens: 16000, stream: true, thinking: { type: 'adaptive' }, output_config: { effort: 'high' },
+    system: TRANSLATION_BRIEFS[style].system, messages: [{ role: 'user', content: `Passage to translate (${src.cite}):\n\n<passage>\n${src.text}\n</passage>` }] };
+  const call = fb => fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: Object.assign({ 'content-type': 'application/json', 'x-api-key': TR_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, fb ? { 'anthropic-beta': 'server-side-fallback-2026-07-01' } : {}), body: JSON.stringify(fb ? { ...body, fallbacks: 'default' } : body) });
+  let res = await call(true);
+  if (res.status === 400) { const e = await res.clone().json().catch(() => ({})); if (/fallback|beta/i.test((e.error && e.error.message) || '')) res = await call(false); }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(res.status === 401 ? 'The API key was not accepted.' : `${res.status}: ${(e.error && e.error.message) || res.statusText}`); }
+  const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '', acc = '', stop = null;
+  for (;;) {
+    const { value, done } = await rd.read(); if (done) break;
+    buf += dec.decode(value, { stream: true }); let i;
+    while ((i = buf.indexOf('\n\n')) !== -1) {
+      const line = buf.slice(0, i).split('\n').find(l => l.startsWith('data:')); buf = buf.slice(i + 2);
+      if (!line) continue; let d; try { d = JSON.parse(line.slice(5)); } catch (e) { continue; }
+      if (d.type === 'content_block_delta' && d.delta && d.delta.type === 'text_delta') { acc += d.delta.text; onText(acc); }
+      else if (d.type === 'message_delta' && d.delta && d.delta.stop_reason) stop = d.delta.stop_reason;
+      else if (d.type === 'error') throw new Error((d.error && d.error.message) || 'stream error');
+    }
+  }
+  if (stop === 'refusal') throw new Error('The model declined to translate this passage.');
+  return acc;
+}
+function showTr(col, full) {
+  const i = full.indexOf('===NOTES==='), tr = (i < 0 ? full : full.slice(0, i)).trim(), notes = i < 0 ? [] : full.slice(i + 11).split('\n').map(l => l.replace(/^\s*[-•]\s*/, '').trim()).filter(Boolean);
+  col.querySelectorAll('.tt, ul, .trwarn').forEach(n => n.remove());
+  const t = el('div', 'tt'); richInto(t, tr); col.append(t);
+  if (notes.length) { const ul = el('ul'); notes.forEach(n => { const li = el('li'); richInto(li, n); ul.append(li); }); col.append(ul); }
+}
+function onDemand(box, src) {
+  const row = el('div', 'trwarn'), key = el('input'); key.type = 'password'; key.placeholder = 'Claude API key (sk-ant-…)'; key.value = TR_KEY; key.style.cssText = 'font:inherit;font-size:.8rem;width:220px;margin:0 6px';
+  const go = el('button', 'pbtn', 'Translate now'), cp = el('button', 'pbtn', 'Copy prompts');
+  row.append('Translate now with your own key (kept only in this tab, sent only to Anthropic):', key, go, cp);
+  go.addEventListener('click', ev => {
+    ev.stopPropagation(); TR_KEY = key.value.trim(); if (!TR_KEY) { key.focus(); return; }
+    box.querySelectorAll('[data-st]').forEach(col => {
+      col.querySelectorAll('.trwarn').forEach(n => { n.textContent = 'Translating…'; });
+      claudeTranslate(col.dataset.st, src, t => showTr(col, t)).then(t => showTr(col, t)).catch(e => { col.querySelectorAll('.trwarn').forEach(n => n.remove()); col.append(el('div', 'trwarn', e.message)); });
+    });
+  });
+  cp.addEventListener('click', ev => {
+    ev.stopPropagation();
+    const t = TR_STYLES.map(st => `===== ${st.label.toUpperCase()} =====\n\n[System instructions]\n${TRANSLATION_BRIEFS[st.k].system}\n\n[Message]\nPassage to translate (${src.cite}):\n\n${src.text}`).join('\n\n\n');
+    const ta = el('textarea'); ta.value = t; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); cp.textContent = 'Copied: paste into claude.ai';
+  });
+  [key, row].forEach(n => n.addEventListener('click', ev => ev.stopPropagation()));
+  return row;
+}
+
+/* ── Question a connection: the lab's own “Text error” issue form, filled in ─────────────────────── */
+const REPORTS = {};          // passage id -> [{ url, title, state }], from the lab's issues
+let reportsAsked = false;
+function askReports() {
+  if (reportsAsked) return; reportsAsked = true;
+  fetch('https://api.github.com/repos/mikrishnan/kant-lab/issues?state=all&labels=text-error&per_page=100')
+    .then(r => r.ok ? r.json() : []).then(list => {
+      (list || []).forEach(i => { const m = /Connection:\s*(\S+)\s+(\S+)\s*->\s*§\s*(\d+)/.exec(i.body || ''); if (m) (REPORTS[m[2]] = REPORTS[m[2]] || []).push({ url: i.html_url, title: i.title, state: i.state }); });
+      if (Object.keys(REPORTS).length) renderAll();
+    }).catch(() => {});
+}
+function questionButtons(info) {
+  const f = document.createDocumentFragment();
+  const b = el('button', 'pbtn', 'Question this link'); b.type = 'button';
+  b.title = 'Say why this passage may not be lecturing on this § of Meier';
+  b.addEventListener('click', ev => { ev.stopPropagation(); openFeedback(info); });
+  f.append(b);
+  (REPORTS[info.id] || []).forEach(r => { const a = el('a', 'pbtn rep', `⚑ ${r.state === 'open' ? 'open report' : 'report'}`); a.href = r.url; a.target = '_blank'; a.title = r.title; a.addEventListener('click', ev => ev.stopPropagation()); f.append(a); });
+  return f;
+}
+function openFeedback(info) {
+  const box = $('fbBox'); box.replaceChildren();
+  const c = '123'.includes(info.code) ? confOf(info.work, info.code) : null;
+  const mark = `${EV_SHORT[info.code]}${c ? ', ' + c.pct + '%' : ''}`;
+  box.append(el('h2', null, 'QUESTION THIS CONNECTION'));
+  const what = el('div', 'what');
+  what.append(el('b', null, info.cite), ` is connected to `, el('b', null, `Meier § ${info.n}`), ` (${mark}: ${EV[info.code]}).`);
+  box.append(what);
+  const L = (t, node) => { const l = el('label', null, t); box.append(l, node); return node; };
+  const why = L('Why might this connection be wrong? (required)', el('textarea')); why.rows = 5; why.placeholder = 'e.g. the passage is about the division of concepts, which Meier treats in § 278, not about definitions';
+  const better = L('Which § of Meier do you think it is lecturing on? (optional)', el('input')); better.type = 'number'; better.min = 1; better.max = 563;
+  const src = L('Your source (optional): a page of the AA, an edition, a concordance', el('input')); src.type = 'text';
+  const sure = L('How sure are you?', el('select'));
+  ['Probable', 'Certain — checked against the AA', 'A question'].forEach(o => sure.append(new Option(o, o)));
+  const btns = el('div', 'btns');
+  const go = el('button', 'btn pri', 'Open the report on GitHub'); go.type = 'button';
+  const cp = el('button', 'copy', 'Copy the report instead'); cp.type = 'button';
+  const x = el('button', 'copy', 'Cancel'); x.type = 'button';
+  const report = () => {
+    const shows = `The Meier–Kant Comparison (Individuals/Jesus-La-Paz) connects ${info.cite} to Meier § ${info.n} (${mark}).\nConnection: ${info.work} ${info.id} -> § ${info.n}\nPage: ${location.href.split('#')[0]}\n\nPassage: ${info.text.slice(0, 700)}${info.text.length > 700 ? ' …' : ''}`;
+    const should = `${why.value.trim()}${better.value ? `\n\nThe § it is lecturing on, I think: Meier § ${better.value}` : ''}`;
+    return { title: `Text error: Meier–Kant connection, ${info.cite} → Meier § ${info.n}`, where: `Meier § ${info.n}; ${info.cite}`, shows, should, source: src.value.trim() || (better.value ? `Meier § ${better.value}` : 'see above'), confidence: sure.value };
+  };
+  go.addEventListener('click', () => {
+    if (!why.value.trim()) { why.focus(); why.style.borderColor = '#9a2a1a'; return; }
+    const r = report(), q = new URLSearchParams({ template: 'text-error.yml', title: r.title, tool: 'A new tool', where: r.where, shows: r.shows, should: r.should, source: r.source, confidence: r.confidence });
+    window.open('https://github.com/mikrishnan/kant-lab/issues/new?' + q.toString(), '_blank');
+    $('fbVeil').classList.remove('on');
+  });
+  cp.addEventListener('click', () => {
+    if (!why.value.trim()) { why.focus(); why.style.borderColor = '#9a2a1a'; return; }
+    const r = report(), t = `${r.title}\n\nWhere: ${r.where}\n\nWhat the tool shows:\n${r.shows}\n\nWhat it should show:\n${r.should}\n\nSource: ${r.source}\nHow sure: ${r.confidence}`;
+    const done = () => { cp.textContent = 'Copied'; setTimeout(() => { cp.textContent = 'Copy the report instead'; }, 1500); };
+    const fb = () => { const ta = el('textarea'); ta.value = t; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove(); done(); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, fb); else fb();
+  });
+  x.addEventListener('click', () => $('fbVeil').classList.remove('on'));
+  btns.append(go, cp, x); box.append(btns);
+  box.append(el('div', 'small', 'The report opens the lab’s “Text error” form on GitHub, filled in; you need a GitHub account to file it, and it is reviewed like any other. No GitHub account? Copy the report and send it to the professor.'));
+  $('fbVeil').classList.add('on'); why.focus();
+}
+const NB_KEY = 'meierKantNotebook.v1';
+let NB = []; try { NB = JSON.parse(localStorage.getItem(NB_KEY) || '[]'); } catch (e) {}
+function saveNB() { try { localStorage.setItem(NB_KEY, JSON.stringify(NB)); } catch (e) {} $('nbBtn').textContent = `Notebook (${NB.length})`; }
+function pinButton(src) {
+  const b = el('button', 'pbtn', 'Pin'); b.type = 'button'; b.title = 'Keep this passage, with its citation, in your notebook';
+  b.addEventListener('click', ev => { ev.stopPropagation(); NB.push({ cite: src.cite, text: src.text, note: '' }); saveNB(); b.textContent = 'Pinned'; });
+  return b;
+}
+function nbText() { return NB.map((p, i) => `[${i + 1}] ${p.cite}\n${p.text}${p.note ? '\nMy note: ' + p.note : ''}`).join('\n\n'); }
+function showNB() {
+  const box = $('nbBox'); box.replaceChildren(); box.append(el('h2', null, 'NOTEBOOK'));
+  box.append(el('div', 'small', 'Passages you pinned, with their citations. Kept in this browser on this computer. Copy them into your assignment.'));
+  if (!NB.length) box.append(el('div', 'empty', 'Nothing pinned yet. Use “Pin” under any passage.'));
+  NB.forEach((p, i) => {
+    const d = el('div', 'pin'); d.append(el('span', 'r', p.cite), p.text.length > 400 ? p.text.slice(0, 398) + '…' : p.text);
+    const note = el('textarea'); note.rows = 2; note.placeholder = 'Your note…'; note.value = p.note || ''; note.style.cssText = 'width:100%;font:inherit;font-size:.85rem;margin-top:4px';
+    note.addEventListener('input', () => { p.note = note.value; saveNB(); });
+    const x = el('button', 'pbtn', 'Remove'); x.addEventListener('click', () => { NB.splice(i, 1); saveNB(); showNB(); });
+    d.append(note, x); box.append(d);
+  });
+  const btns = el('div', 'btns');
+  const cp = el('button', 'btn pri', 'Copy all'); cp.addEventListener('click', () => { const t = el('textarea'); t.value = nbText(); document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); cp.textContent = 'Copied'; });
+  const sv = el('button', 'copy', 'Save as .txt'); sv.addEventListener('click', () => { const a = el('a'); a.href = URL.createObjectURL(new Blob([nbText()], { type: 'text/plain' })); a.download = 'meier-kant-notebook.txt'; a.click(); });
+  const cl = el('button', 'copy', 'Close'); cl.addEventListener('click', () => $('nbVeil').classList.remove('on'));
+  btns.append(cp, sv, cl); box.append(btns); $('nbVeil').classList.add('on');
+}
+function passageActions(text, id, info, src) {
+  const a = el('div', 'pacts');
+  a.append(trButton(text, id, a, src || info));
+  if (src || info) a.append(pinButton(src || info));
+  if (info) a.append(questionButtons(info));
+  return a;
+}
+
 /* ── Connections: a word, and the Meier §§ and Kant passages it connects ─────────── */
 function bestTab(n) { const w = CW.find(x => AT[x][n] && AT[x][n].some(y => y.code === 'S' || y.code === 'A')) || CW.find(x => AT[x][n]); return w || 'reflexionen'; }
 function connRegex() { return makeRegex(state.query, state.whole, state.variants, state.start); }
@@ -1135,6 +1369,7 @@ function connCard({ n, mh, kh, rh, kc }, re) {
   left.append(h);
   const t = el('div', 'ct'); t.append(highlighted(PARAS[n], re)); left.append(t);
   if (!mh) left.append(el('div', 'none', 'Meier does not use the word in this §; Kant does, in a passage on it.'));
+  left.append(passageActions('meier', 'meier:' + n, null, { cite: `Meier, Auszug aus der Vernunftlehre, § ${n}`, text: PARAS[n] }));
   const right = el('div', 'ck');
   if (!kc) {
     const total = CW.reduce((s, w) => s + linkedTo(w, n, 0).length, 0) + reflFor(n).length;
@@ -1148,7 +1383,7 @@ function connCard({ n, mh, kh, rh, kc }, re) {
   });
   if (rh.length) {
     right.append(el('div', 'wk', `KANT’S REFLEXIONEN ON THIS § · ${rh.length}`));
-    rh.slice(0, 2).forEach(e => { const d = el('div', 'kp'); const r = el('span', 'kr', `Refl. ${e.r}${e.aa ? ', AA 16:' + e.aa : ''}${e.phRaw ? ' · phase ' + e.phRaw : ''} `); r.append(evBadge(e.src === 'locus' || e.src === 'group' ? 'R' : 'Ri')); d.append(r, clip(e.text.replace(/\n/g, ' '), re, 420)); right.append(d); });
+    rh.slice(0, 2).forEach(e => { const d = el('div', 'kp'); const r = el('span', 'kr', `Refl. ${e.r}${e.aa ? ', AA 16:' + e.aa : ''}${e.phRaw ? ' · phase ' + e.phRaw : ''} `); r.append(evBadge(e.src === 'locus' || e.src === 'group' ? 'R' : 'Ri')); d.append(r, clip(e.text.replace(/\n/g, ' '), re, 420)); d.append(passageActions('refl', 'refl:' + e.r, { work: 'refl', id: 'refl:' + e.r, n, code: e.src === 'locus' || e.src === 'group' ? 'R' : 'Ri', cite: `Kant, Reflexion ${e.r}${e.aa ? ', AA 16:' + e.aa : ''}`, text: e.text })); right.append(d); });
     if (rh.length > 2) right.append(el('div', 'small', `and ${rh.length - 2} more Reflexionen`));
   }
   const acts = el('div', 'acts');
@@ -1160,10 +1395,11 @@ function connCard({ n, mh, kh, rh, kc }, re) {
 function kantPassage(w, x, re) {
   const d = el('div', 'kp');
   const r = el('span', 'kr', `${CW_LABEL[w]}, AA ${CW_VOL[w]}:${aaRange(x.b)}${w === 'blomberg' && x.b.para ? ' · ' + x.b.para.raw : ''}${w === 'jaesche' && x.b.para ? ' · Jäsche § ' + x.b.para : ''} `);
-  r.append(evBadge(x.code));
+  r.append(evBadge(x.code, w));
   if (x.hi > x.lo) r.append(el('span', null, ` · runs over §§ ${x.lo}–${x.hi}`));
   d.append(r, clip(x.b.text, re, 420));
-  d.style.cursor = 'pointer'; d.title = 'Read it beside Meier’s §';
+  d.append(passageActions(w, x.b.id, { work: w, id: x.b.id, n: x.at, code: x.code, cite: `${CW_FULL[w]}, AA ${CW_VOL[w]}:${aaRange(x.b)}`, text: x.b.text }));
+  d.style.cursor = 'pointer'; d.title = 'Click the text to read it beside Meier’s §';
   d.addEventListener('click', () => openAt(x.at, w, { kind: 'block', id: x.b.id }));
   return d;
 }
@@ -1191,8 +1427,10 @@ function showMethod() {
   row('Jäsche, against the AA’s headers', pct(acc.jaesche_vs_AA.exact), pct(acc.jaesche_vs_AA.within2), pct(acc.jaesche_vs_AA.section));
   row('Wiener Logik, against the Cambridge concordance (sample)', '–', pct(acc.wiener_vs_cambridge_sample.within2), '–');
   box.append(t);
-  const t2 = el('table'); const h2 = el('tr'); ['Mark', 'Meaning', 'Within ±2 §§: Blomberg', 'Wiener'].forEach(x => h2.append(el('th', null, x))); t2.append(h2);
-  ['1', '2', '3'].forEach(k => { const r = el('tr'); const c1 = el('td'); c1.append(evBadge(k)); r.append(c1, el('td', null, EV[k]), el('td', null, pct(acc.by_tier_within2.blomberg[k])), el('td', null, pct(acc.by_tier_within2.wiener[k]))); t2.append(r); });
+  const t2 = el('table'); const h2 = el('tr'); ['Mark', 'Meaning', 'Blomberg', 'Wiener', 'Busolt', 'Jäsche'].forEach(x => h2.append(el('th', null, x))); t2.append(h2);
+  const CT = M.confidence.table;
+  ['1', '2', '3'].forEach(k => { const r = el('tr'); const c1 = el('td'); c1.append(evBadge(k)); r.append(c1, el('td', null, EV[k])); ['blomberg', 'wiener', 'busolt', 'jaesche'].forEach(w => { const c = CT[w][k]; const td = el('td', null, `${c.pct}%`); td.title = `${c.n} checked: ${c.basis}`; r.append(td); }); t2.append(r); });
+  box.append(P(el('span', 'small', 'The percentage on each connection: the share of links with the same mark, in the same text, that were right within ±2 §§ when checked (hover a figure for its basis). Busolt has nothing to check against, so its figures are pooled from the Blomberg and Wiener transcripts.')));
   box.append(t2);
   box.append(P(el('b', null, 'Read with care. '), `Every passage gets one home, so a long passage that treats several §§ in turn is filed under one of them: in the Wiener test, only ${pct(acc.wiener_vs_cambridge_sample.paras_recovered)} of the §§ the Cambridge concordance finds on a page are found there by this page. Tick “also show passages linked to the two §§ on either side” in By § to widen the net. Busolt could not be tested at all: no concordance covers it. A “tentative” link is placed by its position in the lecture only. Kant did not always follow Meier: digressions, examples of his own and later doctrine sit where the lecture put them, and the nearest § is the best this page can say.`));
   box.append(el('h3', null, 'THE CONCORDANCE OF TITLES'));
@@ -1234,7 +1472,21 @@ function renderTabs() {
     box.append(b);
   });
 }
+function writeHash() {
+  const h = new URLSearchParams({ mode: state.mode });
+  if (state.query) h.set('q', state.query);
+  if (state.mode === 'para') { h.set('n', state.n); h.set('tab', state.ktab); }
+  history.replaceState(null, '', '#' + h.toString());
+}
+function readHash() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (['conn', 'para', 'term'].includes(h.get('mode'))) state.mode = h.get('mode');
+  if (h.get('n') && PARAS[+h.get('n')]) state.n = +h.get('n');
+  if (h.get('tab')) state.ktab = h.get('tab');
+  if (h.get('q')) { state.query = h.get('q'); $('q').value = state.query; runSearch(); }
+}
 function renderAll() {
+  askReports(); writeHash();
   renderBar();
   if (state.mode === 'conn') { renderConn(); return; }
   renderTabs();
@@ -1257,8 +1509,12 @@ function setQuery(q) {
 OUTLINE.forEach((o, i) => { const op = el('option', null, `${o.label} (§§ ${o.from}–${o.to})`); op.value = i; $('secSel').append(op); });
 document.querySelectorAll('#modeSeg button').forEach(b => b.addEventListener('click', () => { state.mode = b.dataset.mode; state.focus = null; if (state.mode === 'term' && state.ktab === 'reflexionen' && !state.hits) state.ktab = 'blomberg'; renderAll(); }));
 $('howBtn').addEventListener('click', showMethod);
+$('nbBtn').addEventListener('click', showNB); saveNB();
+$('nbVeil').addEventListener('click', e => { if (e.target === $('nbVeil')) $('nbVeil').classList.remove('on'); });
+$('linkBtn').addEventListener('click', () => { const t = el('textarea'); t.value = location.href; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); $('linkBtn').textContent = 'Link copied'; setTimeout(() => { $('linkBtn').textContent = 'Copy link'; }, 1500); });
 $('methodVeil').addEventListener('click', e => { if (e.target === $('methodVeil')) $('methodVeil').classList.remove('on'); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') $('methodVeil').classList.remove('on'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('methodVeil').classList.remove('on'); $('fbVeil').classList.remove('on'); } });
+$('fbVeil').addEventListener('click', e => { if (e.target === $('fbVeil')) $('fbVeil').classList.remove('on'); });
 $('secSel').addEventListener('change', e => goPara(OUTLINE[+e.target.value].from));
 $('nInput').addEventListener('change', e => { const n = +e.target.value; if (PARAS[n]) goPara(n); else e.target.value = state.n; });
 $('prev').addEventListener('click', () => goPara(step(-1)));
@@ -1287,6 +1543,7 @@ document.addEventListener('keydown', e => { if (e.key === '/' && document.active
 
 /* ── init ─────────────────────────────────────────────────────────────── */
 state.n = 5;      // a § all three layers speak to
+readHash();
 renderAll();
 </script>
 </body>
