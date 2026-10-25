@@ -111,9 +111,25 @@ A pull request that changes a pipeline's commands or what an extractor knows upd
 this section in the same pull request. Since this file is outside the owners' folders,
 that also brings in the professor's approval.
 
-`textutil` is macOS-only, so as things stand **regenerating needs a Mac**. Committing its
-`.txt` output, so that the Python steps run anywhere, is the open task in
-[docs/todo-in-repo.md](docs/todo-in-repo.md).
+`textutil` is macOS-only. Committing its `.txt` output, so that the Python steps run
+anywhere, is the open task in [docs/todo-in-repo.md](docs/todo-in-repo.md).
+
+**Without a Mac**, LibreOffice's text conversion serves for the Logik transcripts and the
+Reflexionen, once three things it adds and `textutil` does not are removed: a byte-order
+mark, the two InteLex link-image lines (`previous.png ¬`, `next.png ¬`), and
+`Attachment.png ¬` wherever the transcription has an embedded image, which `textutil`
+drops without trace. From files cleaned that way the extractors reproduced the
+`textutil`-built data byte for byte (October 2026). That has **not** been checked for the
+*Metaphysica* itself (`parse_baum.py`), which leans on `textutil`'s U+2028 line separators.
+
+```sh
+mkdir -p /tmp/rtf && cp Textfiles/Vol16reflexionenMeier.rtfd/TXT.rtf /tmp/rtf/vol16.rtf   # and so on
+soffice --headless --convert-to 'txt:Text (encoded):UTF8' --outdir /tmp/rtf /tmp/rtf/*.rtf
+sed -e '1s/^\xEF\xBB\xBF//' -e '/^\(previous\|next\)\.png ¬$/d' -e 's/Attachment\.png ¬//g' \
+  /tmp/rtf/vol16.txt > /tmp/vol16.txt
+```
+
+Then run the pipeline's Python steps below on the cleaned files.
 
 ### The Reflexionen on Meier
 
@@ -211,6 +227,11 @@ Things the extractor knows about the AA's conventions, which are easy to break:
   (`γ? η? κ? λ? ν−ξ?? L 3'.`), so the sigla has to be peeled back off.
 - A capital `Α` (U+0391) in the transcription is an OCR artefact of Latin `A` ("Αus"),
   not a phase.
+- The sigla can go on past a page with no letter of its own: `L 95. 95'.` (the note runs
+  from p. 95 onto the interleaf), `M 147'. E II 797. 771.` (two Erdmann numbers),
+  `M. 277'.`. When the header line ends in bare numbers like these, they belong to the
+  sigla. Until October 2026 they were taken as the first line of the text, which opened
+  249 Reflexionen (50 in AA XVI, 199 in XVII–XVIII) with a stray `95'.`.
 
 ### The Logik transcripts of AA XXIV
 
@@ -228,24 +249,6 @@ markers, so one paragraph of the lecture arrives in three or four pieces. The ex
 joins them back into running prose and keeps every page the prose crossed as a character
 offset into it, so that any stretch can still be cited as `AA 24:N` and the pagination
 put back exactly where it stood.
-
-**Without a Mac**, LibreOffice's conversion serves for these three, once its byte-order
-mark and its two InteLex link-image lines are removed. From those files the extractor
-reproduced the `textutil`-built data byte for byte (October 2026). That was checked for
-the Logik transcripts only, not for the other pipelines:
-
-```sh
-mkdir -p /tmp/rtf
-cp Textfiles/Vol24logikBlomberg.rtfd/TXT.rtf /tmp/rtf/blomberg.rtf
-cp Textfiles/Vol24logikBusolt.rtf            /tmp/rtf/busolt.rtf
-cp Textfiles/Vol24logikWien.rtf              /tmp/rtf/wiener.rtf
-soffice --headless --convert-to 'txt:Text (encoded):UTF8' --outdir /tmp/rtf /tmp/rtf/*.rtf
-for w in blomberg busolt wiener; do
-  sed -e '1s/^\xEF\xBB\xBF//' -e '/^\(previous\|next\)\.png ¬$/d' /tmp/rtf/$w.txt > /tmp/$w.txt
-done
-```
-
-and then the three `parse_logik.py` lines above.
 
 `parse_logik.py` prints a report per work — sections, blocks, words, the AA page range
 and any gap in it, how many paragraph joins were attested and how many inferred,

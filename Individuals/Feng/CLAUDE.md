@@ -138,7 +138,7 @@ against the works themselves before they are used.
    - sufficient reason as a principle of possible experience, in the Second Analogy.
 
    On logical vs. real possibility: Stang, *Kant's Modal Metaphysics* (2016).
-   *Question:* which principles in groups A–C have both a logical and a real
+   *Question:* which principles in groups 1–3 have both a logical and a real
    version, and should the classification follow that split?
 3. **What general logic is.** Debated: in what sense Kant's logic is formal, and
    whether its laws are constitutive of thinking or normative for it. See MacFarlane,

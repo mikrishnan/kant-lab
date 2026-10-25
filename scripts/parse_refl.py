@@ -249,6 +249,13 @@ def parse_entry_header(rest, siglum):
     if sm:
         out['siglaRaw'] = sm.group(1).strip()
         out['trailing'] = sm.group(2).strip()
+        # A second page of the handbook, or a second Erdmann number, continues
+        # the sigla without a letter of its own: "L 95. 95'.", "M 147'. E II 797.
+        # 771.", "M. 277'.". When that is all the header line has left, it is
+        # sigla, not the first line of the text.
+        if re.fullmatch(r"(?:\d+[\w']*\.\s*)+", out['trailing']):
+            out['siglaRaw'] += ' ' + out['trailing']
+            out['trailing'] = ''
     else:
         out['trailing'] = rest.strip()
     return out
