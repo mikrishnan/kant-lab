@@ -36,6 +36,30 @@ header {
 }
 header h1 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.15rem; letter-spacing: .08em; margin: 0; }
 header .sub { font-size: .9rem; opacity: .85; }
+header .glink { margin-left: auto; font-family: 'Cinzel', serif; font-size: .74rem; letter-spacing: .08em; color: var(--parchment); text-decoration: none; border: 1px solid rgba(244,237,224,.5); border-radius: 12px; padding: 3px 11px; }
+header .glink:hover { background: rgba(244,237,224,.15); }
+.term { text-decoration: underline dotted rgba(58, 90, 58, .55); text-underline-offset: 3px; cursor: pointer; }
+.term:hover { background: var(--aa-bg); }
+body.noterms .term { text-decoration: none; cursor: inherit; }
+body.noterms .term:hover { background: none; }
+#gcard { flex: none; max-height: 52%; overflow-y: auto; margin: 12px 12px 4px; padding: 10px 14px 12px; background: var(--parchment); border: 1px solid var(--aa-bd); border-left: 4px solid var(--aa-ink); border-radius: 5px; font-size: .92rem; line-height: 1.4; position: relative; }
+#gcard[hidden] { display: none; }
+#gcard .k { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--aa-ink); }
+#gcard .x { position: absolute; top: 6px; right: 8px; border: 0; background: none; font-size: 1.1rem; color: var(--faded); cursor: pointer; }
+#gcard .de { font-weight: 600; font-size: 1.05rem; margin-top: 2px; }
+#gcard .pr { color: var(--faded); font-size: .82rem; font-weight: 400; }
+#gcard .en { color: #2b3a52; font-weight: 600; font-size: 1.15rem; margin: 2px 0 4px; }
+#gcard .sn { font-size: .84rem; color: #2b3a52; margin: 2px 0; }
+#gcard .sn i { color: var(--faded); }
+#gcard .av { font-size: .82rem; color: #a0522d; }
+#gcard .la { font-style: italic; color: var(--accent-lt); font-size: .88rem; }
+#gcard .nt { font-size: .84rem; margin-top: 4px; }
+#gcard .ct { font-size: .78rem; color: var(--faded); margin-top: 6px; }
+#gcard .st { font-family: 'Cinzel', serif; font-size: .58rem; letter-spacing: .08em; background: #fff4dc; color: #7a4a00; border-radius: 8px; padding: 1px 6px; margin-left: 4px; vertical-align: 2px; }
+#gcard .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+#gcard .acts a, #gcard .acts button { font: inherit; font-size: .8rem; padding: 2px 9px; border: 1px solid var(--line); border-radius: 3px; background: var(--parch-dark); color: var(--accent); cursor: pointer; text-decoration: none; }
+#pop .gl { margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(244,237,224,.3); font-size: .78rem; opacity: .9; }
+#pop .gl b { font-weight: 600; }
 .tools { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .85rem; padding: 6px 20px; border-bottom: 1px solid var(--line); background: var(--panel-bg); }
 input[type=search], input[type=number] {
   font: inherit; padding: 3px 8px; border: 1px solid var(--line); border-radius: 3px;
@@ -144,6 +168,7 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
 <header>
   <h1>Kant’s Logic</h1>
   <span class="sub">Two student transcripts of the lectures (AA XXIV) and the textbook they follow, Meier’s Auszug (1752)</span>
+  <a class="glink" href="glossary/index.html" target="_blank" rel="noopener" title="The shared glossary: one English rendering for every Kantian term">Glossary ↗</a>
 </header>
 <main>
   <section id="left">
@@ -153,10 +178,12 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
       <input type="number" id="goaa" placeholder="Go to AA page" aria-label="Go to page">
       <label id="lpg"><input type="checkbox" id="tpg" checked> page breaks</label>
       <label id="linf"><input type="checkbox" id="tinf" checked> inferred joins</label>
+      <label title="Underline the terms that have an entry in the shared glossary; click one to see it"><input type="checkbox" id="tterms" checked> glossary terms</label>
     </div>
     <div id="reader"><div id="page"></div></div>
   </section>
   <aside id="side">
+    <div id="gcard" hidden></div>
     <h2>Search terms</h2>
     <form id="sf"><input type="search" id="q" placeholder="e.g. Urtheil, Begriff, cognitio" aria-label="Search" autocomplete="off"><button type="button" id="clr">Clear</button></form>
     <div class="opts"><label><input type="checkbox" id="whole"> whole words only</label> &nbsp; <label><input type="checkbox" id="allw" checked> all three texts</label></div>
@@ -171,6 +198,9 @@ mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2p
 <script src="meier-auszug.js"></script>
 <script src="translations/meier-aligned.js"></script>
 <script src="translations/meier-phrases.js"></script>
+<script src="glossary/kant-glossary.js"></script>
+<script src="glossary/counts.js"></script>
+<script src="glossary/terms-index.js"></script>
 <script>
 /* ── data ──
    LOGIK_BUSOLT and LOGIK_BLOMBERG come from ../../data/; MEIER_AUSZUG from meier-auszug.js.
@@ -264,6 +294,28 @@ function addText(parent, text) {
   });
 }
 
+/* A slice [from, to) of a block's text, with the glossary's terms (KANT_GLOSSARY_SPANS, generated by
+   glossary/glossary.py index) as clickable spans. The spans are offsets into the block's own text. */
+const GLOSS_BY_ID = Object.fromEntries(KANT_GLOSSARY.map(e => [e.id, e]));
+function addTx(parent, b, from, to) {
+  const flat = (KANT_GLOSSARY_SPANS.spans[W().key] || {})[b.id];
+  if (!flat) { addText(parent, b.text.slice(from, to)); return; }
+  let at = from;
+  for (let i = 0; i < flat.length; i += 3) {
+    const s0 = Math.max(flat[i], from), s1 = Math.min(flat[i + 1], to);
+    if (s1 <= s0 || s0 < at) continue;
+    if (s0 > at) addText(parent, b.text.slice(at, s0));
+    const t = el('span', 'term');
+    t.dataset.g = KANT_GLOSSARY_SPANS.ids[flat[i + 2]];
+    t.dataset.pr = b.text.slice(flat[i], flat[i + 1]);
+    addText(t, b.text.slice(s0, s1));
+    t.onclick = e => { if (document.body.classList.contains('noterms') || String(getSelection())) return; e.stopPropagation(); openTerm(t.dataset.g, t.dataset.pr); };
+    parent.appendChild(t);
+    at = s1;
+  }
+  if (at < to) addText(parent, b.text.slice(at, to));
+}
+
 function pageChip(p) {
   const c = el('span', 'pg', 'AA ' + p);
   c.title = 'AA 24:' + p + ' — click to link to this page';
@@ -327,7 +379,7 @@ function renderSentences(tx, b) {
       if (ph[0] > pa) sp.appendChild(document.createTextNode(b.text.slice(pa, ph[0])));
       const span = el('span', 'ph');
       span.dataset.p = pi;
-      addText(span, b.text.slice(ph[0], ph[1]));
+      addTx(span, b, ph[0], ph[1]);
       span.onmouseenter = () => { hovPh = span; refreshPop(); };
       span.onmouseleave = () => { hovPh = null; refreshPop(); };
       sp.appendChild(span);
@@ -353,12 +405,12 @@ function renderBlock(b) {
   const cuts = (b.pages || []).filter(p => p.i > 0);
   let at = 0;
   cuts.forEach(p => {
-    addText(tx, b.text.slice(at, p.i));
+    addTx(tx, b, at, p.i);
     tx.appendChild(pageChip(p.p));
     at = p.i;
   });
   if (b.n && MEIER_ALIGNED[b.n]) renderSentences(tx, b);
-  else addText(tx, b.text.slice(at));
+  else addTx(tx, b, at, b.text.length);
   d.appendChild(tx);
   if (inferred) {
     const t = el('span', 'tag', 'joined · inferred');
@@ -472,6 +524,19 @@ function showPop(sp, ph) {
   const full = el('div', ph ? 's' : 'g');
   addText(full, englishOf(sp));                                           // the search term marked in the English too
   pop.appendChild(full);
+  const ids = ph && !document.body.classList.contains('noterms') ? [...ph.querySelectorAll('.term')] : [];
+  if (ids.length) {                                                       // the glossary's renderings of the terms in this division
+    const gl = el('div', 'gl', 'Glossary: ');
+    const seen = new Set();
+    ids.forEach(t => {
+      if (seen.has(t.dataset.g)) return;
+      if (seen.size) gl.appendChild(document.createTextNode(' · '));
+      seen.add(t.dataset.g);
+      gl.appendChild(document.createTextNode(t.dataset.pr + ' → '));
+      gl.appendChild(el('b', null, GLOSS_BY_ID[t.dataset.g].en));
+    });
+    pop.appendChild(gl);
+  }
   pop.style.maxWidth = Math.min(34 * 16, box.width - 8) + 'px';
   pop.hidden = false;
   const rects = (ph || sp).getClientRects(), r0 = rects[0], gap = 6;
@@ -501,6 +566,37 @@ function markSelected() {
 function selectSentence(n, k) {
   sel = (sel && sel.n === n && sel.k === k) ? null : { n, k };       // a second click unpins
   markSelected();
+}
+
+/* ── glossary card ── */
+const TEXT_NAMES = { meier: 'Meier', busolt: 'Busolt', blomberg: 'Blomberg', wiener: 'Wiener Logik', refl16: 'Refl. XVI', refl17: 'Refl. XVII–XVIII' };
+function openTerm(id, printed) {
+  const e = GLOSS_BY_ID[id], card = document.getElementById('gcard');
+  if (!e) return;
+  card.textContent = '';
+  const x = el('button', 'x', '×'); x.type = 'button'; x.title = 'Close'; x.onclick = () => { card.hidden = true; };
+  card.appendChild(x);
+  const k = el('div', 'k', 'Glossary'); if (e.status !== 'confirmed') k.appendChild(el('span', 'st', 'proposed'));
+  card.appendChild(k);
+  const de = el('div', 'de', e.de);
+  if (printed && printed !== e.de) de.appendChild(el('span', 'pr', '  as printed: ' + printed));
+  card.appendChild(de);
+  card.appendChild(el('div', 'en', e.en));
+  (e.senses || []).forEach(sn => { const d = el('div', 'sn', '“' + sn.en + '”'); d.appendChild(el('i', null, ' when ' + sn.when)); card.appendChild(d); });
+  if (e.avoid && e.avoid.length) card.appendChild(el('div', 'av', 'Not: ' + e.avoid.join(', ')));
+  if (e.la && e.la.length) card.appendChild(el('div', 'la', 'Latin: ' + e.la.join(', ')));
+  if (e.note) card.appendChild(el('div', 'nt', e.note));
+  const c = (typeof KANT_GLOSSARY_COUNTS !== 'undefined' && KANT_GLOSSARY_COUNTS[id]) || null;
+  if (c && c.total) card.appendChild(el('div', 'ct', 'Occurs ' + c.total.toLocaleString('en') + '× in the corpus: ' +
+    Object.keys(TEXT_NAMES).filter(t => c[t]).map(t => TEXT_NAMES[t] + ' ' + c[t]).join(' · ')));
+  const acts = el('div', 'acts');
+  const a = el('a', null, 'Open in the glossary ↗'); a.href = 'glossary/index.html#' + id; a.target = '_blank'; a.rel = 'noopener';
+  const f = el('button', null, 'Find “' + (printed || e.de) + '” in the texts'); f.type = 'button';
+  f.onclick = () => { document.getElementById('q').value = printed || e.de; runSearch(); };
+  acts.append(a, f);
+  card.appendChild(acts);
+  card.hidden = false;
+  card.scrollTop = 0;
 }
 
 /* ── search ── */
@@ -617,6 +713,7 @@ document.getElementById('goaa').addEventListener('change', e => {
 });
 document.getElementById('tpg').onchange = e => document.body.classList.toggle('nopg', !e.target.checked);
 document.getElementById('tinf').onchange = e => document.body.classList.toggle('noinf', !e.target.checked);
+document.getElementById('tterms').onchange = e => { document.body.classList.toggle('noterms', !e.target.checked); if (!e.target.checked) document.getElementById('gcard').hidden = true; };
 window.addEventListener('hashchange', route);
 
 /* #busolt  #blomberg:s06  #blomberg:aa-80  #meier:para-12   (a bare #aa-614 or #s04 means Busolt) */

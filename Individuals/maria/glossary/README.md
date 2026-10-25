@@ -18,7 +18,7 @@ Latin he glosses it with.
 | [`index.html`](index.html) | The glossary as a searchable page: renderings, senses, Latin, notes, how often each term occurs, how the prototype translations fared |
 | [`glossary.py`](glossary.py) | The tool: `validate`, `count`, `check`, `missing`, `slice`. No language model involved |
 | [`corpus-dump.js`](corpus-dump.js) | Reads the texts from `data/` for `glossary.py`; copies nothing |
-| `counts.js`, `check.js`, `check-report.txt` | **Generated** by `glossary.py`; do not hand-edit |
+| `counts.js`, `check.js`, `check-report.txt`, `terms-index.js` | **Generated** by `glossary.py`; do not hand-edit |
 
 ## Editing an entry
 
@@ -28,6 +28,7 @@ Open `kant-glossary.js`, change the entry, then run
 python3 glossary.py validate    # ids, required fields, two entries claiming the same spelling
 python3 glossary.py count       # refreshes counts.js
 python3 glossary.py check       # refreshes check.js and check-report.txt
+python3 glossary.py index       # refreshes terms-index.js, which the reader uses to mark terms
 ```
 
 Rules of thumb:
@@ -74,3 +75,13 @@ glossary prevents, for example:
   is a decision to make, not an error.
 
 `check-report.txt` lists every term with examples.
+
+## In the reader
+
+[`../busolt-reader.html`](../busolt-reader.html) loads the glossary. Every term that has an
+entry is underlined (dotted) in Busolt, Blomberg and Meier; clicking one opens a card with its
+fixed English rendering, senses, Latin, note and corpus counts, a link to the entry on this
+page (`index.html#<id>`), and a button that searches the texts for the word as printed. In the
+Meier tab the translation window also lists the glossary renderings of the terms in the
+hovered phrase. A "glossary terms" checkbox turns the underlining off. The term positions come
+from `terms-index.js`, so after editing the glossary run `count`, `check` and `index` again.

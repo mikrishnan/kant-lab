@@ -19,6 +19,8 @@ header { background: var(--accent); color: var(--parchment); padding: 22px 24px 
 header .in, .bar .in, main { max-width: 72rem; margin: 0 auto; }
 h1 { font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: .05em; font-size: 1.5rem; margin: 0 0 4px; }
 header p { margin: 0; opacity: .9; font-size: .98rem; }
+.back { margin-left: 12px; font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .08em; color: var(--parchment); text-decoration: none; border-bottom: 1px solid rgba(244,237,224,.5); }
+tr.flash td { background: #fff1c4 !important; transition: background 2s; }
 .status { display: inline-block; margin-top: 8px; font-family: 'Cinzel', serif; font-size: .66rem; letter-spacing: .1em; background: #fff4dc; color: #7a4a00; border-radius: 10px; padding: 2px 10px; }
 .bar { position: sticky; top: 0; z-index: 3; background: var(--panel); border-bottom: 1px solid var(--line); padding: 10px 24px; }
 .bar .in { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .88rem; }
@@ -62,6 +64,7 @@ mark { background: var(--hit); color: inherit; border-radius: 2px; }
   <h1>Kant Lab Glossary</h1>
   <p>One English rendering for every Kantian term, with its Latin and the spellings the transcripts actually use. Every translation of the corpus is held to it.</p>
   <span class="status" id="status"></span>
+  <a class="back" href="../busolt-reader.html">← Kant’s Logic reader</a>
 </div></header>
 <div class="bar"><div class="in">
   <input type="search" id="q" placeholder="Search German, English, Latin or a period spelling…" aria-label="Search the glossary">
@@ -117,6 +120,7 @@ function chk(e) { const c = KANT_GLOSSARY_CHECK[e.id]; return c && c[0] >= 3 ? c
 /* ── render ── */
 function row(e) {
   const tr = el('tr');
+  tr.id = 'g-' + e.id;
   const de = el('td', 'de'); addMarked(de, e.de);
   const forms = [...(e.v || []), ...(e.f || [])];
   if (forms.length) { const v = el('span', 'var'); addMarked(v, forms.join(' · ')); de.appendChild(v); }
@@ -185,6 +189,21 @@ document.querySelectorAll('th[data-s]').forEach(th => th.onclick = () => { docum
 document.getElementById('status').textContent = 'v' + KANT_GLOSSARY_META.version + ' · ' + KANT_GLOSSARY_META.status + ' · ' + KANT_GLOSSARY.length + ' entries';
 buildChips();
 render();
+/* index.html#erkenntnis (linked from the reader): scroll to that entry and mark it */
+function jump() {
+  const id = decodeURIComponent(location.hash.slice(1));
+  if (!id) return;
+  if (!document.getElementById('g-' + id)) {        // filtered out: clear the filters first
+    query = ''; document.getElementById('q').value = ''; document.getElementById('basis').value = '';
+    domains.clear(); document.querySelectorAll('.chip.on').forEach(c => c.classList.remove('on')); render();
+  }
+  const tr = document.getElementById('g-' + id);
+  if (!tr) return;
+  tr.scrollIntoView({ block: 'center' });
+  tr.classList.add('flash'); setTimeout(() => tr.classList.remove('flash'), 2500);
+}
+window.addEventListener('hashchange', jump);
+jump();
 </script>
 </body>
 </html>
