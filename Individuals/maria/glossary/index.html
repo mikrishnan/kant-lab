@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kant Lab Glossary — German · Latin · English</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1208; --parchment: #f4ede0; --parch-dark: #e8dcc8; --parch-deep: #d8ccb4;
+  --accent: #5c3d1e; --accent-lt: #8b5e3c; --faded: #7a6a52; --line: #b8a88a;
+  --aa-ink: #3a5a3a; --aa-bg: #eef5ee; --aa-bd: #8aaa8a; --panel: #faf7f0; --en-ink: #2b3a52;
+  --warn: #a0522d; --hit: #f3d98a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--parchment); color: var(--ink); font-family: 'EB Garamond', Georgia, serif; font-size: 18px; line-height: 1.45; }
+header { background: var(--accent); color: var(--parchment); padding: 22px 24px 18px; }
+header .in, .bar .in, main { max-width: 72rem; margin: 0 auto; }
+h1 { font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: .05em; font-size: 1.5rem; margin: 0 0 4px; }
+header p { margin: 0; opacity: .9; font-size: .98rem; }
+.status { display: inline-block; margin-top: 8px; font-family: 'Cinzel', serif; font-size: .66rem; letter-spacing: .1em; background: #fff4dc; color: #7a4a00; border-radius: 10px; padding: 2px 10px; }
+.bar { position: sticky; top: 0; z-index: 3; background: var(--panel); border-bottom: 1px solid var(--line); padding: 10px 24px; }
+.bar .in { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .88rem; }
+.bar input[type=search] { font: inherit; font-size: 1rem; padding: 4px 10px; width: 18rem; border: 1px solid var(--line); border-radius: 4px; background: var(--parchment); }
+.bar select { font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 4px; background: var(--parchment); }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { font-family: 'Cinzel', serif; font-size: .64rem; letter-spacing: .07em; padding: 3px 9px; border: 1px solid var(--line); border-radius: 12px; background: var(--parch-dark); color: var(--accent); cursor: pointer; user-select: none; }
+.chip.on { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+#n { color: var(--faded); margin-left: auto; }
+main { padding: 10px 24px 70px; }
+.intro { font-size: .92rem; color: var(--faded); margin: 10px 0 14px; max-width: 52rem; }
+table { border-collapse: collapse; width: 100%; background: var(--panel); font-size: .93rem; }
+th { position: sticky; top: 52px; background: var(--parch-dark); font-family: 'Cinzel', serif; font-weight: 400; font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faded); text-align: left; padding: 7px 10px; cursor: pointer; white-space: nowrap; }
+td { padding: 8px 10px; border-bottom: 1px solid var(--parch-deep); vertical-align: top; }
+tr:hover td { background: #fffaf0; }
+.de { font-weight: 600; font-size: 1.02rem; }
+.var { display: block; font-size: .78rem; color: var(--faded); font-weight: 400; margin-top: 2px; }
+.en { color: var(--en-ink); font-weight: 600; font-size: 1.02rem; }
+.sense { display: block; font-size: .82rem; color: var(--en-ink); margin-top: 3px; font-weight: 400; }
+.sense i { color: var(--faded); }
+.la { font-style: italic; color: var(--accent-lt); }
+.avoid { display: block; font-size: .8rem; color: var(--warn); margin-top: 3px; }
+.avoid s { text-decoration-thickness: 1px; }
+.note { font-size: .84rem; color: #3d3020; }
+.tag { display: inline-block; font-family: 'Cinzel', serif; font-size: .58rem; letter-spacing: .07em; padding: 1px 6px; border-radius: 8px; margin: 0 4px 3px 0; background: var(--parch-dark); color: var(--accent); white-space: nowrap; }
+.tag.proposal { background: #fff4dc; color: #7a4a00; }
+.tag.meier { background: var(--aa-bg); color: var(--aa-ink); }
+.freq { white-space: nowrap; font-size: .82rem; color: var(--faded); }
+.freq .barw { display: block; height: 5px; background: var(--parch-deep); border-radius: 3px; margin-top: 4px; width: 7rem; overflow: hidden; }
+.freq .barw span { display: block; height: 100%; background: var(--accent-lt); }
+.chk { font-size: .78rem; white-space: nowrap; }
+.chk b { font-family: 'Cinzel', serif; font-size: .7rem; }
+.good { color: var(--aa-ink); } .mid { color: #8a6d1c; } .bad { color: var(--warn); }
+mark { background: var(--hit); color: inherit; border-radius: 2px; }
+.none { padding: 30px; text-align: center; color: var(--faded); font-style: italic; }
+@media (max-width: 760px) { .hide-sm { display: none; } th { top: 96px; } .bar input[type=search] { width: 100%; } }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>Kant Lab Glossary</h1>
+  <p>One English rendering for every Kantian term, with its Latin and the spellings the transcripts actually use. Every translation of the corpus is held to it.</p>
+  <span class="status" id="status"></span>
+</div></header>
+<div class="bar"><div class="in">
+  <input type="search" id="q" placeholder="Search German, English, Latin or a period spelling…" aria-label="Search the glossary">
+  <div class="chips" id="domains"></div>
+  <select id="basis" aria-label="Basis">
+    <option value="">any basis</option><option value="convention">convention</option><option value="meier">Meier’s terminology</option><option value="proposal">proposal (to decide)</option>
+  </select>
+  <select id="sort" aria-label="Sort">
+    <option value="freq">most frequent first</option><option value="de">German A–Z</option><option value="en">English A–Z</option><option value="chk">least consistent in the prototype first</option>
+  </select>
+  <span id="n"></span>
+</div></div>
+<main>
+  <p class="intro"><b>How to read this.</b> <b>English</b> is the rendering every translation must use. Other renderings appear only under the stated condition, and anything struck through is wrong here. <b>Occurrences</b> counts the term in Meier, the three Logik transcripts and the Reflexionen, matched despite period spellings. <b>Prototype</b> shows how often the earlier machine translations (made before this glossary existed) used the agreed rendering where the German has the term. Every entry is a proposal until a reader of Kant’s German confirms it.</p>
+  <table>
+    <thead><tr><th data-s="de">German</th><th data-s="en">English</th><th class="hide-sm">Latin</th><th class="hide-sm">Note</th><th data-s="freq">Occurrences</th><th data-s="chk" class="hide-sm">Prototype</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</main>
+
+<script src="kant-glossary.js"></script>
+<script src="counts.js"></script>
+<script src="check.js"></script>
+<script>
+/* ── data ── KANT_GLOSSARY (hand-curated), KANT_GLOSSARY_COUNTS and KANT_GLOSSARY_CHECK (generated by glossary.py) */
+const DOMAINS = ['logic', 'cognition', 'mind', 'metaphysics', 'practical', 'aesthetics', 'scholarship', 'idiom'];
+const TEXT_LABEL = { meier: 'Meier', busolt: 'Busolt', blomberg: 'Blomberg', wiener: 'Wiener', refl16: 'Refl. XVI', refl17: 'Refl. XVII–XVIII' };
+const MAXF = Math.max(...Object.values(KANT_GLOSSARY_COUNTS).map(c => c.total || 0));
+
+/* ── state ── */
+let domains = new Set();
+let query = '';
+
+/* ── helpers ── */
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function fold(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss'); }
+function hay(e) {
+  return fold([e.de, ...(e.v || []), ...(e.f || []), e.en, ...(e.senses || []).map(s => s.en), ...(e.la || []), e.note || ''].join(' | '));
+}
+function addMarked(node, text) {           // text nodes only, search term marked
+  if (!query) { node.appendChild(document.createTextNode(text)); return; }
+  const f = fold(text), q = fold(query);
+  let i = 0, j;
+  while (q && (j = f.indexOf(q, i)) >= 0) {
+    node.appendChild(document.createTextNode(text.slice(i, j)));
+    node.appendChild(el('mark', null, text.slice(j, j + q.length)));
+    i = j + q.length;
+  }
+  node.appendChild(document.createTextNode(text.slice(i)));
+}
+function chk(e) { const c = KANT_GLOSSARY_CHECK[e.id]; return c && c[0] >= 3 ? c[1] / c[0] : null; }
+
+/* ── render ── */
+function row(e) {
+  const tr = el('tr');
+  const de = el('td', 'de'); addMarked(de, e.de);
+  const forms = [...(e.v || []), ...(e.f || [])];
+  if (forms.length) { const v = el('span', 'var'); addMarked(v, forms.join(' · ')); de.appendChild(v); }
+  tr.appendChild(de);
+
+  const en = el('td'); const b = el('span', 'en'); addMarked(b, e.en); en.appendChild(b);
+  (e.senses || []).forEach(s => { const x = el('span', 'sense'); addMarked(x, s.en); x.appendChild(el('i', null, ' — ' + s.when)); en.appendChild(x); });
+  if (e.avoid && e.avoid.length) { const a = el('span', 'avoid', 'not: '); e.avoid.forEach((w, i) => { if (i) a.appendChild(document.createTextNode(', ')); a.appendChild(el('s', null, w)); }); en.appendChild(a); }
+  tr.appendChild(en);
+
+  const la = el('td', 'la hide-sm'); addMarked(la, (e.la || []).join(', ')); tr.appendChild(la);
+
+  const nt = el('td', 'note hide-sm');
+  nt.appendChild(el('span', 'tag', e.d));
+  nt.appendChild(el('span', 'tag ' + e.b, e.b === 'meier' ? 'Meier' : e.b));
+  if (e.note) addMarked(nt, e.note);
+  tr.appendChild(nt);
+
+  const c = KANT_GLOSSARY_COUNTS[e.id] || { total: 0 };
+  const fq = el('td', 'freq');
+  fq.textContent = (c.total || 0).toLocaleString('en');
+  const bw = el('span', 'barw'); const bi = el('span'); bi.style.width = Math.max(2, Math.sqrt((c.total || 0) / MAXF) * 100) + '%'; bw.appendChild(bi); fq.appendChild(bw);
+  fq.title = Object.keys(TEXT_LABEL).map(k => TEXT_LABEL[k] + ': ' + (c[k] || 0)).join('\n');
+  tr.appendChild(fq);
+
+  const k = el('td', 'chk hide-sm'); const r = chk(e);
+  if (r == null) k.textContent = '—';
+  else { const n = KANT_GLOSSARY_CHECK[e.id]; const bb = el('b', r >= .9 ? 'good' : r >= .6 ? 'mid' : 'bad', Math.round(r * 100) + '%'); k.appendChild(bb); k.appendChild(document.createTextNode(' of ' + n[0])); k.title = n[1] + ' of ' + n[0] + ' translated blocks used “' + e.en + '” (or an allowed sense)'; }
+  tr.appendChild(k);
+  return tr;
+}
+
+function render() {
+  const basis = document.getElementById('basis').value, sort = document.getElementById('sort').value;
+  const q = fold(query);
+  let list = KANT_GLOSSARY.filter(e => (!domains.size || domains.has(e.d)) && (!basis || e.b === basis) && (!q || hay(e).includes(q)));
+  const f = e => (KANT_GLOSSARY_COUNTS[e.id] || {}).total || 0;
+  if (sort === 'freq') list.sort((a, b) => f(b) - f(a));
+  if (sort === 'de') list.sort((a, b) => fold(a.de).localeCompare(fold(b.de)));
+  if (sort === 'en') list.sort((a, b) => a.en.localeCompare(b.en));
+  if (sort === 'chk') list.sort((a, b) => (chk(a) ?? 2) - (chk(b) ?? 2));
+  const body = document.getElementById('rows');
+  body.textContent = '';
+  list.forEach(e => body.appendChild(row(e)));
+  if (!list.length) { const tr = el('tr'); const td = el('td', 'none', 'No entry matches.'); td.colSpan = 6; tr.appendChild(td); body.appendChild(tr); }
+  document.getElementById('n').textContent = list.length + ' of ' + KANT_GLOSSARY.length + ' entries';
+}
+
+function buildChips() {
+  const box = document.getElementById('domains');
+  DOMAINS.forEach(d => {
+    const c = el('span', 'chip', d);
+    c.onclick = () => { domains.has(d) ? domains.delete(d) : domains.add(d); c.classList.toggle('on'); render(); };
+    box.appendChild(c);
+  });
+}
+
+/* ── events ── */
+let t;
+document.getElementById('q').addEventListener('input', e => { clearTimeout(t); t = setTimeout(() => { query = e.target.value.trim(); render(); }, 150); });
+document.getElementById('basis').onchange = render;
+document.getElementById('sort').onchange = render;
+document.querySelectorAll('th[data-s]').forEach(th => th.onclick = () => { document.getElementById('sort').value = th.dataset.s; render(); });
+
+/* ── init ── */
+document.getElementById('status').textContent = 'v' + KANT_GLOSSARY_META.version + ' · ' + KANT_GLOSSARY_META.status + ' · ' + KANT_GLOSSARY.length + ' entries';
+buildChips();
+render();
+</script>
+</body>
+</html>
