@@ -57,6 +57,13 @@ body.ilm .sent:hover .ph { border-bottom: 0; }
 body.ilm .sent:hover .ph .il { border-top-color: var(--line); }
 body.ilm .sent.on .ph .il { color: #1d2a40; }
 body.ilm .blk { margin-bottom: 1.1em; }
+/* try first: the current sentence is outlined until its English is revealed */
+body.tfm .sent.on { background: none; box-shadow: 0 0 0 2px var(--hit); }
+body.tfm .sent.on.open { background: var(--hit); }
+#pop .hint { margin-top: 5px; font-size: .74rem; opacity: .7; font-style: italic; }
+#tfhint { display: none; font-size: .8rem; color: var(--faded); }
+#tfhint kbd { font-family: inherit; font-size: .74rem; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; background: var(--parchment); color: var(--ink); }
+body.tfm #tfhint { display: inline; }
 .term { text-decoration: underline dotted rgba(58, 90, 58, .55); text-underline-offset: 3px; cursor: pointer; }
 .term:hover { background: var(--aa-bg); }
 body.noterms .term { text-decoration: none; cursor: inherit; }
@@ -232,6 +239,7 @@ body.noinf .toc-note { display: none; }
   <div id="mode" role="radiogroup" aria-label="Reading mode">
     <button type="button" role="radio" data-m="de" aria-checked="false" title="Read the German alone: no English appears over the sentences, and the search looks only at the German. Hovering an underlined glossary term still shows the glossary’s rendering of it.">German only</button>
     <button type="button" role="radio" data-m="il" aria-checked="false" title="Interlinear: each phrase of the German stands over its own short English gloss, in German word order. Click a sentence for its full English translation. Hovering an underlined glossary term shows the glossary’s rendering of it.">Interlinear</button>
+    <button type="button" role="radio" data-m="tf" aria-checked="false" title="Try first: hovering a phrase gives only that phrase’s gloss. The whole sentence’s English waits until you click the sentence, press Space or Enter, or rest on it for a few seconds. ← and → step from sentence to sentence.">Try first</button>
     <button type="button" role="radio" data-m="en" aria-checked="true" class="on" title="Hover a sentence or phrase for its English; click to pin it. The search also finds German sentences through their English.">With English</button>
   </div>
   <a class="glink" href="glossary/index.html" target="_blank" rel="noopener" title="The shared glossary: one English rendering for every Kantian term">Glossary ↗</a>
@@ -245,6 +253,7 @@ body.noinf .toc-note { display: none; }
       <label id="lpg"><input type="checkbox" id="tpg" checked> page breaks</label>
       <label id="linf"><input type="checkbox" id="tinf" checked> inferred joins</label>
       <label title="Underline the terms that have an entry in the shared glossary; click one to see it"><input type="checkbox" id="tterms" checked> glossary terms</label>
+      <span id="tfhint"><kbd>←</kbd> <kbd>→</kbd> step · <kbd>Space</kbd> reveal the sentence · or rest on it</span>
     </div>
     <div id="reader"><div id="page"></div></div>
   </section>
@@ -327,6 +336,9 @@ const TOC_GROUPS = {
 let wi = 0;              // the text on show
 let mode = 'en';         // reading mode: 'de' German only · 'il' interlinear glosses under the phrases · 'en' English floats over the sentences
 let hovTerm = null;      // the glossary term under the pointer, for German-only mode
+let shown = null;        // try-first mode: 'blockId:k' of the sentence whose English has been revealed
+let pauseT = null;       // try-first mode: the timer that reveals a sentence the pointer rests on
+const TF_PAUSE = 4000;   // ms
 let cur = -1;            // the section on show
 let queryRe = null;      // the compiled search, or null
 let hitCount = null;     // per work, per section: occurrences, for the tab badges
@@ -495,8 +507,8 @@ function renderSentences(tx, b, units) {
     });
     if (pa < g.o[1]) addTx(sp, b, pa, g.o[1]);
     sp.onclick = e => { if (mode === 'de') return; e.stopPropagation(); if (!String(getSelection())) selectSentence(b.id, k); };
-    sp.onmouseenter = () => { hov = sp; refreshPop(); };
-    sp.onmouseleave = () => { hov = null; hovPh = null; refreshPop(); };
+    sp.onmouseenter = () => { hov = sp; refreshPop(); if (mode === 'tf') armPause(sp); };
+    sp.onmouseleave = () => { hov = null; hovPh = null; clearTimeout(pauseT); refreshPop(); };
     tx.appendChild(sp);
     at = g.o[1];
   });
@@ -713,13 +725,15 @@ let hovPh = null;        // the division under the pointer, if any
 
 function englishOf(sp) { return UNITS.get(sp.dataset.b)[sp.dataset.k].en; }
 function glossOf(sp, ph) { return UNITS.get(sp.dataset.b)[sp.dataset.k].p[ph.dataset.p][2]; }
-function showPop(sp, ph) {
+function showPop(sp, ph, sentence = true) {   // sentence = false: the division's gloss alone (try-first mode, before the reveal)
   const pop = document.getElementById('pop');
   pop.textContent = '';
   if (ph) pop.appendChild(el('div', 'g', glossOf(sp, ph)));
-  const full = el('div', ph ? 's' : 'g');
-  addText(full, englishOf(sp));                                           // the search term marked in the English too
-  pop.appendChild(full);
+  if (sentence || !ph) {
+    const full = el('div', ph ? 's' : 'g');
+    addText(full, englishOf(sp));                                         // the search term marked in the English too
+    pop.appendChild(full);
+  }
   const ids = ph && !document.body.classList.contains('noterms') ? [...ph.querySelectorAll('.term')] : [];
   if (ids.length) {                                                       // the glossary's renderings of the terms in this division
     const gl = el('div', 'gl', 'Glossary: ');
@@ -733,6 +747,7 @@ function showPop(sp, ph) {
     });
     pop.appendChild(gl);
   }
+  if (!sentence && ph) pop.appendChild(el('div', 'hint', 'Click, press Space, or rest here for the whole sentence'));
   placePop(ph || sp, 34);
 }
 function placePop(target, em) {           // over the target (below it if there is no room), never leaving the text side
@@ -769,6 +784,13 @@ function pinnedSpan() {
 }
 function refreshPop() {                  // the hovered division's English, else the hovered/pinned sentence's, else nothing
   document.querySelectorAll('.ph.hot').forEach(x => x.classList.remove('hot'));
+  if (mode === 'tf') {                    // try first: a division's gloss on hover; the sentence only once revealed
+    const pin = pinnedSpan(), open = !!pin && shown === sel.b + ':' + sel.k;
+    if (hov && hovPh) { hovPh.classList.add('hot'); showPop(hov, hovPh, open && hov === pin); }
+    else if (open) showPop(pin, null);
+    else document.getElementById('pop').hidden = true;
+    return;
+  }
   if (mode !== 'en') {                    // German only and interlinear: the glossary's rendering over a hovered term;
     const pin = mode === 'il' && pinnedSpan();   // interlinear also shows a clicked sentence's full English
     if (hovTerm && hovTerm.isConnected && !document.body.classList.contains('noterms')) showTermPop(hovTerm);
@@ -780,16 +802,64 @@ function refreshPop() {                  // the hovered division's English, else
   if (hov && hovPh) hovPh.classList.add('hot');
   if (sp) showPop(sp, hov ? hovPh : null); else document.getElementById('pop').hidden = true;
 }
-function markSelected() {
-  document.querySelectorAll('.sent.on').forEach(x => x.classList.remove('on'));
+function markClasses() {
+  document.querySelectorAll('.sent.on').forEach(x => x.classList.remove('on', 'open'));
   const sp = pinnedSpan();
-  if (sp) sp.classList.add('on');
+  if (sp) { sp.classList.add('on'); if (shown === sel.b + ':' + sel.k) sp.classList.add('open'); }
+  return sp;
+}
+function markSelected() {
+  markClasses();
   hov = null; hovPh = null;
   refreshPop();
 }
 function selectSentence(bid, k) {
-  sel = (sel && sel.b === bid && sel.k === k) ? null : { b: bid, k };  // a second click unpins
+  const same = sel && sel.b === bid && sel.k === k;
+  if (mode === 'tf') {                    // try first: a click reveals the sentence's English, a second click hides it
+    sel = { b: bid, k };
+    shown = same && shown === bid + ':' + k ? null : bid + ':' + k;
+    markClasses(); refreshPop();
+    return;
+  }
+  sel = same ? null : { b: bid, k };      // a second click unpins
   markSelected();
+}
+
+/* ── try first: the current sentence, stepped with ← →, revealed with Space / Enter or a rest of the pointer ── */
+function armPause(sp) {
+  clearTimeout(pauseT);
+  pauseT = setTimeout(() => {
+    if (hov !== sp || mode !== 'tf') return;
+    sel = { b: sp.dataset.b, k: +sp.dataset.k };
+    shown = sp.dataset.b + ':' + sp.dataset.k;
+    markClasses(); refreshPop();
+  }, TF_PAUSE);
+}
+function stepSentence(d) {
+  const all = [...document.querySelectorAll('#page .sent')];
+  let i = all.indexOf(pinnedSpan());
+  if (i < 0) {                            // no current sentence yet: start from the first one in view
+    const top = document.getElementById('reader').getBoundingClientRect().top;
+    i = all.findIndex(x => x.getBoundingClientRect().bottom > top) - (d > 0 ? 1 : 0);
+  }
+  const j = i + d;
+  if (j >= all.length && cur < W().sections.length - 1) { show(cur + 1); return stepSentence(1); }
+  if (j < 0 && cur > 0) { show(cur - 1); const a = document.querySelectorAll('#page .sent'); if (a.length) { const x = a[a.length - 1]; sel = { b: x.dataset.b, k: +x.dataset.k }; shown = null; markClasses(); x.scrollIntoView({ block: 'center' }); refreshPop(); } return; }
+  const x = all[Math.max(0, Math.min(all.length - 1, j))];
+  if (!x) return;
+  sel = { b: x.dataset.b, k: +x.dataset.k };
+  shown = null;
+  hov = null; hovPh = null;
+  markClasses();
+  x.scrollIntoView({ block: 'nearest' });
+  refreshPop();
+}
+function revealCurrent() {
+  if (!pinnedSpan()) stepSentence(1);
+  if (!sel) return;
+  const key = sel.b + ':' + sel.k;
+  shown = shown === key ? null : key;
+  markClasses(); refreshPop();
 }
 
 /* ── glossary card ── */
@@ -965,6 +1035,8 @@ function setMode(m) {                    // switch the reading mode; the glossar
   mode = m;
   document.body.classList.toggle('noen', m !== 'en');
   document.body.classList.toggle('ilm', m === 'il');
+  document.body.classList.toggle('tfm', m === 'tf');
+  shown = null; clearTimeout(pauseT);
   document.querySelectorAll('#mode button').forEach(b => {
     b.classList.toggle('on', b.dataset.m === m); b.setAttribute('aria-checked', b.dataset.m === m);
   });
@@ -973,9 +1045,15 @@ function setMode(m) {                    // switch the reading mode; the glossar
   if (hadEnglish !== (m !== 'de')) runSearch();   // English hits come and go with German-only mode
   else markSelected();
 }
-document.querySelectorAll('#mode button').forEach(b => { b.onclick = () => { if (b.dataset.m !== mode) setMode(b.dataset.m); }; });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && sel) { sel = null; markSelected(); } });
-document.addEventListener('click', () => { if (sel) { sel = null; markSelected(); } });
+document.querySelectorAll('#mode button').forEach(b => { b.onclick = () => { if (b.dataset.m !== mode) setMode(b.dataset.m); b.blur(); }; });   // blur: Space belongs to the reader
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && sel) { sel = null; shown = null; markSelected(); return; }
+  if (mode !== 'tf' || e.altKey || e.ctrlKey || e.metaKey || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(document.activeElement.tagName)) return;
+  if (e.key === 'ArrowRight') { e.preventDefault(); stepSentence(1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); stepSentence(-1); }
+  else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); revealCurrent(); }
+});
+document.addEventListener('click', () => { if (sel) { sel = null; shown = null; markSelected(); } });
 document.getElementById('reader').addEventListener('scroll', () => { hov = null; hovPh = null; hovTerm = null; refreshPop(); });
 window.addEventListener('resize', refreshPop);
 document.getElementById('goaa').addEventListener('change', e => {
