@@ -542,8 +542,8 @@ function addWords(parent, b, from, to, words) {   // a slice of a block with its
   if (at < to) addTx(parent, b, at, to);
 }
 /* The verb brackets of the hovered sentence (else the current one) as arcs over the text, from the finite verb or
-   clause opener to the last verb part at the clause's end; an arc that crosses a line break runs off the right
-   edge and resumes at the left, dashed. Opener brackets are orange, verb brackets red. */
+   clause opener to the last verb part at the clause's end; across a line break, a short dashed tail leaves the left
+   word and another enters the right one. The words themselves are boxed. Opener brackets are orange, verb brackets red. */
 function drawArcs() {
   const svg = document.getElementById('arcs');
   if (!svg) return;
@@ -557,7 +557,7 @@ function drawArcs() {
   sp.querySelectorAll('.bk').forEach(x => (groups[x.dataset.n] = groups[x.dataset.n] || []).push(x));
   const ns = 'http://www.w3.org/2000/svg';
   const path = (d, cls) => { const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); if (cls) p.setAttribute('class', cls); svg.appendChild(p); };
-  Object.values(groups).forEach(ws => {
+  Object.values(groups).forEach((ws, i) => {
     const l = ws.find(x => x.dataset.side === 'l'), rs = ws.filter(x => x.dataset.side === 'r');
     if (!l || !rs.length) return;
     const opener = l.closest('.ph') && l.closest('.ph').classList.contains('rK');
@@ -566,14 +566,14 @@ function drawArcs() {
     if (!a || !c) return;
     const ax = a.left + a.width / 2 - page.left, ay = a.top - page.top - 2;
     const cx = c.left + c.width / 2 - page.left, cy = c.top - page.top - 2;
-    const cls = opener ? 'k' : '';
+    const cls = opener ? 'k' : '', lift = 3 * (i % 3);         // staggered, so neighbouring arcs don't overlap
     if (Math.abs(ay - cy) < 4) {
-      const h = Math.min(16, 6 + Math.abs(cx - ax) / 12);
+      const h = Math.min(16, 6 + Math.abs(cx - ax) / 12) + lift;
       path(`M${ax},${ay} C${ax},${ay - h} ${cx},${cy - h} ${cx},${cy}`, cls);
-    } else {
-      const right = page.width + 6, h = 9;
-      path(`M${ax},${ay} C${ax},${ay - h} ${ax + 12},${ay - h} ${ax + 18},${ay - h} L${right},${ay - h}`, cls + ' cont');
-      path(`M-6,${cy - h} L${cx - 18},${cy - h} C${cx - 12},${cy - h} ${cx},${cy - h} ${cx},${cy}`, cls + ' cont');
+    } else {                            // across a line break: a short dashed tail out of the left word, and one into the right
+      const h = 8 + lift, t = 34;
+      path(`M${ax},${ay} C${ax},${ay - h} ${ax + 10},${ay - h} ${ax + t},${ay - h}`, cls + ' cont');
+      path(`M${cx - t},${cy - h} C${cx - 10},${cy - h} ${cx},${cy - h} ${cx},${cy}`, cls + ' cont');
     }
   });
 }

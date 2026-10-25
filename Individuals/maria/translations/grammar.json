@@ -1,0 +1,7094 @@
+{
+ "meta": {
+  "roles": {
+   "S": "subject",
+   "V": "finite verb",
+   "O": "object",
+   "G": "genitive",
+   "P": "predicative",
+   "A": "adverbial",
+   "E": "verb part at the end",
+   "K": "clause opener",
+   "C": "conjunction",
+   "X": "other"
+  },
+  "depth": "0 main clause, 1 subordinate clause, 2 and 3 clauses inside that",
+  "method": "Phrases from translations/logik-units.js and translations/meier-phrases.js; each sentence tagged by a model (grammar.py). Unreviewed analysis, not the Academy Edition's."
+ },
+ "sentences": {
+  "busolt": {
+   "busolt-s26-046": {
+    "9": {
+     "phrases": [
+      "Wenn ein Begrif",
+      "aus dem andern",
+      "soll geschloßen werden,",
+      "der im vorigen nicht enthalten ist;",
+      "so muß man",
+      "einen Begriff,",
+      "der die Bedingung der Regeln enthält",
+      "hinzufügen;",
+      "der Begriff",
+      "des Obiects",
+      "enthalt nun",
+      "die Bedingung",
+      "der Regel,",
+      "und also muß",
+      "von dieser conclusion",
+      "auch das Praedicat",
+      "der Conclusion",
+      "gelten."
+     ],
+     "r": [
+      "K1",
+      "A1",
+      "E1",
+      "K2",
+      "V0",
+      "O0",
+      "K1",
+      "E0",
+      "S0",
+      "G0",
+      "V0",
+      "O0",
+      "G0",
+      "V0",
+      "A0",
+      "S0",
+      "G0",
+      "E0"
+     ],
+     "b": [
+      [
+       "Wenn",
+       [
+        "soll",
+        "geschloßen",
+        "werden"
+       ]
+      ],
+      [
+       "der",
+       [
+        "enthalten",
+        "ist"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "hinzufügen"
+       ]
+      ],
+      [
+       "der",
+       [
+        "enthält"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "gelten"
+       ]
+      ]
+     ]
+    },
+    "10": {
+     "phrases": [
+      "Z.E.",
+      "Alle Menschen",
+      "sind Sterblich,",
+      "Caius ist ein Mensch,",
+      "also ist Caius sterblich."
+     ],
+     "r": [
+      "X0",
+      "S0",
+      "V0",
+      "V0",
+      "V0"
+     ],
+     "b": []
+    },
+    "11": {
+     "phrases": [
+      "Es gründet sich",
+      "dieser Vernunftschluß",
+      "auf den Grundsaz:",
+      "einem jeden Dinge",
+      "in so fern es",
+      "unter die Bedingung",
+      "subsumirt werden kann",
+      "kommt das Praedikat zu",
+      "ein Vernunftschluß aber",
+      "ist",
+      "cognitio a priori per subsumtionem conceptus sub conditione regulae cuiusdam generali."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "A0",
+      "O0",
+      "K1",
+      "A1",
+      "E1",
+      "V0",
+      "S0",
+      "V0",
+      "P0"
+     ],
+     "b": [
+      [
+       "in",
+       [
+        "subsumirt",
+        "werden",
+        "kann"
+       ]
+      ],
+      [
+       "kommt",
+       [
+        "zu"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s26-047": {
+    "0": {
+     "phrases": [
+      "Der Vernunftschluß",
+      "hat zwei requisitionen"
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s26-048": {
+    "0": {
+     "phrases": [
+      "a.) Allgemeine Regel",
+      "d.i. Maior."
+     ],
+     "r": [
+      "S0",
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s26-049": {
+    "0": {
+     "phrases": [
+      "b.) Die Subsumtion",
+      "eines Begrifs",
+      "unter die Bedingung",
+      "dieser allgemeinen Regel",
+      "d.i. Minor."
+     ],
+     "r": [
+      "S0",
+      "G0",
+      "A0",
+      "G0",
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s26-050": {
+    "0": {
+     "phrases": [
+      "c.) Die Verbindung",
+      "des Praedicats",
+      "mit dem Subiect,",
+      "oder das was",
+      "aus der allgemeinen Regel",
+      "der Subsumtion",
+      "zukommt,",
+      "dies ist die Conclusion."
+     ],
+     "r": [
+      "S0",
+      "G0",
+      "A0",
+      "K1",
+      "A1",
+      "G1",
+      "E1",
+      "V0"
+     ],
+     "b": [
+      [
+       "was",
+       [
+        "zukommt"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Maior und Minor",
+      "heißen Praemissen."
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Die Praemissen und die Conclusion",
+      "ist also das,",
+      "was zum Schluß gehört."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1"
+     ],
+     "b": [
+      [
+       "was",
+       [
+        "gehört"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s26-051": {
+    "0": {
+     "phrases": [
+      "Bei diesen Schlüßen",
+      "sieht man",
+      "auf die Relation,",
+      "und nach dieser",
+      "werden die Schlüße eingetheilt",
+      "in Kategorische, Hypothetische und disiunctiue."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "A0",
+      "A0",
+      "V0",
+      "A0"
+     ],
+     "b": [
+      [
+       "werden",
+       [
+        "eingetheilt"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Alle Schlüße",
+      "werden beurtheilt",
+      "nach der Maiore propositione."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "A0"
+     ],
+     "b": [
+      [
+       "werden",
+       [
+        "beurtheilt"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Ist das ein kategorisches Urtheil",
+      "so ist der Schluß auch Kategorisch."
+     ],
+     "r": [
+      "V0",
+      "V0"
+     ],
+     "b": []
+    },
+    "3": {
+     "phrases": [
+      "Nur in Kategorischen Schlüssen",
+      "ist Subiect praedicat und Terminus medius,",
+      "und daher",
+      "sieht man leicht die Wichtigkeit ein",
+      "daß man sagte:",
+      "zu einem Vernunftschluß",
+      "werden 3 Termini:",
+      "Maior",
+      "oder das Praedicat",
+      "der Conclusion,",
+      "minor",
+      "oder das Subiect",
+      "der Conclusion",
+      "und Terminus medius",
+      "der die Condition der Conclusion ist,",
+      "erfordert;",
+      "jeder Vernunftschluß",
+      "besteht überhaupt",
+      "aus 3 Stücken."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "A0",
+      "V0",
+      "K1",
+      "A1",
+      "V1",
+      "S1",
+      "S1",
+      "G1",
+      "S1",
+      "S1",
+      "G1",
+      "S1",
+      "K2",
+      "E1",
+      "S0",
+      "V0",
+      "A0"
+     ],
+     "b": [
+      [
+       "sieht",
+       [
+        "ein"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "sagte"
+       ]
+      ],
+      [
+       "werden",
+       [
+        "erfordert"
+       ]
+      ],
+      [
+       "der",
+       [
+        "ist"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s26-052": {
+    "0": {
+     "phrases": [
+      "a.) Praemissen."
+     ],
+     "r": [
+      "S0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s26-053": {
+    "0": {
+     "phrases": [
+      "b.) Maior und Minor und"
+     ],
+     "r": [
+      "S0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s26-054": {
+    "0": {
+     "phrases": [
+      "c.) Conclusion."
+     ],
+     "r": [
+      "S0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s26-055": {
+    "0": {
+     "phrases": [
+      "Die Materie",
+      "zu den Vernunftschlüßen",
+      "sind die Praemissen",
+      "oder Propositionen",
+      "aus welchen die Conclusion folgt."
+     ],
+     "r": [
+      "S0",
+      "A0",
+      "V0",
+      "P0",
+      "K1"
+     ],
+     "b": [
+      [
+       "welchen",
+       [
+        "folgt"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Die Form",
+      "besteht in der Folgerung",
+      "der Conclusion",
+      "aus den Praemißen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "G0",
+      "A0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Ein Vernunftschluß",
+      "kann in der Materie richtig seyn,",
+      "aber in der Form fehlen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "seyn",
+        "fehlen"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Nur in den Kategorischen Schlüssen",
+      "ist ein Medius Terminus."
+     ],
+     "r": [
+      "A0",
+      "V0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Bey den Hypothetischen",
+      "ist nur bloß das Verhältniß",
+      "zweierley Urtheile,",
+      "wie eins",
+      "aus der Richtigkeit",
+      "des andern folgt."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "G0",
+      "K1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wie",
+       [
+        "folgt"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s27-001": {
+    "0": {
+     "phrases": [
+      "Zu der Hauptregel",
+      "der Vernunftschlüße",
+      "wird sonst von andern gerechnet",
+      "der Saz des Wiederspruchs."
+     ],
+     "r": [
+      "A0",
+      "G0",
+      "V0",
+      "S0"
+     ],
+     "b": [
+      [
+       "wird",
+       [
+        "gerechnet"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Kein Urtheil ist wahr,",
+      "wo das praedicat",
+      "dem Subiect wiederspricht."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wo",
+       [
+        "wiederspricht"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Allein dies Principium",
+      "der Contradiction",
+      "kann nicht",
+      "als ein Vernunftschluß",
+      "gebraucht werden:",
+      "denn es ist nur",
+      "ein Principium iudicii."
+     ],
+     "r": [
+      "S0",
+      "G0",
+      "V0",
+      "P0",
+      "E0",
+      "V0",
+      "P0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "gebraucht",
+        "werden"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s27-002": {
+    "0": {
+     "phrases": [
+      "Ein Vernunftschluß",
+      "ist bejahend,",
+      "wenn die Conclusion bejahend ist,",
+      "und verneinend,",
+      "wenn die Conclusion verneinend ist."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "P0",
+      "K1"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "ist"
+       ]
+      ],
+      [
+       "wenn",
+       [
+        "ist"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Nach dieser allgemeinen Eintheilung",
+      "aller Vernunftschlüße",
+      "machen wir",
+      "2. besondere Regeln:"
+     ],
+     "r": [
+      "A0",
+      "G0",
+      "V0",
+      "O0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s27-003": {
+    "0": {
+     "phrases": [
+      "a.) Nota notae est Nota rei ipsius,",
+      "dies gilt",
+      "von bejahenden Urtheilen."
+     ],
+     "r": [
+      "X0",
+      "V0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s27-004": {
+    "0": {
+     "phrases": [
+      "b.) Repugnans notae repugnat rei ipsi",
+      "dies gilt",
+      "von verneinenden Schlüßen,",
+      "z.E.",
+      "Veränderlich seyn",
+      "ist ein Merkmahl",
+      "alles theilbaren,",
+      "theilbar seyn",
+      "ist ein Merkmahl",
+      "eines Körpers,",
+      "also ist",
+      "vermittelst der theilbarkeit",
+      "die Veränderlichkeit",
+      "ein Merkmahl",
+      "des Körpers."
+     ],
+     "r": [
+      "X0",
+      "V0",
+      "A0",
+      "X0",
+      "S0",
+      "V0",
+      "G0",
+      "S0",
+      "V0",
+      "G0",
+      "V0",
+      "A0",
+      "S0",
+      "P0",
+      "G0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s27-005": {
+    "0": {
+     "phrases": [
+      "Eine jede Conclusion",
+      "enthält Subiect und Praedicat",
+      "Terminus medius",
+      "kommt in beiden Praemißen vor;",
+      "also wird in Maiori seyn",
+      "Praedicat und Terminus medius,",
+      "in minore",
+      "Subiect und Terminus medius."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "S0",
+      "V0",
+      "V0",
+      "S0",
+      "A0",
+      "S0"
+     ],
+     "b": [
+      [
+       "kommt",
+       [
+        "vor"
+       ]
+      ],
+      [
+       "wird",
+       [
+        "seyn"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Es kann in solchen Vernunftschlüßen",
+      "bloß Terminus medius",
+      "versezt werden."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "E0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "versezt",
+        "werden"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Die Art",
+      "der Versezzung",
+      "ist vierfach,",
+      "und daher entstehen eben",
+      "die 4. Figuren",
+      "der Syllogistic."
+     ],
+     "r": [
+      "S0",
+      "G0",
+      "V0",
+      "V0",
+      "S0",
+      "G0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s27-006": {
+    "0": {
+     "phrases": [
+      "Repugnans notae repugnat rei ipsi."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Z.E.",
+      "Nichts Zusammengeseztes",
+      "ist einfach,",
+      "alle Materie",
+      "ist zusammengesezt,",
+      "also ist keine Materie einfach etc.",
+      "Einfach seyn",
+      "gilt von Zusammengesezten,",
+      "und vermöge des Zusammengesezten",
+      "von Körpern."
+     ],
+     "r": [
+      "X0",
+      "S0",
+      "V0",
+      "S0",
+      "V0",
+      "V0",
+      "S0",
+      "V0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Die Beiden angeführten Regeln",
+      "sind eben dies,",
+      "was den alten",
+      "dictum de omni et nullo war."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "was",
+       [
+        "war"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s27-007": {
+    "0": {
+     "phrases": [
+      "a.) Dictum de omni",
+      "quidquid valet de genere aut specie",
+      "valet etiam de omnibus indiuiduis",
+      "in genere aut specie contentis."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s27-008": {
+    "0": {
+     "phrases": [
+      "b.) Dictum de nullo",
+      "quidquid repugnat generi aut speciei,",
+      "repugnat etiam omnibus indiuiduis",
+      "in genere aut specie contentis."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s27-009": {
+    "0": {
+     "phrases": [
+      "Das Principium",
+      "der Hypothetischen und Disiunctiuen Schlüße",
+      "erklärt der Autor",
+      "im 364. und 365. §."
+     ],
+     "r": [
+      "O0",
+      "G0",
+      "V0",
+      "A0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Es giebt also",
+      "nur drey Principien",
+      "der Vernunftschlüße",
+      "denn die Consequentiae immediatae",
+      "sind eigentlich keine Vernunftschlüße;",
+      "sie sind nur Folgerungen",
+      "und bedürfen keiner Regel."
+     ],
+     "r": [
+      "V0",
+      "O0",
+      "G0",
+      "S0",
+      "V0",
+      "V0",
+      "V0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Der Autor redet",
+      "von ordentlichen und außerordentlichen Vernunftschlüßen."
+     ],
+     "r": [
+      "V0",
+      "A0"
+     ],
+     "b": []
+    },
+    "3": {
+     "phrases": [
+      "Es ist aber hierin",
+      "kein anderer Unterschied,",
+      "als daß die Schlüße",
+      "in denen die Form versteckt ist",
+      "außerordentliche sind."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "K1",
+      "K2",
+      "E1"
+     ],
+     "b": [
+      [
+       "daß",
+       [
+        "sind"
+       ]
+      ],
+      [
+       "denen",
+       [
+        "versteckt",
+        "ist"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s28-001": {
+    "0": {
+     "phrases": [
+      "Figura I.",
+      "Est notior quam ut egeat explicatione,",
+      "est quasi radi x omnis conversionis medii Termini in ceteris."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s28-002": {
+    "0": {
+     "phrases": [
+      "Figura II."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Hic medius Terminus est praedicatum in maiori et minori",
+      "z.E.",
+      "Kein denkendes Wesen",
+      "ist zusammengesetzt,",
+      "alle Körper",
+      "sind zusammengesezt",
+      "daher ist kein Körper",
+      "ein denkendes Wesen."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "S0",
+      "V0",
+      "S0",
+      "V0",
+      "V0",
+      "P0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s28-003": {
+    "0": {
+     "phrases": [
+      "Figura III."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Hic medius Terminus in maiori et minori propositione est Subiectum."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Z.E.",
+      "Alle Menschen",
+      "sind unvollkommen;",
+      "einige Menschen",
+      "sind tugendhaft,",
+      "also sind einige Tugendhafte unvollkommen."
+     ],
+     "r": [
+      "X0",
+      "S0",
+      "V0",
+      "S0",
+      "V0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s28-004": {
+    "0": {
+     "phrases": [
+      "Figura IV."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Hic medius Terminus est Praedicatum in maiori et Subiectum in minori",
+      "Z.E.",
+      "Quidquid habet vim agendi est Spiritus",
+      "omnis spiritus est substantia,",
+      "ergo omnis substantia habet vim agendi."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-001": {
+    "0": {
+     "phrases": [
+      "1.) In einem ordentlichen Vernunftschluß",
+      "können nicht mehr,",
+      "als 3. Hauptbegriffe seyn;",
+      "denn die Conclusion hat nur 2",
+      "Anmerkung",
+      "Ist einer",
+      "von den beiden Hauptbegriffen",
+      "in den Praemißen",
+      "doppelt Sinnig;",
+      "so findet sich das doppelt Sinnige",
+      "im ganzen Schluß",
+      "Z.E.",
+      "In dem Ort",
+      "wo ich bin,",
+      "ist kein anderer,",
+      "die Stube",
+      "das ist der Ort",
+      "wo ich bin,",
+      "also ist in der Stube",
+      "kein anderer."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "E0",
+      "V0",
+      "X0",
+      "V0",
+      "A0",
+      "A0",
+      "P0",
+      "V0",
+      "A0",
+      "X0",
+      "A0",
+      "K1",
+      "V0",
+      "S0",
+      "V0",
+      "K1",
+      "V0",
+      "S0"
+     ],
+     "b": [
+      [
+       "können",
+       [
+        "seyn"
+       ]
+      ],
+      [
+       "wo",
+       [
+        "bin"
+       ]
+      ],
+      [
+       "wo",
+       [
+        "bin"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-002": {
+    "0": {
+     "phrases": [
+      "2.) Medius Terminus ne ingrediatur conclusionem,",
+      "id vero pessimi concurrit vitium."
+     ],
+     "r": [
+      "X0",
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-003": {
+    "0": {
+     "phrases": [
+      "3.) Ex puris negatiuis nihil sequitur."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Dieses sieht man",
+      "durch die gesunde Vernunft ein;",
+      "es folgt",
+      "aus der Natur",
+      "der Sache selbst:",
+      "Denn die Subsumtion",
+      "muß unter der Bedingung",
+      "der Regel seyn."
+     ],
+     "r": [
+      "V0",
+      "E0",
+      "V0",
+      "A0",
+      "G0",
+      "S0",
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "sieht",
+       [
+        "ein"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Ich muß sagen",
+      "daß einem Dinge",
+      "das zu komme,",
+      "was die Bedingung der Regel ist,",
+      "und dies muß doch bejahend seyn."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "E1",
+      "K2",
+      "V0"
+     ],
+     "b": [
+      [
+       "muß",
+       [
+        "sagen"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "zu",
+        "komme"
+       ]
+      ],
+      [
+       "was",
+       [
+        "ist"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Z.E.",
+      "Kein Mensch",
+      "ist ein unvernünftiges Thier,",
+      "Kein Ochs",
+      "ist ein Mensch",
+      "also ist kein Ochs",
+      "ein unvernünftiges Thier."
+     ],
+     "r": [
+      "X0",
+      "S0",
+      "V0",
+      "S0",
+      "V0",
+      "V0",
+      "P0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-004": {
+    "0": {
+     "phrases": [
+      "4.) Ex puris particularibus nihil sequitur."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Weil sonst",
+      "das was",
+      "unter der Bedingung",
+      "der Regel steht,",
+      "nicht aufs Praedicat derselben",
+      "angewendet werden kann",
+      "Z.E.",
+      "Einige empfindende Wesen",
+      "sind Menschen,",
+      "einige unvernünftige Thiere",
+      "sind empfindende Wesen,",
+      "also sind einige unvernünftige Thiere Menschen."
+     ],
+     "r": [
+      "K1",
+      "K2",
+      "A2",
+      "E2",
+      "A1",
+      "E1",
+      "X0",
+      "S0",
+      "V0",
+      "S0",
+      "V0",
+      "V0"
+     ],
+     "b": [
+      [
+       "Weil",
+       [
+        "angewendet",
+        "werden",
+        "kann"
+       ]
+      ],
+      [
+       "was",
+       [
+        "steht"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-005": {
+    "0": {
+     "phrases": [
+      "5.) Conclusio sequi debet partem debiliorem",
+      "NB:",
+      "Unter den Praemissen",
+      "nennt man partem debiliorem",
+      "welcher entweder Particulair oder verneinend ist",
+      "Der Saz heißt:",
+      "ist eine Praemisse verneinend,",
+      "so ist die Conclusion verneinend,",
+      "ist eine Praemisse Particulair",
+      "so ist die Conclusion particulair."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "A0",
+      "V0",
+      "K1",
+      "V0",
+      "V0",
+      "V0",
+      "V0",
+      "V0"
+     ],
+     "b": [
+      [
+       "welcher",
+       [
+        "ist"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Grund:",
+      "Wenn ich nur einige Dinge",
+      "subsumirt habe",
+      "unter der Bedingung",
+      "der allgemeinen Regel;",
+      "so muß auch das Praedicat",
+      "der allgemeinen Regel",
+      "nur von einigen gelten",
+      "ist die Regel verneinend,",
+      "so muß auch",
+      "von dem,",
+      "was unter der Regel steht,",
+      "die Verneinung",
+      "der Regel gelten."
+     ],
+     "r": [
+      "X0",
+      "K1",
+      "E1",
+      "A1",
+      "G1",
+      "V0",
+      "G0",
+      "E0",
+      "V0",
+      "V0",
+      "A0",
+      "K1",
+      "S0",
+      "E0"
+     ],
+     "b": [
+      [
+       "Wenn",
+       [
+        "subsumirt",
+        "habe"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "gelten"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "gelten"
+       ]
+      ],
+      [
+       "was",
+       [
+        "steht"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-006": {
+    "0": {
+     "phrases": [
+      "6.) In Conclusione nec Plus, nec Minus continentur quam in praemissis",
+      "id est,",
+      "ne notus in conclusione amplus reperiatur."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Es muß also nicht mehr geschloßen werden,",
+      "als was in den Praemissen begriffen ist",
+      "in den Praemissis",
+      "ist maior, minor und Terminus medius."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "A0",
+      "V0"
+     ],
+     "b": [
+      [
+       "muß",
+       [
+        "geschloßen",
+        "werden"
+       ]
+      ],
+      [
+       "was",
+       [
+        "begriffen",
+        "ist"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "In der Conclusion",
+      "nur maior und minor."
+     ],
+     "r": [
+      "A0",
+      "S0"
+     ],
+     "b": []
+    },
+    "3": {
+     "phrases": [
+      "Die erste Figur",
+      "ist unmittelbar euident."
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Bey der Zweyten und Dritten Figur",
+      "muß man sich erst besinnen",
+      "welches wohl die Folge wäre."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "K1"
+     ],
+     "b": [
+      [
+       "muß",
+       [
+        "besinnen"
+       ]
+      ],
+      [
+       "welches",
+       [
+        "wäre"
+       ]
+      ]
+     ]
+    },
+    "5": {
+     "phrases": [
+      "Die vierte Figur",
+      "haben die Logiker",
+      "die Unnatürliche genannt,",
+      "bey dieser",
+      "haben sie wohl",
+      "die Verwickelung gemerkt."
+     ],
+     "r": [
+      "O0",
+      "V0",
+      "E0",
+      "A0",
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "haben",
+       [
+        "genannt"
+       ]
+      ],
+      [
+       "haben",
+       [
+        "gemerkt"
+       ]
+      ]
+     ]
+    },
+    "6": {
+     "phrases": [
+      "In den lezten Figuren",
+      "läßt sich die Form",
+      "sehr verstecken."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "läßt",
+       [
+        "verstecken"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-007": {
+    "0": {
+     "phrases": [
+      "Die Regeln",
+      "der ersten Figur",
+      "sind:"
+     ],
+     "r": [
+      "S0",
+      "G0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-008": {
+    "0": {
+     "phrases": [
+      "a.) Maior esse debet vniversalis."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-009": {
+    "0": {
+     "phrases": [
+      "b.) Minor affirmans."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-010": {
+    "0": {
+     "phrases": [
+      "Diese Regeln",
+      "scheinen die erste Figur einzuschränken",
+      "allein sie zeigen uns vielmer",
+      "derselben ausdehnung",
+      "auf alle und jede Arten",
+      "der Schlüße,",
+      "der maior muß",
+      "vermöge der Regel",
+      "vniversal seyn,",
+      "er kann aber auch",
+      "affirmativ oder negativ seyn;",
+      "minor soll affirmans seyn,",
+      "er kann aber auch",
+      "vniversal und particulaer seyn."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "V0",
+      "O0",
+      "A0",
+      "G0",
+      "V0",
+      "A0",
+      "E0",
+      "V0",
+      "E0",
+      "V0",
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "scheinen",
+       [
+        "einzuschränken"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ],
+      [
+       "kann",
+       [
+        "seyn"
+       ]
+      ],
+      [
+       "soll",
+       [
+        "seyn"
+       ]
+      ],
+      [
+       "kann",
+       [
+        "seyn"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Also sind in der ersten Figur",
+      "Schlüße",
+      "von aller Qualitaet und Quantitaet",
+      "möglich,",
+      "also von A, E, I, et O",
+      "In den übrigen",
+      "sind allemal nur einige derselben möglich;",
+      "folglich ist die erste Figur",
+      "die ächte,",
+      "die einzig Natürliche und Reine."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "A0",
+      "P0",
+      "A0",
+      "A0",
+      "V0",
+      "V0",
+      "P0",
+      "P0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Anmerkung",
+      "Obige Regeln",
+      "gelten für alle und jede Vernunftschlüße:",
+      "denn in jedem Vernunftschluß",
+      "muß immer eine Regel seyn,",
+      "eine Regel aber",
+      "ist nichts anders,",
+      "als eine allgemeine Wahrheit."
+     ],
+     "r": [
+      "X0",
+      "S0",
+      "V0",
+      "A0",
+      "V0",
+      "S0",
+      "V0",
+      "P0"
+     ],
+     "b": [
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Ferner,",
+      "da ich",
+      "in jedem Vernunftschluß",
+      "einen Begriff subsumiren soll",
+      "so muß ich ja behaupten,",
+      "daß dieser Begriff",
+      "unter eine allgemeine Regel gehöre;",
+      "mithin affirmiren."
+     ],
+     "r": [
+      "A0",
+      "K1",
+      "A1",
+      "E1",
+      "V0",
+      "K1",
+      "E1",
+      "E0"
+     ],
+     "b": [
+      [
+       "da",
+       [
+        "subsumiren",
+        "soll"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "behaupten",
+        "affirmiren"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "gehöre"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-011": {
+    "0": {
+     "phrases": [
+      "Die Regeln",
+      "der Zweyten Figur",
+      "beschränken sich nur blos",
+      "auf eine Art von Schlüßen,",
+      "nehmlich auf verneinende conclusionen!"
+     ],
+     "r": [
+      "S0",
+      "G0",
+      "V0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-012": {
+    "0": {
+     "phrases": [
+      "Die Dritte Figur",
+      "kann nur particulaere conclusionen haben."
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "haben"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-013": {
+    "0": {
+     "phrases": [
+      "In der vierten Figur",
+      "sind nur particulaere oder negative Conclusionen möglich;",
+      "die conclusion hat also",
+      "nur partes debiliores."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "V0",
+      "O0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Hieraus erhellet,",
+      "daß die erste Figur",
+      "bloß die Reine sey,",
+      "daß die andern aber alle",
+      "vermischte Schlüße haben."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "E1",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "daß",
+       [
+        "sey"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "haben"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Ratiocinium purum ist,",
+      "wo ausser dem maiori, minori und der Conclusion",
+      "kein anderer Saz",
+      "mit ein läuft."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "S1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wo",
+       [
+        "mit",
+        "ein",
+        "läuft"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-014": {
+    "0": {
+     "phrases": [
+      "Ratiocinium impurum seu hybridum,",
+      "da zu den 3 propositionen",
+      "auch eine consequentia immediata",
+      "muß gedacht werden."
+     ],
+     "r": [
+      "X0",
+      "K1",
+      "S1",
+      "E1"
+     ],
+     "b": [
+      [
+       "da",
+       [
+        "muß",
+        "gedacht",
+        "werden"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Es ist also Begattung",
+      "eines ratiocinii",
+      "mit einer consequentia immediata,",
+      "diese findet",
+      "bey den drey lezten Figuren statt."
+     ],
+     "r": [
+      "V0",
+      "G0",
+      "A0",
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "findet",
+       [
+        "statt"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Die Erklärung",
+      "aus der zweyten Figur:",
+      "kein denkendes Wesen",
+      "ist zusammengesezt",
+      "alle Körper",
+      "sind zusammengesezt",
+      "also ist kein Körper",
+      "eine denkende Substanz."
+     ],
+     "r": [
+      "S0",
+      "A0",
+      "S0",
+      "V0",
+      "S0",
+      "V0",
+      "V0",
+      "P0"
+     ],
+     "b": []
+    },
+    "3": {
+     "phrases": [
+      "– Hier denke ich mir",
+      "bey Erwägung",
+      "des Maioris",
+      "per conversionem:",
+      "nichts Zusammengeseztes",
+      "ist eine denkende Substanz;",
+      "ich bringe also",
+      "die zweyte Figur",
+      "per conuersionem maioris",
+      "in die erste."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "G0",
+      "A0",
+      "S0",
+      "V0",
+      "V0",
+      "O0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Die erste conclusion",
+      "muß hier negativ seyn,",
+      "denn die zweyte",
+      "soll per conversionem",
+      "in die erste gebracht werden,",
+      "in dieser",
+      "muß maior seyn vniversaliter,",
+      "so muß",
+      "da nur verneinende Säzze",
+      "einen allgemeinen Saz",
+      "geben können",
+      "per conversionem simpliciter,",
+      "auch die Conclusion verneinend seyn:",
+      "Conclusio sequitur partem debiliorem."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "S0",
+      "V0",
+      "E0",
+      "A0",
+      "V0",
+      "V0",
+      "K1",
+      "O1",
+      "E1",
+      "A1",
+      "E0",
+      "X0"
+     ],
+     "b": [
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ],
+      [
+       "soll",
+       [
+        "gebracht",
+        "werden"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ],
+      [
+       "da",
+       [
+        "geben",
+        "können"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-015": {
+    "0": {
+     "phrases": [
+      "Erklärung",
+      "der Dritten Figur:",
+      "Alle Menschen",
+      "sind unvollkommen",
+      "einige sind tugendhaft;",
+      "also sind einige tugendhafte unvollkommen."
+     ],
+     "r": [
+      "S0",
+      "G0",
+      "S0",
+      "V0",
+      "V0",
+      "V0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Hier steht Terminus medius",
+      "nicht an seiner geziemenden Stelle,",
+      "und diese giebt ihm",
+      "blos die Reduction",
+      "in die erste Figur."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "V0",
+      "S0",
+      "A0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Alle Menschen",
+      "sind unvollkommen",
+      "einige tugendhafte",
+      "sind Menschen,",
+      "also sind einige tugendhafte unvollkommen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "S0",
+      "V0",
+      "V0"
+     ],
+     "b": []
+    },
+    "3": {
+     "phrases": [
+      "In reductione igitur tertiae Figurae",
+      "metathesis Terminorum",
+      "efficit minorem",
+      "quae quidem per consequentiam immediatam."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Aus einige Tugendhafte sind Menschen,",
+      "folgt,",
+      "einige Menschen sind tugendhaft."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "S0"
+     ],
+     "b": []
+    },
+    "5": {
+     "phrases": [
+      "Der Beweis",
+      "der Dritten Figur,",
+      "daß nehmlich",
+      "bloß particulaere conclusionen",
+      "darin statt finden",
+      "liegt darin",
+      "weil ich hier den minorem",
+      "in die erste Figur",
+      "muß reduciren können,",
+      "dieser minor aber",
+      "affirmans seyn muß,",
+      "so ists nothwendig,",
+      "daß da immer particulaere Säzze",
+      "per conseqventiam immediatam",
+      "können simpliciter conuertirt werden,",
+      "auch ein particulaerer Saz",
+      "in minori propositione seyn",
+      "und dann nach diesem",
+      "als parti debiliori",
+      "richtig sey auf den Schluß,",
+      "mithin muß die Conclusion",
+      "in der Dritten Figur",
+      "immer particulaer seyn."
+     ],
+     "r": [
+      "S0",
+      "G0",
+      "K1",
+      "S1",
+      "E1",
+      "V0",
+      "K1",
+      "A1",
+      "E1",
+      "S1",
+      "E1",
+      "V0",
+      "K1",
+      "A2",
+      "E2",
+      "S1",
+      "E1",
+      "A1",
+      "A1",
+      "E1",
+      "V0",
+      "A0",
+      "E0"
+     ],
+     "b": [
+      [
+       "daß",
+       [
+        "statt",
+        "finden"
+       ]
+      ],
+      [
+       "weil",
+       [
+        "muß",
+        "reduciren",
+        "können",
+        "seyn",
+        "muß"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "seyn",
+        "sey"
+       ]
+      ],
+      [
+       "da",
+       [
+        "können",
+        "conuertirt",
+        "werden"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-016": {
+    "0": {
+     "phrases": [
+      "In der vierten Figur",
+      "wird der maior",
+      "zum minor gemacht,",
+      "aus diesem aber erhellet nun,",
+      "daß die 3 lezten Schlußarten",
+      "Unnatürlich seyn,",
+      "und den Verstand bloß verwirren,",
+      "mithin aus der Logik,",
+      "die ein Leuchtturm",
+      "der Seele",
+      "seyn soll,",
+      "verbannt seyn müßen;",
+      "Jedes Urtheil hat einen modum,",
+      "der die Quantitaet und Qualitaet ausdrückt,",
+      "dergleichen bedeuten die vocalen A, E, I, O.",
+      "Von diesen vier Vokalen",
+      "können in einem Syllogismus nur 3 vorkommen,",
+      "weil nur 3 Propositionen sind."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "E0",
+      "V0",
+      "K1",
+      "E1",
+      "E1",
+      "A1",
+      "K2",
+      "G2",
+      "E2",
+      "E1",
+      "V0",
+      "K1",
+      "V0",
+      "A0",
+      "V0",
+      "K1"
+     ],
+     "b": [
+      [
+       "wird",
+       [
+        "gemacht"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "seyn",
+        "verwirren",
+        "verbannt",
+        "seyn",
+        "müßen"
+       ]
+      ],
+      [
+       "die",
+       [
+        "seyn",
+        "soll"
+       ]
+      ],
+      [
+       "der",
+       [
+        "ausdrückt"
+       ]
+      ],
+      [
+       "können",
+       [
+        "vorkommen"
+       ]
+      ],
+      [
+       "weil",
+       [
+        "sind"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-017": {
+    "0": {
+     "phrases": [
+      "Aus der Versezzung",
+      "dieser Vokalen",
+      "entstehen 64 besondere Formen."
+     ],
+     "r": [
+      "A0",
+      "G0",
+      "V0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Allein durch die Regel",
+      "ex puris negatiuis nihil sequitur",
+      "fallen 16 weg",
+      "durch conclusio sequitur partem debiliorem",
+      "fallen 24 weg",
+      "ueberhaupt sind nur 19 mogliche,",
+      "unter denen sind einige corrupt",
+      "so daß nur übrig bleiben."
+     ],
+     "r": [
+      "A0",
+      "X0",
+      "V0",
+      "A0",
+      "V0",
+      "V0",
+      "V0",
+      "K1"
+     ],
+     "b": [
+      [
+       "fallen",
+       [
+        "weg"
+       ]
+      ],
+      [
+       "fallen",
+       [
+        "weg"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "bleiben"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Um diese auf Formeln zu bringen,",
+      "hat man eine gewiße Technic",
+      "von Kunstwörtern",
+      "ersonnen."
+     ],
+     "r": [
+      "K1",
+      "V0",
+      "A0",
+      "E0"
+     ],
+     "b": [
+      [
+       "Um",
+       [
+        "zu",
+        "bringen"
+       ]
+      ],
+      [
+       "hat",
+       [
+        "ersonnen"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Man hat dabei",
+      "zu den Vocalen",
+      "auch consonanten gesezt",
+      "welche aber auch alle willkührlich sind."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "E0",
+      "K1"
+     ],
+     "b": [
+      [
+       "hat",
+       [
+        "gesezt"
+       ]
+      ],
+      [
+       "welche",
+       [
+        "sind"
+       ]
+      ]
+     ]
+    },
+    "4": {
+     "phrases": [
+      "Die Regeln",
+      "der Vokale sind:"
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-018": {
+    "0": {
+     "phrases": [
+      "a.)",
+      "S vult simpliciter verti,",
+      "P vero accidens."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "M vult transponi,",
+      "dies geschieht",
+      "per Metathesin,",
+      "per migrationem."
+     ],
+     "r": [
+      "X0",
+      "V0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-019": {
+    "0": {
+     "phrases": [
+      "b.)",
+      "C per impossibili duci,",
+      "per contrapositionem,",
+      "die Kunstwörter heißen"
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "A0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-020": {
+    "0": {
+     "phrases": [
+      "In der ersten Figur",
+      "Barbara, Celarent, Darii, Ferio."
+     ],
+     "r": [
+      "A0",
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "In der zweiten Figur",
+      "Cesare, Camestres, Festino, Barocco."
+     ],
+     "r": [
+      "A0",
+      "X0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "In der dritten Figur",
+      "Darapti, Felapton, Disamis, Datisi, Bocardo, Ferison."
+     ],
+     "r": [
+      "A0",
+      "X0"
+     ],
+     "b": []
+    },
+    "3": {
+     "phrases": [
+      "In der vierten Figur",
+      "Calemes, Bamalip, Dimatis, Fesapo, Fresisom."
+     ],
+     "r": [
+      "A0",
+      "X0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Dieses alles",
+      "was bisher",
+      "von den Syllogismen",
+      "gesagt ist,",
+      "gilt nur",
+      "von den Kategorischen Schlüßen",
+      "Die Hypothetischen Ratiocinia",
+      "sind von ganz anderer Art."
+     ],
+     "r": [
+      "S0",
+      "K1",
+      "A1",
+      "E1",
+      "V0",
+      "A0",
+      "S0",
+      "V0"
+     ],
+     "b": [
+      [
+       "was",
+       [
+        "gesagt",
+        "ist"
+       ]
+      ]
+     ]
+    },
+    "5": {
+     "phrases": [
+      "Die Ratiocinia hypothetica",
+      "haben 2 Modos:"
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-021": {
+    "0": {
+     "phrases": [
+      "a.)",
+      "Modum ponentem."
+     ],
+     "r": [
+      "X0",
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Da Schlüße ich",
+      "a veritate antecedentis",
+      "ad consequentis positionem."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-022": {
+    "0": {
+     "phrases": [
+      "b.)",
+      "Modum tollentem;",
+      "hier schließe ich",
+      "a remotione consequentis",
+      "ad remotionem antecedentis,",
+      "e.g.",
+      "wenn ein Blindes Ohngefähr ist,",
+      "so ist in der Welt",
+      "keine Ordnung",
+      "atqui falsum est posterius",
+      "ergo primus;",
+      "id est modus tollens."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "V0",
+      "A0",
+      "A0",
+      "X0",
+      "K1",
+      "V0",
+      "S0",
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "ist"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-023": {
+    "0": {
+     "phrases": [
+      "Sind die Körper theilbar,",
+      "so sind sie veränderlich;",
+      "atqui verum est prius,",
+      "ergo posterius."
+     ],
+     "r": [
+      "V0",
+      "V0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Der maior propositionis",
+      "sagt nichts mehr",
+      "als wie ein Saz",
+      "aus dem andern folgt."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wie",
+       [
+        "folgt"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Ist die consequens Unrichtig;",
+      "so sagt man",
+      "es ist",
+      "a baculo ad angulum",
+      "geschloßen."
+     ],
+     "r": [
+      "V0",
+      "V0",
+      "V0",
+      "A0",
+      "E0"
+     ],
+     "b": [
+      [
+       "ist",
+       [
+        "geschloßen"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Der modus tollens",
+      "findet nur statt,",
+      "a consequente ad antecedentem,",
+      "nehmlich sublato consequente tollitur antecedens,",
+      "aber a positione consequentis",
+      "ad positionem antecedentis",
+      "non valet modus ponens."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "A0",
+      "X0",
+      "A0",
+      "A0",
+      "X0"
+     ],
+     "b": [
+      [
+       "findet",
+       [
+        "statt"
+       ]
+      ]
+     ]
+    },
+    "4": {
+     "phrases": [
+      "Die Disiunctiuen Vernunftschlüße",
+      "bestehen darinn,",
+      "daß der maior",
+      "in mehr theile",
+      "getheilt wird,",
+      "die einander opponirt sind."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "A1",
+      "E1",
+      "K2"
+     ],
+     "b": [
+      [
+       "daß",
+       [
+        "getheilt",
+        "wird"
+       ]
+      ],
+      [
+       "die",
+       [
+        "opponirt",
+        "sind"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-024": {
+    "0": {
+     "phrases": [
+      "Die Membra diuidentia",
+      "nennen wir",
+      "in einem Vernunftschluß",
+      "membra disiunctiua."
+     ],
+     "r": [
+      "O0",
+      "V0",
+      "A0",
+      "P0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "In einem solchen Schluß",
+      "schließen wir",
+      "a negatigatione omnium membrorum disiunctionis",
+      "praeter vnum",
+      "ad positionem huius vnius"
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "A0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-025": {
+    "0": {
+     "phrases": [
+      "Bey Zweyen Membris",
+      "schließet man",
+      "a negatione vnius",
+      "ad positionem alterius."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Ist eins falsch;",
+      "so ist das andere wahr."
+     ],
+     "r": [
+      "V0",
+      "V0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Oder ich schließe auch",
+      "a positione vnius membri disiunctionis",
+      "ad negationem ceterorum omnium."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-026": {
+    "0": {
+     "phrases": [
+      "Dilemma est id argumentandi genus,",
+      "in quo maior est hypothetica."
+     ],
+     "r": [
+      "X0",
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Alle dilemmata",
+      "haben eine negatiue conclusion",
+      "z.E.",
+      "Wenn Gott",
+      "nicht die beste Welt geschaffen,",
+      "so hätte er sie entweder",
+      "nicht schaffen können,",
+      "oder nicht schaffen wollen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "X0",
+      "K1",
+      "E1",
+      "V0",
+      "E0",
+      "E0"
+     ],
+     "b": [
+      [
+       "Wenn",
+       [
+        "geschaffen"
+       ]
+      ],
+      [
+       "hätte",
+       [
+        "schaffen",
+        "können",
+        "schaffen",
+        "wollen"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Dicitur alius",
+      "Syllogismus cornutus crocodilus."
+     ],
+     "r": [
+      "X0",
+      "X0"
+     ],
+     "b": []
+    },
+    "3": {
+     "phrases": [
+      "Daß die Alten",
+      "viel vom Dilemma machten,",
+      "wenn sie",
+      "aus den Behauptungen",
+      "andere Folgen zogen."
+     ],
+     "r": [
+      "K1",
+      "E1",
+      "K2",
+      "A2",
+      "E2"
+     ],
+     "b": [
+      [
+       "Daß",
+       [
+        "machten"
+       ]
+      ],
+      [
+       "wenn",
+       [
+        "zogen"
+       ]
+      ]
+     ]
+    },
+    "4": {
+     "phrases": [
+      "Ein Dilemma",
+      "hat allemal etwas Sophistisches,",
+      "und ist ein modus indirectus",
+      "zu schließen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "V0",
+      "E1"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-027": {
+    "0": {
+     "phrases": [
+      "Eine Art",
+      "zu schließen ist:"
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-028": {
+    "0": {
+     "phrases": [
+      "Von der Folge",
+      "auf den Grund,",
+      "denn der Saz",
+      "ist alsdenn nicht affirmation,",
+      "weil eine Folge",
+      "mehr als einen Grund",
+      "haben kann."
+     ],
+     "r": [
+      "A0",
+      "A0",
+      "S0",
+      "V0",
+      "K1",
+      "O1",
+      "E1"
+     ],
+     "b": [
+      [
+       "weil",
+       [
+        "haben",
+        "kann"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Nur alsdenn kann ich",
+      "nach diesem modo",
+      "mit Wahrheit schließen,",
+      "wenn ich",
+      "die Wahrheit",
+      "aller Folgen",
+      "als wahr bestätige",
+      "Von der Falschheit",
+      "der Folgen",
+      "auf die Falschheit",
+      "des Grundes",
+      "zu schließen ist ganz leicht",
+      "denn ich darf nur zeigen,",
+      "daß eine Folge falsch sey."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "E0",
+      "K1",
+      "O1",
+      "G1",
+      "E1",
+      "A1",
+      "G1",
+      "A1",
+      "G1",
+      "V0",
+      "V0",
+      "K1"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "schließen"
+       ]
+      ],
+      [
+       "wenn",
+       [
+        "bestätige"
+       ]
+      ],
+      [
+       "darf",
+       [
+        "zeigen"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "sey"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Das Dilemma",
+      "hat viel bequemes an sich:",
+      "denn"
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "C0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-029": {
+    "0": {
+     "phrases": [
+      "a.)",
+      "Beweiset man nicht geradezu,",
+      "aus der Beschaffenheit",
+      "der Sache"
+     ],
+     "r": [
+      "X0",
+      "V0",
+      "A0",
+      "G0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-030": {
+    "0": {
+     "phrases": [
+      "b.)",
+      "Haben auch",
+      "die verneinende Säzze",
+      "mehr Nachdruck."
+     ],
+     "r": [
+      "X0",
+      "V0",
+      "S0",
+      "O0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Sie dienen gleichsam",
+      "zur Ueberzeugung."
+     ],
+     "r": [
+      "V0",
+      "A0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Ein Wiederspruch",
+      "macht immer",
+      "einen größeren relatiuen Eindruck,",
+      "er ist viel auffallender,",
+      "als ein wahrer Beweis,",
+      "was von unmittelbaren Folgen gilt,",
+      "ist eben gesagt worden."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "O0",
+      "V0",
+      "P0",
+      "K1",
+      "V0"
+     ],
+     "b": [
+      [
+       "was",
+       [
+        "gilt"
+       ]
+      ],
+      [
+       "ist",
+       [
+        "gesagt",
+        "worden"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Jedes Ratiocinium",
+      "ist entweder Formale",
+      "oder crypticum,",
+      "ein versteckter Vernunftschluß."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "P0",
+      "P0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Wir reden mehrenteils",
+      "durch Ratiocinia cryptica."
+     ],
+     "r": [
+      "V0",
+      "A0"
+     ],
+     "b": []
+    },
+    "5": {
+     "phrases": [
+      "Z.E.",
+      "Die Seele",
+      "weil sie einfach ist,",
+      "ist unvergänglich."
+     ],
+     "r": [
+      "X0",
+      "S0",
+      "K1",
+      "V0"
+     ],
+     "b": [
+      [
+       "weil",
+       [
+        "ist"
+       ]
+      ]
+     ]
+    },
+    "6": {
+     "phrases": [
+      "Ein Ratiocinium formale",
+      "ist das,",
+      "was Schulgerecht ist."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1"
+     ],
+     "b": [
+      [
+       "was",
+       [
+        "ist"
+       ]
+      ]
+     ]
+    },
+    "7": {
+     "phrases": [
+      "Im Verstande",
+      "ist jedes Ratiocinium formale,",
+      "in den Worten",
+      "nicht immer."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    },
+    "8": {
+     "phrases": [
+      "Ein enthymema",
+      "heißt ein Schluß,",
+      "wo man",
+      "eine von den praemissen",
+      "wegläßt,",
+      "z.B.",
+      "Alle Menschen",
+      "können irren",
+      "also ich."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "O1",
+      "E1",
+      "X0",
+      "S0",
+      "V0",
+      "S0"
+     ],
+     "b": [
+      [
+       "wo",
+       [
+        "wegläßt"
+       ]
+      ],
+      [
+       "können",
+       [
+        "irren"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-031": {
+    "0": {
+     "phrases": [
+      "Die Schlüße",
+      "durch die induction",
+      "und durch die analogie."
+     ],
+     "r": [
+      "S0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Die Vernunftschlüße",
+      "sind entweder apodictisch",
+      "oder nicht."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "A0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Was ich",
+      "durch die Vernunft",
+      "erkenne",
+      "ist apodictisch."
+     ],
+     "r": [
+      "K1",
+      "A1",
+      "E1",
+      "V0"
+     ],
+     "b": [
+      [
+       "Was",
+       [
+        "erkenne"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Ich erkenne durch sie alles,",
+      "was Nothwendig ist;",
+      "was ich hingegen",
+      "durch die Erfahrung",
+      "erkenne",
+      "ist nicht apodictisch",
+      "Die Verstandesschlüße",
+      "geben blos eine empirische Gewißheit,",
+      "es kann doch aber",
+      "eine empirische Gewißheit",
+      "Nothwendigkeit heißen,",
+      "wenn sie nehmlich",
+      "zum Erfahrungsgebrauch",
+      "so viel als eine Nothwendigkeit",
+      "hilft."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "K1",
+      "A1",
+      "E1",
+      "V0",
+      "S0",
+      "V0",
+      "V0",
+      "S0",
+      "E0",
+      "K1",
+      "A1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "was",
+       [
+        "ist"
+       ]
+      ],
+      [
+       "was",
+       [
+        "erkenne"
+       ]
+      ],
+      [
+       "kann",
+       [
+        "heißen"
+       ]
+      ],
+      [
+       "wenn",
+       [
+        "hilft"
+       ]
+      ]
+     ]
+    },
+    "4": {
+     "phrases": [
+      "Jene sind strenge,",
+      "diese nicht strenge Schlüsse."
+     ],
+     "r": [
+      "V0",
+      "S0"
+     ],
+     "b": []
+    },
+    "5": {
+     "phrases": [
+      "Bey vernunftschlüßen",
+      "folgern wir",
+      "aus dem allgemeinen",
+      "das besondere;",
+      "bey Verstandesschlüßen",
+      "aus dem besonderen",
+      "das allgemeine."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "A0",
+      "O0",
+      "A0",
+      "A0",
+      "O0"
+     ],
+     "b": []
+    },
+    "6": {
+     "phrases": [
+      "Jenes ist Ratiocinium genuinum,",
+      "dieses spurium",
+      "welche der Autor",
+      "ordinaire extraordinis",
+      "nennt."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "K1",
+      "P1",
+      "E1"
+     ],
+     "b": [
+      [
+       "welche",
+       [
+        "nennt"
+       ]
+      ]
+     ]
+    },
+    "7": {
+     "phrases": [
+      "Weil aber",
+      "aus lauter besondern Säzzen",
+      "nichts folgt;",
+      "so ist der Verstand bemüht",
+      "durch seine Wahrnehmungen",
+      "hier Regeln",
+      "d.i.",
+      "allgemeine Säzze",
+      "zu machen."
+     ],
+     "r": [
+      "K1",
+      "A1",
+      "E1",
+      "V0",
+      "A1",
+      "O1",
+      "X1",
+      "O1",
+      "E1"
+     ],
+     "b": [
+      [
+       "Weil",
+       [
+        "folgt"
+       ]
+      ]
+     ]
+    },
+    "8": {
+     "phrases": [
+      "So sehe ich",
+      "z.E.",
+      "blos durch die Erfahrung ein,",
+      "daß alle Menschen",
+      "sterben müßen,",
+      "weil nemlich dieser, jener",
+      "und alle Menschen,",
+      "die gelebt haben,",
+      "gestorben sind:",
+      "Ich schließe hier also umgekehrt,",
+      "als bey den ratiociniis."
+     ],
+     "r": [
+      "V0",
+      "X0",
+      "E0",
+      "K1",
+      "E1",
+      "K1",
+      "S1",
+      "K2",
+      "E1",
+      "V0",
+      "A0"
+     ],
+     "b": [
+      [
+       "sehe",
+       [
+        "ein"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "sterben",
+        "müßen"
+       ]
+      ],
+      [
+       "weil",
+       [
+        "gestorben",
+        "sind"
+       ]
+      ],
+      [
+       "die",
+       [
+        "gelebt",
+        "haben"
+       ]
+      ]
+     ]
+    },
+    "9": {
+     "phrases": [
+      "Was so vielen indiuiduen zukommt,",
+      "die nur je gewesen,",
+      "das kommt allen andern",
+      "dieser Art zu",
+      "d.i.",
+      "was wir induction nennen."
+     ],
+     "r": [
+      "K1",
+      "K2",
+      "V0",
+      "E0",
+      "X0",
+      "K1"
+     ],
+     "b": [
+      [
+       "Was",
+       [
+        "zukommt"
+       ]
+      ],
+      [
+       "die",
+       [
+        "gewesen"
+       ]
+      ],
+      [
+       "kommt",
+       [
+        "zu"
+       ]
+      ],
+      [
+       "was",
+       [
+        "nennen"
+       ]
+      ]
+     ]
+    },
+    "10": {
+     "phrases": [
+      "Dies ist der Weg,",
+      "den der Verstand",
+      "continuirlich geht."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "den",
+       [
+        "geht"
+       ]
+      ]
+     ]
+    },
+    "11": {
+     "phrases": [
+      "Indessen giebts hier",
+      "keine apodictische Gewißheit:",
+      "denn es können noch immer",
+      "einzelne Fälle",
+      "von unseren sogenannten Regeln",
+      "Ausnamen machen,",
+      "wie z.E.",
+      "noch einige Menschliche Körper",
+      "gefunden werden,",
+      "wo das Herz",
+      "an der rechten Seite schlägt,",
+      "und ueberhaupt",
+      "alles verkehrt liegt."
+     ],
+     "r": [
+      "V0",
+      "O0",
+      "V0",
+      "S0",
+      "A0",
+      "E0",
+      "K1",
+      "S1",
+      "E1",
+      "K2",
+      "E2",
+      "A2",
+      "E2"
+     ],
+     "b": [
+      [
+       "können",
+       [
+        "machen"
+       ]
+      ],
+      [
+       "wie",
+       [
+        "gefunden",
+        "werden"
+       ]
+      ],
+      [
+       "wo",
+       [
+        "schlägt",
+        "liegt"
+       ]
+      ]
+     ]
+    },
+    "12": {
+     "phrases": [
+      "Dem ohngeachtet",
+      "ändert der Medicus",
+      "seine Laudana."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "O0"
+     ],
+     "b": []
+    },
+    "13": {
+     "phrases": [
+      "Eben so ists",
+      "mit allen Sprachen",
+      "und mit dem allgemeinen Charakter",
+      "der Nazionen,",
+      "wie man z.E. sagt:",
+      "daß alle Leute",
+      "in Frankreich",
+      "höflich seyn,",
+      "nur die Wirtsleute nicht,",
+      "und umgekehrt in England",
+      "alle Grob",
+      "nur die Wirte aber höflich",
+      "im ganzen",
+      "gehört hieher die Regel",
+      "nulla regula sine exceptione."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "A0",
+      "G0",
+      "K1",
+      "K2",
+      "A2",
+      "E2",
+      "S2",
+      "A2",
+      "S2",
+      "S2",
+      "A0",
+      "V0",
+      "X0"
+     ],
+     "b": [
+      [
+       "wie",
+       [
+        "sagt"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "seyn"
+       ]
+      ]
+     ]
+    },
+    "14": {
+     "phrases": [
+      "Diese Ausnamen",
+      "nennt man",
+      "im disputiren",
+      "Instanzen",
+      "die Regel hat als denn",
+      "nur eine Wirklichkeit,",
+      "in der Erfahrung",
+      "zu schließen",
+      "und da kann eine Ausname seyn,",
+      "wenn nur nicht",
+      "die ganze Größe",
+      "aufgehoben wird."
+     ],
+     "r": [
+      "O0",
+      "V0",
+      "A0",
+      "P0",
+      "V0",
+      "O0",
+      "A1",
+      "E1",
+      "V0",
+      "K1",
+      "S1",
+      "E1"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "seyn"
+       ]
+      ],
+      [
+       "wenn",
+       [
+        "aufgehoben",
+        "wird"
+       ]
+      ]
+     ]
+    },
+    "15": {
+     "phrases": [
+      "Durch die Induction",
+      "machen wir allgemeine Säzze,",
+      "und dieser Schluß ist",
+      "a particulaire ad vniversale."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "V0",
+      "A0"
+     ],
+     "b": []
+    },
+    "16": {
+     "phrases": [
+      "Sonst giebts auch",
+      "eine Art von Inductionen",
+      "aus Systematischen Säzzen",
+      "d.i.",
+      "wenn etwas",
+      "einer Gattung praedicirt wird,",
+      "weil es schon",
+      "in der analysis",
+      "des Begriffs selbst",
+      "liegt."
+     ],
+     "r": [
+      "V0",
+      "O0",
+      "A0",
+      "X0",
+      "K1",
+      "E1",
+      "K2",
+      "A2",
+      "G2",
+      "E2"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "praedicirt",
+        "wird"
+       ]
+      ],
+      [
+       "weil",
+       [
+        "liegt"
+       ]
+      ]
+     ]
+    },
+    "17": {
+     "phrases": [
+      "Z.E.",
+      "der Mensch ist Vernünftig."
+     ],
+     "r": [
+      "X0",
+      "V0"
+     ],
+     "b": []
+    },
+    "18": {
+     "phrases": [
+      "Noch giebts",
+      "eine Zweyte Art",
+      "oblique zu schließen,",
+      "nehmlich durch die Analogie."
+     ],
+     "r": [
+      "V0",
+      "O0",
+      "E1",
+      "A1"
+     ],
+     "b": []
+    },
+    "19": {
+     "phrases": [
+      "Diese Schlußart",
+      "ist von der vorigen",
+      "dadurch unterschieden,",
+      "wenn zweyen Dingen",
+      "so viel stükke",
+      "als ich",
+      "durch die scharfeste Untersuchung",
+      "wahrgenommen habe,",
+      "gemein sind,",
+      "so können sie auch",
+      "in allen Stükken übereinkommen,",
+      "die ich noch nicht erforschen kann."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "E0",
+      "K1",
+      "S1",
+      "K2",
+      "A2",
+      "E2",
+      "E1",
+      "V0",
+      "E0",
+      "K1"
+     ],
+     "b": [
+      [
+       "ist",
+       [
+        "unterschieden"
+       ]
+      ],
+      [
+       "wenn",
+       [
+        "sind"
+       ]
+      ],
+      [
+       "als",
+       [
+        "wahrgenommen",
+        "habe"
+       ]
+      ],
+      [
+       "können",
+       [
+        "übereinkommen"
+       ]
+      ],
+      [
+       "die",
+       [
+        "erforschen",
+        "kann"
+       ]
+      ]
+     ]
+    },
+    "20": {
+     "phrases": [
+      "Ich bringe also meinen Schluß",
+      "nicht auf mehrere Urtheile",
+      "sondern Eigenschaften",
+      "eben dieser nemlichen Dinge."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "A0",
+      "G0"
+     ],
+     "b": []
+    },
+    "21": {
+     "phrases": [
+      "So schließen wir",
+      "die circulation",
+      "des Bluts",
+      "bey thieren",
+      "aus der sonstigen Aehnlichkeit",
+      "des Menschlichen und thierischen Körpers",
+      "in ihrer constitution."
+     ],
+     "r": [
+      "V0",
+      "O0",
+      "G0",
+      "A0",
+      "A0",
+      "G0",
+      "A0"
+     ],
+     "b": []
+    },
+    "22": {
+     "phrases": [
+      "Eben so",
+      "den innern Bau",
+      "der Polypen,",
+      "an denen wir doch sonst",
+      "keine Eingeweide bemerken."
+     ],
+     "r": [
+      "A0",
+      "O0",
+      "G0",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "denen",
+       [
+        "bemerken"
+       ]
+      ]
+     ]
+    },
+    "23": {
+     "phrases": [
+      "Diese Schlüße",
+      "durch die induction und analogie",
+      "sind gleichsam",
+      "die beiden Krükken",
+      "der Menschlichen Ratiocination",
+      "wahre Krükken,",
+      "denn wir gehen sehr unsicher Daher,",
+      "es ist ein bloßer Versuch."
+     ],
+     "r": [
+      "S0",
+      "A0",
+      "V0",
+      "P0",
+      "G0",
+      "P0",
+      "V0",
+      "V0"
+     ],
+     "b": []
+    },
+    "24": {
+     "phrases": [
+      "Sie sagen",
+      "z.E.",
+      "alle Jungen",
+      "kommen entweder lebendig",
+      "in die Welt",
+      "oder werden aus den Eyern gebrütet."
+     ],
+     "r": [
+      "V0",
+      "X0",
+      "S0",
+      "V0",
+      "A0",
+      "V0"
+     ],
+     "b": [
+      [
+       "werden",
+       [
+        "gebrütet"
+       ]
+      ]
+     ]
+    },
+    "25": {
+     "phrases": [
+      "Demohngeachtet",
+      "war immer bekannt.",
+      "daß es bei den Polypen",
+      "in jedem abgeschnittenen theil",
+      "Junge giebt."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "K1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "daß",
+       [
+        "giebt"
+       ]
+      ]
+     ]
+    },
+    "26": {
+     "phrases": [
+      "Sophisma",
+      "ist eine dialectische Schlußart,",
+      "die blos den Schein",
+      "der Wahrheit hat."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "die",
+       [
+        "hat"
+       ]
+      ]
+     ]
+    },
+    "27": {
+     "phrases": [
+      "Der Schein",
+      "kann liegen"
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "liegen"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-032": {
+    "0": {
+     "phrases": [
+      "a.)",
+      "In der Materie",
+      "d.i.",
+      "in praemißis",
+      "oder in den Sazzen selbst,",
+      "oder"
+     ],
+     "r": [
+      "X0",
+      "A0",
+      "X0",
+      "A0",
+      "A0",
+      "C0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s29-033": {
+    "0": {
+     "phrases": [
+      "b.)",
+      "In der Form",
+      "d.i.",
+      "wenn der Schein",
+      "in der Conclusion",
+      "(in der Art zu schließen)",
+      "liegt."
+     ],
+     "r": [
+      "X0",
+      "A0",
+      "X0",
+      "K1",
+      "A1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "liegt"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-034": {
+    "0": {
+     "phrases": [
+      "Von erstern",
+      "reden wir hier nicht,",
+      "Einige dialecticer",
+      "vergnügten sich",
+      "mit dem Zweyten,",
+      "andere mit dem ersten."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "S0",
+      "V0",
+      "A0",
+      "S0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Einen solchen Schluß",
+      "nennt man einen paralogischen",
+      "wenn z.E.",
+      "ein Terminus Zweydeutig ist",
+      "z.E.",
+      "Kein Künstler wird geboren."
+     ],
+     "r": [
+      "O0",
+      "V0",
+      "K1",
+      "E1",
+      "X0",
+      "V0"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "ist"
+       ]
+      ],
+      [
+       "wird",
+       [
+        "geboren"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Die Alten hatten",
+      "einen solchen Schluß",
+      "den sie den Lügner nannten:",
+      "wenn du sagst",
+      "du lügest",
+      "und redest die Wahrheit,",
+      "so redest du die Wahrheit,",
+      "wenn du lügest."
+     ],
+     "r": [
+      "V0",
+      "O0",
+      "K1",
+      "K1",
+      "V2",
+      "E1",
+      "V0",
+      "K1"
+     ],
+     "b": [
+      [
+       "den",
+       [
+        "nannten"
+       ]
+      ],
+      [
+       "wenn",
+       [
+        "sagst",
+        "redest"
+       ]
+      ],
+      [
+       "wenn",
+       [
+        "lügest"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Sophisma heterogenea,",
+      "vbi Status quaestionis mutatur,",
+      "dicitur etiam",
+      "Sophisma ignorationis elenchi",
+      "Hic pertinet illud",
+      "alter mulget hircum,",
+      "alter supponit cribrum."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "X0",
+      "X0",
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Copulatiue sophismen",
+      "sind diejenige",
+      "wo eigentlich",
+      "zwey Syllogismen verbunden sind",
+      "als:",
+      "Alles einfache ist Unsterblich,",
+      "Gott und alle Geister",
+      "sind einfach."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "E1",
+      "X0",
+      "V0",
+      "S0",
+      "V0"
+     ],
+     "b": [
+      [
+       "wo",
+       [
+        "verbunden",
+        "sind"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-035": {
+    "0": {
+     "phrases": [
+      "Die ars Polysyllogistica ist,",
+      "wenn wir viele Schlüße",
+      "miteinander verketten,",
+      "und es wird darin",
+      "die conclusion",
+      "des vorigen Schlußes",
+      "die Praemisse",
+      "des folgenden,",
+      "und wir schließen hier immer",
+      "in Episyllogismen,",
+      "und so ist die Polysyllogistic progrediens;",
+      "gehe ich aber",
+      "auf die Deduction",
+      "und beweise eine der Praemissen",
+      "zurück",
+      "so ist die Polysyllogistic regrediens."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "E1",
+      "V0",
+      "S0",
+      "G0",
+      "P0",
+      "G0",
+      "V0",
+      "A0",
+      "V0",
+      "V0",
+      "A0",
+      "V0",
+      "E0",
+      "V0"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "verketten"
+       ]
+      ],
+      [
+       "gehe",
+       [
+        "zurück"
+       ]
+      ],
+      [
+       "beweise",
+       [
+        "zurück"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Diese scheint sonst",
+      "Vortheilhaft angebracht zu werden."
+     ],
+     "r": [
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "scheint",
+       [
+        "angebracht",
+        "zu",
+        "werden"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Besonders beim disputiren;",
+      "allein es ist große Behutsamkeit",
+      "dabei nöthig,",
+      "denn räume ich",
+      "bei der Polysyllogistic progrediens",
+      "die erste praemisse ein,",
+      "und untersuche ich nicht recht",
+      "ihre Richtigkeit",
+      "in der Materie und Form",
+      "so können immer wahre Sachen",
+      "gefolgert werden,",
+      "die aber mit der Praemisse",
+      "stehen sowohl, als fallen."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "P0",
+      "V0",
+      "A0",
+      "E0",
+      "V0",
+      "O0",
+      "A0",
+      "V0",
+      "E0",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "räume",
+       [
+        "ein"
+       ]
+      ],
+      [
+       "können",
+       [
+        "gefolgert",
+        "werden"
+       ]
+      ],
+      [
+       "die",
+       [
+        "stehen",
+        "fallen"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Damit also kein Fehler",
+      "im disputiren",
+      "hierin ausfalle;",
+      "so ist es Ratsam,",
+      "daß die conclusion",
+      "des Opponenten",
+      "immer die Behauptung",
+      "der Respondenten gebe."
+     ],
+     "r": [
+      "K1",
+      "A1",
+      "E1",
+      "V0",
+      "K1",
+      "G1",
+      "O1",
+      "E1"
+     ],
+     "b": [
+      [
+       "Damit",
+       [
+        "ausfalle"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "gebe"
+       ]
+      ]
+     ]
+    },
+    "4": {
+     "phrases": [
+      "Erwähnter Fehler",
+      "bei den progredienten Syllogismen",
+      "hat sich nicht selten",
+      "in Philosophische Systeme",
+      "eingeschlichen."
+     ],
+     "r": [
+      "S0",
+      "A0",
+      "V0",
+      "A0",
+      "E0"
+     ],
+     "b": [
+      [
+       "hat",
+       [
+        "eingeschlichen"
+       ]
+      ]
+     ]
+    },
+    "5": {
+     "phrases": [
+      "Die regrediente Syllogistic",
+      "hat dagegen",
+      "weit mehr Vorzüge",
+      "vor der ersten:",
+      "Denn ich kritisire hier,",
+      "ob der Grund wahr",
+      "und die Folge richtig sey."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "O0",
+      "A0",
+      "V0",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "ob",
+       [
+        "sey"
+       ]
+      ]
+     ]
+    },
+    "6": {
+     "phrases": [
+      "Sorites",
+      "ist blos eine Folgerung",
+      "des Ausdrucks."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "G0"
+     ],
+     "b": []
+    },
+    "7": {
+     "phrases": [
+      "Daselbst häufe ich",
+      "Conclusion auf Conclusion",
+      "und laße die praemißen weg."
+     ],
+     "r": [
+      "V0",
+      "O0",
+      "V0"
+     ],
+     "b": [
+      [
+       "laße",
+       [
+        "weg"
+       ]
+      ]
+     ]
+    },
+    "8": {
+     "phrases": [
+      "Eine solche Verkettung",
+      "von Schlüßen",
+      "kann nun",
+      "aus kategorischen, Hypothetischen Säzzen",
+      "bestehen",
+      "und so wird",
+      "Sorites kategorikus",
+      "Sorites Hypotheticus."
+     ],
+     "r": [
+      "S0",
+      "A0",
+      "V0",
+      "A0",
+      "E0",
+      "V0",
+      "S0",
+      "S0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "bestehen"
+       ]
+      ]
+     ]
+    },
+    "9": {
+     "phrases": [
+      "Circulus in demonstrando,",
+      "saltus in probando",
+      "geschieht,",
+      "wenn ich",
+      "a ratione remota",
+      "sogleich ad rationatum schließe."
+     ],
+     "r": [
+      "S0",
+      "S0",
+      "V0",
+      "K1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "schließe"
+       ]
+      ]
+     ]
+    },
+    "10": {
+     "phrases": [
+      "Es ist hier also",
+      "die Folge nicht klar,",
+      "und ich laße",
+      "einen nöthigen zwischen schluß weg."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "laße",
+       [
+        "weg"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s29-036": {
+    "0": {
+     "phrases": [
+      "Petitio Principii."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Petere Principium,",
+      "heißt ein principium erbitten,",
+      "postulare principium ist,",
+      "forderen",
+      "daß man ihm das beweisen darf."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "V0",
+      "P0",
+      "K1"
+     ],
+     "b": [
+      [
+       "daß",
+       [
+        "beweisen",
+        "darf"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Ein Beweis",
+      "der zuwenig dartut,",
+      "ist darum nicht als falsch",
+      "sondern als Mangelhaft anzusehen,",
+      "denn ich beweise etwas,",
+      "und es kann noch immer etwas",
+      "zugetan werden."
+     ],
+     "r": [
+      "S0",
+      "K1",
+      "V0",
+      "E0",
+      "V0",
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "der",
+       [
+        "dartut"
+       ]
+      ],
+      [
+       "ist",
+       [
+        "anzusehen"
+       ]
+      ],
+      [
+       "kann",
+       [
+        "zugetan",
+        "werden"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Ein Beweis aber,",
+      "der zuviel beweiset,",
+      "ist falsch",
+      "und beweiset gar nichts."
+     ],
+     "r": [
+      "S0",
+      "K1",
+      "V0",
+      "V0"
+     ],
+     "b": [
+      [
+       "der",
+       [
+        "beweiset"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s30-001": {
+    "0": {
+     "phrases": [
+      "Die Topica",
+      "des Aristoteles",
+      "waren nichts anders,",
+      "als eine Rezension",
+      "aller Titteln und argumentae",
+      "worunter die Gegenstände",
+      "betrachtet werden können;",
+      "wie wir z.E.",
+      "eine Sache",
+      "aus verschiedenen Gesichtspunkten",
+      "betrachten können."
+     ],
+     "r": [
+      "S0",
+      "G0",
+      "V0",
+      "P0",
+      "G0",
+      "K1",
+      "E1",
+      "K1",
+      "O1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "worunter",
+       [
+        "betrachtet",
+        "werden",
+        "können"
+       ]
+      ],
+      [
+       "wie",
+       [
+        "betrachten",
+        "können"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Locus topicus",
+      "ist ein in der Logic angeblicher tittel,",
+      "worunter ein Gegenstand",
+      "kann betrachtet und behandelt werden."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "E1"
+     ],
+     "b": [
+      [
+       "worunter",
+       [
+        "kann",
+        "betrachtet",
+        "behandelt",
+        "werden"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Ich kann ein Ding betrachten",
+      "in genere",
+      "und in differentia specifica,",
+      "nach der Deutlichkeit und Undeutlichkeit;",
+      "als Grund und Folge,",
+      "als axiom und Theorem etc.",
+      "So ist eine Metaphysische Stelle",
+      "Locus metaphysicus",
+      "loci rerum sunt etiam fines rerum."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "A0",
+      "A0",
+      "P0",
+      "P0",
+      "V0",
+      "P0",
+      "X0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "betrachten"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Es giebt locos grammaticos",
+      "da kann ich einen Gegenstand",
+      "nach seiner definition",
+      "betrachten."
+     ],
+     "r": [
+      "V0",
+      "V0",
+      "A0",
+      "E0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "betrachten"
+       ]
+      ]
+     ]
+    },
+    "4": {
+     "phrases": [
+      "Diese Locos Logicos,",
+      "weil sie nur die Form betreffen,",
+      "nennt man gemeinarten,",
+      "Locos communes",
+      "oder besser gemeinsäzze."
+     ],
+     "r": [
+      "O0",
+      "K1",
+      "V0",
+      "P0",
+      "P0"
+     ],
+     "b": [
+      [
+       "weil",
+       [
+        "betreffen"
+       ]
+      ]
+     ]
+    },
+    "5": {
+     "phrases": [
+      "Locorum communium vsus",
+      "et in logicis et in rhetoricis",
+      "locum habet."
+     ],
+     "r": [
+      "X0",
+      "X0",
+      "X0"
+     ],
+     "b": []
+    },
+    "6": {
+     "phrases": [
+      "Loci ethici",
+      "handelt von decore und honesto",
+      "Loci physici,",
+      "ob ich",
+      "aus causis efficientibus, oder finalibus",
+      "ein Ding herleite."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "S0",
+      "K1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "ob",
+       [
+        "herleite"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s31-001": {
+    "0": {
+     "phrases": [
+      "So wie der theoretische Theil",
+      "der Logic",
+      "die allgemeine Bedingung",
+      "der möglichen Vollkommenheit",
+      "der Logischen Erkenntniß",
+      "vorträgt,",
+      "so ist die Praktische Logic",
+      "eine allgemeine Wißenschaft,",
+      "welche die Bedingung enthält,",
+      "zu einer möglichen Logischen Vollkommenen Erkentniß",
+      "zu gelangen."
+     ],
+     "r": [
+      "K1",
+      "G1",
+      "O1",
+      "G1",
+      "G1",
+      "E1",
+      "V0",
+      "P0",
+      "K1",
+      "A2",
+      "E2"
+     ],
+     "b": [
+      [
+       "wie",
+       [
+        "vorträgt"
+       ]
+      ],
+      [
+       "welche",
+       [
+        "enthält"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Hier ist also die Frage:",
+      "wie soll ich nun",
+      "zur möglichen Logischen Vollkommenheit",
+      "in der Erkentniß",
+      "gelangen,",
+      "wo diese, wo jene anbringen?"
+     ],
+     "r": [
+      "V0",
+      "V0",
+      "A0",
+      "A0",
+      "E0",
+      "E0"
+     ],
+     "b": [
+      [
+       "soll",
+       [
+        "gelangen",
+        "anbringen"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Hier neme man sich",
+      "vor Tautologischen Definitionen",
+      "in acht:",
+      "Denn merentheils",
+      "pflegt man die Auflösung",
+      "so abzufertigen;",
+      "man soll das thun,",
+      "was dazu erfordert wird."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "E0",
+      "A0",
+      "V0",
+      "E0",
+      "V0",
+      "K1"
+     ],
+     "b": [
+      [
+       "neme",
+       [
+        "acht"
+       ]
+      ],
+      [
+       "pflegt",
+       [
+        "abzufertigen"
+       ]
+      ],
+      [
+       "soll",
+       [
+        "thun"
+       ]
+      ],
+      [
+       "was",
+       [
+        "erfordert",
+        "wird"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Man sage dafür lieber:",
+      "Die Bekanntschaft",
+      "mit dem vorhabenden Obiect",
+      "giebt hier die beste Auflösung."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "A0",
+      "V0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Denn hiebey komts",
+      "auf die Materie allein an,",
+      "und diese kann auch selbst",
+      "die Praktische Logic",
+      "nicht zu ihrem Gegenstande haben."
+     ],
+     "r": [
+      "V0",
+      "E0",
+      "V0",
+      "S0",
+      "E0"
+     ],
+     "b": [
+      [
+       "komts",
+       [
+        "an"
+       ]
+      ],
+      [
+       "kann",
+       [
+        "haben"
+       ]
+      ]
+     ]
+    },
+    "5": {
+     "phrases": [
+      "Nur so viel zur Form gehört",
+      "kann sie uns",
+      "alle Regeln",
+      "der Theorie",
+      "anwenden lehren;",
+      "also nur die Anwendung",
+      "Der Hauptgegenstand",
+      "der praktischen Logic",
+      "ist demnach die Methode,",
+      "d.i.",
+      "die Anordnung",
+      "der mannigfaltigen Erkentniß",
+      "mit aller Logischen Vollkommenheit,",
+      "in so fern sie",
+      "in ein ganzes",
+      "zusammengenommen werden soll."
+     ],
+     "r": [
+      "K1",
+      "V0",
+      "O0",
+      "G0",
+      "E0",
+      "O0",
+      "S0",
+      "G0",
+      "V0",
+      "X0",
+      "P0",
+      "G0",
+      "A0",
+      "K1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "so",
+       [
+        "gehört"
+       ]
+      ],
+      [
+       "kann",
+       [
+        "anwenden",
+        "lehren"
+       ]
+      ],
+      [
+       "in",
+       [
+        "zusammengenommen",
+        "werden",
+        "soll"
+       ]
+      ]
+     ]
+    },
+    "6": {
+     "phrases": [
+      "Die Praktische Logic",
+      "konnte man demnach auch nennen",
+      "die pure allgemeine Methodenlehre."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "P0"
+     ],
+     "b": [
+      [
+       "konnte",
+       [
+        "nennen"
+       ]
+      ]
+     ]
+    },
+    "7": {
+     "phrases": [
+      "Der Methode",
+      "wird contra distinguirt",
+      "die Manier."
+     ],
+     "r": [
+      "O0",
+      "V0",
+      "S0"
+     ],
+     "b": [
+      [
+       "wird",
+       [
+        "distinguirt"
+       ]
+      ]
+     ]
+    },
+    "8": {
+     "phrases": [
+      "Diese leztere",
+      "erfordert blos gemeine Lehrart,",
+      "und jeder hat daher",
+      "seine Manier, seinen Geschmack,",
+      "doch ist die popularitaet",
+      "das Hauptstück dabei."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "V0",
+      "O0",
+      "V0",
+      "P0"
+     ],
+     "b": []
+    },
+    "9": {
+     "phrases": [
+      "Die Manier",
+      "ist eine Art der Behandlung",
+      "des Obiects",
+      "nach Vernunftgesezzen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "G0",
+      "A0"
+     ],
+     "b": []
+    },
+    "10": {
+     "phrases": [
+      "Die Manier",
+      "läßt sich demnach",
+      "wie alles empirische",
+      "nicht in Regeln bringen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "A0",
+      "E0"
+     ],
+     "b": [
+      [
+       "läßt",
+       [
+        "bringen"
+       ]
+      ]
+     ]
+    },
+    "11": {
+     "phrases": [
+      "Doch ist die Popularitaet",
+      "die Lobenswürdigste Eigenschaft dabei:",
+      "denn sie sezt",
+      "die Logische Vollkommenheit voraus,",
+      "da sie nichts anders ist,",
+      "als accomodatio Logicae cognitionis",
+      "ad sensum communem."
+     ],
+     "r": [
+      "V0",
+      "P0",
+      "V0",
+      "E0",
+      "K1",
+      "P1",
+      "A1"
+     ],
+     "b": [
+      [
+       "sezt",
+       [
+        "voraus"
+       ]
+      ],
+      [
+       "da",
+       [
+        "ist"
+       ]
+      ]
+     ]
+    },
+    "12": {
+     "phrases": [
+      "Man zeigt hier",
+      "ohne alle Kunst,",
+      "wie sich unsere Begriffe",
+      "allmählich",
+      "ohne Scholastische Strenge",
+      "erweitern."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "K1",
+      "A1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wie",
+       [
+        "erweitern"
+       ]
+      ]
+     ]
+    },
+    "13": {
+     "phrases": [
+      "Ferner zeichnen sich",
+      "Manier und Methode",
+      "dadurch aus,",
+      "daß die Methode",
+      "zur Wißenschaft gehört,",
+      "die Manier",
+      "blos zur Unterhaltung;",
+      "so wie eben diese",
+      "sich durch Hang und Uebung",
+      "kundbar macht."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "E0",
+      "K1",
+      "E1",
+      "S1",
+      "A1",
+      "K1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "zeichnen",
+       [
+        "aus"
+       ]
+      ],
+      [
+       "daß",
+       [
+        "gehört"
+       ]
+      ],
+      [
+       "wie",
+       [
+        "macht"
+       ]
+      ]
+     ]
+    },
+    "14": {
+     "phrases": [
+      "In dem leztern",
+      "sind selbst die Fehler schon:",
+      "denn es ist Natur;",
+      "so wie beym Frauenzimmer",
+      "selbst die Flecken",
+      "im Gesicht",
+      "die Schonheit",
+      "mehr hervorstehend machen."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "V0",
+      "K1",
+      "S1",
+      "A1",
+      "O1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wie",
+       [
+        "machen"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s31-002": {
+    "0": {
+     "phrases": [
+      "Der Methode",
+      "steht entgegen:"
+     ],
+     "r": [
+      "O0",
+      "V0"
+     ],
+     "b": [
+      [
+       "steht",
+       [
+        "entgegen"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s31-003": {
+    "0": {
+     "phrases": [
+      "a.)",
+      "Das Tumultuarische,",
+      "wo man keine Ordnung",
+      "im Denken beobachtet;",
+      "doch im concipiren",
+      "ist das tumultuarische erlaubt,",
+      "und vorteilhaft;"
+     ],
+     "r": [
+      "X0",
+      "S0",
+      "K1",
+      "E1",
+      "A0",
+      "V0",
+      "P0"
+     ],
+     "b": [
+      [
+       "wo",
+       [
+        "beobachtet"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s31-004": {
+    "0": {
+     "phrases": [
+      "denn man sieht sich gleichsam ganz frey",
+      "im Felde",
+      "der Gegenstände um;",
+      "dahingegen uns die Methode",
+      "in der Betrachtung",
+      "schranken sezt:",
+      "denn das Tumultuarische",
+      "dient zur mannigfaltigkeit,",
+      "die Methode zur Einheit."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "E0",
+      "K1",
+      "A1",
+      "E1",
+      "S0",
+      "V0",
+      "S0"
+     ],
+     "b": [
+      [
+       "sieht",
+       [
+        "um"
+       ]
+      ],
+      [
+       "dahingegen",
+       [
+        "sezt"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Dies Tumultuarische",
+      "in der Methode",
+      "ist allemal ein Beweis",
+      "von einer Tumultuarischen Denkungsart."
+     ],
+     "r": [
+      "S0",
+      "A0",
+      "V0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s31-005": {
+    "0": {
+     "phrases": [
+      "b.)",
+      "Giebts eine Art",
+      "von Vortragen,",
+      "die ist Rhapsodistisch,",
+      "vermöge derselben",
+      "kann man immer",
+      "eine Ordnung",
+      "im Denken",
+      "beobachtet haben,",
+      "nur ist man nicht im stande",
+      "den Leitfaden",
+      "seiner Betrachtung",
+      "Sichtbar zu machen."
+     ],
+     "r": [
+      "X0",
+      "V0",
+      "A0",
+      "V0",
+      "A0",
+      "V0",
+      "O0",
+      "A0",
+      "E0",
+      "V0",
+      "O1",
+      "G1",
+      "E1"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "beobachtet",
+        "haben"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Der entdecket sich besonders",
+      "im Mangel",
+      "an titeln",
+      "der Abschnitte;",
+      "kurz",
+      "es fehlt",
+      "das schuldige Rechte",
+      "der Methode;",
+      "denn das macht einander klar."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "A0",
+      "G0",
+      "A0",
+      "V0",
+      "S0",
+      "G0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s31-006": {
+    "0": {
+     "phrases": [
+      "c.)",
+      "Aphoristisch nennt man",
+      "einen Vortrag,",
+      "wenn zwar Methode",
+      "im Denken",
+      "und selbst im Vortrage",
+      "hervorleuchtet,",
+      "nur der Uebergang",
+      "von einem theil",
+      "zum andern",
+      "nicht deutlich vorgestellt wird,",
+      "wenn Einheit",
+      "im Denken,",
+      "aber nicht continuitaet",
+      "da ist."
+     ],
+     "r": [
+      "X0",
+      "V0",
+      "O0",
+      "K1",
+      "A1",
+      "A1",
+      "E1",
+      "S1",
+      "A1",
+      "A1",
+      "E1",
+      "K1",
+      "A1",
+      "S1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "hervorleuchtet",
+        "vorgestellt",
+        "wird"
+       ]
+      ],
+      [
+       "wenn",
+       [
+        "ist"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Es enthält gleichsam",
+      "das vorhergehende Kapitel",
+      "keine Propädeutik",
+      "zum Uebergange",
+      "zum Folgenden,",
+      "die Aphoristiker",
+      "überraschen uns gleichsam,",
+      "und werden nicht selten angenehm."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "O0",
+      "A0",
+      "A0",
+      "S0",
+      "V0",
+      "V0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Dahingegen ein Buch",
+      "von rhapsodistischer Methode",
+      "unerträglich ist,",
+      "indem man gleich nicht sobald",
+      "im Archiv",
+      "des Gedächtnißes",
+      "nachschlagen kann.",
+      "in der Aphoristischen Methode",
+      "ist es gleichsam",
+      "als springe ich",
+      "von einem Stein",
+      "zum andern",
+      "die in gerader Linie liegen."
+     ],
+     "r": [
+      "K1",
+      "A1",
+      "E1",
+      "K2",
+      "A2",
+      "G2",
+      "E2",
+      "A0",
+      "V0",
+      "K1",
+      "A1",
+      "A1",
+      "K2"
+     ],
+     "b": [
+      [
+       "Dahingegen",
+       [
+        "ist"
+       ]
+      ],
+      [
+       "indem",
+       [
+        "nachschlagen",
+        "kann"
+       ]
+      ],
+      [
+       "die",
+       [
+        "liegen"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s31-007": {
+    "0": {
+     "phrases": [
+      "d.)",
+      "Es verdient endlich",
+      "die populaere Methode,",
+      "als die gemeinnützigste,",
+      "allen andern",
+      "vorgezogen zu werden."
+     ],
+     "r": [
+      "X0",
+      "V0",
+      "S0",
+      "P0",
+      "O1",
+      "E1"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Denn sie ist gleichsam",
+      "die Herablassung",
+      "eines Mannes",
+      "von Wißenschaft",
+      "zum gemeinen menschlichen Verstande."
+     ],
+     "r": [
+      "V0",
+      "P0",
+      "G0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s31-008": {
+    "0": {
+     "phrases": [
+      "Die eigentliche Methode",
+      "hat gar zu viel Anstrengung",
+      "des Verstandes,",
+      "und alsdenn verbietet sie",
+      "jede Art",
+      "der Versöhnung",
+      "In der Popularitaet",
+      "haben sonst die Franzosen",
+      "den großen Vorzug,",
+      "und ein Fontenelle kann",
+      "einen Mathematischen Saz",
+      "eben so begreiflich machen",
+      "als eine aesthetische Wahrheit."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "G0",
+      "V0",
+      "O0",
+      "G0",
+      "A0",
+      "V0",
+      "O0",
+      "V0",
+      "O0",
+      "E0",
+      "A0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "machen"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Die Methode wird auch eingetheilt",
+      "in die Analytische",
+      "und Synthetische."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "A0"
+     ],
+     "b": [
+      [
+       "wird",
+       [
+        "eingetheilt"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Bey der Synthetischen",
+      "geht man",
+      "von Prinzipien",
+      "zu Principata,",
+      "bey der andern umgekehrt,",
+      "so ist die ganze Mathematik Synthetisch."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "A0",
+      "A0",
+      "A0",
+      "V0"
+     ],
+     "b": []
+    },
+    "3": {
+     "phrases": [
+      "Die Analytische ist gleichsam",
+      "eine inverse Synthesis,",
+      "und ist die Philosophie."
+     ],
+     "r": [
+      "V0",
+      "P0",
+      "V0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Ferner wird die Methode eingeteilt:"
+     ],
+     "r": [
+      "V0"
+     ],
+     "b": [
+      [
+       "wird",
+       [
+        "eingeteilt"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s31-009": {
+    "0": {
+     "phrases": [
+      "a.)",
+      "In die Scientifische",
+      "diese gehört für Gelehrte",
+      "und man sieht dabei besonders",
+      "auf die Gründlichkeit.",
+      "sie trägt alles in abstracto vor,",
+      "nehmlich Ordnung und Deutlichkeit",
+      "ist das Hauptwerk dabei."
+     ],
+     "r": [
+      "X0",
+      "A0",
+      "V0",
+      "V0",
+      "A0",
+      "V0",
+      "S0",
+      "V0"
+     ],
+     "b": [
+      [
+       "trägt",
+       [
+        "vor"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s31-010": {
+    "0": {
+     "phrases": [
+      "b.)",
+      "In die populäre",
+      "diese sieht auch",
+      "auf die Ideen,",
+      "indem dabei alles",
+      "in concreto",
+      "vorgetragen wird."
+     ],
+     "r": [
+      "X0",
+      "A0",
+      "V0",
+      "A0",
+      "K1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "indem",
+       [
+        "vorgetragen",
+        "wird"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "So schreibt Hume reflexionen",
+      "über den Menschlichen Verstand",
+      "in scientiuischer Methode,",
+      "allein mit wenigem Beifall."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "A0",
+      "A0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Eben diese Materie",
+      "handelte er",
+      "in populaerer Methode ab,",
+      "brachte dabei Vergleiche",
+      "aus der Redekunst, Poesie, Empfindung etc. etc. an,",
+      "und das Buch",
+      "war durchgangig approbirt."
+     ],
+     "r": [
+      "O0",
+      "V0",
+      "E0",
+      "V0",
+      "E0",
+      "S0",
+      "V0"
+     ],
+     "b": [
+      [
+       "handelte",
+       [
+        "ab"
+       ]
+      ],
+      [
+       "brachte",
+       [
+        "an"
+       ]
+      ],
+      [
+       "war",
+       [
+        "approbirt"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Anmerkung",
+      "zum Vorigen."
+     ],
+     "r": [
+      "X0",
+      "A0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Die Synthetische Methode",
+      "ist nur den Wißenschaften angemeßen,",
+      "wo man",
+      "vom allgemeinen",
+      "zum besondern geht,",
+      "also der Mathematik;",
+      "dahingegen in der Philosophie",
+      "die Analytische",
+      "am meisten stattfindet",
+      "in einigen teilen ausgenommen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "A1",
+      "E1",
+      "O0",
+      "K1",
+      "S1",
+      "E1",
+      "A1"
+     ],
+     "b": [
+      [
+       "wo",
+       [
+        "geht"
+       ]
+      ],
+      [
+       "dahingegen",
+       [
+        "stattfindet"
+       ]
+      ]
+     ]
+    },
+    "5": {
+     "phrases": [
+      "Die Mathematische Methode",
+      "ist die eigentliche Methode."
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": []
+    },
+    "6": {
+     "phrases": [
+      "Eben diese",
+      "auf andere Wißenschaften angewandt,",
+      "ist blos vergeblich",
+      "sonst verfällt man",
+      "in das Laster",
+      "der Methodenmanier."
+     ],
+     "r": [
+      "S0",
+      "A0",
+      "V0",
+      "V0",
+      "A0",
+      "G0"
+     ],
+     "b": []
+    },
+    "7": {
+     "phrases": [
+      "Noch ist die Eintheilung",
+      "der Methode",
+      "in die:"
+     ],
+     "r": [
+      "V0",
+      "G0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s31-011": {
+    "0": {
+     "phrases": [
+      "a.)",
+      "Natürliche,",
+      "nemlich obiective natürliche,",
+      "die dem Gegenstande angemeßen ist."
+     ],
+     "r": [
+      "X0",
+      "S0",
+      "S0",
+      "K1"
+     ],
+     "b": [
+      [
+       "die",
+       [
+        "ist"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Die Methode",
+      "in concreto",
+      "ist eine Naturliche"
+     ],
+     "r": [
+      "S0",
+      "A0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s31-012": {
+    "0": {
+     "phrases": [
+      "b.)",
+      "Die Künstliche."
+     ],
+     "r": [
+      "X0",
+      "S0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Soll diese Künstliche",
+      "keinen Fehler haben,",
+      "so muß sie Natur seyn;",
+      "denn die Kunst",
+      "ist wirklich nichts anders",
+      "als Kultivirte Natur."
+     ],
+     "r": [
+      "V0",
+      "E0",
+      "V0",
+      "S0",
+      "V0",
+      "P0"
+     ],
+     "b": [
+      [
+       "Soll",
+       [
+        "haben"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Eben dies nennt man",
+      "die naivitaet,",
+      "nemlich eine Kunst,",
+      "die Natur scheint,",
+      "oder eine Natur,",
+      "die Kunst scheint."
+     ],
+     "r": [
+      "V0",
+      "P0",
+      "P0",
+      "K1",
+      "P0",
+      "K1"
+     ],
+     "b": [
+      [
+       "die",
+       [
+        "scheint"
+       ]
+      ],
+      [
+       "die",
+       [
+        "scheint"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Ferner die Syllogistische Lehrart,",
+      "dergleichen giebts nicht eigentlich,",
+      "und muß auch nicht geduldet werden:",
+      "denn wen verdrüßen nicht",
+      "die Formale Schlüßen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "V0",
+      "V0",
+      "S0"
+     ],
+     "b": [
+      [
+       "muß",
+       [
+        "geduldet",
+        "werden"
+       ]
+      ]
+     ]
+    },
+    "4": {
+     "phrases": [
+      "Ja bei einzelnen Sazzen,",
+      "beim disputiren",
+      "ist sie erlaubt."
+     ],
+     "r": [
+      "A0",
+      "A0",
+      "V0"
+     ],
+     "b": []
+    },
+    "5": {
+     "phrases": [
+      "Die Tabellarische Methode",
+      "ist die",
+      "wo man",
+      "das Gerippe",
+      "eines Systems",
+      "entwürft."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "O1",
+      "G1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wo",
+       [
+        "entwürft"
+       ]
+      ]
+     ]
+    },
+    "6": {
+     "phrases": [
+      "Die Dialogische Methode",
+      "unterrichtet",
+      "durch discuriren."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "A0"
+     ],
+     "b": []
+    },
+    "7": {
+     "phrases": [
+      "Sie ist zwiefach:"
+     ],
+     "r": [
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s31-013": {
+    "0": {
+     "phrases": [
+      "a.)",
+      "Socratisch,",
+      "wo sich der Lehrer",
+      "als Schüler anstellt,",
+      "und durch Zergliederung",
+      "aus dem Schüler selbst",
+      "die Frage",
+      "zu entscheiden sucht."
+     ],
+     "r": [
+      "X0",
+      "P0",
+      "K1",
+      "E1",
+      "A1",
+      "A1",
+      "O1",
+      "E1"
+     ],
+     "b": [
+      [
+       "wo",
+       [
+        "anstellt",
+        "sucht"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Sie heißt deswegen so;",
+      "weil Socrates",
+      "in seinen Dialogen",
+      "sich derselben besonders bedient."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "weil",
+       [
+        "bedient"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s31-014": {
+    "0": {
+     "phrases": [
+      "b.)",
+      "Catechetisch,",
+      "diese ist blos",
+      "für Gedächtniß Erkentniße,",
+      "denn da giebt sie",
+      "der Lehrer",
+      "dem Schüler selbst."
+     ],
+     "r": [
+      "X0",
+      "P0",
+      "V0",
+      "A0",
+      "V0",
+      "S0",
+      "O0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Die Geographische Methode",
+      "ist diejenige,",
+      "welche die Gegenstände vorträgt,",
+      "die zugleich sind."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "K2"
+     ],
+     "b": [
+      [
+       "welche",
+       [
+        "vorträgt"
+       ]
+      ],
+      [
+       "die",
+       [
+        "sind"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s31-015": {
+    "0": {
+     "phrases": [
+      "Die Chronologische Methode",
+      "ist diejenige,",
+      "welche die Gegenstände vorträgt,",
+      "die in der zeit",
+      "auf einander folgen."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "K1",
+      "K2",
+      "E2"
+     ],
+     "b": [
+      [
+       "welche",
+       [
+        "vorträgt"
+       ]
+      ],
+      [
+       "die",
+       [
+        "folgen"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Noch ist die Einteilung",
+      "in doctrin und disciplin."
+     ],
+     "r": [
+      "V0",
+      "A0"
+     ],
+     "b": []
+    },
+    "2": {
+     "phrases": [
+      "Die Doctrin",
+      "erweitert die Erkentniße",
+      "und ist also positiv."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "V0"
+     ],
+     "b": []
+    },
+    "3": {
+     "phrases": [
+      "Die Disciplin",
+      "hält blos den Irrthum ab,",
+      "ist also negativ."
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "V0"
+     ],
+     "b": [
+      [
+       "hält",
+       [
+        "ab"
+       ]
+      ]
+     ]
+    },
+    "4": {
+     "phrases": [
+      "Die Tumultuarische Meditation",
+      "hat viel Vortheilhaftes in sich:",
+      "denn durch diese Art",
+      "von Streiferey,",
+      "wo wir",
+      "vom Fußsteig,",
+      "ohne Aufhaltung",
+      "überall"
+     ],
+     "r": [
+      "S0",
+      "V0",
+      "A0",
+      "A0",
+      "K1",
+      "A1",
+      "A1",
+      "A1"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s31-016": {
+    "0": {
+     "phrases": [
+      "aus jeder Gegend",
+      "plündern,",
+      "gewinnt unsere Erkentniß",
+      "gewiß nicht wenig."
+     ],
+     "r": [
+      "A1",
+      "E1",
+      "V0",
+      "A0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s32-001": {
+    "0": {
+     "phrases": [
+      "Beim meditiren",
+      "hat man ein Obiect nothig,",
+      "folglich muß man",
+      "die Materialien samlen",
+      "und dies geht am besten",
+      "durch das Tumultuarische Denken an."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "V0",
+      "E0",
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "muß",
+       [
+        "samlen"
+       ]
+      ],
+      [
+       "geht",
+       [
+        "an"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Zur weiteren Beförderung davon",
+      "peset man Bücher,",
+      "besonders wenn es",
+      "Historische oder Polemische Sachen betrift:",
+      "sonstens aber giebt",
+      "das Denken anderer",
+      "uns selbst",
+      "zu neuen Ideen anlaß",
+      "und zu neuen Gedanken."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "K1",
+      "E1",
+      "V0",
+      "S0",
+      "O0",
+      "O0",
+      "A0"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "betrift"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s32-002": {
+    "0": {
+     "phrases": [
+      "Lambert brauchte Lexica,",
+      "und suchte Synonyma, analogien etc. etc. auf,",
+      "und so erlangt man",
+      "die Mannigfaltigkeit."
+     ],
+     "r": [
+      "V0",
+      "V0",
+      "V0",
+      "O0"
+     ],
+     "b": [
+      [
+       "suchte",
+       [
+        "auf"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Diese beobachtet man",
+      "im Denken;",
+      "im aufschreiben aber",
+      "wird Einheit erfordert,",
+      "die uns gleichsam unterwegens aufstoßende Neben Gedanken",
+      "merkt man am Rande an,",
+      "und theilt sie nachher",
+      "in ihre Fächer."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "A0",
+      "V0",
+      "O0",
+      "V0",
+      "V0",
+      "A0"
+     ],
+     "b": [
+      [
+       "wird",
+       [
+        "erfordert"
+       ]
+      ],
+      [
+       "merkt",
+       [
+        "an"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Weil aber unsere imagination",
+      "sobald sie einmal",
+      "auf eine Reise gebracht worden,",
+      "nicht sobald davon abläßt;",
+      "so muß man sich,",
+      "damit man den Gegenstand",
+      "nicht immer nur",
+      "aus einem Gesichtspunkte betrachte",
+      "Gewalt antun",
+      "öfters abzubrechen,",
+      "Bücher",
+      "von ganz anderer Materie zu lesen,",
+      "und gleichsam eine Diuersion zu machen."
+     ],
+     "r": [
+      "K1",
+      "K2",
+      "E2",
+      "E1",
+      "V0",
+      "K1",
+      "A1",
+      "E1",
+      "E0",
+      "E1",
+      "O1",
+      "E1",
+      "E1"
+     ],
+     "b": [
+      [
+       "Weil",
+       [
+        "abläßt"
+       ]
+      ],
+      [
+       "sobald",
+       [
+        "gebracht",
+        "worden"
+       ]
+      ],
+      [
+       "muß",
+       [
+        "antun"
+       ]
+      ],
+      [
+       "damit",
+       [
+        "betrachte"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Des Morgens",
+      "muß man die Materialien",
+      "zu einem System",
+      "in Ordnung bringen",
+      "des Abends hingegen",
+      "Materialien samlen:",
+      "denn die Imagination",
+      "schwärmt gleichsam",
+      "des Abends",
+      "mit vielen Gegenständen beschäftigt herum",
+      "des Morgens",
+      "ist sie aber gleichsam",
+      "unter der Aufsicht",
+      "der Vernunft."
+     ],
+     "r": [
+      "A0",
+      "V0",
+      "A0",
+      "E0",
+      "A0",
+      "E0",
+      "S0",
+      "V0",
+      "A0",
+      "E0",
+      "A0",
+      "V0",
+      "A0",
+      "G0"
+     ],
+     "b": [
+      [
+       "muß",
+       [
+        "bringen",
+        "samlen"
+       ]
+      ],
+      [
+       "schwärmt",
+       [
+        "herum"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s33-001": {
+    "0": {
+     "phrases": [
+      "Sprechen und reden",
+      "sind unterschieden."
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": [
+      [
+       "sind",
+       [
+        "unterschieden"
+       ]
+      ]
+     ]
+    },
+    "1": {
+     "phrases": [
+      "Sprechen geschieht",
+      "um sich verständlich zu machen;",
+      "reden",
+      "um zu seinem Zweck zu gelangen."
+     ],
+     "r": [
+      "V0",
+      "K1",
+      "S0",
+      "K1"
+     ],
+     "b": [
+      [
+       "um",
+       [
+        "zu",
+        "machen"
+       ]
+      ],
+      [
+       "um",
+       [
+        "gelangen"
+       ]
+      ]
+     ]
+    },
+    "2": {
+     "phrases": [
+      "Wie soll nun der Philosoph",
+      "seine Sprache einrichten?"
+     ],
+     "r": [
+      "V0",
+      "E0"
+     ],
+     "b": [
+      [
+       "soll",
+       [
+        "einrichten"
+       ]
+      ]
+     ]
+    },
+    "3": {
+     "phrases": [
+      "Ueberhaupt sieht der Philosoph mehr",
+      "auf die Bedeutung",
+      "der Wörter,",
+      "als auf den Styl."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "G0",
+      "A0"
+     ],
+     "b": []
+    },
+    "4": {
+     "phrases": [
+      "Das principium hiervon ist:",
+      "Der Ausdruck",
+      "muß dem Begrif angemeßen seyn."
+     ],
+     "r": [
+      "V0",
+      "S0",
+      "V0"
+     ],
+     "b": [
+      [
+       "muß",
+       [
+        "seyn"
+       ]
+      ]
+     ]
+    },
+    "5": {
+     "phrases": [
+      "Er kann darum auch",
+      "die Sprache",
+      "der Gelehrten",
+      "brauchen,",
+      "das ist nicht allein todte Sprache,",
+      "sondern auch Technische Termini."
+     ],
+     "r": [
+      "V0",
+      "O0",
+      "G0",
+      "E0",
+      "V0",
+      "P0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "brauchen"
+       ]
+      ]
+     ]
+    },
+    "6": {
+     "phrases": [
+      "Doch sind diese nur",
+      "so zu sagen",
+      "ein Nothnagel,",
+      "und er geht nicht",
+      "ohne Bedacht und Not",
+      "vom gemeinen Sprachgebrauch ab;",
+      "allein für die Philosophischen Principien",
+      "in Ansehung des Ausdrucks",
+      "ist selten eine Sprache hinlänglich."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "P0",
+      "V0",
+      "A0",
+      "E0",
+      "A0",
+      "A0",
+      "V0"
+     ],
+     "b": [
+      [
+       "geht",
+       [
+        "ab"
+       ]
+      ]
+     ]
+    },
+    "7": {
+     "phrases": [
+      "Die Deutsche scheint",
+      "nebst der Griechischen",
+      "am meisten Philosophisch zu seyn;",
+      "denn sie ist die aller richtigste,",
+      "sie hat die meiste Synonyma."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "E0",
+      "V0",
+      "V0"
+     ],
+     "b": [
+      [
+       "scheint",
+       [
+        "zu",
+        "seyn"
+       ]
+      ]
+     ]
+    },
+    "8": {
+     "phrases": [
+      "Demohngeachtet findet man doch selten",
+      "Zwey Wörter",
+      "in der ganzen Sprache,",
+      "die einerley wären:",
+      "Denn die Menge",
+      "der Synonymen",
+      "ist immer ein Beweis",
+      "von Reichthum",
+      "der Sprache."
+     ],
+     "r": [
+      "V0",
+      "O0",
+      "A0",
+      "K1",
+      "S0",
+      "G0",
+      "V0",
+      "A0",
+      "G0"
+     ],
+     "b": [
+      [
+       "die",
+       [
+        "wären"
+       ]
+      ]
+     ]
+    },
+    "9": {
+     "phrases": [
+      "Denn man kann",
+      "vermittelst der Synonymen",
+      "die verschiedene Grade",
+      "der Genauigkeit",
+      "im Obiect",
+      "bestimmen."
+     ],
+     "r": [
+      "V0",
+      "A0",
+      "O0",
+      "G0",
+      "A0",
+      "E0"
+     ],
+     "b": [
+      [
+       "kann",
+       [
+        "bestimmen"
+       ]
+      ]
+     ]
+    },
+    "10": {
+     "phrases": [
+      "Die Ursache",
+      "des Reichtums",
+      "der deutschen Sprache,",
+      "leitet man füglich",
+      "von ihren Missionaren her,",
+      "die,",
+      "als sie sie bekehren wollten",
+      "viele ihrer schon erfundenen Wörter",
+      "nach dem Griechischen und Lateinischen bildeten",
+      "als aus compassio Mitleiden,",
+      "misericordia Barmherzigkeit."
+     ],
+     "r": [
+      "O0",
+      "G0",
+      "G0",
+      "V0",
+      "E0",
+      "K1",
+      "K2",
+      "O1",
+      "E1",
+      "A0",
+      "X0"
+     ],
+     "b": [
+      [
+       "leitet",
+       [
+        "her"
+       ]
+      ],
+      [
+       "die",
+       [
+        "bildeten"
+       ]
+      ],
+      [
+       "als",
+       [
+        "bekehren",
+        "wollten"
+       ]
+      ]
+     ]
+    },
+    "11": {
+     "phrases": [
+      "Eben weil diese Missionare",
+      "alle verbesserer",
+      "der Deutschen Sprache,",
+      "den Verstand",
+      "der Deutschen",
+      "aufklären wollten,",
+      "so mußten sie auch wenig tropisch reden,",
+      "und daher mußten sie aus Noth",
+      "die Welsche Sprache",
+      "mit ganz neueren Wörtern bereichern,",
+      "da sonst auch eben diese tropi",
+      "ein Beweis",
+      "von der Armut",
+      "einer Sprache sind."
+     ],
+     "r": [
+      "K1",
+      "S1",
+      "G1",
+      "O1",
+      "G1",
+      "E1",
+      "V0",
+      "V0",
+      "O0",
+      "E0",
+      "K1",
+      "P1",
+      "A1",
+      "E1"
+     ],
+     "b": [
+      [
+       "weil",
+       [
+        "aufklären",
+        "wollten"
+       ]
+      ],
+      [
+       "mußten",
+       [
+        "reden"
+       ]
+      ],
+      [
+       "mußten",
+       [
+        "bereichern"
+       ]
+      ],
+      [
+       "da",
+       [
+        "sind"
+       ]
+      ]
+     ]
+    },
+    "12": {
+     "phrases": [
+      "Eben wenn eine Sprache",
+      "viel tropos hat;",
+      "so giebt dies Anlaß",
+      "zu Unterschiedenen Wortspielen",
+      "und wizzigen Einfällen."
+     ],
+     "r": [
+      "K1",
+      "E1",
+      "V0",
+      "A0",
+      "A0"
+     ],
+     "b": [
+      [
+       "wenn",
+       [
+        "hat"
+       ]
+      ]
+     ]
+    }
+   },
+   "busolt-s33-002": {
+    "0": {
+     "phrases": [
+      "Die Wortschneiderei",
+      "ist ein großer Fehler."
+     ],
+     "r": [
+      "S0",
+      "V0"
+     ],
+     "b": []
+    },
+    "1": {
+     "phrases": [
+      "Freylich sagt man",
+      "verba valent sicut nummi,",
+      "allein es hat doch nur",
+      "die Hohe Landes Obrigkeit",
+      "die Münzgerechtigkeit",
+      "sonst aber bleibt es wahr"
+     ],
+     "r": [
+      "V0",
+      "X0",
+      "V0",
+      "S0",
+      "O0",
+      "V0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s33-003": {
+    "0": {
+     "phrases": [
+      "Penes vsum est et ius et norma loquendi"
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    }
+   },
+   "busolt-s33-004": {
+    "0": {
+     "phrases": [
+      "Finis."
+     ],
+     "r": [
+      "X0"
+     ],
+     "b": []
+    }
+   }
+  },
+  "blomberg": {},
+  "meier": {}
+ }
+}
