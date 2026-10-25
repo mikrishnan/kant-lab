@@ -842,8 +842,8 @@ function openTerm(id, printed) {
   if (c && c.total) card.appendChild(el('div', 'ct', 'Occurs ' + c.total.toLocaleString('en') + '× in the corpus: ' +
     Object.keys(TEXT_NAMES).filter(t => c[t]).map(t => TEXT_NAMES[t] + ' ' + c[t]).join(' · ')));
   const exs = (typeof KANT_GLOSSARY_EXAMPLES !== 'undefined' && KANT_GLOSSARY_EXAMPLES[id]) || [];
-  if (exs.length) {                       // one sentence per text, chosen by glossary.py examples, with its English
-    card.appendChild(el('div', 'exh', 'In the texts'));
+  if (exs.length) {                       // one sentence, chosen by glossary.py examples, with its English
+    card.appendChild(el('div', 'exh', 'Example'));
     exs.forEach(x => card.appendChild(exampleEl(x)));
   }
   const acts = el('div', 'acts');

@@ -63,7 +63,7 @@ mark { background: var(--hit); color: inherit; border-radius: 2px; }
 tr.exrow td { padding: 0 10px 12px; border-bottom: 1px solid var(--line); }
 tr.exrow:hover td, tr.exrow + tr:hover td { background: inherit; }
 tr.has-ex td { border-bottom: 0; }
-.exs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 16px; font-size: .86rem; line-height: 1.38; }
+.exs { max-width: 52rem; font-size: .9rem; line-height: 1.4; }
 .ex { border-left: 2px solid var(--parch-deep); padding-left: 9px; }
 .ex a { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .06em; color: var(--accent); text-decoration: none; }
 .ex a:hover { text-decoration: underline; }
@@ -74,7 +74,6 @@ tr.has-ex td { border-bottom: 0; }
 .noex { font-size: .8rem; font-style: italic; color: var(--faded); }
 body.hide-ex tr.exrow { display: none; }
 body.hide-ex tr.has-ex td { border-bottom: 1px solid var(--parch-deep); }
-@media (max-width: 900px) { .exs { grid-template-columns: 1fr; } }
 .none { padding: 30px; text-align: center; color: var(--faded); font-style: italic; }
 @media (max-width: 760px) { .hide-sm { display: none; } th { top: 96px; } .bar input[type=search] { width: 100%; } }
 </style>
@@ -95,11 +94,11 @@ body.hide-ex tr.has-ex td { border-bottom: 1px solid var(--parch-deep); }
   <select id="sort" aria-label="Sort">
     <option value="freq">most frequent first</option><option value="de">German A–Z</option><option value="en">English A–Z</option><option value="chk">least consistent in the prototype first</option>
   </select>
-  <label title="One sentence per text — Busolt, Blomberg, Meier — that uses the term, with its translation"><input type="checkbox" id="showex" checked> examples</label>
+  <label title="A sentence from Busolt, Blomberg or Meier that uses the term, with its translation"><input type="checkbox" id="showex" checked> examples</label>
   <span id="n"></span>
 </div></div>
 <main>
-  <p class="intro"><b>How to read this.</b> <b>English</b> is the rendering every translation must use. Other renderings appear only under the stated condition, and anything struck through is wrong here. <b>Occurrences</b> counts the term in Meier, the three Logik transcripts and the Reflexionen, matched despite period spellings. <b>Prototype</b> shows how often the earlier machine translations (made before this glossary existed) used the agreed rendering where the German has the term. Every entry is a proposal until a reader of Kant’s German confirms it. The <b>German</b> column gives the modern spelling, and beneath it how the texts actually <b>print</b> the word, most frequent spelling first, with its count (hover a spelling to see which texts use it). Period spellings are in bold; the modern spelling, where the texts use it, in green. Searching finds an entry by any of its printed spellings. Beneath each entry are <b>examples</b>: one sentence from each of Logik Busolt, Logik Blomberg and Meier’s <i>Auszug</i> that uses the term, with the term in bold and its English (the reader’s sentence translation) beside it. Click a citation to open the sentence in the reader. The examples are chosen by rule (<code>glossary.py examples</code>: the English must use the agreed rendering, then whole sentences of middling length are preferred), not by hand, and the translations are unreviewed machine output.</p>
+  <p class="intro"><b>How to read this.</b> <b>English</b> is the rendering every translation must use. Other renderings appear only under the stated condition, and anything struck through is wrong here. <b>Occurrences</b> counts the term in Meier, the three Logik transcripts and the Reflexionen, matched despite period spellings. <b>Prototype</b> shows how often the earlier machine translations (made before this glossary existed) used the agreed rendering where the German has the term. Every entry is a proposal until a reader of Kant’s German confirms it. The <b>German</b> column gives the modern spelling, and beneath it how the texts actually <b>print</b> the word, most frequent spelling first, with its count (hover a spelling to see which texts use it). Period spellings are in bold; the modern spelling, where the texts use it, in green. Searching finds an entry by any of its printed spellings. Beneath each entry is an <b>example</b>: a sentence from Logik Busolt, Logik Blomberg or Meier’s <i>Auszug</i> that uses the term, with the term in bold and its English (the reader’s sentence translation) beneath it. Click the citation to open the sentence in the reader. The example is chosen by rule (<code>glossary.py examples</code>: the English must use the agreed rendering, then whole sentences of middling length are preferred), not by hand, and the translation is unreviewed machine output.</p>
   <table>
     <thead><tr><th data-s="de">German</th><th data-s="en">English</th><th class="hide-sm">Latin</th><th class="hide-sm">Note</th><th data-s="freq">Occurrences</th><th data-s="chk" class="hide-sm">Prototype</th></tr></thead>
     <tbody id="rows"></tbody>

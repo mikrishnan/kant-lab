@@ -29,7 +29,7 @@ python3 glossary.py validate    # ids, required fields, two entries claiming the
 python3 glossary.py count       # refreshes counts.js
 python3 glossary.py check       # refreshes check.js and check-report.txt
 python3 glossary.py index       # refreshes terms-index.js, which the reader uses to mark terms
-python3 glossary.py examples    # refreshes examples.js: one example sentence per entry and text
+python3 glossary.py examples    # refreshes examples.js: one example sentence per entry
 python3 glossary.py spellings   # refreshes spellings.js: how the texts actually spell each term
 ```
 
@@ -90,24 +90,23 @@ from `terms-index.js`, so after editing the glossary run `count`, `check` and `i
 
 ## Examples
 
-Beneath each entry, `index.html` shows one sentence from each of Logik Busolt, Logik Blomberg and
+Beneath each entry, `index.html` shows one example: a sentence from Logik Busolt, Logik Blomberg or
 Meier's *Auszug* that uses the term. The term is in bold, and the sentence's English from the
 reader's translations (`../translations/logik-units.json`, `../translations/meier-aligned.js`) is
-shown with the rendering in bold. The reader's glossary card shows the same examples, and the
-citation on each opens that sentence in the reader with its translation pinned.
+shown with the rendering in bold. The reader's glossary card shows the same example, and its
+citation opens the sentence in the reader with its translation pinned.
 
-`glossary.py examples` picks them by rule, not by hand. The English must use the agreed rendering.
-Among those sentences it prefers:
+`glossary.py examples` picks it by rule, not by hand. The English must use the agreed rendering.
+Among those sentences, in all three texts, it takes the one that best fits:
 
-- whole sentences of 60–220 characters;
+- a whole sentence of 60–220 characters;
 - no editorial brackets;
-- sentences that say what the thing is (*… ist …*, *… heißt …*).
+- one that says what the thing is (*… ist …*, *… heißt …*).
 
-Where no sentence in a text renders the term as agreed, it falls back to the best sentence there
-and marks the translation as not yet following the glossary. That applies to 19 of the 855
-examples. 355 of the 393 entries have at least one example; the other 38 (*Kategorie*,
-*Apperzeption*, …) do not occur in these three texts. The translations are unreviewed machine
-output.
+Where no sentence renders the term as agreed, it falls back to the best sentence and marks the
+translation as not yet following the glossary. 355 of the 393 entries have an example; the
+other 38 (*Kategorie*, *Apperzeption*, …) do not occur in these three texts. The translations are
+unreviewed machine output.
 
 ## Old spellings
 
