@@ -315,7 +315,7 @@ function dateExplain(d) {
 }
 
 function lectureCard(it) {
-  const card=el('article','item era-'+it.date.era); const head=el('div','item-head');
+  const card=el('article','item era-'+it.date.era); card.dataset.id=it.b.id; const head=el('div','item-head');
   const cite=el('div','cite',it.cite); cite.appendChild(el('span','pages',it.pages)); head.appendChild(cite); head.appendChild(metaBlock(it)); card.appendChild(head);
   card.appendChild(el('div','crumb', SRC[SRC_ORDER[it.k]].chip+' › '+secTitle(it.s)));
   const box=el('div','ctx'); card.appendChild(box);
@@ -325,7 +325,7 @@ function lectureCard(it) {
   return card;
 }
 function reflCard(it) {
-  const d=it.dt; const card=el('article','item era-'+d.era); const head=el('div','item-head');
+  const d=it.dt; const card=el('article','item era-'+d.era); card.dataset.id='R'+it.e.r; const head=el('div','item-head');
   const cite=el('div','cite',it.cite); cite.appendChild(el('span','pages',it.pages)); head.appendChild(cite); head.appendChild(metaBlock(it));
   const work = it.w==='meier' ? 'Meier, Auszug' : 'Baumgarten, Metaphysica';
   const how = { locus:'§ from the edition’s own locus note', group:'§ from the heading of its block', block:'§ from the heading of its block', page:'§ from the handbook page it is written on' }[it.e.src] || '';
