@@ -38,14 +38,16 @@ header h1 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.15rem; 
 header .sub { font-size: .9rem; opacity: .85; }
 header .glink { margin-left: auto; font-family: 'Cinzel', serif; font-size: .74rem; letter-spacing: .08em; color: var(--parchment); text-decoration: none; border: 1px solid rgba(244,237,224,.5); border-radius: 12px; padding: 3px 11px; }
 header .glink:hover { background: rgba(244,237,224,.15); }
-/* reading mode: German only (try the German first), interlinear, or the English floating over each sentence.
-   Glossary features are not part of it */
+/* reading mode: German only, interlinear, or try first (the English on demand). Glossary features are not part of it */
 #mode { margin-left: auto; display: flex; border: 1px solid rgba(244,237,224,.5); border-radius: 12px; overflow: hidden; align-self: center; }
 #mode button { font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .07em; color: var(--parchment); background: none; border: 0; padding: 3px 11px; cursor: pointer; }
 #mode button + button { border-left: 1px solid rgba(244,237,224,.5); }
 #mode button:hover { background: rgba(244,237,224,.15); }
 #mode button.on { background: var(--parchment); color: var(--accent); font-weight: 600; }
 header #mode + .glink { margin-left: 0; }
+body.noen .sent { cursor: text; }
+body.noen .sent:hover, body.noen .sent.enhit { background: none; border-bottom: 0; }
+body.noen .sent:hover .ph { border-bottom: 0; }
 /* interlinear: every phrase stands over its own gloss; the sentence's English waits for a click */
 .ph .il { display: none; }
 body.ilm .ph { display: inline-flex; flex-direction: column; vertical-align: top; max-width: 100%; margin: 0 .12em .55em 0; }
@@ -55,13 +57,13 @@ body.ilm .sent:hover .ph { border-bottom: 0; }
 body.ilm .sent:hover .ph .il { border-top-color: var(--line); }
 body.ilm .sent.on .ph .il { color: #1d2a40; }
 body.ilm .blk { margin-bottom: 1.1em; }
-/* German only: the current sentence is outlined until its English is revealed */
-body.dem .sent.on { background: none; box-shadow: 0 0 0 2px var(--hit); }
-body.dem .sent.on.open { background: var(--hit); }
+/* try first: the current sentence is outlined until its English is revealed */
+body.tfm .sent.on { background: none; box-shadow: 0 0 0 2px var(--hit); }
+body.tfm .sent.on.open { background: var(--hit); }
 #pop .hint { margin-top: 5px; font-size: .74rem; opacity: .7; font-style: italic; }
-#dehint { display: none; font-size: .8rem; color: var(--faded); }
-#dehint kbd { font-family: inherit; font-size: .74rem; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; background: var(--parchment); color: var(--ink); }
-body.dem #dehint { display: inline; }
+#tfhint { display: none; font-size: .8rem; color: var(--faded); }
+#tfhint kbd { font-family: inherit; font-size: .74rem; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; background: var(--parchment); color: var(--ink); }
+body.tfm #tfhint { display: inline; }
 .term { text-decoration: underline dotted rgba(58, 90, 58, .55); text-underline-offset: 3px; cursor: pointer; }
 .term:hover { background: var(--aa-bg); }
 body.noterms .term { text-decoration: none; cursor: inherit; }
@@ -230,14 +232,14 @@ body.noinf .toc-note { display: none; }
 @media (max-width: 860px) { main { flex-direction: column; } #side { width: auto; height: 40%; border-left: 0; border-top: 1px solid var(--line); } #reader { padding: 16px; } }
 </style>
 </head>
-<body>
+<body class="tfm">
 <header>
   <h1>Kant’s Logic</h1>
   <span class="sub">Two student transcripts of the lectures (AA XXIV) and the textbook they follow, Meier’s Auszug (1752)</span>
   <div id="mode" role="radiogroup" aria-label="Reading mode">
-    <button type="button" role="radio" data-m="de" aria-checked="false" title="German only: try the German first. Hovering a phrase gives only that phrase’s gloss; the whole sentence’s English waits until you click the sentence, press Space or Enter, or rest on it for a few seconds. ← and → step from sentence to sentence.">German only</button>
+    <button type="button" role="radio" data-m="de" aria-checked="false" title="Read the German alone: no English appears over the sentences, and the search looks only at the German. Hovering an underlined glossary term still shows the glossary’s rendering of it.">German only</button>
     <button type="button" role="radio" data-m="il" aria-checked="false" title="Interlinear: each phrase of the German stands over its own short English gloss, in German word order. Click a sentence for its full English translation. Hovering an underlined glossary term shows the glossary’s rendering of it.">Interlinear</button>
-    <button type="button" role="radio" data-m="en" aria-checked="true" class="on" title="Hover a sentence or phrase for its English; click to pin it. The search also finds German sentences through their English.">With English</button>
+    <button type="button" role="radio" data-m="tf" aria-checked="true" class="on" title="Try first: hovering a phrase gives only that phrase’s gloss. The whole sentence’s English waits until you click the sentence, press Space or Enter, or rest on it for a few seconds. ← and → step from sentence to sentence.">Try first</button>
   </div>
   <a class="glink" href="glossary/index.html" target="_blank" rel="noopener" title="The shared glossary: one English rendering for every Kantian term">Glossary ↗</a>
 </header>
@@ -250,7 +252,7 @@ body.noinf .toc-note { display: none; }
       <label id="lpg"><input type="checkbox" id="tpg" checked> page breaks</label>
       <label id="linf"><input type="checkbox" id="tinf" checked> inferred joins</label>
       <label title="Underline the terms that have an entry in the shared glossary; click one to see it"><input type="checkbox" id="tterms" checked> glossary terms</label>
-      <span id="dehint"><kbd>←</kbd> <kbd>→</kbd> step · <kbd>Space</kbd> reveal the sentence · or rest on it</span>
+      <span id="tfhint"><kbd>←</kbd> <kbd>→</kbd> step · <kbd>Space</kbd> reveal the sentence · or rest on it</span>
     </div>
     <div id="reader"><div id="page"></div></div>
   </section>
@@ -331,12 +333,12 @@ const TOC_GROUPS = {
 
 /* ── state ── */
 let wi = 0;              // the text on show
-let mode = 'en';         // reading mode: 'de' German only (phrase glosses on hover, the sentence's English on demand) ·
-                         // 'il' interlinear glosses under the phrases · 'en' English floats over the sentences
-let hovTerm = null;      // the glossary term under the pointer, for interlinear mode
-let shown = null;        // German-only mode: 'blockId:k' of the sentence whose English has been revealed
-let pauseT = null;       // German-only mode: the timer that reveals a sentence the pointer rests on
-const DE_PAUSE = 4000;   // ms
+let mode = 'tf';         // reading mode: 'de' German only · 'il' interlinear glosses under the phrases ·
+                         // 'tf' try first: phrase glosses on hover, the sentence's English on demand
+let hovTerm = null;      // the glossary term under the pointer, for German-only mode
+let shown = null;        // try-first mode: 'blockId:k' of the sentence whose English has been revealed
+let pauseT = null;       // try-first mode: the timer that reveals a sentence the pointer rests on
+const TF_PAUSE = 4000;   // ms
 let cur = -1;            // the section on show
 let queryRe = null;      // the compiled search, or null
 let hitCount = null;     // per work, per section: occurrences, for the tab badges
@@ -412,7 +414,7 @@ function addTerms(parent, b, from, to) {
     t.dataset.pr = b.text.slice(flat[i], flat[i + 1]);
     addText(t, b.text.slice(s0, s1));
     t.onclick = e => { if (document.body.classList.contains('noterms') || String(getSelection())) return; e.stopPropagation(); openTerm(t.dataset.g, t.dataset.pr); };
-    t.onmouseenter = () => { hovTerm = t; refreshPop(); };       // interlinear mode: the glossary's rendering floats over the term
+    t.onmouseenter = () => { hovTerm = t; refreshPop(); };       // German-only mode: the glossary's rendering floats over the term
     t.onmouseleave = () => { hovTerm = null; refreshPop(); };
     parent.appendChild(t);
     at = s1;
@@ -489,7 +491,7 @@ function renderSentences(tx, b, units) {
     if (g.o[0] > at) addTx(tx, b, at, g.o[0]);
     const sp = el('span', 'sent');
     sp.dataset.b = b.id; sp.dataset.k = k;
-    if (queryRe) { queryRe.lastIndex = 0; if (queryRe.test(g.en)) { sp.classList.add('enhit'); sp.title = 'The English translation of this sentence matches the search'; } }
+    if (mode !== 'de' && queryRe) { queryRe.lastIndex = 0; if (queryRe.test(g.en)) { sp.classList.add('enhit'); sp.title = 'The English translation of this sentence matches the search'; } }
     let pa = g.o[0];
     (g.p || []).forEach((ph, pi) => {
       if (ph[0] > pa) addTx(sp, b, pa, ph[0]);
@@ -504,8 +506,8 @@ function renderSentences(tx, b, units) {
       pa = ph[1];
     });
     if (pa < g.o[1]) addTx(sp, b, pa, g.o[1]);
-    sp.onclick = e => { e.stopPropagation(); if (!String(getSelection())) selectSentence(b.id, k); };
-    sp.onmouseenter = () => { hov = sp; refreshPop(); if (mode === 'de') armPause(sp); };
+    sp.onclick = e => { if (mode === 'de') return; e.stopPropagation(); if (!String(getSelection())) selectSentence(b.id, k); };
+    sp.onmouseenter = () => { hov = sp; refreshPop(); if (mode === 'tf') armPause(sp); };
     sp.onmouseleave = () => { hov = null; hovPh = null; clearTimeout(pauseT); refreshPop(); };
     tx.appendChild(sp);
     at = g.o[1];
@@ -723,7 +725,7 @@ let hovPh = null;        // the division under the pointer, if any
 
 function englishOf(sp) { return UNITS.get(sp.dataset.b)[sp.dataset.k].en; }
 function glossOf(sp, ph) { return UNITS.get(sp.dataset.b)[sp.dataset.k].p[ph.dataset.p][2]; }
-function showPop(sp, ph, sentence = true) {   // sentence = false: the division's gloss alone (German-only mode, before the reveal)
+function showPop(sp, ph, sentence = true) {   // sentence = false: the division's gloss alone (try-first mode, before the reveal)
   const pop = document.getElementById('pop');
   pop.textContent = '';
   if (ph) pop.appendChild(el('div', 'g', glossOf(sp, ph)));
@@ -761,7 +763,7 @@ function placePop(target, em) {           // over the target (below it if there 
   pop.style.top = top + 'px';
   pop.style.left = left + 'px';
 }
-/* Interlinear mode keeps the glossary: hovering an underlined term floats the glossary's rendering of it
+/* German-only mode keeps the glossary: hovering an underlined term floats the glossary's rendering of it
    (and its other senses, if it has any) — the glossary's English, never the sentence's. */
 function showTermPop(t) {
   const e = GLOSS_BY_ID[t.dataset.g], pop = document.getElementById('pop');
@@ -781,25 +783,20 @@ function showTermPop(t) {
 function pinnedSpan() {
   return sel && document.querySelector('.sent[data-b="' + sel.b + '"][data-k="' + sel.k + '"]');
 }
-function refreshPop() {                  // the hovered division's English, else the hovered/pinned sentence's, else nothing
+function refreshPop() {                  // what floats over the text, by reading mode
   document.querySelectorAll('.ph.hot').forEach(x => x.classList.remove('hot'));
-  if (mode === 'de') {                    // German only: a division's gloss on hover; the sentence only once revealed
+  if (mode === 'tf') {                    // try first: a division's gloss on hover; the sentence only once revealed
     const pin = pinnedSpan(), open = !!pin && shown === sel.b + ':' + sel.k;
     if (hov && hovPh) { hovPh.classList.add('hot'); showPop(hov, hovPh, open && hov === pin); }
     else if (open) showPop(pin, null);
     else document.getElementById('pop').hidden = true;
     return;
   }
-  if (mode === 'il') {                    // interlinear: the glossary's rendering over a hovered term;
-    const pin = pinnedSpan();             // and a clicked sentence's full English
-    if (hovTerm && hovTerm.isConnected && !document.body.classList.contains('noterms')) showTermPop(hovTerm);
-    else if (pin) showPop(pin, null);
-    else document.getElementById('pop').hidden = true;
-    return;
-  }
-  const sp = hov || pinnedSpan();
-  if (hov && hovPh) hovPh.classList.add('hot');
-  if (sp) showPop(sp, hov ? hovPh : null); else document.getElementById('pop').hidden = true;
+  // German only and interlinear: the glossary's rendering over a hovered term; interlinear also shows a clicked sentence's English
+  const pin = mode === 'il' && pinnedSpan();
+  if (hovTerm && hovTerm.isConnected && !document.body.classList.contains('noterms')) showTermPop(hovTerm);
+  else if (pin) showPop(pin, null);
+  else document.getElementById('pop').hidden = true;
 }
 function markClasses() {
   document.querySelectorAll('.sent.on').forEach(x => x.classList.remove('on', 'open'));
@@ -814,7 +811,7 @@ function markSelected() {
 }
 function selectSentence(bid, k) {
   const same = sel && sel.b === bid && sel.k === k;
-  if (mode === 'de') {                    // German only: a click reveals the sentence's English, a second click hides it
+  if (mode === 'tf') {                    // try first: a click reveals the sentence's English, a second click hides it
     sel = { b: bid, k };
     shown = same && shown === bid + ':' + k ? null : bid + ':' + k;
     markClasses(); refreshPop();
@@ -824,15 +821,15 @@ function selectSentence(bid, k) {
   markSelected();
 }
 
-/* ── German only: the current sentence, stepped with ← →, revealed with Space / Enter or a rest of the pointer ── */
+/* ── try first: the current sentence, stepped with ← →, revealed with Space / Enter or a rest of the pointer ── */
 function armPause(sp) {
   clearTimeout(pauseT);
   pauseT = setTimeout(() => {
-    if (hov !== sp || mode !== 'de') return;
+    if (hov !== sp || mode !== 'tf') return;
     sel = { b: sp.dataset.b, k: +sp.dataset.k };
     shown = sp.dataset.b + ':' + sp.dataset.k;
     markClasses(); refreshPop();
-  }, DE_PAUSE);
+  }, TF_PAUSE);
 }
 function stepSentence(d) {
   const all = [...document.querySelectorAll('#page .sent')];
@@ -943,7 +940,7 @@ function runSearch() {
   document.querySelectorAll('#works .n').forEach(n => n.remove());
   if (!queryRe) {
     hitCount = null;
-    count.textContent = 'Type at least two letters. ß and ss are treated alike; case is ignored.' + ' The English translation is searched too and leads to its German sentence.';
+    count.textContent = 'Type at least two letters. ß and ss are treated alike; case is ignored.' + (mode !== 'de' ? ' The English translation is searched too and leads to its German sentence.' : ' German only: the English is not searched.');
     if (cur >= 0) show(cur);
     return;
   }
@@ -964,7 +961,7 @@ function runSearch() {
         rows.push({ b, k: first.index, len: first[0].length });
         total += n; passages++; perWork[k] += n; hitCount[k][i] += n;
       });
-      s.blocks.forEach(b => {          // the English, sentence by sentence: a hit belongs to its German sentence
+      if (mode !== 'de') s.blocks.forEach(b => {          // the English, sentence by sentence: a hit belongs to its German sentence
         const units = b.kind === 'rule' ? null : unitsFor(w, b);
         if (!units) return;
         units.forEach((g, si) => {
@@ -1030,21 +1027,24 @@ document.getElementById('whole').onchange = runSearch;
 document.getElementById('allw').onchange = runSearch;
 document.getElementById('clr').onclick = () => { document.getElementById('q').value = ''; runSearch(); document.getElementById('q').focus(); };
 function setMode(m) {                    // switch the reading mode; the glossary toggle is left alone
+  const hadEnglish = mode !== 'de';
   mode = m;
+  document.body.classList.toggle('noen', m === 'de');
   document.body.classList.toggle('ilm', m === 'il');
-  document.body.classList.toggle('dem', m === 'de');
+  document.body.classList.toggle('tfm', m === 'tf');
   shown = null; clearTimeout(pauseT);
   document.querySelectorAll('#mode button').forEach(b => {
     b.classList.toggle('on', b.dataset.m === m); b.setAttribute('aria-checked', b.dataset.m === m);
   });
   sel = null; hov = null; hovPh = null; hovTerm = null;
   refreshPop();
-  markSelected();
+  if (hadEnglish !== (m !== 'de')) runSearch();   // English hits come and go with German-only mode
+  else markSelected();
 }
 document.querySelectorAll('#mode button').forEach(b => { b.onclick = () => { if (b.dataset.m !== mode) setMode(b.dataset.m); b.blur(); }; });   // blur: Space belongs to the reader
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && sel) { sel = null; shown = null; markSelected(); return; }
-  if (mode !== 'de' || e.altKey || e.ctrlKey || e.metaKey || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(document.activeElement.tagName)) return;
+  if (mode !== 'tf' || e.altKey || e.ctrlKey || e.metaKey || /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(document.activeElement.tagName)) return;
   if (e.key === 'ArrowRight') { e.preventDefault(); stepSentence(1); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); stepSentence(-1); }
   else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); revealCurrent(); }
@@ -1074,7 +1074,7 @@ function route() {
   if ((m = /^para-(\d+)$/.exec(h)) && !WORKS[wi].logik && goTo(+m[1])) return;
   if ((m = /^(.+)\.(\d+)$/.exec(h))) {     // #busolt:busolt-s14-012.3 — one sentence, pinned (from the glossary's examples)
     const j = WORKS[wi].sections.findIndex(s => s.blocks.some(b => b.id === m[1]));
-    if (j >= 0) { sel = { b: m[1], k: +m[2] }; return show(j, m[1]); }
+    if (j >= 0) { sel = mode !== 'de' ? { b: m[1], k: +m[2] } : null; return show(j, m[1]); }
   }
   const i = WORKS[wi].sections.findIndex(s => s.id === h);
   if (i >= 0) return show(i);

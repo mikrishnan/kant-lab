@@ -124,5 +124,6 @@ modern spelling. 202 of the 388 terms that occur are printed in at least one per
 
 The glossary page lists these spellings under each entry, most frequent first, and its search
 finds an entry by any of them. In the reader, the glossary card lists them too. Wherever a hover names
-a glossary term (the "Glossary:" line under a phrase's gloss, or a term hovered in interlinear
-mode), it gives the modern spelling beside the printed one, which is the form a dictionary has.
+a glossary term (a term hovered in German-only or interlinear mode, or the "Glossary:" line
+under a phrase's gloss in try-first mode), it gives the modern spelling beside the printed one,
+which is the form a dictionary has.
