@@ -70,6 +70,8 @@ body.noterms .term:hover { background: none; }
 #gcard .acts a, #gcard .acts button { font: inherit; font-size: .8rem; padding: 2px 9px; border: 1px solid var(--line); border-radius: 3px; background: var(--parch-dark); color: var(--accent); cursor: pointer; text-decoration: none; }
 #pop .gl { margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(244,237,224,.3); font-size: .78rem; opacity: .9; }
 #pop .gl b { font-weight: 600; }
+#pop .g b { font-weight: 600; }
+#pop .sn { font-size: .82rem; opacity: .85; margin-top: 2px; }
 .tools { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .85rem; padding: 6px 20px; border-bottom: 1px solid var(--line); background: var(--panel-bg); }
 input[type=search], input[type=number] {
   font: inherit; padding: 3px 8px; border: 1px solid var(--line); border-radius: 3px;
@@ -207,7 +209,7 @@ body.noinf .toc-note { display: none; }
   <h1>Kant’s Logic</h1>
   <span class="sub">Two student transcripts of the lectures (AA XXIV) and the textbook they follow, Meier’s Auszug (1752)</span>
   <div id="mode" role="radiogroup" aria-label="Reading mode">
-    <button type="button" role="radio" data-m="de" aria-checked="false" title="Read the German alone: no English appears over the sentences, and the search looks only at the German. Glossary terms stay as they are.">German only</button>
+    <button type="button" role="radio" data-m="de" aria-checked="false" title="Read the German alone: no English appears over the sentences, and the search looks only at the German. Hovering an underlined glossary term still shows the glossary’s rendering of it.">German only</button>
     <button type="button" role="radio" data-m="en" aria-checked="true" class="on" title="Hover a sentence or phrase for its English; click to pin it. The search also finds German sentences through their English.">With English</button>
   </div>
   <a class="glink" href="glossary/index.html" target="_blank" rel="noopener" title="The shared glossary: one English rendering for every Kantian term">Glossary ↗</a>
@@ -300,6 +302,7 @@ const TOC_GROUPS = {
 /* ── state ── */
 let wi = 0;              // the text on show
 let english = true;      // reading mode: the English floats over the sentences (true), or the German stands alone
+let hovTerm = null;      // the glossary term under the pointer, for German-only mode
 let cur = -1;            // the section on show
 let queryRe = null;      // the compiled search, or null
 let hitCount = null;     // per work, per section: occurrences, for the tab badges
@@ -375,6 +378,8 @@ function addTerms(parent, b, from, to) {
     t.dataset.pr = b.text.slice(flat[i], flat[i + 1]);
     addText(t, b.text.slice(s0, s1));
     t.onclick = e => { if (document.body.classList.contains('noterms') || String(getSelection())) return; e.stopPropagation(); openTerm(t.dataset.g, t.dataset.pr); };
+    t.onmouseenter = () => { hovTerm = t; refreshPop(); };       // German-only mode: the glossary's rendering floats over the term
+    t.onmouseleave = () => { hovTerm = null; refreshPop(); };
     parent.appendChild(t);
     at = s1;
   }
@@ -684,7 +689,6 @@ function englishOf(sp) { return UNITS.get(sp.dataset.b)[sp.dataset.k].en; }
 function glossOf(sp, ph) { return UNITS.get(sp.dataset.b)[sp.dataset.k].p[ph.dataset.p][2]; }
 function showPop(sp, ph) {
   const pop = document.getElementById('pop');
-  const box = document.getElementById('left').getBoundingClientRect();   // never leave the text side
   pop.textContent = '';
   if (ph) pop.appendChild(el('div', 'g', glossOf(sp, ph)));
   const full = el('div', ph ? 's' : 'g');
@@ -703,9 +707,13 @@ function showPop(sp, ph) {
     });
     pop.appendChild(gl);
   }
-  pop.style.maxWidth = Math.min(34 * 16, box.width - 8) + 'px';
+  placePop(ph || sp, 34);
+}
+function placePop(target, em) {           // over the target (below it if there is no room), never leaving the text side
+  const pop = document.getElementById('pop'), box = document.getElementById('left').getBoundingClientRect();
+  pop.style.maxWidth = Math.min(em * 16, box.width - 8) + 'px';
   pop.hidden = false;
-  const rects = (ph || sp).getClientRects(), r0 = rects[0], gap = 6;
+  const rects = target.getClientRects(), r0 = rects[0], gap = 6;
   const pw = pop.offsetWidth, phh = pop.offsetHeight;
   let top = r0.top - phh - gap;
   if (top < box.top + 4) top = rects[rects.length - 1].bottom + gap;  // no room above: below the last line
@@ -713,12 +721,28 @@ function showPop(sp, ph) {
   pop.style.top = top + 'px';
   pop.style.left = left + 'px';
 }
+/* German-only mode keeps the glossary: hovering an underlined term floats the glossary's rendering of it
+   (and its other senses, if it has any) — the glossary's English, never the sentence's. */
+function showTermPop(t) {
+  const e = GLOSS_BY_ID[t.dataset.g], pop = document.getElementById('pop');
+  pop.textContent = '';
+  const g = el('div', 'g');
+  g.append(document.createTextNode(t.dataset.pr + ' → '), el('b', null, e.en));
+  pop.appendChild(g);
+  (e.senses || []).forEach(sn => pop.appendChild(el('div', 'sn', '“' + sn.en + '” when ' + sn.when)));
+  pop.appendChild(el('div', 'gl', 'Glossary' + (e.status !== 'confirmed' ? ' (proposed)' : '') + ' · click for the full entry'));
+  placePop(t, 24);
+}
 function pinnedSpan() {
   return sel && document.querySelector('.sent[data-b="' + sel.b + '"][data-k="' + sel.k + '"]');
 }
 function refreshPop() {                  // the hovered division's English, else the hovered/pinned sentence's, else nothing
   document.querySelectorAll('.ph.hot').forEach(x => x.classList.remove('hot'));
-  if (!english) { document.getElementById('pop').hidden = true; return; }    // German-only mode: no English at all
+  if (!english) {                         // German-only mode: no sentence English, only the glossary's, over a hovered term
+    if (hovTerm && hovTerm.isConnected && !document.body.classList.contains('noterms')) showTermPop(hovTerm);
+    else document.getElementById('pop').hidden = true;
+    return;
+  }
   const sp = hov || pinnedSpan();
   if (hov && hovPh) hovPh.classList.add('hot');
   if (sp) showPop(sp, hov ? hovPh : null); else document.getElementById('pop').hidden = true;
@@ -877,14 +901,14 @@ function setMode(on) {                   // switch the reading mode; the glossar
     const me = (b.dataset.m === 'en') === on;
     b.classList.toggle('on', me); b.setAttribute('aria-checked', me);
   });
-  sel = null; hov = null; hovPh = null;
+  sel = null; hov = null; hovPh = null; hovTerm = null;
   refreshPop();
   runSearch();                           // English hits come and go with the mode; with no query this just re-renders
 }
 document.querySelectorAll('#mode button').forEach(b => { b.onclick = () => { if ((b.dataset.m === 'en') !== english) setMode(b.dataset.m === 'en'); }; });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && sel) { sel = null; markSelected(); } });
 document.addEventListener('click', () => { if (sel) { sel = null; markSelected(); } });
-document.getElementById('reader').addEventListener('scroll', () => { hov = null; hovPh = null; refreshPop(); });
+document.getElementById('reader').addEventListener('scroll', () => { hov = null; hovPh = null; hovTerm = null; refreshPop(); });
 window.addEventListener('resize', refreshPop);
 document.getElementById('goaa').addEventListener('change', e => {
   const n = +e.target.value, w = W();
