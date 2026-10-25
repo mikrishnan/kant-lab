@@ -299,10 +299,10 @@ function sectionText(it, n) {
 
 // ── Shared pieces ─────────────────────────────────────────────────────────────
 function ctrl(step, max, labels, onchange) {
-  const c=el('div','ctrl'); const less=el('button',null,'◂ less'), more=el('button',null,'more context ▸'), full=el('button',null,labels.fullBtn), lab=el('span','lvl','');
-  c.append(less,more,full,lab);
-  function upd() { less.disabled=step<=0; more.disabled=step>=max; full.disabled=(step===2 && max===2); lab.textContent='showing: '+labels.names[step]; }
-  less.onclick=()=>{step--;upd();onchange(step)}; more.onclick=()=>{step++;upd();onchange(step)}; full.onclick=()=>{step=2;upd();onchange(step)};
+  const c=el('div','ctrl'); const less=el('button',null,'◂ less context'), more=el('button',null,'more context ▸'), lab=el('span','lvl','');
+  c.append(less,more,lab);
+  function upd() { less.disabled=step<=0; more.disabled=step>=max; lab.textContent='showing: '+labels.names[step]; }
+  less.onclick=()=>{step--;upd();onchange(step)}; more.onclick=()=>{step++;upd();onchange(step)};
   upd(); return c;
 }
 const TAGS = { D:{cls:'define',label:'DEFINES'}, C:{cls:'contrast',label:'CONTRASTS WITH IMMEDIATE'}, P:{cls:'principle',label:'PRINCIPLE / RULE'} };
@@ -320,7 +320,7 @@ function lectureCard(it) {
   card.appendChild(el('div','crumb', SRC[SRC_ORDER[it.k]].chip+' › '+secTitle(it.s)));
   const box=el('div','ctx'); card.appendChild(box);
   const max=maxStep(it); const step=Math.min(it.start,max); renderLecture(it,step,box);
-  card.appendChild(ctrl(step,max,{names:LSTEP,fullBtn:'full paragraph'},s=>renderLecture(it,s,box)));
+  card.appendChild(ctrl(step,max,{names:LSTEP},s=>renderLecture(it,s,box)));
   if (it.note) { const n=el('p','note'); n.appendChild(el('b',null,'NOTE ')); n.appendChild(document.createTextNode(it.note)); card.appendChild(n); }
   return card;
 }
@@ -350,7 +350,7 @@ function reflCard(it) {
   L.appendChild(el('h4',null,'KANT’S NOTE')); const lb=el('div','ctx'); L.appendChild(lb);
   const short = it.text.length<=900 || it.text.split('\n').length<=7; const step0 = short ? 2 : 0;
   renderReflLeft(it,step0,lb);
-  L.appendChild(ctrl(step0,2,{names:RSTEP,fullBtn:'whole Reflexion'},s=>renderReflLeft(it,s,lb)));
+  L.appendChild(ctrl(step0,2,{names:RSTEP},s=>renderReflLeft(it,s,lb)));
   R.appendChild(el('h4',null, it.w==='meier' ? 'MEIER, AUSZUG AUS DER VERNUNFTLEHRE' : 'BAUMGARTEN, METAPHYSICA'));
   const rb=el('div','ctx'); R.appendChild(rb); const st=el('div','stepper'); const flag=el('div','flag');
   if (it.focus==null) { rb.appendChild(el('span','flag','The edition names no § for this Reflexion, so there is no passage of '+work+' to set beside it.')); }
