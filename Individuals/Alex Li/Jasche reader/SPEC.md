@@ -3,11 +3,11 @@
 *The spec is the source of truth for this tool. When the tool's behaviour changes, this
 file changes in the same pull request.*
 
-**Status:** first version built; revision 3 designed, not yet built. [index.html](index.html) is
-the tool, running on the data in the repository. [mockup.html](mockup.html) is now the static
-preview of revision 3 (revision 2, which the first version was built from, is in the history of
-pull request 44). Behaviour items marked **(built)** work in index.html; **(rev. 3)** marks what
-revision 3 adds or changes; the others are planned.
+**Status:** revision 3 built. [index.html](index.html) is the tool, running on the data in the
+repository. [mockup.html](mockup.html) is the static preview revision 3 was built from (revision 2,
+which the first version was built from, is in the history of pull request 44). Behaviour items
+marked **(built)** work in index.html, and **(rev. 3)** marks what revision 3 added or changed,
+all of it built; items without either mark are planned.
 
 ## Question
 
@@ -145,7 +145,7 @@ between Meier §§ and Jäsche pages, where a block header gives one.
 - *The Meier § behind a Jäsche passage, where the AA gives no concordance* (all of the
   Elementarlehre and Methodenlehre). Taken from the §§ of the Reflexionen it matches, and
   labelled "inferred from the matches".
-- *Transcript matches* (proposed, item 16). Sentence-level parallels in the transcripts,
+- *Transcript matches* (item 16). Sentence-level parallels in the transcripts,
   labelled as parallels and never as dated sources. They replace the section-level transcript
   parallels of the first version, which are removed (item 8).
 - *Flags.* Conditions the page computes, worded as observations and never as verdicts.
@@ -244,17 +244,24 @@ always on screen.
     *Contents* tab: clicking it folds the contents to a slim rail, clicking it again brings them
     back. On the right, clicking the tab already open (marked ×) folds the panel to a rail of
     the three tab names; clicking a name opens the panel at that tab. With both folded the text
-    takes the full width. Like all the page's state, the layout is lost on reload.
-15. *Go to* is a small box, not a long drop-down. Typing a § number or an AA 9 page offers the
-    matches in a list of six rows at most.
-16. *(proposed, not agreed)* **Transcript matches**, a tick box in the Sources tab ("also show
-    transcript matches"), off by default. Sources then adds grey cards for the sentences of the § in view that have a close
-    parallel in a transcript. A card gives the transcript, its date and AA 24 page, both texts,
+    takes the full width. The layout is remembered between visits (see item 18).
+15. *Go to* is a small box, not a long drop-down. Typing a § number, an AA 9 page (`57` or
+    `9:57`) or words of a heading offers the matches in a list of six rows at most; Enter or a
+    click goes to the one chosen.
+16. **Transcript matches**, a tick box in the Sources tab ("also show parallels in the student
+    transcripts"), off by default. Sources then adds grey cards for the sentences of the § in
+    view that have a close parallel in a transcript: ≥ 60% of the sentence's words in order, or
+    ≥ 70% of its content words (at least four) within one passage twice its length. A card gives the transcript, its date and AA 24 page, both texts,
     the strength, and the words "a parallel, not one of Jäsche's sources". The matching is done
     sentence by sentence (words in order, or most of the content words within one passage),
     never section by section.
 17. All charts and tables share one type scale: labels in 10 px Cinzel, figures in 13 px EB
     Garamond, at the panel's full width.
+18. The page remembers, in the browser, which sides are open, the tab, X-Ray mode, the contents
+    view and the transcript tick box, and reopens as it was left. Nothing else is stored, and the
+    *Hold here* position is not kept. This is the one exception to the repository's
+    no-persistence rule, at the owner's request. A browser that refuses storage (some do for
+    pages opened from a file) simply starts with the defaults.
 
 ## Out of scope
 
@@ -296,7 +303,7 @@ always on screen.
    Hinske (2000) read at first hand.
 8. *From the mockup's design notes:* should search also cover the Reflexionen? Should the
    timeline draw a mixed note's span as a bar? Should the strip have a column per page or per §?
-9. *From the revision 3 mockup:* keep *Hold here* (item 7), or drop pinning altogether? Reopen the
-   page with the sides open or folded as they were left (item 14)? It would be the first thing the app stores in the
-   browser. Build item 16, and if so, should X-Ray mark those sentences too, say with a grey
-   dotted underline? Bars per entry only (item 2a), or a per-page strip as well?
+9. *From the revision 3 mockup:* ~~keep *Hold here*?~~ Kept. ~~Remember the layout?~~ Yes (item
+   18). ~~Build item 16?~~ Built. Still open: should X-Ray mark the sentences with a transcript
+   parallel too, say with a grey dotted underline? And are bars per entry (item 2a) enough, or
+   is a per-page strip wanted back somewhere?
