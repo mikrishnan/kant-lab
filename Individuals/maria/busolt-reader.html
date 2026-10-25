@@ -121,6 +121,34 @@ body.noinf .blk.inf .tx { border-bottom: 0; }
 .blk.rule { padding-left: 4.6em; }
 .blk.rule hr { border: 0; border-top: 1px solid var(--line); margin: .6em 0; }
 mark { background: var(--hit); color: inherit; padding: 0 1px; border-radius: 2px; }
+/* Busolt's first page: the title page and the AA's table of contents, set as a contents table */
+.titlepage { text-align: center; margin: 6px 0 22px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.titlepage .blk { margin-bottom: .15em; }
+.titlepage .blk.big .tx { font-family: 'Cinzel', serif; font-size: 1.2rem; letter-spacing: .05em; color: #2e1a00; }
+.titlepage .blk.small .tx { font-style: italic; font-size: .95rem; }
+.toc { position: relative; padding-left: 4.6em; margin-bottom: 1.4em; }
+.toc .mg { position: absolute; left: 0; top: .25em; width: 3.8em; text-align: right; font-family: 'Cinzel', serif; font-size: .68rem; color: var(--aa-ink); }
+.toc-head { text-align: center; margin-bottom: 10px; }
+.toc-head .tx { font-family: 'Cinzel', serif; font-size: 1.1rem; letter-spacing: .08em; color: #2e1a00; }
+.toc-head .en { display: block; font-size: .8rem; font-style: italic; color: var(--faded); }
+.toc-cols { display: flex; justify-content: space-between; font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faded); border-bottom: 1px solid var(--line); padding: 0 6px 2px; margin-bottom: 4px; }
+.toc-row { display: flex; align-items: baseline; gap: .45em; padding: 2px 6px; border-radius: 3px; cursor: pointer; scroll-margin-top: 12px; }
+.toc-row:hover { background: var(--parch-dark); }
+.toc-row .lead { flex: 1; min-width: 1.5em; border-bottom: 1px dotted var(--line); position: relative; top: -.3em; }
+.toc-row .p { font-family: 'Cinzel', serif; font-size: .76rem; color: var(--aa-ink); white-space: nowrap; }
+.toc-row.part { margin-top: .45em; font-variant: small-caps; letter-spacing: .03em; font-size: 1.04em; }
+.toc-row.flash { background: var(--hit); transition: background 1.5s; }
+.toc-sub { margin: 0 0 .3em 1.1em; padding-left: .7em; border-left: 1px dashed var(--accent-lt); }
+.toc-sub .toc-row { font-size: .96em; }
+body.noinf .toc-sub { border-left-color: transparent; }
+.toc-grp { margin: .7em 0 .15em; padding: 0 6px; font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .05em; color: var(--accent-lt); cursor: pointer; border-bottom: 1px dashed var(--line); }
+.toc-grp:first-child { margin-top: .2em; }
+.toc-grp:hover { color: var(--accent); background: var(--parch-dark); }
+.toc-grp .k { display: inline-block; margin-right: .6em; padding: 0 5px; border: 1px dashed var(--accent-lt); border-radius: 3px; font-size: .62rem; }
+.toc-grp .pp { float: right; font-family: 'EB Garamond', serif; font-style: italic; font-size: .78rem; color: var(--faded); letter-spacing: 0; }
+body.noinf .toc-grp { display: none; }
+.toc-note { font-size: .78rem; font-style: italic; color: var(--faded); margin-top: 8px; }
+body.noinf .toc-note { display: none; }
 .step { display: flex; justify-content: space-between; margin-top: 30px; font-size: .9rem; }
 .step a { color: var(--accent); cursor: pointer; }
 #side {
@@ -240,6 +268,20 @@ const WORKS = [
   logikWork('blomberg', LOGIK_BLOMBERG, 'Logik Blomberg', 'ca. 1771'),
   meierWork(MEIER_AUSZUG)
 ];
+
+/* Busolt's contents, grouped by the divisions of Meier's Auszug that the lectures follow. The grouping
+   is the reader's, not the AA's: each group starts at the entry whose title begins with `from`, and
+   names (and opens) the Meier sections it parallels, by their tab numbers. */
+const TOC_GROUPS = {
+  busolt: [
+    { from: 'Von der Vollkommenheit', meier: ['1.1', '1.7'] },
+    { from: 'Von den Begriffen',      meier: ['1.8'] },
+    { from: 'Von den Urtheilen',      meier: ['1.9'] },
+    { from: 'Regeln der Vernunft',    meier: ['1.10'] },
+    { from: 'Die Praktische Logic',   meier: ['2.1'] },
+    { from: 'Vom Gebrauch der Wörter', meier: ['3.1'] }
+  ]
+};
 
 /* ── state ── */
 let wi = 0;              // the text on show
@@ -453,6 +495,99 @@ function margin(w, b, prev) {
   return any ? m : null;
 }
 
+/* The AA prints Busolt's table of contents as a run of one-line blocks — a title, then its page —
+   after a block ending in "Inhaltsverzeichnis". Found here and set as a contents table: the printed
+   titles and pages verbatim, each row opening the section it names. Only the indentation is the
+   reader's own: the AA prints the list flat, and entries are indented beneath an entry whose page is
+   a range ("Abhandlung der Logic 616-686") when their pages fall inside it. */
+const tocKey = t => t.toLowerCase().replace(/ß/g, 'ss').replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
+  .replace(/c/g, 'k').replace(/[^a-z]/g, '').replace(/(.)\1+/g, '$1');
+function tocRun(w, s) {
+  if (!w.logik) return null;
+  const B = s.blocks, h = B.findIndex(b => b.kind === 'text' && /Inhaltsverzeichnis$/.test(b.text));
+  if (h < 0) return null;
+  const entries = [];
+  let i = h + 1;
+  for (; i + 1 < B.length && /^\d+(-\d+)?$/.test(B[i + 1].text); i += 2) {
+    const k = tocKey(B[i].text), [a, z] = B[i + 1].text.split('-').map(Number);
+    const target = w.sections.findIndex((x, j) => j !== cur && !x.untitled && tocKey(x.label).includes(k));
+    entries.push({ b: B[i], pb: B[i + 1], a, z: z || a, target });
+  }
+  return entries.length ? { head: h, end: i, entries } : null;
+}
+function tocRow(w, e) {
+  const row = el('div', 'toc-row');
+  row.id = e.b.id;
+  const t = el('span', 'tx'), units = unitsFor(w, e.b);
+  if (units) renderSentences(t, e.b, units); else addTx(t, e.b, 0, e.b.text.length);
+  const p = el('span', 'p');
+  p.id = e.pb.id;
+  addTx(p, e.pb, 0, e.pb.text.length);
+  row.append(t, el('span', 'lead'), p);
+  if (e.target >= 0) {
+    const sec = w.sections[e.target];
+    row.title = 'Open “' + sec.label + '” (AA 24:' + secPages(sec) + ')';
+    // capture, so a click opens the section rather than pinning the sentence; hovering still shows the English
+    row.addEventListener('click', ev => { ev.stopPropagation(); hov = null; hovPh = null; refreshPop(); show(e.target); }, true);
+  } else row.style.cursor = 'default';
+  return row;
+}
+function tocGroup(g, M) {                  // a Meier division heading over the entries that parallel it
+  const secs = WORKS[M].sections, ix = g.meier.map(n => secs.findIndex(x => x.tabNo === n));
+  const first = secs[ix[0]], last = secs[ix[ix.length - 1]];
+  const d = el('div', 'toc-grp');
+  const roman = n => ['', 'I', 'II', 'III', 'IV'][+n.split('.')[0]] + '.' + n.split('.')[1];
+  d.appendChild(el('span', 'k', 'Meier ' + roman(g.meier[0]) + (g.meier[1] ? '–' + g.meier[1].split('.')[1] : '')));
+  d.appendChild(document.createTextNode(ix.length > 1 ? first.headings[0] : first.label));
+  const pp = [first.blocks[0].n, last.blocks[last.blocks.length - 1].n];
+  d.appendChild(el('span', 'pp', '§§ ' + pp[0] + '–' + pp[1]));
+  d.title = 'Open Meier’s Auszug at ' + first.label + ' (§ ' + pp[0] + ')';
+  d.onclick = ev => { ev.stopPropagation(); showWork(M, ix[0]); };
+  return d;
+}
+function renderToc(page, w, s, run) {
+  const B = s.blocks, prev = { end: 0, b: null };
+  const tp = el('div', 'titlepage');
+  B.slice(0, run.head).forEach((b, k) => {
+    const d = renderBlock(b);
+    d.classList.add(k < 3 ? 'big' : 'small');
+    const m = margin(w, b, prev); if (m) d.insertBefore(m, d.firstChild);
+    prev.end = b.aaEnd || b.aa; prev.b = b;
+    tp.appendChild(d);
+  });
+  if (tp.childNodes.length) page.appendChild(tp);
+  const toc = el('div', 'toc');
+  const hb = B[run.head], first = run.entries[0].b;
+  if (first.aa !== prev.end) toc.appendChild(el('span', 'mg', 'AA ' + first.aa));
+  const head = el('div', 'toc-head');
+  head.id = hb.id;
+  const ht = el('span', 'tx'), hu = unitsFor(w, hb);
+  if (hu) renderSentences(ht, hb, hu); else addTx(ht, hb, 0, hb.text.length);
+  head.append(ht, el('span', 'en', 'Table of contents'));
+  toc.append(head, el('div', 'toc-cols'));
+  toc.lastChild.append(el('span', null, 'Section'), el('span', null, 'AA 24'));
+  let box = null, range = null, nested = false;
+  const groups = TOC_GROUPS[w.key] || [], M = WORKS.findIndex(x => x.key === 'meier');
+  const used = new Set();
+  run.entries.forEach(e => {
+    if (range && e.a >= range[0] && e.a <= range[1]) {
+      if (!box) { box = el('div', 'toc-sub'); toc.appendChild(box); nested = true; }
+      const g = groups.find(g => !used.has(g) && e.b.text.startsWith(g.from));
+      if (g) { used.add(g); box.appendChild(tocGroup(g, M)); }
+      box.appendChild(tocRow(w, e));
+      return;
+    }
+    box = null; range = e.z > e.a ? [e.a, e.z] : null;
+    const r = tocRow(w, e);
+    if (range) r.classList.add('part');
+    toc.appendChild(r);
+  });
+  if (nested) toc.appendChild(el('div', 'toc-note', 'Titles and pages as the AA prints them; click a title to open its section. The structure is the reader’s, not the AA’s, which sets the list flat: the indented entries are those whose pages fall within the range printed beside the entry above them, and the headings over them are the divisions of Meier’s Auszug that the lectures follow (click one to open it in the Meier tab).'));
+  page.appendChild(toc);
+  prev.end = run.entries[run.entries.length - 1].pb.aa; prev.b = run.entries[run.entries.length - 1].pb;
+  return { from: run.end, prev };
+}
+
 function show(i, blockId) {
   const w = W();
   if (i < 0 || i >= w.sections.length) return;
@@ -462,8 +597,10 @@ function show(i, blockId) {
   page.appendChild(el('h2', null, s.label));
   if (s.headings.length) page.appendChild(el('div', 'heads', (w.logik ? 'Manuscript heading: ' : '') + s.headings.join(' · ')));
   page.appendChild(el('div', 'prov', s.provenance + (w.logik && secPages(s) ? ' · AA 24:' + secPages(s) : '')));
-  const prev = { end: 0, b: null };
-  s.blocks.forEach(b => {
+  const run = tocRun(w, s);
+  let prev = { end: 0, b: null }, from = 0;
+  if (run) ({ from, prev } = renderToc(page, w, s, run));
+  s.blocks.slice(from).forEach(b => {
     const d = renderBlock(b);
     if (b.kind !== 'rule') {
       const m = margin(w, b, prev);
