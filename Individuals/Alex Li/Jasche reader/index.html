@@ -41,6 +41,8 @@
   header nav a { color: var(--faded); }
 
   .app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) var(--panel-w); }
+  .app.panel-off { grid-template-columns: minmax(0, 1fr) 2rem; }
+  .app.panel-off .panel { display: none; }
   .reader, .panel { min-height: 0; display: flex; flex-direction: column; }
   .panel { border-left: 1px solid var(--accent-light); background: #f9f4e8; }
 
@@ -54,7 +56,14 @@
   .btn:disabled { opacity: 0.4; cursor: default; }
   .count { font-size: 0.84rem; color: var(--faded); min-width: 4rem; text-align: center; white-space: nowrap; }
   .opt { font-size: 0.85rem; color: var(--faded); display: inline-flex; gap: 0.25rem; align-items: center; cursor: pointer; white-space: nowrap; }
-  .bar select { padding: 0.25rem 0.4rem; background: #fffaf0; border: 1px solid var(--accent-light); border-radius: 2px; max-width: 15rem; }
+  .goto { position: relative; }
+  .goto input { width: 11.5rem; padding: 0.28rem 0.5rem; background: #fffaf0; border: 1px solid var(--accent-light); border-radius: 2px; }
+  .goto input:focus { outline: 2px solid rgba(139, 94, 60, 0.4); }
+  .golist { position: absolute; left: 0; top: calc(100% + 3px); width: 17rem; background: #fffaf0; border: 1px solid var(--accent-light); box-shadow: 0 8px 22px rgba(60, 40, 10, 0.22); z-index: 20; font-size: 0.86rem; }
+  .golist button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 0.22rem 0.55rem; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .golist button:hover, .golist button.on { background: rgba(139, 94, 60, 0.18); }
+  .golist b { font-weight: 600; }
+  .golist .none { padding: 0.3rem 0.55rem; color: var(--faded); font-style: italic; white-space: normal; }
   .xray { display: inline-flex; align-items: center; gap: 0.55rem; font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.07em; padding: 0.38rem 0.8rem; border: 1px solid rgb(var(--d-early)); border-radius: 2px; background: transparent; color: rgb(var(--d-early)); cursor: pointer; }
   .xray i { width: 1.7rem; height: 0.9rem; border-radius: 0.45rem; background: var(--rule); position: relative; display: inline-block; transition: background 0.15s; }
   .xray i::after { content: ''; position: absolute; left: 0.12rem; top: 0.12rem; width: 0.66rem; height: 0.66rem; border-radius: 50%; background: #fff; transition: left 0.15s; }
@@ -62,9 +71,34 @@
   .xray[aria-pressed="true"] i { background: rgb(var(--d-90s)); }
   .xray[aria-pressed="true"] i::after { left: 0.92rem; }
 
-  .body { flex: 1; min-height: 0; display: grid; grid-template-columns: 240px minmax(0, 1fr); }
+  .body { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.8rem 280px minmax(0, 1fr); }
+  .body.toc-off { grid-template-columns: 1.8rem minmax(0, 1fr); }
+  .body.toc-off .toc { display: none; }
+  /* rails: each side opens and closes from its own tab button */
+  .rail { background: var(--parchment); display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding-top: 0.55rem; min-height: 0; }
+  .rail.l { border-right: 1px solid var(--rule); }
+  .rail.r { border-left: 1px solid var(--accent-light); display: none; }
+  .app.panel-off .rail.r { display: flex; }
+  .vt { writing-mode: vertical-rl; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--accent); border: 1px solid var(--accent-light); border-radius: 3px; padding: 0.6rem 0.18rem; background: #efe7d4; cursor: pointer; }
+  .vt:hover { background: var(--parchment-dark); }
+  .vt[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
   .toc { border-right: 1px solid var(--rule); background: #f9f4e8; overflow-y: auto; padding: 0.7rem 0.4rem 3rem 0.7rem; font-size: 0.92rem; }
-  .toc h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.7rem; letter-spacing: 0.07em; color: var(--faded); margin-bottom: 0.35rem; }
+  .toc h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.7rem; letter-spacing: 0.07em; color: var(--faded); }
+  .tochead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem; padding-right: 0.3rem; }
+  .seg { display: inline-flex; border: 1px solid var(--accent); border-radius: 2px; overflow: hidden; }
+  .seg button { background: transparent; border: none; padding: 0.08rem 0.45rem; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.05em; color: var(--accent); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .tocnote { font-size: 0.76rem; color: var(--faded); font-style: italic; line-height: 1.3; margin: 0 0.3rem 0.3rem 0; }
+  .tb { display: block; position: relative; height: 0.5rem; background: #ece3cf; border-radius: 1px; margin: 0.18rem 0 0.12rem; overflow: hidden; }
+  .tb span { position: absolute; top: 0; bottom: 0; }
+  .tb[data-stat]:hover { box-shadow: 0 0 0 1.5px var(--accent); }
+  .tip { position: fixed; z-index: 30; width: 16.5rem; background: #fffaf0; border: 1px solid var(--accent); box-shadow: 0 6px 18px rgba(60, 40, 10, 0.28); padding: 0.4rem 0.6rem 0.45rem; font-size: 0.84rem; line-height: 1.3; pointer-events: none; }
+  .tip .th { font-weight: 600; margin-bottom: 0.1rem; }
+  .tip .ts { font-size: 0.75rem; color: var(--faded); font-style: italic; margin: 0.1rem 0 0.2rem; }
+  .tip .tr { display: flex; align-items: center; gap: 0.1rem; padding: 0.05rem 0; }
+  .tip .tr b { margin-left: auto; font-weight: 600; min-width: 2.3rem; text-align: right; }
+  .tip .tr small { color: var(--faded); font-size: 0.75rem; min-width: 3.3rem; text-align: right; }
+  .tip .tr.un { border-top: 1px solid var(--rule); margin-top: 0.15rem; padding-top: 0.2rem; color: var(--faded); }
   .toc .part { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--accent); margin: 0.8rem 0 0.2rem; }
   .toc .row { display: flex; align-items: baseline; }
   .toc button.t { flex: 1; text-align: left; background: transparent; border: none; cursor: pointer; padding: 0.1rem 0.35rem; border-radius: 2px; line-height: 1.3; color: var(--ink); }
@@ -113,6 +147,13 @@
   .tab { flex: 1; text-align: center; padding: 0.35rem 0.2rem 0.4rem; font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.05em; color: var(--accent); border: 1px solid var(--accent-light); border-bottom: none; border-radius: 3px 3px 0 0; background: #efe7d4; cursor: pointer; line-height: 1.25; }
   .tab:hover { background: var(--parchment-dark); }
   .tab[aria-selected="true"] { background: #f9f4e8; position: relative; top: 1px; font-weight: 600; }
+  .tab .x { display: none; font-family: 'EB Garamond', serif; font-weight: 400; color: var(--faded); margin-left: 0.25rem; }
+  .tab[aria-selected="true"] .x { display: inline; }
+  .follow { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.9rem; background: #eef2f7; border-bottom: 1px solid #c9d6e6; font-size: 0.84rem; color: rgb(var(--d-early)); flex: none; }
+  .follow .dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: rgb(var(--d-70s)); box-shadow: 0 0 0 3px rgba(47, 93, 138, 0.18); flex: none; }
+  .follow.held { background: #f3ede2; border-bottom-color: var(--rule); color: var(--accent); }
+  .follow.held .dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(92, 61, 30, 0.18); border-radius: 1px; }
+  .follow .hold { margin-left: auto; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.05em; padding: 0.12rem 0.5rem; border: 1px solid currentColor; border-radius: 2px; color: inherit; background: #fff; cursor: pointer; white-space: nowrap; }
   .tab small { display: block; font-family: 'EB Garamond', serif; font-size: 0.74rem; letter-spacing: 0; color: var(--faded); font-weight: 400; }
   .leg { display: flex; flex-wrap: wrap; gap: 0.15rem 0.75rem; padding: 0.4rem 0.9rem; border-bottom: 1px solid var(--rule); font-size: 0.8rem; color: var(--faded); align-items: center; flex: none; }
   .sw { display: inline-block; width: 0.72rem; height: 0.72rem; border-radius: 2px; vertical-align: -0.08em; margin-right: 0.22rem; }
@@ -152,29 +193,29 @@
   .extra { color: #a89a80; }
   .linkbtn { background: none; border: none; color: var(--accent-light); text-decoration: underline; cursor: pointer; font-size: 0.8rem; padding: 0; }
 
-  .strip, .donut, .tl { width: 100%; height: auto; display: block; }
-  .strip { background: #fffaf0; border: 1px solid var(--rule); border-radius: 3px; }
-  .sub2 { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.05em; color: var(--faded); margin: 0.75rem 0 0.2rem; }
+  /* one type scale for every chart and table: labels 0.62rem Cinzel, figures 0.84rem Garamond */
+  .tl { width: 100%; height: auto; display: block; }
+  .donut { width: 7.5rem; height: 7.5rem; flex: none; display: block; }
+  .ovrow { display: flex; gap: 0.9rem; align-items: center; }
+  .ovrow table.tot { flex: 1; margin-top: 0; }
+  .sub2 { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.06em; color: var(--faded); font-weight: 600; margin: 1rem 0 0.35rem; }
+  .sub2.first { margin-top: 0.1rem; }
+  .muted2 { font-family: 'EB Garamond', serif; font-weight: 400; letter-spacing: 0; font-size: 0.78rem; }
+  .meta.note { margin-top: 0.8rem; line-height: 1.4; }
+  .txopt { display: flex; margin: 0 0 0.6rem; }
+  .txs { border-top: 1px dashed #e2d8c2; padding-top: 0.35rem; margin-top: 0.4rem; }
+  .xcard { background: #f4f1ea; border: 1px dashed #9c8f78; border-left: 4px solid #9c8f78; border-radius: 3px; padding: 0.35rem 0.55rem; margin: 0.3rem 0 0.4rem; }
+  .xcard .ph { display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+  .xcard .wl { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.74rem; color: #4b3a22; }
   .meter { margin-top: 0.6rem; }
-  .mtrack { height: 0.75rem; background: #ece3cf; border-radius: 3px; display: flex; overflow: hidden; }
+  .mtrack { height: 0.65rem; background: #ece3cf; border-radius: 3px; display: flex; overflow: hidden; }
   .mtrack span { display: block; height: 100%; border-right: 2px solid #f9f4e8; }
-  .mkey { display: flex; flex-wrap: wrap; gap: 0.1rem 0.7rem; font-size: 0.78rem; color: #3d2e18; margin-top: 0.25rem; }
+  .mkey { display: flex; flex-wrap: wrap; gap: 0.1rem 0.7rem; font-size: 0.84rem; color: #3d2e18; margin-top: 0.25rem; }
   .mkey i { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 2px; margin-right: 0.2rem; vertical-align: -0.05em; }
-  table.tot { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 0.6rem; }
+  table.tot { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-top: 0.2rem; }
   table.tot th { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.05em; color: var(--faded); text-align: left; font-weight: 600; border-bottom: 1px solid var(--rule); padding: 0.15rem 0.25rem; }
   table.tot td { padding: 0.12rem 0.25rem; border-bottom: 1px solid #ece3cf; }
   table.tot td:nth-child(n+2), table.tot th:nth-child(n+2) { text-align: right; }
-
-  .wit { background: #fffaf0; border: 1px solid var(--rule); border-left: 4px solid var(--accent-light); border-radius: 3px; padding: 0.45rem 0.65rem; margin-bottom: 0.5rem; }
-  .wit.dim { opacity: 0.65; }
-  .wit .wh { display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
-  .wit .date { font-size: 0.8rem; color: var(--faded); }
-  .tag { font-size: 0.72rem; padding: 0 0.35rem; border: 1px solid var(--accent-light); border-radius: 2px; color: var(--accent); }
-  .tag.s1 { border-style: dashed; color: var(--faded); } .tag.s3 { font-weight: 600; border-color: var(--accent); }
-  .chips { margin: 0.2rem 0; line-height: 1.7; }
-  .chp { font-size: 0.76rem; padding: 0 0.35rem; margin-right: 0.15rem; border-radius: 2px; background: rgba(122,106,82,0.13); }
-  .chp.con { font-style: italic; background: rgba(139,94,60,0.2); }
-  .wit .ex { font-size: 0.86rem; color: #4b3a22; font-style: italic; }
 
   .fg { background: #fffaf0; border: 1px solid var(--rule); border-radius: 3px; padding: 0.45rem 0.65rem; margin-bottom: 0.55rem; }
   .fg.hot { border-color: var(--ink); }
@@ -193,7 +234,8 @@
     body { overflow: auto; }
     .app { display: block; }
     .reader { height: 75vh; } .panel { height: 90vh; border-left: none; border-top: 1px solid var(--accent-light); }
-    .body { grid-template-columns: 1fr; } .toc { display: none; }
+    .body, .body.toc-off { grid-template-columns: 1fr; } .toc, .rail { display: none !important; }
+    .app.panel-off .panel { display: flex; }
   }
 </style>
 </head>
@@ -205,7 +247,7 @@
   <nav><a href="SPEC.md">spec</a><a href="mockup.html">design mockup</a><a href="../logic-corpus.html">Logic Corpus ↗</a></nav>
 </header>
 
-<div class="app">
+<div class="app" id="app">
   <section class="reader" aria-label="Jäsche Logik">
     <div class="bar">
       <div class="find">
@@ -215,10 +257,11 @@
         <span class="count" id="count"></span>
       </div>
       <label class="opt" title="Let one printed spelling find the others: Schluß · Schlüsse, Logik · Logic, Begriff · Begrif"><input type="checkbox" id="loose" checked> spelling-tolerant</label>
-      <select id="goto" aria-label="Go to a section or §"></select>
+      <div class="goto"><input type="search" id="goto" placeholder="Go to § or AA page…" autocomplete="off" spellcheck="false" aria-label="Go to a §, an AA 9 page, or a heading"><div class="golist" id="golist" hidden></div></div>
       <button class="xray" id="xray" aria-pressed="false" title="Mark every sentence traced to one of Kant’s Reflexionen, coloured by the note’s dating">X-RAY MODE <i></i></button>
     </div>
-    <div class="body">
+    <div class="body" id="body">
+      <div class="rail l"><button class="vt" id="railToc" aria-pressed="true" title="Open or fold the contents">Contents</button></div>
       <nav class="toc" id="toc" aria-label="Contents"></nav>
       <div class="text" id="text"><div class="inner" id="inner"></div></div>
     </div>
@@ -226,19 +269,24 @@
 
   <aside class="panel" aria-label="Sources">
     <div class="tabs" id="tabs" role="tablist">
-      <button class="tab" role="tab" data-tab="ov" aria-selected="true">Overview<small>the whole book</small></button>
-      <button class="tab" role="tab" data-tab="src" aria-selected="false">Sources<small id="tab-src">the § in view</small></button>
-      <button class="tab" role="tab" data-tab="par" aria-selected="false">Transcript parallels<small>Blomberg · Wiener · Busolt</small></button>
-      <button class="tab" role="tab" data-tab="fl" aria-selected="false">Flags<small id="tab-fl">places to look at</small></button>
+      <button class="tab" role="tab" data-tab="ov" aria-selected="true">Overview<span class="x" aria-hidden="true">×</span><small>the whole book</small></button>
+      <button class="tab" role="tab" data-tab="src" aria-selected="false">Sources<span class="x" aria-hidden="true">×</span><small id="tab-src">the § in view</small></button>
+      <button class="tab" role="tab" data-tab="fl" aria-selected="false">Flags<span class="x" aria-hidden="true">×</span><small id="tab-fl">places to look at</small></button>
     </div>
+    <div class="follow" id="followbar" hidden></div>
     <div class="leg" id="legend"></div>
     <div class="pbody" id="pbody"></div>
     <div class="foot" id="foot">A machine reading, not a finding. A sentence is traced to a Reflexion when at least 70% of its words appear in that note in the same order, after folding spelling; Adickes’ datings are his, shown as he gives them.</div>
   </aside>
+  <div class="rail r" id="railR" aria-label="Open the panel">
+    <button class="vt" data-tab="ov">Overview</button><button class="vt" data-tab="src">Sources</button><button class="vt" data-tab="fl">Flags</button>
+  </div>
 </div>
+<div class="tip" id="tip" hidden></div>
 
 <!-- Shared data, as plain <script src> includes so the page still opens from a file:// URL.
-     The Jäsche Logik is Alex Li's own extraction (../logik-jasche-9.js); everything else is data/. -->
+     The Jäsche Logik is Alex Li's own extraction (../logik-jasche-9.js); everything else is data/.
+     The three transcripts are read only when the Sources tab is asked for transcript parallels. -->
 <script src="../../../data/reflexionen-16-meier.js"></script>
 <script src="../../../data/phases-adickes.js"></script>
 <script src="../../../data/logik-blomberg-24.js"></script>
@@ -246,107 +294,18 @@
 <script src="../../../data/logik-wiener-24.js"></script>
 <script src="../logik-jasche-9.js"></script>
 <script>
-/* ═══ the comparison engine: no DOM, only words ═══════════════════════════ */
-/* Section-wide, content-level comparison of the Jäsche Logik with other lectures.
-   Pure JS, no DOM: pasted into the page unchanged. */
-
-const SEM_STOP_RAW = `der die das den dem des ein eine einer einem einen eines und oder aber auch als wie so zu zur zum von vom mit bei nach aus auf an in im ist sind war waren wird werden wurde wurden sein seine seiner seinem seinen seines ihr ihre ihrer ihren ihrem ihm ihn sie es er wir ich du man nicht nur noch schon wenn weil dass daß da dann denn doch dieser diese dieses diesem diesen jeder jede jedes jedem jeden welche welcher welches welchen welchem wo wer was dabei dadurch daher dafür dagegen damit dazu hier hin her über unter vor für gegen durch ohne um bis sich selbst kann können müssen muß soll sollen will wollen mehr mehrere viel viele allen alle aller alles einige einigen andere anderen anderer anderes anders sehr nun also ob oder sowohl noch entweder zwar nämlich eben ganz gar immer schon doch wohl bloß blos bloße bloßen nur sondern denn weiter weit hat haben hatte hatten habe hast gibt giebt geben gegeben gehört gehören gehen geht kommt kommen kommt lassen läßt läßt lässt machen macht gemacht sagen sagt gesagt sagen heißt heißen heissen nennen genannt ist sei seien wäre wären würde würden kann könnte könnten mag mögen möge muss müssen musste mussten soll sollte sollten darf dürfen will wollte wollten zwei drei vier fünf erst erste ersten erstes zweite dritte dritten letzte letzten nach vor bei seit bis während wegen zwischen innerhalb außer außerhalb sofern sofern insofern wiefern wieweit weshalb warum wozu wonach woraus worin womit wodurch worauf wovon dieselbe derselbe dasselbe denselben demselben desselben derselben solche solcher solches solchen solchem solch gewisse gewissen gewisser gewisses etwas nichts jemand niemand kein keine keiner keinen keinem keines mein dein unser unsere unsrer unsre unsrem unserem unserer unserer eurer ihnen euch uns mir mich dir dich et est in ad de ex ut non quod sed si cum vel aut per qui quae quid quo sunt esse sit sint fuit enim autem ergo igitur atqui ita sic nec neque vero etiam quam tam hoc haec hic ille illa illud ipse ipsa ipsum eius eorum aliis alii alia alius ab ab cui quibus quam quem quas quos id ea eam eum eos eas ei ii pro sub super inter ante post contra sine apud ob propter sine tantum quoque beispiel beyspiel beispiele beyspiele exempel exempeln exemplum z b e d h i u s w f usw etc vgl nr s o bzw ganz recht eigentlich besonders überhaupt zuerst zuletzt endlich übrigens bisweilen oft öfters öfter zuweilen jederzeit niemals allemal allezeit hiermit hierzu hierbei hierin hierdurch hieraus hiervon hiebei hiedurch dadurch darum deswegen deßwegen deshalb folglich mithin demnach daraus darin darauf darüber davon dabei dazu wirklich gleichfalls ebenfalls`;
-
-/* Terms that name one concept. A passage that uses any of them is read as speaking of it,
-   in whichever language or spelling. Hand-written; extend it freely. */
-const SEM_CONCEPTS = [
-  ['Begriff', 'Begriff Begriffe Begrif Begrife conceptus conceptuum notio notiones Notion Concept'],
-  ['Urteil', 'Urtheil Urtheile Urtheilen judicium judicia iudicium iudicia judicium Judicio Judiciis'],
-  ['Schluss', 'Schluß Schlüße Schlüsse Vernunftschluß Vernunftschlüsse ratiocinium ratiocinia ratiocinio syllogismus syllogismi syllogistic Syllogistik Syllogismen Syllogismo'],
-  ['unmittelbarer Schluss', 'Verstandesschluß Verstandesschlüsse consequentia consequentiae immediata immediatas immediatis unmittelbar unmittelbare unmittelbaren'],
-  ['Merkmal', 'Merkmal Merkmale Merkmahl Merkmahle Merckmahl Merckmahle nota notae notam notis Notas'],
-  ['Gattung und Art', 'Gattung Gattungen genus generis genera species speciei specierum Species'],
-  ['Umfang', 'Umfang Sphäre Sphaera sphaera sphaeram Sphäre Weitläufigkeit'],
-  ['Hypothese', 'Hypothese Hypothesen Hypothesis hypothesis hypothetisch hypothetische hypothetischen hypothetica hypothetici Hypothetischen'],
-  ['Wahrscheinlichkeit', 'Wahrscheinlichkeit wahrscheinlich Wahrscheinliche probabilis probabilitas Scheinbarkeit'],
-  ['Meinen', 'Meinung Meinungen meinen Meynung Meynungen opinio opinari'],
-  ['Glauben', 'Glaube Glauben glauben fides'],
-  ['Wissen', 'Wissen wissen scientia Wißenschaft Wissenschaft Wissenschaften'],
-  ['Vorurteil', 'Vorurtheil Vorurtheile Vorurtheilen praejudicium praejudicia Praejudicium'],
-  ['Definition', 'Definition Definitionen definitio definitiones definiren Definizion Erklärung Erklärungen explicatio Exposition expositio Beschreibung Description descriptio'],
-  ['Eintheilung', 'Eintheilung Eintheilungen eintheilen Division divisio Dichotomie Eintheilen'],
-  ['Beweis', 'Beweis Beweise beweisen Beweiß demonstratio Demonstration demonstriren probatio Probe'],
-  ['Wahrheit', 'Wahrheit Wahrheiten wahr veritas verum Wahre'],
-  ['Irrtum', 'Irrthum Irrthümer Irthum irren error errores Irrtum'],
-  ['Klarheit', 'Klarheit klar klare klaren Klahrheit claritas clarus Klarheiten'],
-  ['Deutlichkeit', 'Deutlichkeit deutlich deutliche deutlichen distinctio distinctus Deutlichkeiten undeutlich'],
-  ['Gewissheit', 'Gewißheit gewiß Gewisheit certitudo certus Gewißheiten'],
-  ['Grund und Folge', 'antecedens consequens consequentia consequentiam Antecedens Consequens Folge Folgen'],
-  ['Modus', 'modus ponens ponentem tollens tollentem modum'],
-  ['disjunktiv', 'disjunctiv disjunctive disjunctiven disjunctivum disjunctivus Disjunction membra dividentia membris'],
-  ['kategorisch', 'kategorisch kategorische kategorischen categorisch categorische categorischen categoricum categoricus'],
-  ['Umkehrung', 'Umkehrung conversio conversionem convertiren Conversion Contraposition contrapositio contrapositionem Contraponiren'],
-  ['Gegensatz', 'contradictorisch contradictoria contradictorie contrarie contraria contrarium subcontrar subcontrarie subcontraria opposita oppositis entgegengesetzt Wiederspruch Widerspruch'],
-  ['Quantität', 'Quantität Quantitaet quantitas Quantitat'],
-  ['Qualität', 'Qualität Qualitaet qualitas Qualitat'],
-  ['Relation', 'Relation relatio Relationen'],
-  ['Modalität', 'Modalität Modalitaet modalitas problematisch problematische problematischen Problematisch assertorisch aßertorisch assertorische Aßertorisch apodiktisch apodictisch apodiktische Apodictisch'],
-  ['allgemein', 'allgemein allgemeine allgemeinen Allgemeine universalis universal universale particulair particular partikulär particulaer particularis besondre besondere einzeln einzelne singularis'],
-  ['Anschauung', 'Anschauung Anschauungen intuitus intuitiv intuitive'],
-  ['Sinnlichkeit', 'Sinnlichkeit Sinne sinnlich sinnliche sensitiv sensitiue sensus'],
-  ['Verstand', 'Verstand Verstandes Verstande intellectus intellectuell'],
-  ['Vernunft', 'Vernunft Vernünftig vernünftige rationalis'],
-  ['Logik', 'Logik Logic Logica logica logisch logische logischen Logicker Logiker'],
-  ['Philosophie', 'Philosophie philosophia Philosoph Philosophen philosophisch'],
-  ['Mathematik', 'Mathematik Mathematic mathematisch mathematische Mathematicker mathematicus Mathematiker'],
-  ['Kanon und Organon', 'Kanon Canon canon Organon organon Canonicon'],
-  ['analytisch', 'analytisch analytische Analytik analysis Analysis Analyse'],
-  ['synthetisch', 'synthetisch synthetische synthesis Synthesis Synthesin'],
-  ['Tautologie', 'Tautologie tavtologisch tautologisch Tavtologie Tautologische tavtologischen'],
-  ['Induktion', 'Induction inductio Inductio Analogie analogia Analogia'],
-  ['Kettenschluss', 'Prosyllogismus Episyllogismus Sorites polysyllogisticum Polysyllogistic Kettenschluß'],
-  ['Dilemma', 'Dilemma dilemma cornutus Cornutum Hörnerschluß'],
-  ['dictum de omni', 'dictum omni nullo'],
-  ['Horizont', 'Horizont Horizonte Horizonts'],
-  ['Unwissenheit', 'Unwissenheit Unwißenheit Unwissen ignorantia ignoranz'],
-  ['Gelehrsamkeit', 'Gelehrsamkeit Gelahrtsamkeit gelehrt gelahrt gelehrte Gelehrten Gelahrten'],
-  ['Postulat', 'Postulat Postulate Axiom Axiome Axiomen Theorem Theoreme Problem Probleme Lehnsatz Lehnsätze Lemma Scholion Scholien Corollarium Corollarien Grundsatz Grundsätze'],
-  ['Methode', 'Methode Manier methodisch Methodenlehre scholastisch popular populär populare'],
-  ['Idee', 'Idee Ideen Ideal'],
-  ['Erkenntnis', 'Erkenntniß Erkenntnisse Erkentniß Erkentnisse cognitio cognitiones Erkenntniss'],
-  ['Wesen', 'Wesen essentia essentialia Essentialia essentiale attributa Attribut attributum'],
-  ['Aristoteles', 'Aristoteles Aristotelis Aristoteli Aristotelische'],
-  ['Lüge', 'Lüge lügen Nothlüge Nothlügen mentiri'],
-  ['Mond', 'Mond Monde Monde Mondes Monds']
-];
+/* Function words, left out when a sentence is compared with the transcripts by its content words alone */
+const JR_STOP_RAW = `der die das den dem des ein eine einer einem einen eines und oder aber auch als wie so zu zur zum von vom mit bei nach aus auf an in im ist sind war waren wird werden wurde wurden sein seine seiner seinem seinen seines ihr ihre ihrer ihren ihrem ihm ihn sie es er wir ich du man nicht nur noch schon wenn weil dass daß da dann denn doch dieser diese dieses diesem diesen jeder jede jedes jedem jeden welche welcher welches welchen welchem wo wer was dabei dadurch daher dafür dagegen damit dazu hier hin her über unter vor für gegen durch ohne um bis sich selbst kann können müssen muß soll sollen will wollen mehr mehrere viel viele allen alle aller alles einige einigen andere anderen anderer anderes anders sehr nun also ob oder sowohl noch entweder zwar nämlich eben ganz gar immer schon doch wohl bloß blos bloße bloßen nur sondern denn weiter weit hat haben hatte hatten habe hast gibt giebt geben gegeben gehört gehören gehen geht kommt kommen kommt lassen läßt läßt lässt machen macht gemacht sagen sagt gesagt sagen heißt heißen heissen nennen genannt ist sei seien wäre wären würde würden kann könnte könnten mag mögen möge muss müssen musste mussten soll sollte sollten darf dürfen will wollte wollten zwei drei vier fünf erst erste ersten erstes zweite dritte dritten letzte letzten nach vor bei seit bis während wegen zwischen innerhalb außer außerhalb sofern sofern insofern wiefern wieweit weshalb warum wozu wonach woraus worin womit wodurch worauf wovon dieselbe derselbe dasselbe denselben demselben desselben derselben solche solcher solches solchen solchem solch gewisse gewissen gewisser gewisses etwas nichts jemand niemand kein keine keiner keinen keinem keines mein dein unser unsere unsrer unsre unsrem unserem unserer unserer eurer ihnen euch uns mir mich dir dich et est in ad de ex ut non quod sed si cum vel aut per qui quae quid quo sunt esse sit sint fuit enim autem ergo igitur atqui ita sic nec neque vero etiam quam tam hoc haec hic ille illa illud ipse ipsa ipsum eius eorum aliis alii alia alius ab ab cui quibus quam quem quas quos id ea eam eum eos eas ei ii pro sub super inter ante post contra sine apud ob propter sine tantum quoque beispiel beyspiel beispiele beyspiele exempel exempeln exemplum z b e d h i u s w f usw etc vgl nr s o bzw ganz recht eigentlich besonders überhaupt zuerst zuletzt endlich übrigens bisweilen oft öfters öfter zuweilen jederzeit niemals allemal allezeit hiermit hierzu hierbei hierin hierdurch hieraus hiervon hiebei hiedurch dadurch darum deswegen deßwegen deshalb folglich mithin demnach daraus darin darauf darüber davon dabei dazu wirklich gleichfalls ebenfalls`;
 
 /* ── words ──────────────────────────────────────────────────────────────── */
-function semNorm(w) {
+/* One spelling for the many the printings use, so that Erkenntniß, Erkentniß and erkenntnis meet */
+function jrNorm(w) {
   return w.toLowerCase().replace(/ß/g, 'ss').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/æ/g, 'ae')
     .replace(/gelahr/g, 'gelehr').replace(/ch/g, '\u0001').replace(/ph/g, 'f').replace(/th/g, 't')
     .replace(/c/g, 'k').replace(/\u0001/g, 'ch').replace(/y/g, 'i').replace(/tz|zz/g, 'z').replace(/(.)\1+/g, '$1');
 }
-const SEM_SUFFIX = ['ungen', 'ung', 'heiten', 'heit', 'keiten', 'keit', 'lichen', 'licher', 'liches', 'liche', 'lich', 'ischen', 'ischer', 'isches', 'ische', 'isch', 'ern', 'em', 'en', 'er', 'es', 'e', 's', 'n', 't'];
-function semStem(w) {
-  for (let pass = 0; pass < 3; pass++) {
-    let cut = false;
-    for (const suf of SEM_SUFFIX) if (w.length - suf.length >= 4 && w.endsWith(suf)) { w = w.slice(0, -suf.length); cut = true; break; }
-    if (!cut) break;
-  }
-  return w;
-}
-const SEM_STOP = new Set(SEM_STOP_RAW.split(/\s+/).filter(Boolean).map(w => semStem(semNorm(w))).concat(SEM_STOP_RAW.split(/\s+/).filter(Boolean).map(semNorm)));
-const SEM_CONCEPT_OF = new Map();
-SEM_CONCEPTS.forEach(([name, terms]) => terms.split(/\s+/).forEach(t => { SEM_CONCEPT_OF.set(semStem(semNorm(t)), name); SEM_CONCEPT_OF.set(semNorm(t), name); }));
-
-function semTokens(text) {
-  const out = [], re = /[A-Za-zÄÖÜäöüßæœ]+/g; let m;
-  while ((m = re.exec(text))) {
-    const n = semNorm(m[0]), st = semStem(n);
-    out.push({ raw: m[0], s: m.index, e: m.index + m[0].length, n, st, stop: SEM_STOP.has(n) || SEM_STOP.has(st) || st.length < 3 });
-  }
-  return out;
-}
-
-/* ── a block, as features ───────────────────────────────────────────────── */
-const SEM_EX = /(?:\bz\.\s?[bBeE]\.|\bzum\s+(?:beispiel|exempel|beyspiel)|\bbeispiel|\bbeyspiel|\bexempel|\bexemplum|\be\.\s?g\.|\bwie\s+z\.)/i;
-
-function semSentences(text) {
+const JR_STOP = new Set(JR_STOP_RAW.split(/\s+/).filter(Boolean).map(jrNorm));
+function jrSentences(text) {
   const out = []; let start = 0, m;
   const re = /[.!?]+["»”’)\]]*\s+(?=["«„“(\[]?[A-ZÄÖÜ0-9])/g;
   const abbr = /(?:^|[\s(])(?:d\.\s?h|d\.\s?i|z\.\s?b|z\.\s?e|u\.\s?s\.\s?w|u\.\s?s\.\s?f|u\.\s?dgl|u\.\s?a|s\.\s?w|s\.\s?o|v\.\s?a|bzw|etc|vgl|nr|dgl|dr|prof|st)\.$/i;
@@ -358,245 +317,6 @@ function semSentences(text) {
   if (start < text.length) out.push([start, text.length]);
   return out;
 }
-
-/* One block's content words (stems, with the parts of long compounds), the concepts it
-   speaks of, its collocations (two content words within three of each other in one
-   sentence) and its examples (the sentences that announce one). */
-function semBlock(b, vocab) {
-  const toks = semTokens(b.text), terms = [], pos = [];
-  toks.forEach(t => {
-    if (t.stop) return;
-    terms.push(t.st); pos.push({ term: t.st, s: t.s, e: t.e, raw: t.raw });
-    if (vocab && t.st.length >= 9) {
-      for (let i = 4; i <= t.st.length - 4; i++) {
-        const right = t.st.slice(i);
-        const left = [t.st.slice(0, i), t.st.slice(0, i - 1), t.st.slice(0, i - 2)].find(l => l.length >= 4 && vocab.has(l) && !SEM_STOP.has(l));
-        if (left && right.length >= 4 && vocab.has(right) && !SEM_STOP.has(right)) {
-          terms.push(left, right); pos.push({ term: left, s: t.s, e: t.e, raw: t.raw }, { term: right, s: t.s, e: t.e, raw: t.raw }); break;
-        }
-      }
-    }
-    const c = SEM_CONCEPT_OF.get(t.st) || SEM_CONCEPT_OF.get(t.n);
-    if (c) { terms.push('§' + c); pos.push({ term: '§' + c, s: t.s, e: t.e, raw: t.raw }); }
-  });
-  const colls = new Map(), sents = semSentences(b.text), exs = [];
-  sents.forEach(([a, z]) => {
-    const ts = toks.filter(t => t.s >= a && t.e <= z && !t.stop);
-    for (let i = 0; i < ts.length; i++) for (let j = i + 1; j < ts.length && j <= i + 3; j++) {
-      if (ts[i].st === ts[j].st) continue;
-      const key = ts[i].st < ts[j].st ? ts[i].st + '+' + ts[j].st : ts[j].st + '+' + ts[i].st;
-      if (!colls.has(key)) colls.set(key, { s: ts[i].s, e: ts[j].e });
-    }
-    if (SEM_EX.test(b.text.slice(a, z))) exs.push({ s: a, e: z, terms: new Set(ts.map(t => t.st)) });
-  });
-  return { terms, pos, colls, exs, words: toks.filter(t => !t.stop).length };
-}
-
-/* ── the model: units of Jäsche, windows of the lectures ────────────────── */
-const SEM_UNIT_WORDS = 130;      // an Einleitung chunk is about this long
-const SEM_WIN = [110, 260];      // window sizes, in content words
-
-function semCount(terms) { const m = new Map(); terms.forEach(t => m.set(t, (m.get(t) || 0) + 1)); return m; }
-
-function semBuild(J, sources) {
-  // 1. the vocabulary a compound may be split into: stems that stand alone somewhere
-  const all = [];
-  const vocabCount = new Map();
-  const eachBlock = f => { J.sections.forEach((s, si) => s.blocks.forEach(b => b.kind === 'text' && f('jasche', s, si, b))); sources.forEach(S => S.data.sections.forEach((s, si) => s.blocks.forEach(b => b.kind === 'text' && b.text && f(S.key, s, si, b)))); };
-  const surf = new Map();
-  eachBlock((w, s, si, b) => {
-    const toks = semTokens(b.text);
-    new Set(toks.filter(t => !t.stop && t.st.length >= 4).map(t => t.st)).forEach(t => vocabCount.set(t, (vocabCount.get(t) || 0) + 1));
-    toks.forEach(t => { if (t.stop) return; let m = surf.get(t.st); if (!m) surf.set(t.st, m = new Map()); const r = t.raw.toLowerCase(); m.set(r, (m.get(r) || 0) + 1); });
-  });
-  const surface = st => { const m = surf.get(st); if (!m) return st; let best = st, n = 0; m.forEach((c, r) => { if (c > n) { n = c; best = r; } }); return best; };
-  const vocab = new Set([...vocabCount].filter(([, n]) => n >= 3).map(([t]) => t));
-  // 2. every block as features
-  const blocks = new Map();
-  eachBlock((work, sec, si, b) => { const f = semBlock(b, vocab); f.work = work; f.sec = si; f.b = b; blocks.set(b.id, f); all.push(f); });
-  // 3. document frequency, over blocks
-  const df = new Map();
-  all.forEach(f => new Set(f.terms).forEach(t => df.set(t, (df.get(t) || 0) + 1)));
-  const N = all.length, idf = t => Math.log(N / (df.get(t) || 1));
-  // 4. Jäsche units: a § whole (split if long); the Einleitung in chunks of about SEM_UNIT_WORDS
-  const units = [];
-  const pushUnit = (sec, si, bl, label, para) => {
-    if (!bl.length) return;
-    units.push({ id: 'u' + units.length, sec: sec.id, si, part: sec.part, label, para, blocks: bl.map(b => b.id), words: bl.reduce((a, b) => a + blocks.get(b.id).words, 0) });
-  };
-  J.sections.forEach((sec, si) => {
-    const txt = sec.blocks.filter(b => b.kind === 'text');
-    if (sec.part === 'Vorrede') { return; }
-    if (txt.some(b => b.para)) {
-      const byPara = new Map();
-      txt.forEach(b => { const k = b.para || 0; if (!byPara.has(k)) byPara.set(k, []); byPara.get(k).push(b); });
-      byPara.forEach((bl, k) => {
-        const p = k ? J.paras[k - 1] : null;
-        let cur = [], w = 0, part = 1;
-        const lab = () => p ? '§ ' + p.n + ' ' + p.title : sec.title;
-        bl.forEach(b => { const bw = blocks.get(b.id).words; if (cur.length && w + bw > 2 * SEM_UNIT_WORDS + 60) { pushUnit(sec, si, cur, lab() + ' (' + part++ + ')', k); cur = []; w = 0; } cur.push(b); w += bw; });
-        pushUnit(sec, si, cur, part > 1 ? lab() + ' (' + part + ')' : lab(), k);
-      });
-    } else {
-      let cur = [], w = 0, n = 1;
-      txt.forEach(b => { const bw = blocks.get(b.id).words; cur.push(b); w += bw; if (w >= SEM_UNIT_WORDS) { pushUnit(sec, si, cur, sec.title + ' · ' + n++, 0); cur = []; w = 0; } });
-      if (cur.length) { if (w < SEM_UNIT_WORDS / 3 && units.length && units[units.length - 1].sec === sec.id) { const u = units[units.length - 1]; cur.forEach(b => { u.blocks.push(b.id); u.words += blocks.get(b.id).words; }); } else pushUnit(sec, si, cur, sec.title + ' · ' + n, 0); }
-    }
-  });
-  // 5. lecture windows
-  const wins = [];
-  sources.forEach(S => S.data.sections.forEach((sec, si) => {
-    const txt = sec.blocks.filter(b => b.kind === 'text' && b.text);
-    SEM_WIN.forEach(T => {
-      for (let i = 0; i < txt.length;) {
-        let w = 0, j = i; const ids = [];
-        while (j < txt.length && w < T) { w += blocks.get(txt[j].id).words; ids.push(txt[j].id); j++; }
-        if (!ids.length) break;
-        if (ids.length > 1 || T === SEM_WIN[0] || true) wins.push({ id: 'w' + wins.length, work: S.key, sec: si, secId: sec.id, blocks: ids, words: w });
-        let h = 0, k = i; while (k < j && h < T / 2) { h += blocks.get(txt[k].id).words; k++; }
-        i = Math.max(i + 1, k);
-        if (j >= txt.length) break;
-      }
-    });
-  }));
-  // 6. vectors
-  const vec = (ids) => {
-    const cnt = new Map(); ids.forEach(id => blocks.get(id).terms.forEach(t => cnt.set(t, (cnt.get(t) || 0) + 1)));
-    const v = new Map(); let n2 = 0;
-    cnt.forEach((c, t) => { const wt = (1 + Math.log(c)) * idf(t); if (wt <= 0.4) return; v.set(t, wt); n2 += wt * wt; });
-    const n = Math.sqrt(n2) || 1; const nv = new Map(); v.forEach((wt, t) => nv.set(t, wt / n));
-    return { v: nv, raw: v };
-  };
-  units.forEach(u => { const x = vec(u.blocks); u.vec = x.v; u.raw = x.raw; u.mass = [...x.raw.values()].reduce((a, b) => a + b, 0); });
-  const post = new Map();
-  wins.forEach((w, wi) => { const x = vec(w.blocks); w.vec = x.v; x.v.forEach((wt, t) => { let a = post.get(t); if (!a) post.set(t, a = []); a.push(wi, wt); }); });
-  const winCount = {}; wins.forEach(w => { winCount[w.work] = (winCount[w.work] || 0) + 1; });
-  return { blocks, units, wins, post, idf, df, N, vocab, winCount, surface };
-}
-
-/* similarity: half the cosine of the two weighted term vectors, half the share of the
-   unit's own weighted terms that the window also has */
-function semScores(M, u) {
-  const dot = new Float32Array(M.wins.length), cont = new Float32Array(M.wins.length);
-  const touched = new Set();
-  u.vec.forEach((uw, t) => {
-    const a = M.post.get(t); if (!a) return;
-    const raw = u.raw.get(t);
-    for (let h = 0; h < a.length; h += 2) { const wi = a[h]; dot[wi] += uw * a[h + 1]; cont[wi] += raw; touched.add(wi); }
-  });
-  const out = [];
-  touched.forEach(wi => out.push({ wi, cos: dot[wi], cont: cont[wi] / u.mass, score: 0.5 * dot[wi] + 0.5 * cont[wi] / u.mass }));
-  // how far above the unit's usual score against this lecture's windows: a short § scores low
-  // against everything, so a raw score alone would call it a poor match to its true parallel
-  const by = {};
-  out.forEach(r => { (by[M.wins[r.wi].work] = by[M.wins[r.wi].work] || []).push(r.score); });
-  const stat = {};
-  Object.keys(by).forEach(k => { const a = by[k], n = M.winCount[k] || a.length; let m = 0, q = 0; a.forEach(x => { m += x; q += x * x; }); m /= n; stat[k] = { m, sd: Math.sqrt(Math.max(1e-9, q / n - m * m)) }; });
-  out.forEach(r => { const st = stat[M.wins[r.wi].work]; r.z = (r.score - st.m) / st.sd; });
-  return out;
-}
-function semTop(M, u, perWork) {
-  const sc = semScores(M, u).sort((a, b) => b.z - a.z), res = {};
-  sc.forEach(r => {
-    const w = M.wins[r.wi]; const list = res[w.work] = res[w.work] || [];
-    if (list.length >= perWork) return;
-    if (list.some(x => { const o = M.wins[x.wi]; return o.secId === w.secId && o.blocks.some(b => w.blocks.includes(b)); })) return;
-    list.push(r);
-  });
-  return res;
-}
-
-
-
-/* ── why two passages are alike ─────────────────────────────────────────── */
-/* keywords: the terms both have, heaviest first; concepts: the lexicon concepts both speak of;
-   collocations: pairs of content words within three of each other, in one sentence, in both;
-   examples: sentences announcing an example whose distinctive words overlap. */
-function semEvidence(M, u, win) {
-  const ub = u.blocks.map(id => M.blocks.get(id)), wb = win.blocks.map(id => M.blocks.get(id));
-  const wTerms = new Set(); wb.forEach(f => f.terms.forEach(t => wTerms.add(t)));
-  const kw = [], concepts = [];
-  u.raw.forEach((wt, t) => { if (!wTerms.has(t)) return; if (t[0] === '§') concepts.push({ term: t.slice(1), w: wt }); else if (t.length >= 4) kw.push({ term: t, w: wt }); });
-  kw.sort((a, b) => b.w - a.w); concepts.sort((a, b) => b.w - a.w);
-  // collocations
-  const wc = new Map(); wb.forEach(f => f.colls.forEach((v, k) => { if (!wc.has(k)) wc.set(k, v); }));
-  const colls = [], seen = new Set();
-  ub.forEach(f => f.colls.forEach((v, k) => {
-    if (!wc.has(k) || seen.has(k)) return; seen.add(k);
-    const [a, b] = k.split('+'); if (SEM_CONCEPT_OF.has(a) && SEM_CONCEPT_OF.has(b) && false) return;
-    colls.push({ key: k, a, b, w: M.idf(a) + M.idf(b) });
-  }));
-  colls.sort((x, y) => y.w - x.w);
-  // examples
-  const exs = [];
-  ub.forEach((f, i) => f.exs.forEach(x => {
-    const dist = [...x.terms].filter(t => M.idf(t) >= 2.4);
-    if (dist.length < 2) return;
-    wb.forEach((g, j) => g.exs.forEach(y => {
-      const shared = dist.filter(t => y.terms.has(t));
-      if (shared.length < 2) return;
-      const dy = [...y.terms].filter(t => M.idf(t) >= 2.4);
-      const jac = shared.length / (dist.length + dy.length - shared.length);
-      if (jac < 0.18) return;
-      exs.push({ ub: u.blocks[i], us: x.s, ue: x.e, wb: win.blocks[j], ws: y.s, we: y.e, shared, jac });
-    }));
-  }));
-  exs.sort((x, y) => y.jac - x.jac);
-  return { kw, concepts, colls, exs };
-}
-
-/* examples: every sentence announcing an example in Jäsche, set against the same in each
-   lecture; kept where two distinctive words are shared and a fifth of the words are */
-function semExamplePairs(M, J, sources) {
-  const lec = {};
-  sources.forEach(S => { lec[S.key] = []; });
-  M.blocks.forEach((f, id) => { if (f.work !== 'jasche') f.exs.forEach(x => lec[f.work].push({ id, f, x })); });
-  const out = [];
-  M.blocks.forEach((f, id) => {
-    if (f.work !== 'jasche' || f.b.para === undefined && false) return;
-    f.exs.forEach(x => {
-      const d = [...x.terms].filter(t => M.idf(t) >= 2.4);
-      if (d.length < 2) return;
-      Object.keys(lec).forEach(work => {
-        let best = null;
-        lec[work].forEach(y => {
-          const sh = d.filter(t => y.x.terms.has(t)); if (sh.length < 2) return;
-          const dy = [...y.x.terms].filter(t => M.idf(t) >= 2.4);
-          const jac = sh.length / (d.length + dy.length - sh.length);
-          if (jac >= 0.18 && (!best || jac > best.jac)) best = { work, jb: id, js: x.s, je: x.e, lb: y.id, ls: y.x.s, le: y.x.e, shared: sh, jac };
-        });
-        if (best) out.push(best);
-      });
-    });
-  });
-  return out.sort((a, b) => b.jac - a.jac);
-}
-
-/* whole sections: each Jäsche section against each lecture's sections, by the cosine of
-   their weighted term vectors */
-function semSections(M, J, sources) {
-  const secVec = ids => {
-    const cnt = new Map(); ids.forEach(id => M.blocks.get(id).terms.forEach(t => cnt.set(t, (cnt.get(t) || 0) + 1)));
-    const v = new Map(); let n2 = 0;
-    cnt.forEach((c, t) => { const w = (1 + Math.log(c)) * M.idf(t); if (w <= 0.4) return; v.set(t, w); n2 += w * w; });
-    const n = Math.sqrt(n2) || 1; v.forEach((w, t) => v.set(t, w / n)); return v;
-  };
-  const cos = (a, b) => { let s = 0; const [x, y] = a.size < b.size ? [a, b] : [b, a]; x.forEach((w, t) => { const o = y.get(t); if (o) s += w * o; }); return s; };
-  const lec = [];
-  sources.forEach(S => S.data.sections.forEach((sec, si) => { const ids = sec.blocks.filter(b => b.kind === 'text' && b.text).map(b => b.id); if (ids.length > 2) lec.push({ work: S.key, si, sec, ids, vec: secVec(ids) }); }));
-  const rows = [];
-  J.sections.forEach((sec, si) => {
-    if (sec.part === 'Vorrede') return;
-    const ids = sec.blocks.filter(b => b.kind === 'text').map(b => b.id), v = secVec(ids), m = {};
-    sources.forEach(S => {
-      const sc = lec.filter(l => l.work === S.key).map(l => ({ l, c: cos(v, l.vec) })).sort((a, b) => b.c - a.c);
-      m[S.key] = { l: sc[0].l, c: sc[0].c, next: sc[1] && { l: sc[1].l, c: sc[1].c } };
-    });
-    rows.push({ sec, si, m });
-  });
-  return rows;
-}
-
 
 /* ═══ the page ════════════════════════════════════════════════════════════ */
 
@@ -617,30 +337,57 @@ const JR_CLASSES = [
   { k: 'undated', label: 'undated',      rgb: '190,182,168', light: true }
 ];
 const JR_CLASS = {};  JR_CLASSES.forEach(c => { JR_CLASS[c.k] = c; });
-/* the dated transcripts, oldest first; the same shape as LOGIK_ data, so another is one line */
+/* the dated transcripts, oldest first, for the transcript matches; the same shape as LOGIK_ data, so another is one line */
 const JR_LECTURES = [
   { key: 'blomberg', label: 'Blomberg',     date: 'ca. 1771',    data: LOGIK_BLOMBERG },
   { key: 'wiener',   label: 'Wiener Logik', date: '1780ff.',     data: LOGIK_WIENER },
   { key: 'busolt',   label: 'Busolt',       date: 'ca. 1789/90', data: LOGIK_BUSOLT }
 ];
-const JR_LATE = ['wiener', 'busolt'];   // the transcripts of the critical period
-const JR_Z = [0, 3.5, 4.5, 6.0];        // what "possible", "good" and "strong" ask of a parallel
-const JR_ZNAME = ['', 'possible', 'good', 'strong'];
+const JR_TX_ORDER = 0.6;        // a transcript match: this share of the sentence's words in order,
+const JR_TX_LOOSE = 0.7;        // or this share of its content words within one passage twice its length
+const JR_TX_MINCW = 4;          // with fewer content words than this the looser test is not tried
+const JR_PREFS = 'kant-lab.jasche-reader';   // where the layout is remembered between visits
+const EINL = J.sections.filter(s => s.part === 'Einleitung').map(s => s.id);
+const JR_PARTS = [
+  { label: 'Einleitung I–V',          has: s => EINL.indexOf(s.sec) >= 0 && EINL.indexOf(s.sec) < 5 },
+  { label: 'Einleitung VI–X, Anhang', has: s => EINL.indexOf(s.sec) >= 5 },
+  { label: 'Elementarlehre',          has: s => /Elementarlehre/.test(jb[s.id].s.part) },
+  { label: 'Methodenlehre',           has: s => /Methodenlehre/.test(jb[s.id].s.part) }
+];
 
 /* ── state ──────────────────────────────────────────────────────────────── */
-let xray = false, follow = true, tab = 'ov';
+let xray = false, tab = 'ov', panelOpen = true, tocOpen = true, tocView = 'titles', showTx = false;   // remembered
+let hold = false;                 // Sources held on one § instead of following the text
 let unitKey = null;               // the § ('p21') or Einleitung section ('ss07') the panel shows
 let selSent = null;               // a sentence clicked in the text
 let jrReady = false, jrProgress = 0;
 let SENTS = [], byBlock = {};     // every compared Jäsche sentence; those of each block
-let SEM = null, semBusy = false;  // the transcript comparison, built when first needed
-const semCache = {};
+let STATS = {};                   // per contents entry: its words, and those traced, by dating class
+let TXI = null, txReady = false, txBusy = false, txProgress = 0;   // the transcript matches, made when first asked for
 let query = '', loose = true, HITS = [], hitCur = -1, hitsByBlock = {};
+let GO = [], goCur = 0;           // the Go to suggestions
+const openSecs = new Set();       // contents sections opened to show their §§
 const jb = {};  J.sections.forEach((s, si) => s.blocks.forEach(b => { jb[b.id] = { b, s, si }; }));
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const pageAt = (b, off) => { let p = b.aa; (b.pages || []).forEach(x => { if (x.i <= off) p = x.p; }); return p; };
+
+/* the layout, kept in the browser between visits; a page opened from file:// may refuse, and then starts fresh */
+function loadPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem(JR_PREFS) || '{}');
+    if (typeof p.xray === 'boolean') xray = p.xray;
+    if (['ov', 'src', 'fl'].indexOf(p.tab) >= 0) tab = p.tab;
+    if (typeof p.panelOpen === 'boolean') panelOpen = p.panelOpen;
+    if (typeof p.tocOpen === 'boolean') tocOpen = p.tocOpen;
+    if (p.tocView === 'dating' || p.tocView === 'titles') tocView = p.tocView;
+    if (typeof p.showTx === 'boolean') showTx = p.showTx;
+  } catch (e) { /* nothing remembered */ }
+}
+function savePrefs() {
+  try { localStorage.setItem(JR_PREFS, JSON.stringify({ xray, tab, panelOpen, tocOpen, tocView, showTx })); } catch (e) { /* not kept */ }
+}
 
 /* ── Adickes' datings → a dating class ──────────────────────────────────── */
 function jrSpan(sym) {
@@ -671,7 +418,7 @@ const DAT = REFL_ENTRIES.map(jrDating);
 /* ── the comparison with the Reflexionen ────────────────────────────────── */
 function jrTokens(text) {
   const out = [], re = /[A-Za-zÄÖÜäöüßæœ]+/g; let m;
-  while ((m = re.exec(text))) out.push({ w: semNorm(m[0]), s: m.index, e: m.index + m[0].length });
+  while ((m = re.exec(text))) out.push({ w: jrNorm(m[0]), s: m.index, e: m.index + m[0].length });
   return out;
 }
 function lcsLen(a, b) {
@@ -693,22 +440,35 @@ REFL_ENTRIES.forEach((e, ei) => {
   RT[ei] = { text, t, w: t.map(x => x.w) };
   for (let k = 0; k + JR_GRAM <= t.length; k++) { const key = RT[ei].w.slice(k, k + JR_GRAM).join(' '); let a = GRAM.get(key); if (!a) GRAM.set(key, a = []); a.push(ei, k); }
 });
-/* the note, and the stretch of it, that holds the largest share of a sentence's words in order */
-function jrBest(jw) {
+/* the passage, and the stretch of it, that holds the largest share of a sentence's words in order */
+function bestInOrder(jw, gram, words) {
   const n = jw.length, cand = new Map();
   for (let j = 0; j + JR_GRAM <= n; j++) {
-    const a = GRAM.get(jw.slice(j, j + JR_GRAM).join(' '));
+    const a = gram.get(jw.slice(j, j + JR_GRAM).join(' '));
     if (!a || a.length > 2 * JR_STOP_GRAM) continue;
     for (let h = 0; h < a.length; h += 2) cand.set(a[h] + ':' + Math.round((a[h + 1] - j) / 3), [a[h], a[h + 1] - j]);
   }
   const sl = Math.max(4, Math.ceil(n * 0.25)); let best = null;
   cand.forEach(([ei, d]) => {
-    const w = RT[ei].w, lo = Math.max(0, d - sl), hi = Math.min(w.length, d + n + sl);
+    const w = words(ei), lo = Math.max(0, d - sl), hi = Math.min(w.length, d + n + sl);
     if (hi <= lo) return;
     const cov = lcsLen(jw, w.slice(lo, hi)) / n;
     if (!best || cov > best.cov) best = { ei, cov, lo, hi };
   });
   return best;
+}
+const jrBest = jw => bestInOrder(jw, GRAM, ei => RT[ei].w);
+/* run a job over a list a slice at a time, so that the page stays responsive */
+function inSlices(list, each, onStep) {
+  let k = 0;
+  return new Promise(resolve => {
+    (function step() {
+      const stop = Math.min(list.length, k + 90);
+      for (; k < stop; k++) each(list[k]);
+      onStep(k / list.length);
+      if (k < list.length) setTimeout(step, 0); else resolve();
+    })();
+  });
 }
 function jrRun() {
   const todo = [];
@@ -716,29 +476,78 @@ function jrRun() {
     if (sec.part === 'Vorrede') return;
     sec.blocks.forEach(b => {
       if (b.kind !== 'text') return;
-      semSentences(b.text).forEach(([s, e]) => {
+      jrSentences(b.text).forEach(([s, e]) => {
         const t = jrTokens(b.text.slice(s, e));
         if (t.length < JR_MIN_WORDS) return;
         todo.push({ i: todo.length, id: b.id, s, e, t, jw: t.map(x => x.w), page: pageAt(b, s), para: b.para || null, sec: sec.id });
       });
     });
   });
-  let k = 0;
-  return new Promise(resolve => {
-    (function step() {
-      const stop = Math.min(todo.length, k + 90);
-      for (; k < stop; k++) {
-        const sn = todo[k], m = jrBest(sn.jw);
-        sn.cov = m ? m.cov : 0;
-        if (m && m.cov >= JR_CLOSE) { sn.m = m; sn.cls = DAT[m.ei].k; sn.v = m.cov >= JR_NEAR; }
-      }
-      jrProgress = k / todo.length; paintProgress();
-      if (k < todo.length) setTimeout(step, 0);
-      else { SENTS = todo; byBlock = {}; SENTS.forEach(sn => { (byBlock[sn.id] = byBlock[sn.id] || []).push(sn); }); jrReady = true; resolve(); }
-    })();
+  return inSlices(todo, sn => {
+    const m = jrBest(sn.jw);
+    sn.cov = m ? m.cov : 0;
+    if (m && m.cov >= JR_CLOSE) { sn.m = m; sn.cls = DAT[m.ei].k; sn.v = m.cov >= JR_NEAR; }
+  }, f => { jrProgress = f; paintProgress(); }).then(() => {
+    SENTS = todo; byBlock = {}; SENTS.forEach(sn => { (byBlock[sn.id] = byBlock[sn.id] || []).push(sn); });
+    buildStats(); jrReady = true;
   });
 }
 const traced = () => SENTS.filter(s => s.m);
+/* per contents entry (a section 's…', a § 'p…'): its words, those traced by dating class, and the notes */
+function buildStats() {
+  STATS = {};
+  const add = (key, s) => {
+    const u = STATS[key] = STATS[key] || { w: 0, n: 0, t: 0, c: {}, cs: {}, R: new Set() };
+    u.w += s.jw.length; u.n++;
+    if (s.m) { u.t += s.jw.length; u.c[s.cls] = (u.c[s.cls] || 0) + s.jw.length; u.cs[s.cls] = (u.cs[s.cls] || 0) + 1; u.R.add(s.m.ei); }
+  };
+  SENTS.forEach(s => { add('s' + s.sec, s); if (s.para) add('p' + s.para, s); });
+}
+
+/* ── the transcript matches: sentence by sentence, never section by section ── */
+function txIndex(L) {
+  const src = [], gram = new Map(), uni = new Map();
+  L.data.sections.forEach(sec => sec.blocks.forEach(b => {
+    if (b.kind !== 'text' || !b.text) return;
+    const t = jrTokens(b.text), w = t.map(x => x.w), id = src.length;
+    src.push({ b, sec, t, w });
+    for (let k = 0; k < t.length; k++) {
+      if (k + JR_GRAM <= t.length) { const key = w.slice(k, k + JR_GRAM).join(' '); let a = gram.get(key); if (!a) gram.set(key, a = []); a.push(id, k); }
+      if (!JR_STOP.has(w[k]) && w[k].length >= 4) { let a = uni.get(w[k]); if (!a) uni.set(w[k], a = []); a.push(id, k); }
+    }
+  }));
+  return { L, src, gram, uni };
+}
+const contentWords = jw => [...new Set(jw.filter(x => !JR_STOP.has(x) && x.length >= 4))];
+/* the looser test: most of the sentence's content words, in any order, within one passage twice its length */
+function bestLoose(I, jw) {
+  const cw = contentWords(jw), n = jw.length;
+  if (cw.length < JR_TX_MINCW) return null;
+  const hits = new Map();
+  cw.forEach(x => { const h = I.uni.get(x); if (!h || h.length > 6000) return; for (let q = 0; q < h.length; q += 2) { const key = h[q] + ':' + Math.floor(h[q + 1] / n); let s = hits.get(key); if (!s) hits.set(key, s = new Set()); s.add(x); } });
+  let best = null;
+  hits.forEach((s, key) => {
+    const [id, k] = key.split(':').map(Number), nx = hits.get(id + ':' + (k + 1)), u = nx ? new Set([...s, ...nx]) : s;
+    if (!best || u.size > best.got) best = { ei: id, got: u.size, of: cw.length, cov: u.size / cw.length, lo: k * n, hi: Math.min(I.src[id].w.length, (k + 2) * n) };
+  });
+  return best;
+}
+function txMatch(I, jw) {
+  const o = bestInOrder(jw, I.gram, id => I.src[id].w);
+  if (o && o.cov >= JR_TX_ORDER) return Object.assign(o, { how: 'order' });
+  const l = bestLoose(I, jw);
+  if (l && l.cov >= JR_TX_LOOSE) return Object.assign(l, { how: 'loose' });
+  return null;
+}
+function txRun() {
+  if (txReady || txBusy || !jrReady) return;
+  txBusy = true;
+  setTimeout(() => {
+    TXI = JR_LECTURES.map(txIndex);
+    inSlices(SENTS, sn => { sn.tx = TXI.map(I => txMatch(I, sn.jw)); }, f => { txProgress = f; const el = document.querySelector('#pbody .txprog i'); if (el) el.style.width = Math.round(f * 100) + '%'; })
+      .then(() => { txReady = true; txBusy = false; if (tab === 'src') renderPanel(); });
+  }, 30);
+}
 
 /* ── units: a § of the Elementar- and Methodenlehre, or a section of the Einleitung ── */
 function unitOf(blockId) {
@@ -828,36 +637,61 @@ function renderText() {
   $('inner').innerHTML = html;
   box.style.scrollBehavior = 'auto'; box.scrollTop = keep; box.style.scrollBehavior = '';
 }
+
+/* ── the contents, with its Dating view ─────────────────────────────────── */
+function bgOf(k) { const c = JR_CLASS[k]; return c.hatch ? 'background:var(--hatch)' : 'background:rgb(' + c.rgb + ')'; }
+/* a bar: the entry's words, coloured where they are traced to a Reflexion, by the note's dating */
+function barHtml(key) {
+  const u = STATS[key]; if (!u || !u.w) return '<span class="tb" aria-hidden="true"></span>';
+  let x = 0, h = '';
+  ORDER.concat(['undated']).forEach(k => { const v = u.c[k] || 0; if (!v) return; const w = 100 * v / u.w; h += '<span style="left:' + x.toFixed(2) + '%;width:' + w.toFixed(2) + '%;' + bgOf(k) + '"></span>'; x += w; });
+  return '<span class="tb" data-stat="' + key + '">' + h + '</span>';
+}
+function tipHtml(key) {
+  const u = STATS[key], pc = v => { const p = 100 * v / u.w; return p > 0 && p < 1 ? '<1%' : Math.round(p) + '%'; };
+  const label = key[0] === 'p' ? '§ ' + key.slice(1) + ' ' + J.paras[+key.slice(1) - 1].title : J.sections.find(s => s.id === key.slice(1)).title;
+  let h = '<div class="th">' + esc(label) + '</div>';
+  if (!u.t) return h + '<div class="ts">No sentence here is traced to a Reflexion at 70% or more. ' + u.n + ' sentences compared.</div>';
+  h += '<div class="ts">Share of its words in sentences taken from a Reflexion, by Adickes’ dating of the note</div>';
+  ORDER.concat(['undated']).forEach(k => { if (u.c[k]) h += '<div class="tr">' + swatch(k) + esc(JR_CLASS[k].label) + '<b>' + pc(u.c[k]) + '</b><small>' + u.cs[k] + ' sent.</small></div>'; });
+  h += '<div class="tr un"><span class="sw" style="background:#ece3cf;box-shadow:inset 0 0 0 1px #cfc3a6"></span>not traced<b>' + pc(u.w - u.t) + '</b><small></small></div>';
+  return h + '<div class="ts">' + u.n + ' sentences compared, ' + u.R.size + ' Reflexion' + (u.R.size === 1 ? '' : 'en') + '</div>';
+}
 function renderToc() {
-  let html = '<h2>CONTENTS</h2>';
+  const dating = tocView === 'dating';
+  let html = '<div class="tochead"><h2>CONTENTS</h2><span class="seg" role="group" aria-label="Contents view"><button data-view="titles" aria-pressed="' + !dating + '">Titles</button><button data-view="dating" aria-pressed="' + dating + '">Dating</button></span></div>';
+  if (dating) html += '<div class="tocnote">' + (jrReady ? 'Each bar is the entry’s text, coloured where it is taken from a Reflexion, by the note’s decade. Hover a bar for the shares.' : 'Reading Jäsche against the Reflexionen…') + '</div>';
   parts.forEach(p => {
     html += '<div class="part">' + esc(p.name) + '</div>';
     p.secs.forEach(sec => {
-      const ps = parasBySec[sec.id] || [];
-      html += '<div class="row">' + (ps.length ? '<button class="d" data-open="' + sec.id + '" aria-label="Show the §§">▸</button>' : '<span style="width:1.1rem"></span>') +
-        '<button class="t" data-sec="' + sec.id + '" id="toc-' + sec.id + '">' + esc(sec.title) + (sec.range ? ' <span class="rng">' + esc(sec.range.raw.replace(/[\[\]]/g, '')) + '</span>' : '') + '</button></div>';
-      if (ps.length) html += '<div class="paras" id="paras-' + sec.id + '">' + ps.map(q => '<button class="t" data-para="' + q.n + '" id="toc-p' + q.n + '">§ ' + q.n + ' ' + esc(q.title) + '</button>').join('') + '</div>';
+      const ps = parasBySec[sec.id] || [], open = openSecs.has(sec.id), bar = dating && sec.part !== 'Vorrede' ? barHtml('s' + sec.id) : '';
+      html += '<div class="row">' + (ps.length ? '<button class="d" data-open="' + sec.id + '" aria-label="Show the §§">' + (open ? '▾' : '▸') + '</button>' : '<span style="width:1.1rem;flex:none"></span>') +
+        '<button class="t" data-sec="' + sec.id + '" id="toc-' + sec.id + '">' + esc(sec.title) + (sec.range ? ' <span class="rng">' + esc(sec.range.raw.replace(/[\[\]]/g, '')) + '</span>' : '') + bar + '</button></div>';
+      if (ps.length) html += '<div class="paras' + (open ? ' open' : '') + '" id="paras-' + sec.id + '">' + ps.map(q => '<button class="t" data-para="' + q.n + '" id="toc-p' + q.n + '">§ ' + q.n + ' ' + esc(q.title) + (dating ? barHtml('p' + q.n) : '') + '</button>').join('') + '</div>';
     });
   });
-  $('toc').innerHTML = html;
-  let g = '<option value="">Go to…</option>';
-  parts.forEach(p => { g += '<optgroup label="' + esc(p.name) + '">' + p.secs.map(sec => '<option value="sec-' + sec.id + '">' + esc(sec.title) + '</option>' + (parasBySec[sec.id] || []).map(q => '<option value="para-' + q.n + '">    § ' + q.n + ' ' + esc(q.title) + '</option>').join('')).join('') + '</optgroup>'; });
-  $('goto').innerHTML = g;
+  const box = $('toc'), keep = box.scrollTop;
+  box.innerHTML = html; box.scrollTop = keep;
+  markToc();
 }
+function showTip(el) {
+  const tip = $('tip'); if (!STATS[el.dataset.stat]) return;
+  tip.innerHTML = tipHtml(el.dataset.stat); tip.hidden = false;
+  const r = el.getBoundingClientRect(), h = tip.offsetHeight, w = tip.offsetWidth;
+  tip.style.left = Math.max(6, Math.min(r.left, innerWidth - w - 6)) + 'px';
+  tip.style.top = (r.bottom + 6 + h > innerHeight ? r.top - h - 6 : r.bottom + 6) + 'px';
+}
+
 function flash(el) { if (!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2800); }
 function scrollToId(id, fl) {
   const el = document.getElementById(id); if (!el) return;
   el.scrollIntoView({ block: fl ? 'center' : 'start' });
   if (fl) flash(el.closest('.blk') || el);
 }
-function scrollToPage(p) {
-  for (const sec of J.sections) for (const b of sec.blocks) {
-    if (b.kind !== 'text') continue;
-    if (b.aa === p || (b.pages || []).some(x => x.p === p)) { scrollToId(b.id, true); return; }
-  }
-}
+const blockAtPage = p => { for (const sec of J.sections) for (const b of sec.blocks) { if (b.kind === 'text' && (b.aa === p || (b.pages || []).some(x => x.p === p))) return b; } return null; };
+function scrollToPage(p) { const b = blockAtPage(p); if (b) scrollToId(b.id, true); }
 /* the section and § at the top of the text decide the contents highlight and the panel's unit */
-let tick = 0, followTimer = 0;
+let tick = 0, followTimer = 0, viewSec = null, viewPara = null;
 function inView() {
   const top = $('text').getBoundingClientRect().top + 70;
   let sec = null, para = null;
@@ -865,17 +699,22 @@ function inView() {
     if (h.getBoundingClientRect().top <= top) { if (h.classList.contains('sec')) { sec = h.id.slice(4); para = null; } else para = +h.id.slice(5); }
   });
   if (!sec) sec = J.sections[0].id;
-  document.querySelectorAll('#toc button.t.active').forEach(b => b.classList.remove('active'));
-  const t = $('toc-' + sec); if (t) { t.classList.add('active'); const ps = $('paras-' + sec); if (ps && !ps.classList.contains('open')) { ps.classList.add('open'); const d = document.querySelector('[data-open="' + sec + '"]'); if (d) d.textContent = '▾'; } }
-  if (para) { const tp = $('toc-p' + para); if (tp) tp.classList.add('active'); }
+  viewSec = sec; viewPara = para && J.paras[para - 1].sec === sec ? para : null;
+  if (parasBySec[sec] && !openSecs.has(sec)) { openSecs.add(sec); const ps = $('paras-' + sec); if (ps) ps.classList.add('open'); const d = document.querySelector('[data-open="' + sec + '"]'); if (d) d.textContent = '▾'; }
+  markToc();
   const s = J.sections.find(x => x.id === sec);
-  return s.part === 'Vorrede' ? 'v' : para && J.paras[para - 1].sec === sec ? 'p' + para : 's' + sec;
+  return s.part === 'Vorrede' ? 'v' : viewPara ? 'p' + viewPara : 's' + sec;
+}
+function markToc() {
+  document.querySelectorAll('#toc button.t.active').forEach(b => b.classList.remove('active'));
+  const t = viewSec && $('toc-' + viewSec); if (t) t.classList.add('active');
+  const tp = viewPara && $('toc-p' + viewPara); if (tp) tp.classList.add('active');
 }
 function onScroll() {
   const k = inView();
-  if (follow && k !== unitKey) {
+  if (!hold && k !== unitKey) {
     unitKey = k; paintTabs();
-    if (tab === 'src' || tab === 'par') { clearTimeout(followTimer); followTimer = setTimeout(renderPanel, 180); }
+    if (tab === 'src' && panelOpen) { clearTimeout(followTimer); followTimer = setTimeout(renderPanel, 180); }
   }
 }
 
@@ -919,19 +758,65 @@ function gotoHit(d) {
   const el = document.querySelector('#inner .hit.cur'); if (el) el.scrollIntoView({ block: 'center' });
 }
 
+/* ── Go to: a § number, an AA 9 page, or words of a heading ─────────────── */
+function gotoMatches(q) {
+  q = q.trim(); const out = [], pages = J.meta.aa;
+  if (!q) return out;
+  const num = q.match(/^(?:§\s*)?(\d{1,3})$/), pg = q.match(/^(?:aa\s*)?(?:ix|9)\s*[:,.]\s*(\d{1,3})$/i);
+  const addPara = n => { const p = J.paras[n - 1]; if (p && !out.some(o => o.id === 'para-' + n)) out.push({ id: 'para-' + n, html: '<b>§ ' + n + '</b> ' + esc(p.title) }); };
+  const addPage = n => { if (n < pages[0] || n > pages[1]) return; const b = blockAtPage(n); if (!b) return; const u = unitInfo(unitOf(b.id)); out.push({ page: n, html: '<b>AA 9:' + n + '</b> <span class="muted">' + esc(u ? u.label : 'Vorrede') + '</span>' }); };
+  if (pg) addPage(+pg[1]);
+  else if (num) {
+    const n = +num[1];
+    addPara(n);
+    if (!/§/.test(q)) addPage(n);
+    J.paras.forEach(p => { if (out.length < 6 && String(p.n).startsWith(num[1]) && p.n !== n) addPara(p.n); });
+  } else if (q.length >= 2) {
+    const re = qRegex(q, 'i');
+    J.sections.forEach(s => { if (out.length < 6 && re.test(s.title)) out.push({ id: 'sec-' + s.id, html: esc(s.title) }); });
+    J.paras.forEach(p => { if (out.length < 6 && re.test(p.title)) addPara(p.n); });
+  }
+  return out.slice(0, 6);
+}
+function paintGoto() {
+  const box = $('golist');
+  if (!GO.length) { box.hidden = !$('goto').value.trim(); box.innerHTML = '<div class="none">Nothing matches. Type a § number, an AA 9 page (9:57) or words of a heading.</div>'; return; }
+  box.innerHTML = GO.map((g, i) => '<button data-gi="' + i + '"' + (i === goCur ? ' class="on"' : '') + '>' + g.html + '</button>').join('');
+  box.hidden = false;
+}
+function gotoPick(i) {
+  const g = GO[i]; if (!g) return;
+  if (g.page) scrollToPage(g.page); else scrollToId(g.id);
+  $('goto').value = ''; GO = []; $('golist').hidden = true;
+}
+
 /* ── right: shared pieces ───────────────────────────────────────────────── */
 function swatch(k) { const c = JR_CLASS[k]; return '<span class="sw' + (c.hatch ? ' hatch' : '') + '"' + (c.hatch ? '' : ' style="background:rgb(' + c.rgb + ')"') + '></span>'; }
 function chipCls(k) { const c = JR_CLASS[k]; return '<span class="per k-' + k + (c.light ? ' light' : '') + '" style="--pc:' + c.rgb + '">' + esc(c.label) + '</span>'; }
 function paintLegend() {
   $('legend').innerHTML = JR_CLASSES.filter(c => c.k !== 'undated').map(c => '<span>' + swatch(c.k) + esc(c.label) + '</span>').join('') +
-    '<span><span class="ls" style="border-top:3px solid #7a6a52"></span>≥ 90%</span><span><span class="ls" style="border-top:2px dashed #7a6a52"></span>≥ 70%</span>' +
-    '<label class="opt" title="Untick to keep the panel on the current § while you scroll"><input type="checkbox" id="follow"' + (follow ? ' checked' : '') + '> follow the text</label>';
+    '<span><span class="ls" style="border-top:3px solid #7a6a52"></span>≥ 90%</span><span><span class="ls" style="border-top:2px dashed #7a6a52"></span>≥ 70%</span>';
 }
 function paintTabs() {
-  document.querySelectorAll('#tabs .tab').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab));
+  document.querySelectorAll('#tabs .tab, #railR .vt').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab && panelOpen)));
+  document.querySelectorAll('#tabs .tab').forEach(b => { b.title = b.dataset.tab === tab ? 'Click to fold the panel away' : ''; });
   const u = unitInfo(unitKey);
-  $('tab-src').textContent = u ? u.label.slice(0, 26) + (follow ? ' · follows the text' : ' · pinned') : 'the § in view';
+  $('tab-src').textContent = u ? (u.label.length > 24 ? u.label.slice(0, 22) + '…' : u.label) : 'the § in view';
   if (jrReady) { const f = flagsOf(); $('tab-fl').textContent = (new Set([...f.early, ...f.decades].map(x => x.key))).size + ' places'; }
+  const fb = $('followbar');
+  fb.hidden = tab !== 'src';
+  if (tab === 'src') {
+    const where = u ? esc(u.label) + ', AA 9:' + u.aa : unitKey === 'v' ? 'the Vorrede' : '—';
+    fb.classList.toggle('held', hold);
+    fb.innerHTML = hold ? '<span class="dot"></span><span><b>Held</b> at ' + where + '</span><button id="hold" class="hold">RELEASE</button>'
+      : '<span class="dot"></span><span><b>Following the text</b> · now at ' + where + '</span><button id="hold" class="hold" title="Keep the panel on this § while you scroll">HOLD HERE</button>';
+  }
+}
+function paintLayout() {
+  $('app').classList.toggle('panel-off', !panelOpen);
+  $('body').classList.toggle('toc-off', !tocOpen);
+  $('railToc').setAttribute('aria-pressed', String(tocOpen));
+  $('xray').setAttribute('aria-pressed', String(xray));
 }
 function paintProgress() { const el = document.querySelector('#pbody .progress i'); if (el) el.style.width = Math.round(jrProgress * 100) + '%'; }
 
@@ -939,64 +824,36 @@ function paintProgress() { const el = document.querySelector('#pbody .progress i
 const ORDER = ['early', '70s', '80s', '90s', 'mixed'];
 function hatchDef(id, w) { return '<pattern id="' + id + '" width="' + w + '" height="' + w + '" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="' + w + '" height="' + w + '" fill="rgb(214,206,190)"/><rect width="' + (w / 2) + '" height="' + w + '" fill="rgb(156,143,120)"/></pattern>'; }
 const fillOf = (k, hid) => JR_CLASS[k].hatch ? 'url(#' + hid + ')' : 'rgb(' + JR_CLASS[k].rgb + ')';
-function stripSvg() {
-  const T = traced(), p0 = J.meta.aa[0] < 11 ? 11 : J.meta.aa[0], p1 = J.meta.aa[1], cw = 2.72, H = 84;
-  const by = {}; T.forEach(s => { const o = by[s.page] = by[s.page] || {}; o[s.cls] = (o[s.cls] || 0) + 1; });
-  const mx = Math.max(1, ...Object.values(by).map(o => Object.values(o).reduce((a, b) => a + b, 0)));
-  const u = unitInfo(unitKey);
-  let h = '<svg viewBox="0 0 ' + Math.ceil((p1 - p0 + 1) * cw + 8) + ' 132" class="strip" role="img" aria-label="Traced sentences per page of Jäsche, by the dating of the note"><defs>' + hatchDef('hs', 3) + '</defs>';
-  for (let p = p0; p <= p1; p++) {
-    const o = by[p], x = 4 + (p - p0) * cw; if (!o) continue;
-    let y = 20 + H; const tip = [];
-    ORDER.concat(['undated']).forEach(k => { const n = o[k] || 0; if (!n) return; tip.push(JR_CLASS[k].label + ' ' + n); const hh = n / mx * H; y -= hh; h += '<rect x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" width="' + (cw - 0.5) + '" height="' + hh.toFixed(2) + '" fill="' + fillOf(k, 'hs') + '" stroke="#fffaf0" stroke-width="0.35"/>'; });
-    h += '<rect class="hov" data-page="' + p + '" x="' + (x - 0.3).toFixed(2) + '" y="16" width="' + cw + '" height="' + (H + 6) + '" fill="transparent"><title>AA 9:' + p + ' — ' + tip.join(', ') + ' · click to go there</title></rect>';
-  }
-  const labs = [];
-  J.sections.forEach(s => {
-    const a = s.blocks.find(b => b.kind === 'text'); if (!a) return;
-    if (s.part === 'Einleitung' && !labs.some(l => l[1] === 'Einleitung')) labs.push([a.aa, 'Einleitung']);
-    const m = s.title.match(/^(Erster|Zweiter|Dritter) Abschnitt\. Von den (\S+?)\.?$/); if (m) labs.push([a.aa, m[2]]);
-    if (/Methodenlehre/.test(s.part) && !labs.some(l => l[1] === 'Methodenl.')) labs.push([a.aa, 'Methodenl.']);
-  });
-  labs.forEach(([p, t]) => { const x = 4 + (p - p0) * cw; h += '<line x1="' + x + '" y1="8" x2="' + x + '" y2="' + (20 + H) + '" stroke="#5c3d1e" stroke-width="0.6"/><text x="' + (x + 1.5) + '" y="7" font-size="7" fill="#5c3d1e">' + esc(t) + '</text>'; });
-  if (u) { const x = 4 + (u.aa - p0) * cw; h += '<rect x="' + (x - 1) + '" y="16" width="' + ((u.aaEnd - u.aa + 1) * cw + 1.5) + '" height="' + (H + 6) + '" fill="none" stroke="#1a1208" stroke-width="0.8" stroke-dasharray="2 1.5"/>'; }
-  [p0, 30, 50, 70, 90, 110, 130, p1].forEach(p => { h += '<text x="' + (4 + (p - p0) * cw) + '" y="128" font-size="6.5" text-anchor="middle" fill="#7a6a52">' + p + '</text>'; });
-  return h + '</svg>';
-}
-function donutSvg(T) {
-  const cnt = {}; ORDER.forEach(k => { cnt[k] = 0; }); T.forEach(s => { if (cnt[s.cls] !== undefined) cnt[s.cls]++; });
-  const tot = ORDER.reduce((a, k) => a + cnt[k], 0) || 1, cx = 92, cy = 92, R0 = 52, R1 = 80;
-  let h = '<svg viewBox="0 0 300 184" class="donut" role="img" aria-label="Traced sentences by the dating of the note"><defs>' + hatchDef('hd', 5) + '</defs>';
-  let a0 = -Math.PI / 2;
-  const pt = (r, a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+function donutSvg(cnt, tot) {
+  const cx = 60, cy = 60, R1 = 56, R0 = 34, pt = (r, a) => (cx + r * Math.cos(a)).toFixed(2) + ' ' + (cy + r * Math.sin(a)).toFixed(2);
+  let h = '<svg viewBox="0 0 120 120" class="donut" role="img" aria-label="Traced sentences by the dating of the note"><defs>' + hatchDef('hd', 4) + '</defs>', a0 = -Math.PI / 2;
   ORDER.forEach(k => {
     if (!cnt[k]) return;
-    const fr = cnt[k] / tot, a1 = a0 + fr * 2 * Math.PI, lg = a1 - a0 > Math.PI ? 1 : 0;
-    const [x0, y0] = pt(R1, a0), [x1, y1] = pt(R1, a1), [x2, y2] = pt(R0, a1), [x3, y3] = pt(R0, a0);
-    h += '<path d="M' + x0.toFixed(2) + ' ' + y0.toFixed(2) + ' A' + R1 + ' ' + R1 + ' 0 ' + lg + ' 1 ' + x1.toFixed(2) + ' ' + y1.toFixed(2) + ' L' + x2.toFixed(2) + ' ' + y2.toFixed(2) + ' A' + R0 + ' ' + R0 + ' 0 ' + lg + ' 0 ' + x3.toFixed(2) + ' ' + y3.toFixed(2) + ' Z" fill="' + fillOf(k, 'hd') + '" stroke="#f9f4e8" stroke-width="2"><title>' + JR_CLASS[k].label + ': ' + cnt[k] + ' sentences (' + Math.round(fr * 100) + '%)</title></path>';
-    const am = (a0 + a1) / 2, [lx, ly] = pt(R1 + 12, am);
-    if (fr >= 0.03) h += '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" font-size="10.5" text-anchor="' + (Math.cos(am) >= 0 ? 'start' : 'end') + '" dominant-baseline="middle" fill="#1a1208">' + Math.round(fr * 100) + '%</text>';
+    const a1 = a0 + cnt[k] / tot * 2 * Math.PI, lg = a1 - a0 > Math.PI ? 1 : 0;
+    h += '<path d="M' + pt(R1, a0) + ' A' + R1 + ' ' + R1 + ' 0 ' + lg + ' 1 ' + pt(R1, a1) + ' L' + pt(R0, a1) + ' A' + R0 + ' ' + R0 + ' 0 ' + lg + ' 0 ' + pt(R0, a0) + ' Z" fill="' + fillOf(k, 'hd') + '" stroke="#f9f4e8" stroke-width="1.5"><title>' + JR_CLASS[k].label + ': ' + cnt[k] + ' sentences</title></path>';
     a0 = a1;
   });
-  h += '<text x="' + cx + '" y="' + (cy + 3) + '" font-size="20" text-anchor="middle" fill="#1a1208">' + tot + '</text><text x="' + cx + '" y="' + (cy + 16) + '" font-size="8.5" text-anchor="middle" fill="#7a6a52">traced, dated sentences</text>';
-  let ly = 30;
-  ORDER.forEach(k => { h += '<rect x="200" y="' + ly + '" width="11" height="11" rx="2" fill="' + fillOf(k, 'hd') + '"/><text x="216" y="' + (ly + 9.5) + '" font-size="11" fill="#1a1208">' + JR_CLASS[k].label + '</text><text x="296" y="' + (ly + 9.5) + '" font-size="11" text-anchor="end" fill="#7a6a52">' + cnt[k] + '</text>'; ly += 22; });
-  return h + '</svg>';
+  return h + '<text x="60" y="61" font-size="20" text-anchor="middle" fill="#1a1208">' + tot + '</text><text x="60" y="75" font-size="10" text-anchor="middle" fill="#7a6a52">sentences</text></svg>';
 }
 function renderOverview() {
   if (!jrReady) return '<div class="busy">Reading Jäsche against Kant’s 1,870 Reflexionen zur Logik…</div><div class="progress"><i></i></div>';
-  const T = traced(), words = s => s.jw.length, W = SENTS.reduce((a, s) => a + words(s), 0) || 1;
-  const w90 = SENTS.filter(s => s.cov >= JR_NEAR).reduce((a, s) => a + words(s), 0) / W, w70 = SENTS.filter(s => s.cov >= JR_CLOSE).reduce((a, s) => a + words(s), 0) / W, w50 = SENTS.filter(s => s.cov >= JR_REWORK).reduce((a, s) => a + words(s), 0) / W;
+  const T = traced(), words = ss => ss.reduce((a, s) => a + s.jw.length, 0), W = words(SENTS) || 1;
   const pc = x => Math.round(x * 100) + '%';
-  let h = '<div class="ptitle">THE WHOLE BOOK, BY THE DATE OF ITS SOURCES</div><div class="lede">One column per AA 9 page; its height is the number of sentences traced to a Reflexion on that page, coloured by the dating of the note. Click a column to go there.</div>' + stripSvg();
-  h += '<div class="sub2">THE SAME, AS SHARES</div>' + donutSvg(T);
-  h += '<div class="meter"><div class="sub2" style="margin-top:0">JÄSCHE’S WORDS IN SENTENCES TRACED TO A REFLEXION</div><div class="mtrack" role="img" aria-label="Share of Jäsche’s words traced">' +
-    '<span style="width:' + (w90 * 100).toFixed(1) + '%;background:#8b5e3c" title="near-verbatim"></span><span style="width:' + ((w70 - w90) * 100).toFixed(1) + '%;background:#b08a66" title="close"></span><span style="width:' + ((w50 - w70) * 100).toFixed(1) + '%;background:#d7c2a6" title="reworked"></span></div>' +
-    '<div class="mkey"><span><i style="background:#8b5e3c"></i>near-verbatim ≥ 90% · ' + pc(w90) + '</span><span><i style="background:#b08a66"></i>close ≥ 70% · ' + pc(w70 - w90) + '</span><span><i style="background:#d7c2a6"></i>reworked ≥ 50% · ' + pc(w50 - w70) + '</span><span><i style="background:#ece3cf;border:1px solid #cfc3a6"></i>not traced · ' + pc(1 - w50) + '</span></div></div>';
-  const rows = ORDER.concat(['undated']).map(k => { const ss = T.filter(s => s.cls === k); return ss.length ? '<tr><td>' + swatch(k) + esc(JR_CLASS[k].label) + '</td><td>' + ss.length + '</td><td>' + new Set(ss.map(s => s.m.ei)).size + '</td></tr>' : ''; }).join('');
-  h += '<table class="tot"><tr><th>Dating of the note</th><th>Sentences</th><th>Reflexionen</th></tr>' + rows + '</table>';
-  h += '<div class="meta" style="margin-top:0.5rem">' + T.length + ' of ' + SENTS.length.toLocaleString('en') + ' sentences (≥ ' + JR_MIN_WORDS + ' words) are traced at ≥ 70%; ' + SENTS.filter(s => s.cov >= JR_NEAR).length + ' at ≥ 90%. Only marked sentences count; the “reworked” band is shown here but not marked. The Vorrede is not compared. ' +
-    'Mixed dating: Adickes’ first dating of the note spans two decades, a span reaching one year past a boundary keeping the first decade (κ−λ, 1769–70, counts as before 1770). About four-fifths of Jäsche is not traced to any Reflexion; see the spec for what that does and does not show.</div>';
+  const cnt = {}; ORDER.concat(['undated']).forEach(k => { cnt[k] = T.filter(s => s.cls === k).length; });
+  const tot = ORDER.reduce((a, k) => a + cnt[k], 0) || 1;
+  let h = '<div class="sub2 first">TRACED SENTENCES, BY THE DATING OF THE NOTE</div><div class="ovrow">' + donutSvg(cnt, tot) + '<table class="tot"><tr><th>Note first dated</th><th>Sentences</th><th>Share</th><th>Reflexionen</th></tr>' +
+    ORDER.concat(['undated']).map(k => cnt[k] ? '<tr><td>' + swatch(k) + esc(JR_CLASS[k].label) + '</td><td>' + cnt[k] + '</td><td>' + (k === 'undated' ? '—' : pc(cnt[k] / tot)) + '</td><td>' + new Set(T.filter(s => s.cls === k).map(s => s.m.ei)).size + '</td></tr>' : '').join('') + '</table></div>';
+  const w90 = words(SENTS.filter(s => s.cov >= JR_NEAR)) / W, w70 = words(SENTS.filter(s => s.cov >= JR_CLOSE)) / W, w50 = words(SENTS.filter(s => s.cov >= JR_REWORK)) / W;
+  h += '<div class="sub2">HOW MUCH OF JÄSCHE IS TRACED AT ALL <span class="muted2">share of words</span></div><div class="mtrack" role="img" aria-label="Share of Jäsche’s words traced">' +
+    '<span style="width:' + (w90 * 100).toFixed(1) + '%;background:#5c3d1e" title="near-verbatim"></span><span style="width:' + ((w70 - w90) * 100).toFixed(1) + '%;background:#a07b56" title="close"></span><span style="width:' + ((w50 - w70) * 100).toFixed(1) + '%;background:#d7c2a6" title="reworked"></span></div>' +
+    '<div class="mkey"><span><i style="background:#5c3d1e"></i>near-verbatim ≥ 90% · ' + pc(w90) + '</span><span><i style="background:#a07b56"></i>close ≥ 70% · ' + pc(w70 - w90) + '</span><span><i style="background:#d7c2a6"></i>reworked ≥ 50% · ' + pc(w50 - w70) + '</span><span><i style="background:#ece3cf;box-shadow:inset 0 0 0 1px #cfc3a6"></i>not traced · ' + pc(1 - w50) + '</span></div>';
+  h += '<div class="sub2">BY PART</div><table class="tot"><tr><th></th><th>Words</th><th>≥ 70%</th><th>≥ 50%</th></tr>' + JR_PARTS.map(P => {
+    const ss = SENTS.filter(P.has), w = words(ss) || 1;
+    return '<tr><td>' + P.label + '</td><td>' + words(ss).toLocaleString('en') + '</td><td>' + pc(words(ss.filter(s => s.cov >= JR_CLOSE)) / w) + '</td><td>' + pc(words(ss.filter(s => s.cov >= JR_REWORK)) / w) + '</td></tr>';
+  }).join('') + '</table>';
+  h += '<div class="meta note">' + T.length + ' of ' + SENTS.length.toLocaleString('en') + ' sentences (≥ ' + JR_MIN_WORDS + ' words) are traced at ≥ 70%, and marked in X-Ray mode; ' + SENTS.filter(s => s.cov >= JR_NEAR).length + ' at ≥ 90%. The reworked band (50–70%) is counted here but not marked. The Vorrede is not compared. ' +
+    'Mixed dating: Adickes’ first dating of the note spans two decades, a span reaching one year past a boundary keeping the first decade (κ−λ, 1769–70, counts as before 1770). Einleitung I–V is almost untraced; the spec says what that may mean. ' +
+    'The book page by page: switch the contents to Dating.</div>';
   return h;
 }
 
@@ -1041,60 +898,49 @@ function pairHtml(sn) {
     '<div class="meta">AA 16:' + e.aa + ' · filed under Meier § ' + esc((e.paras || []).join(', ')) + (e.loc && e.loc.raw ? ' · ' + esc(e.loc.raw) : '') + ' · <b>' + Math.round(sn.m.cov * 100) + '%</b> of the Jäsche sentence’s words, in order — ' + (sn.v ? 'near-verbatim' : 'close') + '</div>' +
     '<div class="lab">Jäsche · AA 9:' + sn.page + '</div><p class="jt" data-go="' + sn.i + '" title="Show it in the text">' + jh + '</p><div class="lab">Kant, R ' + e.r + '</div><p class="rt">' + rh + '</p></div>';
 }
+/* a transcript passage beside a Jäsche sentence; its words that are not in the sentence greyed */
+function txCard(sn, li) {
+  const x = sn.tx[li], L = JR_LECTURES[li], s = TXI[li].src[x.ei], b = s.b, jw = new Set(sn.jw);
+  const i0 = Math.max(0, x.lo - 3), i1 = Math.min(s.t.length - 1, x.hi + 2), lo = s.t[i0].s, hi = s.t[i1].e;
+  let th = lo > 0 ? '… ' : '', l2 = lo;
+  for (let i = i0; i <= i1; i++) { const t = s.t[i]; if (jw.has(t.w)) continue; th += esc(b.text.slice(l2, t.s)) + '<span class="extra">' + esc(b.text.slice(t.s, t.e)) + '</span>'; l2 = t.e; }
+  th += esc(b.text.slice(l2, hi)) + (hi < b.text.length ? ' …' : '');
+  const how = x.how === 'order' ? Math.round(x.cov * 100) + '% of the sentence’s words, in order' : x.got + ' of its ' + x.of + ' content words within one passage';
+  return '<div class="xcard"><div class="ph"><span class="wl">' + esc(L.label) + '</span><span class="yrs">' + esc(L.date) + ' · AA 24:' + pageAt(b, lo) + '</span></div>' +
+    '<div class="meta">' + esc((s.sec.title || '').trim() || '(title page)') + ' · ' + how + '</div><div class="lab">' + esc(L.label) + '</div><p class="rt">' + th + '</p></div>';
+}
+function txBox(u) {
+  let h = '<div class="box"><h5>PARALLELS IN THE STUDENT TRANSCRIPTS <span class="tg">a parallel, not one of Jäsche’s sources</span></h5>';
+  if (!txReady) { txRun(); return h + '<div class="busy">Reading Blomberg, the Wiener Logik and Busolt, sentence by sentence… (a few seconds, once)</div><div class="progress txprog"><i style="width:' + Math.round(txProgress * 100) + '%"></i></div></div>'; }
+  const ss = u.sents.filter(s => s.tx && s.tx.some(Boolean));
+  if (!ss.length) return h + '<div class="empty">No sentence here has a close parallel in Blomberg, the Wiener Logik or Busolt.</div></div>';
+  h += '<div class="meta">A transcript records what a student heard in one semester. A parallel shows the matter was taught then; it does not date Jäsche’s sentence.</div>';
+  ss.forEach(sn => {
+    const b = jb[sn.id].b;
+    h += '<div class="txs"><div class="lab">Jäsche · AA 9:' + sn.page + (sn.m ? ' · also traced to R ' + REFL_ENTRIES[sn.m.ei].r : '') + '</div><p class="jt" data-go="' + sn.i + '" title="Show it in the text">' + esc(b.text.slice(sn.s, sn.e)) + '</p>' +
+      sn.tx.map((x, li) => x ? txCard(sn, li) : '').join('') + '</div>';
+  });
+  return h + '</div>';
+}
 function renderSources() {
   if (!jrReady) return renderOverview();
   if (unitKey === 'v') return '<div class="ptitle">VORREDE</div><div class="lede">Jäsche’s own preface. It is not compared with Kant’s notes.</div>';
   const u = unitInfo(unitKey); if (!u) return '<div class="empty">Scroll the text to a § or a section.</div>';
-  const T = u.sents.filter(s => s.m), rs = new Set(T.map(s => s.m.ei)), cls = new Set(T.map(s => s.cls));
+  const T = u.sents.filter(s => s.m), rs = new Set(T.map(s => s.m.ei));
   let h = '<div class="ptitle">' + esc(u.label) + (u.title ? ' · <span>' + esc(u.title) + '</span>' : '') + '</div>';
-  h += '<div class="summ">AA 9:' + u.aa + (u.aaEnd !== u.aa ? '–' + u.aaEnd : '') + ' · ' + u.sents.length + ' sentences compared, <b>' + T.length + ' traced</b> to ' + rs.size + ' Reflexion' + (rs.size === 1 ? '' : 'en') +
-    (T.length ? ' · ' + ORDER.concat(['undated']).filter(k => cls.has(k)).map(k => JR_CLASS[k].label).join(', ') : '') + '</div>';
+  const byCls = ORDER.concat(['undated']).map(k => { const r = [...new Set(T.filter(s => s.cls === k).map(s => REFL_ENTRIES[s.m.ei].r))]; return r.length ? r.length + ' ' + JR_CLASS[k].label + ' (R ' + r.join(', ') + ')' : ''; }).filter(Boolean);
+  h += '<div class="summ">AA 9:' + u.aa + (u.aaEnd !== u.aa ? '–' + u.aaEnd : '') + ' · <b>' + T.length + ' of ' + u.sents.length + ' sentences</b> traced' + (T.length ? ', to <b>' + rs.size + ' Reflexion' + (rs.size === 1 ? '' : 'en') + '</b>: ' + byCls.join('; ') : '') + '.</div>';
+  h += '<label class="opt txopt"><input type="checkbox" id="showtx"' + (showTx ? ' checked' : '') + '> also show parallels in the student transcripts</label>';
+  h += '<div class="box"><h5>EACH TRACED SENTENCE BESIDE ITS NOTE <span class="tg">machine match</span></h5>' + (T.length ? T.map(pairHtml).join('') : '<div class="empty">No sentence here is traced to a Reflexion at 70% or more. Jäsche may have reworked Kant’s notes beyond what word matching sees, or drawn on something else.</div>') + '</div>';
+  if (showTx) h += txBox(u);
   const me = meierOf(u);
-  h += '<div class="box"><h5>MEIER §§ BEHIND IT ' + (me.attested ? '<span class="tg att">AA concordance</span>' : '<span class="tg">inferred from the matches</span>') + '</h5><div class="meier">' +
-    (me.attested ? me.groups.map(g => 'Meier § ' + esc(rangeList(g.paras)) + ' · ' + esc(g.jaesche) + (g.topic ? ' · <i>' + esc(g.topic) + '</i>' : '')).join('<br>') : me.paras.length ? 'Meier §§ ' + rangeList(me.paras) : '<span class="muted">None: no sentence here is traced, and the AA gives no concordance.</span>') + '</div></div>';
   const filed = [...new Set(me.paras.flatMap(p => REFL_BY_PARA[p] || []))].filter(ei => REFL_ENTRIES[ei] && !REFL_ENTRIES[ei].vacat);
   const used = new Map(); T.forEach(s => used.set(s.m.ei, s.cls));
-  if (filed.length || used.size) h += '<div class="box"><h5>REFLEXIONEN ON THESE §§, BY ADICKES’ DATE <span class="tg att">attested dates</span></h5>' + timelineSvg(filed, used) +
-    '<div class="meta">' + filed.length + ' notes filed under these Meier §§; Jäsche’s text is traced to ' + used.size + ' (coloured; hatched = mixed dating). Placed by the start of Adickes’ first dating.</div></div>';
-  h += '<div class="box"><h5>JÄSCHE BESIDE KANT <span class="tg">machine match</span></h5>' + (T.length ? T.map(pairHtml).join('') : '<div class="empty">No sentence here is traced to a Reflexion at 70% or more. Jäsche may have reworked Kant’s notes beyond what word matching sees, or drawn on something else.</div>') + '</div>';
+  const meier = me.attested ? me.groups.map(g => 'Meier § ' + esc(rangeList(g.paras)) + ' · ' + esc(g.jaesche) + (g.topic ? ' · <i>' + esc(g.topic) + '</i>' : '')).join('<br>') + ' <span class="tg att">AA concordance</span>'
+    : me.paras.length ? 'Meier §§ ' + rangeList(me.paras) + ' <span class="tg">inferred from the matches</span>' : '<span class="muted">No Meier § known: no sentence here is traced, and the AA gives no concordance.</span>';
+  h += '<div class="box"><h5>WHEN KANT WROTE ON THESE §§ <span class="tg att">Adickes’ dates</span></h5>' + (filed.length || used.size ? timelineSvg(filed, used) : '') +
+    '<div class="meta">' + meier + (filed.length ? ' · ' + filed.length + ' notes filed there; the ' + used.size + ' Jäsche’s text is traced to are coloured (hatched = mixed dating), placed by the start of Adickes’ first dating.' : '') + '</div></div>';
   return h;
-}
-
-/* ── Transcript parallels ───────────────────────────────────────────────── */
-function ensureSem() {
-  if (SEM || semBusy) return;
-  semBusy = true;
-  setTimeout(() => { SEM = semBuild(J, JR_LECTURES); semBusy = false; paintTabs(); renderPanel(); }, 40);
-}
-function semFor(u) {
-  if (semCache[u.key]) return semCache[u.key];
-  const us = SEM.units.filter(x => u.para ? x.para === u.para : (x.sec === u.sec && !x.para)), best = {};
-  us.forEach(x => { const top = semTop(SEM, x, 1); Object.keys(top).forEach(w => { const r = top[w][0]; if (!best[w] || r.z > best[w].r.z) best[w] = { r, x }; }); });
-  return (semCache[u.key] = best);
-}
-const zLevel = z => z >= JR_Z[3] ? 3 : z >= JR_Z[2] ? 2 : z >= JR_Z[1] ? 1 : 0;
-function renderParallels() {
-  if (unitKey === 'v') return '<div class="lede">The Vorrede is Jäsche’s own preface; there is nothing to set it against.</div>';
-  const u = unitInfo(unitKey); if (!u) return '<div class="empty">Scroll the text to a § or a section.</div>';
-  let h = '<div class="ptitle">' + esc(u.label) + ' · <span>parallels in the student transcripts</span></div><div class="lede">Passages of the transcripts that treat the same matter, oldest first. They are not Jäsche’s sources: they show what Kant was teaching when. Matched by shared content words and concepts, not by wording.</div>';
-  if (!SEM) { ensureSem(); return h + '<div class="busy">Reading the three transcripts… (a few seconds, once)</div>'; }
-  const best = semFor(u);
-  JR_LECTURES.forEach(L => {
-    const b = best[L.key];
-    if (!b) { h += '<div class="wit dim"><div class="wh"><b>' + esc(L.label) + '</b><span class="date">' + L.date + '</span><span class="tag s1">no parallel</span></div></div>'; return; }
-    const win = SEM.wins[b.r.wi], lv = zLevel(b.r.z), sec = L.data.sections[win.sec], fb = SEM.blocks.get(win.blocks[0]).b, lb = SEM.blocks.get(win.blocks[win.blocks.length - 1]).b;
-    const cite = 'AA 24:' + fb.aa + ((lb.aaEnd || lb.aa) !== fb.aa ? '–' + (lb.aaEnd || lb.aa) : '');
-    if (!lv) { h += '<div class="wit dim"><div class="wh"><b>' + esc(L.label) + '</b><span class="date">' + L.date + '</span><span class="tag s1">no parallel above “possible”</span></div><div class="meta">Nearest: ' + esc((sec.title || '').trim() || '(title page)') + ' · ' + cite + ' · strength ' + b.r.z.toFixed(1) + '</div></div>'; return; }
-    const ev = semEvidence(SEM, b.x, win);
-    // the excerpt: the paragraph of the window where the shared words are thickest, from the first of them
-    const kws = new Set(ev.kw.slice(0, 12).map(k => k.term)); let pick = null;
-    win.blocks.forEach(id => { const f = SEM.blocks.get(id), hits = f.pos.filter(p => kws.has(p.term)); if (hits.length && (!pick || hits.length > pick.n)) pick = { f, n: hits.length, s: hits[0].s }; });
-    const xb = pick ? pick.f.b : fb, xs = pick ? Math.max(0, xb.text.lastIndexOf(' ', Math.max(0, pick.s - 60)) + 1) : 0, xt = xb.text.slice(xs, xs + 230);
-    const chips = ev.concepts.slice(0, 4).map(c => '<span class="chp con">' + esc(c.term) + '</span>').concat(ev.kw.slice(0, 6).map(k => '<span class="chp">' + esc(SEM.surface(k.term)) + '</span>')).join(' ');
-    h += '<div class="wit"><div class="wh"><b>' + esc(L.label) + '</b><span class="date">' + L.date + '</span><span class="tag s' + lv + '">' + JR_ZNAME[lv] + '</span></div><div class="meta">' + esc((sec.title || '').trim() || '(title page)') + ' · ' + cite + ' · strength ' + b.r.z.toFixed(1) + ' · <a href="../logic-corpus.html#' + esc(win.blocks[0]) + '" target="_blank" rel="noopener">open in Logic Corpus ↗</a></div>' +
-      '<div class="chips">' + chips + '</div><p class="ex">“' + (xs > 0 ? '… ' : '') + esc(xt) + (xs + 230 < xb.text.length ? ' …' : '') + '” <span class="meta">AA 24:' + pageAt(xb, xs) + '</span></p></div>';
-  });
-  return h + '<div class="meta">Strength is how far the match stands above this part of Jäsche’s usual score against that transcript, in standard deviations: possible ≥ 3.5, good ≥ 4.5, strong ≥ 6.</div>';
 }
 
 /* ── Flags ──────────────────────────────────────────────────────────────── */
@@ -1120,50 +966,70 @@ function renderFlags() {
   let h = '<div class="ptitle">PLACES TO LOOK AT</div><div class="lede">Conditions the page computes. Observations, not verdicts: an early note may still say what the critical Kant held. Click one to go there.</div>';
   h += '<div class="fg"><h4><span class="fdot" style="background:rgb(29,53,87)"></span>Early only<span class="cnt">' + F.early.length + '</span></h4><div class="fd">Every Reflexion traced here is dated before 1770.</div>' + F.early.map(flagItem).join('') + '</div>';
   h += '<div class="fg"><h4><span class="fdot" style="background:linear-gradient(90deg,rgb(29,53,87),rgb(147,181,216))"></span>Sources from three or more decades<span class="cnt">' + F.decades.length + '</span></h4><div class="fd">The notes traced in one § or section fall in three or more dating classes.</div>' + F.decades.map(flagItem).join('') + '</div>';
-  h += '<div class="fg hot"><h4><span class="fdot" style="background:#1a1208"></span>Early, and no late transcript parallel';
-  if (!SEM) { ensureSem(); return h + '</h4><div class="busy">Reading the three transcripts… (a few seconds, once)</div></div>'; }
-  const nl = F.early.filter(f => { const best = semFor(unitInfo(f.key)); return !JR_LATE.some(w => best[w] && best[w].r.z >= JR_Z[2]); });
-  return h + '<span class="cnt">' + nl.length + '</span></h4><div class="fd">Early only, and neither the Wiener Logik nor Busolt has a good parallel.</div>' + nl.map(flagItem).join('') + '</div>';
+  return h;
 }
 
 /* ── the panel ──────────────────────────────────────────────────────────── */
 function renderPanel() {
   paintTabs();
-  const body = $('pbody');
-  body.innerHTML = tab === 'ov' ? renderOverview() : tab === 'src' ? renderSources() : tab === 'par' ? renderParallels() : renderFlags();
+  if (!panelOpen) return;
+  $('pbody').innerHTML = tab === 'ov' ? renderOverview() : tab === 'src' ? renderSources() : renderFlags();
   paintProgress();
 }
+function openTab(t) { tab = t; panelOpen = true; paintLayout(); renderPanel(); $('pbody').scrollTop = 0; savePrefs(); }
 function openSentence(i) {
   const sn = SENTS[i]; if (!sn) return;
-  selSent = i; unitKey = sn.para ? 'p' + sn.para : 's' + sn.sec; tab = 'src';
+  selSent = i; unitKey = sn.para ? 'p' + sn.para : 's' + sn.sec; tab = 'src'; panelOpen = true; paintLayout(); savePrefs();
   renderText(); renderPanel();
   const el = $('pr-' + i); if (el) { el.scrollIntoView({ block: 'center' }); flash(el); }
 }
 function openUnit(key) {
-  unitKey = key; tab = 'src';
+  hold = false; unitKey = key; tab = 'src'; panelOpen = true; paintLayout(); savePrefs();
   const u = unitInfo(key); if (u) scrollToId(u.anchor);
   renderPanel();
 }
 
 /* ── events ─────────────────────────────────────────────────────────────── */
-$('xray').addEventListener('click', () => { xray = !xray; $('xray').setAttribute('aria-pressed', xray); renderText(); });
-$('tabs').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (b) { tab = b.dataset.tab; renderPanel(); $('pbody').scrollTop = 0; } });
-$('legend').addEventListener('change', ev => { if (ev.target.id === 'follow') { follow = ev.target.checked; if (follow) onScroll(); paintTabs(); } });
+$('xray').addEventListener('click', () => { xray = !xray; paintLayout(); renderText(); savePrefs(); });
+$('tabs').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-tab]'); if (!b) return;
+  if (b.dataset.tab === tab) { panelOpen = false; paintLayout(); paintTabs(); savePrefs(); } else openTab(b.dataset.tab);
+});
+$('railR').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (b) openTab(b.dataset.tab); });
+$('railToc').addEventListener('click', () => { tocOpen = !tocOpen; paintLayout(); savePrefs(); });
+$('followbar').addEventListener('click', ev => {
+  if (!ev.target.closest('#hold')) return;
+  hold = !hold;
+  if (!hold) { const k = inView(); if (k !== unitKey) { unitKey = k; renderPanel(); return; } }
+  paintTabs();
+});
 $('toc').addEventListener('click', ev => {
-  const d = ev.target.closest('[data-open]'); if (d) { const el = $('paras-' + d.dataset.open); el.classList.toggle('open'); d.textContent = el.classList.contains('open') ? '▾' : '▸'; return; }
+  const v = ev.target.closest('[data-view]'); if (v) { tocView = v.dataset.view; renderToc(); savePrefs(); return; }
+  const d = ev.target.closest('[data-open]'); if (d) { const id = d.dataset.open, el = $('paras-' + id); if (openSecs.has(id)) openSecs.delete(id); else openSecs.add(id); el.classList.toggle('open', openSecs.has(id)); d.textContent = openSecs.has(id) ? '▾' : '▸'; return; }
   const s = ev.target.closest('[data-sec]'); if (s) { scrollToId('sec-' + s.dataset.sec); return; }
   const p = ev.target.closest('[data-para]'); if (p) scrollToId('para-' + p.dataset.para);
 });
-$('goto').addEventListener('change', ev => { if (ev.target.value) scrollToId(ev.target.value); ev.target.value = ''; });
+$('toc').addEventListener('mouseover', ev => { const t = ev.target.closest('.tb[data-stat]'); if (t) showTip(t); else $('tip').hidden = true; });
+$('toc').addEventListener('mouseleave', () => { $('tip').hidden = true; });
+$('toc').addEventListener('scroll', () => { $('tip').hidden = true; });
+$('goto').addEventListener('input', () => { GO = gotoMatches($('goto').value); goCur = 0; paintGoto(); });
+$('goto').addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); if (GO.length) { goCur = (goCur + (ev.key === 'ArrowDown' ? 1 : GO.length - 1)) % GO.length; paintGoto(); } }
+  else if (ev.key === 'Enter') { ev.preventDefault(); gotoPick(goCur); }
+  else if (ev.key === 'Escape') { $('goto').value = ''; GO = []; $('golist').hidden = true; }
+});
+$('goto').addEventListener('blur', () => setTimeout(() => { $('golist').hidden = true; }, 150));
+$('goto').addEventListener('focus', () => { if ($('goto').value.trim()) paintGoto(); });
+$('golist').addEventListener('mousedown', ev => { const b = ev.target.closest('[data-gi]'); if (b) { ev.preventDefault(); gotoPick(+b.dataset.gi); } });
 $('text').addEventListener('scroll', () => { if (!tick) tick = requestAnimationFrame(() => { tick = 0; onScroll(); }); });
 $('inner').addEventListener('click', ev => {
   const g = ev.target.closest('.gut'); if (g) { ev.preventDefault(); history.replaceState(null, '', g.getAttribute('href')); return; }
   if (window.getSelection().toString()) return;
   const s = ev.target.closest('[data-sent]'); if (s) openSentence(+s.dataset.sent);
 });
+$('pbody').addEventListener('change', ev => { if (ev.target.id === 'showtx') { showTx = ev.target.checked; savePrefs(); const keep = $('pbody').scrollTop; renderPanel(); $('pbody').scrollTop = keep; } });
 $('pbody').addEventListener('click', ev => {
   const t = ev.target;
-  const pg = t.closest('[data-page]'); if (pg) { scrollToPage(+pg.dataset.page); return; }
   const ei = t.closest('[data-ei]'); if (ei) { const sn = SENTS.find(s => s.m && s.m.ei === +ei.dataset.ei && (s.para ? 'p' + s.para : 's' + s.sec) === unitKey); if (sn) { const el = $('pr-' + sn.i); el.scrollIntoView({ block: 'center' }); flash(el); } return; }
   const go = t.closest('[data-go]'); if (go) { const sn = SENTS[+go.dataset.go]; selSent = sn.i; renderText(); scrollToId(sn.id, true); return; }
   const u = t.closest('[data-unit]'); if (u) openUnit(u.dataset.unit);
@@ -1177,9 +1043,9 @@ $('loose').addEventListener('change', ev => { loose = ev.target.checked; runSear
 window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (document.getElementById(id)) scrollToId(id, true); });
 
 /* ── init ───────────────────────────────────────────────────────────────── */
-renderToc(); paintLegend(); renderText(); unitKey = inView(); renderPanel();
+loadPrefs(); paintLayout(); paintLegend(); renderToc(); renderText(); unitKey = inView(); renderPanel();
 if (location.hash && document.getElementById(location.hash.slice(1))) scrollToId(location.hash.slice(1), true);
-setTimeout(() => jrRun().then(() => { flagMemo = null; if (xray) renderText(); renderPanel(); }), 30);
+setTimeout(() => jrRun().then(() => { flagMemo = null; if (xray) renderText(); if (tocView === 'dating') renderToc(); renderPanel(); }), 30);
 </script>
 </body>
 </html>

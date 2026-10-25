@@ -3,10 +3,11 @@
 *The spec is the source of truth for this tool. When the tool's behaviour changes, this
 file changes in the same pull request.*
 
-**Status:** first version built. [index.html](index.html) is the tool, running on the data in
-the repository. [mockup.html](mockup.html) is the static design preview it was built from (revision
-2), kept for the design notes and the decisions still open. Behaviour items marked **(built)** work
-in index.html; the others are planned.
+**Status:** revision 3 built. [index.html](index.html) is the tool, running on the data in the
+repository. [mockup.html](mockup.html) is the static preview revision 3 was built from (revision 2,
+which the first version was built from, is in the history of pull request 44). Behaviour items
+marked **(built)** work in index.html, and **(rev. 3)** marks what revision 3 added or changed,
+all of it built; items without either mark are planned.
 
 ## Question
 
@@ -56,6 +57,59 @@ the *Critique* as data, and re-run the comparison. Existing scholarship (Boswell
 the Logik's textual authenticity, 1988; Hinske's Kant-Index concordances) should be read first,
 as it may already answer part of this.
 
+### Other sources: what was found for revision 3
+
+**The scholarship.** Boswell, *Quellengeschichtliche Untersuchungen zum Kantischen
+Logikhandbuch* (Frankfurt a. M.: Lang, 1991), is reported in the secondary literature as finding
+that Jäsche switched between Kant's notes and student transcripts (Nachschriften), sometimes
+within one paragraph, in roughly equal shares. Naragon's catalogue of the lecture notes calls the
+lost transcript "an-Jäsche". He places it in one family, sharing a source of the late 1770s or
+early 1780s, with an-Pölitz, Hechsel, Hoffmann and the Wiener Logik. Neither has been read here
+at first hand. Both should be, with Hinske, "Die Jäsche-Logik und ihr besonderes Schicksal im
+Rahmen der Akademie-Ausgabe", *Kant-Studien* 91 (2000).
+
+**What the data here shows.** Einleitung I–V (AA 9:11–39: the concept of logic and of
+philosophy, the history of philosophy, cognition in general) owes almost nothing to the
+Reflexionen: 11 of its 386 sentences match one at ≥ 50%, none at ≥ 70%. Against each transcript
+separately, with a looser test (≥ 60% of a sentence's content words within one passage of twice
+its length), the Wiener Logik has clearly more parallels than the others:
+
+| | Wiener Logik (AA 24:785–940) | Blomberg (24:7–301) | Busolt (24:603–686) |
+| --- | --- | --- | --- |
+| Einleitung, sentences with a parallel | 58 | 18 | 21 |
+| of which in Einleitung I–V | 28 | 9 | 10 |
+| whole book | 83 | 34 | 36 |
+| rank correlation with Jäsche's order, over the Einleitung | 0.78 | 0.21 | 0.44 |
+
+Blomberg is about twice the Wiener Logik's length, so this is not an effect of size. A few
+parallels are word for word: "Die Hauptquellen der Vorurtheile sind vorzüglich Nachahmung,
+Gewohnheit und Neigung" (AA 24:865; Jäsche AA 9:76), "Aristoteles kann als der Vater der Logik
+angesehen werden" (24:796; 9:20). And the order matters: Wiener's parallels come in Jäsche's own
+sequence, through the history of philosophy, which is not in Meier. That fits Jäsche working from
+a transcript of the Wiener family. It does not fit the Wiener Logik itself being his source:
+83 parallels in 1,600 sentences is too few. Those sentences were read by eye only as a sample of
+about twenty, nearly all genuine; the loose test catches paraphrase, and short sentences can
+reach it by chance.
+
+**Texts that would settle it**, in order of value:
+
+1. *Logik Pölitz* (AA 24:497–602) and *Logik Hechsel* (ed. Pinder, *Logik-Vorlesung:
+   Unveröffentlichte Nachschriften*, 1998, which also has the *Warschauer Logik*): the Wiener
+   Logik's closest relatives.
+2. *Logik Dohna-Wundlacken* (AA 24:687–784, early 1790s) and *Logik Philippi* (AA 24:303–496,
+   1772): the latest and an early control.
+3. Kant's published works where Jäsche's Einleitung has the same matter, as candidates only, not
+   yet checked: the *Critique of Pure Reason* (AA III–IV: the Architectonic for the
+   Weltbegriff and Schulbegriff of philosophy, the Canon for the question "Was kann ich
+   wissen?", the Discipline for definitions), the *Anthropologie* (AA VII) and the *Critique of Judgement*
+   § 40 (AA V) for the three maxims of thinking, and *Die falsche Spitzfindigkeit der vier
+   syllogistischen Figuren* (1762, AA II:45–61) for §§ 66–75. The last would matter
+   particularly, being pre-critical.
+
+Plain-text or RTF copies, transcribed as the existing `Textfiles/` are, are what the comparison
+needs. Its scripts are in the session that produced this revision and can be added to the
+folder.
+
 ## Sources
 
 - The Jäsche *Logik*, AA 9:3–150: [../logik-jasche-9.js](../logik-jasche-9.js), `LOGIK_JASCHE`
@@ -91,8 +145,9 @@ between Meier §§ and Jäsche pages, where a block header gives one.
 - *The Meier § behind a Jäsche passage, where the AA gives no concordance* (all of the
   Elementarlehre and Methodenlehre). Taken from the §§ of the Reflexionen it matches, and
   labelled "inferred from the matches".
-- *Transcript parallels.* The section-level parallels in the transcripts, from the content
-  comparison in [../jasche-cross-reference.html](../jasche-cross-reference.html).
+- *Transcript matches* (item 16). Sentence-level parallels in the transcripts,
+  labelled as parallels and never as dated sources. They replace the section-level transcript
+  parallels of the first version, which are removed (item 8).
 - *Flags.* Conditions the page computes, worded as observations and never as verdicts.
 
 **Rules that follow:**
@@ -120,6 +175,13 @@ always on screen.
    the margin and page breaks inside paragraphs marked `‹N›`.
 2. **(built)** A contents tree beside the text lists the parts, sections and §§; clicking
    an entry scrolls the text to it, and the entry for the section and § in view is highlighted.
+   - a. **(rev. 3)** A *Titles · Dating* switch at the head of the contents. In Dating view every
+     part, section and § has a bar beneath its title, with no figures beside it. The bar is the
+     entry's words, coloured by dating class where they are traced to a Reflexion at ≥ 70%.
+     Hovering a bar opens a box giving, for each dating class present, the share of the entry's
+     words taken from notes of that class and the number of sentences, then the share not
+     traced, and the entry's sentences and distinct Reflexionen. Clicking still goes to the
+     entry. This replaces the dating strip of item 6a.
 3. **(built)** A search box finds a term in Jäsche, with a hit count and previous/next; a
    *spelling-tolerant* option lets one printed spelling find the others.
 4. **(built)** An **X-Ray mode** switch above the text. Off, Jäsche reads as a clean text.
@@ -127,19 +189,28 @@ always on screen.
    Colour), with a solid underline for near-verbatim and a dashed one for close, and a small
    `R 3036` after it names the note.
 5. **(built)** In X-Ray mode, clicking a marked sentence opens it in the **Sources** tab.
+   **(rev. 3)** It no longer pins the tab: Sources scrolls to that sentence's pair and highlights
+   it, and goes on following the text.
 
-**Panel (right): four tabs**
+**Panel (right): three tabs** (four in the first version)
 
 6. **(built)** **Overview.**
-   - a. A dating strip of the whole book: one column per AA 9 page, its height the number of
-     traced sentences on that page, stacked by dating class. Section boundaries are marked
-     above it. Clicking a column scrolls the text to that page.
+   - ~~a. A dating strip of the whole book, one column per AA 9 page.~~ (dropped in rev. 3: hard
+     to read at panel width; replaced by the bars in the contents, item 2a)
    - b. The same as shares: a pie of the traced sentences by dating class, labelled with
-     percentages and counts.
+     percentages and counts. **(rev. 3)** 120 px across, its figures in a table beside it rather
+     than around it.
    - c. A bar of how much of Jäsche is traced at all, by strength: near-verbatim, close,
      reworked (50–70%, counted here but not marked in the text), not traced (share of words).
-   - d. The totals by dating class, in sentences and in distinct Reflexionen.
-7. **(built)** **Sources.** Follows the § in view (or the sentence clicked). It shows:
+   - d. The totals by dating class, in sentences and in distinct Reflexionen. **(rev. 3)** Merged
+     into the pie's table, with the share.
+   - e. **(rev. 3)** A table by part (Einleitung I–V, Einleitung VI–X with the Anhang,
+     Elementarlehre, Methodenlehre): words, and the share traced at ≥ 70% and ≥ 50%.
+7. **(built)** **Sources.** Follows the § in view (or the sentence clicked). **(rev. 3)** It always
+   follows the text, and a band at its top says where it is ("Following the text · now at § 21").
+   Pinning is a separate, visible *Hold here* button. Once pressed the band reads "Held at § 21 ·
+   release". The traced sentences (c) come first, then the timeline (b), with the Meier §§ (a)
+   in a line beneath it. It shows:
    - a. the Meier §§ the passage rests on, from the AA concordance (attested) or from the
      matches (inferred), with the AA's topic heading;
    - b. a timeline, 1750–1805, of the Reflexionen filed under those §§, each placed by Adickes'
@@ -147,18 +218,17 @@ always on screen.
      at 1781;
    - c. each matched sentence beside its Reflexion, Jäsche's words that are not in the note
      marked, with the phase expression verbatim, its years, and AA 16 page.
-8. **(built)** **Transcript parallels** (formerly "Witnesses"). For the § in view, the
-   passages of Blomberg, the Wiener Logik and Busolt that deal with the same matter, oldest
-   first, each with its date, strength and the shared concepts, so that one can see whether the
-   doctrine was still being taught in the 1780s. The tab says plainly that these are not
-   Jäsche's sources.
+8. ~~**Transcript parallels** (formerly "Witnesses"). For the § in view, the passages of
+   Blomberg, the Wiener Logik and Busolt that deal with the same matter, oldest first.~~
+   (dropped in rev. 3: it matched whole sections by shared vocabulary and could not point to a
+   passage; see item 16)
 9. **(built)** **Flags.** A list across the book of §§ and sections that meet a condition,
    each clickable:
    - *early only* — every Reflexion matched is in the "before 1770" class;
    - *sources from three or more decades* — the notes matched in one § or section fall in three
      or more dating classes;
-   - *early, no late transcript parallel* — early only, and no good parallel in the Wiener
-     Logik or Busolt.
+   - ~~*early, no late transcript parallel* — early only, and no good parallel in the Wiener
+     Logik or Busolt.~~ (dropped in rev. 3 with item 8; it can return on item 16's matches)
 10. ~~A *Design notes* switch in the header.~~ (dropped: the numbered design notes live in
     mockup.html, not in the tool)
 11. Meier's text for the §§ in 7a, beside the Reflexionen. Needs Meier's *Auszug* in `data/`.
@@ -167,6 +237,31 @@ always on screen.
 13. A Jäsche-internal layer: where the same doctrine is treated twice (Jäsche moved material
     from the Elementarlehre into the Einleitung, as his Vorrede says), the two places side by
     side.
+
+**Throughout (rev. 3)**
+
+14. Each side opens and closes from its own tab button, with no separate menu. On the left, a
+    *Contents* tab: clicking it folds the contents to a slim rail, clicking it again brings them
+    back. On the right, clicking the tab already open (marked ×) folds the panel to a rail of
+    the three tab names; clicking a name opens the panel at that tab. With both folded the text
+    takes the full width. The layout is remembered between visits (see item 18).
+15. *Go to* is a small box, not a long drop-down. Typing a § number, an AA 9 page (`57` or
+    `9:57`) or words of a heading offers the matches in a list of six rows at most; Enter or a
+    click goes to the one chosen.
+16. **Transcript matches**, a tick box in the Sources tab ("also show parallels in the student
+    transcripts"), off by default. Sources then adds grey cards for the sentences of the § in
+    view that have a close parallel in a transcript: ≥ 60% of the sentence's words in order, or
+    ≥ 70% of its content words (at least four) within one passage twice its length. A card gives the transcript, its date and AA 24 page, both texts,
+    the strength, and the words "a parallel, not one of Jäsche's sources". The matching is done
+    sentence by sentence (words in order, or most of the content words within one passage),
+    never section by section.
+17. All charts and tables share one type scale: labels in 10 px Cinzel, figures in 13 px EB
+    Garamond, at the panel's full width.
+18. The page remembers, in the browser, which sides are open, the tab, X-Ray mode, the contents
+    view and the transcript tick box, and reopens as it was left. Nothing else is stored, and the
+    *Hold here* position is not kept. This is the one exception to the repository's
+    no-persistence rule, at the owner's request. A browser that refuses storage (some do for
+    pages opened from a file) simply starts with the defaults.
 
 ## Out of scope
 
@@ -180,9 +275,12 @@ always on screen.
 - **Unit:** individual sentences are marked; §-level views are built from them.
 - **Periods:** by decade — before 1770, 1770s, 1780s, 1790s.
 - **Mixed dating:** a class and colour of its own (hatched warm grey).
-- **Transcript parallels:** a tab of its own, under that name.
+- ~~**Transcript parallels:** a tab of its own, under that name.~~ Removed in rev. 3 (item 8).
 - **X-Ray mode:** the marks in the text are a switch.
-- **Overview:** the strip is shown again as a pie.
+- **Overview:** the strip is shown again as a pie. In rev. 3 the strip moves into the contents
+  as bars (item 2a), and the pie shrinks.
+- **Sources:** follows the text always; pinning only by an explicit button (rev. 3).
+- **Every side can be folded** from its own tab button, without a separate menu (rev. 3, item 14).
 
 ## Open questions
 
@@ -200,8 +298,12 @@ always on screen.
    on Einleitung IX and on the §§ on syllogisms. And add a third, dotted strength for reworked
    sentences (50–70%), which would mark another 8% of Jäsche's words?
 6. **The vocabulary layer (item 12).** Wanted, or left out as too weak to help?
-7. **The untraced 78%.** Add the other AA XXIV transcripts and the logic passages of the
-   *Critique* as data, and re-run (see "What the pilot found"). Read Boswell (1988) and Hinske's
-   Kant-Index first.
+7. **The untraced 78%.** Partly answered: Einleitung I–V points to a transcript of the Wiener
+   family (see "Other sources"). Next: the texts listed there, and Boswell (1988, 1991) and
+   Hinske (2000) read at first hand.
 8. *From the mockup's design notes:* should search also cover the Reflexionen? Should the
    timeline draw a mixed note's span as a bar? Should the strip have a column per page or per §?
+9. *From the revision 3 mockup:* ~~keep *Hold here*?~~ Kept. ~~Remember the layout?~~ Yes (item
+   18). ~~Build item 16?~~ Built. Still open: should X-Ray mark the sentences with a transcript
+   parallel too, say with a grey dotted underline? And are bars per entry (item 2a) enough, or
+   is a per-page strip wanted back somewhere?
