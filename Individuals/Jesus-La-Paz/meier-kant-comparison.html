@@ -1476,7 +1476,8 @@ function connCard({ n, mh, kh, rh, kc }, re) {
   }
   const acts = el('div', 'acts');
   const o = el('button', 'copy', `Read § ${n} side by side`); o.addEventListener('click', () => openAt(n, bestTab(n)));
-  acts.append(o); right.append(acts);
+  const tl = el('button', 'copy', 'Kant over time'); tl.title = `Everything Kant says on § ${n}, earliest first`; tl.addEventListener('click', () => openAt(n, 'time'));
+  acts.append(o, tl); right.append(acts);
   c.append(left, right);
   return c;
 }
