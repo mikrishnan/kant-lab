@@ -65,3 +65,26 @@ sentence-aligned form of `meier-en.json`). A hit in the English is listed with t
 German sentence"; clicking it opens that § in the Meier tab, marks the German sentence whose translation
 matched and pins the translation window with the term highlighted. A term that matches in both
 languages gives a row for each.
+
+## Busolt and Blomberg by sentence and phrase
+
+`logik-units.json` gives Logik Busolt and Logik Blomberg what the Meier tab has. Every block is
+split into sentences by `../logik-units.py`, and each German sentence was translated on its own,
+starting from `busolt-en.json` / `blomberg-en.json` and following the shared glossary
+(`../glossary/kant-glossary.js`). Each sentence is also cut into grammatical phrases with a short
+gloss. Nothing is aligned after the fact: a sentence's English belongs to it by construction. The
+build checks every unit — the phrases reproduce the German exactly (ignoring whitespace), and every
+editorial bracket survives into the English. In total: 5495 sentences, 36144 phrases, 0 problems.
+Glossary renderings are present in 98.8% of the places the glossary calls for them.
+
+`logik-units.js` is the same data as a classic script, `LOGIK_UNITS[text][blockId] = [{ o, en, p }]`:
+`o` is the sentence's character range in the block text, `en` its English, and `p` its phrases as
+`[start, end, gloss]`. In `busolt-reader.html`, the Busolt and Blomberg tabs use it as the Meier tab
+uses `meier-phrases.js`:
+
+- hovering a sentence shows its English;
+- hovering a phrase shows that phrase's gloss, plus the glossary terms in it;
+- clicking pins the sentence;
+- the search finds German sentences through their English.
+
+All of it is unreviewed machine translation.
