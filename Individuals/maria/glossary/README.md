@@ -16,9 +16,9 @@ Latin he glosses it with.
 | --- | --- |
 | [`kant-glossary.js`](kant-glossary.js) | **The glossary.** Hand-curated: edit it directly. Its header explains every field |
 | [`index.html`](index.html) | The glossary as a searchable page: renderings, senses, Latin, notes, how often each term occurs, how the prototype translations fared |
-| [`glossary.py`](glossary.py) | The tool: `validate`, `count`, `check`, `missing`, `slice`, `index`, `examples`. No language model involved |
+| [`glossary.py`](glossary.py) | The tool: `validate`, `count`, `check`, `missing`, `slice`, `index`, `examples`, `spellings`. No language model involved |
 | [`corpus-dump.js`](corpus-dump.js) | Reads the texts from `data/` for `glossary.py`; copies nothing |
-| `counts.js`, `check.js`, `check-report.txt`, `terms-index.js`, `examples.js` | **Generated** by `glossary.py`; do not hand-edit |
+| `counts.js`, `check.js`, `check-report.txt`, `terms-index.js`, `examples.js`, `spellings.js` | **Generated** by `glossary.py`; do not hand-edit |
 
 ## Editing an entry
 
@@ -30,6 +30,7 @@ python3 glossary.py count       # refreshes counts.js
 python3 glossary.py check       # refreshes check.js and check-report.txt
 python3 glossary.py index       # refreshes terms-index.js, which the reader uses to mark terms
 python3 glossary.py examples    # refreshes examples.js: one example sentence per entry and text
+python3 glossary.py spellings   # refreshes spellings.js: how the texts actually spell each term
 ```
 
 Rules of thumb:
@@ -107,3 +108,22 @@ and marks the translation as not yet following the glossary. That applies to 19 
 examples. 355 of the 393 entries have at least one example; the other 38 (*Kategorie*,
 *Apperzeption*, …) do not occur in these three texts. The translations are unreviewed machine
 output.
+
+## Old spellings
+
+An entry's `de` is the **modern spelling**. `glossary.py spellings` records how the six texts
+actually print each term. Every occurrence is grouped by its spelling, so *Urtheilen* counts
+under *Urtheil*, and counted per text. An ending is taken off only where the stem left over is
+itself printed somewhere, so *Ideen* is never cut to "Ide"; modern inflections count as the
+modern spelling. 202 of the 388 terms that occur are printed in at least one period spelling:
+
+- *Urtheil* for *Urteil*;
+- *Erkenntniß*, *Erkentnis* and *Erkenntniss* for *Erkenntnis*;
+- *Merckmahl* for *Merkmal*;
+- *Begrif* for *Begriff*;
+- *Warheit* for *Wahrheit*.
+
+The glossary page lists these spellings under each entry, most frequent first, and its search
+finds an entry by any of them. In the reader, the glossary card lists them too. Hovering a term
+in German-only or interlinear mode gives the modern spelling beside the printed one, which is
+the form a dictionary has.

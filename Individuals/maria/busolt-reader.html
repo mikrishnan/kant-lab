@@ -75,6 +75,10 @@ body.noterms .term:hover { background: none; }
 #gcard .nt { font-size: .84rem; margin-top: 4px; }
 #gcard .ct { font-size: .78rem; color: var(--faded); margin-top: 6px; }
 #gcard .st { font-family: 'Cinzel', serif; font-size: .58rem; letter-spacing: .08em; background: #fff4dc; color: #7a4a00; border-radius: 8px; padding: 1px 6px; margin-left: 4px; vertical-align: 2px; }
+#gcard .sp { font-size: .82rem; margin: 3px 0 2px; color: var(--faded); }
+#gcard .sp .old { color: var(--ink); font-weight: 600; }
+#gcard .sp .mod { color: var(--aa-ink); }
+#gcard .sp .n { font-size: .74rem; }
 #gcard .exh { font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--aa-ink); margin: 9px 0 2px; border-top: 1px solid var(--parch-dark); padding-top: 6px; }
 #gcard .ex { margin: 5px 0 7px; }
 #gcard .ex a { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .05em; color: var(--accent); cursor: pointer; text-decoration: none; }
@@ -265,6 +269,7 @@ body.noinf .toc-note { display: none; }
 <script src="glossary/counts.js"></script>
 <script src="glossary/terms-index.js"></script>
 <script src="glossary/examples.js"></script>
+<script src="glossary/spellings.js"></script>
 <script>
 /* ── data ──
    LOGIK_BUSOLT and LOGIK_BLOMBERG come from ../../data/; MEIER_AUSZUG from meier-auszug.js.
@@ -750,6 +755,11 @@ function showTermPop(t) {
   const g = el('div', 'g');
   g.append(document.createTextNode(t.dataset.pr + ' → '), el('b', null, e.en));
   pop.appendChild(g);
+  if (t.dataset.pr !== e.de) {            // the period spelling as printed, and the modern form to look up
+    const m = el('div', 'sn', 'modern spelling: ');
+    m.appendChild(el('b', null, e.de));
+    pop.appendChild(m);
+  }
   (e.senses || []).forEach(sn => pop.appendChild(el('div', 'sn', '“' + sn.en + '” when ' + sn.when)));
   pop.appendChild(el('div', 'gl', 'Glossary' + (e.status !== 'confirmed' ? ' (proposed)' : '') + ' · click for the full entry'));
   placePop(t, 24);
@@ -799,6 +809,16 @@ function exampleEl(x) {
   if (!x.e) d.lastChild.appendChild(el('span', 'xo', '  (this translation does not yet use the glossary’s rendering)'));
   return d;
 }
+function spellingsEl(sp, modern) {     // how the six texts print the term, most frequent first, the modern form marked
+  const d = el('div', 'sp', 'Spellings in the texts: ');
+  sp.forEach((x, i) => {
+    if (i) d.appendChild(document.createTextNode(' · '));
+    const f = el('span', x[0] === modern ? 'mod' : 'old', x[0]);
+    f.title = (x[0] === modern ? 'the modern spelling — ' : 'a period spelling — ') + Object.entries(x[2]).map(([t, n]) => TEXT_NAMES[t] + ' ' + n).join(', ');
+    d.append(f, el('span', 'n', ' ' + x[1].toLocaleString('en')));
+  });
+  return d;
+}
 function openTerm(id, printed) {
   const e = GLOSS_BY_ID[id], card = document.getElementById('gcard');
   if (!e) return;
@@ -808,8 +828,11 @@ function openTerm(id, printed) {
   const k = el('div', 'k', 'Glossary'); if (e.status !== 'confirmed') k.appendChild(el('span', 'st', 'proposed'));
   card.appendChild(k);
   const de = el('div', 'de', e.de);
-  if (printed && printed !== e.de) de.appendChild(el('span', 'pr', '  as printed: ' + printed));
+  de.appendChild(el('span', 'pr', '  modern spelling'));
+  if (printed && printed !== e.de) de.appendChild(el('span', 'pr', ' · as printed here: ' + printed));
   card.appendChild(de);
+  const sp = (typeof KANT_GLOSSARY_SPELLINGS !== 'undefined' && KANT_GLOSSARY_SPELLINGS[id]) || [];
+  if (sp.some(x => x[0] !== e.de)) card.appendChild(spellingsEl(sp, e.de));
   card.appendChild(el('div', 'en', e.en));
   (e.senses || []).forEach(sn => { const d = el('div', 'sn', '“' + sn.en + '”'); d.appendChild(el('i', null, ' when ' + sn.when)); card.appendChild(d); });
   if (e.avoid && e.avoid.length) card.appendChild(el('div', 'av', 'Not: ' + e.avoid.join(', ')));
