@@ -66,6 +66,14 @@ body.noterms .term:hover { background: none; }
 #gcard .nt { font-size: .84rem; margin-top: 4px; }
 #gcard .ct { font-size: .78rem; color: var(--faded); margin-top: 6px; }
 #gcard .st { font-family: 'Cinzel', serif; font-size: .58rem; letter-spacing: .08em; background: #fff4dc; color: #7a4a00; border-radius: 8px; padding: 1px 6px; margin-left: 4px; vertical-align: 2px; }
+#gcard .exh { font-family: 'Cinzel', serif; font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--aa-ink); margin: 9px 0 2px; border-top: 1px solid var(--parch-dark); padding-top: 6px; }
+#gcard .ex { margin: 5px 0 7px; }
+#gcard .ex a { font-family: 'Cinzel', serif; font-size: .62rem; letter-spacing: .05em; color: var(--accent); cursor: pointer; text-decoration: none; }
+#gcard .ex a:hover { text-decoration: underline; }
+#gcard .ex .xd { font-size: .86rem; }
+#gcard .ex .xe { font-size: .82rem; font-style: italic; color: #2b3a52; }
+#gcard .ex .xo { font-size: .74rem; color: #a0522d; font-style: normal; }
+#gcard .ex b { font-weight: 600; }
 #gcard .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 #gcard .acts a, #gcard .acts button { font: inherit; font-size: .8rem; padding: 2px 9px; border: 1px solid var(--line); border-radius: 3px; background: var(--parch-dark); color: var(--accent); cursor: pointer; text-decoration: none; }
 #pop .gl { margin-top: 5px; padding-top: 5px; border-top: 1px solid rgba(244,237,224,.3); font-size: .78rem; opacity: .9; }
@@ -246,6 +254,7 @@ body.noinf .toc-note { display: none; }
 <script src="glossary/kant-glossary.js"></script>
 <script src="glossary/counts.js"></script>
 <script src="glossary/terms-index.js"></script>
+<script src="glossary/examples.js"></script>
 <script>
 /* ── data ──
    LOGIK_BUSOLT and LOGIK_BLOMBERG come from ../../data/; MEIER_AUSZUG from meier-auszug.js.
@@ -761,6 +770,21 @@ function selectSentence(bid, k) {
 
 /* ── glossary card ── */
 const TEXT_NAMES = { meier: 'Meier', busolt: 'Busolt', blomberg: 'Blomberg', wiener: 'Wiener Logik', refl16: 'Refl. XVI', refl17: 'Refl. XVII–XVIII' };
+function marked(cls, text, at) {         // text with [start, end) in bold
+  const d = el('div', cls);
+  if (!at) { d.textContent = text; return d; }
+  d.append(document.createTextNode(text.slice(0, at[0])), el('b', null, text.slice(at[0], at[1])), document.createTextNode(text.slice(at[1])));
+  return d;
+}
+function exampleEl(x) {
+  const d = el('div', 'ex');
+  const a = el('a', null, TEXT_NAMES[x.t] + ' · ' + x.cite + ' →');
+  a.title = 'Open this sentence in the reader';
+  a.onclick = () => { location.hash = x.link; };
+  d.append(a, marked('xd', x.de, x.d), marked('xe', x.en, x.e));
+  if (!x.e) d.lastChild.appendChild(el('span', 'xo', '  (this translation does not yet use the glossary’s rendering)'));
+  return d;
+}
 function openTerm(id, printed) {
   const e = GLOSS_BY_ID[id], card = document.getElementById('gcard');
   if (!e) return;
@@ -780,6 +804,11 @@ function openTerm(id, printed) {
   const c = (typeof KANT_GLOSSARY_COUNTS !== 'undefined' && KANT_GLOSSARY_COUNTS[id]) || null;
   if (c && c.total) card.appendChild(el('div', 'ct', 'Occurs ' + c.total.toLocaleString('en') + '× in the corpus: ' +
     Object.keys(TEXT_NAMES).filter(t => c[t]).map(t => TEXT_NAMES[t] + ' ' + c[t]).join(' · ')));
+  const exs = (typeof KANT_GLOSSARY_EXAMPLES !== 'undefined' && KANT_GLOSSARY_EXAMPLES[id]) || [];
+  if (exs.length) {                       // one sentence per text, chosen by glossary.py examples, with its English
+    card.appendChild(el('div', 'exh', 'In the texts'));
+    exs.forEach(x => card.appendChild(exampleEl(x)));
+  }
   const acts = el('div', 'acts');
   const a = el('a', null, 'Open in the glossary ↗'); a.href = 'glossary/index.html#' + id; a.target = '_blank'; a.rel = 'noopener';
   const f = el('button', null, 'Find “' + (printed || e.de) + '” in the texts'); f.type = 'button';
@@ -920,7 +949,8 @@ document.getElementById('tinf').onchange = e => document.body.classList.toggle('
 document.getElementById('tterms').onchange = e => { document.body.classList.toggle('noterms', !e.target.checked); if (!e.target.checked) document.getElementById('gcard').hidden = true; };
 window.addEventListener('hashchange', route);
 
-/* #busolt  #blomberg:s06  #blomberg:aa-80  #meier:para-12   (a bare #aa-614 or #s04 means Busolt) */
+/* #busolt  #blomberg:s06  #blomberg:aa-80  #meier:para-12  #busolt:busolt-s14-012.3 (a block's sentence)
+   (a bare #aa-614 or #s04 means Busolt) */
 function route() {
   let h = location.hash.slice(1), k = 0;
   const m0 = /^(busolt|blomberg|meier)(?::(.*))?$/.exec(h);
@@ -929,6 +959,10 @@ function route() {
   let m;
   if ((m = /^aa-(\d+)$/.exec(h)) && WORKS[wi].logik && goTo(+m[1])) return;
   if ((m = /^para-(\d+)$/.exec(h)) && !WORKS[wi].logik && goTo(+m[1])) return;
+  if ((m = /^(.+)\.(\d+)$/.exec(h))) {     // #busolt:busolt-s14-012.3 — one sentence, pinned (from the glossary's examples)
+    const j = WORKS[wi].sections.findIndex(s => s.blocks.some(b => b.id === m[1]));
+    if (j >= 0) { sel = english ? { b: m[1], k: +m[2] } : null; return show(j, m[1]); }
+  }
   const i = WORKS[wi].sections.findIndex(s => s.id === h);
   if (i >= 0) return show(i);
   if (cur < 0) show(0);

@@ -16,9 +16,9 @@ Latin he glosses it with.
 | --- | --- |
 | [`kant-glossary.js`](kant-glossary.js) | **The glossary.** Hand-curated: edit it directly. Its header explains every field |
 | [`index.html`](index.html) | The glossary as a searchable page: renderings, senses, Latin, notes, how often each term occurs, how the prototype translations fared |
-| [`glossary.py`](glossary.py) | The tool: `validate`, `count`, `check`, `missing`, `slice`. No language model involved |
+| [`glossary.py`](glossary.py) | The tool: `validate`, `count`, `check`, `missing`, `slice`, `index`, `examples`. No language model involved |
 | [`corpus-dump.js`](corpus-dump.js) | Reads the texts from `data/` for `glossary.py`; copies nothing |
-| `counts.js`, `check.js`, `check-report.txt`, `terms-index.js` | **Generated** by `glossary.py`; do not hand-edit |
+| `counts.js`, `check.js`, `check-report.txt`, `terms-index.js`, `examples.js` | **Generated** by `glossary.py`; do not hand-edit |
 
 ## Editing an entry
 
@@ -29,6 +29,7 @@ python3 glossary.py validate    # ids, required fields, two entries claiming the
 python3 glossary.py count       # refreshes counts.js
 python3 glossary.py check       # refreshes check.js and check-report.txt
 python3 glossary.py index       # refreshes terms-index.js, which the reader uses to mark terms
+python3 glossary.py examples    # refreshes examples.js: one example sentence per entry and text
 ```
 
 Rules of thumb:
@@ -85,3 +86,24 @@ page (`index.html#<id>`), and a button that searches the texts for the word as p
 Meier tab the translation window also lists the glossary renderings of the terms in the
 hovered phrase. A "glossary terms" checkbox turns the underlining off. The term positions come
 from `terms-index.js`, so after editing the glossary run `count`, `check` and `index` again.
+
+## Examples
+
+Beneath each entry, `index.html` shows one sentence from each of Logik Busolt, Logik Blomberg and
+Meier's *Auszug* that uses the term. The term is in bold, and the sentence's English from the
+reader's translations (`../translations/logik-units.json`, `../translations/meier-aligned.js`) is
+shown with the rendering in bold. The reader's glossary card shows the same examples, and the
+citation on each opens that sentence in the reader with its translation pinned.
+
+`glossary.py examples` picks them by rule, not by hand. The English must use the agreed rendering.
+Among those sentences it prefers:
+
+- whole sentences of 60–220 characters;
+- no editorial brackets;
+- sentences that say what the thing is (*… ist …*, *… heißt …*).
+
+Where no sentence in a text renders the term as agreed, it falls back to the best sentence there
+and marks the translation as not yet following the glossary. That applies to 19 of the 855
+examples. 355 of the 393 entries have at least one example; the other 38 (*Kategorie*,
+*Apperzeption*, …) do not occur in these three texts. The translations are unreviewed machine
+output.
