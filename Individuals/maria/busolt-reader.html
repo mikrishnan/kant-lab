@@ -134,7 +134,33 @@ main { flex: 1; display: flex; min-height: 0; }
 .tab.untitled { font-style: italic; }
 .tab .n { margin-left: 5px; color: #fff; background: var(--accent-lt); border-radius: 8px; padding: 0 5px; font-size: .62rem; }
 #reader { flex: 1; overflow-y: auto; padding: 24px 32px 80px; }
-#page { max-width: 46em; margin: 0 auto; }
+#page { max-width: 46em; margin: 0 auto; position: relative; }
+/* grammar layer: each phrase coloured by its role, subordinate clauses tinted by depth, verb brackets arced */
+:root { --g-S: #1f4e8c; --g-V: #a12a1a; --g-O: #2f6b2f; --g-G: #6b3d8c; --g-P: #0f6b6b; --g-K: #b0600a; }
+body.gram .ph.rS { color: var(--g-S); }
+body.gram .ph.rV { color: var(--g-V); }
+body.gram .ph.rE { color: var(--g-V); }
+body.gram .ph.rO { color: var(--g-O); }
+body.gram .ph.rG { color: var(--g-G); }
+body.gram .ph.rP { color: var(--g-P); }
+body.gram .ph.rK { color: var(--g-K); }
+body.gram .ph.rC, body.gram .ph.rX { color: var(--faded); }
+body.gram .ph.d1 { background: rgba(176, 96, 10, .07); }
+body.gram .ph.d2 { background: rgba(176, 96, 10, .14); }
+body.gram .ph.d3 { background: rgba(176, 96, 10, .21); }
+body.gram .bk { font-weight: 700; }
+body.gram .bk.lit { outline: 1.5px solid var(--g-V); outline-offset: 1px; border-radius: 2px; }
+body.gram .bk.lit.k { outline-color: var(--g-K); }
+#arcs { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; display: none; }
+body.gram #arcs { display: block; }
+#arcs path { fill: none; stroke: var(--g-V); stroke-width: 1.6; opacity: .8; }
+#arcs path.k { stroke: var(--g-K); }
+#arcs path.cont { stroke-dasharray: 4 3; }
+#glegend { display: none; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: .78rem; padding: 4px 20px 5px; border-bottom: 1px solid var(--line); background: var(--panel-bg); color: var(--faded); }
+body.gram #glegend { display: flex; }
+#glegend b { font-weight: 600; }
+#glegend .tint { background: rgba(176, 96, 10, .14); padding: 0 4px; border-radius: 2px; color: var(--ink); }
+#pop .rl { margin-top: 4px; font-family: 'Cinzel', serif; font-size: .64rem; letter-spacing: .07em; text-transform: uppercase; opacity: .75; }
 #page h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.3rem; color: #2e1a00; margin: 0 0 4px; letter-spacing: .04em; }
 .prov { font-size: .85rem; font-style: italic; color: var(--faded); margin-bottom: 18px; }
 .heads { font-size: .85rem; color: var(--faded); margin: -10px 0 14px; }
@@ -252,7 +278,11 @@ body.noinf .toc-note { display: none; }
       <label id="lpg"><input type="checkbox" id="tpg" checked> page breaks</label>
       <label id="linf"><input type="checkbox" id="tinf" checked> inferred joins</label>
       <label title="Underline the terms that have an entry in the shared glossary; click one to see it"><input type="checkbox" id="tterms" checked> glossary terms</label>
+      <label title="Colour each phrase by its role in the sentence and arc the verb brackets — a model’s analysis, unreviewed"><input type="checkbox" id="tgram"> grammar</label>
       <span id="tfhint"><kbd>←</kbd> <kbd>→</kbd> step · <kbd>Space</kbd> reveal the sentence · or rest on it</span>
+    </div>
+    <div id="glegend" title="Grammar tags are a model’s analysis of each phrase, unreviewed. Hover a sentence to see its verb brackets.">
+      <b style="color:var(--g-S)">subject</b><b style="color:var(--g-V)">finite verb</b><b style="color:var(--g-O)">object</b><b style="color:var(--g-G)">genitive</b><b style="color:var(--g-P)">predicative</b><span>adverbial</span><b style="color:var(--g-V)">verb at the end</b><b style="color:var(--g-K)">clause opener</b><span class="tint">subordinate clause</span><span>⌒ verb bracket (hover a sentence)</span>
     </div>
     <div id="reader"><div id="page"></div></div>
   </section>
@@ -273,6 +303,7 @@ body.noinf .toc-note { display: none; }
 <script src="translations/meier-aligned.js"></script>
 <script src="translations/meier-phrases.js"></script>
 <script src="translations/logik-units.js"></script>
+<script src="translations/grammar.js"></script>
 <script src="glossary/kant-glossary.js"></script>
 <script src="glossary/counts.js"></script>
 <script src="glossary/terms-index.js"></script>
@@ -482,6 +513,71 @@ function unitsFor(w, b) {
   return u;
 }
 
+/* ── grammar layer ── GRAMMAR (translations/grammar.js, made by grammar.py): per sentence, each phrase's role
+   and clause depth, and its verb brackets as word offsets into the block text. A model's analysis, unreviewed. */
+const ROLE_NAME = { S: 'subject', V: 'finite verb', O: 'object', G: 'genitive', P: 'predicative', A: 'adverbial',
+                    E: 'verb part at the end', K: 'clause opener', C: 'conjunction', X: 'other' };
+const DEPTH_NAME = ['main clause', 'subordinate clause', 'clause within a subordinate clause', 'deeply nested clause'];
+function grammarOf(b, k) {
+  const t = typeof GRAMMAR !== 'undefined' && GRAMMAR[W().key];
+  return (t && t[b.id] && t[b.id][k]) || null;
+}
+function bracketWords(gr) {             // [start, end, bracket index, 'l' | 'r'], in text order
+  if (!gr) return [];
+  const w = [];
+  gr.b.forEach((br, n) => { w.push([br[0][0], br[0][1], n, 'l']); br[1].forEach(r => w.push([r[0], r[1], n, 'r'])); });
+  return w.sort((x, y) => x[0] - y[0]);
+}
+function addWords(parent, b, from, to, words) {   // a slice of a block with its bracket words wrapped, for the arcs
+  let at = from;
+  words.forEach(([s0, s1, n, side]) => {
+    if (s0 < at || s1 > to) return;
+    if (s0 > at) addTx(parent, b, at, s0);
+    const w = el('span', 'bk');
+    w.dataset.n = n; w.dataset.side = side;
+    addTx(w, b, s0, s1);
+    parent.appendChild(w);
+    at = s1;
+  });
+  if (at < to) addTx(parent, b, at, to);
+}
+/* The verb brackets of the hovered sentence (else the current one) as arcs over the text, from the finite verb or
+   clause opener to the last verb part at the clause's end; an arc that crosses a line break runs off the right
+   edge and resumes at the left, dashed. Opener brackets are orange, verb brackets red. */
+function drawArcs() {
+  const svg = document.getElementById('arcs');
+  if (!svg) return;
+  svg.textContent = '';
+  document.querySelectorAll('.bk.lit').forEach(x => x.classList.remove('lit', 'k'));
+  if (!document.body.classList.contains('gram')) return;
+  const sp = hov || pinnedSpan();
+  if (!sp) return;
+  const page = document.getElementById('page').getBoundingClientRect();
+  const groups = {};
+  sp.querySelectorAll('.bk').forEach(x => (groups[x.dataset.n] = groups[x.dataset.n] || []).push(x));
+  const ns = 'http://www.w3.org/2000/svg';
+  const path = (d, cls) => { const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); if (cls) p.setAttribute('class', cls); svg.appendChild(p); };
+  Object.values(groups).forEach(ws => {
+    const l = ws.find(x => x.dataset.side === 'l'), rs = ws.filter(x => x.dataset.side === 'r');
+    if (!l || !rs.length) return;
+    const opener = l.closest('.ph') && l.closest('.ph').classList.contains('rK');
+    ws.forEach(x => { x.classList.add('lit'); if (opener) x.classList.add('k'); });
+    const a = l.getClientRects()[0], cr = rs[rs.length - 1].getClientRects(), c = cr[cr.length - 1];
+    if (!a || !c) return;
+    const ax = a.left + a.width / 2 - page.left, ay = a.top - page.top - 2;
+    const cx = c.left + c.width / 2 - page.left, cy = c.top - page.top - 2;
+    const cls = opener ? 'k' : '';
+    if (Math.abs(ay - cy) < 4) {
+      const h = Math.min(16, 6 + Math.abs(cx - ax) / 12);
+      path(`M${ax},${ay} C${ax},${ay - h} ${cx},${cy - h} ${cx},${cy}`, cls);
+    } else {
+      const right = page.width + 6, h = 9;
+      path(`M${ax},${ay} C${ax},${ay - h} ${ax + 12},${ay - h} ${ax + 18},${ay - h} L${right},${ay - h}`, cls + ' cont');
+      path(`M-6,${cy - h} L${cx - 18},${cy - h} C${cx - 12},${cy - h} ${cx},${cy - h} ${cx},${cy}`, cls + ' cont');
+    }
+  });
+}
+
 /* A block as a row of sentences, each a unit with its English counterpart and cut into divisions
    that carry their own glosses. The spans are slices of the source's own text, so nothing in the
    German is altered. */
@@ -493,12 +589,18 @@ function renderSentences(tx, b, units) {
     sp.dataset.b = b.id; sp.dataset.k = k;
     if (mode !== 'de' && queryRe) { queryRe.lastIndex = 0; if (queryRe.test(g.en)) { sp.classList.add('enhit'); sp.title = 'The English translation of this sentence matches the search'; } }
     let pa = g.o[0];
+    const gr = grammarOf(b, k), words = bracketWords(gr);
     (g.p || []).forEach((ph, pi) => {
       if (ph[0] > pa) addTx(sp, b, pa, ph[0]);
       const span = el('span', 'ph');
       span.dataset.p = pi;
+      if (gr && gr.r.length === 2 * g.p.length) {             // its role and clause depth (grammar layer)
+        span.classList.add('r' + gr.r[2 * pi]);
+        if (gr.r[2 * pi + 1] !== '0') span.classList.add('d' + gr.r[2 * pi + 1]);
+        span.dataset.r = gr.r.substr(2 * pi, 2);
+      }
       const de = el('span', 'ild');                             // the phrase's German as one piece, so interlinear mode can stack
-      addTx(de, b, ph[0], ph[1]);                               // it over its gloss
+      addWords(de, b, ph[0], ph[1], words);                     // it over its gloss
       span.append(de, el('span', 'il', ph[2]));                 // the gloss, shown beneath the phrase in interlinear mode
       span.onmouseenter = () => { hovPh = span; refreshPop(); };
       span.onmouseleave = () => { hovPh = null; refreshPop(); };
@@ -652,6 +754,7 @@ function show(i, blockId) {
   cur = i;
   const s = w.sections[i], page = document.getElementById('page');
   page.textContent = '';
+  page.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'svg')).id = 'arcs';
   page.appendChild(el('h2', null, s.label));
   if (s.headings.length) page.appendChild(el('div', 'heads', (w.logik ? 'Manuscript heading: ' : '') + s.headings.join(' · ')));
   page.appendChild(el('div', 'prov', s.provenance + (w.logik && secPages(s) ? ' · AA 24:' + secPages(s) : '')));
@@ -748,6 +851,8 @@ function showPop(sp, ph, sentence = true) {   // sentence = false: the division'
     });
     pop.appendChild(gl);
   }
+  if (ph && ph.dataset.r && document.body.classList.contains('gram'))
+    pop.appendChild(el('div', 'rl', ROLE_NAME[ph.dataset.r[0]] + ' · ' + DEPTH_NAME[+ph.dataset.r[1]]));
   if (!sentence && ph) pop.appendChild(el('div', 'hint', 'Click, press Space, or rest here for the whole sentence'));
   placePop(ph || sp, 34);
 }
@@ -783,8 +888,9 @@ function showTermPop(t) {
 function pinnedSpan() {
   return sel && document.querySelector('.sent[data-b="' + sel.b + '"][data-k="' + sel.k + '"]');
 }
-function refreshPop() {                  // what floats over the text, by reading mode
+function refreshPop() {                  // what floats over the text, by reading mode; and the arcs of the grammar layer
   document.querySelectorAll('.ph.hot').forEach(x => x.classList.remove('hot'));
+  drawArcs();
   if (mode === 'tf') {                    // try first: a division's gloss on hover; the sentence only once revealed
     const pin = pinnedSpan(), open = !!pin && shown === sel.b + ':' + sel.k;
     if (hov && hovPh) { hovPh.classList.add('hot'); showPop(hov, hovPh, open && hov === pin); }
@@ -1059,6 +1165,8 @@ document.getElementById('goaa').addEventListener('change', e => {
 });
 document.getElementById('tpg').onchange = e => document.body.classList.toggle('nopg', !e.target.checked);
 document.getElementById('tinf').onchange = e => document.body.classList.toggle('noinf', !e.target.checked);
+if (typeof GRAMMAR === 'undefined') document.getElementById('tgram').parentElement.hidden = true;   // until grammar.py has run
+document.getElementById('tgram').onchange = e => { document.body.classList.toggle('gram', e.target.checked); refreshPop(); };
 document.getElementById('tterms').onchange = e => { document.body.classList.toggle('noterms', !e.target.checked); if (!e.target.checked) document.getElementById('gcard').hidden = true; };
 window.addEventListener('hashchange', route);
 
