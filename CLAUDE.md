@@ -10,7 +10,7 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | Path | What it is |
 | --- | --- |
 | [README.md](README.md) | The contributor workflow — issue → spec → pull request → review → merge — written for participants |
-| [index.html](index.html) | GitHub Pages landing page: the approved tools, then the working groups' works in progress |
+| [index.html](index.html) | GitHub Pages landing page: the Logic Portal, then the older tools it is absorbing |
 | [baumgarten-reader/](baumgarten-reader/) | Single-file SPA: Latin reading guide for Baumgarten's *Metaphysica* with inline German glosses |
 | [meier-reader/](meier-reader/) | Single-file SPA: German reading guide for Meier's *Auszug*, with a side panel of parallel passages from the tradition |
 | [porphyrian-tree/](porphyrian-tree/) | Single-file SPA: a configurator for building genus–species trees under user-chosen division rules |
