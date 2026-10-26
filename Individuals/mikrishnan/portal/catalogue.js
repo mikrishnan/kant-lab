@@ -27,7 +27,7 @@
 
    Shapes
      logik        { meta: { volume }, sections: [{ title, blocks: [{ id, kind, aa, aaEnd, text }] }] }
-                  The AA XXIV transcripts and Alex Li's Jäsche, which adds
+                  The AA XXIV transcripts and Alex's Jäsche, which adds
                   paras: [{ n, blocks: [id] }] for its §§.
      refl         an array of Reflexionen as data/ has them: { r, ph, phRaw, aa, vol?, paras,
                   src, interp, text }. `byPara` names the file's { §: [entry index] } global.
@@ -42,49 +42,49 @@ const PORTAL_TEXTS = [
     date: '1752', year: 1752, vol: 16, shape: 'meier',
     file: '../../Jesus-La-Paz/meier-auszug-data.js', global: 'MEIER_AUSZUG',
     source: 'AA XVI, from the InteLex transcription in Textfiles/; the text of the Meier Reader',
-    credit: 'Meier Reader (Sophia Wyatt & Maria); copied into a data file by Jesus La Paz' },
+    credit: 'Meier Reader (Sophia & Maria); copied into a data file by Jesus' },
 
   { key: 'baumgarten', title: 'Baumgarten, Metaphysica (4th ed., 1757)', short: 'Baumgarten', layer: 'textbook',
     date: '1757', year: 1757, vol: 17, shape: 'metaphysica',
     file: '../../../data/metaphysica-17.js', global: 'MET_PARAGRAPHS',
     source: 'AA XVII, from Textfiles/Baumgarten.rtfd by scripts/parse_baum.py; §§ 504–699 are in AA XV and not here',
-    credit: 'Baumgarten Reader (Sophia Wyatt & Maria)' },
+    credit: 'Baumgarten Reader (Sophia & Maria)' },
 
   { key: 'refl-logik', title: 'Kant, Reflexionen zur Logik (on Meier)', short: 'Refl. Logik', layer: 'notes',
     date: 'ca. 1752–1800', year: 1752, vol: 16, shape: 'refl', on: 'meier',
     file: '../../../data/reflexionen-16-meier.js', global: 'REFL_ENTRIES', byPara: 'REFL_BY_PARA',
     source: 'AA XVI, from Textfiles/ by scripts/parse_refl.py; dated by Adickes’ phases',
-    credit: 'shared data (Sophia Wyatt & Maria)' },
+    credit: 'shared data (Sophia & Maria)' },
 
   { key: 'refl-meta', title: 'Kant, Reflexionen zur Metaphysik (on Baumgarten)', short: 'Refl. Metaphysik', layer: 'notes',
     date: 'ca. 1752–1800', year: 1752, vol: 17, shape: 'refl', on: 'baumgarten',
     file: '../../../data/reflexionen-17-18-baumgarten.js', global: 'REFLM_ENTRIES', byPara: 'REFLM_BY_PARA',
     source: 'AA XVII–XVIII, from Textfiles/ by scripts/parse_refl.py; dated by Adickes’ phases',
-    credit: 'shared data (Sophia Wyatt & Maria)' },
+    credit: 'shared data (Sophia & Maria)' },
 
   { key: 'blomberg', title: 'Logik Blomberg', short: 'Blomberg', layer: 'lecture',
     date: 'ca. 1771', year: 1771, vol: 24, shape: 'logik', on: 'meier',
     file: '../../../data/logik-blomberg-24.js', global: 'LOGIK_BLOMBERG',
     source: 'AA 24:7–301, from Textfiles/ by scripts/parse_logik.py; a student transcript',
-    credit: 'shared data (Sophia Wyatt & Maria)' },
+    credit: 'shared data (Sophia & Maria)' },
 
   { key: 'wiener', title: 'Wiener Logik', short: 'Wiener', layer: 'lecture',
     date: '1780ff.', year: 1780, vol: 24, shape: 'logik', on: 'meier',
     file: '../../../data/logik-wiener-24.js', global: 'LOGIK_WIENER',
     source: 'AA 24:785–940, from Textfiles/ by scripts/parse_logik.py; a student transcript',
-    credit: 'shared data (Sophia Wyatt & Maria)' },
+    credit: 'shared data (Sophia & Maria)' },
 
   { key: 'busolt', title: 'Logik Busolt', short: 'Busolt', layer: 'lecture',
     date: 'ca. 1789/90', year: 1789, vol: 24, shape: 'logik', on: 'meier',
     file: '../../../data/logik-busolt-24.js', global: 'LOGIK_BUSOLT',
     source: 'AA 24:603–686, from Textfiles/ by scripts/parse_logik.py; a student transcript',
-    credit: 'shared data (Sophia Wyatt & Maria)' },
+    credit: 'shared data (Sophia & Maria)' },
 
   { key: 'jaesche', title: 'Jäsche Logik', short: 'Jäsche', layer: 'compilation',
     date: '1800', year: 1800, vol: 9, shape: 'logik', on: 'meier',
     file: '../../Alex%20Li/logik-jasche-9.js', global: 'LOGIK_JASCHE',
-    source: 'AA 9:1–150, from Textfiles/Vol9Logic.rtfd by Alex Li’s parse_jasche.py; compiled by G. B. Jäsche from Kant’s notes',
-    credit: 'Alex Li' },
+    source: 'AA 9:3–150, from Textfiles/Vol9Logic.rtfd by Alex’s parse_jasche.py; compiled by G. B. Jäsche from Kant’s notes',
+    credit: 'Alex' },
 ];
 
 /* The seminar's annotation layers: connections and classifications the portal shows beside
@@ -94,14 +94,15 @@ const PORTAL_LAYERS = [
   { key: 'concordance', file: '../../Jesus-La-Paz/meier-kant-concordance.js', global: 'CONCORDANCE', who: 'jesus' },
   { key: 'jaescheLinks', file: 'pinned/jaesche-meier-links.js', global: 'PORTAL_PIN_JAESCHE_LINKS', who: 'jesus' },
   { key: 'immediate', file: '../../Nik%20Land/immediate-inference-examples.js', global: 'IMMEDIATE_EXAMPLES', who: 'nik' },
+  { key: 'nikfig', file: 'pinned/nik-figures.js', global: 'PORTAL_PIN_NIK_FIGURES', who: 'nik' },
   { key: 'judgement', file: '../../Nik%20Land/judgement-examples.js', global: 'JUDGEMENT_EXAMPLES', who: 'nik' },
-  { key: 'inference', file: '../../Nik%20Land/inference-examples.js', global: 'INFERENCE_EXAMPLES', who: 'nik' },
   { key: 'mediate', file: 'pinned/sophia-mediate-inferences.js', global: 'PORTAL_PIN_SOPHIA', who: 'sophia' },
   { key: 'principles', file: '../../Feng/principles-lexicon.js', global: 'PRINCIPLE_LEXICON', who: 'feng' },
   { key: 'concepts', file: 'pinned/jin-concepts.js', global: 'PORTAL_PIN_JIN', who: 'jin' },
   { key: 'stopwords', file: 'pinned/jin-stopwords.js', global: 'PORTAL_PIN_JIN_STOP', who: 'jin' },
   { key: 'forms', file: 'pinned/aidan-forms.js', global: 'PORTAL_PIN_AIDAN', who: 'aidan' },
-  { key: 'parallels', file: '../../Alex%20Li/annotations.js', global: 'LC_PARALLELS', who: 'alex' },
+  { key: 'finder', file: 'pinned/aidan-finder.js', global: 'PORTAL_PIN_AIDAN_FINDER', who: 'aidan' },
+  { key: 'ptrans', file: '../../Feng/principles-translations.js', global: 'PRINCIPLE_TRANSLATIONS', who: 'feng' },
   { key: 'tradition', file: '../../../data/tradition-meier.js', global: 'TRADITION', who: 'readers' },
 ];
 
