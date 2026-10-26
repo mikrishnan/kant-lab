@@ -21,8 +21,11 @@ and then answers at once.
 - **Follow.** Any passage opens in the right-hand pane with the textbook § it is on and how
   that is known (stated, or inferred with a measured confidence). Below that come Kant's
   notes on that §, oldest first, then the lectures and Jäsche on the same §, the tradition
-  behind it, and what the seminar has said about it. Every step goes on the trail, and
-  **Copy link** reproduces the exact view.
+  behind it, and what the seminar has said about it. Every step goes on the **route** bar
+  under the header, which shows the last few steps with back and forward arrows. **Map**
+  opens the whole route: one row per document, each step a mark, joined in order, so you can
+  see how you have moved through the corpus. Click any mark to return to it. **Copy link**
+  reproduces the exact view.
 - **English.** Press **English** on a passage to see a translation beside the German, in one
   of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
   are Jesus La Paz's machine translations, made for his Meier–Kant comparison; neither
@@ -34,7 +37,12 @@ and then answers at once.
   chooses the tool from the form's list and gives their source.
 - **The seminar's questions, doctrines and lexicons** are one click away:
   - the questions asked in class so far;
-  - kinds of immediate inference, forms of judgment and kinds of syllogism (Nik Land);
+  - kinds of immediate inference, forms of judgment and kinds of syllogism (Nik Land).
+    The immediate inferences open on a **square of opposition** built from the judgments
+    Kant's examples write out: A, E, I and O with their counts, and the sides with the
+    passages on each. The judgments open on the **table of judgments** as the *Critique* lays
+    it out. Both show what the passage itself names (solid) apart from Nik's reading (dashed),
+    as his explorers do;
   - kinds of mediate inference (Sophia Wyatt);
   - the logical principles (Feng's lexicon);
   - the lectures' concepts (Jin's list);
