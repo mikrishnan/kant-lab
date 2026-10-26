@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Executive brief — syncing flags to GitHub</title>
+<style>
+  :root { --parchment:#f5efe0; --card:#fbf8ef; --ink:#2b2118; --soft:#5a4a3a; --rule:#d6c9a8; --accent:#5c3d1e; --tint:#e9dcc0; --auto:#2f5a2a; --autotint:#e3ecd9; --warn:#8a2b1c; --warntint:#f6e3dc; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--parchment); color:var(--ink); font:17px/1.45 'EB Garamond', Georgia, serif; }
+  .page { max-width: 900px; margin: 0 auto; padding: 30px 28px 48px; }
+  h1 { margin:0; font:600 24px/1.2 Georgia, serif; letter-spacing:.03em; color:var(--accent); }
+  .sub { margin:4px 0 20px; color:var(--soft); font-size:15px; }
+  h2 { margin:28px 0 10px; font:600 13px/1 Georgia, serif; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); border-bottom:1px solid var(--rule); padding-bottom:5px; }
+  .bottom { background:var(--card); border:1px solid var(--rule); border-left:5px solid var(--accent); padding:14px 18px; }
+  .bottom p { margin:0 0 6px; } .bottom p:last-child { margin:0; }
+  svg text { font-family: Georgia, serif; }
+  .cards { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
+  .card { background:var(--card); border:1px solid var(--rule); padding:12px 14px; }
+  .card.pick { border:2px solid var(--auto); }
+  .card h3 { margin:0 0 4px; font:600 16px/1.25 Georgia, serif; }
+  .card .verdict { display:inline-block; margin:0 0 8px; padding:0 8px; border-radius:10px; font-size:13px; border:1px solid; }
+  .yes { color:var(--auto); border-color:var(--auto); background:var(--autotint); }
+  .meh { color:var(--accent); border-color:var(--accent); }
+  .no { color:var(--warn); border-color:var(--warn); background:var(--warntint); }
+  .card ul { margin:0; padding-left:18px; font-size:15px; } .card li { margin:0 0 3px; }
+  .plus::marker { content: "+  "; color: var(--auto); } .minus::marker { content: "–  "; color: var(--warn); }
+  table { width:100%; border-collapse:collapse; font-size:15.5px; }
+  th, td { text-align:left; vertical-align:top; padding:7px 8px; border-bottom:1px solid var(--rule); }
+  th { font-weight:600; color:var(--soft); font-size:13px; letter-spacing:.06em; text-transform:uppercase; }
+  table.needs { table-layout:fixed; }
+  table.needs col.c1 { width:30%; } table.needs col.c2 { width:48%; } table.needs col.c3 { width:22%; }
+  .who { font-size:14px; color:var(--soft); }
+  code { font-family: Menlo, monospace; font-size: 13px; background: var(--tint); padding: 0 4px; overflow-wrap:anywhere; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .box { background:var(--card); border:1px solid var(--rule); padding:12px 16px; }
+  .box h3 { margin:0 0 6px; font:600 15px/1.2 Georgia, serif; color:var(--accent); }
+  .box ul { margin:0; padding-left:18px; font-size:15.5px; } .box li { margin:0 0 4px; }
+  .ask { background:var(--warntint); border:1px solid var(--warn); padding:12px 16px; }
+  .ask ol { margin:6px 0 0; padding-left:22px; } .ask li { margin:0 0 4px; }
+  .foot { margin-top:24px; font-size:13.5px; color:var(--soft); }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Syncing flagged miscategorisations to GitHub</h1>
+  <p class="sub">Executive brief · 25 October 2026 · for the live site at mikrishnan.github.io/kant-lab</p>
+
+  <h2>Bottom line</h2>
+  <div class="bottom">
+    <p><b>Yes, it's possible, but the page can't do it alone.</b> GitHub Pages only serves files. A page running in a reader's browser has no permission to change the repository. Today's button writes to a file on your own computer, and on the live site there is no such file.</p>
+    <p><b>Recommended: let GitHub do the writing.</b> The button opens a filled-in GitHub issue. A GitHub Action, a small script GitHub runs for the repository, checks it and opens a pull request that adds the flags to <code>miscategorisations.js</code>. Once that's merged, every visitor sees the flags. Readers never handle a password, and there is no server to run.</p>
+  </div>
+
+  <h2>How it works</h2>
+  <svg viewBox="0 0 860 250" width="100%" role="img" aria-labelledby="flowt flowd">
+    <title id="flowt">From a click on the site to the file in the repository</title>
+    <desc id="flowd">Five steps. A reader flags an example and sends it, which opens a filled-in issue they submit. A GitHub Action checks it and opens a pull request changing miscategorisations.js. Once merged, GitHub Pages republishes and everyone sees the flag.</desc>
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L8 5L1 9" fill="none" stroke="#5a4a3a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    </defs>
+    <!-- step boxes: reader steps brown, automatic steps green -->
+    <g>
+      <rect x="6" y="40" width="150" height="120" rx="8" fill="#e9dcc0" stroke="#5c3d1e" stroke-width="1.5"/>
+      <circle cx="31" cy="64" r="13" fill="#5c3d1e"/><text x="31" y="69" text-anchor="middle" font-size="14" fill="#f5efe0">1</text>
+      <text x="81" y="100" text-anchor="middle" font-size="17" font-weight="600" fill="#2b2118">Flag</text>
+      <text x="81" y="122" text-anchor="middle" font-size="13.5" fill="#5a4a3a">on the live site,</text>
+      <text x="81" y="139" text-anchor="middle" font-size="13.5" fill="#5a4a3a">as now</text>
+    </g>
+    <g>
+      <rect x="182" y="40" width="150" height="120" rx="8" fill="#e9dcc0" stroke="#5c3d1e" stroke-width="1.5"/>
+      <circle cx="207" cy="64" r="13" fill="#5c3d1e"/><text x="207" y="69" text-anchor="middle" font-size="14" fill="#f5efe0">2</text>
+      <text x="257" y="100" text-anchor="middle" font-size="17" font-weight="600" fill="#2b2118">Send</text>
+      <text x="257" y="122" text-anchor="middle" font-size="13.5" fill="#5a4a3a">filled-in issue opens;</text>
+      <text x="257" y="139" text-anchor="middle" font-size="13.5" fill="#5a4a3a">press Submit</text>
+    </g>
+    <g>
+      <rect x="358" y="40" width="150" height="120" rx="8" fill="#e3ecd9" stroke="#2f5a2a" stroke-width="1.5"/>
+      <circle cx="383" cy="64" r="13" fill="#2f5a2a"/><text x="383" y="69" text-anchor="middle" font-size="14" fill="#f5efe0">3</text>
+      <text x="433" y="100" text-anchor="middle" font-size="17" font-weight="600" fill="#2b2118">Check</text>
+      <text x="433" y="122" text-anchor="middle" font-size="13.5" fill="#5a4a3a">the Action validates</text>
+      <text x="433" y="139" text-anchor="middle" font-size="13.5" fill="#5a4a3a">each flag</text>
+    </g>
+    <g>
+      <rect x="534" y="40" width="150" height="120" rx="8" fill="#e3ecd9" stroke="#2f5a2a" stroke-width="1.5"/>
+      <circle cx="559" cy="64" r="13" fill="#2f5a2a"/><text x="559" y="69" text-anchor="middle" font-size="14" fill="#f5efe0">4</text>
+      <text x="609" y="100" text-anchor="middle" font-size="17" font-weight="600" fill="#2b2118">Pull request</text>
+      <text x="609" y="122" text-anchor="middle" font-size="13.5" fill="#5a4a3a">adds the flags to</text>
+      <text x="609" y="139" text-anchor="middle" font-size="13.5" fill="#5a4a3a">the file</text>
+    </g>
+    <g>
+      <rect x="710" y="40" width="144" height="120" rx="8" fill="#e9dcc0" stroke="#5c3d1e" stroke-width="1.5" stroke-dasharray="5 3"/>
+      <circle cx="735" cy="64" r="13" fill="#5c3d1e"/><text x="735" y="69" text-anchor="middle" font-size="14" fill="#f5efe0">5</text>
+      <text x="782" y="100" text-anchor="middle" font-size="17" font-weight="600" fill="#2b2118">Merge</text>
+      <text x="782" y="122" text-anchor="middle" font-size="13.5" fill="#5a4a3a">site republishes;</text>
+      <text x="782" y="139" text-anchor="middle" font-size="13.5" fill="#5a4a3a">everyone sees it</text>
+    </g>
+    <line x1="158" y1="100" x2="178" y2="100" stroke="#5a4a3a" stroke-width="1.6" marker-end="url(#ar)"/>
+    <line x1="334" y1="100" x2="354" y2="100" stroke="#5a4a3a" stroke-width="1.6" marker-end="url(#ar)"/>
+    <line x1="510" y1="100" x2="530" y2="100" stroke="#5a4a3a" stroke-width="1.6" marker-end="url(#ar)"/>
+    <line x1="686" y1="100" x2="706" y2="100" stroke="#5a4a3a" stroke-width="1.6" marker-end="url(#ar)"/>
+    <!-- where each step happens -->
+    <line x1="6" y1="184" x2="332" y2="184" stroke="#5c3d1e" stroke-width="1"/>
+    <text x="169" y="204" text-anchor="middle" font-size="13.5" fill="#5c3d1e">in the reader's browser · signed in to GitHub</text>
+    <line x1="358" y1="184" x2="684" y2="184" stroke="#2f5a2a" stroke-width="1"/>
+    <text x="521" y="204" text-anchor="middle" font-size="13.5" fill="#2f5a2a">on GitHub, automatically</text>
+    <line x1="710" y1="184" x2="854" y2="184" stroke="#5c3d1e" stroke-width="1" stroke-dasharray="5 3"/>
+    <text x="782" y="204" text-anchor="middle" font-size="13.5" fill="#5c3d1e">you, or automatic</text>
+    <!-- legend -->
+    <rect x="6" y="226" width="14" height="14" rx="3" fill="#e9dcc0" stroke="#5c3d1e"/>
+    <text x="26" y="238" font-size="13.5" fill="#5a4a3a">a person clicks</text>
+    <rect x="146" y="226" width="14" height="14" rx="3" fill="#e3ecd9" stroke="#2f5a2a"/>
+    <text x="166" y="238" font-size="13.5" fill="#5a4a3a">GitHub does it</text>
+    <rect x="282" y="226" width="14" height="14" rx="3" fill="#e9dcc0" stroke="#5c3d1e" stroke-dasharray="4 2"/>
+    <text x="302" y="238" font-size="13.5" fill="#5a4a3a">your choice: decision 2 below</text>
+  </svg>
+
+  <h2>The three ways to do it</h2>
+  <div class="cards">
+    <div class="card pick">
+      <h3>A · Issue, then Action</h3>
+      <span class="verdict yes">Recommended</span>
+      <ul>
+        <li class="plus">No password or key in the page</li>
+        <li class="plus">No server; everything stays on GitHub</li>
+        <li class="plus">Fits the repo's workflow: issue, pull request, merge</li>
+        <li class="plus">Each flag leaves a record you can trace</li>
+        <li class="minus">One extra click (Submit), and a GitHub account</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>B · A token in the browser</h3>
+      <span class="verdict meh">Only for you alone</span>
+      <ul>
+        <li class="plus">One click, straight to GitHub</li>
+        <li class="minus">Each flagger pastes a personal access token with write access</li>
+        <li class="minus">A leaked token can change the whole repository</li>
+        <li class="minus">Protected <code>main</code> still forces a pull request</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>C · A small server</h3>
+      <span class="verdict no">Not advised</span>
+      <ul>
+        <li class="plus">One click, no GitHub account needed</li>
+        <li class="minus">An outside service and a secret key to look after</li>
+        <li class="minus">Breaks the repository's no-server design</li>
+        <li class="minus">Needs its own spam protection</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>What option A needs</h2>
+  <table class="needs">
+    <colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup>
+    <tr><th>Piece</th><th>What it does</th><th>Who approves</th></tr>
+    <tr><td>The page, in your folder</td><td>On the live site the button becomes <b>Send to GitHub</b> and opens the filled-in issue. Opened from disk, it still writes the file as now.</td><td class="who">You; <code>Individuals/</code> needs no reviewer</td></tr>
+    <tr><td>Issue form <code>.github/ISSUE_TEMPLATE/miscategorisation.yml</code></td><td>A "Miscategorisation" form, like the existing "Text error" one, with a box the page fills in.</td><td class="who">@mikrishnan, @Benzenberg or @jweirich-globus</td></tr>
+    <tr><td>Workflow <code>.github/workflows/sync-miscategorisations.yml</code></td><td>Runs on each new issue with that label: checks the flags, updates the file, opens the pull request and links it to the issue. It would be the repository's first workflow.</td><td class="who">same as above</td></tr>
+    <tr><td>Two repository settings</td><td>Let Actions write and open pull requests. Optionally, allow auto-merge.</td><td class="who">a repository admin</td></tr>
+  </table>
+
+  <h2>Safeguards and limits</h2>
+  <div class="two">
+    <div class="box">
+      <h3>Safeguards built in</h3>
+      <ul>
+        <li>The Action reads the issue as data and never runs it as code.</li>
+        <li>Every flag must name a real example whose categorisation matches the file. Anything else is rejected with a comment on the issue.</li>
+        <li>Duplicate flags are ignored.</li>
+        <li>Only people signed in to GitHub can file, and every change arrives as a pull request you can turn down.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Limits to know</h3>
+      <ul>
+        <li>"Automatic" starts after the reader presses Submit on GitHub.</li>
+        <li>A filled-in link holds only a handful of flags. For more, the page copies them for pasting into the form.</li>
+        <li>Whether a pull request can merge with no click depends on <code>main</code>'s protection rules. I can't see those from here.</li>
+        <li>After a merge, the live site takes a few minutes to update.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="ask" style="margin-top:22px">
+    <b>Decisions for you</b>
+    <ol>
+      <li>Go with option A, issue then Action?</li>
+      <li>Should flag pull requests merge automatically, or wait for you to merge them?</li>
+      <li>Will you ask @mikrishnan, @Benzenberg or @jweirich-globus to approve the two <code>.github/</code> files and the settings?</li>
+    </ol>
+  </div>
+
+  <p class="foot">Effort: one session. It's about 40 lines in the page, a 40-line issue form, and a 120-line workflow with its checking script. It can be tried on a fork before it touches the real repository. Nothing has been built yet.</p>
+</div>
+</body>
+</html>

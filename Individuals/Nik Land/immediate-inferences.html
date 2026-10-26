@@ -228,27 +228,154 @@
   blockquote mark.rejected { background: transparent; text-decoration: line-through; text-decoration-color: var(--warn); }
   blockquote mark sup { font-family: 'Cinzel', Georgia, serif; font-size: 10px; color: var(--accent); margin-left: 2px; letter-spacing: .03em; }
   blockquote mark sup.inferred { font-style: italic; opacity: .8; }
+  blockquote mark.hover { outline: 2px solid var(--accent); outline-offset: 1px; }
   .card .cite { font-size: 15px; display: flex; flex-wrap: wrap; gap: 2px 14px; }
   .note { margin: 7px 0 0; font-size: 15.5px; font-style: italic; color: var(--ink-soft); }
   .flag { margin: 7px 0 0; font-size: 15.5px; color: var(--warn); }
   .flag b { font-family: 'Cinzel', Georgia, serif; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; margin-right: 6px; }
   #eempty { border: 1px dashed var(--rule); padding: 20px; color: var(--ink-soft); font-style: italic; max-width: 60em; }
 
-  /* ── Flagging miscategorised examples ─────────────────────────────────── */
-  .tools { margin: 8px 0 0; display: flex; justify-content: flex-end; }
-  .miscat {
+  /* ── Card tools and flags ─────────────────────────────────────────────── */
+  .card { cursor: pointer; }
+  .card:hover { border-color: #c4b48d; }
+  .card.selected { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .card.flagged { border-left-color: var(--warn); }
+  .tools { margin: 8px 0 0; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+  .tbtn {
     font: inherit; font-size: 14px; padding: 2px 12px; cursor: pointer;
     background: transparent; border: 1px solid var(--ink-soft); color: var(--ink-soft);
   }
-  .miscat:hover:not(:disabled) { border-color: var(--warn); color: var(--warn); }
-  .miscat[aria-pressed="true"] { border-color: var(--warn); color: var(--warn); background: #f6e3dc; }
-  .miscat:disabled { opacity: .55; cursor: default; }
-  .card.flagged { border-left-color: var(--warn); }
-  #miscat-bar { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--ink-soft); }
-  #miscat-bar button { font: inherit; font-size: 15px; padding: 5px 14px; cursor: pointer; background: transparent; border: 1px solid var(--warn); color: var(--warn); }
-  #miscat-bar button:hover:not(:disabled) { background: #f6e3dc; }
-  #miscat-bar button:disabled { opacity: .5; cursor: default; }
-  #miscat-bar .dirty { font-style: italic; color: var(--warn); }
+  .tbtn:hover { border-color: var(--accent); color: var(--accent); }
+  .tbtn.warnish:hover, .tbtn.warnish[aria-expanded="true"] { border-color: var(--warn); color: var(--warn); }
+  .tbtn.warnish[aria-expanded="true"] { background: #f6e3dc; }
+  .tbtn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--parchment); }
+  .flagform { margin: 10px 0 0; padding: 10px 12px; border: 1px solid var(--warn); background: #fbf1ec; cursor: auto; }
+  .flagform fieldset { border: 0; margin: 0 0 8px; padding: 0; }
+  .flagform legend, .flagform .lab2 {
+    font-family: 'Cinzel', Georgia, serif; font-size: 11.5px; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--warn); padding: 0; margin: 0 0 4px; display: block;
+  }
+  .flagform .checks { display: flex; flex-wrap: wrap; gap: 2px 16px; }
+  .flagform .opt { font-size: 15px; }
+  .flagform textarea {
+    width: 100%; min-height: 76px; font: inherit; font-size: 15.5px; padding: 6px 8px;
+    border: 1px solid var(--rule); background: #fff; color: var(--ink); resize: vertical;
+  }
+  .flagform .err { color: var(--warn); font-size: 14px; margin: 4px 0 0; }
+  .flagform .hint { color: var(--ink-soft); font-size: 13.5px; margin: 3px 0 0; }
+  .flagform .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+  .flagform .row button { font: inherit; font-size: 14.5px; padding: 3px 14px; cursor: pointer; background: #fff; border: 1px solid var(--warn); color: var(--warn); }
+  .flagform .row button.save { background: var(--warn); color: #fff; }
+  .reports { margin: 8px 0 0; font-size: 15px; cursor: auto; }
+  .reports summary { cursor: pointer; color: var(--warn); }
+  .reports ol { margin: 6px 0 0; padding-left: 22px; }
+  .reports li { margin: 0 0 7px; }
+  .reports .rmeta { color: var(--ink-soft); font-size: 14px; }
+  .reports .rnew { font-style: italic; color: var(--warn); margin-left: 6px; }
+  .reports .rtext { margin: 1px 0 0; white-space: pre-line; }
+  .reports button { font: inherit; font-size: 13px; padding: 0 8px; margin-left: 6px; cursor: pointer; background: transparent; border: 1px solid var(--rule); color: var(--ink-soft); }
+  .reports .rmall { margin-top: 4px; }
+  #flag-bar { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 15px; color: var(--ink-soft); }
+  #flag-bar button { font: inherit; font-size: 15px; padding: 5px 14px; cursor: pointer; background: transparent; border: 1px solid var(--warn); color: var(--warn); }
+  #flag-bar button:hover { background: #f6e3dc; }
+  #flag-bar .dirty { font-style: italic; color: var(--warn); }
+  #flag-bar a { color: var(--warn); }
+
+  /* ── Diagram panel ────────────────────────────────────────────────────── */
+  #dpanel { border-left: 1px solid var(--rule); background: var(--card); overflow-y: auto; padding: 14px 20px 30px; }
+  #dpanel[hidden] { display: none; }
+  #dpanel:focus { outline: none; }
+  .dp-head { display: flex; align-items: flex-start; gap: 8px; }
+  .dp-head h2 { flex: 1; font-size: 16px; }
+  .dp-head h2:focus { outline: none; }
+  .dp-head button { font: inherit; font-size: 14px; padding: 2px 10px; cursor: pointer; background: transparent; border: 1px solid var(--rule); color: var(--ink-soft); }
+  .dp-head button.x { font-size: 19px; line-height: 1; padding: 2px 9px 4px; }
+  .dp-sub { margin: 2px 0 0; font-size: 15px; color: var(--ink-soft); }
+  .dp-key { margin: 10px 0 12px; padding: 5px 10px; border: 1px dashed var(--rule); font-size: 14.5px; color: var(--ink-soft); }
+  .dp-key b { font-family: 'Cinzel', Georgia, serif; font-weight: 600; color: var(--accent); }
+  .dp-type { margin: 14px 0 6px; font-family: 'Cinzel', Georgia, serif; font-size: 12.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--accent); }
+  .dp-note { margin: 10px 0 0; font-size: 15px; color: var(--ink-soft); }
+  .dp-prov { margin: 10px 0 0; font-size: 14px; font-style: italic; color: var(--ink-soft); }
+  details.dp-legend { margin: 10px 0 0; font-size: 14.5px; color: var(--ink-soft); }
+  details.dp-legend summary { cursor: pointer; font-family: 'Cinzel', Georgia, serif; font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--accent); }
+  details.dp-legend p { margin: 5px 0 0; }
+  .sw { display: inline-block; width: 22px; height: 13px; vertical-align: -1px; margin-right: 5px; border: 1px solid var(--accent); }
+  .sw.whole { background: var(--hilite); }
+  .sw.part { background: repeating-linear-gradient(45deg, #f6ecd0 0 3px, var(--accent) 3px 4.5px); }
+  .sw.open { background: repeating-linear-gradient(45deg, #f8e6de 0 3px, var(--warn) 3px 4.5px); border-color: var(--warn); }
+  .sw.dash { border-style: dashed; background: transparent; }
+  .dp-flag { margin: 18px 0 0; padding-top: 10px; border-top: 1px solid var(--rule); }
+  .dp-flag .tools { justify-content: flex-start; }
+
+  .steps { display: grid; gap: 14px; }
+  .chain-label { margin: 4px 0 -6px; font-size: 14px; font-style: italic; color: var(--ink-soft); }
+  .step { display: grid; grid-template-columns: minmax(0, 1fr) 66px minmax(0, 1fr); align-items: start; }
+  .step.single { grid-template-columns: minmax(0, 1fr); max-width: 240px; margin: 0 auto; width: 100%; }
+  .conn { text-align: center; padding-top: 74px; color: var(--accent); }
+  .conn b { display: block; font-size: 24px; line-height: 1; font-weight: 400; }
+  .conn small { display: block; font-size: 11px; font-style: italic; color: var(--ink-soft); line-height: 1.2; }
+  .conn.no { color: var(--warn); }
+  figure.cell { margin: 0; padding: 7px 8px 8px; border: 1px solid var(--rule); background: #fff; }
+  figure.cell.supplied { border-style: dashed; }
+  figure.cell.rejected { border-color: var(--warn); }
+  .cell .ctop { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-soft); }
+  .form.sm { width: 22px; height: 22px; font-size: 12.5px; flex: none; }
+  .cell .jt { margin: 4px 0 1px; font-size: 15.5px; line-height: 1.25; font-weight: 500; }
+  .cell .jt.schema { font-style: italic; font-weight: 400; }
+  .cell .jt.hover { background: var(--hilite); }
+  .cell .supply { margin: 0; font-size: 13.5px; font-style: italic; color: var(--ink-soft); }
+  .cell svg { display: block; width: 100%; height: auto; margin: 4px 0 2px; }
+  .cell figcaption { font-size: 13.5px; color: var(--ink-soft); line-height: 1.3; }
+  .cell .verdict { margin: 4px 0 0; font-size: 13.5px; line-height: 1.3; color: var(--warn); }
+
+  .sq { position: relative; height: 430px; margin: 6px 0 4px; }
+  .sq svg.lines { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .sq .corner {
+    position: absolute; width: 40%; min-height: 116px; padding: 6px 8px; z-index: 1;
+    background: #fff; border: 1px solid var(--rule); font-size: 14.5px;
+  }
+  .sq .corner.filled { border-color: var(--accent); }
+  .sq .corner.empty { border-style: dashed; background: var(--card); }
+  .sq .c-A { left: 0; top: 0; } .sq .c-E { right: 0; top: 0; }
+  .sq .c-I { left: 0; bottom: 0; } .sq .c-O { right: 0; bottom: 0; }
+  .sq .corner .schema { font-style: italic; color: var(--ink-soft); font-size: 13.5px; }
+  .sq .corner .jt { margin: 3px 0 0; font-weight: 500; line-height: 1.25; }
+  .sq .corner .supply { margin: 0; font-size: 13px; font-style: italic; color: var(--ink-soft); }
+  .sq .corner .tv { display: inline-block; margin-top: 2px; padding: 0 6px; border: 1px solid var(--ink-soft); border-radius: 9px; font-size: 12.5px; color: var(--ink-soft); }
+  .sq .elab {
+    position: absolute; transform: translate(-50%, -50%); z-index: 2; text-align: center;
+    padding: 1px 5px; background: var(--card); font-size: 13px; line-height: 1.2; color: var(--ink-soft); max-width: 22%;
+  }
+  .sq .elab.side { max-width: 38%; }
+  .sq .elab.on { color: var(--accent); font-weight: 600; }
+  .sq .elab small { display: block; font-weight: 400; font-size: 11.5px; font-style: italic; }
+
+  .map { margin: 6px 0 0; }
+  .map .root { border: 1px solid var(--accent); background: #fff; padding: 8px 12px; text-align: center; }
+  .map .root b { font-family: 'Cinzel', Georgia, serif; font-weight: 600; color: var(--accent); font-size: 14px; letter-spacing: .04em; }
+  .map .root small { display: block; font-size: 13.5px; font-style: italic; color: var(--ink-soft); }
+  .map ul { list-style: none; margin: 0 0 0 26px; padding: 0; border-left: 1px solid var(--accent); }
+  .map li { position: relative; padding: 10px 0 0 18px; }
+  .map li::before { content: ''; position: absolute; left: 0; top: 22px; width: 13px; border-top: 1px solid var(--accent); }
+  .map .head { font-family: 'Cinzel', Georgia, serif; font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--accent); }
+  .map .kbtn { font: inherit; font-size: 15px; padding: 2px 10px; margin: 3px 6px 0 0; cursor: pointer; background: #fff; border: 1px solid var(--accent); color: var(--accent); }
+  .map .kbtn .n { margin-left: 5px; font-size: 12.5px; opacity: .75; }
+  .map .kbtn.cur { background: var(--accent); color: var(--parchment); }
+  .map .apart { margin: 14px 0 0; padding: 8px 12px; border: 1px dashed var(--ink-soft); }
+  .map .apart p { margin: 3px 0 0; font-size: 14px; font-style: italic; color: var(--ink-soft); }
+  .med-rows { margin: 6px 0 0; padding: 0; list-style: none; }
+  .med-rows li { margin: 0 0 6px; padding: 5px 9px; border: 1px solid var(--rule); background: #fff; font-size: 15px; }
+  .med-rows li.supplied { border-style: dashed; background: transparent; }
+  .med-rows .rl { font-size: 13px; color: var(--ink-soft); }
+  .med-rows .jt { font-weight: 500; }
+  .med-rows .sup { font-size: 12.5px; font-style: italic; color: var(--warn); margin-left: 6px; }
+
+  @media (min-width: 1360px) {
+    .layout.with-panel { grid-template-columns: 340px minmax(0, 1fr) 500px; }
+  }
+  @media (max-width: 1359px) {
+    #dpanel { position: fixed; top: 0; right: 0; bottom: 0; width: min(520px, 100vw); z-index: 30; box-shadow: -6px 0 18px rgba(43, 33, 24, .18); }
+  }
 
   @media (max-width: 960px) {
     body { display: block; height: auto; }
@@ -263,7 +390,7 @@
 
 <header>
   <h1>Immediate Inferences</h1>
-  <p>Kant's examples of the <i>consequentiae immediatae</i> — equipollence, subalternation, opposition, conversion, contraposition — from the Blomberg, Wiener and Busolt logic transcripts (Academy Edition vol. 24) and from his own Reflexionen on Meier's <i>Auszug</i> (vol. 16). The examples are on the right. On the left are the judgements they are made of, each with the transcript or Reflexion, the volume and the page.</p>
+  <p>Kant's examples of the <i>consequentiae immediatae</i> — equipollence, subalternation, opposition, conversion, contraposition — from the Blomberg, Wiener and Busolt logic transcripts (Academy Edition vol. 24) and from his own Reflexionen on Meier's <i>Auszug</i> (vol. 16). The examples are in the middle. On the left are the judgements they are made of, each with the transcript or Reflexion, the volume and the page. Click an example to see it drawn on the right; a flag marks one that is filed or drawn wrongly.</p>
 </header>
 
 <nav id="kinds" aria-label="Kind of immediate inference"></nav>
@@ -297,9 +424,11 @@
     <div id="elist"></div>
     <div id="eempty" hidden>Nothing fits. Choose another kind, tick another source, or untick the filters.</div>
   </main>
+
+  <section id="dpanel" hidden aria-labelledby="dp-title"></section>
 </div>
 
-<!-- Shared data (generated; read-only), then this tool's own hand-curated examples. -->
+<!-- Shared data (generated; read-only), then this tool's own hand-curated examples and the readers' flags on them. -->
 <script src="../../data/logik-blomberg-24.js"></script>
 <script src="../../data/logik-wiener-24.js"></script>
 <script src="../../data/logik-busolt-24.js"></script>
@@ -307,6 +436,7 @@
 <script src="../../data/phases-adickes.js"></script>
 <script src="immediate-inference-examples.js"></script>
 <script src="miscategorisations.js"></script>
+<script src="diagram-flags.js"></script>
 
 <script>
 /* ── Data ─────────────────────────────────────────────────────────────────── */
@@ -361,39 +491,10 @@ const FORMS = [
   { key: 'S', title: 'Singular' }
 ];
 
-// The comment that heads miscategorisations.js, written back unchanged each time
-// the file is saved. Keep it the same as the file's own.
-const FILE_HEADER = `/* ─────────────────────────────────────────────────────────────────────────────
-   Examples in immediate-inference-examples.js that a reader has flagged as
-   miscategorised. Written by immediate-inferences.html ("Update
-   miscategorisations.js"), which also reads this file back on load, so the
-   flags it holds show on the cards. It can be edited by hand.
-
-   An entry is a flag, and holds the categorisation as it stood when the flag
-   was set. It does not change the example: immediate-inference-examples.js is
-   untouched until someone applies a replacement there.
-
-   Fields of an entry
-     id           the example's id in immediate-inference-examples.js
-     src          blomberg | wiener | busolt | refl16, as on the example
-     block | r    where the example is, as on the example
-     flaggedOn    the date the flag was set, YYYY-MM-DD
-     old          the categorisation that was flagged, copied from the example:
-                    kinds       the kinds it was filed under
-                    named       whether the passage itself names the kind
-                    sub         the species, or absent
-                    judgements  the judgements, each with t, role, form,
-                                formStated and whatever else the example gave
-     replacement  the categorisation that should stand instead, in the same
-                  shape as \`old\`. Left empty for now: no replacement has been
-                  decided on, and the page does not fill it in.
-   ───────────────────────────────────────────────────────────────────────────── */
-
-`;
-
 const ROLE_LABEL = {
   premise: 'Premise', conclusion: 'Conclusion', member: 'One of the pair',
-  intermediate: 'Intermediate step', rejected: 'Rejected by the passage'
+  intermediate: 'Intermediate step', rejected: 'Rejected by the passage',
+  major: 'Major premise', minor: 'Minor premise'
 };
 
 /* ── State ────────────────────────────────────────────────────────────────── */
@@ -405,8 +506,6 @@ let withJudgements = false;
 let examples = [];           // IMMEDIATE_EXAMPLES, each resolved against its source
 let blocksByWork = {};       // work -> block id -> block, with its start pages worked out
 let reflByNumber = {};       // Reflexion number -> entry
-let flagged = new Map();     // example id -> its miscategorisations.js entry
-let unsaved = false;         // flags changed since the page loaded or was last saved
 
 /* ── Resolving an example against its source ──────────────────────────────── */
 
@@ -626,6 +725,7 @@ function buildQuote(ex) {
     sup.title = (m.j.formStated ? 'Form named by the passage' : 'Form read off the sentence here; not named by the passage');
     mk.append(sup);
     mk.title = 'Show this judgement in the list';
+    mk.dataset.n = m.n;
     mk.addEventListener('click', () => goTo('j-' + ex.id + '-' + m.n));
     q.append(mk);
     pos = m.end;
@@ -635,8 +735,10 @@ function buildQuote(ex) {
 }
 
 function buildCard(ex) {
+  const isFlagged = flagSets.categorisation.has(ex.id);
   const card = el('article', 'card' + (ex.judgements.length ? '' : ' rule') +
-    (ex.counter || ex.invalid ? ' counter' : '') + (ex.ok ? '' : ' unresolved'));
+    (ex.counter || ex.invalid ? ' counter' : '') + (ex.ok ? '' : ' unresolved') +
+    (isFlagged ? ' flagged' : '') + (ex.id === panelId ? ' selected' : ''));
   card.id = 'ex-' + ex.id;
   if (!ex.ok) {
     card.append(el('p', 'flag', 'The quotation could not be found in ' + (ex.block || 'Refl. ' + ex.r) +
@@ -647,13 +749,40 @@ function buildCard(ex) {
   if (ex.counter) { const p = el('p', 'flag'); p.append(el('b', null, 'Not immediate'), ex.counter); card.append(p); }
   if (ex.invalid) { const p = el('p', 'flag'); p.append(el('b', null, 'Ruled out'), ex.invalid); card.append(p); }
   if (ex.note) card.append(el('p', 'note', ex.note));
+
   const tools = el('div', 'tools');
-  const btn = el('button', 'miscat');
-  btn.type = 'button';
-  btn.addEventListener('click', () => toggleFlag(ex.id));
-  tools.append(btn);
+  const db = el('button', 'tbtn show-diagram', 'Show diagram');
+  db.type = 'button';
+  db.setAttribute('aria-pressed', ex.id === panelId ? 'true' : 'false');
+  db.addEventListener('click', () => (panelId === ex.id ? closePanel() : openPanel(ex.id, db)));
+  const formId = 'categorisation|' + ex.id;
+  const fb = el('button', 'tbtn warnish', isFlagged ? 'Add a report' : 'Flag as miscategorised');
+  fb.type = 'button';
+  fb.setAttribute('aria-expanded', openForm === formId ? 'true' : 'false');
+  fb.addEventListener('click', () => {
+    openForm = openForm === formId ? null : formId;
+    refreshFlagViews(ex.id);
+    const ta = document.querySelector('#ex-' + CSS.escape(ex.id) + ' .flagform textarea');
+    if (ta) ta.focus();
+  });
+  tools.append(db, fb);
   card.append(tools);
-  paintFlag(card, ex.id);
+  if (openForm === formId) {
+    card.append(buildFlagForm('categorisation', formId,
+      (problem, details) => { addReport('categorisation', rawExample(ex.id), null, problem, details); openForm = null; refreshFlagViews(ex.id); },
+      () => { openForm = null; refreshFlagViews(ex.id); }));
+  }
+  const reps = buildReports('categorisation', ex.id, 'Flagged as miscategorised', () => refreshFlagViews(ex.id));
+  if (reps) card.append(reps);
+
+  // A click anywhere on the card opens its diagram, except on its own controls
+  // or when the reader is selecting text.
+  card.addEventListener('click', e => {
+    if (e.target.closest('button, a, input, textarea, label, select, summary, details, form')) return;
+    const sel = window.getSelection();
+    if (sel && String(sel).trim() && card.contains(sel.anchorNode)) return;
+    openPanel(ex.id, db);
+  });
   return card;
 }
 
@@ -663,11 +792,7 @@ function buildJudgement(ex, j, n) {
   li.tabIndex = 0;
   li.title = 'Show the example this judgement belongs to';
 
-  const f = el('div', 'form' + (j.formStated ? '' : ' inferred'));
-  f.title = (FORMS.filter(x => x.key === formKey(j.form))[0].title) +
-    (j.formStated ? ' — named by the passage' : ' — read off the sentence here, not named by the passage');
-  f.append(formKey(j.form));
-  if (j.form.length > 1) f.append(el('sup', null, j.form.charAt(1) === '+' ? '+' : '−'));
+  const f = formBadge(j, false);
 
   const body = el('div');
   const t = el('p', 't', flat(j.t));
@@ -689,8 +814,10 @@ function buildJudgement(ex, j, n) {
   body.append(meta, citation(ex, j));
 
   li.append(f, body);
-  li.addEventListener('click', () => goTo('ex-' + ex.id));
-  li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goTo('ex-' + ex.id); } });
+  // Finding the example also moves an open diagram to it.
+  const find = () => { goTo('ex-' + ex.id); if (panelId) openPanel(ex.id, li); };
+  li.addEventListener('click', find);
+  li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); find(); } });
   return li;
 }
 
@@ -761,6 +888,7 @@ function render() {
   renderExamples(hits);
   renderJudgements(hits);
   refreshCounts();
+  renderPanel();
 }
 
 // Counts under every other setting, so each button says what it would show.
@@ -776,7 +904,52 @@ function refreshCounts() {
   });
 }
 
-/* ── Flagging an example as miscategorised ────────────────────────────────── */
+/* ── Flags ────────────────────────────────────────────────────────────────── */
+
+// Two kinds of flag, each kept in its own file in this folder: an example filed
+// under the wrong kind, and a diagram drawn wrongly. Both hold one entry per
+// thing flagged, with a report for each time someone flagged it.
+const FLAG_FILES = {
+  categorisation: { file: 'miscategorisations.js', global: 'MISCATEGORISATIONS', what: 'miscategorised' },
+  diagram:        { file: 'diagram-flags.js',      global: 'DIAGRAM_FLAGS',      what: 'inaccurate' }
+};
+const PROBLEMS = {
+  categorisation: [
+    ['kind', 'The kind of inference'], ['named', 'Whether the passage names the kind'],
+    ['form', 'A judgement’s form (A E I O)'], ['judgements', 'Which judgements are marked'],
+    ['quote', 'The quotation or its page'], ['other', 'Something else']
+  ],
+  diagram: [
+    ['terms', 'The concept names'], ['reading', 'How a judgement is read as subject and predicate'],
+    ['drawing', 'What is shaded, or where'], ['type', 'The wrong kind of diagram'], ['other', 'Something else']
+  ]
+};
+const DETAILS_MAX = 2000;
+
+// The live site sends flags to GitHub as an issue, which the repository's
+// workflow (.github/workflows/sync-inference-flags.yml) turns into a pull
+// request. Opened from disk, the page can also write the two files itself.
+const REPO = 'mikrishnan/kant-lab';
+const ISSUE_FORM = 'inference-flags.yml';
+const FLAGS_FORMAT = 'kant-lab-flags-v1';
+const ON_GITHUB = /\.github\.io$/.test(location.hostname);
+const CAN_WRITE = !!window.showDirectoryPicker;
+const URL_MAX = 7500;          // GitHub refuses much longer links to a new issue
+
+const flagSets = { categorisation: new Map(), diagram: new Map() };   // key -> entry
+let openForm = null;           // the flag form now open: 'categorisation|<id>' or 'diagram|<id>|<kind>'
+const drafts = new Map();      // what has been typed into a form, kept across redraws
+let unsaved = false;           // changed since the files were loaded or last written
+
+function flagKey(about, id, k) { return about === 'diagram' ? id + '|' + k : id; }
+function rawExample(id) { return IMMEDIATE_EXAMPLES.filter(e => e.id === id)[0]; }
+function today() { return new Date().toISOString().slice(0, 10); }
+
+function placeOf(raw) {
+  const p = { id: raw.id, src: raw.src };
+  if (raw.block) p.block = raw.block; else p.r = raw.r;
+  return p;
+}
 
 // The categorisation as the example stands in immediate-inference-examples.js,
 // copied so that the flag keeps it even after the example is corrected there.
@@ -787,68 +960,219 @@ function oldCategorisation(raw) {
   return old;
 }
 
+// What a diagram was drawn from. The sync workflow builds the same object from
+// the examples file, so the two must stay in step.
+function drawnOf(raw, spec) {
+  return {
+    kind: spec.kind, type: spec.type, diagram: raw.diagram || null,
+    judgements: raw.judgements.map(j => ({ t: j.t, role: j.role, form: j.form, sp: j.sp || null }))
+  };
+}
+
 // `replacement` is left empty on purpose: no replacement has been decided on,
 // and nothing on this page fills it in.
-function emptyReplacement() {
-  return { kinds: [], named: null, sub: null, judgements: [] };
-}
-
-function hasReplacement(entry) {
-  const r = entry.replacement;
-  return !!r && (r.kinds.length > 0 || r.judgements.length > 0 || r.named != null || r.sub != null);
-}
-
-function makeFlag(raw) {
-  const entry = { id: raw.id, src: raw.src };
-  if (raw.block) entry.block = raw.block; else entry.r = raw.r;
-  entry.flaggedOn = new Date().toISOString().slice(0, 10);
-  entry.old = oldCategorisation(raw);
-  entry.replacement = emptyReplacement();
-  return entry;
-}
-
-function paintFlag(card, id) {
-  const on = flagged.has(id);
-  const btn = card.querySelector('.miscat');
-  card.classList.toggle('flagged', on);
-  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-  const locked = on && hasReplacement(flagged.get(id));
-  btn.disabled = locked;
-  btn.textContent = locked ? 'Flagged · has a replacement' : on ? 'Flagged as miscategorised · undo' : 'Flag as miscategorised';
-  btn.title = on ? 'Remove the flag from miscategorisations.js' : 'Record this categorisation in miscategorisations.js as one to be corrected';
-}
-
-function toggleFlag(id) {
-  if (flagged.has(id)) {
-    if (hasReplacement(flagged.get(id))) return;
-    flagged.delete(id);
+function newEntry(about, raw, spec) {
+  const e = placeOf(raw);
+  if (about === 'diagram') {
+    e.drawn = drawnOf(raw, spec);
+    e.reports = [];
+    e.replacement = { diagram: null, judgements: [] };
   } else {
-    flagged.set(id, makeFlag(IMMEDIATE_EXAMPLES.filter(e => e.id === id)[0]));
+    e.old = oldCategorisation(raw);
+    e.reports = [];
+    e.replacement = { kinds: [], named: null, sub: null, judgements: [] };
   }
-  unsaved = true;
-  const card = document.getElementById('ex-' + id);
-  if (card) paintFlag(card, id);
-  paintBar();
+  e._new = true;
+  return e;
 }
 
-// The whole of miscategorisations.js as it should now read: the header the file
-// has, then every flag, in the order of the examples file.
-function miscategorisationsText() {
-  const head = FILE_HEADER;
+// Entries in the first shape had one flag and no details.
+function normaliseEntry(e) {
+  if (!e.reports) {
+    e.reports = [{ flaggedOn: e.flaggedOn || '', problem: [], details: '' }];
+    delete e.flaggedOn;
+  }
+  return e;
+}
+
+function loadFlags() {
+  (typeof MISCATEGORISATIONS !== 'undefined' ? MISCATEGORISATIONS : []).forEach(e => {
+    flagSets.categorisation.set(flagKey('categorisation', e.id), normaliseEntry(e));
+  });
+  (typeof DIAGRAM_FLAGS !== 'undefined' ? DIAGRAM_FLAGS : []).forEach(e => {
+    flagSets.diagram.set(flagKey('diagram', e.id, e.drawn && e.drawn.kind), normaliseEntry(e));
+  });
+}
+
+function addReport(about, raw, spec, problem, details) {
+  const key = flagKey(about, raw.id, spec && spec.kind);
+  let entry = flagSets[about].get(key);
+  if (!entry) { entry = newEntry(about, raw, spec); flagSets[about].set(key, entry); }
+  entry.reports.push({ flaggedOn: today(), problem: problem, details: details, _new: true });
+  unsaved = true;
+}
+
+function dropReport(about, key, report) {
+  const entry = flagSets[about].get(key);
+  if (!entry) return;
+  entry.reports = entry.reports.filter(r => r !== report);
+  if (!entry.reports.length && entry._new) flagSets[about].delete(key);
+  unsaved = true;
+}
+
+// Removing a whole flag is for whoever keeps the files, so it is offered only
+// when the page is opened from disk.
+function dropEntry(about, key) {
+  flagSets[about].delete(key);
+  unsaved = true;
+}
+
+function newReports() {
+  const out = [];
+  ['categorisation', 'diagram'].forEach(about => {
+    sortedEntries(about).forEach(e => e.reports.forEach(r => { if (r._new && !r._sent) out.push({ about, e, r }); }));
+  });
+  return out;
+}
+
+function sortedEntries(about) {
   const order = {};
   IMMEDIATE_EXAMPLES.forEach((e, n) => { order[e.id] = n; });
-  const entries = Array.from(flagged.values()).sort((a, b) => (order[a.id] != null ? order[a.id] : 1e9) - (order[b.id] != null ? order[b.id] : 1e9));
-  const body = entries.map(e => '  ' + JSON.stringify(e, null, 2).replace(/\n/g, '\n  ')).join(',\n');
-  return head + 'const MISCATEGORISATIONS = [' + (body ? '\n' + body + '\n' : '\n') + '];\n';
+  const rank = e => (order[e.id] != null ? order[e.id] : 1e6) * 20 +
+    (about === 'diagram' ? Math.max(0, KIND_ORDER.indexOf(e.drawn && e.drawn.kind)) : 0);
+  return Array.from(flagSets[about].values()).sort((a, b) => rank(a) - rank(b));
 }
 
-// The page cannot reach into the folder by itself, so the first update asks you
-// to pick miscategorisations.js (the one in this folder). The browser's handle on
-// that file is then kept, and later updates write to it in place with no dialog.
-// This needs the File System Access API: Chrome, Edge and the browsers built on them.
-const FILE_NAME = 'miscategorisations.js';
-const CAN_WRITE = !!window.showOpenFilePicker;
-let fileHandle = null;
+/* ── The flag form and the list of reports ────────────────────────────────── */
+
+function problemLabel(about, p) {
+  const hit = PROBLEMS[about].filter(x => x[0] === p)[0];
+  return hit ? hit[1] : p;
+}
+
+function buildFlagForm(about, formId, onSave, onCancel) {
+  const box = el('form', 'flagform');
+  box.noValidate = true;
+  const draft = drafts.get(formId) || { problem: [], details: '' };
+  const fs = el('fieldset');
+  fs.append(el('legend', null, 'What is wrong?'));
+  const checks = el('div', 'checks');
+  PROBLEMS[about].forEach(([key, label]) => {
+    const lab = el('label', 'opt');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = key;
+    cb.checked = draft.problem.indexOf(key) >= 0;
+    lab.append(cb, el('span', null, label));
+    checks.append(lab);
+  });
+  fs.append(checks);
+  const tid = 'details-' + formId.replace(/[^A-Za-z0-9]/g, '-');
+  const tl = el('label', 'lab2', 'Details');
+  tl.htmlFor = tid;
+  const ta = document.createElement('textarea');
+  ta.id = tid;
+  ta.maxLength = DETAILS_MAX;
+  ta.value = draft.details;
+  ta.placeholder = about === 'diagram'
+    ? 'Einige Sterbliche are drawn as all of sterblich; only part should be hatched.'
+    : 'This is a contraposition, not a conversion: the quality changes.';
+  const hint = el('p', 'hint', 'Say what is wrong and, if you can, what it should be. Give your source where it helps.');
+  const err = el('p', 'err');
+  err.hidden = true;
+  err.setAttribute('role', 'alert');
+  const row = el('div', 'row');
+  const cancel = el('button', null, 'Cancel');
+  cancel.type = 'button';
+  const save = el('button', 'save', 'Save flag');
+  save.type = 'submit';
+  row.append(cancel, save);
+  box.append(fs, tl, ta, hint, err, row);
+
+  const read = () => ({
+    problem: PROBLEMS[about].map(p => p[0]).filter(k => checks.querySelector('input[value="' + k + '"]').checked),
+    details: ta.value.trim()
+  });
+  const keep = () => { drafts.set(formId, { problem: read().problem, details: ta.value }); err.hidden = true; };
+  box.addEventListener('input', keep);
+  box.addEventListener('change', keep);
+  box.addEventListener('submit', ev => {
+    ev.preventDefault();
+    const v = read();
+    if (!v.problem.length) { err.textContent = 'Tick what is wrong first.'; err.hidden = false; return; }
+    if (!v.details) { err.textContent = 'Describe the problem first.'; err.hidden = false; ta.focus(); return; }
+    drafts.delete(formId);
+    onSave(v.problem, v.details);
+  });
+  cancel.addEventListener('click', () => { drafts.delete(formId); onCancel(); });
+  box.addEventListener('keydown', ev => { if (ev.key === 'Escape') { ev.stopPropagation(); drafts.delete(formId); onCancel(); } });
+  return box;
+}
+
+function buildReports(about, key, title, onChange) {
+  const entry = flagSets[about].get(key);
+  if (!entry || !entry.reports.length) return null;
+  const d = el('details', 'reports');
+  const n = entry.reports.length;
+  d.append(el('summary', null, title + ' · ' + n + ' report' + (n === 1 ? '' : 's')));
+  const ol = el('ol');
+  entry.reports.forEach(r => {
+    const li = el('li');
+    const meta = el('span', 'rmeta');
+    const bits = [r.flaggedOn || 'undated'];
+    if (r.problem && r.problem.length) bits.push(r.problem.map(p => problemLabel(about, p)).join(', '));
+    meta.append(bits.join(' · '));
+    if (r.reportedBy) meta.append(' · @' + r.reportedBy);
+    if (r.issue) {
+      meta.append(' · ');
+      const a = el('a', null, '#' + r.issue);
+      a.href = 'https://github.com/' + REPO + '/issues/' + r.issue;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      meta.append(a);
+    }
+    li.append(meta);
+    if (r._new) {
+      li.append(el('span', 'rnew', r._sent ? 'sent to GitHub' : 'new, not yet sent or saved'));
+      const rm = el('button', null, 'Remove');
+      rm.type = 'button';
+      rm.addEventListener('click', () => { dropReport(about, key, r); onChange(); });
+      li.append(rm);
+    }
+    li.append(el('p', 'rtext', r.details || 'No details given.'));
+    ol.append(li);
+  });
+  d.append(ol);
+  if (!ON_GITHUB) {
+    const all = el('button', 'rmall', 'Remove this flag from the file');
+    all.type = 'button';
+    all.addEventListener('click', () => { dropEntry(about, key); onChange(); });
+    d.append(all);
+  }
+  return d;
+}
+
+/* ── Saving: writing the files, or sending to GitHub ──────────────────────── */
+
+function serialise(e) {
+  return JSON.stringify(e, (k, v) => (k.charAt(0) === '_' ? undefined : v), 2);
+}
+
+// The file as it should now read: its own header, kept as it is, then every
+// entry. The sync workflow writes the files the same way.
+function flagFileText(about, oldText) {
+  const marker = 'const ' + FLAG_FILES[about].global + ' = [';
+  const at = oldText.indexOf(marker);
+  if (at < 0) throw new Error(FLAG_FILES[about].file + ' does not look like a flag file');
+  const body = sortedEntries(about).map(e => '  ' + serialise(e).replace(/\n/g, '\n  ')).join(',\n');
+  return oldText.slice(0, at) + marker + (body ? '\n' + body + '\n' : '\n') + '];\n';
+}
+
+// The page cannot reach into the folder by itself, so the first update asks for
+// the folder (Individuals/Nik Land). The browser's handle on it is kept, and
+// later updates write both files with no dialog. This needs the File System
+// Access API: Chrome, Edge and the browsers built on them.
+let folderHandle = null;
 
 function handleStore(mode, fn) {
   return new Promise((resolve, reject) => {
@@ -864,78 +1188,783 @@ function handleStore(mode, fn) {
   });
 }
 // A browser that will not store the handle only means being asked again next visit.
-function rememberHandle(h) { return handleStore('readwrite', s => (h ? s.put(h, 'file') : s.delete('file'))).catch(() => {}); }
-function recallHandle() { return handleStore('readonly', s => s.get('file')).catch(() => null); }
+function rememberFolder(h) { return handleStore('readwrite', s => (h ? s.put(h, 'folder') : s.delete('folder'))).catch(() => {}); }
+function recallFolder() { return handleStore('readonly', s => s.get('folder')).catch(() => null); }
 
-async function writableHandle() {
-  if (!fileHandle) fileHandle = await recallHandle();
-  if (fileHandle) {
-    let ok = (await fileHandle.queryPermission({ mode: 'readwrite' })) === 'granted';
-    if (!ok) ok = (await fileHandle.requestPermission({ mode: 'readwrite' })) === 'granted';
-    if (ok) return fileHandle;
-    fileHandle = null;
+async function writableFolder() {
+  if (!folderHandle) folderHandle = await recallFolder();
+  if (folderHandle) {
+    let ok = (await folderHandle.queryPermission({ mode: 'readwrite' })) === 'granted';
+    if (!ok) ok = (await folderHandle.requestPermission({ mode: 'readwrite' })) === 'granted';
+    if (ok) return folderHandle;
+    folderHandle = null;
   }
-  const picked = await window.showOpenFilePicker({
-    multiple: false,
-    types: [{ description: 'miscategorisations.js', accept: { 'text/javascript': ['.js'] } }]
-  });
-  const h = picked[0];
-  if (h.name !== FILE_NAME) throw new Error('that file is “' + h.name + '”; choose ' + FILE_NAME + ' in the Individuals/Nik Land folder');
-  if ((await h.requestPermission({ mode: 'readwrite' })) !== 'granted') throw new Error('write permission was not given');
-  fileHandle = h;
-  await rememberHandle(h);
+  const h = await window.showDirectoryPicker({ id: 'kant-lab-flags', mode: 'readwrite' });
+  try { await h.getFileHandle('immediate-inferences.html'); }
+  catch (e) { throw new Error('that folder has no immediate-inferences.html in it; choose Individuals/Nik Land'); }
+  folderHandle = h;
+  await rememberFolder(h);
   return h;
 }
 
-async function saveFlags() {
-  let message = '', failed = false;
+async function writeFlagFiles() {
+  let message, failed = false;
   try {
-    const h = await writableHandle();
-    const w = await h.createWritable();
-    await w.write(miscategorisationsText());
-    await w.close();
+    const dir = await writableFolder();
+    for (const about of ['categorisation', 'diagram']) {
+      const fh = await dir.getFileHandle(FLAG_FILES[about].file);
+      const text = flagFileText(about, await (await fh.getFile()).text());
+      const w = await fh.createWritable();
+      await w.write(text);
+      await w.close();
+    }
     unsaved = false;
-    message = 'Updated ' + FILE_NAME + '.';
+    message = 'Updated miscategorisations.js and diagram-flags.js.';
   } catch (err) {
     if (err && err.name === 'AbortError') return;      // the picker was cancelled
-    fileHandle = null;                                  // ask again next time
-    rememberHandle(null);
-    message = 'Could not update ' + FILE_NAME + ': ' + err.message;
+    folderHandle = null;                                // ask again next time
+    rememberFolder(null);
+    message = 'Could not update the files: ' + err.message;
     failed = true;
   }
-  paintBar();
-  const status = document.getElementById('miscat-status');
-  status.textContent = message;
-  status.className = failed ? 'dirty' : '';
+  paintBar(message, failed);
 }
 
-function paintBar() {
-  document.getElementById('miscat-count').textContent =
-    flagged.size + ' flagged as miscategorised';
-  const d = document.getElementById('miscat-status');
-  if (unsaved) { d.textContent = 'not yet in ' + FILE_NAME; d.className = 'dirty'; }
-  const save = document.getElementById('miscat-save');
-  save.disabled = !unsaved || !CAN_WRITE;
-  save.title = CAN_WRITE ? 'Write the flags into ' + FILE_NAME + ' in this folder'
-                         : 'Updating the file needs Chrome or Edge; this browser cannot write to a file on disk';
+function githubPayload(items) {
+  return {
+    format: FLAGS_FORMAT,
+    tool: 'immediate-inferences',
+    flags: items.map(({ about, e, r }) => {
+      const f = { about: about, id: e.id };
+      if (about === 'diagram') { f.kind = e.drawn.kind; f.type = e.drawn.type; }
+      f.problem = r.problem;
+      f.details = r.details;
+      return f;
+    })
+  };
+}
+
+function githubSummary(items) {
+  return items.map(({ about, e, r }) => {
+    const what = about === 'diagram' ? 'diagram under ' + e.drawn.kind : 'categorisation';
+    const details = r.details.length > 300 ? r.details.slice(0, 300) + '…' : r.details;
+    return '- `' + e.id + '` — ' + what + ': ' + r.problem.map(p => problemLabel(about, p).toLowerCase()).join(', ') +
+      '\n  > ' + details.replace(/\n+/g, ' ');
+  }).join('\n');
+}
+
+async function sendToGithub() {
+  const items = newReports();
+  if (!items.length) { paintBar('There is nothing new to send.', false); return; }
+  const json = JSON.stringify(githubPayload(items), null, 1);
+  const ids = items.map(x => x.e.id).filter((v, i, a) => a.indexOf(v) === i);
+  const title = 'Flags: ' + ids.slice(0, 3).join(', ') + (ids.length > 3 ? ' and ' + (ids.length - 3) + ' more' : '');
+  const base = 'https://github.com/' + REPO + '/issues/new?template=' + ISSUE_FORM +
+    '&title=' + encodeURIComponent(title) + '&summary=' + encodeURIComponent(githubSummary(items));
+  let url = base + '&flags=' + encodeURIComponent(json);
+  let note = '';
+  if (url.length > URL_MAX) {
+    // Too many for one link: copy the data, and open the form for pasting.
+    url = base;
+    try { await navigator.clipboard.writeText(json); note = ' They were too many for one link, so they are copied: paste them into the Flags box.'; }
+    catch (e) { paintBar('Too many flags for one link, and the browser would not copy them. Send them in smaller groups.', true); return; }
+  }
+  const w = window.open(url, '_blank');
+  items.forEach(x => { x.r._sent = true; });
+  render();
+  if (!w) {
+    paintBar('', false);
+    const a = el('a', null, 'Open the GitHub issue');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.getElementById('flag-status').replaceChildren('Your browser blocked the new tab. ', a, '.' + note);
+  } else {
+    w.opener = null;
+    paintBar('A GitHub issue is open in a new tab with ' + items.length + ' flag' + (items.length === 1 ? '' : 's') +
+      '. Press “Submit new issue” there. The flags will show here once the pull request is merged.' + note, false);
+  }
+}
+
+function paintBar(message, failed) {
+  const total = flagSets.categorisation.size + flagSets.diagram.size;
+  const fresh = newReports().length;
+  document.getElementById('flag-count').textContent =
+    total + ' flagged' + (fresh ? ' · ' + fresh + ' new' : '');
+  const st = document.getElementById('flag-status');
+  if (message != null) { st.textContent = message; st.className = failed ? 'dirty' : ''; }
+  else if (!ON_GITHUB && unsaved) { st.textContent = 'not yet in the files'; st.className = 'dirty'; }
+  else if (st.className === 'dirty') { st.textContent = ''; st.className = ''; }
 }
 
 function buildBar() {
   const bar = el('div');
-  bar.id = 'miscat-bar';
+  bar.id = 'flag-bar';
   const count = el('span');
-  count.id = 'miscat-count';
+  count.id = 'flag-count';
   const status = el('span');
-  status.id = 'miscat-status';
-  const save = el('button', null, 'Update miscategorisations.js');
-  save.id = 'miscat-save';
-  save.type = 'button';
-  save.addEventListener('click', saveFlags);
-  bar.append(count, status, save);
+  status.id = 'flag-status';
+  status.setAttribute('aria-live', 'polite');
+  const send = el('button', null, 'Send flags to GitHub');
+  send.type = 'button';
+  send.title = 'Open a GitHub issue holding the flags made in this visit; the repository turns it into a pull request';
+  send.addEventListener('click', sendToGithub);
+  bar.append(count, status, send);
+  if (!ON_GITHUB) {
+    const save = el('button', null, 'Update the flag files');
+    save.type = 'button';
+    save.title = CAN_WRITE ? 'Write miscategorisations.js and diagram-flags.js in this folder'
+                           : 'Writing the files needs Chrome or Edge; this browser cannot write to a folder on disk';
+    save.addEventListener('click', () => {
+      if (!CAN_WRITE) { paintBar('Writing the files needs Chrome or Edge. Send the flags to GitHub instead.', true); return; }
+      writeFlagFiles();
+    });
+    bar.append(save);
+  }
   document.getElementById('kinds').append(bar);
-  // Flags already in the file show on their cards.
-  MISCATEGORISATIONS.forEach(e => flagged.set(e.id, e));
   paintBar();
+}
+
+// After a flag changes: the card and the panel redraw, and the bar recounts.
+function refreshFlagViews(id) {
+  if (id) {
+    const ex = examples.filter(e => e.id === id)[0];
+    const old = document.getElementById('ex-' + id);
+    if (ex && old) old.replaceWith(buildCard(ex));
+  }
+  if (panelId) renderPanel();
+  paintBar();
+}
+
+/* ── Diagrams ─────────────────────────────────────────────────────────────── */
+
+// The lecturers explain these inferences by the spheres (Sphaera) of the
+// concepts, and the diagrams draw the spheres as circles. Two concepts S and P
+// cut things into four parts: a, what is both; b, S and not P; c, P and not S;
+// d, neither. Each judgement picks out some of the parts, so one drawing serves
+// a premise and its conclusion alike, and only the emphasis moves.
+const REGION = { S: ['a', 'b'], P: ['a', 'c'], nonS: ['c', 'd'], nonP: ['b', 'd'], SP: ['a'] };
+const both = (x, y) => x.filter(a => y.indexOf(a) >= 0);
+const less = (x, y) => x.filter(a => y.indexOf(a) < 0);
+const SQUARE_KINDS = ['contradictory', 'contrary', 'subcontrary', 'subalternation'];
+const SVGNS = 'http://www.w3.org/2000/svg';
+const INK = '#2b2118', ACCENT = '#5c3d1e', SOFT = '#5a4a3a', WARN = '#8a2b1c', TINT = '#f1dfae';
+let svgSeq = 0;                // keeps each drawing's pattern and mask ids apart
+
+function svgEl(tag, attrs, text) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function isSingular(r) { return r.form.charAt(0) === 'S'; }
+
+// What a judgement says about the four parts. Traditional logic gives a
+// subject existential import, so a universal also says its subject has members.
+function assertReading(states, r) {
+  const X = REGION[r.sp[0]], Y = REGION[r.sp[1]], f = r.form.charAt(0);
+  const occupy = atoms => { if (atoms.length === 1 && states[atoms[0]] === 'open') states[atoms[0]] = 'occupied'; };
+  if (f === 'A') { less(X, Y).forEach(a => { states[a] = 'empty'; }); occupy(both(X, Y)); }
+  else if (f === 'E') { both(X, Y).forEach(a => { states[a] = 'empty'; }); occupy(less(X, Y)); }
+  else if (f === 'I') occupy(both(X, Y));
+  else if (f === 'O') occupy(less(X, Y));
+}
+
+function applyConfig(states, config) {
+  if (config === 'S=P') { states.b = 'empty'; states.c = 'empty'; states.a = 'occupied'; }
+  if (config === 'S<P') { states.b = 'empty'; if (states.a === 'open') states.a = 'occupied'; }
+}
+
+function shapeOf(states) {
+  if (states.a === 'empty') return 'apart';
+  if (states.b === 'empty' && states.c === 'empty') return 'same';
+  if (states.b === 'empty') return 'SinP';
+  if (states.c === 'empty') return 'PinS';
+  return 'cross';
+}
+
+// Whether a reading that is not the premise is borne out by what the premise said.
+function verdictOf(states, r) {
+  const X = REGION[r.sp[0]], Y = REGION[r.sp[1]], f = r.form.charAt(0);
+  if (f === 'I' || f === 'O') {
+    const R = f === 'I' ? both(X, Y) : less(X, Y);
+    if (!R.length || R.every(a => states[a] === 'empty')) return 'empty';
+    return R.some(a => states[a] === 'occupied') ? 'follows' : 'open';
+  }
+  if (f === 'A') return less(X, Y).every(a => states[a] === 'empty') ? 'follows' : 'open';
+  if (f === 'E') return both(X, Y).every(a => states[a] === 'empty') ? 'follows' : 'open';
+  return 'follows';
+}
+
+function regionOf(r) {
+  const X = REGION[r.sp[0]], Y = REGION[r.sp[1]], f = r.form.charAt(0);
+  if (f === 'A' || f === 'E') return { atoms: X, style: 'whole' };
+  if (f === 'I') return { atoms: both(X, Y), style: 'part' };
+  if (f === 'O') return { atoms: less(X, Y), style: 'part' };
+  return { atoms: [], style: 'point' };
+}
+
+function termName(terms, key) {
+  if (key === 'S' || key === 'P' || key === 'M') return terms[key] || key;
+  if (key === 'nonP') return terms.nonP || 'nicht-' + (terms.P || 'P');
+  if (key === 'nonS') return terms.nonS || 'nicht-' + (terms.S || 'S');
+  if (key === 'SP') return 'what is both ' + (terms.S || 'S') + ' and ' + (terms.P || 'P');
+  return key;
+}
+
+function describeReading(r, terms) {
+  const X = termName(terms, r.sp[0]), Y = termName(terms, r.sp[1]), f = r.form;
+  if (f === 'A') return 'All of ' + X + ' lies inside ' + Y + '.';
+  if (f === 'E') return X + ' lies wholly outside ' + Y + '.';
+  if (f === 'I') return 'Some of ' + X + ' lies inside ' + Y + ': the hatched part.';
+  if (f === 'O') return 'Some of ' + X + ' lies outside ' + Y + ': the hatched part.';
+  if (f === 'S+') return X + ' is one thing, inside ' + Y + '.';
+  return X + ' is one thing, outside ' + Y + '.';
+}
+
+function verdictText(v, r, terms) {
+  const X = termName(terms, r.sp[0]), Y = termName(terms, r.sp[1]);
+  if (v === 'empty') return 'This reading picks out nothing: there is no such part.';
+  if (v !== 'open') return '';
+  if (r.form === 'A') return 'Does not follow: the premise leaves room for some of ' + X + ' outside ' + Y + '.';
+  if (r.form === 'E') return 'Does not follow: the premise leaves room for some of ' + X + ' inside ' + Y + '.';
+  return 'Drawn, but the premise does not say this part has anything in it.';
+}
+
+// Circles in a 200 × 146 drawing: [cx, cy, r] for S and P, and where their names go.
+const GEO = {
+  SinP:  { S: [90, 78, 27],  P: [104, 68, 54], lab: { S: [90, 78], P: [104, 29] }, fit: { S: 46, P: 70 } },
+  PinS:  { S: [104, 68, 54], P: [90, 78, 27],  lab: { S: [104, 29], P: [90, 78] }, fit: { S: 70, P: 46 } },
+  same:  { S: [100, 68, 52], P: [100, 68, 52], lab: { S: [100, 60], P: [100, 80] }, fit: { S: 90, P: 90 } },
+  apart: { S: [56, 68, 38],  P: [146, 68, 40], lab: { S: [56, 68], P: [146, 68] }, fit: { S: 64, P: 68 } },
+  cross: { S: [78, 68, 44],  P: [124, 68, 44], lab: { S: [57, 68], P: [145, 68] }, fit: { S: 40, P: 40 } },
+  point: { S: [110, 68, 0],  P: [110, 68, 52], lab: { S: [110, 86], P: [110, 30] }, fit: { S: 90, P: 80 } }
+};
+
+// A concept's name inside its circle where it fits, else its letter (the key
+// above the drawing gives the names in full).
+function fitLabel(name, letter, room) { return name.length * 6.1 <= room ? name : letter; }
+
+function drawCell(shape, r, terms, region, warn, universe) {
+  const id = 'dg' + (++svgSeq);
+  const g = GEO[shape];
+  const [sx, sy, sr] = g.S, [px, py, pr] = g.P;
+  const svg = svgEl('svg', { viewBox: '0 0 200 146', role: 'img', 'aria-label': describeReading(r, terms) });
+  const defs = svgEl('defs', {});
+  const hatch = (hid, color, bg) => {
+    const p = svgEl('pattern', { id: hid, width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' });
+    p.append(svgEl('rect', { width: 6, height: 6, fill: bg }), svgEl('line', { x1: 0, y1: 0, x2: 0, y2: 6, stroke: color, 'stroke-width': 1.7 }));
+    return p;
+  };
+  defs.append(hatch(id + 'h', ACCENT, '#f6ecd0'), hatch(id + 'w', WARN, '#f8e6de'));
+  const clip = (cid, c) => { const cp = svgEl('clipPath', { id: cid }); cp.append(svgEl('circle', { cx: c[0], cy: c[1], r: c[2] })); return cp; };
+  defs.append(clip(id + 'cs', g.S), clip(id + 'cp', g.P));
+  const mask = (mid, holes) => {
+    const m = svgEl('mask', { id: mid });
+    m.append(svgEl('rect', { x: 0, y: 0, width: 200, height: 146, fill: '#fff' }));
+    holes.forEach(c => m.append(svgEl('circle', { cx: c[0], cy: c[1], r: c[2], fill: '#000' })));
+    return m;
+  };
+  defs.append(mask(id + 'ms', [g.S]), mask(id + 'mp', [g.P]), mask(id + 'mn', [g.S, g.P]));
+  svg.append(defs);
+
+  if (universe) svg.append(svgEl('rect', { x: 3, y: 3, width: 194, height: 140, rx: 5, fill: 'none', stroke: SOFT, 'stroke-width': r.sp[0] === 'nonP' || r.sp[0] === 'nonS' ? 2.4 : 0.8 }));
+
+  // The part this judgement speaks of.
+  if (region.style !== 'point' && region.atoms.length) {
+    const fill = region.style === 'whole' ? (warn ? '#f8e6de' : TINT) : 'url(#' + id + (warn ? 'w' : 'h') + ')';
+    region.atoms.forEach(a => {
+      const full = { x: 0, y: 0, width: 200, height: 146, fill: fill };
+      if (a === 'a') { const gg = svgEl('g', { 'clip-path': 'url(#' + id + 'cp)' }); gg.append(svgEl('rect', Object.assign({ 'clip-path': 'url(#' + id + 'cs)' }, full))); svg.append(gg); }
+      if (a === 'b' && shape !== 'same' && shape !== 'SinP') { const gg = svgEl('g', { mask: 'url(#' + id + 'mp)' }); gg.append(svgEl('rect', Object.assign({ 'clip-path': 'url(#' + id + 'cs)' }, full))); svg.append(gg); }
+      if (a === 'c' && shape !== 'same' && shape !== 'PinS') { const gg = svgEl('g', { mask: 'url(#' + id + 'ms)' }); gg.append(svgEl('rect', Object.assign({ 'clip-path': 'url(#' + id + 'cp)' }, full))); svg.append(gg); }
+      if (a === 'd' && universe) svg.append(svgEl('rect', { x: 3, y: 3, width: 194, height: 140, rx: 5, fill: fill, mask: 'url(#' + id + 'mn)' }));
+    });
+  }
+
+  // The circles: the subject of this judgement drawn heavy.
+  const subj = r.sp[0];
+  const heavyS = subj === 'S' || subj === 'SP', heavyP = subj === 'P' || subj === 'SP';
+  if (shape === 'same') {
+    svg.append(svgEl('circle', { cx: px, cy: py, r: pr, fill: 'none', stroke: ACCENT, 'stroke-width': heavyS || heavyP ? 2.6 : 1.2 }));
+  } else if (shape === 'point') {
+    svg.append(svgEl('circle', { cx: px, cy: py, r: pr, fill: 'none', stroke: SOFT, 'stroke-width': 1.2 }));
+    const inside = r.form === 'S+';
+    const ptx = inside ? sx : 26;
+    svg.append(svgEl('circle', { cx: ptx, cy: sy, r: 4.5, fill: ACCENT }));
+  } else {
+    svg.append(svgEl('circle', { cx: px, cy: py, r: pr, fill: 'none', stroke: SOFT, 'stroke-width': heavyP ? 2.6 : 1.2 }));
+    svg.append(svgEl('circle', { cx: sx, cy: sy, r: sr, fill: 'none', stroke: ACCENT, 'stroke-width': heavyS ? 2.6 : 1.2 }));
+  }
+
+  // Names. Text stays off the hatching: a light halo keeps it legible.
+  const label = (x, y, text, italic) => svgEl('text', {
+    x: x, y: y, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 12.5,
+    'font-family': 'EB Garamond, Georgia, serif', 'font-style': italic ? 'italic' : 'normal', fill: INK,
+    stroke: '#fff', 'stroke-width': 3, 'paint-order': 'stroke', 'stroke-linejoin': 'round'
+  }, text);
+  const sName = termName(terms, 'S'), pName = termName(terms, 'P');
+  if (shape === 'point') {
+    const inside = r.form === 'S+';
+    svg.append(label(inside ? g.lab.S[0] : 34, inside ? g.lab.S[1] : 86, fitLabel(sName, 'S', 90)));
+    svg.append(label(g.lab.P[0], g.lab.P[1], fitLabel(pName, 'P', g.fit.P)));
+  } else {
+    svg.append(label(g.lab.S[0], g.lab.S[1], fitLabel(sName, 'S', g.fit.S)));
+    svg.append(label(g.lab.P[0], g.lab.P[1], fitLabel(pName, 'P', g.fit.P)));
+  }
+  if (universe) {
+    const t = label(9, 136, termName(terms, 'nonP'), true);
+    t.setAttribute('text-anchor', 'start');
+    svg.append(t);
+  }
+  if (region.atoms.length === 0 && region.style !== 'point') {
+    svg.append(svgEl('text', { x: 186, y: 22, 'text-anchor': 'end', 'font-size': 22, fill: WARN, 'font-family': 'Georgia, serif' }, '∅'));
+  }
+  return svg;
+}
+
+function formBadge(j, small) {
+  const f = el('div', 'form' + (small ? ' sm' : '') + (j.formStated ? '' : ' inferred'));
+  f.title = (FORMS.filter(x => x.key === formKey(j.form))[0] || { title: j.form }).title +
+    (j.formStated ? ' — named by the passage' : ' — read off the sentence here, not named by the passage');
+  f.append(formKey(j.form));
+  if (j.form.length > 1) f.append(el('sup', null, j.form.charAt(1) === '+' ? '+' : '−'));
+  return f;
+}
+
+const VIA = {
+  conversion: ['→', 'conversio'], contraposition: ['→', 'contrapositio'],
+  aequipollentia: ['=', 'aequipollens'], subalternation: ['→', 'subalternatio']
+};
+
+function connector(r, kindKey) {
+  const c = el('div', 'conn' + (r.role === 'rejected' ? ' no' : ''));
+  const v = r.role === 'rejected' ? ['↛', 'does not follow'] : (VIA[r.via || kindKey] || ['→', '']);
+  c.append(el('b', null, v[0]), el('small', null, v[1]));
+  return c;
+}
+
+function buildCell(r, ctx, isPremise) {
+  const fig = el('figure', 'cell' + (r.supplied ? ' supplied' : '') + (r.role === 'rejected' ? ' rejected' : ''));
+  if (r.n != null) fig.dataset.j = r.n;
+  const top = el('div', 'ctop');
+  top.append(formBadge(r, true), el('span', null, (ROLE_LABEL[r.role] || r.role) + (r.supplied ? ' · supplied, not in the passage' : '')));
+  fig.append(top);
+  // The drawing comes first, so that the drawings in a row line up for comparison.
+  const v = isPremise ? 'follows' : verdictOf(ctx.states, r);
+  const region = v === 'empty' ? { atoms: [], style: 'part' } : regionOf(r);
+  fig.append(drawCell(isSingular(r) ? 'point' : ctx.shape, r, ctx.terms, region, v === 'open', ctx.universe));
+  const jt = el('p', 'jt' + (r.schema ? ' schema' : ''), r.schema ? r.t : flat(r.t));
+  if (!r.schema) jt.lang = 'de';
+  fig.append(jt);
+  if (r.supply) { const s = el('p', 'supply', 'read as: ' + r.supply); s.lang = 'de'; fig.append(s); }
+  fig.append(el('figcaption', null, describeReading(r, ctx.terms)));
+  const vt = verdictText(v, r, ctx.terms);
+  if (vt) fig.append(el('p', 'verdict', vt));
+  // Hovering a judgement in the diagram picks it out in the example's text.
+  if (r.n != null) {
+    const mark = on => {
+      const m = document.querySelector('#ex-' + CSS.escape(ctx.id) + ' mark[data-n="' + r.n + '"]');
+      if (m) m.classList.toggle('hover', on);
+    };
+    fig.addEventListener('mouseenter', () => mark(true));
+    fig.addEventListener('mouseleave', () => mark(false));
+  }
+  return fig;
+}
+
+// One chain of judgements drawn on one set of spheres: each step a row,
+// the judgement it starts from on the left and the one it reaches on the right.
+function drawChain(chain, terms, config, kindKey, id) {
+  const states = { a: 'open', b: 'open', c: 'open', d: 'open' };
+  applyConfig(states, config);
+  const premise = chain.readings.filter(r => r.role === 'premise' || r.role === 'member')[0];
+  if (premise && !isSingular(premise)) assertReading(states, premise);
+  const ctx = {
+    states: states, shape: shapeOf(states), terms: terms, id: id,
+    universe: chain.readings.some(r => r.sp.indexOf('nonP') >= 0 || r.sp.indexOf('nonS') >= 0)
+  };
+  const box = el('div', 'steps');
+  if (chain.label) box.append(el('p', 'chain-label', chain.label));
+  const main = chain.readings.filter(r => r.role !== 'rejected');
+  const rejected = chain.readings.filter(r => r.role === 'rejected');
+  if (main.length === 1 && !rejected.length) {
+    const row = el('div', 'step single');
+    row.append(buildCell(main[0], ctx, true));
+    box.append(row);
+  }
+  for (let i = 1; i < main.length; i++) {
+    const row = el('div', 'step');
+    row.append(buildCell(main[i - 1], ctx, i === 1), connector(main[i], kindKey), buildCell(main[i], ctx, false));
+    box.append(row);
+  }
+  rejected.forEach(r => {
+    const row = el('div', 'step');
+    row.append(buildCell(main[0], ctx, true), connector(r, kindKey), buildCell(r, ctx, false));
+    box.append(row);
+  });
+  return box;
+}
+
+/* The square of opposition. */
+
+const SQ_EDGES = {
+  contrary: [['A', 'E']], subcontrary: [['I', 'O']],
+  contradictory: [['A', 'O'], ['E', 'I']], subalternation: [['A', 'I'], ['E', 'O']]
+};
+const SQ_NAME = { contrary: 'contraria', subcontrary: 'subcontraria', contradictory: 'contradictoria', subalternation: 'subalternata' };
+const SQ_RULE = {
+  contrary: 'not both true; both can be false', subcontrary: 'not both false; both can be true',
+  contradictory: 'exactly one is true', subalternation: 'if the universal is true, so is the particular'
+};
+const SQ_AT = { A: [20, 13], E: [80, 13], I: [20, 87], O: [80, 87] };
+const SQ_SCHEMA = { A: 'alle S sind P', E: 'kein S ist P', I: 'einige S sind P', O: 'einige S sind nicht P' };
+
+function relationOf(p, q) {
+  const k = [p, q].sort().join('');
+  return { AE: 'contrary', IO: 'subcontrary', AO: 'contradictory', EI: 'contradictory', AI: 'subalternation', EO: 'subalternation' }[k];
+}
+
+function drawSquare(ex, kindKey, readings) {
+  const corners = { A: [], E: [], I: [], O: [] };
+  readings.forEach(r => { if (corners[r.form]) corners[r.form].push(r); });
+  const rels = (kindKey === 'general' ? [] : [kindKey]).concat(ex.kinds.filter(k => k !== kindKey && SQUARE_KINDS.indexOf(k) >= 0))
+    .filter(k => SQUARE_KINDS.indexOf(k) >= 0);
+  const lit = {};
+  rels.forEach(rel => {
+    const edges = SQ_EDGES[rel];
+    const full = edges.filter(([p, q]) => corners[p].length && corners[q].length);
+    const half = edges.filter(([p, q]) => corners[p].length || corners[q].length);
+    (full.length ? full : half.length ? half : edges).forEach(([p, q]) => { lit[p + q] = rel; });
+  });
+
+  const box = el('div', 'sq');
+  box.setAttribute('role', 'img');
+  const lines = svgEl('svg', { class: 'lines', viewBox: '0 0 100 100', preserveAspectRatio: 'none', 'aria-hidden': 'true' });
+  Object.keys(SQ_EDGES).forEach(rel => SQ_EDGES[rel].forEach(([p, q]) => {
+    const on = !!lit[p + q];
+    lines.append(svgEl('line', {
+      x1: SQ_AT[p][0], y1: SQ_AT[p][1], x2: SQ_AT[q][0], y2: SQ_AT[q][1],
+      stroke: on ? ACCENT : '#c9bb98', 'stroke-width': on ? 3 : 1, 'vector-effect': 'non-scaling-stroke'
+    }));
+  }));
+  box.append(lines);
+
+  ['A', 'E', 'I', 'O'].forEach(c => {
+    const rs = corners[c];
+    const d = el('div', 'corner c-' + c + (rs.length ? ' filled' : ' empty'));
+    const head = el('div', 'ctop');
+    head.append(rs.length ? formBadge({ form: c, formStated: rs.some(r => r.formStated) }, true) : formBadge({ form: c, formStated: false }, true));
+    head.append(el('span', 'schema', SQ_SCHEMA[c]));
+    d.append(head);
+    if (!rs.length) d.append(el('p', 'supply', 'not written out in the passage'));
+    rs.forEach(r => {
+      const jt = el('p', 'jt' + (r.schema ? ' schema' : ''), r.schema ? r.t : flat(r.t));
+      if (!r.schema) jt.lang = 'de';
+      d.append(jt);
+      if (r.supply) { const s = el('p', 'supply', 'read as: ' + r.supply); s.lang = 'de'; d.append(s); }
+      if (r.tv) d.append(el('span', 'tv', 'the passage says: ' + r.tv));
+    });
+    box.append(d);
+  });
+
+  // Names sit beside their edges, never on them, so a highlighted edge stays visible.
+  const at = { contrary: [[50, 24]], subcontrary: [[50, 76]], subalternation: [[20, 50], [80, 50]], contradictory: [[50, 50]] };
+  Object.keys(at).forEach(rel => at[rel].forEach((pos, i) => {
+    const edge = rel === 'subalternation' ? (i === 0 ? 'AI' : 'EO') : null;
+    const on = edge ? !!lit[edge] : SQ_EDGES[rel].some(([p, q]) => lit[p + q]);
+    const lab = el('div', 'elab' + (rel === 'subalternation' ? ' side' : '') + (on ? ' on' : ''));
+    lab.style.left = pos[0] + '%';
+    lab.style.top = pos[1] + '%';
+    lab.append(SQ_NAME[rel] + (rel === 'subalternation' ? ' ↓' : ''));
+    if (on) lab.append(el('small', null, SQ_RULE[rel]));
+    box.append(lab);
+  }));
+
+  const filled = ['A', 'E', 'I', 'O'].filter(c => corners[c].length);
+  const desc = filled.length
+    ? 'Square of opposition. The passage’s judgements stand at ' + filled.join(', ') + '. Highlighted: ' +
+      (Object.keys(lit).map(k => SQ_NAME[lit[k]] + ' (' + k.split('').join('–') + ')').join(', ') || 'nothing') + '.'
+    : 'Square of opposition, schematic. Highlighted: ' + Object.keys(lit).map(k => SQ_NAME[lit[k]] + ' (' + k.split('').join('–') + ')').join(', ') + '.';
+  box.setAttribute('aria-label', desc);
+
+  const wrap = el('div');
+  wrap.append(box);
+  if (filled.length > 1) {
+    const pairs = [];
+    for (let i = 0; i < filled.length; i++) for (let j = i + 1; j < filled.length; j++) {
+      pairs.push(filled[i] + ' and ' + filled[j] + ' are ' + SQ_NAME[relationOf(filled[i], filled[j])]);
+    }
+    wrap.append(el('p', 'dp-note', 'Of the judgements written out: ' + pairs.join('; ') + '.'));
+  }
+  return wrap;
+}
+
+/* The middle term: what an immediate inference does without. */
+
+function drawMediate(ex, terms, readings) {
+  const singular = readings.some(r => r.sp[0] === 'S' && isSingular(r));
+  const svg = svgEl('svg', { viewBox: '0 0 460 230', role: 'img',
+    'aria-label': 'Three spheres: ' + terms.S + ' inside ' + terms.M + ', the middle term, inside ' + terms.P + '.' });
+  svg.append(svgEl('circle', { cx: 240, cy: 118, r: 102, fill: 'none', stroke: SOFT, 'stroke-width': 1.4 }));
+  svg.append(svgEl('circle', { cx: 220, cy: 130, r: 64, fill: TINT, stroke: ACCENT, 'stroke-width': 2.2, 'stroke-dasharray': '7 4' }));
+  if (singular) svg.append(svgEl('circle', { cx: 204, cy: 150, r: 5, fill: ACCENT }));
+  else svg.append(svgEl('circle', { cx: 204, cy: 150, r: 28, fill: '#fff', stroke: ACCENT, 'stroke-width': 2.6 }));
+  const t = (x, y, s, opt) => svgEl('text', Object.assign({ x: x, y: y, 'text-anchor': 'middle', 'dominant-baseline': 'central',
+    'font-size': 14, 'font-family': 'EB Garamond, Georgia, serif', fill: INK }, opt || {}), s);
+  svg.append(t(240, 32, terms.P));
+  svg.append(t(220, 86, terms.M + ' — the middle term', { 'font-style': 'italic', fill: ACCENT }));
+  svg.append(t(204, singular ? 166 : 150, terms.S, { 'font-weight': 600 }));
+  const box = el('div');
+  box.append(svg);
+  const ol = el('ol', 'med-rows');
+  readings.forEach(r => {
+    const li = el('li', r.supplied ? 'supplied' : '');
+    li.append(el('span', 'rl', (ROLE_LABEL[r.role] || r.role) + ' · '));
+    const jt = el('span', 'jt', flat(r.t));
+    jt.lang = 'de';
+    li.append(jt);
+    if (r.supplied) li.append(el('span', 'sup', 'supplied, not in the passage'));
+    li.append(el('div', 'rl', describeReading(r, terms)));
+    ol.append(li);
+  });
+  box.append(ol);
+  box.append(el('p', 'dp-note', 'To reach the conclusion, ' + terms.S + ' has to be placed under ' + terms.M +
+    ', a concept the premise does not contain. An inference that needs this middle term is mediate, a Vernunftschluß. ' +
+    'Kant, Refl. 3166 (AA 16:691): »In den consequentiis immediatis ist kein Mittelbegrif.«'));
+  return box;
+}
+
+/* The map of the kinds, after Kant’s own sorting in Refl. 3170. */
+
+function drawMap() {
+  const count = k => examples.filter(ex => ex.kinds.indexOf(k) >= 0 && hasSource(ex)).length;
+  const kb = k => {
+    const b = el('button', 'kbtn' + (kind === k ? ' cur' : ''), KIND_BY_KEY[k].label);
+    b.type = 'button';
+    b.append(el('span', 'n', String(count(k))));
+    b.addEventListener('click', () => setKind(k));
+    return b;
+  };
+  const box = el('div', 'map');
+  const root = el('div', 'root');
+  root.append(el('b', null, 'Verstandesschluß · consequentia immediata'));
+  root.append(el('small', null, 'one judgement from another, with no middle term'));
+  box.append(root);
+  const ul = el('ul');
+  [['Quantität', ['subalternation']], ['Qualität', ['contradictory', 'contrary', 'subcontrary']],
+   ['Relation', ['conversion']], ['Modalität', ['contraposition']]].forEach(([head, ks]) => {
+    const li = el('li');
+    li.append(el('div', 'head', head));
+    ks.forEach(k => li.append(kb(k)));
+    ul.append(li);
+  });
+  box.append(ul);
+  const apart = el('div', 'apart');
+  apart.append(kb('aequipollentia'));
+  apart.append(el('p', null, 'Set apart: the transcripts and Kant deny it is an inference at all (Refl. 3167: »sind nicht conseqventzen«).'));
+  box.append(apart);
+  return box;
+}
+
+/* Schematic diagrams, for a passage that states a rule and gives no instance. */
+
+const SCHEMA_TERMS = { S: 'S', P: 'P', nonP: 'nicht-P' };
+const sr = (t, form, sp, role) => ({ t: t, form: form, sp: sp, role: role, formStated: false, schema: true });
+const SCHEMA_CHAINS = {
+  aequipollentia: [{ readings: [sr('alle S sind P', 'A', ['S', 'P'], 'member'), sr('kein S ist nicht-P', 'E', ['S', 'nonP'], 'member')] }],
+  conversion: [
+    { label: 'per accidens', readings: [sr('alle S sind P', 'A', ['S', 'P'], 'premise'), sr('einige P sind S', 'I', ['P', 'S'], 'conclusion')] },
+    { label: 'simpliciter', readings: [sr('kein S ist P', 'E', ['S', 'P'], 'premise'), sr('kein P ist S', 'E', ['P', 'S'], 'conclusion')] },
+    { label: 'simpliciter', readings: [sr('einige S sind P', 'I', ['S', 'P'], 'premise'), sr('einige P sind S', 'I', ['P', 'S'], 'conclusion')] }
+  ],
+  contraposition: [{ readings: [sr('alle S sind P', 'A', ['S', 'P'], 'premise'), sr('kein nicht-P ist S', 'E', ['nonP', 'S'], 'conclusion')] }]
+};
+
+/* Choosing and drawing the diagram for an example. */
+
+function readingsOf(ex) {
+  return ex.judgements.map((j, n) => Object.assign({}, j, { n: n, sp: j.sp || ['S', 'P'] }));
+}
+
+function diagramSpec(ex) {
+  const k = primaryKind(ex);
+  const d = ex.diagram || {};
+  const singularOnly = ex.judgements.length && ex.judgements.every(j => isSingular(j));
+  let type;
+  if (d.config === 'mediate') type = 'mediate';
+  else if ((d.type === 'square' || SQUARE_KINDS.indexOf(k) >= 0) && !singularOnly) type = 'square';
+  else if (!ex.judgements.length) type = k === 'general' ? 'map' : 'schema';
+  else type = 'spheres';
+  return { kind: k, type: type };
+}
+
+const DP_TITLE = { spheres: 'Spheres', square: 'Square of opposition', mediate: 'The middle term', map: 'The kinds of immediate inference', schema: 'Schematic spheres' };
+
+function drawDiagram(ex, spec) {
+  const terms = (ex.diagram && ex.diagram.terms) || SCHEMA_TERMS;
+  if (spec.type === 'map') return drawMap();
+  if (spec.type === 'mediate') {
+    const rs = readingsOf(ex).concat(((ex.diagram && ex.diagram.supplied) || []).map(s =>
+      ({ t: s.t, role: s.role, sp: s.sp, form: s.sp[0] === 'S' && ex.judgements.some(j => isSingular(j)) ? 'S+' : 'A', supplied: true })));
+    const order = { premise: 0, major: 0, minor: 1, conclusion: 2 };
+    rs.sort((a, b) => (order[a.role] != null ? order[a.role] : 3) - (order[b.role] != null ? order[b.role] : 3));
+    return drawMediate(ex, terms, rs);
+  }
+  if (spec.type === 'square') {
+    const rs = ex.judgements.length ? readingsOf(ex) : [];
+    return drawSquare(ex, spec.kind, rs);
+  }
+  if (spec.type === 'schema') {
+    const box = el('div', 'steps');
+    (SCHEMA_CHAINS[spec.kind] || []).forEach(ch => box.append(drawChain(ch, SCHEMA_TERMS, null, spec.kind, ex.id)));
+    if (spec.kind === 'conversion') {
+      box.append(el('p', 'dp-note', 'The transcripts’ rule also lets a particular negative convert simply (Blomberg AA 24:282, Busolt AA 24:671). Kant’s own note converts it only by way of an infinite judgement (Refl. 3187).'));
+    }
+    return box;
+  }
+  return drawChain({ readings: readingsOf(ex) }, terms, ex.diagram && ex.diagram.config, spec.kind, ex.id);
+}
+
+function provenance(ex, spec) {
+  if (spec.type === 'map') return 'Kant’s own sorting of the immediate inferences under the heads of the categories, Refl. 3170 (AA 16:692–693). Choose a kind to see its passages.';
+  if (spec.type === 'square') {
+    const kant = ex.src === 'refl16' && ex.r === 3177;
+    return 'The traditional square of opposition. The transcripts describe these relations without drawing them.' +
+      (kant ? ' Kant’s own note here sets its judgements out in this arrangement: the universals above, the particulars below.' : '') +
+      ' Judgements from the passage are drawn in solid boxes; a dashed corner is the form only.';
+  }
+  const base = 'The lectures explain these inferences by the spheres of the concepts (Blomberg AA 24:275, Busolt AA 24:671, Refl. 3189). The spheres are drawn here as circles, after Euler (1768); the Academy Edition prints no figure.';
+  if (spec.type === 'schema') return base + ' The passage gives the rule without an instance, so the drawing uses S and P.';
+  return base + ' The concept names, and how each judgement is read as subject and predicate, are the annotator’s reading.';
+}
+
+function legend(spec) {
+  const d = el('details', 'dp-legend');
+  d.append(el('summary', null, 'How to read this diagram'));
+  const p = html => { const x = el('p'); x.append(...html); return x; };
+  if (spec.type === 'spheres' || spec.type === 'schema' || spec.type === 'mediate') {
+    d.append(
+      p([el('span', 'sw whole'), 'Filled: the whole of the subject, for alle and kein.']),
+      p([el('span', 'sw part'), 'Hatched: einige, the part said to have something in it.']),
+      p([el('span', 'sw open'), 'Red hatching: drawn, but the premise does not say it.']),
+      p(['A heavy outline marks the subject of that judgement. A premise and its conclusion share one drawing, since, as the Wiener Logik puts it, they differ only in form.']),
+      p([el('span', 'sw dash'), 'A dashed box: supplied here, not in the passage. A circle’s size means nothing.'])
+    );
+  } else if (spec.type === 'square') {
+    d.append(
+      p(['The judgements at the four corners share one subject and predicate. The relation this passage is about is drawn heavy, with its rule beneath its name.']),
+      p(['A E I O: universal affirmative, universal negative, particular affirmative, particular negative.'])
+    );
+  } else {
+    d.append(p(['Each button shows the passages filed under that kind.']));
+  }
+  return d;
+}
+
+/* ── The panel ────────────────────────────────────────────────────────────── */
+
+let panelId = null;            // the example whose diagram is open
+let panelOpener = null;        // the element to return focus to on close
+
+// The card whose diagram is open is outlined, and its button shows as pressed.
+function markSelected() {
+  document.querySelectorAll('.card').forEach(c => {
+    const on = c.id === 'ex-' + panelId;
+    c.classList.toggle('selected', on);
+    const b = c.querySelector('.show-diagram');
+    if (b) b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+
+function openPanel(id, opener) {
+  panelId = id;
+  panelOpener = opener || null;
+  markSelected();
+  renderPanel();
+  const h = document.getElementById('dp-title');
+  if (h) h.focus({ preventScroll: true });
+}
+
+function closePanel() {
+  panelId = null;
+  markSelected();
+  renderPanel();
+  if (panelOpener && document.body.contains(panelOpener)) panelOpener.focus({ preventScroll: true });
+  panelOpener = null;
+}
+
+function renderPanel() {
+  const panel = document.getElementById('dpanel');
+  const layout = document.querySelector('.layout');
+  const ex = panelId && examples.filter(e => e.id === panelId)[0];
+  if (!ex || !ex.ok) {
+    panel.hidden = true;
+    layout.classList.remove('with-panel');
+    return;
+  }
+  const raw = rawExample(ex.id);
+  const spec = diagramSpec(ex);
+  const nodes = [];
+
+  const head = el('div', 'dp-head');
+  const h = el('h2', null, KIND_BY_KEY[spec.kind].title + (ex.sub && ex.kinds.length === 1 ? ' · ' + ex.sub : ''));
+  h.id = 'dp-title';
+  h.tabIndex = -1;
+  const find = el('button', null, 'Show in list');
+  find.type = 'button';
+  find.addEventListener('click', () => goTo('ex-' + ex.id));
+  const x = el('button', 'x', '×');
+  x.type = 'button';
+  x.setAttribute('aria-label', 'Close the diagram');
+  x.addEventListener('click', closePanel);
+  head.append(h, find, x);
+  nodes.push(head);
+  const src = SOURCES[ex.src];
+  nodes.push(el('p', 'dp-sub', (ex.src === 'refl16' ? 'Refl. ' + ex.r : src.label) + ' · AA ' + src.vol + ':' + pageRange(ex.pageFrom, ex.pageTo)));
+
+  const terms = ex.diagram && ex.diagram.terms;
+  if (terms && spec.type !== 'map' && spec.type !== 'schema') {
+    const key = el('p', 'dp-key');
+    ['S', 'M', 'P'].filter(k => terms[k]).forEach((k, i) => {
+      if (i) key.append(' · ');
+      key.append(el('b', null, k), ' = ' + terms[k]);
+    });
+    key.append(' — concept names supplied here');
+    nodes.push(key);
+  }
+
+  nodes.push(el('div', 'dp-type', DP_TITLE[spec.type]));
+  nodes.push(drawDiagram(ex, spec));
+  nodes.push(el('p', 'dp-prov', provenance(ex, spec)));
+  nodes.push(legend(spec));
+
+  // Flagging this diagram.
+  const fk = flagKey('diagram', ex.id, spec.kind);
+  const formId = 'diagram|' + fk;
+  const sec = el('div', 'dp-flag');
+  const tools = el('div', 'tools');
+  const fb = el('button', 'tbtn warnish', flagSets.diagram.has(fk) ? 'Add a report on this diagram' : 'Flag this diagram as inaccurate');
+  fb.type = 'button';
+  fb.setAttribute('aria-expanded', openForm === formId ? 'true' : 'false');
+  fb.addEventListener('click', () => { openForm = openForm === formId ? null : formId; renderPanel(); });
+  tools.append(fb);
+  sec.append(tools);
+  if (openForm === formId) {
+    sec.append(buildFlagForm('diagram', formId,
+      (problem, details) => { addReport('diagram', raw, spec, problem, details); openForm = null; refreshFlagViews(); },
+      () => { openForm = null; renderPanel(); }));
+  }
+  const reps = buildReports('diagram', fk, 'This diagram is flagged as inaccurate', () => refreshFlagViews());
+  if (reps) { reps.open = true; sec.append(reps); }
+  nodes.push(sec);
+
+  panel.replaceChildren(...nodes);
+  panel.hidden = false;
+  layout.classList.add('with-panel');
+  const f = panel.querySelector('.flagform textarea');
+  if (f && openForm === formId) f.focus({ preventScroll: true });
 }
 
 /* ── Jumping between the two lists ────────────────────────────────────────── */
@@ -1016,9 +2045,18 @@ window.addEventListener('hashchange', () => {
   if (KIND_BY_KEY[k] && k !== kind) setKind(k);
 });
 
-window.addEventListener('beforeunload', e => { if (unsaved) { e.preventDefault(); e.returnValue = ''; } });
+// Leaving with flags not yet sent (on the live site) or not yet written (from disk).
+window.addEventListener('beforeunload', e => {
+  if (ON_GITHUB ? newReports().length : unsaved) { e.preventDefault(); e.returnValue = ''; }
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !panelId) return;
+  if (e.target.closest && e.target.closest('textarea, input, select')) return;
+  closePanel();
+});
 
 loadExamples();
+loadFlags();
 buildButtons();
 buildBar();
 buildFilters();

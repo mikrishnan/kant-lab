@@ -1,0 +1,28 @@
+<!DOCTYPE html><html><body style="margin:0"><pre id="out" style="display:none">running</pre>
+<iframe id="f" style="width:1500px;height:1100px;border:0"></iframe>
+<script>
+const q=new URLSearchParams(location.search);
+const out=[];const f=document.getElementById('f');
+f.src='immediate-inferences.html'+(q.get('kind')?'#'+q.get('kind'):'');
+const show=()=>{const o=document.getElementById('out');o.textContent=out.join('\n');};
+f.addEventListener('load',()=>{
+  const w=f.contentWindow;
+  w.addEventListener('error',e=>out.push('PAGE ERROR '+e.message));
+  setTimeout(()=>{try{
+   const d=f.contentDocument;
+   if(q.get('ex')){ const c=d.getElementById('ex-'+q.get('ex')); c.scrollIntoView(); c.querySelector('blockquote').dispatchEvent(new MouseEvent('click',{bubbles:true})); }
+   if(q.get('mode')==='check'){
+     // open every example's diagram under each of its kinds; record errors and types
+     const types={}; let errs=0;
+     w.eval("examples").forEach(ex=>{ ex.kinds.forEach(k=>{ try{ w.eval('kind='+JSON.stringify(k)); w.openPanel(ex.id); const t=d.querySelector('.dp-type').textContent; types[t]=(types[t]||0)+1; if(d.querySelector('#dpanel').hidden) out.push('hidden '+ex.id); }catch(e){errs++; out.push('ERR '+ex.id+' '+k+' '+e.message);} }); });
+     w.eval("kind='all'"); w.closePanel();
+     out.push('types '+JSON.stringify(types)+' errors '+errs);
+     out.push('verdict warnings: '+[...d.querySelectorAll('.verdict')].length);
+     // count warnings across all
+     let warn=[]; w.eval("examples").forEach(ex=>{ w.openPanel(ex.id); d.querySelectorAll('#dpanel .verdict').forEach(v=>warn.push(ex.id+': '+v.textContent)); });
+     out.push(warn.join('\n'));
+     w.closePanel();
+   }
+  }catch(e){out.push('EXC '+e.message+' '+e.stack)} show();},1500);
+});
+</script></body></html>

@@ -1,0 +1,1903 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logic Concordance — Jäsche, Meier, Kant’s lectures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5efe0;
+    --parchment-deep: #ece3cc;
+    --card: #fbf8ef;
+    --ink: #2b2118;
+    --ink-soft: #5a4a3a;
+    --ink-faint: #8b7b66;
+    --rule: #d6c9a8;
+    --accent: #5c3d1e;
+    --accent-soft: #e9dcc0;
+    --warn: #8a2b1c;
+    /* one hue per text, drawn from the era / strata hues the readers already use */
+    --c-ja: #5c3d1e;
+    --c-me: #7a6a4a;
+    --c-bl: #3b5068;
+    --c-wi: #5c6e3a;
+    --c-bu: #6b4f7a;
+    --c-re: #8b5e3c;
+    --c-tr: #4a7a76;
+    --era-1750: #7a6a4a;
+    --era-1760: #5c6e3a;
+    --era-1770: #8b5e3c;
+    --era-1780: #3b5068;
+    --era-1790: #6b4f7a;
+    --era-none: #9a9a9a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex; flex-direction: column;
+    background: var(--parchment); color: var(--ink);
+    font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    font-size: 17px; line-height: 1.45;
+  }
+  button, select, input { font: inherit; color: inherit; }
+
+  /* ── header ───────────────────────────────────────────────────────────── */
+  header { padding: 10px 22px 8px; border-bottom: 1px solid var(--rule); background: var(--parchment-deep); }
+  .hrow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; }
+  header h1 { margin: 0; font-family: 'Cinzel', Georgia, serif; font-weight: 600; font-size: 19px; letter-spacing: .06em; color: var(--accent); }
+  header .sub { color: var(--ink-soft); font-size: 15px; }
+  #texts { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-top: 8px; align-items: center; }
+  #texts .lbl, #reading .lbl { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: .08em; color: var(--ink-faint); margin-right: 2px; min-width: 5.2em; }
+  #textsToggle { background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 0 9px; cursor: pointer; color: var(--ink-soft); font-size: 14px; }
+  #textsToggle:hover { background: var(--accent-soft); }
+  #nav #suggestBtn { background: var(--accent-soft); color: var(--ink); border: 1.5px solid var(--accent); border-radius: 4px; padding: 0 10px; cursor: pointer; font-size: 14px; font-weight: 600; }
+  #nav #suggestBtn:hover { background: var(--rule); }
+  #suggestCount { font-size: 12px; margin-left: 6px; background: var(--accent); color: #fffdf6; border-radius: 999px; padding: 0 6px; }
+  #suggestCount:empty { display: none; }
+  #textsum { display: none; margin-right: auto; color: var(--ink-soft); font-size: 14.5px; }
+  header.compact #textsum { display: inline; }
+  header.compact .hrow, header.compact #reading, header.compact #texts { display: none; }
+  header.compact { padding-top: 5px; padding-bottom: 5px; }
+  header.compact #nav { margin-top: 0; }
+  #reading { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-top: 8px; align-items: center; }
+  .rd { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; user-select: none;
+    padding: 2px 11px 2px 8px; border: 1.5px solid var(--cc); border-radius: 4px; color: var(--cc); font-size: 15.5px; line-height: 1.3; }
+  .rd input { accent-color: var(--cc); margin: 0; width: 14px; height: 14px; cursor: pointer; }
+  .rd.on { background: var(--cc); color: #fffdf6; font-weight: 600; }
+  .chip.primary { opacity: .5; cursor: default; }
+  .chip.primary input { cursor: default; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;
+    padding: 3px 10px 3px 8px; border: 1.5px solid var(--cc); border-radius: 999px;
+    background: transparent; color: var(--cc); font-size: 15.5px; line-height: 1.3;
+  }
+  .chip input { accent-color: var(--cc); margin: 0; width: 15px; height: 15px; cursor: pointer; }
+  .chip.on { background: var(--cc); color: #fffdf6; }
+  .chip .date { font-size: 12.5px; opacity: .8; }
+  .chip .cnt { font-size: 12px; font-weight: 600; min-width: 1.4em; text-align: center;
+    padding: 0 5px; border-radius: 999px; background: rgba(0,0,0,.12); }
+  .chip.on .cnt { background: rgba(255,255,255,.25); }
+  .chip.zero .cnt { opacity: .55; }
+  #nav { margin: 6px 0 0; width: 100%; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 14.5px; }
+  #nav select, #nav input {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 2px 6px; max-width: 24ch;
+  }
+  #nav input { width: 5.5em; }
+  #nav button { background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 9px; cursor: pointer; }
+  #nav button:hover { background: var(--accent-soft); }
+
+  /* ── the selected stretch ─────────────────────────────────────────────── */
+  #sel { padding: 7px 22px; border-bottom: 1px solid var(--rule); background: var(--card); font-size: 15.5px; }
+  #sel .what { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; letter-spacing: .04em; }
+  #sel .ttl { margin-left: 8px; }
+  #sel .aa { color: var(--ink-faint); margin-left: 8px; font-size: 14px; }
+  #sel .m { display: block; color: var(--ink-soft); font-size: 14.5px; margin-top: 1px; }
+  #sel .m b { color: var(--c-me); font-weight: 600; }
+  .legend { float: right; font-size: 13px; color: var(--ink-faint); margin-left: 16px; }
+  .legend i { display: inline-block; width: 22px; height: 0; vertical-align: middle; margin: 0 4px 0 8px; }
+  .legend i.att { border-top: 2px solid var(--ink-soft); }
+  .legend i.inf { border-top: 2px dashed var(--ink-soft); }
+
+  /* ── body ─────────────────────────────────────────────────────────────── */
+  main { flex: 1; display: flex; min-height: 0; }
+  #leftcol { flex: 0 0 min(36vw, 560px); min-width: 300px; display: flex; flex-direction: column; min-height: 0;
+    border-right: 1px solid var(--rule); background: var(--parchment); }
+  #jaesche { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 0 80px; }
+  body.no-ja #leftcol { flex-basis: 230px; min-width: 230px; }
+  body.no-ja #psearch, body.no-ja #qresults { display: none; }
+  body.no-ja #jaesche .ubody, body.no-ja #jaesche .uh .utitle { display: none; }
+  #panels { flex: 1; display: flex; overflow-x: auto; min-width: 0; }
+  .panel { flex: 1 0 330px; min-width: 300px; max-width: 640px; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--rule);
+    border-top: 3px solid var(--cc); }
+  .ph { position: relative; padding: 7px 14px 6px; background: var(--parchment-deep); border-bottom: 1px solid var(--rule); }
+  .ph h2 { margin: 0; font-family: 'Cinzel', serif; font-weight: 600; font-size: 14.5px; letter-spacing: .05em; color: var(--cc); }
+  .ph .meta { font-size: 13.5px; color: var(--ink-soft); line-height: 1.3; }
+  .ph .note { font-size: 13.5px; color: var(--ink-faint); font-style: italic; line-height: 1.3; margin-top: 2px; }
+  .pbody { flex: 1; overflow-y: auto; padding: 10px 14px 60px; }
+  .empty { color: var(--ink-faint); font-style: italic; padding: 14px 4px; font-size: 15.5px; }
+  .welcome { color: var(--ink-soft); padding: 24px 18px; max-width: 520px; font-size: 17px; }
+
+  /* resizing the readers */
+  .panel { position: relative; }
+  .ph h2 { padding-right: 80px; }
+  .rsz, #split { cursor: col-resize; z-index: 6; touch-action: none; }
+  .rsz { position: absolute; top: 0; right: -4px; bottom: 0; width: 8px; }
+  #split { flex: 0 0 8px; margin: 0 -4px; position: relative; }
+  .rsz:hover, .rsz.on, #split:hover, #split.on { background: rgba(92,61,30,.28); }
+  body.dragging { user-select: none; cursor: col-resize; }
+  .zoomctl { display: inline-flex; gap: 2px; }
+  .zoomctl button { background: var(--card); border: 1px solid var(--rule); border-radius: 3px; cursor: pointer; padding: 0 6px; line-height: 1.3; color: var(--ink-soft); font-family: 'EB Garamond', serif; }
+  .zoomctl button:hover { background: var(--accent-soft); }
+  .ph .zoomctl { position: absolute; top: 6px; right: 12px; }
+  .zoomctl .sm { font-size: 12px; } .zoomctl .lg { font-size: 16px; }
+  #psearch .zoomctl { margin-left: auto; }
+
+  /* the lecture transcripts, as running text */
+  .flowtext { padding: 2px 18px 10px; font-size: 17px; line-height: 1.55; }
+  #jaesche.flow .unit.flow { display: inline; padding: 0; border: 0; margin: 0; cursor: text; }
+  #jaesche.flow .unit.flow:hover { background: rgba(92,61,30,.06); }
+  #jaesche.flow .fl-blk { display: inline; }
+  #jaesche.flow .fl-blk::after { content: ' ¶'; color: var(--ink-faint); font-size: .72em; opacity: .7; }
+  #jaesche.flow .para-tag { margin: 0 4px 0 2px; }
+  #jaesche:not(.flow) .unit.flow { display: block; padding: 2px 6px 2px 12px; border-left: 3px solid transparent; margin: 1px 0; cursor: pointer; }
+  #jaesche:not(.flow) .unit.flow:hover { background: rgba(92,61,30,.05); }
+  #jaesche:not(.flow) .unit.flow .fl-blk { display: block; margin: 3px 0; }
+  #jaesche:not(.flow) .unit.flow .para-tag { display: table; margin: 5px 0 2px; }
+  #jaesche:not(.flow) .unit.flow .fl-rule { display: block; text-align: center; line-height: 1; }
+  .unit.flow.sel { background: var(--accent-soft); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  #jaesche:not(.flow) .unit.flow.sel { border-left-color: var(--accent); }
+  .fl-blk.note { font-style: italic; color: var(--ink-soft); }
+  .fl-rule { color: var(--ink-faint); margin: 0 3px; }
+
+  /* search in the text read */
+  #psearch { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; padding: 6px 12px; background: var(--parchment-deep); border-bottom: 1px solid var(--rule); font-size: 14px; }
+  #psearch input[type=search] { flex: 1 1 160px; min-width: 120px; background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 2px 8px; font-size: 15.5px; }
+  #psearch button { background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 0 8px; cursor: pointer; }
+  #psearch button:hover { background: var(--accent-soft); }
+  #psearch label { display: inline-flex; gap: 4px; align-items: center; color: var(--ink-soft); cursor: pointer; font-size: 13.5px; }
+  #qcount { color: var(--ink-faint); font-size: 13.5px; min-width: 6em; }
+  #psearch label[hidden] { display: none; }
+  #qresults { max-height: 38%; overflow-y: auto; background: var(--card); border-bottom: 1px solid var(--rule); }
+  #qresults[hidden] { display: none; }
+  .qr { padding: 3px 12px; cursor: pointer; font-size: 14px; border-bottom: 1px solid rgba(214,201,168,.5); }
+  .qr:hover { background: var(--accent-soft); }
+  .qr b { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: .04em; color: var(--accent); margin-right: 6px; }
+  .qr .n { color: var(--ink-faint); font-size: 12px; margin-left: 6px; }
+  .qr mark, #jaesche mark.hit, .panel mark.hit { background: #f4d97a; color: inherit; border-radius: 2px; padding: 0 1px; }
+  .qmore { padding: 4px 12px; color: var(--ink-faint); font-size: 13px; font-style: italic; }
+
+  /* Jäsche pane */
+  .sechead { padding: 14px 18px 4px; }
+  .sechead .part { font-family: 'Cinzel', serif; font-size: 12.5px; letter-spacing: .1em; color: var(--ink-faint); text-transform: uppercase; }
+  .sechead .st { font-family: 'Cinzel', serif; font-size: 15.5px; font-weight: 600; color: var(--accent); letter-spacing: .03em; line-height: 1.3; }
+  .unit { margin: 0; padding: 6px 18px 8px 15px; border-left: 3px solid transparent; cursor: pointer; }
+  .unit:hover { background: rgba(92,61,30,.05); }
+  .unit.sel { background: var(--accent-soft); border-left-color: var(--accent); }
+  .unit.cut { border-left-style: dotted; border-left-color: var(--rule); }
+  .unit.cut.sel { border-left-style: solid; border-left-color: var(--accent); }
+  .uh { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .ulabel { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 14px; letter-spacing: .05em; white-space: nowrap; }
+  .utitle { font-weight: 600; font-size: 16px; }
+  .uaa { margin-left: auto; font-size: 12.5px; color: var(--ink-faint); white-space: nowrap; }
+  .ubody { font-size: 17px; }
+  .jb { margin: 3px 0; text-align: left; }
+  .jb.fn { font-size: 15px; color: var(--ink-soft); border-left: 2px solid var(--rule); padding-left: 8px; }
+  .ubody hr { border: 0; border-top: 1px solid var(--rule); margin: 6px 40% 6px 0; }
+  .fig { border: 1px dashed var(--rule); color: var(--ink-faint); font-size: 14px; padding: 4px 8px; margin: 4px 0; font-style: italic; }
+  sup.pg, .pg { font-family: 'EB Garamond', serif; font-size: 11.5px; color: var(--ink-faint); background: rgba(139,123,102,.14);
+    padding: 0 4px; border-radius: 3px; margin: 0 2px; vertical-align: baseline; font-style: normal; white-space: nowrap; }
+  .pg.ms { background: rgba(58,80,104,.14); color: var(--c-bl); }
+
+  /* lecture runs */
+  .run { margin: 0 0 14px; background: var(--card); border: 1.5px solid var(--rule); border-left: 4px solid var(--cc); border-radius: 4px; padding: 6px 10px 8px; }
+  .run.inferred { border-style: dashed; border-left-style: dashed; }
+  .run.mixed { border-style: dashed solid solid dashed; }
+  .rh { display: flex; flex-wrap: wrap; gap: 3px 8px; align-items: baseline; font-size: 13.5px; color: var(--ink-soft); margin-bottom: 4px; }
+  .rh .sec { font-weight: 600; color: var(--ink); }
+  .rh .aa { color: var(--ink-faint); }
+  .badge { font-size: 12px; padding: 0 6px; border-radius: 3px; border: 1px solid var(--ink-faint); color: var(--ink-soft); white-space: nowrap; }
+  .badge.att { border-color: var(--c-wi); color: var(--c-wi); }
+  .badge.inf { border-style: dashed; border-color: var(--warn); color: var(--warn); }
+  .badge.aa { border-color: var(--c-wi); color: var(--c-wi); }
+  .badge.mei { border-style: dashed; border-color: var(--c-me); color: var(--c-me); }
+  .rb { font-size: 16px; }
+  .rb p { margin: 3px 0; position: relative; }
+  .rb p.note { font-style: italic; color: var(--ink-soft); }
+  .rb hr { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; }
+  .para-tag { display: inline-block; font-family: 'Cinzel', serif; font-size: 11.5px; letter-spacing: .04em; color: var(--c-bl);
+    border: 1px solid var(--c-bl); border-radius: 3px; padding: 0 5px; margin: 5px 0 2px; }
+  .more { background: none; border: 1px solid var(--rule); border-radius: 4px; padding: 1px 10px; cursor: pointer; color: var(--ink-soft); font-size: 14px; margin-top: 4px; }
+  .more:hover { background: var(--accent-soft); }
+
+  /* Meier */
+  .mcard { margin: 0 0 12px; background: var(--card); border: 1.5px dashed var(--rule); border-left: 4px solid var(--c-me); border-radius: 4px; padding: 6px 10px 8px; }
+  .mcard .mh { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: .05em; color: var(--c-me); font-weight: 600; }
+  .mcard .mh span { font-family: 'EB Garamond', serif; letter-spacing: 0; font-weight: 400; color: var(--ink-faint); margin-left: 6px; font-size: 13px; }
+  .mcard p { margin: 3px 0 0; font-size: 16px; }
+  .jcard { margin: 0 0 12px; background: var(--card); border: 1.5px solid var(--rule); border-left: 4px solid var(--c-ja); border-radius: 4px; padding: 6px 10px 8px; }
+  .jcard.inferred { border-style: dashed; border-left-style: dashed; }
+  .jcard.pages { border-style: dotted; border-left-style: dotted; }
+  .jcard.suggested, .run.suggested { border-style: dashed; border-color: #b8860b; border-left-color: #b8860b; }
+  .badge.sug { border-style: dashed; border-color: #b8860b; color: #8a6508; }
+  .jcard .mh { font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: .05em; color: var(--c-ja); font-weight: 600; }
+  .jcard .mh span { font-family: 'EB Garamond', serif; letter-spacing: 0; font-weight: 400; color: var(--ink-faint); margin-left: 6px; font-size: 13px; }
+  .unit .camline { margin: 0 0 2px; }
+  .unit .tcard { margin: 5px 0; }
+  .camline { font-size: 12.5px; color: var(--c-wi); margin: 1px 0 2px; }
+
+  /* Reflexionen */
+  .rctl { display: flex; flex-wrap: wrap; gap: 5px 6px; align-items: center; margin-bottom: 8px; font-size: 14px; }
+  .era-btn { border: 1.5px solid currentColor; background: transparent; border-radius: 999px; padding: 0 9px; cursor: pointer; font-size: 13.5px; line-height: 1.5; }
+  .era-btn.off { opacity: .3; }
+  .rctl select { background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 0 4px; font-size: 14px; }
+  .rctl label { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; color: var(--ink-soft); }
+  .rctl .cnt { color: var(--ink-faint); margin-left: auto; font-size: 13.5px; }
+  .rctl .lnk { background: none; border: 0; text-decoration: underline; cursor: pointer; color: var(--c-re); padding: 0; font-size: 14px; }
+  .refl { margin: 0 0 11px; background: var(--card); border: 1.5px solid var(--rule); border-left: 4px solid var(--c-re); border-radius: 4px; padding: 6px 10px 8px; }
+  .rnamed { margin: 0 0 14px; padding: 6px 8px 2px; background: #f3e6c4; border: 1.5px solid var(--accent); border-radius: 5px; }
+  .rnh { font-family: 'Cinzel', serif; font-weight: 600; font-size: 13.5px; letter-spacing: .04em; color: var(--ink); margin: 2px 0 3px; }
+  .rnh.plain { margin: 10px 0 6px; color: var(--ink-soft); font-size: 12.5px; }
+  .rnn { font-size: 13.5px; color: var(--ink-soft); margin: 0 0 7px; }
+  .refl.named { border-left-color: var(--accent); border-left-width: 6px; }
+  .badge.named { border-color: var(--accent); background: var(--accent); color: #fffdf6; font-weight: 600; }
+  .refl.interp { border-style: dashed; border-left-style: dashed; }
+  .refl .rh1 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 7px; }
+  .refl .rnum { font-family: 'Cinzel', serif; font-weight: 600; font-size: 13.5px; color: var(--c-re); letter-spacing: .04em; }
+  .refl .raa { font-size: 13px; color: var(--ink-faint); margin-left: auto; }
+  .glyph { font-size: 14px; color: var(--ink-faint); cursor: help; }
+  .phase { border: 1.5px solid currentColor; background: transparent; border-radius: 4px; padding: 0 6px; cursor: pointer; line-height: 1.35; }
+  .phase .sym { font-weight: 600; font-size: 14px; }
+  .phase .yr { font-size: 11.5px; margin-left: 4px; opacity: .85; }
+  .phase.undated { border-style: dashed; }
+  .phase.open { background: rgba(0,0,0,.07); }
+  .era-1750 { color: var(--era-1750); } .era-1760 { color: var(--era-1760); } .era-1770 { color: var(--era-1770); }
+  .era-1780 { color: var(--era-1780); } .era-1790 { color: var(--era-1790); } .era-none { color: var(--era-none); }
+  .dating { font-size: 13.5px; color: var(--ink-soft); margin: 3px 0 1px; line-height: 1.35; }
+  .dating .raw { font-family: 'EB Garamond', serif; font-style: italic; }
+  .dating .span { font-weight: 600; }
+  .dating .lnk, .rfoot .lnk { background: none; border: 0; padding: 0; color: var(--c-re); text-decoration: underline; cursor: pointer; font-size: inherit; }
+  .adnote { margin: 5px 0 4px; padding: 5px 9px; border-left: 3px solid currentColor; background: rgba(0,0,0,.035); font-size: 14px; line-height: 1.4; color: var(--ink); }
+  .adnote h4 { margin: 0 0 2px; font-family: 'Cinzel', serif; font-size: 12.5px; letter-spacing: .05em; font-weight: 600; }
+  .adnote .flag { color: var(--warn); font-size: 13px; margin: 2px 0; }
+  .adnote .verb { font-style: normal; }
+  .adnote .cite { color: var(--ink-faint); font-size: 12.5px; }
+  .locus { font-size: 13.5px; color: var(--ink-soft); margin: 2px 0; }
+  .locus .chipx { display: inline-block; font-size: 12px; border: 1px solid var(--rule); border-radius: 3px; padding: 0 5px; margin-left: 4px; }
+  .rtext { white-space: pre-wrap; font-size: 16px; margin: 4px 0 2px; }
+  .rfoot { font-size: 12.5px; color: var(--ink-faint); display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+  .rfoot .res { margin-left: auto; }
+  .grp { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
+  .grp summary { cursor: pointer; }
+  .grp pre { white-space: pre-wrap; font-family: inherit; font-size: 12.5px; margin: 3px 0; color: var(--ink-faint); }
+
+  /* Tradition */
+  .tcard { margin: 0 0 10px; background: var(--card); border: 1.5px solid var(--rule); border-left: 4px solid var(--cc2, var(--c-tr)); border-radius: 4px; padding: 5px 10px 7px; }
+  .tcard.wolff { --cc2: #3b5068; } .tcard.scholastic { --cc2: #6b4f7a; } .tcard.aristotle { --cc2: #5c6e3a; }
+  .tcard .th { display: flex; flex-wrap: wrap; gap: 3px 8px; align-items: baseline; }
+  .tcard .au { font-weight: 600; }
+  .tcard .so { font-style: italic; font-size: 14px; color: var(--ink-soft); }
+  .tcard .rl { font-size: 12px; border: 1px solid var(--ink-faint); border-radius: 3px; padding: 0 5px; color: var(--ink-soft); margin-left: auto; }
+  .tcard p { margin: 3px 0 0; font-size: 16px; }
+  .subh { font-family: 'Cinzel', serif; font-size: 12.5px; letter-spacing: .06em; color: var(--c-tr); margin: 10px 0 5px; font-weight: 600; }
+
+  /* modal */
+  #veil { position: fixed; inset: 0; background: rgba(43,33,24,.45); display: none; align-items: center; justify-content: center; z-index: 50; }
+  #veil.open { display: flex; }
+  #box { background: var(--parchment); border: 1px solid var(--rule); border-radius: 6px; width: min(860px, 94vw); max-height: 88vh; overflow-y: auto; padding: 16px 22px 20px; position: relative; box-shadow: 0 8px 40px rgba(0,0,0,.3); }
+  #box h3 { margin: 0 0 4px; font-family: 'Cinzel', serif; color: var(--accent); letter-spacing: .05em; font-size: 17px; }
+  #box h4 { margin: 14px 0 3px; font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: .06em; color: var(--ink-soft); }
+  #box .x { position: absolute; right: 14px; top: 10px; background: none; border: 1px solid var(--rule); border-radius: 4px; cursor: pointer; padding: 0 8px; }
+  #box p { margin: 3px 0; font-size: 15.5px; }
+  #box details { border-top: 1px solid var(--rule); padding: 3px 0; }
+  #box summary { cursor: pointer; font-size: 15px; }
+  #box summary b { font-family: 'EB Garamond', serif; font-size: 16px; margin-right: 6px; }
+  #box .cite { color: var(--ink-faint); font-size: 13px; }
+  #box .sform { display: grid; grid-template-columns: 9.5em 1fr; gap: 6px 10px; align-items: start; margin: 6px 0; }
+  #box .sform label.l { color: var(--ink-soft); font-size: 14.5px; padding-top: 3px; }
+  #box input[type=text], #box select, #box textarea { font: inherit; font-size: 15.5px; background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 2px 6px; max-width: 100%; }
+  #box textarea { width: 100%; min-height: 3.2em; }
+  #box .sq { font-style: italic; color: var(--ink-soft); border-left: 3px solid var(--rule); padding-left: 9px; margin: 3px 0; font-size: 14.5px; }
+  #box .snow { font-size: 14px; color: var(--ink-soft); background: rgba(0,0,0,.035); padding: 4px 9px; border-radius: 3px; margin: 3px 0; }
+  #box .serr { color: var(--warn); font-size: 14px; min-height: 1.2em; }
+  #box .sitem { border-top: 1px solid var(--rule); padding: 4px 0; font-size: 14.5px; }
+  #box .sitem button { float: right; background: none; border: 1px solid var(--rule); border-radius: 3px; cursor: pointer; color: var(--warn); }
+  #box .sstatus { font-size: 13.5px; color: var(--ink-faint); margin-left: 8px; }
+  #box .askq { font-style: italic; color: var(--ink-soft); border-left: 3px solid var(--rule); padding-left: 10px; margin: 8px 0; }
+  .askbtns { display: flex; gap: 10px; margin-top: 12px; }
+  .askbtns button { font: inherit; padding: 3px 16px; border-radius: 4px; border: 1.5px solid var(--accent); cursor: pointer; background: var(--card); color: var(--accent); }
+  .askbtns .askyes { background: var(--accent); color: #fffdf6; font-weight: 600; }
+
+  @media (max-width: 900px) {
+    main { flex-direction: column; }
+    #leftcol { flex: 0 0 42vh; border-right: 0; border-bottom: 1px solid var(--rule); }
+    .panel { flex-basis: 85vw; }
+    #split { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <h1>Logic Concordance · centred on Meier’s Auszug</h1>
+    <span class="sub">Meier’s 563 paragraphs are the centre: Jäsche, Blomberg, Wiener, Busolt, the Reflexionen and the Tradition are all tied to them. Choose the text to read; click a passage, and what corresponds appears to the right.</span>
+  </div>
+  <div id="reading"><span class="lbl">READ</span></div>
+  <div id="texts"><span class="lbl">ALSO SHOW</span></div>
+  <div id="nav">
+    <button type="button" id="textsToggle" title="Hide or show the title, the buttons that choose the text read and the check boxes that choose the texts beside it" aria-expanded="true">▾ hide header</button>
+    <span id="textsum"></span>
+    <button type="button" id="suggestBtn" title="Suggest that a stretch of one of the logic lectures goes with a paragraph of Meier or of Jäsche">✎ Suggest an assignation<span id="suggestCount"></span></button>
+    <span>Go to</span>
+    <select id="jump" aria-label="Section"></select>
+    <input id="jn" type="text" inputmode="numeric" placeholder="§ n" aria-label="Jäsche § number">
+    <button id="prev" title="Previous stretch (↑ / k)">▲</button>
+    <button id="next" title="Next stretch (↓ / j)">▼</button>
+  </div>
+</header>
+<div id="sel"></div>
+<main>
+  <div id="leftcol">
+    <div id="psearch">
+      <input id="q" type="search" placeholder="Search this text…" aria-label="Search the text being read" autocomplete="off">
+      <button id="qprev" title="Previous match (Shift+Enter)">◂</button>
+      <button id="qnext" title="Next match (Enter)">▸</button>
+      <span id="qcount"></span>
+      <label id="flowlbl" title="Show a lecture transcript as running text, with ¶ where the transcription starts a new paragraph, or one paragraph to a line" hidden><input id="qflow" type="checkbox" checked> running text</label>
+      <label title="Treat period spellings alike: Urtheil / Urteil, Erkenntniß / Erkentniss, Logic / Logik …"><input id="qfold" type="checkbox" checked> variant spellings</label>
+      <button id="qlist" title="List every passage that matches">list</button>
+      <span class="zoomctl" id="pzoom" title="Text size of the reading pane"></span>
+    </div>
+    <div id="qresults" hidden></div>
+    <div id="jaesche"></div>
+  </div>
+  <div id="split" title="Drag to resize the reading pane (double-click to reset)"></div>
+  <div id="panels"></div>
+</main>
+<script type="text/plain" id="suggest-head">/* ─────────────────────────────────────────────────────────────────────────────
+   Assignations suggested by readers of logik-concordance.html: a stretch of one of
+   the logic lectures, and the paragraph of Meier or of Jäsche it should go with.
+   Written by that page ("Suggest an assignation" → "Save"), which also reads this
+   file back on load, so the suggestions show beside the concordance's own links,
+   marked as suggested. It can be edited by hand.
+
+   A suggestion does not change the concordance: logik-concordance.js is generated
+   by build_logik_concordance.py and is untouched. This file is the record of what
+   readers proposed, for whoever decides what goes into the extractor or the table.
+
+   Fields of an entry
+     id      a short unique id
+     on      the date it was suggested, YYYY-MM-DD
+     by      who, as typed; may be empty
+     note    why; may be empty
+     src     the lecture passage:
+               k      bl | wi | bu, for Blomberg, Wiener, Busolt
+               g0, g1 first and last block of the passage, as positions in that work's
+                      flat list of blocks in reading order, rules included
+               aa     the AA XXIV pages, as a string, for the human reader
+               title  the section's title, for the same
+               text   the passage's opening words, for the same
+     to      what it is assigned to:
+               kind   meier | jaesche
+               ns     (meier) the Meier §§
+               id     (jaesche) the id of the stretch in logik-concordance.js
+                      (p021 for § 21; s05-03 for the third stretch of section s05)
+               label  the stretch as the page labels it, for the human reader
+   ───────────────────────────────────────────────────────────────────────────── */
+
+</script>
+<div id="veil"><div id="box" role="dialog" aria-modal="true"></div></div>
+
+<!-- Shared data. Each is a classic script, so the page opens from disk.
+     The Jäsche transcript is this folder's own; the correspondence is generated from
+     everything below it by build_logik_concordance.py. -->
+<script src="../../data/phases-adickes.js"></script>
+<script src="../../data/reflexionen-16-meier.js"></script>
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/tradition-meier.js"></script>
+<script src="cambridge-concordance.js"></script>
+<script src="logic-jaesche-9.js"></script>
+<script src="logik-concordance.js"></script>
+<script src="concordance-suggestions.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   Logic concordance, centred on Meier's Auszug.
+
+   Data (loaded above):   CAMBRIDGE       the Cambridge concordance, transcribed from the scan
+                          LOGIK_JAESCHE   the Jäsche Logik, in its own 120 §§
+                          CONCORD         for each of Meier's 563 §§, what corresponds to it in the
+                                          other texts (generated; its header says how)
+                          LOGIK_BLOMBERG / _WIENER / _BUSOLT, REFL_ENTRIES / _GROUPS,
+                          TRADITION, PHASES / phaseInfo()   the texts and the dating
+   Attested vs. inferred: a link a source states (the Cambridge Edition's concordance,
+   Appendices C and D, or the Academy Edition's own headers) is drawn with a solid border;
+   one this tool worked out is dashed and says what it rests on.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+// ── the texts ───────────────────────────────────────────────────────────────
+const TEXTS = [
+  { k: 'me', name: 'Meier',       date: '1752',          cc: '--c-me', on: true,  note: 'Auszug aus der Vernunftlehre — the handbook Kant lectured from, and the centre of the concordance' },
+  { k: 'ja', name: 'Jäsche',      date: '1800',          cc: '--c-ja', on: true,  note: 'Logik, ed. G. B. Jäsche · AA IX' },
+  { k: 'bl', name: 'Blomberg',    date: 'ca. 1771',      cc: '--c-bl', on: true,  note: 'Logik Blomberg · AA XXIV · in the Cambridge concordance' },
+  { k: 'wi', name: 'Wiener',      date: '1780ff.',       cc: '--c-wi', on: true,  note: 'Wiener Logik · AA XXIV · in the Cambridge concordance' },
+  { k: 'bu', name: 'Busolt',      date: 'ca. 1789/90',   cc: '--c-bu', on: false, note: 'Logik Busolt · AA XXIV · not in the Cambridge concordance: inferred throughout' },
+  { k: 're', name: 'Reflexionen', date: '1752–1800',     cc: '--c-re', on: true,  note: 'Kant’s Reflexionen on Meier · AA XVI' },
+  { k: 'tr', name: 'Tradition',   date: '',              cc: '--c-tr', on: false, note: 'Parallel passages from Wolff, the Scholastics and Aristotle' },
+];
+const TEXT = Object.fromEntries(TEXTS.map(t => [t.k, t]));
+
+// the lecture transcripts, flattened exactly as the generator flattened them
+const flatten = w => w.sections.flatMap(s => s.blocks.map(b => ({ s, b })));
+const LEC = {
+  bl: { fl: flatten(LOGIK_BLOMBERG), meta: LOGIK_BLOMBERG.meta, label: 'Logik Blomberg' },
+  wi: { fl: flatten(LOGIK_WIENER),   meta: LOGIK_WIENER.meta,   label: 'Wiener Logik' },
+  bu: { fl: flatten(LOGIK_BUSOLT),   meta: LOGIK_BUSOLT.meta,   label: 'Logik Busolt' },
+};
+const JFL = flatten(LOGIK_JAESCHE);
+const SECS = Object.fromEntries(LOGIK_JAESCHE.sections.map(s => [s.id, s]));
+const UNITS = CONCORD.units;
+const UIDX = Object.fromEntries(UNITS.map((u, i) => [u.id, i]));
+
+// ── state ───────────────────────────────────────────────────────────────────
+const shown = Object.fromEntries(TEXTS.map(t => [t.k, t.on]));
+const ERAS = [
+  { key: '1750', label: '1750s', cls: 'era-1750', lo: 0,    hi: 1759 },
+  { key: '1760', label: '1760s', cls: 'era-1760', lo: 1760, hi: 1769 },
+  { key: '1770', label: '1770s', cls: 'era-1770', lo: 1770, hi: 1779 },
+  { key: '1780', label: '1780s', cls: 'era-1780', lo: 1780, hi: 1789 },
+  { key: '1790', label: '1790 +', cls: 'era-1790', lo: 1790, hi: 9999 },
+  { key: 'none', label: 'undated', cls: 'era-none', lo: null, hi: null },
+];
+const reflState = { eras: Object.fromEntries(ERAS.map(e => [e.key, true])), sort: 'num', inline: false, limit: 30 };
+
+// ── helpers ─────────────────────────────────────────────────────────────────
+function el(tag, cls, text, attrs) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  if (attrs) for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+const txt = s => document.createTextNode(s);
+const range = (a, b) => (b && b !== a) ? a + '–' + b : String(a);
+function paraRanges(ns) {                       // [19,20,21,25] → "19–21, 25"
+  const s = [...new Set(ns)].sort((a, b) => a - b), out = [];
+  for (let i = 0; i < s.length; ) {
+    let j = i; while (j + 1 < s.length && s[j + 1] === s[j] + 1) j++;
+    out.push(j > i ? s[i] + '–' + s[j] : String(s[i])); i = j + 1;
+  }
+  return out.join(', ');
+}
+function unitLabel(u) {
+  if (u.kind === 'para') return '§ ' + u.n;
+  if (u.kind === 'vorrede') return 'Vorrede · ' + u.k;
+  return 'Einl. ' + u.tag + ' · ' + u.k;
+}
+function secOf(u) { return SECS[u.sec]; }
+// Appendix C is a tree of rows; only the most specific ones speak (see import_cambridge_concordance.py)
+const CAM_LEAF = CAMBRIDGE.sections.filter(s => !CAMBRIDGE.sections.some(t => t !== s &&
+  t.meier[0] >= s.meier[0] && t.meier[1] <= s.meier[1] && (t.meier[0] !== s.meier[0] || t.meier[1] !== s.meier[1])));
+/** The Meier §§ whose Cambridge row cites a page this stretch stands on. */
+function cambridgeFor(u) {
+  const out = [];
+  CAM_LEAF.forEach(r => {
+    if (r.v9.some(([lo, hi]) => lo <= u.aaEnd && hi >= u.aa))
+      for (let n = r.meier[0]; n <= r.meier[1]; n++) out.push(n);
+  });
+  return out;
+}
+const pageList = rs => rs.length ? rs.map(([a, b]) => range(a, b)).join(', ') : '—';
+
+/** Fill `e` with a block's text, the AA's page numbers (and the manuscript's) standing where they stood. */
+function fillText(e, b, vol) {
+  const marks = [];
+  (b.pages || []).forEach(m => marks.push({ i: m.i, t: 'aa', p: m.p }));
+  (b.ms || []).forEach(m => marks.push({ i: m.i, t: 'ms', p: m.p }));
+  marks.sort((x, y) => x.i - y.i || (x.t === 'aa' ? -1 : 1));
+  let pos = 0;
+  for (const m of marks) {
+    if (m.i > pos) { e.appendChild(txt(b.text.slice(pos, m.i))); pos = m.i; }
+    const s = el('span', 'pg' + (m.t === 'ms' ? ' ms' : ''), m.t === 'aa' ? m.p : '[' + m.p + ']');
+    s.title = m.t === 'aa' ? 'Academy Edition, vol. ' + vol + ', page ' + m.p + ' begins here'
+                           : 'Manuscript page ' + m.p + ' begins here';
+    e.appendChild(s);
+  }
+  e.appendChild(txt(b.text.slice(pos)));
+}
+
+// ═══ the text being read ═══════════════════════════════════════════════════
+/* Any of the texts can be the one read in the left-hand pane. Every correspondence in
+   CONCORD runs through the stretches of Jäsche, so a selection in another text is carried
+   to Jäsche (and from there to the rest) by looking up which stretches link to it: the
+   *view* of a selection is { uis: Jäsche stretches, meier, trad, links }, the same shape
+   as a stretch, and the panels draw from it. Where the Cambridge concordance gives a Meier §
+   directly (Appendix D) the Meier readings use that instead of the detour. */
+let primary = 'me';
+let cur = -1;                                   // index into the primary text's units
+let view = null;                                // what corresponds to the current selection
+const PRIM = {};
+
+/* Everything in CONCORD.paras hangs on a Meier §. A *view* of a selection is the pooled content of
+   the Meier §§ it is tied to: { ns, meier, uis (Jäsche stretches), jaBasis, links, trad }. */
+const PARAS = CONCORD.paras;
+const BASIS_RANK = { cambridge: 3, pages: 2, mixed: 2, inferred: 1, suggested: 1 };
+function viewOfMeier(ns, firstUi, extra) {
+  const ja = new Map(), L = { bl: new Map(), wi: new Map(), bu: new Map() }, re = new Map();
+  ns.forEach(n => {
+    const d = PARAS[n]; if (!d) return;
+    (d.ja || []).forEach(([ui, b]) => { if (!ja.has(ui) || BASIS_RANK[b] > BASIS_RANK[ja.get(ui)]) ja.set(ui, b); });
+    for (const k of ['bl', 'wi', 'bu']) (d[k] || []).forEach(l => { const key = l.r[0] + '-' + l.r[1]; if (!L[k].has(key)) L[k].set(key, l); });
+    (d.re || []).forEach(([i, res, how]) => { const o = re.get(i); if (!o) re.set(i, [i, res, how]); else { o[1] = Math.max(o[1], res); o[2] |= how; } });
+  });
+  // readers' suggestions: those touching these §§, or naming this stretch of Jäsche
+  const sugg = suggInfos().filter(i => i.ns.some(n => ns.includes(n)) || (i.ui != null && (i.ui === firstUi || (extra && extra.has(i.ui)))));
+  sugg.forEach(i => {
+    const key = i.run.r[0] + '-' + i.run.r[1];
+    if (!L[i.s.src.k].has(key) || L[i.s.src.k].get(key).basis !== 'suggested') L[i.s.src.k].set(key, Object.assign({}, i.run, { title: suggTitle(i.s) }));
+    if (i.ui != null) ja.set(i.ui, 'suggested');
+  });
+  if (firstUi != null && !ja.has(firstUi)) ja.set(firstUi, 'cambridge');
+  const uis = [...ja.keys()].sort((a, b) => a - b);
+  if (firstUi != null) uis.splice(uis.indexOf(firstUi), 1), uis.unshift(firstUi);
+  const v = { ns, meier: ns, uis, jaBasis: ja, mbasis: null, mscore: null, links: {}, stated: true,
+              trad: ns.filter(n => TRADITION[n]) };
+  for (const k of ['bl', 'wi', 'bu']) v.links[k] = [...L[k].values()].sort((a, b) => a.r[0] - b.r[0]);
+  v.links.re = [...re.values()];
+  v.sugUis = new Set(sugg.filter(i => i.ui != null).map(i => i.ui));
+  return v;
+}
+// inverse indexes: which Meier §§ a block of a lecture, or a Reflexion, is placed on
+const _lecInv = {};
+function lecInv(k) {
+  if (_lecInv[k]) return _lecInv[k];
+  const m = new Map();
+  Object.keys(PARAS).forEach(n => (PARAS[n][k] || []).forEach(l => {
+    for (let g = l.r[0]; g <= l.r[1]; g++) { let a = m.get(g); if (!a) m.set(g, a = []); a.push([+n, l.basis]); }
+  }));
+  return (_lecInv[k] = m);
+}
+let _reInv = null;
+function reInv() {
+  if (_reInv) return _reInv;
+  _reInv = new Map();
+  Object.keys(PARAS).forEach(n => (PARAS[n].re || []).forEach(([i, res, how]) => {
+    let a = _reInv.get(i); if (!a) _reInv.set(i, a = []); a.push({ n: +n, res, how });
+  }));
+  return _reInv;
+}
+// the AA's own headers name Jäsche pages for 43 groups of Reflexionen
+const RE_BY_GRP = {};
+REFL_ENTRIES.forEach((e, i) => { if (!e.vacat) (RE_BY_GRP[e.grp] = RE_BY_GRP[e.grp] || []).push(i); });
+const GRP_PAGES = REFL_GROUPS.map((g, gi) => { const m = /AA 9:(\d+)(?:-(\d+))?/.exec(g.jaesche || ''); return m ? [gi, +m[1], +(m[2] || m[1])] : null; }).filter(Boolean);
+
+// ── views of a selection in each text ──
+function viewForJaesche(ui) {
+  const u = UNITS[ui], v = viewOfMeier(u.meier || [], ui);
+  v.mbasis = u.mbasis || null; v.mscore = u.mscore;
+  const re = new Map(v.links.re.map(r => [r[0], r]));
+  GRP_PAGES.forEach(([gi, a, b]) => { if (u.aa <= b && u.aaEnd >= a) (RE_BY_GRP[gi] || []).forEach(i => { const o = re.get(i); if (o) o[2] |= 1; else re.set(i, [i, null, 1]); }); });
+  v.links.re = [...re.values()];
+  return v;
+}
+function viewForMeier(n) { return viewOfMeier([n]); }
+/** Appendix C: the stretches of Jäsche on the AA 9 pages that the rows for these Meier §§ cite. */
+const unitsOnPages = ranges => UNITS.map((u, i) => i).filter(i => ranges.some(([lo, hi]) => lo <= UNITS[i].aaEnd && hi >= UNITS[i].aa));
+function explicitJaesche(ns) {
+  const out = new Set();
+  ns.forEach(n => { const row = CAM_LEAF.find(r => n >= r.meier[0] && n <= r.meier[1]); if (row && row.v9.length) unitsOnPages(row.v9).forEach(i => out.add(i)); });
+  return out;
+}
+/** Where the Cambridge concordance speaks, it — not the words — decides which stretches of Jäsche are shown. */
+function applyExplicit(v, uis) {
+  if (!uis.size) return v;
+  const words = new Set(v.uis), mine = [...(v.sugUis || [])];
+  v.uis = [...new Set([...uis, ...mine])].sort((a, b) => a - b);
+  v.jaBasis = new Map(v.uis.map(ui => [ui, mine.includes(ui) ? 'suggested' : words.has(ui) ? 'cambridge' : 'pages']));
+  v.jaExplicit = true;
+  return v;
+}
+function viewForLecture(k, st) {
+  const inv = lecInv(k), cnt = new Map(), bases = new Map();
+  for (let g = st.g0; g <= st.g1; g++) (inv.get(g) || []).forEach(([n, basis]) => { cnt.set(n, (cnt.get(n) || 0) + 1); bases.set(n, basis); });
+  const ranked = [...cnt].sort((a, b) => b[1] - a[1]);
+  const top = ranked.length ? ranked[0][1] : 0;
+  let ns = ranked.filter(([, c]) => c >= Math.max(1, 0.3 * top)).slice(0, 6).map(([n]) => n).sort((a, b) => a - b);
+  const mine = suggInfos().filter(i => i.s.src.k === k && i.s.src.g0 <= st.g1 && i.s.src.g1 >= st.g0);
+  const extra = new Set();
+  mine.forEach(i => { ns = [...new Set(ns.concat(i.ns))].sort((a, b) => a - b); if (i.ui != null) extra.add(i.ui); });
+  const v = viewOfMeier(ns, null, extra);
+  v.stated = ns.some(n => bases.get(n) !== 'inferred');
+  if (k === 'bl' || k === 'wi') {                    // the pages of the stretch, and the §§ Appendix D gives for them
+    const fl = LEC[k].fl; let p0 = 1e9, p1 = 0;
+    for (let g = st.g0; g <= st.g1; g++) { const b = fl[g].b; if (b.kind === 'rule') continue; p0 = Math.min(p0, b.aa); p1 = Math.max(p1, b.aaEnd || b.aa); }
+    const N = [];
+    Object.keys(CAMBRIDGE.paras).forEach(n => { if (CAMBRIDGE.paras[n][k].some(([lo, hi]) => lo <= p1 && hi >= p0)) N.push(+n); });
+    applyExplicit(v, explicitJaesche(N));
+  }
+  return v;
+}
+function viewForRefl(idx) {
+  const e = REFL_ENTRIES[idx], rows = reInv().get(idx) || [];
+  let ns = rows.filter(r => r.how & 2).map(r => r.n);
+  if (!ns.length) ns = rows.map(r => r.n);
+  ns = [...new Set(ns)].sort((a, b) => a - b).slice(0, 14);
+  const v = viewOfMeier(ns);
+  v.trad = e.paras.filter(n => TRADITION[n]).slice(0, 6);
+  if (e.aa) {                                         // Appendix C: the rows whose AA 16 pages this Reflexion stands on
+    const p1 = e.aaEnd || e.aa, uis = new Set();
+    CAM_LEAF.forEach(r => { if (r.v9.length && r.v16.some(([lo, hi]) => lo <= p1 && hi >= e.aa)) unitsOnPages(r.v9).forEach(i => uis.add(i)); });
+    applyExplicit(v, uis);
+  }
+  return v;
+}
+
+// ── the reading panes ──
+function unitBody(u, body) {
+  for (let g = u.b0; g <= u.b1; g++) {
+    const b = JFL[g].b;
+    if (b.kind === 'rule') { body.appendChild(el('hr')); continue; }
+    if (b.kind === 'figure') { body.appendChild(el('div', 'fig', 'Figur — the transcription has only {} here')); continue; }
+    const p = el('p', 'jb' + (b.kind === 'footnote' ? ' fn' : ''));
+    fillText(p, b, 9);
+    body.appendChild(p);
+  }
+}
+function mkUnit(i, extra) {
+  const d = el('div', 'unit' + (extra ? ' ' + extra : ''), null, { id: 'pu-' + i, 'data-i': i });
+  d.addEventListener('click', ev => { if (ev.target.closest('button, summary, a, input, select')) return; select(i, false); });
+  return d;
+}
+
+PRIM.ja = {
+  count: UNITS.length, hint: '§ n', label: i => unitLabel(UNITS[i]),
+  idOf: i => UNITS[i].id, byId: s => UIDX[s],
+  text: i => { const u = UNITS[i]; let t = u.kind === 'para' ? u.title + ' ' : ''; for (let g = u.b0; g <= u.b1; g++) if (JFL[g].b.kind !== 'rule') t += JFL[g].b.text + ' '; return t; },
+  build(root) {
+    let lastSec = null, lastPart = null;
+    UNITS.forEach((u, i) => {
+      const sec = secOf(u);
+      if (sec.id !== lastSec) {
+        const h = el('div', 'sechead');
+        if (sec.part !== lastPart && sec.part) h.appendChild(el('div', 'part', sec.part));
+        h.appendChild(el('div', 'st', sec.title));
+        root.appendChild(h);
+        lastSec = sec.id; lastPart = sec.part;
+      }
+      const d = mkUnit(i, u.cut ? 'cut' : '');
+      const hd = el('div', 'uh');
+      hd.appendChild(el('span', 'ulabel', unitLabel(u)));
+      if (u.kind === 'para') hd.appendChild(el('span', 'utitle', u.title));
+      hd.appendChild(el('span', 'uaa', 'AA 9:' + range(u.aa, u.aaEnd)));
+      if (u.cut) hd.title = 'This division into stretches is the concordance’s, not Jäsche’s: the Vorrede and Einleitung have no §§, so they are cut at block boundaries into stretches of about 2400 characters.';
+      d.appendChild(hd);
+      const body = el('div', 'ubody'); unitBody(u, body); d.appendChild(body);
+      root.appendChild(d);
+    });
+  },
+  view: i => viewForJaesche(i),
+  describe: i => { const u = UNITS[i]; return { what: unitLabel(u), ttl: u.kind === 'para' ? u.title : secOf(u).title.replace(/\s+/g, ' ').slice(0, 90), aa: 'AA 9:' + range(u.aa, u.aaEnd) + (u.cut ? ' · stretch (the concordance’s own division)' : '') }; },
+  sections() {
+    const seen = new Set(), out = [];
+    UNITS.forEach((u, i) => { if (seen.has(u.sec)) return; seen.add(u.sec); const sec = secOf(u);
+      out.push({ i, label: (u.kind === 'para' ? '§§ ' + sec.paras[0] + '–' + sec.paras[1] + ' · ' : '') + sec.title.replace(/\s+/g, ' ').slice(0, 46) }); });
+    return out;
+  },
+  sectionOf: i => { const f = UNITS.findIndex(x => x.sec === UNITS[i].sec); return PRIM.ja.sections().findIndex(s => s.i === f); },
+  find: s => UNITS.findIndex(u => u.n === parseInt(s)),
+};
+
+const MEIER_NS = Object.keys(CONCORD.meier).map(Number).sort((a, b) => a - b);
+const meierNavOf = n => CONCORD.meierNav.find(x => n >= x.rng[0] && n <= x.rng[1]);
+function camLine(n) {
+  const cp = CAMBRIDGE.paras[n];
+  if (!cp) return null;
+  const row = CAM_LEAF.find(r => n >= r.meier[0] && n <= r.meier[1]);
+  const cl = el('div', 'camline', 'Cambridge: AA 16:' + pageList(cp.v16) + ' · Blomberg 24:' + pageList(cp.bl) + ' · Wiener 24:' + pageList(cp.wi) + (row && row.v9.length ? ' · Jäsche 9:' + pageList(row.v9) : ''));
+  cl.title = 'What the Cambridge Edition’s concordance (Appendices C and D) lists for this Meier §';
+  return cl;
+}
+function meierPrim(ns, withTrad) {
+  return {
+    count: ns.length, hint: '§ n', label: i => 'Meier § ' + ns[i],
+    idOf: i => ns[i], byId: s => ns.indexOf(parseInt(s)),
+    text: i => CONCORD.meier[ns[i]] + (withTrad ? ' ' + (TRADITION[ns[i]] || []).map(e => e.author + ' ' + e.source + ' ' + e.text).join(' ') : ''),
+    build(root) {
+      let lastNav = null;
+      ns.forEach((n, i) => {
+        const nav = meierNavOf(n);
+        if (nav && nav !== lastNav) {
+          const h = el('div', 'sechead');
+          h.appendChild(el('div', 'part', nav.part));
+          if (nav.title !== nav.part) h.appendChild(el('div', 'st', nav.title));
+          root.appendChild(h); lastNav = nav;
+        }
+        const d = mkUnit(i);
+        const hd = el('div', 'uh'); hd.appendChild(el('span', 'ulabel', '§ ' + n)); d.appendChild(hd);
+        const cl = camLine(n); if (cl) d.appendChild(cl);
+        d.appendChild(el('p', 'jb', CONCORD.meier[n] || ''));
+        if (withTrad) (TRADITION[n] || []).forEach(e => {
+          const c = el('div', 'tcard ' + e.strata); const h = el('div', 'th');
+          h.appendChild(el('span', 'au', e.author)); h.appendChild(el('span', 'so', e.source)); h.appendChild(el('span', 'rl', e.relation));
+          c.appendChild(h); c.appendChild(el('p', null, e.text)); d.appendChild(c);
+        });
+        root.appendChild(d);
+      });
+    },
+    view: i => viewForMeier(ns[i]),
+    describe: i => { const n = ns[i], nav = meierNavOf(n), cp = CAMBRIDGE.paras[n];
+      return { what: 'Meier § ' + n, ttl: nav ? nav.title : '', aa: cp && cp.v16.length ? 'AA 16:' + pageList(cp.v16) : '' }; },
+    sections() {
+      const out = [], seen = new Set();
+      ns.forEach((n, i) => { const nav = meierNavOf(n); if (!nav || seen.has(nav)) return; seen.add(nav); out.push({ i, label: '§§ ' + nav.rng[0] + '–' + nav.rng[1] + ' · ' + nav.title.slice(0, 40) }); });
+      return out;
+    },
+    sectionOf: i => { const nav = meierNavOf(ns[i]); return PRIM[primary].sections().findIndex(s => meierNavOf(ns[s.i]) === nav); },
+    find: s => ns.indexOf(parseInt(s)),
+  };
+}
+PRIM.me = meierPrim(MEIER_NS, false);
+PRIM.tr = meierPrim(Object.keys(TRADITION).map(Number).sort((a, b) => a - b), true);
+
+// the lecture transcripts, cut into stretches for reading
+const _lecSt = {};
+function lecStretches(k) {
+  if (_lecSt[k]) return _lecSt[k];
+  const fl = LEC[k].fl, out = []; let cur = null, size = 0;
+  fl.forEach(({ s, b }, g) => {
+    const head = b.para ? b.para.raw : null;
+    if (!cur || cur.sec !== s.id || size >= 1500 || (k === 'bl' && head && cur.tag && head !== cur.tag && size >= 500)) {
+      cur = { g0: g, g1: g, sec: s.id, tag: head }; out.push(cur); size = 0;
+    }
+    cur.g1 = g; if (head) cur.tag = head;
+    if (b.kind !== 'rule') size += b.text.length;
+  });
+  return (_lecSt[k] = out);
+}
+function lecturePrim(k) {
+  const W = LEC[k];
+  const aaOf = st => 'AA ' + W.meta.volume + ':' + range(W.fl[st.g0].b.aa, W.fl[st.g1].b.aaEnd || W.fl[st.g1].b.aa);
+  return {
+    get count() { return lecStretches(k).length; }, hint: 'AA page',
+    label: i => W.label + ' · ' + aaOf(lecStretches(k)[i]),
+    idOf: i => i, byId: s => (parseInt(s) < lecStretches(k).length ? parseInt(s) : -1),
+    text: i => { const st = lecStretches(k)[i]; let t = ''; for (let g = st.g0; g <= st.g1; g++) if (W.fl[g].b.kind !== 'rule') t += W.fl[g].b.text + ' '; return t; },
+    build(root) {
+      /* The whole transcript, section after section, as running text. A stretch is only the unit
+         you select: it is a span with no heading of its own, so the text reads on through it. */
+      let lastSec = null, box = null;
+      lecStretches(k).forEach((st, i) => {
+        const sec = W.fl[st.g0].s;
+        if (sec.id !== lastSec) {
+          const h = el('div', 'sechead');
+          h.appendChild(el('div', 'st', sec.title.replace(/\s+/g, ' ') || '[Titelei]'));
+          const last = sec.blocks[sec.blocks.length - 1];
+          h.appendChild(el('div', 'part', 'AA ' + W.meta.volume + ':' + range(sec.blocks[0].aa, last.aaEnd || last.aa) + (sec.provenance ? ' · ' + sec.provenance.slice(0, 80) : '')));
+          root.appendChild(h);
+          box = el('div', 'flowtext'); root.appendChild(box); lastSec = sec.id;
+        }
+        const d = el('span', 'unit flow', null, { id: 'pu-' + i, 'data-i': i });
+        d.addEventListener('click', ev => { if (ev.target.closest('button, summary, a, input, select')) return; select(i, false); });
+        let lastTag = null;
+        for (let g = st.g0; g <= st.g1; g++) {
+          const b = W.fl[g].b;
+          if (b.kind === 'rule') { d.appendChild(el('span', 'fl-rule', '⸻')); continue; }
+          if (b.para && b.para.raw !== lastTag) {
+            lastTag = b.para.raw;
+            const t = el('span', 'para-tag', b.para.raw.replace(/\s+/g, ' '));
+            t.title = 'The heading the transcription files this under — Meier’s § (AA ' + W.meta.volume + ')';
+            d.appendChild(t);
+          }
+          const p = el('span', 'fl-blk' + (b.kind === 'note' ? ' note' : '')); fillText(p, b, W.meta.volume);
+          d.appendChild(p); d.appendChild(txt(' '));
+        }
+        box.appendChild(d); box.appendChild(txt(' '));
+      });
+    },
+    view: i => viewForLecture(k, lecStretches(k)[i]),
+    describe: i => { const st = lecStretches(k)[i];
+      return { what: W.label, ttl: W.fl[st.g0].s.title.replace(/\s+/g, ' '), aa: aaOf(st) }; },
+    sections() {
+      const out = [], seen = new Set();
+      lecStretches(k).forEach((st, i) => { if (seen.has(st.sec)) return; seen.add(st.sec); out.push({ i, label: (W.fl[st.g0].s.title.replace(/\s+/g, ' ') || '[Titelei]').slice(0, 50) + ' · ' + aaOf(st) }); });
+      return out;
+    },
+    sectionOf: i => PRIM[k].sections().findIndex(s => lecStretches(k)[s.i].sec === lecStretches(k)[i].sec),
+    find: s => { const p = parseInt(s); return lecStretches(k).findIndex(st => W.fl[st.g0].b.aa <= p && p <= (W.fl[st.g1].b.aaEnd || W.fl[st.g1].b.aa)); },
+  };
+}
+['bl', 'wi', 'bu'].forEach(k => { PRIM[k] = lecturePrim(k); });
+
+PRIM.re = {
+  count: REFL_ENTRIES.length, hint: 'Refl. n', label: i => 'Refl. ' + REFL_ENTRIES[i].r,
+  idOf: i => REFL_ENTRIES[i].r, byId: s => REFL_ENTRIES.findIndex(e => e.r === parseInt(s)),
+  text: i => { const e = REFL_ENTRIES[i]; return (e.text || '') + ' ' + (e.loc && e.loc.raw || '') + ' ' + (e.sig || ''); },
+  build(root) {
+    let lastG = null;
+    REFL_ENTRIES.forEach((e, i) => {
+      if (e.grp !== lastG) {
+        lastG = e.grp; const g = REFL_GROUPS[e.grp];
+        const h = el('div', 'sechead');
+        h.appendChild(el('div', 'part', g.paras && g.paras.length ? 'Meier §§ ' + paraRanges(g.paras) : 'Meier’s front matter'));
+        h.appendChild(el('div', 'st', (g.topic || '') + (g.jaesche ? ' · Jäsche ' + g.jaesche.replace('AA 9:', 'pp. ') : '')));
+        root.appendChild(h);
+      }
+      const d = mkUnit(i); d.appendChild(buildRefl(i, 0, null)); root.appendChild(d);
+    });
+  },
+  view: i => viewForRefl(i),
+  describe: i => { const e = REFL_ENTRIES[i], g = REFL_GROUPS[e.grp];
+    return { what: 'Refl. ' + e.r, ttl: g && g.topic ? g.topic : '', aa: e.aa ? 'AA 16:' + range(e.aa, e.aaEnd) : '' }; },
+  sections() {
+    const out = [], seen = new Set();
+    REFL_ENTRIES.forEach((e, i) => { if (seen.has(e.grp)) return; seen.add(e.grp); const g = REFL_GROUPS[e.grp];
+      out.push({ i, label: (g.paras && g.paras.length ? '§§ ' + paraRanges(g.paras).slice(0, 14) + ' · ' : '') + (g.topic || '').slice(0, 36) }); });
+    return out;
+  },
+  sectionOf: i => PRIM.re.sections().findIndex(s => REFL_ENTRIES[s.i].grp === REFL_ENTRIES[i].grp),
+  find: s => REFL_ENTRIES.findIndex(e => e.r === parseInt(s)),
+};
+
+/** Where to land in text `k`, carrying over what is selected now. */
+function carry(k, v) {
+  const fresh = k === 'me' ? MEIER_NS.indexOf(292) : k === 'ja' ? UIDX['p021'] : 0;
+  if (!v) return fresh;
+  if (k === 'me') { const i = MEIER_NS.indexOf(v.ns[0]); return i >= 0 ? i : fresh; }
+  if (k === 'tr') { const ns = Object.keys(TRADITION).map(Number).sort((a, b) => a - b); const t = v.ns.find(n => TRADITION[n]); return t != null ? ns.indexOf(t) : 0; }
+  if (k === 'ja') return v.uis.length ? v.uis[0] : fresh;
+  if (k === 're') {
+    const l = (v.links.re || []).slice().sort((a, b) => ((b[2] & 8) ? 1 : 0) - ((a[2] & 8) ? 1 : 0) || (b[1] || 0) - (a[1] || 0))[0];
+    return l ? l[0] : 0;
+  }
+  const run = (v.links[k] || [])[0];
+  if (!run) return 0;
+  return Math.max(0, lecStretches(k).findIndex(st => st.g1 >= run.r[0]));
+}
+
+// ═══ header: reading choice, the check buttons, navigation ═════════════════
+function buildReading() {
+  const root = document.getElementById('reading');
+  TEXTS.forEach(t => {
+    const lab = el('label', 'rd', null, { title: 'Read ' + t.name + ': ' + t.note });
+    lab.style.setProperty('--cc', 'var(' + t.cc + ')');
+    lab.dataset.k = t.k;
+    const r = el('input', null, null, { type: 'radio', name: 'read' });
+    r.checked = t.k === primary;
+    r.addEventListener('change', () => { if (r.checked) setPrimary(t.k); });
+    lab.appendChild(r); lab.appendChild(txt(t.name));
+    root.appendChild(lab);
+  });
+}
+function paintReading() {
+  document.querySelectorAll('#reading .rd').forEach(l => { const on = l.dataset.k === primary; l.classList.toggle('on', on); l.querySelector('input').checked = on; });
+}
+function buildChips() {
+  const root = document.getElementById('texts');
+  root.querySelectorAll('.chip').forEach(c => c.remove());
+  TEXTS.forEach(t => {
+    const isPrim = t.k === primary;
+    const lab = el('label', 'chip' + (shown[t.k] || isPrim ? ' on' : '') + (isPrim ? ' primary' : ''), null,
+      { title: isPrim ? t.name + ' is the text being read' : t.note });
+    lab.style.setProperty('--cc', 'var(' + t.cc + ')');
+    lab.dataset.k = t.k;
+    const cb = el('input', null, null, { type: 'checkbox' });
+    cb.checked = shown[t.k] || isPrim; cb.disabled = isPrim && t.k !== 'ja';
+    cb.addEventListener('change', () => {
+      shown[t.k] = cb.checked;
+      lab.classList.toggle('on', cb.checked);
+      if (t.k === 'ja' && primary === 'ja') document.body.classList.toggle('no-ja', !cb.checked);
+      else { renderPanels(); syncHash(); }
+      paintSum();
+    });
+    lab.appendChild(cb);
+    lab.appendChild(txt(t.name));
+    if (t.date) lab.appendChild(el('span', 'date', t.date));
+    if (!isPrim) lab.appendChild(el('span', 'cnt', ''));
+    root.appendChild(lab);
+  });
+  paintSum();
+}
+function paintSum() {
+  const names = TEXTS.filter(t => t.k !== primary && shown[t.k]).map(t => t.name);
+  document.getElementById('textsum').textContent = 'reading ' + TEXT[primary].name + ' · also showing: ' + (names.length ? names.join(' · ') : 'nothing');
+}
+function wireTextsToggle() {
+  const hd = document.querySelector('header'), b = document.getElementById('textsToggle');
+  b.addEventListener('click', () => {
+    const c = hd.classList.toggle('compact');
+    b.textContent = c ? '▸ show header' : '▾ hide header';
+    b.setAttribute('aria-expanded', String(!c));
+  });
+}
+function countFor(k, v) {
+  if (!v) return null;
+  if (k === 'ja') return v.uis.length;
+  if (k === 'me') return (v.ns || []).length;
+  if (k === 'tr') return (v.trad || []).reduce((n, m) => n + (TRADITION[m] || []).length, 0);
+  const L = (v.links || {})[k] || [];
+  if (k === 're') return L.length;
+  return L.reduce((n, l) => n + l.n, 0);
+}
+function updateCounts() {
+  document.querySelectorAll('#texts .chip').forEach(c => {
+    const k = c.dataset.k; if (k === primary) return;
+    const n = countFor(k, view);
+    const s = c.querySelector('.cnt');
+    s.textContent = n == null ? '' : n;
+    c.classList.toggle('zero', !n);
+    c.title = TEXT[k].note + (n == null ? '' : ' — ' + n + (k === 're' ? ' Reflexionen' : k === 'me' ? ' §§' : k === 'tr' ? ' entries' : k === 'ja' ? ' stretches' : ' blocks') + ' for this selection');
+  });
+}
+function buildNav() {
+  const j = document.getElementById('jump'), jn = document.getElementById('jn'), P = PRIM[primary];
+  j.textContent = '';
+  P.sections().forEach(s => { const o = el('option', null, s.label); o.value = s.i; j.appendChild(o); });
+  jn.placeholder = P.hint; jn.value = '';
+  jn.setAttribute('aria-label', 'Go to ' + P.hint);
+}
+document.addEventListener('keydown', e => {
+  if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  const N = PRIM[primary].count;
+  if (e.key === 'Escape') closeBox();
+  if (e.key === 'ArrowDown' || e.key === 'j') { select(Math.min(N - 1, cur + 1), true); e.preventDefault(); }
+  if (e.key === 'ArrowUp' || e.key === 'k') { select(Math.max(0, cur - 1), true); e.preventDefault(); }
+});
+function wireNav() {
+  document.getElementById('jump').addEventListener('change', e => select(parseInt(e.target.value), true));
+  const jn = document.getElementById('jn');
+  jn.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const i = PRIM[primary].find(jn.value);
+    if (i >= 0) { select(i, true); jn.blur(); } else jn.select();
+  });
+  document.getElementById('prev').onclick = () => select(Math.max(0, cur - 1), true);
+  document.getElementById('next').onclick = () => select(Math.min(PRIM[primary].count - 1, cur + 1), true);
+}
+
+// ═══ searching the text being read ═════════════════════════════════════════
+/* Words, not substrings: the query's words are matched against the start of the text's words
+   (so "Urtheil" finds Urtheile), every word of an unquoted query must occur in the passage,
+   and a "quoted phrase" must occur as consecutive words. "Variant spellings" folds both sides
+   by the period's spelling habits, so Urtheil, Urteil and Vrtheil agree; unticked, only case is ignored. */
+const FOLD2 = [['ß', 'ss'], ['ſ', 's'], ['ä', 'a'], ['ö', 'o'], ['ü', 'u'], ['ae', 'a'], ['oe', 'o'], ['ue', 'u'], ['th', 't'], ['ph', 'f'],
+  ['ck', 'k'], ['c', 'k'], ['y', 'i'], ['ei', 'ai'], ['ey', 'ai'], ['ie', 'i'], ['ah', 'a'], ['eh', 'e'], ['oh', 'o'], ['uh', 'u'], ['v', 'f']];
+function foldWord(w, fold) {
+  w = w.toLowerCase();
+  if (!fold) return w;
+  for (const [a, b] of FOLD2) w = w.split(a).join(b);
+  return w.replace(/(.)\1+/g, '$1');
+}
+const WORD_RE = /[\p{L}]+/gu;
+const tokenize = t => { const out = []; let m; WORD_RE.lastIndex = 0; while ((m = WORD_RE.exec(t))) out.push({ w: m[0], at: m.index }); return out; };
+const Q = { terms: [], fold: true, hits: [], list: false };
+const _words = new Map();
+function wordsOf(i) {
+  const key = primary + ':' + i + ':' + Q.fold;
+  let v = _words.get(key);
+  if (!v) { const t = tokenize(PRIM[primary].text(i)); v = { fw: t.map(x => foldWord(x.w, Q.fold)), at: t.map(x => x.at) }; _words.set(key, v); }
+  return v;
+}
+function parseQuery(s) {
+  const terms = [], re = /"([^"]+)"|(\S+)/g; let m;
+  while ((m = re.exec(s))) {
+    const ws = tokenize(m[1] || m[2]).map(x => foldWord(x.w, Q.fold));
+    if (ws.length) terms.push(ws);
+  }
+  return terms;
+}
+/** Positions in a passage where the word sequence `term` starts (each word a prefix of the text's word). */
+function seqAt(fw, term) {
+  const out = [];
+  for (let p = 0; p + term.length <= fw.length; p++) {
+    let ok = true;
+    for (let j = 0; j < term.length; j++) if (!fw[p + j].startsWith(term[j])) { ok = false; break; }
+    if (ok) out.push(p);
+  }
+  return out;
+}
+function clearMarks() {
+  document.querySelectorAll('mark.hit').forEach(m => { const p = m.parentNode; p.replaceChild(txt(m.textContent), m); p.normalize(); });
+}
+function markUnit(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode: n => n.parentNode.closest('.pg, button, summary, .rfoot, .adnote, mark') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  // the words of the unit as the page shows them, in order, so that a phrase is marked as a phrase
+  const toks = [];
+  nodes.forEach(n => tokenize(n.nodeValue).forEach(x => toks.push({ n, at: x.at, w: x.w, f: foldWord(x.w, Q.fold) })));
+  const hit = new Set();
+  Q.terms.forEach(t => {
+    for (let p = 0; p + t.length <= toks.length; p++) {
+      let ok = true;
+      for (let j = 0; j < t.length; j++) if (!toks[p + j].f.startsWith(t[j])) { ok = false; break; }
+      if (ok) for (let j = 0; j < t.length; j++) hit.add(p + j);
+    }
+  });
+  const per = new Map();
+  [...hit].sort((a, b) => a - b).forEach(p => { const t = toks[p]; if (!per.has(t.n)) per.set(t.n, []); per.get(t.n).push(t); });
+  per.forEach((list, n) => {
+    const frag = document.createDocumentFragment(); let pos = 0;
+    list.forEach(x => { frag.appendChild(txt(n.nodeValue.slice(pos, x.at))); frag.appendChild(el('mark', 'hit', x.w)); pos = x.at + x.w.length; });
+    frag.appendChild(txt(n.nodeValue.slice(pos)));
+    n.parentNode.replaceChild(frag, n);
+  });
+}
+/** The same words, marked in the compared texts: every passage the panels show. */
+function markPanels(scope) {
+  if (!Q.terms.length) return;
+  (scope ? [scope] : document.querySelectorAll('#panels .pbody')).forEach(markUnit);
+}
+function snippet(i, term) {
+  const text = PRIM[primary].text(i), { fw, at } = wordsOf(i);
+  const p = seqAt(fw, term)[0]; if (p == null) return '';
+  const a = Math.max(0, at[p] - 55), b = Math.min(text.length, at[p] + 110);
+  return (a > 0 ? '… ' : '') + text.slice(a, b).replace(/\s+/g, ' ') + (b < text.length ? ' …' : '');
+}
+function runSearch() {
+  clearMarks();
+  const inp = document.getElementById('q'), P = PRIM[primary];
+  Q.fold = document.getElementById('qfold').checked;
+  Q.terms = parseQuery(inp.value);
+  Q.hits = [];
+  if (Q.terms.length) {
+    for (let i = 0; i < P.count; i++) {
+      const { fw } = wordsOf(i); let n = 0, ok = true;
+      for (const t of Q.terms) { const c = seqAt(fw, t).length; if (!c) { ok = false; break; } n += c; }
+      if (ok) Q.hits.push({ i, n });
+    }
+    Q.hits.forEach(h => { const d = document.getElementById('pu-' + h.i); if (d) markUnit(d); });
+    markPanels();
+  }
+  paintSearch();
+  syncHash();
+}
+function paintSearch() {
+  const c = document.getElementById('qcount'), res = document.getElementById('qresults');
+  if (!Q.terms.length) c.textContent = '';
+  else if (!Q.hits.length) c.textContent = 'no match';
+  else { const at = Q.hits.findIndex(h => h.i === cur); c.textContent = (at >= 0 ? (at + 1) + ' / ' : '') + Q.hits.length + ' passage' + (Q.hits.length > 1 ? 's' : '') + ' · ' + Q.hits.reduce((s, h) => s + h.n, 0) + ' hits'; }
+  res.hidden = !(Q.list && Q.hits.length);
+  res.textContent = '';
+  if (!res.hidden) {
+    Q.hits.slice(0, 300).forEach(h => {
+      const r = el('div', 'qr'); r.appendChild(el('b', null, PRIM[primary].label(h.i)));
+      r.appendChild(txt(snippet(h.i, Q.terms[0])));
+      r.appendChild(el('span', 'n', h.n > 1 ? '×' + h.n : ''));
+      r.addEventListener('click', () => gotoHit(h.i));
+      res.appendChild(r);
+    });
+    if (Q.hits.length > 300) res.appendChild(el('div', 'qmore', (Q.hits.length - 300) + ' more — narrow the search'));
+  }
+  document.getElementById('q').placeholder = 'Search ' + TEXT[primary].name + '…';
+}
+function gotoHit(i) {
+  select(i, true);
+  const m = document.querySelector('#pu-' + i + ' mark.hit');
+  if (m) m.scrollIntoView({ block: 'center' });
+  paintSearch();
+}
+function stepHit(dir) {
+  if (!Q.hits.length) return;
+  let k;
+  if (dir > 0) k = Q.hits.findIndex(h => h.i > cur), k = k < 0 ? 0 : k;
+  else { k = -1; Q.hits.forEach((h, j) => { if (h.i < cur) k = j; }); if (k < 0) k = Q.hits.length - 1; }
+  gotoHit(Q.hits[k].i);
+}
+function wireSearch() {
+  const inp = document.getElementById('q');
+  let timer = null;
+  inp.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(runSearch, 180); });
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { clearTimeout(timer); if (Q.terms.join() !== parseQuery(inp.value).join()) runSearch(); stepHit(e.shiftKey ? -1 : 1); }
+    if (e.key === 'Escape') { inp.value = ''; runSearch(); inp.blur(); }
+  });
+  document.getElementById('qfold').addEventListener('change', runSearch);
+  document.getElementById('qflow').addEventListener('change', e => {
+    flowMode = e.target.checked;
+    document.getElementById('jaesche').classList.toggle('flow', flowMode && ['bl', 'wi', 'bu'].includes(primary));
+    if (cur >= 0) scrollToUnit(cur, true);
+  });
+  document.getElementById('qnext').onclick = () => stepHit(1);
+  document.getElementById('qprev').onclick = () => stepHit(-1);
+  document.getElementById('qlist').onclick = () => { Q.list = !Q.list; paintSearch(); };
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); inp.focus(); inp.select(); }
+  });
+}
+
+// ═══ double-clicking a compared passage: make it the text read? ════════════
+/** The stretch of lecture `k` that block `g` stands in. */
+function lecStretchAt(k, g) {
+  const st = lecStretches(k); let lo = 0, hi = st.length - 1;
+  while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (st[mid].g0 <= g) lo = mid; else hi = mid - 1; }
+  return lo;
+}
+function askRead(k, i) {
+  const P = PRIM[k], D = P.describe(i), box = document.getElementById('box');
+  box.textContent = '';
+  const x = el('button', 'x', 'close'); x.onclick = closeBox; box.appendChild(x);
+  box.appendChild(el('h3', null, 'Read this as the main text?'));
+  box.appendChild(el('div', 'cite', TEXT[k].name + ' · ' + P.label(i)));
+  if (D.ttl) box.appendChild(el('p', null, D.ttl + (D.aa ? ' · ' + D.aa : '')));
+  const t = P.text(i).replace(/\s+/g, ' ').trim();
+  box.appendChild(el('p', 'askq', '“' + t.slice(0, 220) + (t.length > 220 ? ' …' : '') + '”'));
+  const row = el('div', 'askbtns');
+  const yes = el('button', 'askyes', 'Yes — read ' + TEXT[k].name, { type: 'button' });
+  yes.onclick = () => { closeBox(); setPrimary(k); select(i, true, true); };
+  const no = el('button', 'askno', 'No', { type: 'button' }); no.onclick = closeBox;
+  row.appendChild(yes); row.appendChild(no); box.appendChild(row);
+  document.getElementById('veil').classList.add('open');
+  yes.focus();
+}
+function wireAsk() {
+  document.getElementById('panels').addEventListener('dblclick', e => {
+    if (e.target.closest('button, summary, a, input, select, .rsz')) return;
+    const t = e.target.closest('[data-go]'); if (!t) return;
+    const [k, i] = t.dataset.go.split(':');
+    if (!PRIM[k] || k === primary || !(+i >= 0)) return;
+    const sel = window.getSelection(); if (sel) sel.removeAllRanges();
+    askRead(k, +i);
+  });
+}
+
+// ═══ suggested assignations ═════════════════════════════════════════════════
+/* A reader can propose that a stretch of a logic lecture goes with a paragraph of Meier or of Jäsche.
+   The proposals are kept in concordance-suggestions.js (written from here, in place, in Chrome or
+   Edge; elsewhere the file is offered as a download) and are shown beside the concordance's own links,
+   marked as suggested. They change nothing in the generated concordance. */
+const SUGG = (typeof CONCORD_SUGGESTIONS !== 'undefined' ? CONCORD_SUGGESTIONS : []).slice();
+let suggUnsaved = false;
+const SUGG_FILE = 'concordance-suggestions.js';
+const SUGG_CAN_WRITE = !!window.showOpenFilePicker;
+let suggHandle = null;
+
+/** What a suggestion amounts to for the views: the Meier §§ it touches, the Jäsche stretch (if it names one), the run. */
+function suggInfo(s) {
+  const ui = s.to.kind === 'jaesche' ? UIDX[s.to.id] : null;
+  const ns = s.to.kind === 'meier' ? s.to.ns : (ui != null ? (UNITS[ui].meier || []) : []);
+  const fl = LEC[s.src.k].fl; let n = 0;
+  for (let g = s.src.g0; g <= s.src.g1; g++) if (fl[g] && fl[g].b.kind !== 'rule') n++;
+  return { s, ns, ui, run: { r: [s.src.g0, s.src.g1], n, score: null, z: null, basis: 'suggested', direct: true, sugg: s.id } };
+}
+const suggInfos = () => SUGG.filter(s => LEC[s.src.k] && (s.to.kind === 'meier' || UIDX[s.to.id] != null)).map(suggInfo);
+const suggTitle = s => 'Suggested' + (s.by ? ' by ' + s.by : '') + ' on ' + s.on + (s.note ? ': ' + s.note : '') + ' (concordance-suggestions.js)';
+
+function suggestionsText() {
+  const head = document.getElementById('suggest-head').textContent;
+  const body = SUGG.map(e => '  ' + JSON.stringify(e, null, 2).replace(/\n/g, '\n  ')).join(',\n');
+  return head + 'const CONCORD_SUGGESTIONS = [' + (body ? '\n' + body + '\n' : '\n') + '];\n';
+}
+function handleStore(mode, fn) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => reject(new Error('the browser did not answer')), 1500);
+    const open = indexedDB.open('concordance-suggestions', 1);
+    open.onupgradeneeded = () => open.result.createObjectStore('handles');
+    open.onerror = () => reject(open.error);
+    open.onsuccess = () => {
+      const req = fn(open.result.transaction('handles', mode).objectStore('handles'));
+      req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error);
+    };
+  });
+}
+const rememberHandle = h => handleStore('readwrite', st => (h ? st.put(h, 'file') : st.delete('file'))).catch(() => {});
+const recallHandle = () => handleStore('readonly', st => st.get('file')).catch(() => null);
+async function writableHandle() {
+  if (!suggHandle) suggHandle = await recallHandle();
+  if (suggHandle) {
+    let ok = (await suggHandle.queryPermission({ mode: 'readwrite' })) === 'granted';
+    if (!ok) ok = (await suggHandle.requestPermission({ mode: 'readwrite' })) === 'granted';
+    if (ok) return suggHandle;
+    suggHandle = null;
+  }
+  const picked = await window.showOpenFilePicker({ multiple: false, types: [{ description: SUGG_FILE, accept: { 'text/javascript': ['.js'] } }] });
+  const h = picked[0];
+  if (h.name !== SUGG_FILE) throw new Error('that file is “' + h.name + '”; choose ' + SUGG_FILE + ' in the Individuals/Nik Land folder');
+  if ((await h.requestPermission({ mode: 'readwrite' })) !== 'granted') throw new Error('write permission was not given');
+  suggHandle = h; await rememberHandle(h);
+  return h;
+}
+/** Write the file in place; where the browser cannot, offer it as a download. Returns a message. */
+async function saveSuggestions() {
+  const text = suggestionsText();
+  if (!SUGG_CAN_WRITE) {
+    const a = el('a', null, null, { href: URL.createObjectURL(new Blob([text], { type: 'text/javascript' })), download: SUGG_FILE });
+    document.body.appendChild(a); a.click(); a.remove();
+    suggUnsaved = false;
+    return 'Downloaded ' + SUGG_FILE + ' — replace the one in Individuals/Nik Land with it (this browser cannot write to the folder).';
+  }
+  try {
+    const h = await writableHandle(), w = await h.createWritable();
+    await w.write(text); await w.close();
+    suggUnsaved = false;
+    return 'Updated ' + SUGG_FILE + '.';
+  } catch (err) {
+    if (err && err.name === 'AbortError') return 'Not saved to the file (the picker was cancelled); the suggestion is kept until you reload.';
+    suggHandle = null; rememberHandle(null);
+    return 'Could not update ' + SUGG_FILE + ': ' + err.message + ' The suggestion is kept until you reload.';
+  }
+}
+function paintSuggestCount() {
+  document.getElementById('suggestCount').textContent = SUGG.length ? SUGG.length : '';
+}
+function refreshView() {
+  if (cur < 0) return;
+  view = PRIM[primary].view(cur);
+  renderSel(); updateCounts(); renderPanels(); paintSuggestCount();
+}
+function parseNs(str) {
+  const out = new Set();
+  String(str).split(/[,;\s]+/).filter(Boolean).forEach(t => {
+    const m = /^(\d+)\s*[-–—]\s*(\d+)$/.exec(t) || /^(\d+)$/.exec(t);
+    if (!m) return;
+    const a = +m[1], b = +(m[2] || m[1]);
+    for (let n = Math.min(a, b); n <= Math.max(a, b) && n <= 563; n++) if (n >= 1) out.add(n);
+  });
+  return [...out].sort((a, b) => a - b);
+}
+
+function openSuggest() {
+  const box = document.getElementById('box');
+  box.textContent = '';
+  const x = el('button', 'x', 'close'); x.onclick = closeBox; box.appendChild(x);
+  box.appendChild(el('h3', null, 'Suggest an assignation'));
+  box.appendChild(el('div', 'cite', 'Say which paragraph of Meier or of Jäsche a stretch of a logic lecture belongs with. It is recorded in ' + SUGG_FILE + ' and shown, marked as suggested, beside the concordance’s own links.'));
+
+  // 1. the lecture passage
+  let k = ['bl', 'wi', 'bu'].includes(primary) ? primary : 'bl';
+  let si = ['bl', 'wi', 'bu'].includes(primary) && cur >= 0 ? cur : carry(k, view);
+  const form = el('div', 'sform'); box.appendChild(form);
+  const lkSel = el('select'); [['bl', 'Blomberg'], ['wi', 'Wiener'], ['bu', 'Busolt']].forEach(([v, t]) => { const o = el('option', null, t); o.value = v; lkSel.appendChild(o); }); lkSel.value = k;
+  const pageIn = el('input', null, null, { type: 'text', size: '6', placeholder: 'AA page', inputmode: 'numeric' });
+  const prev = el('button', null, '◂', { type: 'button', title: 'The stretch before' }), next = el('button', null, '▸', { type: 'button', title: 'The stretch after' });
+  const lrow = el('div'); [lkSel, txt(' AA 24:'), pageIn, txt(' '), prev, next].forEach(n => lrow.appendChild(n));
+  form.appendChild(el('label', 'l', 'Lecture passage')); form.appendChild(lrow);
+  form.appendChild(el('span')); const pq = el('div', 'sq'); form.appendChild(pq);
+  form.appendChild(el('span')); const now = el('div', 'snow'); form.appendChild(now);
+
+  // 2. the target
+  form.appendChild(el('label', 'l', 'Assign it to'));
+  const trow = el('div');
+  const rM = el('input', null, null, { type: 'radio', name: 'sk', value: 'meier', id: 'sk-m' }), rJ = el('input', null, null, { type: 'radio', name: 'sk', value: 'jaesche', id: 'sk-j' });
+  rM.checked = true;
+  const lm = el('label', null, null, { for: 'sk-m' }); lm.appendChild(rM); lm.appendChild(txt(' a paragraph of Meier   '));
+  const lj = el('label', null, null, { for: 'sk-j' }); lj.appendChild(rJ); lj.appendChild(txt(' a stretch of Jäsche'));
+  trow.appendChild(lm); trow.appendChild(lj); form.appendChild(trow);
+  form.appendChild(el('label', 'l', '…which one'));
+  const meierIn = el('input', null, null, { type: 'text', size: '14', placeholder: 'e.g. 292 or 292–294' });
+  const jSel = el('select');
+  let lastSec = null, grp = null;
+  UNITS.forEach((u, i) => {
+    if (u.sec !== lastSec) { grp = el('optgroup', null, null, { label: secOf(u).title.replace(/\s+/g, ' ').slice(0, 60) }); jSel.appendChild(grp); lastSec = u.sec; }
+    const o = el('option', null, unitLabel(u) + (u.kind === 'para' ? ' · ' + u.title.slice(0, 50) : '')); o.value = u.id; grp.appendChild(o);
+  });
+  const which = el('div'); form.appendChild(which);
+  form.appendChild(el('span')); const tq = el('div', 'sq'); form.appendChild(tq);
+  form.appendChild(el('label', 'l', 'Why (optional)')); const note = el('textarea'); form.appendChild(note);
+  form.appendChild(el('label', 'l', 'Your name (optional)')); const by = el('input', null, null, { type: 'text', size: '16' }); form.appendChild(by);
+
+  const err = el('div', 'serr'); box.appendChild(err);
+  const row = el('div', 'askbtns');
+  const save = el('button', 'askyes', 'Save suggestion', { type: 'button' }), cancel = el('button', 'askno', 'Close', { type: 'button' });
+  const status = el('span', 'sstatus');
+  row.appendChild(save); row.appendChild(cancel); row.appendChild(status); box.appendChild(row);
+  box.appendChild(el('h4', null, 'SUGGESTIONS SO FAR'));
+  const listEl = el('div'); box.appendChild(listEl);
+
+  const stretch = () => lecStretches(k)[si];
+  const aaOfSt = st => { const W = LEC[k], a = W.fl[st.g0].b, z = W.fl[st.g1].b; return 'AA ' + W.meta.volume + ':' + range(a.aa, z.aaEnd || z.aa); };
+  const textOfSt = st => PRIM[k].text(si).replace(/\s+/g, ' ').trim();
+  function paintPassage() {
+    const st = stretch(), t = textOfSt(st);
+    pageIn.value = String(LEC[k].fl[st.g0].b.aa);
+    pq.textContent = TEXT[k].name + ' · ' + aaOfSt(st) + ' · ' + LEC[k].fl[st.g0].s.title.replace(/\s+/g, ' ') + ' — “' + t.slice(0, 260) + (t.length > 260 ? ' …' : '') + '”';
+    const v = viewForLecture(k, st);
+    now.textContent = 'The concordance now ties it to: ' + (v.ns.length ? 'Meier § ' + paraRanges(v.ns) : 'no Meier §') + (v.uis.length ? ' · Jäsche ' + v.uis.slice(0, 5).map(ui => unitLabel(UNITS[ui])).join(', ') + (v.uis.length > 5 ? ' …' : '') : ' · no stretch of Jäsche') + '.';
+  }
+  function paintTarget() {
+    which.textContent = '';
+    if (rM.checked) { which.appendChild(txt('Meier § ')); which.appendChild(meierIn); }
+    else which.appendChild(jSel);
+    let t = '';
+    if (rM.checked) { const ns = parseNs(meierIn.value); if (ns.length) t = 'Meier § ' + ns[0] + ' — “' + (CONCORD.meier[ns[0]] || '').slice(0, 220) + '”'; }
+    else { const ui = UIDX[jSel.value]; if (ui != null) t = unitLabel(UNITS[ui]) + ' — “' + PRIM.ja.text(ui).replace(/\s+/g, ' ').slice(0, 220) + '”'; }
+    tq.textContent = t;
+  }
+  function paintList() {
+    listEl.textContent = '';
+    if (!SUGG.length) { listEl.appendChild(el('div', 'sitem', 'None yet.')); return; }
+    SUGG.slice().reverse().forEach(s => {
+      const d = el('div', 'sitem');
+      const del = el('button', null, 'remove', { type: 'button', title: 'Remove this suggestion' });
+      del.onclick = async () => { const i = SUGG.indexOf(s); if (i >= 0) SUGG.splice(i, 1); suggUnsaved = true; paintList(); refreshView(); status.textContent = await saveSuggestions(); };
+      d.appendChild(del);
+      d.appendChild(txt(TEXT[s.src.k].name + ' ' + s.src.aa + ' → ' + (s.to.kind === 'meier' ? 'Meier § ' + paraRanges(s.to.ns) : 'Jäsche ' + (s.to.label || s.to.id)) + (s.note ? ' — ' + s.note : '') + ' (' + s.on + (s.by ? ', ' + s.by : '') + ')'));
+      listEl.appendChild(d);
+    });
+  }
+  const move = d => { const n = lecStretches(k).length; si = Math.max(0, Math.min(n - 1, si + d)); paintPassage(); };
+  prev.onclick = () => move(-1); next.onclick = () => move(1);
+  lkSel.onchange = () => { k = lkSel.value; si = carry(k, view) || 0; paintPassage(); };
+  pageIn.addEventListener('keydown', e => { if (e.key === 'Enter') { const i = PRIM[k].find(pageIn.value); if (i >= 0) { si = i; paintPassage(); } } });
+  pageIn.addEventListener('change', () => { const i = PRIM[k].find(pageIn.value); if (i >= 0) { si = i; paintPassage(); } });
+  rM.onchange = rJ.onchange = paintTarget; meierIn.oninput = paintTarget; jSel.onchange = paintTarget;
+  cancel.onclick = closeBox;
+  save.onclick = async () => {
+    err.textContent = '';
+    const st = stretch();
+    let to;
+    if (rM.checked) {
+      const ns = parseNs(meierIn.value);
+      if (!ns.length) { err.textContent = 'Give a Meier § number (1–563), or a range such as 292–294.'; return; }
+      to = { kind: 'meier', ns };
+    } else {
+      const ui = UIDX[jSel.value];
+      if (ui == null) { err.textContent = 'Choose a stretch of Jäsche.'; return; }
+      to = { kind: 'jaesche', id: jSel.value, label: unitLabel(UNITS[ui]) };
+    }
+    const t = textOfSt(st);
+    const s = { id: Date.now().toString(36), on: new Date().toISOString().slice(0, 10), by: by.value.trim(), note: note.value.trim(),
+      src: { k, g0: st.g0, g1: st.g1, aa: aaOfSt(st), title: LEC[k].fl[st.g0].s.title.replace(/\s+/g, ' '), text: t.slice(0, 160) }, to };
+    SUGG.push(s); suggUnsaved = true;
+    note.value = ''; paintList(); refreshView();           // shown at once; the file follows
+    save.disabled = true; status.textContent = 'saving…';
+    status.textContent = await saveSuggestions();
+    save.disabled = false;
+  };
+  paintPassage(); paintTarget(); paintList();
+  document.getElementById('veil').classList.add('open');
+}
+function wireSuggest() {
+  document.getElementById('suggestBtn').addEventListener('click', openSuggest);
+  paintSuggestCount();
+}
+
+// ═══ resizing the readers ═══════════════════════════════════════════════════
+/* The reading pane's width is set by the bar between it and the panels; each panel's by the bar on
+   its right edge (double-click to reset). The text size of each reader is set by its A / A buttons,
+   by zooming the reader, so that line lengths and everything in it scale together. Kept for the
+   session only, like the rest of the page's state. */
+const panelW = {};
+const zoomOf = {};
+const ZMIN = 0.7, ZMAX = 2.2;
+function dragBar(bar, start, move, reset) {
+  bar.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    try { bar.setPointerCapture(e.pointerId); } catch (_) { /* a synthetic event */ }
+    const x0 = e.clientX, w0 = start();
+    bar.classList.add('on'); document.body.classList.add('dragging');
+    const mv = ev => move(w0 + ev.clientX - x0);
+    const up = () => { bar.classList.remove('on'); document.body.classList.remove('dragging'); bar.removeEventListener('pointermove', mv); bar.removeEventListener('pointerup', up); bar.removeEventListener('pointercancel', up); };
+    bar.addEventListener('pointermove', mv); bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
+  });
+  bar.addEventListener('dblclick', reset);
+}
+function wireSplit() {
+  const left = document.getElementById('leftcol'), main = document.querySelector('main');
+  dragBar(document.getElementById('split'),
+    () => left.offsetWidth,
+    w => { w = Math.max(220, Math.min(w, main.clientWidth - 260)); left.style.flex = '0 0 ' + w + 'px'; left.style.minWidth = '0'; },
+    () => { left.style.flex = ''; left.style.minWidth = ''; });
+}
+function zoomButtons(key, host) {
+  const mk = (cls, label, title, d) => {
+    const b = el('button', cls, label, { title, type: 'button' });
+    b.addEventListener('click', ev => { ev.stopPropagation(); setZoom(key, d === 0 ? 1 : (zoomOf[key] || 1) + d); });
+    return b;
+  };
+  host.textContent = '';
+  host.appendChild(mk('sm', 'A', 'Smaller text', -0.1));
+  host.appendChild(mk('', '↺', 'Normal size', 0));
+  host.appendChild(mk('lg', 'A', 'Larger text', 0.1));
+}
+function setZoom(key, z) {
+  z = Math.round(Math.max(ZMIN, Math.min(ZMAX, z)) * 10) / 10;
+  zoomOf[key] = z;
+  if (key === 'prim') { document.getElementById('jaesche').style.zoom = z; if (cur >= 0) scrollToUnit(cur, true); }
+  else { const b = document.querySelector('.panel[data-k="' + key + '"] .pbody'); if (b) b.style.zoom = z; }
+}
+function wirePanelResize(p, k) {
+  const bar = el('div', 'rsz', null, { title: 'Drag to resize this reader (double-click to reset)' });
+  const set = w => { p.style.flex = '0 0 ' + w + 'px'; p.style.maxWidth = 'none'; panelW[k] = w; };
+  dragBar(bar, () => p.offsetWidth, w => set(Math.max(220, Math.min(w, 1600))),
+    () => { delete panelW[k]; p.style.flex = ''; p.style.maxWidth = ''; });
+  p.appendChild(bar);
+  if (panelW[k]) set(panelW[k]);
+}
+
+// ═══ choosing the text, selecting in it ════════════════════════════════════
+let flowMode = true;
+function buildPrimaryPane() {
+  const root = document.getElementById('jaesche');
+  root.textContent = '';
+  const lec = ['bl', 'wi', 'bu'].includes(primary);
+  root.classList.toggle('flow', lec && flowMode);
+  document.getElementById('flowlbl').hidden = !lec;
+  PRIM[primary].build(root);
+  root.scrollTop = 0;
+}
+function setPrimary(k) {
+  if (k === primary && cur >= 0) return;
+  const target = carry(k, view);
+  if (primary) shown[primary] = true;           // the text just read becomes a panel
+  primary = k;
+  document.body.classList.remove('no-ja');
+  cur = -1; view = null;
+  paintReading(); buildChips(); buildNav(); buildPrimaryPane();
+  select(target, true, true);
+  if (Q.terms.length || document.getElementById('q').value) runSearch(); else paintSearch();
+}
+function select(i, scroll, instant) {
+  const P = PRIM[primary];
+  if (i === cur) { if (scroll) scrollToUnit(i, instant); return; }
+  const old = document.querySelector('.unit.sel'); if (old) old.classList.remove('sel');
+  cur = i;
+  const d = document.getElementById('pu-' + i); if (d) d.classList.add('sel');
+  if (scroll) scrollToUnit(i, instant);
+  view = P.view(i);
+  const sec = P.sectionOf(i); if (sec >= 0) document.getElementById('jump').selectedIndex = sec;
+  syncHash(); renderSel(); updateCounts(); renderPanels(); paintSearch();
+}
+function syncHash() {
+  if (cur < 0) return;
+  const on = TEXTS.filter(t => t.k !== primary && shown[t.k]).map(t => t.k);
+  const q = document.getElementById('q').value.trim();
+  history.replaceState(null, '', '#' + PRIM[primary].idOf(cur) + '&r=' + primary + '&t=' + on.join(',') + (q ? '&q=' + encodeURIComponent(q) : ''));
+}
+function scrollToUnit(i, instant) {
+  const d = document.getElementById('pu-' + i); if (!d) return;
+  const box = document.getElementById('jaesche');
+  box.scrollTo({ top: d.offsetTop - box.offsetTop - 40, behavior: instant ? 'auto' : 'smooth' });
+}
+function renderSel() {
+  const P = PRIM[primary], D = P.describe(cur), root = document.getElementById('sel');
+  root.textContent = '';
+  const lg = el('span', 'legend');
+  lg.appendChild(el('i', 'att')); lg.appendChild(txt('in the Cambridge concordance or the AA'));
+  lg.appendChild(el('i', 'inf')); lg.appendChild(txt('worked out by this tool'));
+  root.appendChild(lg);
+  root.appendChild(el('span', 'what', D.what));
+  if (D.ttl) root.appendChild(el('span', 'ttl', D.ttl));
+  if (D.aa) root.appendChild(el('span', 'aa', D.aa));
+  const m = el('span', 'm'), v = view;
+  if (primary === 'ja') {
+    const u = UNITS[cur];
+    if (u.meier && u.meier.length) {
+      m.appendChild(txt('corresponds to '));
+      m.appendChild(el('b', null, 'Meier § ' + paraRanges(u.meier)));
+      if (u.mbasis === 'cambridge')
+        m.appendChild(txt(' — the Cambridge concordance (App. C) ties AA 9:' + range(u.aa, u.aaEnd) + ' to Meier §§ ' + paraRanges(cambridgeFor(u)) + '; the words choose among them (similarity ' + u.mscore.toFixed(2) + ')'));
+      else
+        m.appendChild(txt(' — inferred from the words (similarity ' + u.mscore.toFixed(2) + '); these pages are not in the Cambridge concordance'));
+    } else if (u.kind === 'vorrede') {
+      m.appendChild(txt('Jäsche’s own preface; nothing in Meier or the lectures corresponds to it.'));
+    }
+  } else {
+    if (v.ns.length) {
+      if (primary !== 'me' && primary !== 'tr') { m.appendChild(txt('tied to ')); m.appendChild(el('b', null, 'Meier § ' + paraRanges(v.ns) + (v.ns.length >= 14 ? ' …' : ''))); m.appendChild(txt(v.stated ? ' — by the Cambridge concordance or the sources’ own filing' : ' — inferred from the words and the order of the text')); }
+      if (v.uis.length) { m.appendChild(txt(primary === 'me' || primary === 'tr' ? 'Jäsche: ' : ' · Jäsche: ')); m.appendChild(el('b', null, v.uis.slice(0, 6).map(ui => unitLabel(UNITS[ui])).join(', ') + (v.uis.length > 6 ? ' …' : ''))); }
+      else m.appendChild(txt(' · no stretch of Jäsche is aligned to it'));
+    } else {
+      m.appendChild(txt('No Meier § is tied to this selection' + '.'));
+    }
+  }
+  root.appendChild(m);
+}
+
+// ═══ panels ════════════════════════════════════════════════════════════════
+const PANEL_NAME = { ja: 'Jäsche · Logik', me: 'Meier · Auszug aus der Vernunftlehre', bl: 'Logik Blomberg', wi: 'Wiener Logik', bu: 'Logik Busolt', re: 'Reflexionen on Meier', tr: 'Tradition' };
+function renderPanels() {
+  const root = document.getElementById('panels');
+  root.textContent = '';
+  const keys = TEXTS.filter(t => t.k !== primary && shown[t.k]).map(t => t.k);
+  if (!keys.length) { root.appendChild(el('div', 'welcome', 'Tick a text above to see its passages for this selection.')); return; }
+  const u = view;
+  keys.forEach(k => {
+    const t = TEXT[k];
+    const p = el('section', 'panel', null, { 'data-k': k }); p.style.setProperty('--cc', 'var(' + t.cc + ')');
+    const body = el('div', 'pbody');
+    const head = el('div', 'ph');
+    head.appendChild(el('h2', null, PANEL_NAME[k]));
+    const zc = el('span', 'zoomctl'); zoomButtons(k, zc); head.appendChild(zc);
+    if (zoomOf[k]) body.style.zoom = zoomOf[k];
+    p.appendChild(head); p.appendChild(body);
+    wirePanelResize(p, k);
+    ({ ja: panelJaesche, me: panelMeier, bl: panelLecture, wi: panelLecture, bu: panelLecture, re: panelRefl, tr: panelTrad })[k](u, head, body, k);
+    root.appendChild(p);
+  });
+  markPanels();
+}
+// ── Jäsche, when another text is the one read ──
+function panelJaesche(v, head, body) {
+  metaLine(head, 'Immanuel Kant’s Logik, ed. G. B. Jäsche, 1800 · AA IX');
+  noteLine(head, v.jaExplicit ? 'Chosen by the Cambridge concordance: the stretches on the AA 9 pages that Appendix C gives for the selection. Solid border: the words also align the stretch to it; dotted: it is on those pages but the words did not pick it.' : 'The stretches of Jäsche tied to the selection’s Meier §§. Solid: Appendix C of the Cambridge concordance lists the stretch’s pages for the § and the words agree; dotted: the stretch is on the pages Appendix C gives for the §; dashed: no row covers the § and the words aligned it.');
+  if (!v.uis.length) { body.appendChild(el('div', 'empty', 'No stretch of Jäsche is tied to these Meier §§.')); return; }
+  v.uis.forEach(ui => {
+    const u = UNITS[ui];
+    const c = el('div', 'jcard ' + (v.jaBasis.get(ui) || 'cambridge'), null, { 'data-go': 'ja:' + ui, title: 'Double-click to read this stretch as the main text' });
+    const h = el('div', 'mh', unitLabel(u));
+    h.appendChild(el('span', null, (u.kind === 'para' ? u.title + ' · ' : '') + 'AA 9:' + range(u.aa, u.aaEnd)));
+    c.appendChild(h);
+    const b = el('div', 'ubody'); unitBody(u, b); c.appendChild(b);
+    body.appendChild(c);
+  });
+}
+
+const metaLine = (head, s) => head.appendChild(el('div', 'meta', s));
+const noteLine = (head, s) => head.appendChild(el('div', 'note', s));
+
+// ── Meier ──
+function panelMeier(u, head, body) {
+  metaLine(head, 'G. F. Meier, 1752 · AA XVI · the §§ this selection answers to');
+  noteLine(head, 'Jäsche is not keyed to Meier’s §§. Where the Cambridge concordance lists these pages, it fixes which §§ are in question and the words choose among them; elsewhere the placement is inferred.');
+  if (!u.meier || !u.meier.length) { body.appendChild(el('div', 'empty', 'No Meier § is aligned to this selection.')); return; }
+  if (u.meier.length >= 14) body.appendChild(el('div', 'empty', 'The first ' + u.meier.length + ' §§ it is filed under:'));
+  u.meier.forEach(n => {
+    const nav = CONCORD.meierNav.find(x => n >= x.rng[0] && n <= x.rng[1]);
+    const c = el('div', 'mcard', null, { 'data-go': 'me:' + MEIER_NS.indexOf(n), title: 'Double-click to read this § as the main text' });
+    const h = el('div', 'mh', '§ ' + n);
+    if (nav) h.appendChild(el('span', null, nav.title));
+    c.appendChild(h);
+    const cl = camLine(n); if (cl) c.appendChild(cl);
+    c.appendChild(el('p', null, CONCORD.meier[n] || ''));
+    body.appendChild(c);
+  });
+}
+
+// ── the lecture transcripts ──
+const FIRST = 14;
+function panelLecture(u, head, body, k) {
+  const W = LEC[k], m = W.meta;
+  metaLine(head, W.label + ' · ' + m.date + ' · AA ' + m.volume + ':' + m.aa[0] + '–' + m.aa[1]);
+  noteLine(head, k === 'bu'
+    ? 'Busolt is not in the Cambridge concordance, and its transcript has no § apparatus: every placement here is inferred from the words and the order of the lecture, by a model trained on the Cambridge table.'
+    : 'Solid border: the Cambridge concordance (Appendix D) lists these pages for the Meier §§ in question. Dashed: the pages are unlisted there, and the placement is inferred.');
+  const L = ((u.links || {})[k] || []).slice().sort((a, b) => a.r[0] - b.r[0]);
+  if (!L.length) {
+    const e = el('div', 'empty', 'No passage of this text was placed on this selection.');
+    if (k === 'bl' && u.meier && u.meier.length) e.appendChild(txt(' ' + blombergNear(u.meier)));
+    body.appendChild(e); return;
+  }
+  L.forEach(l => body.appendChild(buildRun(W, l, k)));
+}
+/** Where Blomberg's own headings fall nearest to a stretch's Meier §§, for when nothing was placed on it. */
+function blombergNear(meier) {
+  const lo = Math.min(...meier), hi = Math.max(...meier);
+  const heads = new Map();                                    // first Meier § of a heading → first AA page
+  LEC.bl.fl.forEach(({ b }) => { if (b.para && !heads.has(b.para.nums[0])) heads.set(b.para.nums[0], b.aa); });
+  const ns = [...heads.keys()].sort((a, b) => a - b);
+  const below = ns.filter(n => n < lo).pop(), above = ns.find(n => n > hi);
+  const bits = [];
+  if (below != null) bits.push('§ ' + below + ' (AA 24:' + heads.get(below) + ')');
+  if (above != null) bits.push('§ ' + above + ' (AA 24:' + heads.get(above) + ')');
+  return 'Blomberg has no heading at Meier ' + (lo === hi ? '§ ' + lo : '§§ ' + lo + '–' + hi) + (bits.length ? '; the nearest are ' + bits.join(' and ') + '.' : '.');
+}
+function buildRun(W, l, k) {
+  const fl = W.fl, [r0, r1] = l.r;
+  const run = el('div', 'run ' + l.basis); run.style.setProperty('--cc', 'var(--c-' + k + ')');
+  const first = fl[r0].b, last = fl[r1].b;
+  const rh = el('div', 'rh');
+  rh.appendChild(el('span', 'sec', fl[r0].s.title.replace(/\s+/g, ' ') || '[Titelei]'));
+  rh.appendChild(el('span', 'aa', 'AA ' + W.meta.volume + ':' + range(first.aa, last.aaEnd || last.aa)));
+  const bd = el('span', 'badge ' + (l.basis === 'inferred' ? 'inf' : 'att'));
+  bd.textContent = l.basis === 'cambridge' ? 'Cambridge concordance' :
+                   l.basis === 'suggested' ? 'suggested' :
+                   l.basis === 'mixed'     ? 'partly Cambridge, partly inferred' : 'inferred';
+  if (l.basis === 'suggested') bd.className = 'badge sug';
+  bd.title = l.basis === 'suggested' ? (l.title || 'Suggested by a reader') : l.basis === 'inferred'
+    ? 'Placed here by the similarity of its words to this stretch and by the order of the lecture. The Cambridge concordance does not list these pages (or Busolt at all).'
+    : l.direct ? 'The Cambridge concordance (Appendix D) gives these pages for this Meier §.'
+    : 'The Cambridge concordance (Appendix D) gives these pages for a Meier § that its Appendix C ties to the Jäsche pages in question.';
+  rh.appendChild(bd);
+  if (l.score != null)
+    rh.appendChild(el('span', 'badge', 'sim ' + l.score.toFixed(2) + ' · z ' + l.z.toFixed(1) + ' · ' + l.n + ' bl.',
+      )).title = 'Cosine similarity of the passage to the stretch, and how many standard deviations above the other stretches it stands';
+  else rh.appendChild(el('span', 'badge', l.n + ' bl.'));
+  run.appendChild(rh);
+  const rb = el('div', 'rb'); run.appendChild(rb);
+  let g = r0, lastTag = null;
+  const put = until => {
+    for (; g <= r1 && until(g); g++) {
+      const b = fl[g].b;
+      if (b.kind === 'rule') { rb.appendChild(el('hr')); continue; }
+      if (b.para && b.para.raw !== lastTag) {
+        lastTag = b.para.raw;
+        const t = el('div', 'para-tag', b.para.raw.replace(/\s+/g, ' '));
+        t.title = 'The heading the transcription files this under — Meier’s § (AA ' + W.meta.volume + ')';
+        rb.appendChild(t);
+      }
+      const p = el('p', b.kind === 'note' ? 'note' : null, null, { 'data-go': k + ':' + lecStretchAt(k, g), title: 'Double-click to read this passage as the main text' });
+      fillText(p, b, W.meta.volume);
+      rb.appendChild(p);
+    }
+  };
+  let count = 0;
+  put(gi => (fl[gi].b.kind === 'rule') || ++count <= FIRST);
+  if (g <= r1) {
+    const more = el('button', 'more', 'show the remaining ' + (r1 - g + 1) + ' blocks');
+    more.onclick = () => { more.remove(); put(() => true); markPanels(rb); };
+    run.appendChild(more);
+  }
+  return run;
+}
+
+// ── Tradition ──
+function panelTrad(u, head, body) {
+  metaLine(head, 'Wolff · Scholastics · Aristotle, keyed to Meier’s §§ · hand-curated');
+  noteLine(head, 'Keyed to the Meier § it is filed under; that § is tied to the selection by the Cambridge concordance or, failing it, by inference.');
+  const ns = u.trad || [];
+  if (!ns.length) {
+    const nt = Object.keys(TRADITION).length;
+    body.appendChild(el('div', 'empty', 'None of the ' + nt + ' Meier §§ annotated so far (' + Object.keys(TRADITION).join(', ') + ') falls on the Meier §§ aligned to this selection (' + (u.meier && u.meier.length ? paraRanges(u.meier) : 'none') + ').'));
+    return;
+  }
+  ns.forEach(n => {
+    body.appendChild(el('div', 'subh', 'MEIER § ' + n));
+    TRADITION[n].forEach(e => {
+      const c = el('div', 'tcard ' + e.strata, null, { 'data-go': 'tr:' + Object.keys(TRADITION).map(Number).sort((a, b) => a - b).indexOf(n), title: 'Double-click to read this § as the main text' });
+      const h = el('div', 'th');
+      h.appendChild(el('span', 'au', e.author)); h.appendChild(el('span', 'so', e.source));
+      h.appendChild(el('span', 'rl', e.relation));
+      c.appendChild(h); c.appendChild(el('p', null, e.text));
+      body.appendChild(c);
+    });
+  });
+}
+
+// ═══ Reflexionen, and Adickes' dating ══════════════════════════════════════
+const REFL_KIND = {
+  'zu':        { glyph: '→', de: 'Zu …',        en: 'attached to the passage' },
+  'gegenüber': { glyph: '‖', de: 'Gegenüber …', en: 'on the facing page' },
+  'neben':     { glyph: '▎', de: 'Neben …',     en: 'beside the passage, in the margin' },
+  'zwischen':  { glyph: '↕', de: 'Zwischen …',  en: 'between the printed lines, or between two §§' },
+  'über':      { glyph: '↑', de: 'Über …',      en: 'above the line' },
+  'unter':     { glyph: '↓', de: 'Unter …',     en: 'below the line' },
+  'nach':      { glyph: '»', de: 'Nach …',      en: 'after the passage' },
+  'in':        { glyph: '⊂', de: 'In …',        en: 'written into the printed text' },
+};
+function eraOf(sym) {
+  const p = phaseInfo(sym);
+  if (!p || p.from == null) return 'none';
+  for (const e of ERAS) if (e.lo !== null && p.from >= e.lo && p.from <= e.hi) return e.key;
+  return 'none';
+}
+const eraCls = sym => ERAS.find(x => x.key === eraOf(sym)).cls;
+function entryEras(e) { const s = new Set((e.ph || []).map(eraOf)); if (!s.size) s.add('none'); return s; }
+function entryVisible(e) { for (const k of entryEras(e)) if (reflState.eras[k]) return true; return false; }
+/** The span of years Adickes' tables give for every phase an entry is dated to. */
+function entrySpan(e) {
+  let lo = null, hi = null, undated = 0;
+  (e.ph || []).forEach(s => {
+    const p = phaseInfo(s);
+    if (p && p.from != null) { lo = lo == null ? p.from : Math.min(lo, p.from); hi = hi == null ? p.to : Math.max(hi, p.to); }
+    else undated++;
+  });
+  return { lo, hi, undated };
+}
+const entryStart = e => { const s = entrySpan(e); return s.lo == null ? 9999 : s.lo; };
+const hasHyphen = e => /[−–-]/.test(e.phRaw || '') && (e.ph || []).length > 1;
+
+function phaseNote(sym) {
+  const p = phaseInfo(sym);
+  const box = el('div', 'adnote ' + eraCls(sym));
+  box.appendChild(el('h4', null, 'Phase ' + (p ? p.sym : sym) + ' · ' + (p && p.years ? p.years : 'von Adickes nicht datiert')));
+  const flag = s => box.appendChild(el('div', 'flag', s));
+  if (p && p.inherited) flag('Dated from phase ' + p.inheritedFrom + '. ' + p.inheritedReason);
+  if (p && p.relative) flag('Relative position only: ' + p.relative);
+  if (p && p.significance) flag('Significance: ' + p.significance);
+  if (p && p.covers) flag('Covers: ' + p.covers);
+  if (p && p.editorial) flag(p.editorial);
+  if (p && p.notInAdickesTable) flag('Not one of Adickes’ 33 tabled phases.');
+  if (p && p.unlisted) flag('Adickes does not table this exponent of the letter.');
+  if (!p || p.unknown) flag('This label could not be matched against Adickes’ table; it may be a transcription artefact.');
+  if (p && p.note) box.appendChild(el('div', 'verb', p.note));
+  if (p && p.aa) box.appendChild(el('div', 'cite', 'Adickes, ' + p.aa));
+  return box;
+}
+
+function buildRefl(idx, how, res) {
+  const e = REFL_ENTRIES[idx], g = REFL_GROUPS[e.grp];
+  const c = el('div', 'refl' + (e.interp ? ' interp' : ''), null, { 'data-i': idx });
+  const h1 = el('div', 'rh1');
+  const kind = e.loc && e.loc.kind ? REFL_KIND[e.loc.kind] : null;
+  const gl = el('span', 'glyph', kind ? kind.glyph : '·');
+  gl.title = kind ? kind.de + ' — ' + kind.en : 'The AA gives no placement note for this Reflexion';
+  h1.appendChild(gl);
+  h1.appendChild(el('span', 'rnum', 'Refl. ' + e.r));
+  const notes = el('div');                                     // the Adickes notes, opened by the chips
+  (e.ph || []).forEach(sym => {
+    const p = phaseInfo(sym);
+    const b = el('button', 'phase ' + eraCls(sym) + (p && p.years ? '' : ' undated'));
+    b.appendChild(el('span', 'sym', p ? p.sym : sym));
+    b.appendChild(el('span', 'yr', p && p.years ? p.years : 'undat.'));
+    b.title = 'Adickes’ phase ' + (p ? p.sym : sym) + ' — click for his note';
+    b.onclick = () => {
+      const open = notes.querySelector('[data-s="' + sym + '"]');
+      if (open) { open.remove(); b.classList.remove('open'); }
+      else { const n = phaseNote(sym); n.dataset.s = sym; notes.appendChild(n); b.classList.add('open'); }
+    };
+    b.dataset.s = sym;
+    h1.appendChild(b);
+  });
+  if (e.aa) h1.appendChild(el('span', 'raa', 'AA 16:' + range(e.aa, e.aaEnd)));
+  c.appendChild(h1);
+
+  // the dating, whole
+  const dt = el('div', 'dating');
+  dt.appendChild(txt('AA: '));
+  dt.appendChild(el('span', 'raw', e.phRaw || '—'));
+  const sp = entrySpan(e);
+  if (sp.lo != null) {
+    dt.appendChild(txt(' · Adickes: '));
+    dt.appendChild(el('span', 'span', sp.lo === sp.hi ? String(sp.lo) : sp.lo + '–' + sp.hi));
+    if (sp.undated) dt.appendChild(txt(' (+ ' + sp.undated + ' phase' + (sp.undated > 1 ? 's' : '') + ' he does not date)'));
+  } else {
+    dt.appendChild(txt(e.prose ? ' · dated in prose by the AA; no phase symbol' : ' · Adickes gives no date for these phases'));
+  }
+  if (hasHyphen(e)) {
+    dt.appendChild(txt(' · '));
+    const hb = el('button', 'lnk', 'hyphen = every phase between');
+    hb.onclick = () => openAdickes('hyphen');
+    dt.appendChild(hb);
+  }
+  if (e.ph && e.ph.length && e.phRaw && /\?/.test(e.phRaw)) dt.appendChild(txt(' · query marks are Adickes’ own uncertainty'));
+  c.appendChild(dt);
+  c.appendChild(notes);
+  if (reflState.inline) (e.ph || []).forEach(sym => {
+    const n = phaseNote(sym); n.dataset.s = sym; notes.appendChild(n);
+    const b = h1.querySelector('.phase[data-s="' + sym + '"]'); if (b) b.classList.add('open');
+  });
+
+  if (e.loc && e.loc.raw) {
+    const lo = el('div', 'locus', e.loc.raw);
+    if (e.loc.satz && e.loc.satz.length) lo.appendChild(el('span', 'chipx', 'Satz ' + e.loc.satz.join('·')));
+    if (e.loc.nr && e.loc.nr.length) lo.appendChild(el('span', 'chipx', 'Nr. ' + e.loc.nr.join('·')));
+    if (e.loc.part) lo.appendChild(el('span', 'chipx', e.loc.part));
+    if (e.loc.lemma) lo.appendChild(el('span', 'chipx', '»' + e.loc.lemma + '«'));
+    c.appendChild(lo);
+  }
+  c.appendChild(el('div', 'rtext', e.vacat ? '[Vacat — the Academy Edition records this number with no text.]' : e.text));
+
+  const ft = el('div', 'rfoot');
+  if (e.sig) ft.appendChild(el('span', null, e.sig));
+  const src = { locus: 'filed by its own locus note', group: 'filed by the AA’s §-range header', none: 'no § stated; § interpolated' }[e.src] || e.src;
+  ft.appendChild(el('span', null, 'Meier § ' + paraRanges(e.paras) + ' · ' + src));
+  if (how & 8) { const b = el('span', 'badge aa', 'Cambridge: AA 16:' + range(e.aa, e.aaEnd)); b.title = 'Appendix D of the Cambridge concordance gives this AA 16 page for the Meier §'; ft.appendChild(b); }
+  if (how & 1) { const b = el('span', 'badge named', '★ AA names Jäsche ' + g.jaesche.replace('AA 9:', 'pp. ')); b.title = 'The Academy Edition’s own header for this group of Reflexionen cites these Jäsche pages'; ft.appendChild(b); }
+  if (how & 2) { const b = el('span', 'badge aa', 'filed under the Meier §'); b.title = 'The Academy Edition files this Reflexion under this Meier § (its own locus note or its group header)'; ft.appendChild(b); }
+  if (res != null) ft.appendChild(el('span', 'res', 'resemblance ' + res)).title = 'Cosine similarity ×100 of this Reflexion to the stretch; it orders, nothing more';
+  c.appendChild(ft);
+
+  if (g && (g.topic || g.phaseRange || g.raw)) {
+    const d = el('details', 'grp');
+    const s = el('summary', null, 'AA group' + (g.topic ? ': ' + g.topic : '') + (g.phaseRange ? ' · group dating ' + g.phaseRange.phases + (g.phaseRange.years ? ' (' + g.phaseRange.years + ')' : '') : ''));
+    d.appendChild(s); d.appendChild(el('pre', null, g.raw));
+    c.appendChild(d);
+  }
+  return c;
+}
+
+function panelRefl(u, head, body) {
+  metaLine(head, 'Kant’s handschriftliche Bemerkungen · AA XVI · Refl. 1619–3488');
+  noteLine(head, 'Stated pairings: filed under the Meier § by the AA, on an AA 16 page the Cambridge concordance gives for it, or (for a Jäsche stretch) in a group the AA heads with Jäsche pages. Dating is Adickes’ (AA XIV:XXXV–XLIII).');
+  const all = (u.links || {}).re || [];
+  const ctl = el('div', 'rctl');
+  ERAS.forEach(er => {
+    const b = el('button', 'era-btn ' + er.cls + (reflState.eras[er.key] ? '' : ' off'), er.label);
+    b.title = er.key === 'none' ? 'Reflexionen whose phase Adickes leaves undated (ε, ο, π), or which the AA dates only in prose' : 'Phases beginning in the ' + er.label;
+    b.onclick = () => { reflState.eras[er.key] = !reflState.eras[er.key]; reflState.limit = 30; renderPanels(); };
+    ctl.appendChild(b);
+  });
+  const sel = el('select');
+  [['num', 'by Refl. number'], ['date', 'by date (Adickes)'], ['res', 'by resemblance to the selection'], ['aa', 'attested pairing first']].forEach(([v, t]) => { const o = el('option', null, t); o.value = v; sel.appendChild(o); });
+  sel.value = reflState.sort;
+  sel.onchange = () => { reflState.sort = sel.value; reflState.limit = 30; renderPanels(); };
+  ctl.appendChild(sel);
+  const lab = el('label'); const cb = el('input', null, null, { type: 'checkbox' }); cb.checked = reflState.inline;
+  cb.onchange = () => { reflState.inline = cb.checked; renderPanels(); };
+  lab.appendChild(cb); lab.appendChild(txt('all Adickes notes open'));
+  ctl.appendChild(lab);
+  const nb = el('button', 'lnk', 'Adickes’ notation & table');
+  nb.onclick = () => openAdickes(null);
+  ctl.appendChild(nb);
+  const cnt = el('span', 'cnt'); ctl.appendChild(cnt);
+  body.appendChild(ctl);
+
+  const rows = all.filter(([i]) => entryVisible(REFL_ENTRIES[i]));
+  cnt.textContent = rows.length === all.length ? all.length + ' Reflexionen' : rows.length + ' of ' + all.length;
+  if (!all.length) { body.appendChild(el('div', 'empty', 'No Reflexion is paired with this selection by the Cambridge concordance or the AA, or filed under a Meier § aligned to it.')); return; }
+  const cmp = {
+    num:  (a, b) => REFL_ENTRIES[a[0]].r - REFL_ENTRIES[b[0]].r,
+    date: (a, b) => entryStart(REFL_ENTRIES[a[0]]) - entryStart(REFL_ENTRIES[b[0]]) || REFL_ENTRIES[a[0]].r - REFL_ENTRIES[b[0]].r,
+    res:  (a, b) => (b[1] || 0) - (a[1] || 0) || REFL_ENTRIES[a[0]].r - REFL_ENTRIES[b[0]].r,
+    aa:   (a, b) => (((b[2] & 9) ? 1 : 0) - ((a[2] & 9) ? 1 : 0)) || (b[1] || 0) - (a[1] || 0),
+  }[reflState.sort];
+  rows.sort(cmp);
+  // reading Jäsche: the Reflexionen whose AA group header cites the Jäsche pages come first, apart from the rest
+  const named = primary === 'ja' ? rows.filter(r => r[2] & 1) : [];
+  if (named.length) {
+    const top = el('div', 'rnamed');
+    top.appendChild(el('div', 'rnh', 'Named by the editor for these Jäsche pages · ' + named.length + (named.length === 1 ? ' Reflexion' : ' Reflexionen')));
+    top.appendChild(el('div', 'rnn', 'Adickes’ own header for the group these stand in cites the Jäsche pages (“IX …”): the editor ties them to this part of the Logik. The header is the group’s, not each note’s.'));
+    named.forEach(([i, res, how]) => { const c = buildRefl(i, how, res); c.classList.add('named'); c.dataset.go = 're:' + i; c.title = 'Double-click to read this Reflexion as the main text'; top.appendChild(c); });
+    body.appendChild(top);
+    markPanels(top);
+  }
+  const rest = named.length ? rows.filter(r => !(r[2] & 1)) : rows;
+  if (named.length && rest.length) body.appendChild(el('div', 'rnh plain', 'Other Reflexionen paired with this selection · ' + rest.length));
+  const list = el('div'); body.appendChild(list);
+  const draw = () => {
+    list.textContent = '';
+    rest.slice(0, reflState.limit).forEach(([i, res, how]) => { const c = buildRefl(i, how, res); c.dataset.go = 're:' + i; c.title = 'Double-click to read this Reflexion as the main text'; list.appendChild(c); });
+    const left = rest.length - reflState.limit;
+    if (left > 0) {
+      const m = el('button', 'more', 'show ' + Math.min(30, left) + ' more (' + left + ' left)');
+      m.onclick = () => { reflState.limit += 30; draw(); };
+      list.appendChild(m);
+    }
+    markPanels(list);
+  };
+  draw();
+}
+
+// ── the Adickes overlay ──
+function openAdickes(which) {
+  const box = document.getElementById('box');
+  box.textContent = '';
+  const x = el('button', 'x', 'close'); x.onclick = closeBox; box.appendChild(x);
+  box.appendChild(el('h3', null, 'Adickes’ chronology of the phases of Kant’s hand'));
+  box.appendChild(el('div', 'cite', 'Erich Adickes, introduction to AA XIV, pp. XXXV–XLIII'));
+  const add = (title, o) => { box.appendChild(el('h4', null, title + ' · ' + o.aa)); box.appendChild(el('p', null, o.text)); };
+  if (which === 'hyphen') add('THE HYPHEN', ADICKES_HYPHEN_NOTE);
+  add('NOTATION', ADICKES_PREAMBLE);
+  if (which !== 'hyphen') add('THE HYPHEN', ADICKES_HYPHEN_NOTE);
+  add('INK', ADICKES_INK_NOTE);
+  box.appendChild(el('h4', null, 'THE PHASES, in Adickes’ order (chronological)'));
+  PHASES.forEach(p => {
+    const d = el('details'); d.className = eraCls(p.sym);
+    const s = el('summary'); s.appendChild(el('b', null, p.sym));
+    s.appendChild(txt(p.years || (p.relative ? 'relative position only' : 'no date')));
+    d.appendChild(s);
+    const inner = el('div', 'adnote ' + eraCls(p.sym));
+    if (p.relative) inner.appendChild(el('div', 'flag', 'Relative position only: ' + p.relative));
+    if (p.significance) inner.appendChild(el('div', 'flag', 'Significance: ' + p.significance));
+    if (p.covers) inner.appendChild(el('div', 'flag', 'Covers: ' + p.covers));
+    if (p.editorial) inner.appendChild(el('div', 'flag', p.editorial));
+    if (p.note) inner.appendChild(el('div', 'verb', p.note));
+    inner.appendChild(el('div', 'cite', 'Adickes, ' + p.aa));
+    d.appendChild(inner);
+    box.appendChild(d);
+  });
+  document.getElementById('veil').classList.add('open');
+}
+function closeBox() { document.getElementById('veil').classList.remove('open'); }
+document.getElementById('veil').addEventListener('click', e => { if (e.target.id === 'veil') closeBox(); });
+
+// ═══ init ══════════════════════════════════════════════════════════════════
+// A link may carry the text read, the selection and the texts shown: #p021&r=ja&t=bl,wi,re
+const hashParts = location.hash.slice(1).split('&');
+const hashArg = k => (hashParts.find(x => x.startsWith(k + '=')) || '').slice(k.length + 1);
+if (TEXT[hashArg('r')]) primary = hashArg('r');
+const hashTexts = hashArg('t').split(',').filter(k => TEXT[k]);
+if (hashTexts.length) TEXTS.forEach(t => { t.on = hashTexts.includes(t.k); shown[t.k] = t.on; });
+shown[primary] = true;
+buildReading(); paintReading();
+buildChips();
+buildNav(); wireNav();
+buildPrimaryPane();
+wireSearch();
+wireSplit();
+wireSuggest();
+wireAsk();
+wireTextsToggle();
+zoomButtons('prim', document.getElementById('pzoom'));
+if (hashArg('q')) document.getElementById('q').value = decodeURIComponent(hashArg('q'));
+let start = PRIM[primary].byId(hashParts[0]);
+if (start == null || start < 0) start = primary === 'ja' ? UIDX['p021'] : primary === 'me' ? MEIER_NS.indexOf(292) : 0;
+select(start, true, true);
+if (document.getElementById('q').value) runSearch();
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Executive brief — Immediate Inferences explorer</title>
+<style>
+  :root { --parchment:#f5efe0; --card:#fbf8ef; --ink:#2b2118; --soft:#5a4a3a; --rule:#d6c9a8; --accent:#5c3d1e; --tint:#e9dcc0; --warn:#8a2b1c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--parchment); color:var(--ink); font:17px/1.45 'EB Garamond', Georgia, serif; }
+  .page { max-width: 880px; margin: 0 auto; padding: 32px 28px 48px; }
+  h1 { margin:0; font:600 24px/1.2 Georgia, serif; letter-spacing:.04em; color:var(--accent); }
+  .sub { margin:4px 0 22px; color:var(--soft); font-size:15px; }
+  h2 { margin:26px 0 8px; font:600 13px/1 Georgia, serif; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); border-bottom:1px solid var(--rule); padding-bottom:5px; }
+  .bottom { background:var(--card); border:1px solid var(--rule); border-left:5px solid var(--accent); padding:14px 18px; }
+  .bottom p { margin:0 0 6px; } .bottom p:last-child { margin:0; }
+  .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px; }
+  .kpi { background:var(--card); border:1px solid var(--rule); padding:10px 12px; }
+  .kpi b { display:block; font-size:26px; line-height:1.1; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .kpi span { font-size:14px; color:var(--soft); }
+  table { width:100%; border-collapse:collapse; font-size:15.5px; }
+  th, td { text-align:left; vertical-align:top; padding:7px 8px; border-bottom:1px solid var(--rule); }
+  th { font-weight:600; color:var(--soft); font-size:13px; letter-spacing:.06em; text-transform:uppercase; }
+  .pill { display:inline-block; padding:0 8px; border-radius:10px; font-size:13px; border:1px solid; white-space:nowrap; }
+  .done { color:#2f5a2a; border-color:#2f5a2a; } .wait { color:var(--accent); border-color:var(--accent); } .risk { color:var(--warn); border-color:var(--warn); }
+  ul { margin:6px 0 0; padding-left:20px; } li { margin:0 0 5px; }
+  .ask { background:#f6e3dc; border:1px solid var(--warn); padding:12px 16px; }
+  .ask ol { margin:6px 0 0; padding-left:22px; }
+  code { font-family: Menlo, monospace; font-size: 13.5px; background: var(--tint); padding: 0 4px; }
+  .foot { margin-top:26px; font-size:13.5px; color:var(--soft); }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Immediate Inferences explorer</h1>
+  <p class="sub">Executive brief · 23 October 2026 · <code>Individuals/Nik Land/</code></p>
+
+  <h2>Bottom line</h2>
+  <div class="bottom">
+    <p><b>The explorer is built, committed and on <code>origin/main</code>.</b> It lists Kant's examples of immediate inferences from the Blomberg, Wiener and Busolt transcripts (AA 24) and the Reflexionen on Meier (AA 16). Each judgement is cited by source, volume and page, and examples can be flagged as miscategorised.</p>
+    <p><b>The diagram panel is designed but not started.</b> I stopped at your request before changing any files. Nothing in the repository changed this session.</p>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><b>101</b><span>passages, 4 sources</span></div>
+    <div class="kpi"><b>95</b><span>judgements, each with an AA page</span></div>
+    <div class="kpi"><b>0</b><span>quotes that fail to match the data</span></div>
+    <div class="kpi"><b>2</b><span>examples you've flagged (uncommitted)</span></div>
+  </div>
+
+  <h2>Where things stand</h2>
+  <table>
+    <tr><th>Item</th><th>Status</th><th>Note</th></tr>
+    <tr><td>Explorer page and its 101 curated examples</td><td><span class="pill done">Pushed</span></td><td>Judgements on the left, examples on the right; filters by kind, source and form. Every quote and judgement is verbatim and found in the data on load.</td></tr>
+    <tr><td>Flag as miscategorised</td><td><span class="pill done">Pushed</span></td><td>Writes into <code>miscategorisations.js</code> in place (Chrome or Edge). The old categorisation is kept and the replacement left empty.</td></tr>
+    <tr><td>Your flags: <code>wie-aeq-01</code>, <code>refl-contr-02</code></td><td><span class="pill wait">Uncommitted</span></td><td>They're in the file on disk but not committed yet.</td></tr>
+    <tr><td>Diagram panel</td><td><span class="pill wait">Designed, not built</span></td><td>Plan below. A data script for it is drafted in my scratch folder and has not been run.</td></tr>
+  </table>
+
+  <h2>Proposed diagram panel</h2>
+  <p>Clicking an example opens a panel on the right with one diagram that answers one question: what this inference does.</p>
+  <table>
+    <tr><th>Example kind</th><th>Diagram</th><th>Why this one</th></tr>
+    <tr><td>Conversion, contraposition, equipollence</td><td>Spheres (Euler circles), premise and conclusion side by side on the same drawing</td><td>The lectures explain these by the spheres of concepts (Blomberg AA 24:275, Busolt AA 24:671, Refl. 3189). Keeping the drawing identical and changing only the emphasis shows the Wiener point: the matter is the same, only the form differs.</td></tr>
+    <tr><td>Contradictory, contrary, subcontrary, subalternation</td><td>Square of opposition, with the passage's own judgements at the corners and the relation highlighted</td><td>This is the traditional figure. Kant's Refl. 3177 sets the judgements out the same way: universals above, particulars below.</td></tr>
+    <tr><td>Counter-examples ("also ist auch Caius sterblich")</td><td>Nested spheres with the middle term marked</td><td>It shows why these are not immediate, as Refl. 3166 puts it: "kein Mittelbegrif".</td></tr>
+    <tr><td>Definition passages; rules without an instance</td><td>A map of the kinds, following Kant's own sorting in Refl. 3170, or a schematic S / P version of the kind's diagram</td><td>Every card gets a diagram, and none is invented from text the passage lacks.</td></tr>
+  </table>
+  <p><b>Design rules:</b></p>
+  <ul>
+    <li><b>Honest about provenance.</b> Text from the passage is drawn solid; anything supplied (concept names, a missing premise) is dashed and labelled. The panel says the Academy Edition prints no figure.</li>
+    <li><b>Doesn't overclaim.</b> Where the drawing shows more than the premise says, it is flagged. One case is Wiener's contraposition to a particular ("einiges Sterbliche ist nicht Mensch"). Another is Kant's rejected conversion in Refl. 3187, which picks out an empty region.</li>
+    <li><b>Easy to read.</b> Labels go on the shapes rather than in a legend, and the geometry repeats across panels so they can be compared. The app's palette is kept, and meaning is carried by pattern and label as well as colour.</li>
+    <li><b>Usable.</b> The panel is a third column on wide screens and slides over the list on narrow ones. Esc closes it and the keyboard works throughout. Each diagram carries a text description for screen readers.</li>
+  </ul>
+  <p><b>Cost:</b> about 600 lines in the page, plus a <code>diagram</code> field on 49 examples recording the concept names and how each judgement reads as subject and predicate. That field is the annotator's reading, marked as such. The work would be checked in headless Chrome, since the app's Browser preview can't start a server here.</p>
+
+  <h2>Risk to know about</h2>
+  <p><span class="pill risk">Data</span> In the shared transcript data, a block whose first page break falls partway through records the page it <i>ends</i> on as its starting page. For example, <code>busolt-s26-044</code> says AA 24:671, but its first 328 characters are on 670. My explorer works around this. <code>inference-explorer.html</code>, committed alongside it, does not, so it can cite a page one too high. The fix belongs in <code>scripts/parse_logik.py</code>, which Sophia Wyatt and Maria own.</p>
+
+  <div class="ask">
+    <b>Decisions for you</b>
+    <ol>
+      <li>Go ahead with the diagram panel as proposed?</li>
+      <li>Should I tell the data owners about the page bug, or fix <code>inference-explorer.html</code> on your side first?</li>
+      <li>Commit your two flags now?</li>
+    </ol>
+  </div>
+
+  <p class="foot">Commits: ae313cc (explorer), b7acbaf (the earlier inference explorer), 1af3c6d (flagging), ad557f0 (writing the file in place). All are on origin/main.</p>
+</div>
+</body>
+</html>
