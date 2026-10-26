@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Logic Portal · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --paper: #faf6ec;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #d9ccb0;
+    --hl: #f1d98c;
+    --hl-strong: #e6b84a;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+
+  body {
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', serif;
+    font-size: 16px;
+    line-height: 1.4;
+    display: flex;
+    flex-direction: column;
+  }
+
+  button, input, select { font: inherit; color: inherit; }
+  a { color: var(--accent); }
+
+  .cz { font-family: 'Cinzel', serif; letter-spacing: 0.05em; }
+  .muted { color: var(--faded); }
+  .small { font-size: 0.86rem; }
+  [hidden] { display: none !important; }
+
+  /* ── Header and trail ─────────────────────────────────────────────── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    padding: 0.5rem 1.2rem;
+    background: var(--parchment-dark);
+    border-bottom: 1px solid var(--accent-light);
+  }
+
+  .brand { font-family: 'Cinzel', serif; color: var(--accent); white-space: nowrap; }
+  .brand a { text-decoration: none; color: var(--faded); font-size: 0.8rem; letter-spacing: 0.1em; }
+  .brand b { font-weight: 600; font-size: 1.15rem; letter-spacing: 0.04em; margin-left: 0.4rem; }
+
+  nav { display: flex; gap: 0.3rem; }
+  nav button, .btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 0.3rem 0.7rem;
+    color: var(--accent);
+    cursor: pointer;
+  }
+  nav button:hover, .btn:hover { border-color: var(--accent-light); }
+  nav button.on { background: var(--accent); color: var(--parchment); }
+  .btn.solid { background: var(--accent); color: var(--parchment); }
+  header .spacer { flex: 1; }
+  #status { font-size: 0.85rem; color: var(--faded); font-style: italic; }
+
+  #trail {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.3rem 1.2rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.86rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    min-height: 2rem;
+  }
+  #trail .lbl { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--faded); letter-spacing: 0.08em; margin-right: 0.3rem; }
+  #trail .step {
+    border: 1px solid var(--line);
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 0.05rem 0.6rem;
+    cursor: pointer;
+    max-width: 18rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #trail .step.cur { border-color: var(--accent-light); background: var(--parchment-dark); }
+  #trail .step.p { font-style: italic; }
+  #trail .sep { color: var(--accent-light); }
+
+  /* ── Two panes ────────────────────────────────────────────────────── */
+  #app { flex: 1; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); min-height: 0; }
+  #left { overflow: auto; padding: 1rem 1.5rem 4rem; }
+  #rail { overflow: auto; border-left: 1px solid var(--line); background: var(--paper); padding: 1rem 1.4rem 4rem; }
+
+  h2 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 1.15rem; letter-spacing: 0.03em; margin: 0 0 0.3rem; }
+  h3 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 0.82rem; letter-spacing: 0.07em; text-transform: uppercase; margin: 0 0 0.45rem; }
+  h3 .sub { text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', serif; font-weight: 400; font-style: italic; color: var(--faded); font-size: 0.92rem; margin-left: 0.3rem; }
+
+  .from { font-size: 0.8rem; color: var(--faded); margin-top: 0.35rem; }
+  .from::before { content: 'From: '; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.07em; color: var(--accent); }
+
+  /* ── Ask ──────────────────────────────────────────────────────────── */
+  form#ask { background: var(--parchment-dark); border: 1px solid var(--accent-light); border-radius: 6px; padding: 0.7rem 0.8rem; }
+  .qrow { display: flex; gap: 0.5rem; }
+  #q {
+    flex: 1;
+    font-size: 1.15rem;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid var(--accent-light);
+    border-radius: 4px;
+    background: var(--paper);
+  }
+  .opts { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; margin-top: 0.5rem; font-size: 0.92rem; align-items: center; }
+  .opts input[type=number] { width: 3.2rem; padding: 0.05rem 0.2rem; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); }
+  .opts input[type=text], .opts select { padding: 0.08rem 0.3rem; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); }
+  #co { width: 12rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
+  .chip {
+    border: 1px solid var(--accent-light);
+    background: var(--paper);
+    border-radius: 999px;
+    padding: 0.05rem 0.6rem;
+    font-size: 0.86rem;
+    cursor: pointer;
+  }
+  .chip.off { opacity: 0.45; text-decoration: line-through; }
+  .chip .lay { font-family: 'Cinzel', serif; font-size: 0.6rem; color: var(--faded); letter-spacing: 0.06em; margin-right: 0.25rem; }
+  details.help { margin-top: 0.45rem; font-size: 0.9rem; }
+  details.help summary { cursor: pointer; color: var(--accent); }
+  details.help code { background: var(--paper); padding: 0 0.25rem; border-radius: 2px; font-size: 0.85rem; }
+
+  #presets-box { margin-top: 0.8rem; }
+  #presets-box > summary { cursor: pointer; font-size: 0.74rem; letter-spacing: 0.07em; color: var(--accent); }
+  .presets { margin: 0.5rem 0 0.4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 1rem; }
+  .presets .grp { min-width: 0; }
+  .presets .grp.wide { grid-column: 1 / -1; }
+  .presets .ph { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.25rem; }
+  .presets .ph i { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-size: 0.85rem; text-transform: none; }
+  .q-chip {
+    display: inline-block;
+    border: 1px solid var(--accent-light);
+    background: var(--paper);
+    border-radius: 5px;
+    padding: 0.15rem 0.55rem;
+    margin: 0 0.25rem 0.3rem 0;
+    cursor: pointer;
+    font-size: 0.93rem;
+    text-align: left;
+  }
+  .q-chip:hover, .chip:hover { background: var(--parchment-dark); }
+  .q-chip.on { background: var(--accent); color: var(--parchment); }
+  .presets select { width: 100%; padding: 0.15rem 0.3rem; border: 1px solid var(--accent-light); border-radius: 4px; background: var(--paper); }
+
+  /* ── Results ──────────────────────────────────────────────────────── */
+  .res-head { margin: 1.1rem 0 0.6rem; }
+  .summary { font-size: 1.05rem; }
+  .note { font-style: italic; color: var(--faded); margin: 0.2rem 0 0; }
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 0.7rem 0.85rem; margin-bottom: 0.8rem; }
+
+  table.loc { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
+  table.loc th { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.64rem; letter-spacing: 0.05em; color: var(--accent); text-align: right; padding: 0.15rem 0.3rem; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+  table.loc th:first-child { text-align: left; }
+  table.loc td { padding: 0.15rem 0.3rem; border-bottom: 1px dotted var(--line); text-align: right; font-variant-numeric: tabular-nums; }
+  table.loc td:first-child { text-align: left; }
+  table.loc tr.row { cursor: pointer; }
+  table.loc tr.row:hover td { background: var(--parchment); }
+  table.loc tr.sel td { background: var(--hl); }
+  table.loc td.z { color: var(--line); }
+  table.loc td.tot { font-weight: 600; color: var(--accent); }
+  .var { font-size: 0.78rem; color: var(--faded); font-style: italic; margin-left: 0.3rem; }
+  .phr { font-style: italic; }
+
+  .dist { display: grid; grid-template-columns: auto 1fr auto; gap: 0.2rem 0.6rem; align-items: center; font-size: 0.92rem; }
+  .dist .nm { white-space: nowrap; }
+  .dist .nm .d { color: var(--faded); font-size: 0.82rem; margin-left: 0.3rem; }
+  .dist .bar { height: 0.7rem; background: var(--parchment-dark); border-radius: 2px; position: relative; overflow: hidden; }
+  .dist .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent-light); border-radius: 2px; }
+  .dist .num { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--faded); font-size: 0.85rem; }
+  .dist .num b { color: var(--ink); font-weight: 600; }
+  .dist .zero { color: var(--line); }
+
+  .tgroup { margin-top: 0.7rem; }
+  .tgroup > .th { font-family: 'Cinzel', serif; font-size: 0.78rem; letter-spacing: 0.05em; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: 0.15rem; margin-bottom: 0.35rem; }
+  .tgroup > .th span { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-size: 0.88rem; margin-left: 0.4rem; }
+  .hit { padding: 0.3rem 0.45rem; border-radius: 4px; cursor: pointer; border-left: 3px solid transparent; }
+  .hit:hover { background: var(--parchment); border-left-color: var(--accent-light); }
+  .hit.sel { background: var(--parchment-dark); border-left-color: var(--accent); }
+  .hit .cite { font-size: 0.8rem; color: var(--faded); }
+  .hit .cite b { color: var(--accent); font-weight: 600; }
+  .hit .kw { font-size: 0.97rem; }
+  mark { background: var(--hl); color: inherit; padding: 0 0.05rem; border-radius: 2px; }
+  mark.on { background: var(--hl-strong); }
+  .more { margin: 0.3rem 0 0 0.45rem; }
+  .filterbar { background: var(--hl); border-radius: 4px; padding: 0.2rem 0.5rem; margin-bottom: 0.4rem; font-size: 0.9rem; }
+
+  .empty { color: var(--faded); font-style: italic; padding: 0.6rem 0; }
+  .warn { color: #8a3b12; }
+
+  /* ── Rail: one passage and everything connected to it ─────────────── */
+  .rail-empty { color: var(--faded); font-style: italic; margin-top: 2rem; }
+  .rail-empty h2 { font-style: normal; }
+  .rail-empty ol { padding-left: 1.2rem; }
+  .ptitle { font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.8rem; letter-spacing: 0.06em; }
+  .pcite { font-size: 1.25rem; font-weight: 600; color: var(--accent); margin: 0.05rem 0; }
+  .pmeta { font-size: 0.88rem; color: var(--faded); }
+  .layer { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.08em; border: 1px solid var(--accent-light); border-radius: 3px; padding: 0 0.3rem; color: var(--accent); margin-right: 0.4rem; vertical-align: 1px; }
+  .ptext { background: var(--parchment); border: 1px solid var(--line); border-radius: 5px; padding: 0.6rem 0.75rem; margin: 0.6rem 0 0.9rem; white-space: pre-wrap; font-size: 1.02rem; max-height: 22rem; overflow: auto; }
+  .ptext.short { max-height: 9rem; }
+  .conn { border-top: 1px solid var(--line); padding-top: 0.65rem; margin-top: 0.75rem; }
+  .conn h3 { margin-bottom: 0.3rem; }
+  .how { font-size: 0.86rem; color: var(--faded); font-style: italic; }
+  .tier { font-size: 0.82rem; border-radius: 3px; padding: 0 0.3rem; margin-left: 0.3rem; font-style: normal; }
+  .tier.stated { background: #dfe8d2; color: #34501f; }
+  .tier.inferred { background: #f0e1c8; color: #7a4a14; border: 1px dashed #c9a46b; }
+  .tier.interp { background: #f0e1c8; color: #7a4a14; border: 1px dashed #c9a46b; }
+  .lnk { cursor: pointer; color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent-light); text-underline-offset: 2px; }
+  .lnk:hover { color: var(--ink); }
+  .preview { font-size: 0.93rem; margin: 0.25rem 0 0.1rem; }
+  ul.items { list-style: none; padding: 0; margin: 0.2rem 0; }
+  ul.items li { padding: 0.22rem 0.35rem; border-radius: 4px; cursor: pointer; font-size: 0.93rem; }
+  ul.items li:hover { background: var(--parchment); }
+  ul.items li .c { font-size: 0.8rem; color: var(--accent); font-weight: 600; margin-right: 0.35rem; }
+  ul.items li .d { font-size: 0.78rem; color: var(--faded); margin-left: 0.3rem; }
+  .ann { background: var(--parchment); border-radius: 4px; padding: 0.35rem 0.5rem; margin: 0.3rem 0; font-size: 0.92rem; }
+  .ann .lab { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.06em; color: var(--accent); }
+  .trad { margin: 0.3rem 0; font-size: 0.92rem; }
+  .trad b { color: var(--accent); font-weight: 600; }
+  .dives a { display: inline-block; margin: 0 0.6rem 0.2rem 0; font-size: 0.92rem; }
+
+  /* ── Texts and Contributors ───────────────────────────────────────── */
+  table.cat { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin-top: 0.4rem; }
+  table.cat th { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.06em; color: var(--accent); text-align: left; border-bottom: 1px solid var(--accent-light); padding: 0.2rem 0.4rem; }
+  table.cat td { border-bottom: 1px dotted var(--line); padding: 0.3rem 0.4rem; vertical-align: top; }
+  table.cat td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .people { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 0.7rem; margin-top: 0.6rem; }
+  .person { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 0.65rem 0.8rem; }
+  .person .nm { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; }
+  .person .hd { font-size: 0.8rem; color: var(--faded); }
+  .person p { margin: 0.35rem 0; font-size: 0.94rem; }
+  .person .uses { font-size: 0.86rem; color: var(--faded); font-style: italic; }
+  .addtext { background: var(--parchment-dark); border: 1px dashed var(--accent-light); border-radius: 6px; padding: 0.7rem 0.9rem; margin-top: 1rem; font-size: 0.95rem; }
+  .addtext code { background: var(--paper); padding: 0 0.25rem; border-radius: 2px; font-size: 0.85rem; }
+
+  /* ── Loading ──────────────────────────────────────────────────────── */
+  #loading { position: fixed; inset: 0; background: rgba(245, 239, 224, 0.96); display: flex; align-items: center; justify-content: center; z-index: 10; }
+  #loading .box { width: 22rem; text-align: center; }
+  #loading .t { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); margin-bottom: 0.6rem; }
+  #loading .bar { height: 0.4rem; background: var(--parchment-dark); border-radius: 3px; overflow: hidden; margin-top: 0.6rem; }
+  #loading .bar i { display: block; height: 100%; width: 0; background: var(--accent-light); transition: width 0.2s; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><a href="../../../index.html">KANT LAB</a><b>The Logic Portal</b></div>
+  <nav>
+    <button type="button" data-view="ask" class="on">Ask</button>
+    <button type="button" data-view="texts">Texts</button>
+    <button type="button" data-view="people">Contributors</button>
+  </nav>
+  <span class="spacer"></span>
+  <span id="status"></span>
+  <button type="button" class="btn" id="share" title="Copy a link to exactly this view">Copy link</button>
+</header>
+
+<div id="trail"><span class="lbl">TRAIL</span><span class="muted small">Your route through the corpus appears here.</span></div>
+
+<div id="app">
+  <section id="left">
+
+    <div id="view-ask">
+      <form id="ask" autocomplete="off">
+        <div class="qrow">
+          <input id="q" type="search" spellcheck="false" placeholder="A term or phrase: try  form* fals*  or  &quot;satz des widerspruchs&quot;">
+          <button type="submit" class="btn solid">Ask</button>
+        </div>
+        <div class="opts">
+          <label>Words within <input id="w" type="number" min="0" max="40" value="5"> of each other</label>
+          <label>Passages <select id="cm"><option value="">all</option><option value="with">that also mention</option><option value="without">that do not mention</option></select>
+            <input id="co" type="text" spellcheck="false" placeholder="e.g. transcend*"></label>
+          <label><input id="merge" type="checkbox" checked> merge spelling variants</label>
+        </div>
+        <div class="chips" id="textchips"></div>
+        <details class="help">
+          <summary>How to ask</summary>
+          <p><code>falsch</code> finds the word in every spelling the texts use: <i>Urtheil</i> and <i>Urteil</i>,
+          <i>Wiederspruch</i> and <i>Widerspruch</i>, <i>Principium</i> and <i>Prinzip</i>, <i>Saz</i> and <i>Satz</i>, are one word to the search.
+          <code>fals*</code> finds every word that begins so. Several words, <code>form* fals*</code>, find places where they stand
+          within the chosen number of words of each other, in any order. Quotation marks, <code>"der form nach"</code>, keep words together and in order.
+          <code>OR</code> joins alternatives. A regular expression between slashes, <code>/formali?ter/</code>, is matched against the text as printed.</p>
+          <p>The <b>Phrasings</b> table lists every distinct wording the search found, with how often each occurs in each text.
+          Click a phrasing to see only its passages. Click a passage to open it on the right, with the textbook § it belongs to,
+          Kant's notes there, and the other texts on the same §.</p>
+        </details>
+      </form>
+
+      <details id="presets-box" open><summary class="cz">Questions, doctrines and lexicons</summary><div class="presets" id="presets"></div></details>
+      <div id="results"></div>
+    </div>
+
+    <div id="view-texts" hidden></div>
+    <div id="view-people" hidden></div>
+  </section>
+
+  <aside id="rail"></aside>
+</div>
+
+<div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
+
+<script src="catalogue.js"></script>
+<script>
+(() => {
+'use strict';
+
+/* ════════════════════════════════════════════════════════════════════════
+   CONTENT: the seminar's questions, the classified doctrines, the people
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Questions the seminar has asked. Each is an ordinary search, so its settings can be read
+   off the form and changed. */
+const SEMINAR = [
+  { key: 'formal-falsehood', label: 'Formal falsehood: which locutions, how often?',
+    q: 'form* fals*', w: 4,
+    note: 'Every place where a word beginning form- stands within four words of one beginning fals-: formaliter falsch, der Form nach falsch, Falschheit der Form, falsitas formalis. The Phrasings table answers “which locutions, and how often”.' },
+  { key: 'sufficient-ground', label: 'The principle of sufficient ground: its formulations; is it in Meier?',
+    q: 'zureichend* grund* OR ratio* sufficien* OR "satz des grundes" OR "principium rationis" OR "nihil est sine ratione"', w: 3,
+    note: 'Its German and Latin formulations across the corpus. The Meier row of “Where it occurs” answers whether Meier has it; open his passages to read them. Feng’s lexicon, below, has the principle’s stock forms.' },
+  { key: 'contradiction-transcendental', label: 'The principle of contradiction in general and in transcendental logic',
+    q: 'satz* widerspr* OR principi* contradict* OR "satz der contradictio"', w: 3, cm: 'with', co: 'transcend* OR transzend*',
+    note: 'Statements of the principle in passages that also speak of the transcendental. Change the filter to  allgemein* logik*  to compare general logic. The published works, where Kant draws this distinction most fully, are not in the catalogue yet.' },
+  { key: 'opposition-contradiction', label: 'Opposition and contradiction: how do they relate?',
+    q: 'oppos* OR entgegengesetz* OR entgegensetz*', w: 5, cm: 'with', co: 'widerspr* OR contradict* OR contradictori*',
+    note: 'Passages that speak of opposition and of contradiction together. For contradiction as one kind of opposition of judgments, see Nik’s immediate inferences per judicia opposita, below.' },
+];
+
+/* Doctrines students have classified passage by passage. `build` turns their file into
+   items { pi (passage), quotes, labels, note }. */
+const DOCTRINES = [
+  { key: 'immediate', label: 'Kinds of immediate inference', who: 'nik', layer: 'immediate',
+    groups: [['general', 'What an immediate inference is'], ['aequipollentia', 'per judicia aequipollentia'], ['subalternation', 'per judicia subalternata (subalternation)'],
+      ['contradictory', 'per judicia opposita: contradictorie'], ['contrary', 'per judicia opposita: contrarie'], ['subcontrary', 'per judicia opposita: subcontrarie'],
+      ['conversion', 'per conversionem (conversion)'], ['contraposition', 'per contrapositionem (contraposition)']] },
+  { key: 'judgement', label: 'Forms of judgment, by example', who: 'nik', layer: 'judgement',
+    groups: [['universal', 'Quantity: universal'], ['particular', 'Quantity: particular'], ['singular', 'Quantity: singular'],
+      ['affirmative', 'Quality: affirmative'], ['negative', 'Quality: negative'], ['infinite', 'Quality: infinite'],
+      ['categorical', 'Relation: categorical'], ['hypothetical', 'Relation: hypothetical'], ['disjunctive', 'Relation: disjunctive'],
+      ['problematic', 'Modality: problematic'], ['assertoric', 'Modality: assertoric'], ['apodictic', 'Modality: apodictic']] },
+  { key: 'syllogism', label: 'Inferences in the lectures, by kind', who: 'nik', layer: 'inference',
+    groups: [['immediate', 'Immediate inference'], ['categorical', 'Categorical syllogism'], ['hypothetical', 'Hypothetical syllogism'], ['disjunctive', 'Disjunctive syllogism']] },
+  { key: 'mediate', label: 'Kinds of mediate inference', who: 'sophia', layer: 'mediate', groups: null },
+  { key: 'mediate-def', label: 'Mediate inference: definitions, contrasts, rules', who: 'sophia', layer: 'mediate',
+    groups: [['D', 'Defines'], ['C', 'Contrasts with immediate inference'], ['P', 'States a principle or rule']] },
+];
+
+/* The people whose work the portal reads. `key` is what PORTAL_LAYERS' `who` names. */
+const PEOPLE = [
+  { key: 'readers', name: 'Sophia Wyatt & Maria', handle: '@sophia-wyatt · @mari637-pixel',
+    did: 'Own the Meier and Baumgarten Readers and the shared data in data/: the three Logik transcripts, both volumes of Reflexionen, the Metaphysica.',
+    uses: 'Every lecture, every Reflexion and Baumgarten’s text reach the portal through the data they look after; the Meier Reader’s tradition passages appear beside Meier’s §§.',
+    tools: [['Meier Reader', '../../../meier-reader/meier-reading-guide.html'], ['Baumgarten Reader', '../../../baumgarten-reader/baumgartenreading-guide.html']] },
+  { key: 'sophia', name: 'Sophia Wyatt', handle: '@sophia-wyatt',
+    did: 'Mediate inferences: examples and definitions in the lectures and the Reflexionen, filed by kind and dated.',
+    uses: 'Answers “What kinds of mediate inference?”, and shows her filing beside every passage she classified.',
+    tools: [['Mediate inferences', '../../Sophia%20Wyatt/mediate-inferences.html']] },
+  { key: 'maria', name: 'Maria', handle: '@mari637-pixel',
+    did: 'A reading guide to Busolt, Blomberg and Meier’s Auszug, with English translations saved.',
+    uses: 'Co-owner of the shared texts the portal reads. Her reading guide is the place to read a lecture through, in English beside the German.',
+    tools: [['Logik reading guide', '../../maria/busolt-reader.html']] },
+  { key: 'alex', name: 'Alex Li', handle: '@Alexynli',
+    did: 'The Jäsche Logik as a dataset; a reader that traces Jäsche’s sentences to the dated Reflexionen; annotations of the three lectures.',
+    uses: 'The portal’s Jäsche is Alex’s edition of AA IX. Alex’s parallels between the lectures show beside the passages they join.',
+    tools: [['Jäsche reader', '../../Alex%20Li/Jasche%20reader/index.html'], ['Logic corpus', '../../Alex%20Li/logic-corpus.html']] },
+  { key: 'jesus', name: 'Jesus La Paz', handle: '@yizu6201',
+    did: 'The Meier–Kant concordance: the § of Meier each passage of the lectures and of Jäsche is on, stated or inferred, with measured confidence. And the Meier text as a data file.',
+    uses: 'Powers “Where is this in Meier?” for Blomberg, the Wiener Logik, Busolt and Jäsche, and every “Lectures on this §” list.',
+    tools: [['Meier–Kant comparison', '../../Jesus-La-Paz/meier-kant-comparison.html'], ['Logik search', '../../Jesus-La-Paz/logik-search.html']] },
+  { key: 'jin', name: 'Jin', handle: '@jessiejin23',
+    did: 'Parallel passages across Blomberg, the Wiener Logik and Busolt, found from a list of the lectures’ concepts and their wordings.',
+    uses: 'Jin’s concept list is the “Concepts of the lectures” menu: pick one and the portal searches every text for its wordings.',
+    tools: [['Parallel passages', '../../Jin/logik-transcripts.html']] },
+  { key: 'feng', name: 'Feng', handle: '@qianxun-blip',
+    did: 'A lexicon of the logical principles, with every German and Latin form under which the texts name them; a search across the texts.',
+    uses: 'Feng’s lexicon is the “Logical principles” menu: each principle searches for all of its attested forms.',
+    tools: [['Logical principles', '../../Feng/principle-search.html'], ['Text search', '../../Feng/text-search-01.html']] },
+  { key: 'nik', name: 'Nik Land', handle: '@nikolasland',
+    did: 'Examples of immediate inferences, judgments and syllogisms in the lectures and Reflexionen, each filed by kind.',
+    uses: 'Answers “What kinds of immediate inference does Kant recognise?”, and the forms of judgment and kinds of syllogism, from Nik’s filing.',
+    tools: [['Immediate inferences', '../../Nik%20Land/immediate-inferences.html'], ['Judgement explorer', '../../Nik%20Land/judgement-explorer.html'], ['Inference explorer', '../../Nik%20Land/inference-explorer.html']] },
+  { key: 'aidan', name: 'Aidan Chong', handle: '',
+    did: 'A judgment finder: the forms of judgment of the table, the terms that name them, and examples found in the lectures.',
+    uses: 'Aidan’s terms for the twelve forms are the “Forms of judgment” menu: each searches every text for the names of that form.',
+    tools: [['Judgment finder', '../../Aidan/judgment-finder.html']] },
+  { key: 'prof', name: 'The professor', handle: '@mikrishnan',
+    did: 'The first Meier and Baumgarten Readers, the Porphyrian tree, and this portal.',
+    uses: 'Also in the Lab: the Porphyrian trees everyone built in the first session.',
+    tools: [['Porphyrian tree', '../../../porphyrian-tree/porphyrian-tree.html'], ['Kant Lab', '../../../index.html']] },
+];
+
+const LAYER_LABEL = { textbook: 'TEXTBOOK', notes: 'KANT’S NOTES', lecture: 'LECTURE', compilation: 'JÄSCHE', published: 'PUBLISHED' };
+const SRC_HOW = {
+  locus: 'filed there by the Academy edition’s own locus note',
+  group: 'filed there by the Academy edition’s §-range heading over it',
+  block: 'filed there by the Academy edition’s §-range heading over it',
+  page: 'filed there by the handbook page it is written on',
+  none: 'no § stated anywhere: placed there by the extractor, from its neighbours',
+};
+
+/* ════════════════════════════════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════════════════════════════════ */
+
+const TEXTS = [];                 // the catalogue entries that loaded, in catalogue order
+const P = [];                     // every passage of every text
+const BYID = new Map();           // 'textKey:id' → passage index
+const VOCAB = [];                 // normalised word forms
+const VID = new Map();            // normalised form → index in VOCAB
+const LOWER_VID = new Map();      // lower-cased token as printed → index in VOCAB
+const LAYERS = {};                // the annotation layers that loaded, by key
+const CONC_REV = new Map();       // Meier § → [{ key, id, code }]
+const ANNOT = new Map();          // passage index → [{ who, label, text, quote }]
+const DOCS = {};                  // doctrine key → { groups: [[key,label]], items: [] }
+
+const S = {                       // what the user is looking at; mirrored in the URL
+  view: 'ask', q: '', w: 5, co: '', cm: '', merge: true, off: new Set(),
+  loc: null, d: null, sel: null, quote: null, preset: null, expand: new Set(),
+};
+let RESULT = null;
+const TRAIL = [];
+let trailPos = -1;
+
+/* ════════════════════════════════════════════════════════════════════════
+   LOADING: the catalogue's files, by plain <script src>, so that the page
+   still opens from disk
+   ════════════════════════════════════════════════════════════════════════ */
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* Inserted with async = false, the files download side by side but run in the order given. */
+function loadScript(src) {
+  return new Promise(res => {
+    const el = document.createElement('script');
+    el.src = src;
+    el.async = false;
+    el.onload = () => res(true);
+    el.onerror = () => res(false);
+    document.body.appendChild(el);
+  });
+}
+
+/* Top-level consts of a classic script are not properties of window, so a global is looked
+   up by name like this. */
+function getGlobal(name) {
+  try { return Function('return typeof ' + name + ' !== "undefined" ? ' + name + ' : undefined')(); }
+  catch (e) { return undefined; }
+}
+
+async function boot() {
+  const files = [].concat(PORTAL_LAYERS.filter(l => l.key === 'phases'), PORTAL_TEXTS, PORTAL_LAYERS.filter(l => l.key !== 'phases'));
+  const failed = [];
+  let done = 0;
+  const t0 = performance.now();
+  $('loadmsg').textContent = 'Loading ' + PORTAL_TEXTS.length + ' texts and ' + PORTAL_LAYERS.length + ' layers of the seminar’s work…';
+  const oks = await Promise.all(files.map(f => loadScript(f.file).then(ok => {
+    $('loadbar').style.width = Math.round(85 * ++done / files.length) + '%';
+    return ok;
+  })));
+  files.forEach((f, i) => { if (!oks[i] || getGlobal(f.global) === undefined) failed.push(f.title || f.key); });
+  const t1 = performance.now();
+  $('loadmsg').textContent = 'Indexing every word…';
+  $('loadbar').style.width = '92%';
+  await new Promise(r => setTimeout(r, 30));
+
+  PORTAL_LAYERS.forEach(l => { const v = getGlobal(l.global); if (v !== undefined) LAYERS[l.key] = v; });
+  PORTAL_TEXTS.forEach(T => {
+    const D = getGlobal(T.global);
+    if (D === undefined) return;
+    const t = Object.assign({ words: 0, n: 0 }, T, { idx: TEXTS.length });
+    TEXTS.push(t);
+    try { ADAPT[T.shape](t, D); } catch (e) { console.error('Could not read', T.key, e); failed.push(T.title); }
+  });
+  buildConnections();
+  buildDoctrines();
+  console.info('Logic Portal: files loaded in ' + Math.round(t1 - t0) + ' ms, indexed in ' + Math.round(performance.now() - t1) + ' ms');
+
+  $('loading').hidden = true;
+  $('status').textContent = P.length.toLocaleString('en') + ' passages · ' +
+    TEXTS.reduce((a, t) => a + t.words, 0).toLocaleString('en') + ' words · ' + TEXTS.length + ' texts' +
+    (failed.length ? ' · could not load: ' + failed.join(', ') : '');
+  if (failed.length) console.warn('Not loaded:', failed);
+
+  renderPresets();
+  renderTextChips();
+  readHash();
+  wire();
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   SPELLING: one normal form for the many spellings of a word
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Applied alike to the texts and to what the user types, so it only ever widens a match.
+   Urtheil = Urteil, Wiederspruch = Widerspruch, Principium = Prinzipium, Saz = Satz,
+   Erkenntniß = Erkenntnis, seyn = sein, qvoad = quoad, Categorie = Kategorie. */
+const NORM_CACHE = new Map();
+function normWord(lower) {
+  const c = NORM_CACHE.get(lower);
+  if (c !== undefined) return c;
+  const n = lower.normalize('NFD')
+    .replace(/([aou])[̈ͤ]/g, '$1e')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/ſ/g, 's').replace(/ß/g, 'ss').replace(/æ/g, 'ae').replace(/œ/g, 'oe')
+    .replace(/th/g, 't').replace(/qv/g, 'qu')
+    .replace(/ch/g, '\u0001').replace(/ck/g, 'k').replace(/c(?=[eiy])/g, 'z').replace(/c/g, 'k').replace(/\u0001/g, 'ch')
+    .replace(/ey/g, 'ei').replace(/y/g, 'i').replace(/ie/g, 'i').replace(/dt/g, 't').replace(/tz/g, 'z')
+    .replace(/(.)\1+/g, '$1');
+  NORM_CACHE.set(lower, n);
+  return n;
+}
+
+const WORD_RE = /[\p{L}\p{M}]+/gu;
+
+function tokenize(p) {
+  const text = p.text, ts = [], te = [], ids = [];
+  WORD_RE.lastIndex = 0;
+  let m;
+  while ((m = WORD_RE.exec(text))) {
+    const lower = m[0].toLowerCase();
+    let v = LOWER_VID.get(lower);
+    if (v === undefined) {
+      const n = normWord(lower);
+      v = VID.get(n);
+      if (v === undefined) { v = VOCAB.length; VOCAB.push(n); VID.set(n, v); }
+      LOWER_VID.set(lower, v);
+    }
+    ts.push(m.index); te.push(m.index + m[0].length); ids.push(v);
+  }
+  p.ts = Int32Array.from(ts); p.te = Int32Array.from(te); p.ids = Int32Array.from(ids);
+  return ids.length;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   READING THE TEXTS: one adapter per shape in the catalogue
+   ════════════════════════════════════════════════════════════════════════ */
+
+function addPassage(T, o) {
+  const p = Object.assign({ i: P.length, t: T.idx, sec: '', year: T.year, dateLabel: T.date }, o);
+  P.push(p);
+  BYID.set(T.key + ':' + p.id, p.i);
+  T.words += tokenize(p);
+  T.n++;
+  return p;
+}
+
+function reflDate(e) {
+  let from = null, to = null;
+  if (typeof phaseInfo === 'function') {
+    (e.ph || []).forEach(sym => {
+      const info = phaseInfo(sym);
+      if (!info) return;
+      if (info.from != null && (from == null || info.from < from)) from = info.from;
+      if (info.to != null && (to == null || info.to > to)) to = info.to;
+    });
+  }
+  if (from == null && e.phRaw) {
+    const m = String(e.phRaw).match(/(1[78]\d\d)|(\d0)er/);
+    if (m) from = to = m[1] ? +m[1] : 1700 + +m[2];
+  }
+  const yrs = from != null ? (to != null && to !== from ? from + '–' + to : String(from)) : '';
+  const label = (e.prose ? e.phRaw : (e.phRaw ? 'phase ' + e.phRaw : 'undated')) + (yrs && !e.prose ? ' · ca. ' + yrs : '');
+  return { from, to, label };
+}
+
+const ADAPT = {
+  logik(T, D) {
+    const vol = (D.meta && D.meta.volume) || T.vol;
+    const paraOf = {};
+    (D.paras || []).forEach(p => (p.blocks || []).forEach(id => { paraOf[id] = p.n; }));
+    D.sections.forEach(s => {
+      const sec = s.title || (s.headings && s.headings[0]) || s.heading || '';
+      s.blocks.forEach(b => {
+        if (!b.text || b.kind === 'rule' || b.kind === 'note') return;
+        let cite = 'AA ' + vol + ':' + b.aa + (b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '');
+        if (paraOf[b.id]) cite = '§ ' + paraOf[b.id] + ', ' + cite;
+        addPassage(T, { id: b.id, cite, aa: b.aa, text: b.text, sec, para: paraOf[b.id] || null });
+      });
+    });
+  },
+  refl(T, entries) {
+    entries.forEach((e, k) => {
+      if (e.vacat || !e.text) return;
+      const d = reflDate(e);
+      const vol = e.vol || T.vol;
+      addPassage(T, {
+        id: 'r' + e.r, cite: 'Refl. ' + e.r + (e.aa ? ', AA ' + vol + ':' + e.aa : ''), aa: e.aa, text: e.text,
+        year: d.from || T.year, dateLabel: d.label, paras: e.paras || [], src: e.src, interp: !!e.interp, entry: k,
+        sec: e.loc && e.loc.lemma ? '»' + e.loc.lemma + '«' : '',
+      });
+    });
+    T.byPara = getGlobal(T.byPara) || {};
+    T.entries = entries;
+  },
+  meier(T, D) {
+    const secs = [];
+    (D.hierarchy || []).forEach(function walk(h) {
+      if (h.para_range) secs.push({ a: h.para_range[0], b: h.para_range[1], title: h.title_de, span: h.para_range[1] - h.para_range[0] });
+      (h.sections || []).forEach(walk);
+    });
+    const secOf = n => { let best = null; secs.forEach(s => { if (n >= s.a && n <= s.b && (!best || s.span < best.span)) best = s; }); return best ? best.title : ''; };
+    Object.keys(D.paras).map(Number).sort((a, b) => a - b).forEach(n => {
+      const cit = (D.citations && D.citations[n] || '').replace(/ /g, ' ');
+      addPassage(T, { id: 'p' + n, cite: '§ ' + n + (cit ? ', ' + cit : ''), aa: null, text: D.paras[n].replace(/ +/g, ' '), sec: secOf(n), para: n });
+    });
+  },
+  metaphysica(T, D) {
+    const secs = getGlobal('MET_SECTIONS') || [];
+    const label = {};
+    secs.forEach(s => { label[s.id] = s.label; });
+    D.forEach(m => {
+      addPassage(T, { id: 'p' + m.num, cite: '§ ' + m.num + (m.aa ? ', AA 17:' + m.aa : ''), aa: m.aa,
+        text: m.text.replace(/@@\d+@@/g, ''), sec: label[m.section] || '', para: m.num });
+    });
+  },
+  passages(T, D) {
+    (D.passages || []).forEach(x => addPassage(T, { id: x.id, cite: x.cite, aa: x.aa, text: x.text, year: x.year || T.year, sec: x.sec || '' }));
+  },
+};
+
+const textByKey = key => TEXTS.find(t => t.key === key);
+const passage = (key, id) => { const i = BYID.get(key + ':' + id); return i == null ? null : P[i]; };
+
+/* ════════════════════════════════════════════════════════════════════════
+   CONNECTIONS: the seminar's layers, turned into links between passages
+   ════════════════════════════════════════════════════════════════════════ */
+
+function addAnnot(pi, a) {
+  if (pi == null) return;
+  if (!ANNOT.has(pi)) ANNOT.set(pi, []);
+  ANNOT.get(pi).push(a);
+}
+const WORK_KEY = { blomberg: 'blomberg', wiener: 'wiener', busolt: 'busolt', refl16: 'refl-logik', meier: 'refl-logik', baum: 'refl-meta' };
+function workOfBlock(id) { const m = /^(blomberg|wiener|busolt)-/.exec(id || ''); return m ? m[1] : null; }
+
+function buildConnections() {
+  // Jesus's concordance, reversed: Meier § → the lecture passages on it.
+  const C = LAYERS.concordance;
+  const addRev = (n, key, id, code) => { if (!CONC_REV.has(n)) CONC_REV.set(n, []); CONC_REV.get(n).push({ key, id, code }); };
+  const addLink = (key, id, l) => {
+    if (!l) return;
+    const [n, code, from, to] = l;
+    if (from != null && to != null && to - from <= 40) for (let k = from; k <= to; k++) addRev(k, key, id, code);
+    else addRev(n, key, id, code);
+  };
+  if (C && C.links) ['blomberg', 'wiener', 'busolt'].forEach(w => Object.entries(C.links[w] || {}).forEach(([id, l]) => addLink(w, id, l)));
+  if (LAYERS.jaescheLinks) Object.entries(LAYERS.jaescheLinks).forEach(([id, x]) => addLink('jaesche', id, x.link));
+
+  // Alex's parallels between the lectures.
+  (LAYERS.parallels || []).forEach(pa => {
+    const ps = (pa.passages || []).map(x => ({ x, p: passage(x.work, x.block) })).filter(o => o.p);
+    ps.forEach(o => addAnnot(o.p.i, { who: 'alex', label: 'Parallel · ' + pa.topic, text: pa.note || '', quote: o.x.quote,
+      links: ps.filter(q => q !== o).map(q => q.p.i) }));
+  });
+}
+
+function buildDoctrines() {
+  Object.keys(DOCS).forEach(k => { delete DOCS[k]; });
+  const push = (key, item) => { (DOCS[key] = DOCS[key] || { items: [] }).items.push(item); };
+  const lec = (work, block) => passage(WORK_KEY[work] || work, block);
+  const refl = (w, r) => passage(WORK_KEY[w] || 'refl-logik', 'r' + r);
+
+  (LAYERS.immediate || []).forEach(e => {
+    const p = e.src === 'refl16' ? refl('refl16', e.r) : lec(e.src, e.block);
+    if (!p) return;
+    const it = { pi: p.i, quotes: [e.quote].filter(Boolean), labels: e.kinds || [], note: e.note || '' };
+    push('immediate', it);
+    addAnnot(p.i, { who: 'nik', label: 'Immediate inference · ' + (e.kinds || []).join(', '), quote: e.quote, doc: 'immediate' });
+  });
+  (LAYERS.judgement || []).forEach(e => {
+    const p = lec(e.work, e.block);
+    if (!p) return;
+    const labels = [].concat(e.quantity || [], e.quality || [], e.relation || [], e.modality || []);
+    push('judgement', { pi: p.i, quotes: [e.quote].filter(Boolean), labels, note: e.judgement ? '“' + e.judgement + '”' : '' });
+    addAnnot(p.i, { who: 'nik', label: 'Judgment · ' + labels.join(', '), quote: e.quote, doc: 'judgement' });
+  });
+  (LAYERS.inference || []).forEach(e => {
+    const p = lec(e.work, e.block);
+    if (!p) return;
+    push('syllogism', { pi: p.i, quotes: [e.quote].filter(Boolean), labels: e.kind || [], note: e.form || '' });
+    addAnnot(p.i, { who: 'nik', label: 'Inference · ' + (e.kind || []).join(', ') + (e.form ? ' · ' + e.form : ''), quote: e.quote, doc: 'syllogism' });
+  });
+  const MI = LAYERS.mediate;
+  if (MI) {
+    const add = (d, isDef) => {
+      const p = d.block ? lec(workOfBlock(d.block), d.block) : refl(d.w, d.r);
+      if (!p) return;
+      const quotes = d.spans || [];
+      if (isDef) push('mediate-def', { pi: p.i, quotes, labels: [d.dtype], note: d.note || '' });
+      else push('mediate', { pi: p.i, quotes, labels: [d.kind], note: d.note || '' });
+      addAnnot(p.i, { who: 'sophia', label: (isDef ? 'Mediate inference · ' + ({ D: 'defines', C: 'contrasts with immediate', P: 'states a rule' }[d.dtype] || d.dtype) : 'Mediate inference · ' + d.kind),
+        text: d.note || '', quote: quotes[0], doc: isDef ? 'mediate-def' : 'mediate' });
+    };
+    (MI.lecEx || []).forEach(d => add(d, false));
+    (MI.reflEx || []).forEach(d => add(d, false));
+    (MI.lecDef || []).forEach(d => add(d, true));
+    (MI.reflDef || []).forEach(d => add(d, true));
+  }
+  DOCTRINES.forEach(d => {
+    const D = DOCS[d.key];
+    if (!D) return;
+    D.groups = d.groups || [...new Set(D.items.flatMap(i => i.labels))].sort().map(k => [k, k]);
+  });
+}
+
+/* Where a passage sits in a textbook: { book, paras, how, tier ('stated'|'inferred'|'interp'), who }. */
+function placeOf(p) {
+  const T = TEXTS[p.t];
+  if (T.shape === 'meier' || T.shape === 'metaphysica') return null;
+  if (T.shape === 'refl') {
+    if (!p.paras || !p.paras.length) return null;
+    return { book: T.on, paras: p.paras, how: SRC_HOW[p.src] || '', tier: p.interp ? 'interp' : 'stated', who: 'readers' };
+  }
+  let l = null;
+  if (T.key === 'jaesche') { const x = LAYERS.jaescheLinks && LAYERS.jaescheLinks[p.id]; l = x && x.link; }
+  else if (LAYERS.concordance && LAYERS.concordance.links[T.key]) l = LAYERS.concordance.links[T.key][p.id];
+  if (!l) return null;
+  const [n, code, from, to] = l;
+  const meta = LAYERS.concordance.meta;
+  const conf = meta.confidence && meta.confidence.table[T.key] && meta.confidence.table[T.key][code];
+  let how = (meta.tiers && meta.tiers[code]) || code;
+  if (conf) how += ' · ' + conf.pct + '% of links so marked were right within ±2 §§ when checked (n = ' + conf.n + ')';
+  const paras = from != null && to != null ? range(from, to) : [n];
+  return { book: 'meier', paras, how, tier: (code === 'S' || code === 'A') ? 'stated' : 'inferred', who: 'jesus' };
+}
+const range = (a, b) => { const r = []; for (let k = a; k <= b; k++) r.push(k); return r; };
+
+/* ════════════════════════════════════════════════════════════════════════
+   ASKING: parsing the question, and finding it in every passage
+   ════════════════════════════════════════════════════════════════════════ */
+
+const MASKS = new Map();
+function termMask(word) {
+  const lower = word.toLowerCase();
+  const pieces = lower.split('*');
+  const src = '^' + pieces.map((piece, k) => {
+    if (!piece) return '';
+    let n = normWord(piece).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // A stem cut off at c could go on as k, z or ch.
+    if (k < pieces.length - 1 && /c$/.test(piece)) n = n.replace(/k$/, '(?:k|z|ch)');
+    return n;
+  }).join('.*') + '$';
+  if (MASKS.has(src)) return MASKS.get(src);
+  const mask = new Uint8Array(VOCAB.length);
+  const exact = !lower.includes('*');
+  if (exact) { const v = VID.get(normWord(lower)); if (v != null) mask[v] = 1; }
+  else { const rx = new RegExp(src); for (let v = 0; v < VOCAB.length; v++) if (rx.test(VOCAB[v])) mask[v] = 1; }
+  MASKS.set(src, mask);
+  return mask;
+}
+
+/* query  := alt ( OR alt )*
+   alt    := unit+            all units within `w` words of one another, any order
+   unit   := word | "phrase"  a word may carry * ; a phrase keeps its words together, in order
+   or an alt is a /regular expression/ matched against the text as printed. */
+function parseQuery(src) {
+  const alts = [];
+  let cur = [];
+  const re = /\/((?:\\.|[^\\\/])+)\/(?=\s|$)|"([^"]+)"|(\S+)/g;
+  let m;
+  const close = () => { if (cur.length) alts.push({ units: cur }); cur = []; };
+  while ((m = re.exec(src))) {
+    if (m[1] != null) {
+      close();
+      try { alts.push({ rx: new RegExp(m[1], 'giu'), label: m[1] }); } catch (e) { alts.push({ bad: m[1] }); }
+      continue;
+    }
+    if (m[3] === 'OR' || m[3] === '|') { close(); continue; }
+    const words = (m[2] != null ? m[2] : m[3]).match(/[\p{L}\p{M}*]+/gu) || [];
+    if (!words.length) continue;
+    if (m[2] != null || words.length > 1) cur.push({ masks: words.map(termMask), label: words.join(' ') });
+    else cur.push({ masks: [termMask(words[0])], label: words[0] });
+  }
+  close();
+  return alts;
+}
+
+function unitPositions(p, u) {
+  const ids = p.ids, L = u.masks.length, m0 = u.masks[0], out = [];
+  for (let k = 0, end = ids.length - L; k <= end; k++) {
+    if (!m0[ids[k]]) continue;
+    let ok = true;
+    for (let j = 1; j < L; j++) if (!u.masks[j][ids[k + j]]) { ok = false; break; }
+    if (ok) out.push(k);
+  }
+  return out;
+}
+
+function altSpans(p, alt, w) {
+  if (alt.rx) return rxSpans(p, alt.rx);
+  if (!alt.units) return [];
+  const pos = alt.units.map(u => unitPositions(p, u));
+  if (pos.some(a => !a.length)) return [];
+  const len = alt.units.map(u => u.masks.length);
+  if (pos.length === 1) return pos[0].map(k => [k, k + len[0] - 1]);
+  let ai = 0;
+  pos.forEach((a, i) => { if (a.length < pos[ai].length) ai = i; });
+  const out = [];
+  for (const k of pos[ai]) {
+    let lo = k, hi = k + len[ai] - 1, ok = true;
+    for (let u = 0; u < pos.length && ok; u++) {
+      if (u === ai) continue;
+      let best = -1, bd = Infinity;
+      for (const j of pos[u]) { if (j === k) continue; const d = Math.abs(j - k); if (d < bd) { bd = d; best = j; } }
+      if (best < 0 || bd > w + Math.max(len[ai], len[u]) - 1) ok = false;
+      else { lo = Math.min(lo, best); hi = Math.max(hi, best + len[u] - 1); }
+    }
+    if (ok) out.push([lo, hi]);
+  }
+  return out;
+}
+
+function tokenAt(p, off, last) {
+  // the first token ending after `off` (or, with `last`, the last token starting before it)
+  let lo = 0, hi = p.ts.length - 1, ans = -1;
+  if (!last) { while (lo <= hi) { const mid = (lo + hi) >> 1; if (p.te[mid] > off) { ans = mid; hi = mid - 1; } else lo = mid + 1; } }
+  else { while (lo <= hi) { const mid = (lo + hi) >> 1; if (p.ts[mid] < off) { ans = mid; lo = mid + 1; } else hi = mid - 1; } }
+  return ans;
+}
+function rxSpans(p, rx, firstOnly) {
+  const out = [];
+  rx.lastIndex = 0;
+  let m;
+  while ((m = rx.exec(p.text))) {
+    if (!m[0].length) { rx.lastIndex++; continue; }
+    const a = tokenAt(p, m.index, false), b = tokenAt(p, m.index + m[0].length, true);
+    if (a >= 0 && b >= a) { out.push([a, b]); if (firstOnly) break; }
+  }
+  return out;
+}
+
+function dedupe(spans) {
+  spans.sort((x, y) => x[0] - y[0] || y[1] - x[1]);
+  const out = [];
+  let last = -1;
+  for (const s of spans) if (s[0] > last) { out.push(s); last = s[1]; }
+  return out;
+}
+
+function runQuery() {
+  const alts = parseQuery(S.q);
+  if (!alts.length) return null;
+  const bad = alts.filter(a => a.bad).map(a => a.bad);
+  const coAlts = S.cm && S.co.trim() ? parseQuery(S.co) : null;
+  const w = Math.max(0, +S.w || 0);
+  const matches = [];
+  let coWith = 0, coWithout = 0;
+  for (const p of P) {
+    if (S.off.has(TEXTS[p.t].key)) continue;
+    let spans = [];
+    for (const alt of alts) { const s = altSpans(p, alt, w); if (s.length) spans = spans.concat(s); }
+    if (!spans.length) continue;
+    if (coAlts) {
+      const has = coAlts.some(alt => altSpans(p, alt, w).length > 0);
+      if (has) coWith++; else coWithout++;
+      if ((S.cm === 'with') !== has) continue;
+    }
+    dedupe(spans).forEach(([a, b]) => matches.push({ p: p.i, a, b }));
+  }
+  return summarise({ alts, bad, matches, coWith, coWithout });
+}
+
+function surfaceOf(p, a, b) {
+  return p.text.slice(p.ts[a], p.te[b]).replace(/[|¬]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+function normKey(p, a, b) {
+  const out = [];
+  for (let k = a; k <= b; k++) out.push(VOCAB[p.ids[k]]);
+  return out.join(' ');
+}
+
+function summarise(R) {
+  const byText = new Map(), locs = new Map(), byPass = new Map();
+  for (const m of R.matches) {
+    const p = P[m.p];
+    const bt = byText.get(p.t) || { n: 0, ps: new Set() };
+    bt.n++; bt.ps.add(m.p); byText.set(p.t, bt);
+    const surface = surfaceOf(p, m.a, m.b);
+    const key = S.merge ? normKey(p, m.a, m.b) : surface;
+    let L = locs.get(key);
+    if (!L) { L = { key, n: 0, byText: new Map(), surfaces: new Map() }; locs.set(key, L); }
+    L.n++;
+    L.byText.set(p.t, (L.byText.get(p.t) || 0) + 1);
+    L.surfaces.set(surface, (L.surfaces.get(surface) || 0) + 1);
+    m.loc = key;
+    if (!byPass.has(m.p)) byPass.set(m.p, []);
+    byPass.get(m.p).push(m);
+  }
+  locs.forEach(L => { L.label = [...L.surfaces.entries()].sort((x, y) => y[1] - x[1])[0][0]; });
+  R.byText = byText;
+  R.locs = [...locs.values()].sort((x, y) => y.n - x.n || x.label.localeCompare(y.label));
+  R.byPass = byPass;
+  return R;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   RENDERING: the Ask pane
+   ════════════════════════════════════════════════════════════════════════ */
+
+function renderPresets() {
+  let h = '<div class="grp wide"><div class="ph">QUESTIONS FROM THE SEMINAR</div>' +
+    SEMINAR.map(s => '<button type="button" class="q-chip" data-seminar="' + s.key + '">' + esc(s.label) + '</button>').join('') + '</div>';
+  const docs = DOCTRINES.filter(d => DOCS[d.key] && DOCS[d.key].items.length);
+  if (docs.length) h += '<div class="grp wide"><div class="ph">DOCTRINES THE SEMINAR HAS CLASSIFIED <i>passage by passage</i></div>' +
+    docs.map(d => '<button type="button" class="q-chip" data-doc="' + d.key + '">' + esc(d.label) + ' <span class="muted small">· ' + esc(personName(d.who)) + '</span></button>').join('') + '</div>';
+  const lex = LAYERS.principles;
+  if (lex) {
+    const groups = getGlobal('PRINCIPLE_GROUPS') || {};
+    const byG = {};
+    lex.forEach(pr => { (byG[pr.group] = byG[pr.group] || []).push(pr); });
+    h += '<div class="grp"><div class="ph">LOGICAL PRINCIPLES <i>Feng’s lexicon</i></div><select id="sel-principle"><option value="">Choose a principle…</option>' +
+      Object.keys(byG).map(g => '<optgroup label="' + esc(groupName(groups, g)) + '">' + byG[g].map(pr => '<option value="' + esc(pr.id) + '">' + esc(pr.en) + '</option>').join('') + '</optgroup>').join('') +
+      '</select></div>';
+  }
+  const jin = LAYERS.concepts;
+  if (jin) {
+    const byG = {};
+    jin.forEach(c => { (byG[c.group] = byG[c.group] || []).push(c); });
+    h += '<div class="grp"><div class="ph">CONCEPTS OF THE LECTURES <i>Jin’s list</i></div><select id="sel-concept"><option value="">Choose a concept…</option>' +
+      Object.keys(byG).map(g => '<optgroup label="' + esc(g) + '">' + byG[g].map(c => '<option value="' + esc(c.id) + '">' + esc(c.label) + '</option>').join('') + '</optgroup>').join('') +
+      '</select></div>';
+  }
+  const forms = LAYERS.forms;
+  if (forms) {
+    const byG = {};
+    forms.forEach(f => { (byG[f.group] = byG[f.group] || []).push(f); });
+    h += '<div class="grp"><div class="ph">FORMS OF JUDGMENT <i>Aidan’s terms</i></div><select id="sel-form"><option value="">Choose a form…</option>' +
+      Object.keys(byG).map(g => '<optgroup label="' + esc(g) + '">' + byG[g].map(f => '<option value="' + esc(f.id) + '">' + esc(f.en + ' (' + f.de + ', ' + f.la + ')') + '</option>').join('') + '</optgroup>').join('') +
+      '</select></div>';
+  }
+  $('presets').innerHTML = h;
+}
+function groupName(groups, g) {
+  const v = groups[g] || (Array.isArray(groups) ? groups.find(x => String(x.id || x.key) === String(g)) : null);
+  if (!v) return 'Group ' + g;
+  return typeof v === 'string' ? v : (v.label || v.name || v.en || ('Group ' + g));
+}
+function personName(key) { const p = PEOPLE.find(x => x.key === key); return p ? p.name : key; }
+
+function renderTextChips() {
+  $('textchips').innerHTML = TEXTS.map(t => '<span class="chip' + (S.off.has(t.key) ? ' off' : '') + '" data-text="' + t.key + '" title="' + esc(t.title + ', ' + t.date) + '"><span class="lay">' + esc(LAYER_LABEL[t.layer] || '') + '</span>' + esc(t.short) + '</span>').join('');
+}
+
+function syncForm() {
+  $('q').value = S.q;
+  $('w').value = S.w;
+  $('co').value = S.co;
+  $('cm').value = S.cm;
+  $('merge').checked = S.merge;
+  document.querySelectorAll('[data-seminar]').forEach(b => b.classList.toggle('on', S.preset && S.preset.key === b.dataset.seminar));
+  document.querySelectorAll('[data-doc]').forEach(b => b.classList.toggle('on', S.d === b.dataset.doc));
+  renderTextChips();
+}
+
+function renderResults() {
+  const box = $('results');
+  if (S.d) return renderDoctrine(box);
+  if (!S.q.trim()) {
+    box.innerHTML = '<div class="empty">Ask about a term or a phrase, or pick one of the seminar’s questions above.</div>';
+    return;
+  }
+  RESULT = runQuery();
+  const R = RESULT;
+  if (!R) { box.innerHTML = '<div class="empty">Nothing to look for in that question.</div>'; return; }
+  const nPass = R.byPass.size, nTexts = R.byText.size;
+  const shown = TEXTS.filter(t => !S.off.has(t.key));
+  let h = '<div class="res-head">';
+  if (S.preset) h += '<h2>' + esc(S.preset.label) + '</h2>';
+  h += '<div class="summary"><b>' + R.matches.length.toLocaleString('en') + '</b> occurrence' + (R.matches.length === 1 ? '' : 's') +
+    ' in <b>' + nPass + '</b> passage' + (nPass === 1 ? '' : 's') + ', in ' + nTexts + ' of ' + shown.length + ' texts';
+  if (S.cm && S.co.trim()) h += ' · only passages that ' + (S.cm === 'with' ? 'also mention' : 'do not mention') + ' <i>' + esc(S.co) + '</i> (' +
+    (S.cm === 'with' ? R.coWith + ' do, ' + R.coWithout + ' do not' : R.coWithout + ' do not, ' + R.coWith + ' do') + ')';
+  h += '</div>';
+  if (R.bad.length) h += '<div class="warn small">Not a regular expression the browser accepts: ' + R.bad.map(esc).join(', ') + '</div>';
+  if (S.preset && S.preset.note) h += '<p class="note">' + esc(S.preset.note) + '</p>';
+  if (S.preset && S.preset.who) h += '<div class="from">' + esc(S.preset.credit) + '</div>';
+  h += '</div>';
+
+  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">No passage has it. Try a * to widen a word, or more words between.</div>'; return; }
+
+  // Phrasings
+  const cols = TEXTS.filter(t => R.byText.has(t.idx));
+  const LIM = S.expand.has('locs') ? 1e9 : 25;
+  h += '<section class="card"><h3>Phrasings<span class="sub">every distinct wording found, most frequent first · click one to see its passages</span></h3>' +
+    '<table class="loc"><thead><tr><th>Phrasing</th><th>All</th>' + cols.map(t => '<th title="' + esc(t.title) + '">' + esc(t.short) + '</th>').join('') + '</tr></thead><tbody>';
+  R.locs.slice(0, LIM).forEach(L => {
+    const vars = L.surfaces.size > 1 ? '<span class="var" title="' + esc([...L.surfaces.keys()].join(' · ')) + '">+' + (L.surfaces.size - 1) + ' spelling' + (L.surfaces.size > 2 ? 's' : '') + '</span>' : '';
+    h += '<tr class="row' + (S.loc === L.key ? ' sel' : '') + '" data-loc="' + esc(L.key) + '"><td><span class="phr">' + esc(L.label) + '</span>' + vars + '</td><td class="tot">' + L.n + '</td>' +
+      cols.map(t => { const n = L.byText.get(t.idx) || 0; return '<td class="' + (n ? '' : 'z') + '">' + (n || '·') + '</td>'; }).join('') + '</tr>';
+  });
+  h += '</tbody></table>';
+  if (R.locs.length > LIM) h += '<button type="button" class="btn more" data-expand="locs">Show all ' + R.locs.length + ' phrasings</button>';
+  h += '</section>';
+
+  // Where it occurs
+  const rates = shown.map(t => { const bt = R.byText.get(t.idx); return { t, n: bt ? bt.n : 0, ps: bt ? bt.ps.size : 0, rate: bt ? bt.n / t.words * 10000 : 0 }; });
+  const maxRate = Math.max(...rates.map(r => r.rate), 1e-9);
+  h += '<section class="card"><h3>Where it occurs<span class="sub">occurrences in each text, and how often per 10,000 words, so that long and short texts compare</span></h3><div class="dist">' +
+    rates.map(r => '<div class="nm">' + esc(r.t.short) + '<span class="d">' + esc(r.t.date) + '</span></div>' +
+      '<div class="bar"><i style="width:' + (100 * r.rate / maxRate).toFixed(1) + '%"></i></div>' +
+      '<div class="num">' + (r.n ? '<b>' + r.n + '</b> in ' + r.ps + ' passage' + (r.ps === 1 ? '' : 's') + ' · ' + r.rate.toFixed(r.rate < 1 ? 2 : 1) + ' per 10k' : '<span class="zero">none</span>') + '</div>').join('') +
+    '</div></section>';
+
+  // Passages
+  h += '<section class="card"><h3>Passages<span class="sub">in the order of the texts · click one to follow it</span></h3>';
+  if (S.loc) { const L = R.locs.find(x => x.key === S.loc); h += '<div class="filterbar">Only passages with <i>' + esc(L ? L.label : S.loc) + '</i> · <span class="lnk" data-loc="">show all</span></div>'; }
+  TEXTS.forEach(t => {
+    let ps = [...R.byPass.keys()].filter(i => P[i].t === t.idx);
+    if (S.loc) ps = ps.filter(i => R.byPass.get(i).some(m => m.loc === S.loc));
+    if (!ps.length) return;
+    ps.sort((a, b) => a - b);
+    const lim = S.expand.has(t.key) ? 1e9 : 12;
+    h += '<div class="tgroup"><div class="th">' + esc(t.title) + '<span>' + esc(t.date) + ' · ' + ps.length + ' passage' + (ps.length === 1 ? '' : 's') + '</span></div>';
+    ps.slice(0, lim).forEach(i => { h += hitCard(P[i], R.byPass.get(i)); });
+    if (ps.length > lim) h += '<button type="button" class="btn more" data-expand="' + t.key + '">Show all ' + ps.length + '</button>';
+    h += '</div>';
+  });
+  h += '</section>';
+  box.innerHTML = h;
+}
+
+function hitCard(p, ms) {
+  const focus = (S.loc && ms.find(m => m.loc === S.loc)) || ms[0];
+  const T = TEXTS[p.t];
+  const a = Math.max(0, p.ts[focus.a] - 170), b = Math.min(p.text.length, p.te[focus.b] + 170);
+  const spans = ms.map(m => [p.ts[m.a], p.te[m.b], m.loc === S.loc]);
+  const place = placeOf(p);
+  const tag = place ? ' · ' + (place.book === 'baumgarten' ? 'Baumgarten' : 'Meier') + ' ' + paraLabel(place.paras) : '';
+  return '<div class="hit' + (S.sel === p.i ? ' sel' : '') + '" data-open="' + p.i + '"><div class="cite"><b>' + esc(p.cite) + '</b>' +
+    (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : '') + esc(tag) + (ms.length > 1 ? ' · ' + ms.length + ' times' : '') + '</div>' +
+    '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, spans) + (b < p.text.length ? ' …' : '') + '</div></div>';
+}
+
+function paraLabel(paras) {
+  if (!paras || !paras.length) return '';
+  if (paras.length === 1) return '§ ' + paras[0];
+  const runs = [];
+  paras.forEach(n => { const l = runs[runs.length - 1]; if (l && n === l[1] + 1) l[1] = n; else runs.push([n, n]); });
+  return '§§ ' + runs.map(r => r[0] === r[1] ? r[0] : r[0] + '–' + r[1]).join(', ');
+}
+
+/* The text between a and b, escaped, with the given [start, end, strong] spans marked. */
+function marked(text, a, b, spans) {
+  const ss = spans.filter(s => s[1] > a && s[0] < b).sort((x, y) => x[0] - y[0]);
+  let out = '', pos = a;
+  ss.forEach(([s, e, strong]) => {
+    s = Math.max(s, pos); e = Math.min(e, b);
+    if (e <= s) return;
+    out += esc(text.slice(pos, s)) + '<mark' + (strong ? ' class="on"' : '') + '>' + esc(text.slice(s, e)) + '</mark>';
+    pos = e;
+  });
+  return out + esc(text.slice(pos, b));
+}
+
+function renderDoctrine(box) {
+  const d = DOCTRINES.find(x => x.key === S.d);
+  const D = d && DOCS[d.key];
+  if (!D) { box.innerHTML = '<div class="empty">That classification did not load.</div>'; return; }
+  const cols = TEXTS.filter(t => D.items.some(it => P[it.pi].t === t.idx));
+  let h = '<div class="res-head"><h2>' + esc(d.label) + '</h2><div class="summary"><b>' + D.items.length + '</b> passages, each filed by hand by ' + esc(personName(d.who)) + '</div>' +
+    '<div class="from">' + esc(personName(d.who)) + '’s classification · ' + esc((PEOPLE.find(x => x.key === d.who) || {}).did || '') + '</div></div>';
+  h += '<section class="card"><h3>The kinds<span class="sub">how many passages are filed under each, in each text · click a kind to see only its passages</span></h3><table class="loc"><thead><tr><th>Kind</th><th>All</th>' +
+    cols.map(t => '<th>' + esc(t.short) + '</th>').join('') + '</tr></thead><tbody>';
+  D.groups.forEach(([k, label]) => {
+    const its = D.items.filter(it => it.labels.includes(k));
+    if (!its.length) return;
+    h += '<tr class="row' + (S.loc === k ? ' sel' : '') + '" data-loc="' + esc(k) + '"><td>' + esc(label) + '</td><td class="tot">' + its.length + '</td>' +
+      cols.map(t => { const n = its.filter(it => P[it.pi].t === t.idx).length; return '<td class="' + (n ? '' : 'z') + '">' + (n || '·') + '</td>'; }).join('') + '</tr>';
+  });
+  h += '</tbody></table></section>';
+  h += '<section class="card"><h3>Passages</h3>';
+  if (S.loc) h += '<div class="filterbar">Only <i>' + esc((D.groups.find(g => g[0] === S.loc) || [0, S.loc])[1]) + '</i> · <span class="lnk" data-loc="">show all</span></div>';
+  D.groups.forEach(([k, label]) => {
+    if (S.loc && S.loc !== k) return;
+    const its = D.items.filter(it => it.labels.includes(k)).sort((x, y) => x.pi - y.pi);
+    if (!its.length) return;
+    const lim = S.expand.has('d:' + k) ? 1e9 : 8;
+    h += '<div class="tgroup"><div class="th">' + esc(label) + '<span>' + its.length + '</span></div>';
+    its.slice(0, lim).forEach(it => {
+      const p = P[it.pi], T = TEXTS[p.t];
+      const sp = quoteSpans(p.text, it.quotes);
+      const f = sp[0] || [0, Math.min(p.text.length, 300)];
+      const a = Math.max(0, f[0] - 120), b = Math.min(p.text.length, f[1] + 120);
+      h += '<div class="hit' + (S.sel === p.i ? ' sel' : '') + '" data-open="' + p.i + '" data-quote="' + esc(it.quotes[0] || '') + '"><div class="cite"><b>' + esc(T.short) + ', ' + esc(p.cite) + '</b>' +
+        (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : ' · ' + esc(T.date)) + (it.note ? ' · <i>' + esc(it.note) + '</i>' : '') + (it.quotes.length && !sp.length ? ' · <span class="warn">quote not found in the current text</span>' : '') + '</div>' +
+        '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, sp.map(s => [s[0], s[1], true])) + (b < p.text.length ? ' …' : '') + '</div></div>';
+    });
+    if (its.length > lim) h += '<button type="button" class="btn more" data-expand="d:' + esc(k) + '">Show all ' + its.length + '</button>';
+    h += '</div>';
+  });
+  h += '</section>';
+  box.innerHTML = h;
+}
+
+function quoteSpans(text, quotes) {
+  const out = [];
+  (quotes || []).forEach(q => {
+    if (!q) return;
+    let i = text.indexOf(q);
+    if (i < 0) i = text.replace(/\s+/g, ' ').indexOf(q.replace(/\s+/g, ' '));
+    if (i >= 0) out.push([i, i + q.length]);
+  });
+  return out;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   RENDERING: the rail, one passage and everything connected to it
+   ════════════════════════════════════════════════════════════════════════ */
+
+function renderRailEmpty() {
+  $('rail').innerHTML = '<div class="rail-empty"><h2>Follow</h2><p>Open any passage to see where it sits in the corpus:</p><ol>' +
+    '<li>the textbook § it is on, and how we know;</li><li>Kant’s notes on that §, dated;</li><li>the lectures and Jäsche on the same §;</li>' +
+    '<li>what the seminar has said about it.</li></ol><p>Every step goes on the trail above, so you can go back, or copy a link to the route.</p></div>';
+}
+
+function renderRail() {
+  if (S.sel == null || !P[S.sel]) return renderRailEmpty();
+  const p = P[S.sel], T = TEXTS[p.t];
+  let spans = [];
+  if (RESULT && RESULT.byPass && RESULT.byPass.has(p.i) && !S.d) spans = RESULT.byPass.get(p.i).map(m => [p.ts[m.a], p.te[m.b], m.loc === S.loc]);
+  if (S.quote) spans = spans.concat(quoteSpans(p.text, [S.quote]).map(s => [s[0], s[1], true]));
+  let h = '<div class="ptitle"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
+    '<div class="pcite">' + esc(p.cite) + '</div>' +
+    '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>' +
+    '<div class="ptext" lang="de">' + marked(p.text, 0, p.text.length, spans) + '</div>';
+
+  // 1. Where is this in the textbook?
+  const place = placeOf(p);
+  if (place) {
+    const book = textByKey(place.book);
+    const bookName = book ? book.short : place.book;
+    h += '<div class="conn"><h3>Where is this in ' + esc(bookName) + '?</h3>';
+    h += '<div><span class="lnk" data-para="' + place.book + ':' + place.paras[0] + '">' + esc(bookName + ' ' + paraLabel(place.paras)) + '</span>' +
+      '<span class="tier ' + place.tier + '">' + (place.tier === 'stated' ? 'stated' : place.tier === 'interp' ? 'interpolated' : 'inferred') + '</span></div>';
+    h += '<div class="how">' + esc(place.how) + '</div>';
+    const bp = book && passage(book.key, 'p' + place.paras[0]);
+    if (bp) h += '<div class="preview" lang="de">' + esc(clip(bp.text, 300)) + '</div>';
+    h += '<div class="from">' + esc(place.who === 'jesus' ? 'Jesus La Paz’s Meier–Kant concordance' + (T.key === 'jaesche' ? ', re-keyed to Alex Li’s Jäsche' : '') : 'the Academy edition, through the shared Reflexionen data') + '</div></div>';
+    h += railForPara(place.book, place.paras[0], p);
+  } else if (T.shape === 'meier' || T.shape === 'metaphysica') {
+    h += railForPara(T.key, p.para, p);
+  } else if (T.shape !== 'passages') {
+    h += '<div class="conn"><h3>Where is this in Meier?</h3><div class="empty">No link for this passage yet.</div></div>';
+  }
+
+  // 4. What the seminar has said about it
+  const an = ANNOT.get(p.i) || [];
+  if (an.length) {
+    h += '<div class="conn"><h3>What the seminar has said about it</h3>';
+    an.forEach(a => {
+      h += '<div class="ann"><div class="lab">' + esc(a.label) + '</div>' + (a.text ? '<div>' + esc(a.text) + '</div>' : '') +
+        (a.links && a.links.length ? '<div class="small">Parallel in: ' + a.links.map(i => '<span class="lnk" data-open="' + i + '">' + esc(TEXTS[P[i].t].short + ', ' + P[i].cite) + '</span>').join(' · ') + '</div>' : '') +
+        (a.doc ? '<div class="small"><span class="lnk" data-doc="' + a.doc + '">See every passage so filed</span></div>' : '') +
+        '<div class="from">' + esc(personName(a.who)) + '</div></div>';
+    });
+    h += '</div>';
+  }
+
+  // Deep dives into the students' own tools
+  const dives = divesFor(T, p);
+  if (dives.length) h += '<div class="conn"><h3>Go deeper</h3><div class="dives">' + dives.map(([l, u]) => '<a href="' + u + '" target="_blank" rel="noopener">' + esc(l) + ' ↗</a>').join('') + '</div></div>';
+  $('rail').innerHTML = h;
+  $('rail').scrollTop = 0;
+}
+
+const clip = (s, n) => s.length > n ? s.slice(0, n).replace(/\s+\S*$/, '') + ' …' : s;
+
+/* Everything hung on one § of a textbook: the § itself, Kant's notes on it, the lectures on it,
+   the tradition behind it. `from` is the passage we came from, left out of the lists. */
+function railForPara(bookKey, n, from) {
+  const book = textByKey(bookKey);
+  if (!book || n == null) return '';
+  let h = '';
+  const self = from && TEXTS[from.t].key === bookKey;
+  // Kant's notes on this §
+  const notes = TEXTS.find(t => t.shape === 'refl' && t.on === bookKey);
+  if (notes && notes.byPara) {
+    const idx = notes.byPara[n] || [];
+    const ps = idx.map(k => notes.entries[k]).filter(Boolean).map(e => passage(notes.key, 'r' + e.r)).filter(q => q && (!from || q.i !== from.i));
+    ps.sort((a, b) => (a.year || 9999) - (b.year || 9999) || a.i - b.i);
+    h += '<div class="conn"><h3>Kant’s notes on ' + esc(book.short) + ' § ' + n + '<span class="sub">' + ps.length + ', oldest first, dated by Adickes</span></h3>';
+    if (ps.length) h += listItems(ps, 'notes:' + bookKey + n, q => '<span class="c">Refl. ' + q.id.slice(1) + '</span>' + esc(clip(q.text.replace(/\s+/g, ' '), 110)) + '<span class="d">' + esc(q.dateLabel) + (q.interp ? ' · interpolated §' : '') + '</span>');
+    else h += '<div class="empty">The Academy edition files no Reflexion under this §.</div>';
+    h += '<div class="from">the Academy edition’s filing, through the shared Reflexionen data (Sophia Wyatt &amp; Maria); dates from Adickes’ phases</div></div>';
+  }
+  // Lectures and Jäsche on this §
+  if (bookKey === 'meier') {
+    const links = (CONC_REV.get(n) || []).map(x => ({ x, p: passage(x.key, x.id) })).filter(o => o.p && (!from || o.p.i !== from.i));
+    links.sort((a, b) => a.p.t - b.p.t || a.p.i - b.p.i);
+    h += '<div class="conn"><h3>The lectures and Jäsche on Meier § ' + n + '<span class="sub">' + links.length + ' passages</span></h3>';
+    if (links.length) {
+      TEXTS.filter(t => links.some(o => o.p.t === t.idx)).forEach(t => {
+        const ls = links.filter(o => o.p.t === t.idx);
+        h += '<div class="small cz" style="margin-top:0.35rem;color:var(--accent)">' + esc(t.short.toUpperCase()) + ' <span class="muted">' + esc(t.date) + '</span></div>';
+        h += listItems(ls.map(o => o.p), 'lec:' + t.key + n, q => {
+          const o = ls.find(z => z.p === q);
+          const st = o.x.code === 'S' || o.x.code === 'A';
+          return '<span class="c">' + esc(q.cite) + '</span>' + esc(clip(q.text.replace(/\s+/g, ' '), 100)) + '<span class="tier ' + (st ? 'stated' : 'inferred') + '">' + (st ? 'stated' : 'inferred ' + o.x.code) + '</span>';
+        }, 4);
+      });
+    } else h += '<div class="empty">No lecture passage is linked to this § yet.</div>';
+    h += '<div class="from">Jesus La Paz’s Meier–Kant concordance</div></div>';
+    // The tradition behind it
+    const trad = LAYERS.tradition && LAYERS.tradition[n];
+    if (trad && trad.length) {
+      h += '<div class="conn"><h3>The tradition behind Meier § ' + n + '</h3>' + trad.map(e => '<div class="trad"><b>' + esc(e.author) + '</b>, ' + esc(e.source) + ' <span class="muted small">(' + esc(e.relation) + ')</span><br>' + esc(e.text) + '</div>').join('') +
+        '<div class="from">the Meier Reader’s tradition passages (data/tradition-meier.js)</div></div>';
+    }
+  }
+  if (!self) return h;
+  return h;
+}
+
+function listItems(ps, key, fmt, lim0) {
+  const lim = S.expand.has(key) ? 1e9 : (lim0 || 8);
+  let h = '<ul class="items">' + ps.slice(0, lim).map(q => '<li data-open="' + q.i + '">' + fmt(q) + '</li>').join('') + '</ul>';
+  if (ps.length > lim) h += '<button type="button" class="btn more" data-expand-rail="' + esc(key) + '">Show all ' + ps.length + '</button>';
+  return h;
+}
+
+function divesFor(T, p) {
+  const out = [];
+  if (T.key === 'meier' || (placeOf(p) || {}).book === 'meier') out.push(['Meier Reader', '../../../meier-reader/meier-reading-guide.html'], ['Jesus’s Meier–Kant comparison', '../../Jesus-La-Paz/meier-kant-comparison.html']);
+  if (T.key === 'baumgarten' || T.key === 'refl-meta') out.push(['Baumgarten Reader', '../../../baumgarten-reader/baumgartenreading-guide.html']);
+  if (T.key === 'jaesche') out.push(['Alex’s Jäsche reader: where this § comes from', '../../Alex%20Li/Jasche%20reader/index.html']);
+  if (T.layer === 'lecture') out.push(['Jin’s parallel passages', '../../Jin/logik-transcripts.html'], ['Maria’s reading guide', '../../maria/busolt-reader.html']);
+  if (T.shape === 'refl' && T.key === 'refl-logik') out.push(['Sophia’s mediate inferences', '../../Sophia%20Wyatt/mediate-inferences.html']);
+  return out;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   RENDERING: Texts and Contributors
+   ════════════════════════════════════════════════════════════════════════ */
+
+function renderTexts() {
+  let h = '<h2>The texts</h2><p class="note">What the portal reads today: a first, smaller corpus, from transcriptions that are not yet clean. Every passage is cited by its Academy edition page, so links will survive the move to a better edition.</p>' +
+    '<table class="cat"><thead><tr><th>Text</th><th>Layer</th><th>Date</th><th>Passages</th><th>Words</th><th>Transcription</th><th>Brought in by</th></tr></thead><tbody>' +
+    TEXTS.map(t => '<tr><td><b>' + esc(t.title) + '</b></td><td class="small cz">' + esc(LAYER_LABEL[t.layer] || t.layer) + '</td><td>' + esc(t.date) + '</td><td class="n">' + t.n.toLocaleString('en') + '</td><td class="n">' + t.words.toLocaleString('en') + '</td><td class="small">' + esc(t.source) + '</td><td class="small">' + esc(t.credit) + '</td></tr>').join('') +
+    '</tbody></table>';
+  const missing = PORTAL_TEXTS.filter(T => !TEXTS.some(t => t.key === T.key));
+  if (missing.length) h += '<p class="warn">In the catalogue but not loaded: ' + missing.map(T => esc(T.title)).join(', ') + '.</p>';
+  h += '<div class="addtext"><h3>Adding a text</h3><p>Put the text in a <code>.js</code> data file in one of the shapes described at the top of ' +
+    '<code>portal/catalogue.js</code>, and add one entry for it to <code>PORTAL_TEXTS</code> there. Nothing else changes: the search, the phrasings and frequencies, ' +
+    'and the reading pane pick it up on the next load. Another transcript of AA XXIV comes out of <code>scripts/parse_logik.py</code> in the right shape already; ' +
+    'a published work can use the plain <code>passages</code> shape, one passage per paragraph, each with its AA page.</p></div>';
+  $('view-texts').innerHTML = h;
+}
+
+function renderPeople() {
+  const h = '<h2>Contributors</h2><p class="note">Every connection the portal shows comes from someone’s work in the seminar, and says whose.</p><div class="people">' +
+    PEOPLE.map(p => '<div class="person"><div class="nm">' + esc(p.name) + '</div><div class="hd">' + esc(p.handle) + '</div><p>' + esc(p.did) + '</p><p class="uses">In the portal: ' + esc(p.uses) + '</p>' +
+      '<div class="dives">' + p.tools.map(([l, u]) => '<a href="' + u + '" target="_blank" rel="noopener">' + esc(l) + ' ↗</a>').join('') + '</div></div>').join('') + '</div>';
+  $('view-people').innerHTML = h;
+}
+
+function showView(v) {
+  S.view = v;
+  ['ask', 'texts', 'people'].forEach(k => { $('view-' + k).hidden = k !== v; });
+  document.querySelectorAll('nav [data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+  if (v === 'texts') renderTexts();
+  if (v === 'people') renderPeople();
+  $('left').scrollTop = 0;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   THE TRAIL, AND THE URL
+   ════════════════════════════════════════════════════════════════════════ */
+
+function snapshot() {
+  return { q: S.q, w: S.w, co: S.co, cm: S.cm, merge: S.merge, off: [...S.off], loc: S.loc, d: S.d, sel: S.sel, quote: S.quote, preset: S.preset ? S.preset.key || null : null, presetObj: S.preset };
+}
+function restore(snap) {
+  Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, preset: snap.presetObj || null });
+}
+function trailLabel(snap) {
+  if (snap.sel != null && P[snap.sel]) { const p = P[snap.sel]; return TEXTS[p.t].short + ', ' + p.cite.replace(/, AA.*/, ''); }
+  if (snap.d) { const d = DOCTRINES.find(x => x.key === snap.d); return d ? d.label : snap.d; }
+  return snap.presetObj ? snap.presetObj.label : snap.q;
+}
+function pushTrail() {
+  const snap = snapshot();
+  const cur = TRAIL[trailPos];
+  if (cur && JSON.stringify(Object.assign({}, cur, { presetObj: 0 })) === JSON.stringify(Object.assign({}, snap, { presetObj: 0 }))) return;
+  TRAIL.splice(trailPos + 1);
+  TRAIL.push(snap);
+  if (TRAIL.length > 30) TRAIL.shift();
+  trailPos = TRAIL.length - 1;
+  renderTrail();
+  writeHash();
+}
+function renderTrail() {
+  if (!TRAIL.length) return;
+  $('trail').innerHTML = '<span class="lbl">TRAIL</span>' + TRAIL.map((s, k) => (k ? '<span class="sep">›</span>' : '') +
+    '<span class="step' + (s.sel != null ? ' p' : '') + (k === trailPos ? ' cur' : '') + '" data-trail="' + k + '" title="' + esc(trailLabel(s)) + '">' + esc(trailLabel(s)) + '</span>').join('');
+  const cur = $('trail').querySelector('.cur');
+  if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
+function writeHash() {
+  const u = new URLSearchParams();
+  if (S.d) u.set('d', S.d);
+  else if (S.q) {
+    u.set('q', S.q);
+    u.set('w', S.w);
+    if (S.cm && S.co) { u.set('cm', S.cm); u.set('co', S.co); }
+    if (!S.merge) u.set('merge', '0');
+    if (S.preset && S.preset.key) u.set('ask', S.preset.key);
+  }
+  if (S.off.size) u.set('off', [...S.off].join(','));
+  if (S.loc) u.set('loc', S.loc);
+  if (S.sel != null && P[S.sel]) { u.set('p', TEXTS[P[S.sel].t].key + ':' + P[S.sel].id); if (S.quote) u.set('quote', S.quote); }
+  history.replaceState(null, '', '#' + u.toString());
+}
+function readHash() {
+  const u = new URLSearchParams(location.hash.slice(1));
+  S.preset = null;
+  if (u.get('ask')) { const s = SEMINAR.find(x => x.key === u.get('ask')); if (s) S.preset = seminarPreset(s); }
+  S.q = u.get('q') || '';
+  S.w = u.has('w') ? +u.get('w') : 5;
+  S.cm = u.get('cm') || '';
+  S.co = u.get('co') || '';
+  S.merge = u.get('merge') !== '0';
+  S.d = u.get('d') || null;
+  S.off = new Set((u.get('off') || '').split(',').filter(Boolean));
+  S.loc = u.get('loc') || null;
+  S.quote = u.get('quote') || null;
+  const p = u.get('p');
+  if (p) { const k = p.indexOf(':'); const i = BYID.get(p.slice(0, k) + ':' + p.slice(k + 1)); S.sel = i == null ? null : i; }
+  syncForm();
+  renderResults();
+  renderRail();
+  if (S.q || S.d || S.sel != null) pushTrail();
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   ACTIONS
+   ════════════════════════════════════════════════════════════════════════ */
+
+function seminarPreset(s) { return { key: s.key, label: s.label, note: s.note }; }
+
+function ask(opts) {
+  Object.assign(S, { d: null, loc: null, expand: new Set() }, opts);
+  $('presets-box').open = false;
+  showView('ask');
+  syncForm();
+  renderResults();
+  if (S.sel != null) renderRail();
+  pushTrail();
+  $('left').scrollTop = 0;
+}
+
+function openPassage(i, quote) {
+  S.sel = i;
+  S.quote = quote || null;
+  renderRail();
+  document.querySelectorAll('.hit.sel').forEach(el => el.classList.remove('sel'));
+  document.querySelectorAll('.hit[data-open="' + i + '"]').forEach(el => el.classList.add('sel'));
+  pushTrail();
+}
+
+function wire() {
+  $('ask').addEventListener('submit', e => {
+    e.preventDefault();
+    ask({ q: $('q').value.trim(), w: +$('w').value || 0, co: $('co').value.trim(), cm: $('cm').value, merge: $('merge').checked, preset: null });
+  });
+  $('merge').addEventListener('change', () => { if (S.q) ask({ merge: $('merge').checked, preset: S.preset }); });
+  $('cm').addEventListener('change', () => { if (S.q && $('co').value.trim()) ask({ cm: $('cm').value, co: $('co').value.trim(), preset: S.preset }); });
+
+  document.addEventListener('change', e => {
+    const t = e.target;
+    if (t.id === 'sel-principle' && t.value) {
+      const pr = LAYERS.principles.find(x => x.id === t.value);
+      const q = [...new Set(pr.forms.map(f => f.t))].map(f => /\s/.test(f) ? '"' + f + '"' : f).join(' OR ');
+      ask({ q, w: 3, cm: '', co: '', preset: { label: pr.en, note: (pr.note || '') + (pr.enAlt && pr.enAlt.length ? ' Also called: ' + pr.enAlt.join(', ') + '.' : ''), who: 'feng', credit: 'Feng’s lexicon of the logical principles: every form below is one the texts attest' } });
+      t.value = '';
+    }
+    if (t.id === 'sel-concept' && t.value) {
+      const c = LAYERS.concepts.find(x => x.id === t.value);
+      const q = c.forms.map(([, stem]) => '/(?<![\\p{L}])(?:' + stem + ')/').join(' OR ');
+      ask({ q, w: 3, cm: '', co: '', preset: { label: c.label, note: 'Wordings: ' + c.forms.map(f => f[0]).join(', ') + '.', who: 'jin', credit: 'Jin’s list of the lectures’ concepts and their wordings' } });
+      t.value = '';
+    }
+    if (t.id === 'sel-form' && t.value) {
+      const f = LAYERS.forms.find(x => x.id === t.value);
+      ask({ q: '/' + f.term.source + '/', w: 3, cm: '', co: '', preset: { label: 'The ' + f.en + ' judgment: where it is named', note: f.def, who: 'aidan', credit: 'Aidan Chong’s terms for the forms of judgment' } });
+      t.value = '';
+    }
+  });
+
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-open],[data-loc],[data-seminar],[data-doc],[data-view],[data-trail],[data-expand],[data-expand-rail],[data-para],[data-text]');
+    if (!el) return;
+    const d = el.dataset;
+    if (d.seminar) { const s = SEMINAR.find(x => x.key === d.seminar); ask({ q: s.q, w: s.w, co: s.co || '', cm: s.cm || '', preset: seminarPreset(s) }); return; }
+    if (d.doc) { Object.assign(S, { d: d.doc, q: '', co: '', cm: '', loc: null, expand: new Set(), preset: null }); $('presets-box').open = false; showView('ask'); syncForm(); renderResults(); pushTrail(); $('left').scrollTop = 0; return; }
+    if (d.view) { showView(d.view); return; }
+    if (d.trail != null) { trailPos = +d.trail; restore(TRAIL[trailPos]); showView('ask'); syncForm(); renderResults(); renderRail(); renderTrail(); writeHash(); return; }
+    if (d.expandRail) { S.expand.add(d.expandRail); renderRail(); return; }
+    if (d.expand) { S.expand.add(d.expand); renderResults(); return; }
+    if (d.text) { S.off.has(d.text) ? S.off.delete(d.text) : S.off.add(d.text); renderTextChips(); if (S.q && !S.d) { renderResults(); writeHash(); } return; }
+    if (d.loc != null) { S.loc = d.loc && S.loc !== d.loc ? d.loc : null; renderResults(); renderRail(); pushTrail(); return; }
+    if (d.para) { const [book, n] = d.para.split(':'); const q = passage(book, 'p' + n); if (q) openPassage(q.i); return; }
+    if (d.open != null) { openPassage(+d.open, d.quote || null); return; }
+  });
+
+  $('share').addEventListener('click', () => {
+    writeHash();
+    const done = () => { $('share').textContent = 'Link copied'; setTimeout(() => { $('share').textContent = 'Copy link'; }, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(location.href).then(done, () => prompt('Copy this link:', location.href));
+    else prompt('Copy this link:', location.href);
+  });
+  window.addEventListener('hashchange', () => { readHash(); });
+}
+
+/* Exposed for checking the page from the console. */
+window.PORTAL = { S, P, TEXTS, LAYERS, DOCS, CONC_REV, ANNOT, runQuery: () => runQuery(), parseQuery, normWord, placeOf };
+
+boot();
+})();
+</script>
+</body>
+</html>
