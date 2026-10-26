@@ -73,18 +73,40 @@
   header .spacer { flex: 1; }
   #status { font-size: 0.85rem; color: var(--faded); font-style: italic; }
 
+  /* The route: a short bar of the last few steps, and a map of the whole route on demand */
   #trail {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.3rem;
     padding: 0.3rem 1.2rem;
     border-bottom: 1px solid var(--line);
     font-size: 0.86rem;
-    overflow-x: auto;
+    overflow: hidden;
     white-space: nowrap;
-    min-height: 2rem;
+    min-height: 2.1rem;
   }
-  #trail .lbl { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--faded); letter-spacing: 0.08em; margin-right: 0.3rem; }
+  #trail .lbl { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--faded); letter-spacing: 0.08em; margin-right: 0.2rem; }
+  #trail .nav { border: 1px solid var(--line); background: var(--paper); border-radius: 4px; padding: 0 0.45rem; cursor: pointer; color: var(--accent); line-height: 1.4; }
+  #trail .nav:disabled { opacity: 0.35; cursor: default; }
+  #trail .steps { display: flex; align-items: center; gap: 0.25rem; overflow: hidden; min-width: 0; flex: 1; }
+  #trail .more-steps { color: var(--faded); font-style: italic; font-size: 0.82rem; }
+  #trail .count { color: var(--faded); font-size: 0.82rem; }
+  #routemap { display: flex; border-bottom: 1px solid var(--line); background: var(--paper); padding: 0.35rem 0 0.5rem 1.2rem; }
+  #routemap[hidden] { display: none; }
+  #routemap .rm-labels { flex: none; }
+  #routemap .rm-scroll { flex: 1; overflow-x: auto; min-width: 0; padding-right: 1.2rem; }
+  #routemap .rm-head { font-size: 0.8rem; color: var(--faded); margin: 0 0 0.15rem; white-space: nowrap; }
+  #routemap .band { fill: var(--parchment); }
+  #routemap .layer-rule { stroke: var(--line); stroke-width: 1; }
+  #routemap text.lane { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.05em; fill: var(--accent); }
+  #routemap text.lane.unvisited { fill: var(--faded); opacity: 0.55; }
+  #routemap .route { fill: none; stroke: var(--accent-light); stroke-width: 2; stroke-linejoin: round; }
+  #routemap .mark.p { fill: var(--accent); stroke: var(--paper); stroke-width: 2; }
+  #routemap .mark.q { fill: var(--paper); stroke: var(--accent); stroke-width: 2; }
+  #routemap .cur-ring { fill: none; stroke: var(--hl-strong); stroke-width: 3; }
+  #routemap .hitcol { fill: transparent; cursor: pointer; }
+  #routemap .hitcol:hover { fill: rgba(139, 94, 60, 0.08); }
+  #tip { position: fixed; z-index: 30; background: var(--ink); color: var(--parchment); font-size: 0.82rem; line-height: 1.3; padding: 0.3rem 0.55rem; border-radius: 4px; pointer-events: none; max-width: 24rem; white-space: normal; }
   #trail .step {
     border: 1px solid var(--line);
     background: var(--paper);
@@ -206,6 +228,61 @@
   .filterbar { background: var(--hl); border-radius: 4px; padding: 0.2rem 0.5rem; margin-bottom: 0.4rem; font-size: 0.9rem; }
 
   .empty { color: var(--faded); font-style: italic; padding: 0.6rem 0; }
+
+  /* Nik Land's views of his examples: the square of opposition, the table of judgments */
+  .sq-card { container-type: inline-size; }
+  .sq-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 12.5rem; gap: 0.9rem; align-items: start; }
+  @container (max-width: 44rem) {
+    .sq-wrap { grid-template-columns: minmax(0, 1fr); }
+    .sq-side { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .sq-side .ph { flex-basis: 100%; margin: 0.2rem 0 0 !important; }
+    .sq-side .q-chip { width: auto; margin: 0; }
+  }
+  .sq svg { width: 100%; height: auto; display: block; }
+  .sq .edge { stroke: var(--accent-light); stroke-width: 1.5; }
+  .sq g.e { cursor: pointer; }
+  .sq g.e:hover .edge, .sq g.e.on .edge { stroke: var(--accent); stroke-width: 3; }
+  .sq .hitline { stroke: transparent; stroke-width: 18; }
+  .sq .elab { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.06em; fill: var(--accent); }
+  .sq .elab-bg { fill: var(--paper); }
+  .sq g.c { cursor: pointer; }
+  .sq g.c rect { fill: var(--parchment); stroke: var(--accent-light); stroke-width: 1; }
+  .sq g.c:hover rect, .sq g.c.on rect { fill: var(--parchment-dark); stroke: var(--accent); stroke-width: 2; }
+  .sq .letter { font-family: 'Cinzel', serif; font-size: 30px; font-weight: 600; fill: var(--accent); }
+  .sq .cname { font-family: 'Cinzel', serif; font-size: 9.5px; letter-spacing: 0.05em; fill: var(--accent); }
+  .sq .cnum { font-size: 12.5px; fill: var(--ink); }
+  .sq .cex { font-size: 12.5px; font-style: italic; fill: var(--faded); }
+  .sq-side .ph { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.07em; color: var(--accent); margin: 0.1rem 0 0.25rem; }
+  .sq-side .q-chip { display: flex; justify-content: space-between; gap: 0.4rem; width: 100%; margin: 0 0 0.25rem; font-size: 0.88rem; }
+  .sq-side .q-chip b { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .sq-side .q-chip.on b { color: var(--parchment); }
+  .key { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; font-size: 0.82rem; color: var(--faded); margin-top: 0.4rem; align-items: center; }
+  .fb { display: inline-block; min-width: 1.6rem; text-align: center; font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.74rem; border-radius: 3px; padding: 0 0.25rem; line-height: 1.35; }
+  .fb.stated { background: var(--accent); color: var(--parchment); border: 1px solid var(--accent); }
+  .fb.inferred { border: 1px dashed var(--accent-light); color: var(--accent); background: var(--paper); }
+  .jlist { margin-top: 0.3rem; display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.93rem; }
+  .jlist .role { font-size: 0.75rem; color: var(--faded); font-style: italic; }
+  .jhead { font-size: 1.1rem; font-weight: 600; color: var(--ink); }
+  .jchips { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0.15rem 0 0.25rem; }
+  .jchip { font-size: 0.8rem; border-radius: 999px; padding: 0 0.5rem; }
+  .jchip .ax { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.06em; color: var(--faded); margin-right: 0.2rem; }
+  .jchip.stated { background: var(--parchment-dark); border: 1px solid var(--accent-light); }
+  .jchip.inferred { border: 1px dashed var(--accent-light); font-style: italic; }
+  .jchip.none { color: var(--faded); border: 1px dotted var(--line); }
+  .toj { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: ". q ." "l c r" ". m ."; gap: 0.5rem; }
+  .toj-box { border: 1px solid var(--line); border-radius: 5px; padding: 0.35rem 0.5rem; background: var(--parchment); }
+  .toj-h { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 0.15rem; }
+  .toj-h .de { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-style: italic; }
+  .toj-row { display: grid; grid-template-columns: minmax(0, 1fr) 3.6rem 1.5rem; gap: 0.35rem; align-items: center; font-size: 0.86rem; padding: 0.08rem 0.2rem; border-radius: 3px; cursor: pointer; }
+  .toj-row:hover { background: var(--parchment-dark); }
+  .toj-row.sel { background: var(--hl); }
+  .toj-row .de { color: var(--faded); font-size: 0.8rem; font-style: italic; }
+  .toj-row .bar { position: relative; height: 0.55rem; background: var(--paper); border-radius: 2px; overflow: hidden; }
+  .toj-row .bar .all { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent-light); opacity: 0.45; }
+  .toj-row .bar .st { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); }
+  .toj-row .n { text-align: right; font-variant-numeric: tabular-nums; }
+  .toj-c { display: flex; align-items: center; justify-content: center; text-align: center; font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--faded); letter-spacing: 0.06em; line-height: 1.5; }
+  .swatch { display: inline-block; width: 1.4rem; height: 0.55rem; border-radius: 2px; vertical-align: middle; margin-right: 0.3rem; }
   .warn { color: #8a3b12; }
 
   /* ── Rail: one passage and everything connected to it ─────────────── */
@@ -294,7 +371,9 @@
   <button type="button" class="btn" id="share" title="Copy a link to exactly this view">Copy link</button>
 </header>
 
-<div id="trail"><span class="lbl">TRAIL</span><span class="muted small">Your route through the corpus appears here.</span></div>
+<div id="trail"><span class="lbl">ROUTE</span><span class="muted small">Your route through the corpus appears here.</span></div>
+<div id="routemap" hidden></div>
+<div id="tip" hidden></div>
 
 <div id="app">
   <section id="left">
@@ -415,7 +494,7 @@ const PEOPLE = [
     tools: [['Logical principles', '../../Feng/principle-search.html'], ['Text search', '../../Feng/text-search-01.html']] },
   { key: 'nik', name: 'Nik Land', handle: '@nikolasland',
     did: 'Examples of immediate inferences, judgments and syllogisms in the lectures and Reflexionen, each filed by kind.',
-    uses: 'Answers “What kinds of immediate inference does Kant recognise?”, and the forms of judgment and kinds of syllogism, from Nik’s filing.',
+    uses: 'Answers “What kinds of immediate inference does Kant recognise?”, and the forms of judgment and kinds of syllogism, from Nik’s filing. His examples fill the square of opposition and the table of judgments, with his forms and moments on every card.',
     tools: [['Immediate inferences', '../../Nik%20Land/immediate-inferences.html'], ['Judgement explorer', '../../Nik%20Land/judgement-explorer.html'], ['Inference explorer', '../../Nik%20Land/inference-explorer.html']] },
   { key: 'aidan', name: 'Aidan Chong', handle: '',
     did: 'A judgment finder: the forms of judgment of the table, the terms that name them, and examples found in the lectures.',
@@ -710,7 +789,7 @@ function buildDoctrines() {
   (LAYERS.immediate || []).forEach(e => {
     const p = e.src === 'refl16' ? refl('refl16', e.r) : lec(e.src, e.block);
     if (!p) return;
-    const it = { pi: p.i, quotes: [e.quote].filter(Boolean), labels: e.kinds || [], note: e.note || '' };
+    const it = { pi: p.i, quotes: [e.quote].filter(Boolean), labels: e.kinds || [], note: e.note || '', judgements: e.judgements || [], named: !!e.named, sub: e.sub || '' };
     push('immediate', it);
     addAnnot(p.i, { who: 'nik', label: 'Immediate inference · ' + (e.kinds || []).join(', '), quote: e.quote, doc: 'immediate' });
   });
@@ -718,7 +797,8 @@ function buildDoctrines() {
     const p = lec(e.work, e.block);
     if (!p) return;
     const labels = [].concat(e.quantity || [], e.quality || [], e.relation || [], e.modality || []);
-    push('judgement', { pi: p.i, quotes: [e.quote].filter(Boolean), labels, note: e.judgement ? '“' + e.judgement + '”' : '' });
+    push('judgement', { pi: p.i, quotes: [e.quote].filter(Boolean), labels, note: e.note || '', judgement: e.judgement || '',
+      axes: { quantity: e.quantity, quality: e.quality, relation: e.relation, modality: e.modality }, stated: e.stated || [] });
     addAnnot(p.i, { who: 'nik', label: 'Judgment · ' + labels.join(', '), quote: e.quote, doc: 'judgement' });
   });
   (LAYERS.inference || []).forEach(e => {
@@ -1106,6 +1186,8 @@ function renderDoctrine(box) {
   const cols = TEXTS.filter(t => D.items.some(it => P[it.pi].t === t.idx));
   let h = '<div class="res-head"><h2>' + esc(d.label) + '</h2><div class="summary"><b>' + D.items.length + '</b> passages, each filed by hand by ' + esc(personName(d.who)) + '</div>' +
     '<div class="from">' + esc(personName(d.who)) + '’s classification · ' + esc((PEOPLE.find(x => x.key === d.who) || {}).did || '') + '</div></div>';
+  if (d.key === 'immediate') h += squareCard(D);
+  if (d.key === 'judgement') h += tableCard(D);
   h += '<section class="card"><h3>The kinds<span class="sub">how many passages are filed under each, in each text · click a kind to see only its passages</span></h3><table class="loc"><thead><tr><th>Kind</th><th>All</th>' +
     cols.map(t => '<th>' + esc(t.short) + '</th>').join('') + '</tr></thead><tbody>';
   D.groups.forEach(([k, label]) => {
@@ -1116,10 +1198,12 @@ function renderDoctrine(box) {
   });
   h += '</tbody></table></section>';
   h += '<section class="card"><h3>Passages</h3>';
-  if (S.loc) h += '<div class="filterbar">Only <i>' + esc((D.groups.find(g => g[0] === S.loc) || [0, S.loc])[1]) + '</i> · <span class="lnk" data-loc="">show all</span></div>';
-  D.groups.forEach(([k, label]) => {
+  const formLoc = S.loc && S.loc.startsWith('form:') ? S.loc.slice(5) : null;
+  const groups = formLoc ? [[S.loc, 'Judgments of form ' + formLoc + ' (' + (FORM_NAME[formLoc] || formLoc) + ')']] : D.groups;
+  if (S.loc) h += '<div class="filterbar">Only <i>' + esc((groups.find(g => g[0] === S.loc) || [0, S.loc])[1]) + '</i> · <span class="lnk" data-loc="">show all</span></div>';
+  groups.forEach(([k, label]) => {
     if (S.loc && S.loc !== k) return;
-    const its = D.items.filter(it => it.labels.includes(k)).sort((x, y) => x.pi - y.pi);
+    const its = D.items.filter(it => formLoc ? (it.judgements || []).some(j => j.form === formLoc) : it.labels.includes(k)).sort((x, y) => x.pi - y.pi);
     if (!its.length) return;
     const lim = S.expand.has('d:' + k) ? 1e9 : 8;
     h += '<div class="tgroup"><div class="th">' + esc(label) + '<span>' + its.length + '</span></div>';
@@ -1128,15 +1212,114 @@ function renderDoctrine(box) {
       const sp = quoteSpans(p.text, it.quotes);
       const f = sp[0] || [0, Math.min(p.text.length, 300)];
       const a = Math.max(0, f[0] - 120), b = Math.min(p.text.length, f[1] + 120);
-      h += '<div class="hit' + (S.sel === p.i ? ' sel' : '') + '" data-open="' + p.i + '" data-quote="' + esc(it.quotes[0] || '') + '"><div class="cite"><b>' + esc(T.short) + ', ' + esc(p.cite) + '</b>' +
-        (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : ' · ' + esc(T.date)) + (it.note ? ' · <i>' + esc(it.note) + '</i>' : '') + (it.quotes.length && !sp.length ? ' · <span class="warn">quote not found in the current text</span>' : '') + '</div>' +
-        '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, sp.map(s => [s[0], s[1], true])) + (b < p.text.length ? ' …' : '') + '</div></div>';
+      // Nik's judgment cards lead with the judgment and mark it inside the quote
+      const jsp = it.judgement ? quoteSpans(p.text, [it.judgement]) : [];
+      const marks = jsp.length ? sp.map(s => [s[0], s[1], false]).concat(jsp.map(s => [s[0], s[1], true])) : sp.map(s => [s[0], s[1], true]);
+      h += '<div class="hit' + (S.sel === p.i ? ' sel' : '') + '" data-open="' + p.i + '" data-quote="' + esc(it.judgement || it.quotes[0] || '') + '">' +
+        (it.judgement ? '<div class="jhead" lang="de">' + esc(it.judgement) + '</div>' + judgementChips(it) : '') +
+        '<div class="cite"><b>' + esc(T.short) + ', ' + esc(p.cite) + '</b>' +
+        (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : ' · ' + esc(T.date)) + (it.sub ? ' · ' + esc(it.sub) : '') + (it.note ? ' · <i>' + esc(it.note) + '</i>' : '') + (it.quotes.length && !sp.length ? ' · <span class="warn">quote not found in the current text</span>' : '') + '</div>' +
+        '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, marks) + (b < p.text.length ? ' …' : '') + '</div>' +
+        (it.judgements ? formBadges(it) : '') + '</div>';
     });
     if (its.length > lim) h += '<button type="button" class="btn more" data-expand="d:' + esc(k) + '">Show all ' + its.length + '</button>';
     h += '</div>';
   });
   h += '</section>';
   box.innerHTML = h;
+}
+
+/* ── Nik Land's square of opposition, built from the judgments Kant's examples write out ── */
+const FORM_NAME = { A: 'universal affirmative', E: 'universal negative', I: 'particular affirmative', O: 'particular negative', 'S+': 'singular affirmative', 'S-': 'singular negative' };
+const svgClip = (s, n) => s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s;
+
+function squareCard(D) {
+  const js = D.items.flatMap(it => (it.judgements || []).map(j => ({ j, it })));
+  const corner = f => {
+    const xs = js.filter(x => x.j.form === f);
+    const ex = xs.find(x => x.j.formStated) || xs[0];
+    return { n: xs.length, stated: xs.filter(x => x.j.formStated).length, ex: ex ? (ex.j.supply || ex.j.t) : '' };
+  };
+  const kindN = k => D.items.filter(it => it.labels.includes(k)).length;
+  const on = k => S.loc === k ? ' on' : '';
+  const box = (f, x, y) => {
+    const c = corner(f);
+    const tip = f + ', ' + FORM_NAME[f] + ': ' + c.n + ' judgments written out in Kant’s examples, ' + c.stated + ' of them called so by the passage itself' + (c.ex ? '. For instance: ' + c.ex : '') + '. Click to see their passages.';
+    return '<g class="c' + on('form:' + f) + '" data-loc="form:' + f + '" data-tip="' + esc(tip) + '">' +
+      '<rect x="' + x + '" y="' + y + '" width="200" height="72" rx="5"/>' +
+      '<text x="' + (x + 12) + '" y="' + (y + 44) + '" class="letter">' + f + '</text>' +
+      '<text x="' + (x + 48) + '" y="' + (y + 19) + '" class="cname">' + FORM_NAME[f].toUpperCase() + '</text>' +
+      '<text x="' + (x + 48) + '" y="' + (y + 38) + '" class="cnum">' + c.n + ' judgment' + (c.n === 1 ? '' : 's') + ' · ' + c.stated + ' named</text>' +
+      '<text x="' + (x + 48) + '" y="' + (y + 58) + '" class="cex" lang="de">' + esc(svgClip(c.ex, 24)) + '</text></g>';
+  };
+  const edge = (k, x1, y1, x2, y2, lx, ly, rot, label) => {
+    const n = kindN(k);
+    const tip = label + ': ' + n + ' passages filed under it. Click to see them.';
+    const w = label.length * 7.2 + 14;
+    return '<g class="e' + on(k) + '" data-loc="' + k + '" data-tip="' + esc(tip) + '">' +
+      '<line class="edge" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"/>' +
+      '<line class="hitline" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '"/>' +
+      '<g transform="translate(' + lx + ' ' + ly + ')' + (rot ? ' rotate(' + rot + ')' : '') + '">' +
+      '<rect class="elab-bg" x="' + (-w / 2) + '" y="-9" width="' + w + '" height="14"/>' +
+      '<text class="elab" text-anchor="middle" y="2">' + esc(label.toUpperCase()) + ' · ' + n + '</text></g></g>';
+  };
+  const svg = '<svg viewBox="0 0 600 360" role="img" aria-label="The square of opposition, with the number of Kant’s examples at each corner and on each side">' +
+    edge('contradictory', 210, 87, 390, 273, 300, 180, 0, 'contradictory') +
+    '<g class="e' + on('contradictory') + '" data-loc="contradictory" data-tip="contradictory: ' + kindN('contradictory') + ' passages filed under it. Click to see them."><line class="edge" x1="390" y1="87" x2="210" y2="273"/><line class="hitline" x1="390" y1="87" x2="210" y2="273"/></g>' +
+    edge('contrary', 210, 51, 390, 51, 300, 51, 0, 'contrary') +
+    edge('subcontrary', 210, 309, 390, 309, 300, 309, 0, 'subcontrary') +
+    edge('subalternation', 110, 87, 110, 273, 110, 180, -90, 'subalternation') +
+    edge('subalternation', 490, 87, 490, 273, 490, 180, 90, 'subalternation') +
+    box('A', 10, 15) + box('E', 390, 15) + box('I', 10, 273) + box('O', 390, 273) + '</svg>';
+  const chip = (k, label) => { const n = kindN(k); return n ? '<button type="button" class="q-chip' + on(k) + '" data-loc="' + k + '"><span>' + esc(label) + '</span><b>' + n + '</b></button>' : ''; };
+  const sing = f => { const c = corner(f); return c.n ? '<button type="button" class="q-chip' + on('form:' + f) + '" data-loc="form:' + f + '"><span><span class="fb stated">' + esc(f) + '</span> ' + esc(FORM_NAME[f]) + '</span><b>' + c.n + '</b></button>' : ''; };
+  return '<section class="card sq-card"><h3>The square of opposition<span class="sub">built from the judgments Kant’s examples write out, as Nik Land reads them · click a corner or a side</span></h3>' +
+    '<div class="sq-wrap"><div class="sq">' + svg + '</div><div class="sq-side">' +
+    '<div class="ph">INFERENCES THAT TRANSFORM ONE JUDGMENT</div>' + chip('conversion', 'Conversion') + chip('contraposition', 'Contraposition') + chip('aequipollentia', 'Equipollence') +
+    '<div class="ph" style="margin-top:0.6rem">SINGULAR JUDGMENTS</div>' + sing('S+') + sing('S-') +
+    '<div class="ph" style="margin-top:0.6rem">THE DOCTRINE ITSELF</div>' + chip('general', 'What an immediate inference is') + '</div></div>' +
+    '<div class="key"><span><span class="fb stated">A</span> the passage itself names the form</span><span><span class="fb inferred">A</span> Nik’s reading of it</span>' +
+    '<span>Corners count judgments; sides and buttons count passages.</span></div>' +
+    '<div class="from">Nik Land’s immediate-inference examples, shown as his Immediate Inferences explorer shows them</div></section>';
+}
+
+function formBadges(it) {
+  if (!it.judgements.length) return '<div class="jlist muted small">A rule, with no instance written out.</div>';
+  return '<div class="jlist">' + it.judgements.map(j => '<span><span class="fb ' + (j.formStated ? 'stated' : 'inferred') + '" title="' + esc((FORM_NAME[j.form] || j.form || '') + (j.formStated ? ', named by the passage' : ', Nik’s reading')) + '">' + esc(j.form || '?') + '</span> ' +
+    '<span lang="de">' + esc(j.t) + '</span>' + (j.supply ? ' <span class="muted small">read as <i lang="de">' + esc(j.supply) + '</i></span>' : '') + (j.role ? ' <span class="role">' + esc(j.role) + '</span>' : '') + '</span>').join('') + '</div>';
+}
+
+/* ── Nik Land's judgments, set out in the table of judgments (KrV A 70 / B 95) ── */
+const TOJ = [
+  ['quantity', 'Quantity', 'Quantität', [['universal', 'allgemeine'], ['particular', 'besondere'], ['singular', 'einzelne']]],
+  ['quality', 'Quality', 'Qualität', [['affirmative', 'bejahende'], ['negative', 'verneinende'], ['infinite', 'unendliche']]],
+  ['relation', 'Relation', 'Relation', [['categorical', 'kategorische'], ['hypothetical', 'hypothetische'], ['disjunctive', 'disjunktive']]],
+  ['modality', 'Modality', 'Modalität', [['problematic', 'problematische'], ['assertoric', 'assertorische'], ['apodictic', 'apodiktische']]],
+];
+function tableCard(D) {
+  const count = (ax, v) => {
+    const its = D.items.filter(it => it.axes && (it.axes[ax] || []).includes(v));
+    return { n: its.length, stated: its.filter(it => it.stated.includes(ax)).length };
+  };
+  const max = Math.max(1, ...TOJ.flatMap(([ax, , , vs]) => vs.map(([v]) => count(ax, v).n)));
+  const box = ([ax, en, de, vs], area) => '<div class="toj-box" style="grid-area:' + area + '"><div class="toj-h">' + en.toUpperCase() + ' <span class="de">' + de + '</span></div>' +
+    vs.map(([v, vde]) => {
+      const c = count(ax, v);
+      const tip = v + ' (' + vde + '): ' + c.n + ' of Nik’s examples, the transcript itself calling ' + c.stated + ' of them so. Click to see them.';
+      return '<div class="toj-row' + (S.loc === v ? ' sel' : '') + '" data-loc="' + v + '" data-tip="' + esc(tip) + '"><span>' + v + ' <span class="de">' + vde + '</span></span>' +
+        '<span class="bar"><span class="all" style="width:' + (100 * c.n / max).toFixed(1) + '%"></span><span class="st" style="width:' + (100 * c.stated / max).toFixed(1) + '%"></span></span><span class="n">' + c.n + '</span></div>';
+    }).join('') + '</div>';
+  return '<section class="card"><h3>The table of judgments<span class="sub">laid out as in the Critique (A 70 / B 95), with how many of Nik’s examples have each moment · click a moment</span></h3>' +
+    '<div class="toj">' + box(TOJ[0], 'q') + box(TOJ[1], 'l') + '<div class="toj-c" style="grid-area:c">' + D.items.length + ' JUDGMENTS<br>FROM THE LECTURES</div>' + box(TOJ[2], 'r') + box(TOJ[3], 'm') + '</div>' +
+    '<div class="key"><span><span class="swatch" style="background:var(--accent)"></span>the transcript names the moment</span><span><span class="swatch" style="background:var(--accent-light);opacity:0.45"></span>Nik’s reading of the sentence</span></div>' +
+    '<div class="from">Nik Land’s judgment examples, shown as his Judgement Explorer shows them</div></section>';
+}
+
+function judgementChips(it) {
+  return '<div class="jchips">' + ['quantity', 'quality', 'relation', 'modality'].map(ax => {
+    const v = it.axes[ax], st = it.stated.includes(ax);
+    return '<span class="jchip ' + (v ? (st ? 'stated' : 'inferred') : 'none') + '" title="' + (v ? (st ? 'the transcript names it' : 'Nik’s reading of the sentence') : 'not read off this judgment') + '"><span class="ax">' + ax.toUpperCase() + '</span>' + (v ? esc(v.join(' / ')) : '—') + '</span>';
+  }).join('') + '</div>';
 }
 
 function quoteSpans(text, quotes) {
@@ -1230,7 +1413,7 @@ function renderRailEmpty() {
   $('app').classList.remove('en');
   $('rail').innerHTML = '<div class="rail-empty"><h2>Follow</h2><p>Open any passage to see where it sits in the corpus:</p><ol>' +
     '<li>the textbook § it is on, and how we know;</li><li>Kant’s notes on that §, dated;</li><li>the lectures and Jäsche on the same §;</li>' +
-    '<li>what the seminar has said about it.</li></ol><p>Every step goes on the trail above, so you can go back to any of them. Copy link gives a link to the step you are on.</p></div>';
+    '<li>what the seminar has said about it.</li></ol><p>Every step goes on the route above. Its arrows step back and forward, and Map shows the whole route through the documents. Copy link gives a link to the step you are on.</p></div>';
 }
 
 function renderRail() {
@@ -1411,7 +1594,7 @@ function trailLabel(snap) {
   const base = snap.d ? (d ? d.label : snap.d) : snap.presetObj ? snap.presetObj.label : snap.q;
   if (!snap.loc) return base;
   const g = d && DOCS[d.key] && DOCS[d.key].groups.find(x => x[0] === snap.loc);
-  return base + ' · ' + (g ? g[1] : snap.loc);
+  return base + ' · ' + (g ? g[1] : snap.loc.replace(/^form:/, 'form '));
 }
 function pushTrail() {
   const snap = snapshot();
@@ -1421,17 +1604,81 @@ function pushTrail() {
   snap.onP = snap.sel != null && (!cur || cur.sel !== snap.sel);
   TRAIL.splice(trailPos + 1);
   TRAIL.push(snap);
-  if (TRAIL.length > 30) TRAIL.shift();
+  if (TRAIL.length > 60) TRAIL.shift();
   trailPos = TRAIL.length - 1;
   renderTrail();
   writeHash();
 }
+/* The bar shows only the steps around the current one; the map shows the whole route, one row
+   per document, so that a long route stays readable. */
+const stepLane = s => (s.onP && P[s.sel] ? TEXTS[P[s.sel].t].key : 'q');
+
 function renderTrail() {
   if (!TRAIL.length) return;
-  $('trail').innerHTML = '<span class="lbl">TRAIL</span>' + TRAIL.map((s, k) => (k ? '<span class="sep">›</span>' : '') +
-    '<span class="step' + (s.onP ? ' p' : '') + (k === trailPos ? ' cur' : '') + '" data-trail="' + k + '" title="' + esc(trailLabel(s)) + '">' + esc(trailLabel(s)) + '</span>').join('');
-  const cur = $('trail').querySelector('.cur');
-  if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  const n = TRAIL.length;
+  const texts = new Set(TRAIL.map(stepLane).filter(k => k !== 'q'));
+  const from = Math.max(0, Math.min(trailPos - 2, n - 4)), to = Math.min(n, from + 4);
+  const mapOpen = !$('routemap').hidden;
+  $('trail').innerHTML = '<span class="lbl">ROUTE</span>' +
+    '<button type="button" class="nav" data-step="' + (trailPos - 1) + '" title="Back a step"' + (trailPos > 0 ? '' : ' disabled') + '>‹</button>' +
+    '<button type="button" class="nav" data-step="' + (trailPos + 1) + '" title="Forward a step"' + (trailPos < n - 1 ? '' : ' disabled') + '>›</button>' +
+    '<span class="steps">' + (from > 0 ? '<span class="more-steps">' + from + ' earlier ·</span>' : '') +
+    TRAIL.slice(from, to).map((s, j) => { const k = from + j; return (j ? '<span class="sep">›</span>' : '') +
+      '<span class="step' + (s.onP ? ' p' : '') + (k === trailPos ? ' cur' : '') + '" data-trail="' + k + '" title="' + esc(trailLabel(s)) + '">' + esc(trailLabel(s)) + '</span>'; }).join('') +
+    (to < n ? '<span class="more-steps">· ' + (n - to) + ' later</span>' : '') + '</span>' +
+    '<span class="count">' + n + ' step' + (n === 1 ? '' : 's') + ' · ' + texts.size + ' text' + (texts.size === 1 ? '' : 's') + '</span>' +
+    '<button type="button" class="btn" data-map="1" title="See the whole route through the documents">' + (mapOpen ? 'Hide map ▴' : 'Map ▾') + '</button>';
+  renderRouteMap();
+}
+
+function renderRouteMap() {
+  const box = $('routemap');
+  if (box.hidden || !TRAIL.length) return;
+  const lanes = [{ key: 'q', label: 'Questions, doctrines', layer: 'q' }].concat(TEXTS.map(t => ({ key: t.key, label: t.short, layer: t.layer })));
+  const L = new Map(lanes.map((l, i) => [l.key, i]));
+  const laneH = 20, top = 4, stepW = 30, n = TRAIL.length, labW = 150;
+  const H = top * 2 + lanes.length * laneH;
+  const visits = new Map();
+  TRAIL.forEach(s => { const k = stepLane(s); visits.set(k, (visits.get(k) || 0) + 1); });
+  let bands = '', labels = '';
+  let prev = null;
+  lanes.forEach((l, i) => {
+    const y = top + i * laneH;
+    if (i % 2 === 0) bands += '<rect x="0" y="' + y + '" width="100%" height="' + laneH + '" class="band"/>';
+    if (prev !== null && l.layer !== prev) bands += '<line x1="0" x2="100%" y1="' + y + '" y2="' + y + '" class="layer-rule"/>';
+    prev = l.layer;
+    const v = visits.get(l.key) || 0;
+    labels += '<text x="0" y="' + (y + laneH / 2 + 4) + '" class="lane' + (v ? '' : ' unvisited') + '">' + esc(l.label.toUpperCase()) + (v ? ' · ' + v : '') + '</text>';
+  });
+  const pt = (s, k) => [16 + k * stepW, top + L.get(stepLane(s)) * laneH + laneH / 2];
+  let route = n > 1 ? '<polyline class="route" points="' + TRAIL.map((s, k) => pt(s, k).join(',')).join(' ') + '"/>' : '';
+  let marks = '', hits = '';
+  TRAIL.forEach((s, k) => {
+    const [x, y] = pt(s, k);
+    if (k === trailPos) marks += '<circle cx="' + x + '" cy="' + y + '" r="9" class="cur-ring"/>';
+    marks += stepLane(s) === 'q'
+      ? '<rect x="' + (x - 5) + '" y="' + (y - 5) + '" width="10" height="10" transform="rotate(45 ' + x + ' ' + y + ')" class="mark q"/>'
+      : '<circle cx="' + x + '" cy="' + y + '" r="5" class="mark p"/>';
+    hits += '<rect x="' + (x - stepW / 2) + '" y="' + top + '" width="' + stepW + '" height="' + (lanes.length * laneH) + '" class="hitcol" data-trail="' + k + '" data-tip="' + esc((k + 1) + '. ' + trailLabel(s)) + '"/>';
+  });
+  const W = Math.max(32 + n * stepW, 300);
+  box.innerHTML = '<div class="rm-labels"><div class="rm-head cz">THE ROUTE</div><svg width="' + labW + '" height="' + H + '">' + bands + labels + '</svg></div>' +
+    '<div class="rm-scroll"><div class="rm-head">one row per document, the route in order from left to right · ● a passage opened · ◆ a question or doctrine · click a step to return to it</div>' +
+    '<svg width="' + W + '" height="' + H + '" role="img" aria-label="The route through the corpus, ' + n + ' steps">' + bands + route + marks + hits + '</svg></div>';
+  const sc = box.querySelector('.rm-scroll'), cx = 16 + trailPos * stepW;
+  if (cx > sc.clientWidth - 40) sc.scrollLeft = cx - sc.clientWidth / 2;
+}
+
+function goStep(k) {
+  if (k < 0 || k >= TRAIL.length) return;
+  trailPos = k;
+  restore(TRAIL[k]);
+  showView('ask');
+  syncForm();
+  renderResults();
+  renderRail();
+  renderTrail();
+  writeHash();
 }
 
 function writeHash() {
@@ -1528,20 +1775,34 @@ function wire() {
   });
 
   document.addEventListener('click', e => {
-    const el = e.target.closest('[data-open],[data-loc],[data-seminar],[data-doc],[data-view],[data-trail],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en]');
+    const el = e.target.closest('[data-open],[data-loc],[data-seminar],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en]');
     if (!el) return;
     const d = el.dataset;
+    if (d.step != null) { goStep(+d.step); return; }
+    if (d.map) { $('routemap').hidden = !$('routemap').hidden; renderTrail(); return; }
     if (d.en != null) { S.en = d.en; renderRail(); writeHash(); return; }
     if (d.seminar) { const s = SEMINAR.find(x => x.key === d.seminar); ask({ q: s.q, w: s.w, co: s.co || '', cm: s.cm || '', preset: seminarPreset(s) }); return; }
     if (d.doc) { Object.assign(S, { d: d.doc, q: '', co: '', cm: '', loc: null, expand: new Set(), preset: null }); $('presets-box').open = false; showView('ask'); syncForm(); renderResults(); pushTrail(); $('left').scrollTop = 0; return; }
     if (d.view) { showView(d.view); return; }
-    if (d.trail != null) { trailPos = +d.trail; restore(TRAIL[trailPos]); showView('ask'); syncForm(); renderResults(); renderRail(); renderTrail(); writeHash(); return; }
+    if (d.trail != null) { $('tip').hidden = true; goStep(+d.trail); return; }
     if (d.expandRail) { S.expand.add(d.expandRail); renderRail(); return; }
     if (d.expand) { S.expand.add(d.expand); renderResults(); return; }
     if (d.text) { S.off.has(d.text) ? S.off.delete(d.text) : S.off.add(d.text); renderTextChips(); if (S.q && !S.d) { renderResults(); writeHash(); } return; }
     if (d.loc != null) { S.loc = d.loc && S.loc !== d.loc ? d.loc : null; renderResults(); renderRail(); pushTrail(); return; }
     if (d.para) { const [book, n] = d.para.split(':'); const q = passage(book, 'p' + n); if (q) openPassage(q.i); return; }
     if (d.open != null) { openPassage(+d.open, d.quote || null); return; }
+  });
+
+  // One tooltip for every mark that carries a data-tip: the route map, the square, the table
+  document.addEventListener('mousemove', e => {
+    const el = e.target.closest && e.target.closest('[data-tip]');
+    const tip = $('tip');
+    if (!el) { tip.hidden = true; return; }
+    tip.textContent = el.dataset.tip;
+    tip.hidden = false;
+    const x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+    tip.style.left = x + 'px';
+    tip.style.top = (e.clientY + 16) + 'px';
   });
 
   $('share').addEventListener('click', () => {
