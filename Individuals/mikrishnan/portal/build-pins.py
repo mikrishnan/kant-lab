@@ -13,16 +13,16 @@ Some things the portal needs are not yet in files a page can load on its own:
   unchanged, into pinned/sophia-mediate-inferences.js as `PORTAL_PIN_SOPHIA`.
 
 * Jesus La Paz's Meier–Kant concordance links the Jäsche *Logik* to Meier's §§, but by the
-  block ids of his own parse of AA IX (jaesche-logik-data.js), while the portal reads Alex Li's
+  block ids of Jesus's own parse of AA IX (jaesche-logik-data.js), while the portal reads Alex Li's
   parse (logik-jasche-9.js), whose blocks are cut differently. Both come from the same
   transcription, so each of Jesus's blocks is found in Alex's text by its opening letters,
-  and his link is carried over to the Alex block it falls in. The link itself, its code and
+  and Jesus's link is carried over to the Alex block it falls in. The link itself, its code and
   its range are Jesus's, unchanged; only the block it is attached to is re-keyed. Where
-  several of his blocks fall in one of Alex's, the first one's link is kept and the others
+  several of Jesus's blocks fall in one of Alex's, the first one's link is kept and the others
   are listed in `also`. The run reports how many blocks it could not place.
 
 * Jesus's English translations of the Jäsche *Logik* (translations/jaesche-guyer.js and
-  -kemp.js) are keyed by the same blocks of his own parse. This writes no translation: it
+  -kemp.js) are keyed by the same blocks of Jesus's own parse. This writes no translation: it
   writes pinned/jaesche-translation-map.js, `PORTAL_PIN_JAESCHE_TR`, which says for each of
   Alex's blocks which of Jesus's blocks make it up, so that the portal can read Jesus's files
   as they are. Each of Jesus's blocks is placed where it starts, searching only forward from
@@ -30,8 +30,17 @@ Some things the portal needs are not yet in files a page can load on its own:
   ends where Jesus's blocks do is `exact`; one that Alex divides where Jesus does not is
   `part`, and the portal says that its English runs past the passage.
 
-* Jin's concepts (`const L` and `const CONCEPTS`, in Individuals/Jin/logik-transcripts.html),
-  his stopwords (`const STOP_RAW`, the words his parallel passages leave out of the comparison)
+* Aidan's judgment finder, the whole of its finding code (from `const JF_WORKS` up to the page's
+  own state, in Individuals/Aidan/judgment-finder.html), into pinned/aidan-finder.js as
+  `PORTAL_PIN_AIDAN_FINDER`, so the portal finds judgments by Aidan's rules, unchanged.
+
+* Nik's figures for the immediate inferences: the drawing code of
+  Individuals/Nik Land/immediate-inferences-drawn.html, from `const SOURCES` up to its cards, into
+  pinned/nik-figures.js as `PORTAL_PIN_NIK_FIGURES`, and its styles, scoped under `.nikfig`, into
+  pinned/nik-figures.css. The portal draws every figure with Nik's own code.
+
+* Jessie's concepts (`const L` and `const CONCEPTS`, in Individuals/Jin/logik-transcripts.html),
+  Jessie's stopwords (`const STOP_RAW`, the words Jessie's parallel passages leave out of the comparison)
   and Aidan's forms of judgment (`const B` and `const JF_FORMS`, in
   Individuals/Aidan/judgment-finder.html) are JavaScript, regular expressions included.
   Their declarations are copied verbatim into pinned/jin-concepts.js and
@@ -160,10 +169,10 @@ def pin_jaesche_links():
     path = os.path.join(OUT, "jaesche-meier-links.js")
     with open(path, "w", encoding="utf-8") as f:
         f.write(header("Jäsche Logik → Meier §: Jesus La Paz's concordance links, re-keyed to Alex Li's blocks",
-                       "Individuals/Jesus-La-Paz/meier-kant-concordance.js, matched through his jaesche-logik-data.js "
+                       "Individuals/Jesus-La-Paz/meier-kant-concordance.js, matched through Jesus's jaesche-logik-data.js "
                        "to Individuals/Alex Li/logik-jasche-9.js",
                        "PORTAL_PIN_JAESCHE_LINKS[alexBlockId] = { link: [§, code] or [§, code, from, to] as in "
-                       "CONCORDANCE.links.jaesche, from: Jesus's block id, also: his further blocks in it }."))
+                       "CONCORDANCE.links.jaesche, from: Jesus's block id, also: Jesus's further blocks in it }."))
         f.write("const PORTAL_PIN_JAESCHE_LINKS = ")
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
         f.write(";\n")
@@ -248,7 +257,7 @@ def pin_jaesche_translations():
 
     path = os.path.join(OUT, "jaesche-translation-map.js")
     with open(path, "w", encoding="utf-8") as f:
-        f.write(header("Jäsche Logik: which of Jesus La Paz's blocks make up each of Alex Li's, for his English translations",
+        f.write(header("Jäsche Logik: which of Jesus La Paz's blocks make up each of Alex Li's, for Jesus's English translations",
                        "Individuals/Jesus-La-Paz/jaesche-logik-data.js, matched to Individuals/Alex Li/logik-jasche-9.js",
                        "PORTAL_PIN_JAESCHE_TR[alexBlockId] = { ids: [Jesus's block ids, in order], fit: 'exact' | 'part' }. "
                        "The translations themselves stay in Individuals/Jesus-La-Paz/translations/."))
@@ -284,6 +293,48 @@ def pin_source(rel, decls, ret, out_name, glob, title):
     print(f"{out_name}: {', '.join(decls)} ({len(body)} chars)")
 
 
+def pin_block(rel, start, end, glob, ret, out_name, title):
+    """Copy a stretch of a page's script verbatim, from `start` up to `end`, wrapped in a function."""
+    path = os.path.join(IND, rel)
+    s = open(path, encoding="utf-8").read()
+    i = s.index(start)
+    j = s.index(end, i)
+    body = s[i:j].rstrip()
+    with open(os.path.join(OUT, out_name), "w", encoding="utf-8") as f:
+        f.write(header(title, f"Individuals/{rel} (its script from `{start}` up to `{end}`)",
+                       "The code verbatim, wrapped in a function so its names stay private. It reads the lectures from data/."))
+        f.write(f"const {glob} = (() => {{\n{body}\nreturn {ret};\n}})();\n")
+    print(f"{out_name}: {len(body)} chars")
+
+
+def pin_nik_figures():
+    """Nik's figures for the immediate inferences: the drawing code, verbatim, and the styles it
+    draws with, scoped under `.nikfig` so they touch nothing else on the page."""
+    rel = os.path.join("Nik Land", "immediate-inferences-drawn.html")
+    pin_block(rel, "const SOURCES = {", "/* \u2500\u2500 Cards", "PORTAL_PIN_NIK_FIGURES",
+              "{ load: () => { if (!examples.length) loadExamples(); return examples; }, figure: buildFigure }",
+              "nik-figures.js", "Nik's figures for the immediate inferences: every passage drawn, premise and conclusion on one figure, and checked")
+    s = open(os.path.join(IND, rel), encoding="utf-8").read()
+    css = s[s.index("<style>") + len("<style>"):s.index("</style>")]
+    root = re.search(r":root \{(.*?)\}", css, re.S).group(1)
+    lines = [l for l in css.splitlines() if l.startswith("  .card-fig {") or l.startswith("  .broken {")]
+    lines += css[css.index("  .fig-head {"):css.index("  /* \u2500\u2500 Footer")].splitlines()
+    out = []
+    for line in lines:
+        line = re.sub(r"/\*.*?\*/", "", line).rstrip()
+        m = re.match(r"\s*([^{]+)\{(.*)\}$", line)
+        if not m:
+            continue
+        sel = ", ".join(".nikfig " + x.strip() for x in m.group(1).split(","))
+        out.append(sel + " {" + m.group(2) + "}")
+    with open(os.path.join(OUT, "nik-figures.css"), "w", encoding="utf-8") as f:
+        f.write(header("Nik's figures: the styles they are drawn with",
+                       f"Individuals/{rel} (its colours, and its rules for the figures)",
+                       "Each rule verbatim, its selectors scoped under .nikfig."))
+        f.write(".nikfig {" + root.rstrip() + "\n}\n" + "\n".join(out) + "\n")
+    print(f"nik-figures.css: {len(out)} rules")
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     pin_sophia()
@@ -293,5 +344,9 @@ if __name__ == "__main__":
                "jin-concepts.js", "PORTAL_PIN_JIN", "Jin's concepts of the logic lectures, with their wordings")
     pin_source(os.path.join("Aidan", "judgment-finder.html"), ["B", "JF_FORMS"], "JF_FORMS",
                "aidan-forms.js", "PORTAL_PIN_AIDAN", "Aidan Chong's forms of judgment, with the terms that name them")
+    pin_block(os.path.join("Aidan", "judgment-finder.html"), "const JF_WORKS", "let curWork", "PORTAL_PIN_AIDAN_FINDER",
+              "{ forms: JF_FORMS, byId: JF_BY_ID, groups: JF_GROUPS, build: buildExamples }",
+              "aidan-finder.js", "Aidan's judgment finder: the rules by which it finds the judgments the lectures give as examples")
+    pin_nik_figures()
     pin_source(os.path.join("Jin", "logik-transcripts.html"), ["STOP_RAW"], "STOP_RAW",
-               "jin-stopwords.js", "PORTAL_PIN_JIN_STOP", "Jin's list of the words his parallel passages leave out of the comparison")
+               "jin-stopwords.js", "PORTAL_PIN_JIN_STOP", "Jessie's list of the words Jessie's parallel passages leave out of the comparison")

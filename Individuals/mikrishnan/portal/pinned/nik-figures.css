@@ -1,0 +1,104 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Nik's figures: the styles they are drawn with
+   PINNED COPY for the Logic Portal, made by build-pins.py on 2026-10-26
+   from Individuals/Nik Land/immediate-inferences-drawn.html (its colours, and its rules for the figures).
+   Each rule verbatim, its selectors scoped under .nikfig.
+   Do not hand-edit: change the source, then rerun build-pins.py.
+   ───────────────────────────────────────────────────────────────────────────── */
+.nikfig {
+    --parchment: #f5efe0;
+    --parchment-deep: #ece3cc;
+    --card: #fbf8ef;
+    --paper: #fffdf7;
+    --ink: #2b2118;
+    --ink-soft: #5a4a3a;
+    --muted: #857560;
+    --rule: #d6c9a8;
+    --accent: #5c3d1e;
+    --accent-soft: #e9dcc0;
+    --hilite: #f1dfae;
+    --hilite-deep: #e3c47e;
+    --warn: #8a2b1c;
+    --warn-soft: #f6e3dc;
+    --ok: #2f5a2a;
+}
+.nikfig .card-fig { margin: 0; padding: 12px 14px 12px; border-left: 1px solid var(--rule); background: var(--paper); min-width: 0; }
+.nikfig .broken { margin: 6px 0; padding: 6px 10px; border: 1px solid var(--warn); background: var(--warn-soft); font-size: 14.5px; color: var(--warn); }
+.nikfig .fig-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 6px; }
+.nikfig .fig-head .ft { font: 600 11.5px/1.2 'Cinzel', Georgia, serif; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.nikfig .fig-head .terms { font-size: 14px; color: var(--ink-soft); }
+.nikfig .fig-head .terms i { color: var(--ink); }
+.nikfig .panels { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; }
+.nikfig .panel { flex: 0 1 176px; min-width: 150px; max-width: 176px; border: 1px solid var(--rule); background: var(--card); padding: 4px 6px 6px; border-radius: 3px; transition: border-color .12s, box-shadow .12s; }
+.nikfig .pstep { display: flex; align-items: stretch; gap: 6px; }
+.nikfig .panels.few > .panel { flex: 1 1 0; max-width: 300px; }
+.nikfig .panels.few .pstep { flex: 1.25 1 0; max-width: 370px; }
+.nikfig .panels.few .pstep .panel { flex: 1 1 0; max-width: none; }
+.nikfig .panel.wide { flex: 0 1 260px; max-width: 260px; }
+.nikfig .panel.supplied { border-style: dashed; background: transparent; }
+.nikfig .panel.lit { border-color: var(--accent); box-shadow: 0 0 0 2px var(--hilite-deep); }
+.nikfig .panel svg { display: block; width: 100%; height: auto; }
+.nikfig .pcap { font-size: 14.5px; line-height: 1.3; margin-top: 2px; }
+.nikfig .pcap .role { display: block; font: 600 10.5px/1.3 'Cinzel', Georgia, serif; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-soft); }
+.nikfig .pcap .form { display: inline-block; min-width: 18px; text-align: center; font: 600 11.5px/16px Georgia, serif; border: 1px solid var(--accent); color: var(--accent); border-radius: 2px; margin-right: 4px; }
+.nikfig .pcap .form.inferred { border-style: dashed; }
+.nikfig .pcap q { font-style: italic; }
+.nikfig .pcap .gloss { display: block; color: var(--muted); font-size: 13px; }
+.nikfig .pcap .tv { font-size: 12px; padding: 0 5px; border: 1px solid var(--ink-soft); border-radius: 8px; margin-left: 4px; font-style: normal; }
+.nikfig .step { flex: 0 0 auto; align-self: center; display: flex; flex-direction: column; align-items: center; font-size: 22px; color: var(--accent); line-height: 1; padding: 0 1px; }
+.nikfig .step small { font-size: 11.5px; font-style: italic; color: var(--ink-soft); max-width: 64px; text-align: center; line-height: 1.15; margin-top: 3px; }
+.nikfig .verdict { margin-top: 5px; padding: 3px 7px; font-size: 13px; line-height: 1.3; border-radius: 2px; }
+.nikfig .verdict.ok { color: var(--ok); }
+.nikfig .verdict.ok::before { content: '✓ '; }
+.nikfig .verdict.more { background: #fbf0d4; border: 1px solid #b8862b; color: #6b4a12; }
+.nikfig .verdict.more::before { content: '⚠ '; }
+.nikfig .verdict.empty, .nikfig .verdict.fails { background: var(--warn-soft); border: 1px solid var(--warn); color: var(--warn); }
+.nikfig .verdict.empty::before, .nikfig .verdict.fails::before { content: '✕ '; }
+.nikfig .fig-square { border: 1px solid var(--rule); background: var(--card); border-radius: 3px; padding: 4px; }
+.nikfig .fig-square svg { display: block; width: 100%; height: auto; max-height: 300px; }
+.nikfig .fig-square .corner.lit .cbox { stroke: var(--accent); stroke-width: 2.5; }
+.nikfig .syllogism { list-style: none; margin: 6px 0 0; padding: 0; font-size: 14.5px; }
+.nikfig .syllogism li { margin: 0 0 4px; padding: 3px 8px; border: 1px solid var(--rule); background: var(--card); border-radius: 2px; }
+.nikfig .syllogism li.supplied { border-style: dashed; background: transparent; }
+.nikfig .syllogism li.lit { border-color: var(--accent); box-shadow: 0 0 0 2px var(--hilite-deep); }
+.nikfig .syllogism .rl { font: 600 10.5px/1 'Cinzel', Georgia, serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-right: 6px; }
+.nikfig .syllogism .sup { font-size: 12.5px; font-style: italic; color: var(--warn); margin-left: 6px; }
+.nikfig .schema-row { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; }
+.nikfig .schema-row .panel { flex: 0 1 132px; min-width: 0; max-width: 132px; padding: 2px; }
+.nikfig .schema-row .rl { flex: 0 0 104px; font-size: 13.5px; color: var(--ink-soft); line-height: 1.25; }
+.nikfig .schema-row .rl b { color: var(--ink); font-weight: 600; }
+.nikfig figcaption { margin-top: 7px; font-size: 14px; line-height: 1.35; color: var(--ink-soft); }
+.nikfig figcaption .prov { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+.nikfig svg text { font-family: 'EB Garamond', Georgia, serif; }
+.nikfig .u { fill: #fffdf7; stroke: var(--rule); stroke-width: 1; }
+.nikfig .sph, .nikfig .u, .nikfig .void, .nikfig .icon .edge { vector-effect: non-scaling-stroke; }
+.nikfig .sph { fill: none; stroke: var(--ink-soft); stroke-width: 1.5; }
+.nikfig .sph.key { stroke: var(--accent); stroke-width: 2.4; }
+.nikfig .sph.mid { stroke: var(--accent); stroke-width: 2.4; stroke-dasharray: 6 3; }
+.nikfig .sup .sph, .nikfig .sup .pt { stroke-dasharray: 4 3; }
+.nikfig .emph { fill: var(--hilite); }
+.nikfig .panel.lit .emph { fill: var(--hilite-deep); }
+.nikfig .hatch { fill: url(#hatch); }
+.nikfig .lbl { fill: var(--ink); }
+.nikfig .lbl.soft { fill: var(--ink-soft); font-style: italic; }
+.nikfig .lbl.key { fill: var(--accent); font-weight: 600; }
+.nikfig .dot { fill: var(--ink); stroke: #fffdf7; stroke-width: 1.5; }
+.nikfig .dot.open { fill: #fffdf7; stroke: #8a6a2a; stroke-width: 1.6; stroke-dasharray: 2.5 2; }
+.nikfig .qmark { font: 600 11px Georgia, serif; fill: #8a6a2a; }
+.nikfig .pt { fill: var(--ink); }
+.nikfig .void { fill: none; stroke: var(--warn); stroke-width: 1.3; stroke-dasharray: 3 2.5; }
+.nikfig .voidt { font-size: 13px; fill: var(--warn); font-style: italic; }
+.nikfig .edge { stroke: var(--rule); stroke-width: 1.3; fill: none; }
+.nikfig .edge.on { stroke: var(--accent); stroke-width: 3; }
+.nikfig .edge.no { stroke: var(--warn); stroke-width: 2.4; stroke-dasharray: 6 4; }
+.nikfig .elab { font-size: 12.5px; fill: var(--muted); font-style: italic; }
+.nikfig .elab.on { fill: var(--accent); font-weight: 600; font-style: normal; }
+.nikfig .elab.no { fill: var(--warn); font-weight: 600; font-style: normal; }
+.nikfig .cbox { fill: var(--paper); stroke: var(--accent); stroke-width: 1.4; }
+.nikfig .cbox.blank { stroke: var(--rule); fill: var(--card); }
+.nikfig .cletter { font-family: Georgia, serif; font-weight: 600; fill: var(--accent); text-anchor: middle; }
+.nikfig .cletter.blank { fill: var(--muted); }
+.nikfig .ctext { font-size: 13px; fill: var(--ink); font-style: italic; }
+.nikfig .ctext.none { fill: var(--muted); font-style: normal; font-size: 12px; }
+.nikfig .tvtag { font-size: 11px; fill: var(--ink-soft); }
+.nikfig .tvbox { fill: var(--paper); stroke: var(--ink-soft); stroke-width: .9; }

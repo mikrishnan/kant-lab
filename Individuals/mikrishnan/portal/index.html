@@ -111,6 +111,12 @@
 
   /* ── Two panes: questions on the left, the passage being read on the right ─ */
   #app { flex: 1; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); min-height: 0; }
+  /* Another seminar tool, opened inside the portal, under the portal's own header */
+  #toolview { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  #toolview .toolbar { display: flex; align-items: center; gap: 0.9rem; padding: 0.4rem 1.6rem; border-bottom: 1px solid var(--line-soft); background: var(--paper); font-size: 0.9rem; }
+  #toolview .toolbar b { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); letter-spacing: 0.03em; }
+  #toolview .toolbar .spacer { flex: 1; }
+  #toolframe { flex: 1; width: 100%; border: 0; background: #fff; }
   #app.no-rail { grid-template-columns: minmax(0, 1fr); }
   #app.en:not(.no-rail) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
   #left { overflow: auto; padding: 1.4rem 1.8rem 5rem; }
@@ -132,6 +138,20 @@
   .fp { display: grid; grid-template-columns: 6.2rem minmax(0, 1fr); gap: 0.9rem; padding: 0.35rem 0.55rem 0.35rem 0; border-radius: 6px; cursor: pointer; border-left: 3px solid transparent; }
   .fp:hover { background: var(--card); }
   .fp.focus { background: #fbf1d6; border-left-color: var(--accent); }
+  .fp.cont { padding-top: 0.05rem; }   /* a further paragraph on the same page: closed up, no repeated reference */
+  /* a lecture's title page and contents, drawn as one block: the title page, then a contents list */
+  .fp.front { cursor: default; }
+  .fp.front:hover { background: none; }
+  .fronttext { white-space: normal; font-size: 0.95rem; line-height: 1.5; max-width: 34rem; }
+  .ftitle { font-style: italic; color: var(--faded); margin-bottom: 1rem; }
+  .ftoch { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 0.35rem; }
+  .ftoc { display: flex; align-items: baseline; gap: 0.45rem; }
+  .ftoc .dots { flex: 1; min-width: 1rem; border-bottom: 1px dotted var(--line); transform: translateY(-0.3em); }
+  .ftoc .n { color: var(--faded); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .frow { cursor: pointer; border-radius: 3px; }
+  .frow:hover { background: var(--card); }
+  .frow.focus { background: #fbf1d6; }
+  .fulltext .fh.fmh { color: var(--faded); }   /* the portal's own label, not a heading the AA prints */
   .fpm { font-size: 0.78rem; color: var(--faded); text-align: right; padding-top: 0.22rem; line-height: 1.3; }
   .fpm b { display: block; color: var(--accent); font-weight: 600; }
   .fpm i { display: block; }
@@ -148,6 +168,122 @@
   .readbar input { width: 10.5rem; }
   #selbtn { position: fixed; z-index: 40; background: var(--accent); color: var(--parchment); border: none; border-radius: 999px; padding: 0.22rem 0.8rem; font-size: 0.88rem; cursor: pointer; box-shadow: 0 2px 8px rgba(26, 18, 8, 0.25); }
   .starts .qcards.tcards { grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
+
+  /* ── The study view: a textbook with Kant's notes beside it (the Meier and Baumgarten Readers) ─ */
+  #view-read.studymode { max-width: 72rem; }
+  .study { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 1.4rem; align-items: start; }
+  .study.no-outline { grid-template-columns: minmax(0, 1fr); }
+  .study.no-outline .outline { display: none; }
+  nav.outline { display: block; }
+  .outline { position: sticky; top: 3.6rem; max-height: calc(100vh - 11rem); overflow: auto; font-size: 0.9rem; padding-right: 0.4rem; }
+  .outline input { width: 100%; padding: 0.15rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); margin-bottom: 0.5rem; font-size: 0.88rem; }
+  .ol-part { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--accent); cursor: pointer; margin: 0.55rem 0 0.15rem; display: flex; gap: 0.3rem; }
+  .ol-part .arr { color: var(--accent-light); width: 0.7rem; }
+  .ol-part .rng { margin-left: auto; font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-size: 0.8rem; }
+  .ol-sec, .ol-para { padding: 0.12rem 0.4rem 0.12rem 1rem; border-radius: 5px; cursor: pointer; line-height: 1.3; }
+  .ol-sec { color: var(--ink); }
+  .ol-sec .rng, .ol-para b { color: var(--faded); font-size: 0.8rem; }
+  .ol-para { font-size: 0.84rem; color: #3a2c1a; padding-left: 1.4rem; }
+  .ol-para b { font-weight: 600; margin-right: 0.3rem; }
+  .ol-sec:hover, .ol-para:hover { background: var(--card); }
+  .ol-part.cur { color: var(--ink); }
+  .ol-sec.cur, .ol-para.cur { background: #fbf1d6; box-shadow: inset 2px 0 0 var(--accent); }
+  .ol-note { font-size: 0.8rem; color: var(--faded); font-style: italic; padding: 0.1rem 0.4rem 0.2rem 1rem; }
+  .fulltext .fh.part { font-size: 0.9rem; margin-top: 1.9rem; }
+  .fulltext .fh.sub { font-size: 0.72rem; color: var(--accent-light); border-bottom-style: dotted; }
+  .secnote { margin: 0 0 0.6rem 7.1rem; font-style: italic; color: var(--faded); font-size: 0.95rem; }
+  .kantrefs { margin: 0.2rem 0 0.8rem 7.1rem; background: #efe6f3; border: 1px solid #c9b3d6; border-radius: 8px; padding: 0.4rem 0.7rem; }
+  .kantrefs .lab { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.06em; color: #5a3d6e; margin-bottom: 0.2rem; }
+  .gloss { display: inline-block; background: #f6e4b8; border: 1px solid #d9b56a; color: #6b4a12; border-radius: 4px; font-size: 0.84rem; padding: 0 0.3rem; margin: 0 0.15rem; line-height: 1.35; }
+  .gloss sup { font-size: 0.66rem; margin-right: 0.15rem; color: #9a7428; }
+  .xref { text-decoration: underline dotted var(--accent-light); text-underline-offset: 3px; cursor: pointer; color: var(--accent); }
+  .xref:hover { color: var(--ink); }
+  mark.mis { background: none; text-decoration: underline dotted #b4532a; text-underline-offset: 3px; }
+  mark.find { background: #cfe2f3; }
+  mark.find.cur { background: #8fbbe0; }
+  mark.tint-lemma { background: rgba(139, 94, 60, 0.24); box-shadow: 0 1px 0 var(--accent-light); }
+  mark.tint-satz { background: rgba(139, 94, 60, 0.14); }
+  .misnote { font-size: 0.88rem; color: #7a4a14; font-style: italic; margin-top: 0.25rem; }
+  .fp.part-anfang .fpt::before, .fp.part-schluss .fpt::after { content: '⌐'; color: var(--accent); margin: 0 0.25rem; }
+  .fpm .ed { display: block; font-size: 0.72rem; }
+  .findbox { display: inline-flex; align-items: center; gap: 0.2rem; }
+  .findbox input { width: 9.5rem; }
+  .findbox .n { font-size: 0.8rem; color: var(--faded); min-width: 3.5rem; text-align: center; }
+  .findbox button { background: none; border: 1px solid var(--line); border-radius: 5px; cursor: pointer; padding: 0 0.35rem; color: var(--accent); }
+  #rail { position: relative; }
+  #divider { position: absolute; left: -3px; top: 0; bottom: 0; width: 7px; cursor: col-resize; z-index: 3; }
+  #divider:hover, #divider.drag { background: rgba(139, 94, 60, 0.18); }
+
+  /* notes panel */
+  .nbar { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; margin: 0 0 0.7rem; }
+  .era { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 0 0.55rem; font-size: 0.8rem; cursor: pointer; }
+  .era.off { opacity: 0.4; text-decoration: line-through; }
+  .era i { display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%; margin-right: 0.25rem; vertical-align: 0; }
+  .nsearch { flex: 1; min-width: 9rem; padding: 0.12rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); font-size: 0.88rem; }
+  .nblock { margin: 0 0 0.9rem; }
+  .nblock-h { font-size: 0.86rem; color: var(--faded); border-bottom: 1px solid var(--line); padding: 0.2rem 0; margin-bottom: 0.35rem; cursor: pointer; }
+  .nblock-h b { color: var(--accent); font-family: 'Cinzel', serif; font-size: 0.74rem; letter-spacing: 0.05em; }
+  .nblock.cur > .nblock-h { border-bottom-color: var(--accent); }
+  .nsub { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.06em; color: var(--accent-light); margin: 0.5rem 0 0.25rem; cursor: pointer; }
+  .nsub.cur { color: var(--accent); }
+  .nsub.cur::after { content: ' ◂ in view'; font-family: 'EB Garamond', serif; letter-spacing: 0; font-style: italic; color: var(--faded); }
+  .ncard { background: var(--paper); border: 1px solid var(--line-soft); border-left: 3px solid var(--line); border-radius: 8px; padding: 0.45rem 0.65rem 0.45rem 0.6rem; margin: 0 0 0.45rem; font-size: 0.95rem; }
+  .ncard.interp { border-style: dashed; border-left-style: dashed; }
+  .ncard.focus { border-left-color: var(--accent); background: #fbf1d6; }
+  .ncard.lemma { cursor: pointer; }
+  .nhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3rem; }
+  .nhead b { color: var(--accent); font-weight: 600; }
+  .nglyph { color: var(--accent-light); width: 1rem; display: inline-block; text-align: center; cursor: help; }
+  .aapg { margin-left: auto; font-size: 0.78rem; color: var(--faded); }
+  .pchip { font-size: 0.76rem; border-radius: 4px; padding: 0 0.3rem; cursor: pointer; border: 1px solid transparent; }
+  .pchip.undated { border: 1px dashed var(--accent-light); color: var(--faded); }
+  .chips2 { display: flex; flex-wrap: wrap; gap: 0.25rem; margin: 0.2rem 0 0.15rem; }
+  .lchip, .schip, .partchip { font-size: 0.8rem; border-radius: 999px; padding: 0 0.5rem; border: 1px solid var(--line); background: var(--card); cursor: pointer; }
+  .lchip:hover, .schip:hover { border-color: var(--accent-light); }
+  .partchip { cursor: default; color: var(--faded); }
+  .nloc, .naa { font-size: 0.82rem; color: var(--faded); font-style: italic; }
+  .ntext { white-space: pre-wrap; margin-top: 0.2rem; line-height: 1.45; }
+  .nfoot { font-size: 0.78rem; color: var(--faded); margin-top: 0.25rem; display: flex; flex-wrap: wrap; gap: 0.2rem 0.6rem; }
+  .itag { border: 1px dashed #c9a46b; color: #7a4a14; border-radius: 3px; padding: 0 0.3rem; }
+  .nmore { display: block; width: 100%; text-align: center; margin: 0.3rem 0 0.7rem; }
+  .nmore.end { color: var(--faded); font-style: italic; border: none; cursor: default; }
+  .strata { display: flex; gap: 0.3rem; margin: 0 0 0.6rem; }
+  .tcard { background: var(--paper); border: 1px solid var(--line-soft); border-left: 3px solid var(--line); border-radius: 8px; padding: 0.45rem 0.65rem; margin: 0 0 0.5rem; font-size: 0.95rem; }
+  .tcard.wolff { border-left-color: #8b5e3c; } .tcard.scholastic { border-left-color: #6e7f5a; } .tcard.aristotle { border-left-color: #5a6e8b; }
+  .tcard .src { font-size: 0.82rem; color: var(--faded); }
+  .smatch { padding: 0.3rem 0.4rem; border-radius: 6px; cursor: pointer; font-size: 0.92rem; }
+  .smatch:hover { background: var(--paper); }
+  .smatch b { color: var(--accent); font-size: 0.8rem; margin-right: 0.35rem; }
+
+  /* Adickes' notes and the Synopsis, over the page */
+  #modal { position: fixed; inset: 0; z-index: 50; background: rgba(26, 18, 8, 0.35); display: flex; align-items: center; justify-content: center; }
+  #modal .box { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; width: min(44rem, 92vw); max-height: 84vh; overflow: auto; padding: 1.1rem 1.4rem 1.3rem; box-shadow: 0 10px 40px rgba(26, 18, 8, 0.3); }
+  #modal .mh { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.5rem; }
+  #modal .mh h2 { margin: 0; flex: 1; }
+  #modal .blk { background: var(--card); border: 1px solid var(--line-soft); border-radius: 8px; padding: 0.4rem 0.7rem; margin: 0.45rem 0; font-size: 0.95rem; }
+  #modal .blk .lab { font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.06em; color: var(--accent); }
+  .syn { display: grid; grid-template-columns: 3.4rem minmax(0, 1fr); gap: 0.1rem 0.6rem; font-size: 0.97rem; }
+  .syn .m { text-align: right; color: var(--faded); font-size: 0.85rem; padding-top: 0.1rem; }
+  .syn .ed { grid-column: 1 / -1; font-size: 0.78rem; color: var(--faded); border-top: 1px dotted var(--line); margin-top: 0.3rem; padding-top: 0.15rem; }
+  .syn .gap { grid-column: 1 / -1; font-style: italic; color: #7a4a14; margin: 0.3rem 0; }
+  .synref { text-decoration: underline dotted var(--accent-light); cursor: pointer; color: var(--accent); }
+  .synref.absent { color: var(--faded); cursor: help; text-decoration: none; }
+
+  /* ── Qianxun's logical principles ─ */
+  .pgroup { margin: 0 0 1.6rem; }
+  .prgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 0.6rem; }
+  .prcard { background: var(--card); border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.65rem 0.85rem; cursor: pointer; }
+  .prcard:hover { border-color: var(--accent-light); background: var(--paper); }
+  .prn { font-weight: 600; color: var(--accent); font-size: 1.02rem; }
+  .pra, .prnote { font-size: 0.86rem; color: var(--faded); margin-top: 0.15rem; }
+  .prnote { font-style: italic; }
+  .prforms { display: flex; flex-wrap: wrap; gap: 0.2rem; margin: 0.35rem 0 0.25rem; }
+  .fchip { font-size: 0.8rem; border: 1px solid var(--line); border-radius: 999px; padding: 0 0.45rem; background: var(--paper); }
+  .fchip i { font-size: 0.66rem; color: var(--faded); margin-left: 0.2rem; font-style: normal; }
+  .prcount { font-size: 0.84rem; color: var(--faded); }
+  .prcount b { color: var(--ink); }
+  .qen { font-size: 0.92rem; color: #3a2c1a; margin-top: 0.3rem; border-left: 2px dashed var(--accent-light); padding-left: 0.55rem; }
+  .qen .lab { display: block; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.06em; color: var(--accent); }
 
   /* ── Parallel passages ─ */
   .pset { margin: 0 0 1.5rem; }
@@ -269,7 +405,7 @@
   details.bytext > summary { cursor: pointer; color: var(--faded); font-size: 0.9rem; }
   details.bytext > .card { margin-top: 0.5rem; }
 
-  /* Nik Land's views of his examples: the square of opposition, the table of judgments */
+  /* Nik's views of his examples: the square of opposition, the table of judgments */
   .sq-card { container-type: inline-size; }
   .sq-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 12.5rem; gap: 0.9rem; align-items: start; }
   .q-chip { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 0.15rem 0.6rem; cursor: pointer; text-align: left; }
@@ -311,6 +447,9 @@
   .jchip .ax { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.06em; color: var(--faded); margin-right: 0.2rem; }
   .jchip.stated { background: var(--parchment-dark); border: 1px solid var(--accent-light); }
   .jchip.inferred { border: 1px dashed var(--accent-light); font-style: italic; }
+  .nikfig { margin: 0.45rem 0 0.1rem; }
+  .nikfig .card-fig { border-left: 0; border-top: 1px dashed var(--line); padding: 0.5rem 0 0; background: transparent; }
+  .jflag { font-size: 0.9rem; color: #8a3b12; border-left: 3px solid #c9a46b; padding-left: 0.5rem; margin: 0.25rem 0; }
   .jchip.none { color: var(--faded); border: 1px dotted var(--line); }
   .toj { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: ". q ." "l c r" ". m ."; gap: 0.5rem; }
   .toj-box { border: 1px solid var(--line); border-radius: 5px; padding: 0.35rem 0.5rem; background: var(--parchment); }
@@ -347,6 +486,33 @@
   .pair .ptext { margin-bottom: 0.4rem; }
   .pen { border: 1px dashed var(--accent-light); border-radius: 10px; padding: 0.6rem 0.85rem; margin: 0.75rem 0 0.4rem; font-size: 1rem; max-height: 24rem; overflow: auto; }
   .pen .tt { white-space: pre-wrap; }
+  /* English mode: the translation under each passage, quieter than the original it serves */
+  .entog.on { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  #enbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.9rem; padding: 0.35rem 1.2rem; background: var(--paper); border-bottom: 1px solid var(--line-soft); font-size: 0.86rem; color: var(--faded); }
+  #enbar .lab { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--accent); }
+  #enbar .sty { display: inline-flex; gap: 0.25rem; }
+  #enbar .sty button { border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 0 0.55rem; font-size: 0.82rem; cursor: pointer; }
+  #enbar .sty button.on { border-color: var(--accent-light); background: var(--parchment-dark); color: var(--accent); }
+  #enbar .soon { margin-left: auto; font-style: italic; }
+  #enbar .soon b { font-style: normal; color: var(--accent); font-weight: 600; }
+  .fen { margin: 0.3rem 0 0.2rem; padding-left: 0.7rem; border-left: 2px solid var(--line); color: #3d3122; font-size: 0.94em; line-height: 1.45; white-space: pre-wrap; }
+  .fen.wait { color: var(--faded); border-left-style: dashed; }
+  .fp > .fen { grid-column: 2; margin-top: -0.1rem; }
+  .enb { display: inline-block; margin-top: 0.3rem; padding: 0 0.45rem; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--faded); font-size: 0.72rem; line-height: 1.35; cursor: pointer; }
+  .enb:hover { border-color: var(--accent-light); color: var(--accent); }
+  .enb.on { background: var(--parchment-dark); border-color: var(--accent-light); color: var(--accent); }
+  .hit .cite .enb, .nfoot .enb { margin: 0 0 0 0.5rem; vertical-align: 0.05em; }
+  body.trmode .enb { display: none; }
+  .hit .fen, .ncard .fen { font-size: 0.9em; }
+  /* English mode, neater: the bar on one line, and in a pane wide enough for two columns the
+     English stands beside its German, paragraph by paragraph, as in a bilingual edition */
+  #enbar { flex-wrap: nowrap; white-space: nowrap; overflow: hidden; }
+  #enbar .muted { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .fen { border-left-color: var(--line-soft); color: #4a3c2a; }
+  @container (min-width: 44rem) {
+    .fp:has(> .fen) { grid-template-columns: 6.2rem minmax(0, 1fr) minmax(0, 1fr); column-gap: 1.3rem; }
+    .fp > .fen { grid-column: 3; grid-row: 1; margin: 0; padding: 0.05rem 0 0 1.1rem; font-size: 0.95em; line-height: 1.5; }
+  }
   .pen .lab { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.25rem; }
   .pen .lab i { font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: 0.82rem; color: var(--faded); text-transform: none; }
   .pen ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.86rem; color: var(--faded); }
@@ -393,6 +559,7 @@
   .person .hd { font-size: 0.8rem; color: var(--faded); }
   .person p { margin: 0.35rem 0; font-size: 0.94rem; }
   .person .uses { font-size: 0.86rem; color: var(--faded); font-style: italic; }
+  .team-h { font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 600; color: var(--accent); letter-spacing: 0.03em; margin: 1.3rem 0 0.2rem; }
   .addtext { background: var(--parchment-dark); border: 1px dashed var(--accent-light); border-radius: 6px; padding: 0.7rem 0.9rem; margin-top: 1rem; font-size: 0.95rem; }
   .addtext code { background: var(--paper); padding: 0 0.25rem; border-radius: 2px; font-size: 0.85rem; }
 
@@ -403,6 +570,7 @@
   #loading .bar { height: 0.4rem; background: var(--parchment-dark); border-radius: 3px; overflow: hidden; margin-top: 0.6rem; }
   #loading .bar i { display: block; height: 100%; width: 0; background: var(--accent-light); transition: width 0.2s; }
 </style>
+<link rel="stylesheet" href="pinned/nik-figures.css?v=2026-10-26e">
 </head>
 <body>
 
@@ -415,13 +583,20 @@
     <button type="button" data-view="people">Contributors</button>
   </nav>
   <span class="spacer"></span>
+  <button type="button" class="btn entog" id="entog" aria-pressed="false" title="Show the English under every passage. The German and Latin always stay.">English</button>
   <button type="button" class="btn" id="share" title="Copy a link to exactly this view">Copy link</button>
 </header>
 
+<div id="enbar" hidden></div>
 <div id="trail" hidden></div>
 <div id="routemap" hidden></div>
 <div id="tip" hidden></div>
 <button type="button" id="selbtn" hidden></button>
+<div id="modal" hidden></div>
+<div id="toolview" hidden>
+  <div class="toolbar"><button type="button" class="btn" id="toolback">← Back to the portal</button><b id="tooltitle"></b><span class="spacer"></span><a id="toolext" target="_blank" rel="noopener">Open in its own tab ↗</a></div>
+  <iframe id="toolframe" title="A seminar tool, opened inside the portal"></iframe>
+</div>
 
 <div id="app" class="no-rail">
   <section id="left">
@@ -429,7 +604,7 @@
     <div id="view-ask">
       <div id="welcome" hidden>
         <h1>The Logic Portal</h1>
-        <p>Ask the whole logic corpus a question: Meier, Baumgarten, Kant’s notes, the lectures and Jäsche, all at once.</p>
+        <p>Ask the whole logic corpus a question: Meier, Baumgarten, Kant’s notes, the lectures and Jäsche.</p>
       </div>
       <form id="ask" autocomplete="off">
         <div class="qrow">
@@ -467,12 +642,12 @@
     <div id="view-people" hidden></div>
   </section>
 
-  <aside id="rail" hidden><div id="railhead"></div><div id="railbody"></div></aside>
+  <aside id="rail" hidden><div id="divider" title="Drag to resize"></div><div id="railhead"></div><div id="railbody"></div></aside>
 </div>
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
-<script src="catalogue.js"></script>
+<script src="catalogue.js?v=2026-10-26e"></script>
 <script>
 (() => {
 'use strict';
@@ -488,13 +663,11 @@ const DOCTRINES = [
     groups: [['general', 'What an immediate inference is'], ['aequipollentia', 'per judicia aequipollentia'], ['subalternation', 'per judicia subalternata (subalternation)'],
       ['contradictory', 'per judicia opposita: contradictorie'], ['contrary', 'per judicia opposita: contrarie'], ['subcontrary', 'per judicia opposita: subcontrarie'],
       ['conversion', 'per conversionem (conversion)'], ['contraposition', 'per contrapositionem (contraposition)']] },
-  { key: 'judgement', label: 'Forms of judgment, by example', who: 'nik', layer: 'judgement',
+  { key: 'judgement', label: 'Forms of judgment', who: 'aidan', layer: 'judgement',
     groups: [['universal', 'Quantity: universal'], ['particular', 'Quantity: particular'], ['singular', 'Quantity: singular'],
       ['affirmative', 'Quality: affirmative'], ['negative', 'Quality: negative'], ['infinite', 'Quality: infinite'],
       ['categorical', 'Relation: categorical'], ['hypothetical', 'Relation: hypothetical'], ['disjunctive', 'Relation: disjunctive'],
       ['problematic', 'Modality: problematic'], ['assertoric', 'Modality: assertoric'], ['apodictic', 'Modality: apodictic']] },
-  { key: 'syllogism', label: 'Inferences in the lectures, by kind', who: 'nik', layer: 'inference',
-    groups: [['immediate', 'Immediate inference'], ['categorical', 'Categorical syllogism'], ['hypothetical', 'Hypothetical syllogism'], ['disjunctive', 'Disjunctive syllogism']] },
   { key: 'mediate', label: 'Kinds of mediate inference', who: 'sophia', layer: 'mediate', groups: null },
   { key: 'mediate-def', label: 'Mediate inference: definitions, contrasts, rules', who: 'sophia', layer: 'mediate',
     groups: [['D', 'Defines'], ['C', 'Contrasts with immediate inference'], ['P', 'States a principle or rule']] },
@@ -502,47 +675,66 @@ const DOCTRINES = [
 
 /* The people whose work the portal reads. `key` is what PORTAL_LAYERS' `who` names. */
 const PEOPLE = [
-  { key: 'readers', name: 'Sophia Wyatt & Maria', handle: '@sophia-wyatt · @mari637-pixel',
-    did: 'Own the Meier and Baumgarten Readers and the shared data in data/: the three Logik transcripts, both volumes of Reflexionen, the Metaphysica.',
-    uses: 'Every lecture, every Reflexion and Baumgarten’s text reach the portal through the data they look after; the Meier Reader’s tradition passages appear beside Meier’s §§.',
-    tools: [['Meier Reader', '../../../meier-reader/meier-reading-guide.html'], ['Baumgarten Reader', '../../../baumgarten-reader/baumgartenreading-guide.html']] },
-  { key: 'sophia', name: 'Sophia Wyatt', handle: '@sophia-wyatt',
-    did: 'Mediate inferences: examples and definitions in the lectures and the Reflexionen, filed by kind and dated.',
-    uses: 'Answers “What kinds of mediate inference?”, and shows her filing beside every passage she classified.',
-    tools: [['Mediate inferences', '../../Sophia%20Wyatt/mediate-inferences.html']] },
-  { key: 'maria', name: 'Maria', handle: '@mari637-pixel',
-    did: 'A reading guide to Busolt, Blomberg and Meier’s Auszug, with English translations saved.',
-    uses: 'Co-owner of the shared texts the portal reads. Her reading guide is the place to read a lecture through, in English beside the German.',
-    tools: [['Logik reading guide', '../../maria/busolt-reader.html']] },
-  { key: 'alex', name: 'Alex Li', handle: '@Alexynli',
-    did: 'The Jäsche Logik as a dataset; a reader that traces Jäsche’s sentences to the dated Reflexionen; annotations of the three lectures.',
-    uses: 'The portal’s Jäsche is Alex’s edition of AA IX. Alex’s parallels between the lectures show beside the passages they join.',
-    tools: [['Jäsche reader', '../../Alex%20Li/Jasche%20reader/index.html'], ['Logic corpus', '../../Alex%20Li/logic-corpus.html']] },
-  { key: 'jesus', name: 'Jesus La Paz', handle: '@yizu6201',
-    did: 'The Meier–Kant concordance: the § of Meier each passage of the lectures and of Jäsche is on, stated or inferred, with measured confidence. The Meier text as a data file. And two machine translations of every passage of Meier, the Reflexionen on Meier, the three lectures and Jäsche.',
-    uses: 'Powers “Where is this in Meier?” for Blomberg, the Wiener Logik, Busolt and Jäsche, and every “Lectures on this §” list. His translations are the English beside the German.',
-    tools: [['Meier–Kant comparison', '../../Jesus-La-Paz/meier-kant-comparison.html'], ['Logik search', '../../Jesus-La-Paz/logik-search.html']] },
-  { key: 'jin', name: 'Jin', handle: '@jessiejin23',
-    did: 'Parallel passages across Blomberg, the Wiener Logik and Busolt, found from a list of the lectures’ concepts and their wordings.',
-    uses: 'Jin’s concept list is the “Concepts of the lectures” menu: pick one and the portal searches every text for its wordings.',
-    tools: [['Parallel passages', '../../Jin/logik-transcripts.html']] },
-  { key: 'feng', name: 'Feng', handle: '@qianxun-blip',
-    did: 'A lexicon of the logical principles, with every German and Latin form under which the texts name them; a search across the texts.',
-    uses: 'Feng’s lexicon is the “Logical principles” menu: each principle searches for all of its attested forms.',
-    tools: [['Logical principles', '../../Feng/principle-search.html'], ['Text search', '../../Feng/text-search-01.html']] },
-  { key: 'nik', name: 'Nik Land', handle: '@nikolasland',
-    did: 'Examples of immediate inferences, judgments and syllogisms in the lectures and Reflexionen, each filed by kind.',
-    uses: 'Answers “What kinds of immediate inference does Kant recognise?”, and the forms of judgment and kinds of syllogism, from Nik’s filing. His examples fill the square of opposition and the table of judgments, with his forms and moments on every card.',
-    tools: [['Immediate inferences', '../../Nik%20Land/immediate-inferences.html'], ['Judgement explorer', '../../Nik%20Land/judgement-explorer.html'], ['Inference explorer', '../../Nik%20Land/inference-explorer.html']] },
-  { key: 'aidan', name: 'Aidan Chong', handle: '',
+  { key: 'aidan', name: 'Aidan',
     did: 'A judgment finder: the forms of judgment of the table, the terms that name them, and examples found in the lectures.',
-    uses: 'Aidan’s terms for the twelve forms are the “Forms of judgment” menu: each searches every text for the names of that form.',
+    uses: 'Aidan’s judgment finder is the main view of the forms of judgment under Explore: the judgments Aidan’s rules find in the three lectures, set out in the table of judgments. Aidan’s terms for the twelve forms are the “Forms of judgment” menu.',
     tools: [['Judgment finder', '../../Aidan/judgment-finder.html']] },
-  { key: 'prof', name: 'The professor', handle: '@mikrishnan',
-    did: 'The first Meier and Baumgarten Readers, the Porphyrian tree, and this portal.',
-    uses: 'Also in the Lab: the Porphyrian trees everyone built in the first session.',
-    tools: [['Porphyrian tree', '../../../porphyrian-tree/porphyrian-tree.html'], ['Kant Lab', '../../../index.html']] },
+  { key: 'alex', name: 'Alex',
+    did: 'The Jäsche Logik as a dataset; a reader that traces Jäsche’s sentences to the dated Reflexionen; annotations of the three lectures.',
+    uses: 'The portal’s Jäsche is Alex’s edition of AA IX, and Alex’s Jäsche reader, which traces where Jäsche’s text comes from, is a step away from every Jäsche passage.',
+    tools: [['Jäsche reader', '../../Alex%20Li/Jasche%20reader/index.html'], ['Logic corpus', '../../Alex%20Li/logic-corpus.html']] },
+  { key: 'feng', name: 'Qianxun',
+    did: 'A lexicon of the logical principles, with every German and Latin form under which the texts name them; a search across the texts.',
+    uses: 'Qianxun’s lexicon is the logical-principles view under Explore: the principles in Qianxun’s three groups, each with every form the texts attest and where they occur. Searching for a principle shows Qianxun’s English translations beside the passages.',
+    tools: [['Logical principles', '../../Feng/principle-search.html'], ['Text search', '../../Feng/text-search-01.html']] },
+  { key: 'jesus', name: 'Jesus',
+    did: 'The Meier–Kant concordance: the § of Meier each passage of the lectures and of Jäsche is on, stated or inferred, with measured confidence. The Meier text as a data file. And two machine translations of every passage of Meier, the Reflexionen on Meier, the three lectures and Jäsche.',
+    uses: 'Powers “Where is this in Meier?” for Blomberg, the Wiener Logik, Busolt and Jäsche, and every “Lectures on this §” list. Jesus’s translations are the English beside the German.',
+    tools: [['Meier–Kant comparison', '../../Jesus-La-Paz/meier-kant-comparison.html'], ['Logik search', '../../Jesus-La-Paz/logik-search.html']] },
+  { key: 'jin', name: 'Jessie',
+    did: 'Parallel passages across Blomberg, the Wiener Logik and Busolt, found from a list of the lectures’ concepts and their wordings.',
+    uses: 'The parallel passages beside every passage are found as Jessie’s tool finds them, leaving out Jessie’s stopwords, and Jessie’s concept list is the “Concepts of the lectures” menu.',
+    tools: [['Parallel passages', '../../Jin/logik-transcripts.html']] },
+  { key: 'maria', name: 'Maria',
+    did: 'Working on the wraparound translation feature for the whole portal. With Sophia, Maria looks after the Meier and Baumgarten Readers and the shared texts in data/, and built a reading guide to Busolt, Blomberg and Meier’s Auszug with English translations.',
+    uses: 'Every lecture, every Reflexion and Baumgarten’s text reach the portal through the data Maria and Sophia look after, and the two readers now live inside it, under Read.',
+    tools: [['Translation tool, a preview', 'https://raw.githack.com/mikrishnan/kant-lab/eb15ef290b772a4e1ab1e2f4d799ca42623b8ac5/Individuals/maria/busolt-reader.html'], ['The translation plan', 'https://raw.githack.com/mikrishnan/kant-lab/eb15ef290b772a4e1ab1e2f4d799ca42623b8ac5/Individuals/maria/translation-plan.html'], ['Logik reading guide', '../../maria/busolt-reader.html'], ['Meier Reader', '../../../meier-reader/meier-reading-guide.html'], ['Baumgarten Reader', '../../../baumgarten-reader/baumgartenreading-guide.html']] },
+  { key: 'nik', name: 'Nik',
+    did: 'Examples of immediate inferences, judgments and syllogisms in the lectures and Reflexionen, each filed by kind; and a figure for every immediate inference, each checked by a small logic engine.',
+    uses: 'Answers “What kinds of immediate inference does Kant recognise?” from Nik’s filing, set out on the square of opposition with Nik’s forms on every card, and Nik’s own figure for every passage, drawn by Nik’s code. Nik’s judgment examples are a tab of their own beside Aidan’s finder.',
+    tools: [['Immediate inferences, drawn', '../../Nik%20Land/immediate-inferences-drawn.html'], ['Immediate inferences', '../../Nik%20Land/immediate-inferences.html'], ['Judgement explorer', '../../Nik%20Land/judgement-explorer.html'], ['Inference explorer', '../../Nik%20Land/inference-explorer.html']] },
+  { key: 'sophia', name: 'Sophia',
+    did: 'Mediate inferences: examples and definitions in the lectures and the Reflexionen, filed by kind and dated. With Maria, Sophia looks after the Meier and Baumgarten Readers and the shared texts in data/.',
+    uses: 'Answers “What kinds of mediate inference?”, and shows Sophia’s filing beside every passage Sophia classified. Every lecture, every Reflexion and Baumgarten’s text reach the portal through the data Sophia and Maria look after, and the two readers now live inside it, under Read.',
+    tools: [['Mediate inferences', '../../Sophia%20Wyatt/mediate-inferences.html'], ['Meier Reader', '../../../meier-reader/meier-reading-guide.html'], ['Baumgarten Reader', '../../../baumgarten-reader/baumgartenreading-guide.html']] },
+  /* Members of the Kant Quest, Design, and Pedagogy team: not features of the portal, credited in a section of their own. */
+  { key: 'eric', name: 'Eric', team: 'kantquest', did: 'On the Kant Quest, Design, and Pedagogy team.' },
+  { key: 'hannah', name: 'Hannah', team: 'kantquest', did: 'On the Kant Quest, Design, and Pedagogy team.' },
+  { key: 'harper', name: 'Harper', team: 'kantquest', did: 'On the Kant Quest, Design, and Pedagogy team.' },
+  { key: 'kavya', name: 'Kavya', team: 'kantquest', did: 'On the Kant Quest, Design, and Pedagogy team.' },
+  { key: 'jonathan', name: 'Jonathan', team: 'kantquest', did: 'Working on a judgment table overview for learning purposes.' },
+  { key: 'nick', name: 'Nick', team: 'kantquest', did: 'On the Kant Quest, Design, and Pedagogy team.' },
 ];
+
+/* From the Baumgarten Reader: the volume prints a "Handschriftliche Bemerkungen Kants" block for
+   the Prolegomena and for Possibile and nowhere else; hand-entered there, keyed by section id. */
+const KANT_REFS = {
+  'proleg': [{ phase: 'δ', vol: 'XVII', page: '249' }, { phase: 'λ', vol: 'XVII', page: '438' }, { phase: 'ν', vol: 'XVII', page: '527' }],
+  'parsi-capi-seci': [{ phase: 'δ', vol: 'XVII', page: '251' }, { phase: 'ε', vol: 'XVII', page: '262' }, { phase: 'ν', vol: 'XVII', page: '527' }],
+};
+/* From the Meier Reader: where on the page a note stands, from the AA's locus word. */
+const REFL_KIND = {
+  'zu':        { glyph: '→', de: 'Zu …',        en: 'attached to the passage; placement not further specified' },
+  'gegenüber': { glyph: '‖', de: 'Gegenüber …', en: 'on the facing (interleaved) page, opposite the passage' },
+  'neben':     { glyph: '▎', de: 'Neben …',     en: 'beside the passage, in the same margin' },
+  'zwischen':  { glyph: '↕', de: 'Zwischen …',  en: 'between the printed lines, or between two §§' },
+  'über':      { glyph: '↑', de: 'Über …',      en: 'above the line' },
+  'unter':     { glyph: '↓', de: 'Unter …',     en: 'below the line' },
+  'nach':      { glyph: '»', de: 'Nach …',      en: 'after the passage' },
+  'in':        { glyph: '⊂', de: 'In …',        en: 'written into the printed text itself' },
+};
+const ERAS = [['1750', '1750s', '#d8c49a'], ['1760', '1760s', '#c8a36e'], ['1770', '1770s', '#b07d4c'], ['1780', '1780s', '#8b5e3c'], ['1790', '1790 +', '#5c3d1e'], ['none', 'undated', 'transparent']];
+const PLACE_HOW = { locus: 'its own locus note names the §', group: 'the AA’s block heading over it', block: 'the AA’s block heading over it', page: 'the handbook page it is written on', none: 'no § stated: placed from its neighbours' };
 
 const LAYER_LABEL = { textbook: 'TEXTBOOK', notes: 'KANT’S NOTES', lecture: 'LECTURE', compilation: 'JÄSCHE', published: 'PUBLISHED' };
 const SRC_HOW = {
@@ -557,7 +749,7 @@ const SRC_HOW = {
    portal, so that the report can link to the passage as the reporter saw it. */
 const REPO = 'mikrishnan/kant-lab';
 const SITE_PORTAL = 'https://mikrishnan.github.io/kant-lab/Individuals/mikrishnan/portal/index.html';
-const TR_WARNING = 'Machine translation, made for Jesus La Paz’s Meier–Kant comparison by following one translator’s stated principles. ' +
+const TR_WARNING = 'Machine translation, made for Jesus’s Meier–Kant comparison by following one translator’s stated principles. ' +
   'Neither Guyer and Wood nor Kemp Smith translated these texts, and this is not their work. Check it against the German.';
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -581,8 +773,14 @@ const S = {                       // what the user is looking at; mirrored in th
   tab: 'overview',                // results: 'overview' (phrasings, where) or 'passages'
   rtab: 'text',                   // the right pane: 'text' (the passage in its full text) or 'conn' (its connections)
   readKey: null, readAt: null,    // the text being read in full on the left, and where
+  noteFocus: null,                // in the study view, the note picked out in the notes panel
+  eraOff: new Set(), tint: null, outline: true, olOpen: new Set(['0', '1']), olFilter: '',
+  nsearch: '', noFix: false, blocksBefore: 2, blocksAfter: 2, strataOff: new Set(),
+  find: null, railW: null,
   secOpen: new Set(), secClosed: new Set(),   // reading-pane sections the reader opened or closed
   en: '',                         // the English shown beside the German: a PORTAL_TR_STYLES key, or '' for none
+  enStyle: 'guyer',               // the style a single passage's English button opens in
+  enOpen: new Set(),              // passages whose English was opened one at a time
 };
 let RESULT = null;
 let LOAD_FAILED = [];
@@ -600,10 +798,13 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 /* Inserted with async = false, the files download side by side but run in the order given. */
+/* Bump this, and the catalogue's ?v= in the page's <script> tag, whenever the portal's files change,
+   so that a browser holding yesterday's copies fetches today's. */
+const PORTAL_V = '2026-10-26e';
 function loadScript(src) {
   return new Promise(res => {
     const el = document.createElement('script');
-    el.src = src;
+    el.src = src + (src.includes('?') ? '&' : '?') + 'v=' + PORTAL_V;
     el.async = false;
     el.onload = () => res(true);
     el.onerror = () => res(false);
@@ -763,6 +964,9 @@ const ADAPT = {
     });
     T.byPara = getGlobal(T.byPara) || {};
     T.entries = entries;
+    T.groups = getGlobal(T.global.replace('ENTRIES', 'GROUPS')) || [];
+    T.byGrp = new Map();
+    entries.forEach((e, k) => { if (e.grp != null) { if (!T.byGrp.has(e.grp)) T.byGrp.set(e.grp, []); T.byGrp.get(e.grp).push(k); } });
   },
   meier(T, D) {
     const secs = [];
@@ -771,18 +975,30 @@ const ADAPT = {
       (h.sections || []).forEach(walk);
     });
     const secOf = n => { let best = null; secs.forEach(s => { if (n >= s.a && n <= s.b && (!best || s.span < best.span)) best = s; }); return best ? best.title : ''; };
+    T.hier = D.hierarchy || [];
+    const inR = (r, n) => r && n >= r[0] && n <= r[1];
     Object.keys(D.paras).map(Number).sort((a, b) => a - b).forEach(n => {
       const cit = (D.citations && D.citations[n] || '').replace(/ /g, ' ');
-      addPassage(T, { id: 'p' + n, cite: '§ ' + n + (cit ? ', ' + cit : ''), aa: null, text: D.paras[n].replace(/ +/g, ' '), sec: secOf(n), para: n });
+      const top = T.hier.findIndex(h => inR(h.para_range, n));
+      const sub = top >= 0 && T.hier[top].sections ? T.hier[top].sections.findIndex(x => inR(x.para_range, n)) : -1;
+      addPassage(T, { id: 'p' + n, cite: '§ ' + n + (cit ? ', ' + cit : ''), aa: null, aaCite: cit, text: D.paras[n].replace(/ +/g, ' '), sec: secOf(n), para: n, mtop: top, msec: sub });
     });
   },
   metaphysica(T, D) {
     const secs = getGlobal('MET_SECTIONS') || [];
     const label = {};
     secs.forEach(s => { label[s.id] = s.label; });
+    T.secs = secs;
+    T.secIdx = {};
+    secs.forEach((x, i) => { T.secIdx[x.id] = i; });
     D.forEach(m => {
-      addPassage(T, { id: 'p' + m.num, cite: '§ ' + m.num + (m.aa ? ', AA 17:' + m.aa : ''), aa: m.aa,
-        text: m.text.replace(/@@\d+@@/g, ''), sec: label[m.section] || '', para: m.num });
+      // Baumgarten's German equivalents stand at @@n@@ in the Latin; keep where, and take them out
+      const gl = [];
+      let text = '', last = 0;
+      m.text.replace(/@@(\d+)@@/g, (all, n, at) => { text += m.text.slice(last, at); last = at + all.length; const k = +n - 1; gl.push({ at: text.length, de: (m.glosses || [])[k] || '', mk: (m.marks || [])[k] || '' }); return all; });
+      text += m.text.slice(last);
+      addPassage(T, { id: 'p' + m.num, cite: '§ ' + m.num + (m.aa ? ', AA 17:' + m.aa : ''), aa: m.aa, aaEnd: m.aaEnd, ed: m.ed, edEnd: m.edEnd,
+        text, gl, flags: m.flags || [], sec: label[m.section] || '', secId: m.section, para: m.num });
     });
   },
   passages(T, D) {
@@ -817,13 +1033,6 @@ function buildConnections() {
   };
   if (C && C.links) ['blomberg', 'wiener', 'busolt'].forEach(w => Object.entries(C.links[w] || {}).forEach(([id, l]) => addLink(w, id, l)));
   if (LAYERS.jaescheLinks) Object.entries(LAYERS.jaescheLinks).forEach(([id, x]) => addLink('jaesche', id, x.link));
-
-  // Alex's parallels between the lectures.
-  (LAYERS.parallels || []).forEach(pa => {
-    const ps = (pa.passages || []).map(x => ({ x, p: passage(x.work, x.block) })).filter(o => o.p);
-    ps.forEach(o => addAnnot(o.p.i, { who: 'alex', label: 'Parallel · ' + pa.topic, text: pa.note || '', quote: o.x.quote,
-      links: ps.filter(q => q !== o).map(q => q.p.i) }));
-  });
 }
 
 function buildDoctrines() {
@@ -835,23 +1044,18 @@ function buildDoctrines() {
   (LAYERS.immediate || []).forEach(e => {
     const p = e.src === 'refl16' ? refl('refl16', e.r) : lec(e.src, e.block);
     if (!p) return;
-    const it = { pi: p.i, quotes: [e.quote].filter(Boolean), labels: e.kinds || [], note: e.note || '', judgements: e.judgements || [], named: !!e.named, sub: e.sub || '' };
+    const it = { pi: p.i, quotes: [e.quote].filter(Boolean), labels: e.kinds || [], note: e.note || '', judgements: e.judgements || [], named: !!e.named, sub: e.sub || '', counter: e.counter || '', invalid: e.invalid || '', nid: e.id };
     push('immediate', it);
-    addAnnot(p.i, { who: 'nik', label: 'Immediate inference · ' + (e.kinds || []).join(', '), quote: e.quote, doc: 'immediate' });
+    addAnnot(p.i, { who: 'nik', label: (e.counter ? 'Offered as not an immediate inference · ' : 'Immediate inference · ') + (e.kinds || []).join(', ') +
+      (e.named ? '' : ' · the kind is Nik’s filing, not named in the passage') + (e.invalid ? ' · an inference Kant rules out' : ''), text: e.counter || e.invalid || '', quote: e.quote, doc: 'immediate' });
   });
   (LAYERS.judgement || []).forEach(e => {
     const p = lec(e.work, e.block);
     if (!p) return;
     const labels = [].concat(e.quantity || [], e.quality || [], e.relation || [], e.modality || []);
-    push('judgement', { pi: p.i, quotes: [e.quote].filter(Boolean), labels, note: e.note || '', judgement: e.judgement || '',
+    push('judgement', { pi: p.i, quotes: [e.quote].filter(Boolean), labels, note: e.note || '', judgement: e.judgement || '', who: 'nik',
       axes: { quantity: e.quantity, quality: e.quality, relation: e.relation, modality: e.modality }, stated: e.stated || [] });
     addAnnot(p.i, { who: 'nik', label: 'Judgment · ' + labels.join(', '), quote: e.quote, doc: 'judgement' });
-  });
-  (LAYERS.inference || []).forEach(e => {
-    const p = lec(e.work, e.block);
-    if (!p) return;
-    push('syllogism', { pi: p.i, quotes: [e.quote].filter(Boolean), labels: e.kind || [], note: e.form || '' });
-    addAnnot(p.i, { who: 'nik', label: 'Inference · ' + (e.kind || []).join(', ') + (e.form ? ' · ' + e.form : ''), quote: e.quote, doc: 'syllogism' });
   });
   const MI = LAYERS.mediate;
   if (MI) {
@@ -1129,34 +1333,26 @@ const textCard = t => '<button type="button" class="qcard" data-read="' + t.key 
 function renderExplore() {
   let h = '<div class="explore"><h2>Explore</h2><p class="intro">Starting points the seminar has built. Each lists its passages; click one to read it in its full text.</p>';
   const docs = DOCTRINES.filter(d => DOCS[d.key] && DOCS[d.key].items.length);
-  const extra = { immediate: ' · with the square of opposition', judgement: ' · with the table of judgments' };
-  if (docs.length) h += '<section><div class="ph">DOCTRINES, CLASSIFIED PASSAGE BY PASSAGE</div><div class="qcards">' +
-    docs.map(d => '<button type="button" class="qcard" data-doc="' + d.key + '">' + esc(d.label) +
-      '<span class="who">' + DOCS[d.key].items.length + ' passages · ' + esc(personName(d.who)) + (extra[d.key] || '') + '</span></button>').join('') + '</div></section>';
-  if (LAYERS.parallels) h += '<section><div class="ph">PARALLEL PASSAGES</div><div class="qcards">' +
-    '<button type="button" class="qcard" data-doc="parallels">Parallels across the lectures<span class="who">' + LAYERS.parallels.length + ' sets chosen by hand · Alex Li</span></button>' +
-    '<div class="qcard static">The parallels of any passage<span class="who">Open any passage: under Connections, the passages nearest it in wording, measured as Jin’s parallel passages measure them</span></div></div></section>';
+  const extra = { immediate: ' · with the square of opposition' };
+  const whoLine = d => d.key === 'judgement' ? 'Aidan’s judgment finder, and Nik’s examples · with the table of judgments' : DOCS[d.key].items.length + ' passages · ' + personName(d.who) + (extra[d.key] || '');
+  if (docs.length) h += '<section><div class="ph">DOCTRINES</div><div class="qcards">' +
+    docs.map(d => '<button type="button" class="qcard" data-doc="' + d.key + '">' + esc(d.label) + '<span class="who">' + esc(whoLine(d)) + '</span></button>').join('') +
+    (LAYERS.principles ? '<button type="button" class="qcard" data-doc="principles">The logical principles<span class="who">' + LAYERS.principles.length + ' principles in three groups · Qianxun</span></button>' : '') + '</div></section>';
+  h += '<section><div class="ph">PARALLEL PASSAGES</div><div class="qcards">' +
+    '<div class="qcard static">The parallels of any passage<span class="who">Open any passage: under Connections, the passages nearest it in wording, found as Jessie’s parallel passages find them</span></div></div></section>';
   const cards = [];
-  const lex = LAYERS.principles;
-  if (lex) {
-    const groups = getGlobal('PRINCIPLE_GROUPS') || {};
-    const byG = {};
-    lex.forEach(pr => { (byG[pr.group] = byG[pr.group] || []).push(pr); });
-    cards.push('<div class="qcard static">The logical principles<span class="who">Feng’s lexicon: each searches every form the texts attest</span><select id="sel-principle"><option value="">Choose a principle…</option>' +
-      Object.keys(byG).map(g => '<optgroup label="' + esc(groupName(groups, g)) + '">' + byG[g].map(pr => '<option value="' + esc(pr.id) + '">' + esc(pr.en) + '</option>').join('') + '</optgroup>').join('') + '</select></div>');
-  }
   const jin = LAYERS.concepts;
   if (jin) {
     const byG = {};
     jin.forEach(c => { (byG[c.group] = byG[c.group] || []).push(c); });
-    cards.push('<div class="qcard static">Concepts of the lectures<span class="who">Jin’s list, with the wordings of each</span><select id="sel-concept"><option value="">Choose a concept…</option>' +
+    cards.push('<div class="qcard static">Concepts of the lectures<span class="who">Jessie’s list, with the wordings of each</span><select id="sel-concept"><option value="">Choose a concept…</option>' +
       Object.keys(byG).map(g => '<optgroup label="' + esc(g) + '">' + byG[g].map(c => '<option value="' + esc(c.id) + '">' + esc(c.label) + '</option>').join('') + '</optgroup>').join('') + '</select></div>');
   }
   const forms = LAYERS.forms;
   if (forms) {
     const byG = {};
     forms.forEach(f => { (byG[f.group] = byG[f.group] || []).push(f); });
-    cards.push('<div class="qcard static">Forms of judgment<span class="who">Aidan Chong’s terms for each form</span><select id="sel-form"><option value="">Choose a form…</option>' +
+    cards.push('<div class="qcard static">Forms of judgment<span class="who">Aidan’s terms for each form</span><select id="sel-form"><option value="">Choose a form…</option>' +
       Object.keys(byG).map(g => '<optgroup label="' + esc(g) + '">' + byG[g].map(f => '<option value="' + esc(f.id) + '">' + esc(f.en + ' (' + f.de + ', ' + f.la + ')') + '</option>').join('') + '</optgroup>').join('') + '</select></div>');
   }
   if (cards.length) h += '<section><div class="ph">LEXICONS</div><div class="qcards">' + cards.join('') + '</div></section>';
@@ -1264,9 +1460,12 @@ function hitCard(p, ms) {
   const spans = ms.map(m => [p.ts[m.a], p.te[m.b], m.loc === S.loc]);
   const place = placeOf(p);
   const tag = place ? ' · ' + (place.book === 'baumgarten' ? 'Baumgarten' : 'Meier') + ' ' + paraLabel(place.paras) : '';
+  const qen = S.preset && S.preset.who === 'feng' ? qianxunEnglish(p) : '';
   return '<div class="hit' + (S.sel === p.i ? ' sel' : '') + '" data-open="' + p.i + '"><div class="cite"><b>' + esc(p.cite) + '</b>' +
-    (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : '') + esc(tag) + (ms.length > 1 ? ' · ' + ms.length + ' times' : '') + '</div>' +
-    '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, spans) + (b < p.text.length ? ' …' : '') + '</div></div>';
+    (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : '') + esc(tag) + (ms.length > 1 ? ' · ' + ms.length + ' times' : '') + (qen ? '' : enButton(p, a, b)) + '</div>' +
+    '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, spans) + (b < p.text.length ? ' …' : '') + '</div>' +
+    (qen ? '' : enLine(p, a, b)) +
+    (qen ? '<div class="qen" lang="en"><span class="lab">ENGLISH · MACHINE TRANSLATION BY CLAUDE, FROM QIANXUN’S PRINCIPLE SEARCH, NOT REVIEWED</span>' + esc(clip(qen, 480)) + '</div>' : '') + '</div>';
 }
 
 function paraLabel(paras) {
@@ -1290,40 +1489,107 @@ function marked(text, a, b, spans) {
   return out + esc(text.slice(pos, b));
 }
 
-const VIEW_LABEL = { parallels: 'Parallels across the lectures' };
+const VIEW_LABEL = { principles: 'The logical principles' };
 
-function renderParallels(box) {
-  const sets = LAYERS.parallels || [];
-  const kinds = [...new Set(sets.map(x => x.kind).filter(Boolean))];
-  let h = '<div class="res-head"><div class="res-title">Parallel passages across the lectures</div>' +
-    '<div class="summary"><b>' + sets.length + '</b> sets of passages, chosen by hand by Alex Li</div><div class="from">Alex Li’s annotations of the three lectures</div>' +
-    '<p class="note">Click a passage to read it in its full text. Every passage’s own parallels, found by shared wording, are under Connections when you open it.</p></div>';
-  if (kinds.length > 1) h += '<div class="kchips">' + kinds.map(k => '<button type="button" class="kchip' + (S.loc === k ? ' on' : '') + '" data-loc="' + esc(k) + '">' + esc(k) + '<b>' + sets.filter(x => x.kind === k).length + '</b></button>').join('') + '</div>';
-  sets.filter(x => !S.loc || x.kind === S.loc).forEach(set => {
-    const cells = (set.passages || []).map(x => ({ x, p: passage(x.work, x.block) })).filter(o => o.p);
-    if (!cells.length) return;
-    h += '<div class="pset"><div class="ptop">' + esc(set.topic) + '</div>' + (set.note ? '<div class="pnote">' + esc(set.note) + '</div>' : '') + '<div class="pgrid">' +
-      cells.map(o => {
-        const T = TEXTS[o.p.t], sp = quoteSpans(o.p.text, [o.x.quote]);
-        const f = sp[0] || [0, Math.min(220, o.p.text.length)];
-        const a = Math.max(0, f[0] - 70), b = Math.min(o.p.text.length, f[1] + 70);
-        return '<div class="pcell' + (S.sel === o.p.i ? ' sel' : '') + '" data-open="' + o.p.i + '" data-quote="' + esc(o.x.quote || '') + '"><div class="cite"><b>' + esc(T.short) + '</b> · ' + esc(o.p.cite) + ' · ' + esc(T.date) + '</div>' +
-          '<div lang="de">' + (a > 0 ? '… ' : '') + marked(o.p.text, a, b, sp.map(z => [z[0], z[1], true])) + (b < o.p.text.length ? ' …' : '') + '</div></div>';
-      }).join('') + '</div></div>';
+/* ── Qianxun's logical principles: the three groups, each principle with its attested forms ── */
+let PRINCIPLE_COUNTS = null;
+function principleCounts() {
+  if (PRINCIPLE_COUNTS) return PRINCIPLE_COUNTS;
+  PRINCIPLE_COUNTS = {};
+  (LAYERS.principles || []).forEach(pr => {
+    // as Qianxun's lexicon says: each form as printed, whole words, any case, across line breaks
+    const alts = [...new Set(pr.forms.map(f => f.t))].map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+'));
+    const rx = new RegExp('(?<![\\p{L}])(?:' + alts.join('|') + ')(?![\\p{L}])', 'giu');
+    const byText = new Map();
+    let n = 0, ps = 0;
+    P.forEach(p => { const m = p.text.match(rx); if (m) { n += m.length; ps++; byText.set(p.t, (byText.get(p.t) || 0) + m.length); } });
+    PRINCIPLE_COUNTS[pr.id] = { n, ps, byText };
+  });
+  return PRINCIPLE_COUNTS;
+}
+function askPrinciple(pr) {
+  const q = [...new Set(pr.forms.map(f => f.t))].map(f => /\s/.test(f) ? '"' + f + '"' : f).join(' OR ');
+  ask({ q, w: 3, cm: '', co: '', preset: { label: pr.en, note: (pr.note || '') + (pr.enAlt && pr.enAlt.length ? ' Also called: ' + pr.enAlt.join(', ') + '.' : ''), who: 'feng',
+    credit: 'Qianxun’s lexicon of the logical principles: every form searched is one the texts attest' + (LAYERS.ptrans ? '. English beside the passages from Qianxun’s principle search: machine translation by Claude, not reviewed' : '') } });
+}
+function renderPrinciples(box) {
+  const lex = LAYERS.principles || [];
+  const groups = getGlobal('PRINCIPLE_GROUPS') || {}, notes = getGlobal('PRINCIPLE_GROUP_NOTES') || {};
+  const counts = principleCounts();
+  const byG = {};
+  lex.forEach(pr => { (byG[pr.group] = byG[pr.group] || []).push(pr); });
+  let h = '<div class="res-head"><div class="res-title">The logical principles</div>' +
+    '<div class="summary"><b>' + lex.length + '</b> principles, in three groups by what a principle governs</div>' +
+    '<p class="note">Where the logical principles are named in the handbooks Kant taught from, in his notes and in his logic lectures. Each principle lists every German and Latin form under which the texts name it. Click one to read every passage that names it' + (LAYERS.ptrans ? ', with Qianxun’s English translations beside them' : '') + '.</p>' +
+    '<div class="from">Qianxun’s lexicon of the logical principles, and its grouping · <a href="https://github.com/mikrishnan/kant-lab/blob/main/Individuals/Feng/notes/classification.md" target="_blank" rel="noopener">Qianxun’s notes on the classification ↗</a></div></div>';
+  Object.keys(byG).forEach(g => {
+    h += '<section class="pgroup"><h3>' + esc(groupName(groups, g)) + '<span class="sub">' + esc(notes[g] || '') + '</span></h3><div class="prgrid">' +
+      byG[g].map(pr => {
+        const c = counts[pr.id] || { n: 0, ps: 0, byText: new Map() };
+        const where = TEXTS.filter(t => c.byText.has(t.idx)).map(t => t.short + ' ' + c.byText.get(t.idx)).join(' · ');
+        return '<div class="prcard" data-principle="' + esc(pr.id) + '"><div class="prn">' + esc(pr.en) + '</div>' +
+          (pr.enAlt && pr.enAlt.length ? '<div class="pra">also ' + esc(pr.enAlt.join(', ')) + '</div>' : '') +
+          (pr.note ? '<div class="prnote">' + esc(pr.note) + '</div>' : '') +
+          '<div class="prforms">' + [...new Map(pr.forms.map(f => [f.t, f])).values()].map(f => '<span class="fchip">' + esc(f.t) + '<i>' + esc(f.lang || '') + '</i></span>').join('') + '</div>' +
+          '<div class="prcount">' + (c.n ? '<b>' + c.n + '</b> place' + (c.n === 1 ? '' : 's') + ' in ' + c.ps + ' passage' + (c.ps === 1 ? '' : 's') + ' · ' + esc(where) : 'not named in these texts') + '</div></div>';
+      }).join('') + '</div></section>';
   });
   box.innerHTML = h;
 }
+/* Qianxun's English for a passage the principle search finds, where there is one. */
+function qianxunEnglish(p) {
+  const tr = LAYERS.ptrans && LAYERS.ptrans.en;
+  if (!tr) return '';
+  const T = TEXTS[p.t];
+  const key = T.key === 'meier' ? 'meier:' + p.para : T.key === 'baumgarten' ? 'met:' + p.para : T.key === 'refl-logik' ? 'refl:' + p.id.slice(1) :
+    T.key === 'refl-meta' ? 'reflm:' + p.id.slice(1) : T.key === 'jaesche' ? 'jasche:' + p.id : T.key + ':' + p.id;
+  return tr[key] || '';
+}
+
+/* ── Judgments: Aidan's finder, run here by his own rules (pinned from his page) ── */
+function aidanDoc() {
+  if (DOCS['judgement-aidan']) return DOCS['judgement-aidan'];
+  const F = LAYERS.finder;
+  if (!F || typeof F.build !== 'function') return null;
+  const t0 = performance.now(), items = [];
+  F.build().forEach(x => {
+    const pp = passage(workOfBlock(x.b.id), x.b.id);
+    if (!pp) return;
+    const axes = { quantity: null, quality: null, relation: null, modality: null };
+    x.labels.forEach(id => { const g = F.byId[id] && F.byId[id].group; if (g) { const ax = g.toLowerCase(); (axes[ax] = axes[ax] || []).push(id); } });
+    const stated = [...new Set((x.named || []).map(id => F.byId[id] && F.byId[id].group).filter(Boolean).map(g => g.toLowerCase()))];
+    const note = [x.marker ? 'given as an example (' + x.marker + ')' : '', x.inferred ? 'the ' + (x.role || 'part') + ' of a syllogism that holds, which fixes its quantity and quality' : ''].filter(Boolean).join(' · ');
+    items.push({ pi: pp.i, quotes: [x.text], labels: x.labels.slice(), note, judgement: x.text, axes, stated, who: 'aidan' });
+  });
+  const D = { items, groups: DOCTRINES.find(d => d.key === 'judgement').groups, ms: Math.round(performance.now() - t0) };
+  DOCS['judgement-aidan'] = D;
+  items.forEach(it => addAnnot(it.pi, { who: 'aidan', label: 'Judgment found by Aidan’s finder · ' + it.labels.join(', '), quote: it.judgement, doc: 'judgement' }));
+  return D;
+}
 
 function renderDoctrine(box) {
-  if (S.d === 'parallels') return renderParallels(box);
+  if (S.d === 'principles') return renderPrinciples(box);
   const d = DOCTRINES.find(x => x.key === S.d);
-  const D = d && DOCS[d.key];
+  let D = d && DOCS[d.key], who = d && d.who;
+  const judg = d && d.key === 'judgement';
+  if (judg) {
+    // two tabs, each crediting its own work: Aidan's finder (the assigned feature) and Nik's examples
+    const A = aidanDoc();
+    if (S.jtab !== 'nik' && A) { D = A; who = 'aidan'; } else { D = DOCS.judgement; who = 'nik'; }
+  }
   if (!D) { box.innerHTML = '<div class="empty">That classification did not load.</div>'; return; }
   const cols = TEXTS.filter(t => D.items.some(it => P[it.pi].t === t.idx));
-  let h = '<div class="res-head"><div class="res-title">' + esc(d.label) + '</div><div class="summary"><b>' + D.items.length + '</b> passages, each filed by hand by ' + esc(personName(d.who)) + '</div>' +
-    '<div class="from">' + esc(personName(d.who)) + '’s classification</div></div>';
+  let h = '<div class="res-head"><div class="res-title">' + esc(d.label) + '</div>';
+  if (judg) {
+    const A = DOCS['judgement-aidan'], N = DOCS.judgement;
+    h += '<div class="tabs" style="margin:0.5rem 0 0.6rem"><button type="button" data-jtab="aidan"' + (who === 'aidan' ? ' class="on"' : '') + '>Aidan’s judgment finder<span class="n">' + (A ? A.items.length : 0) + '</span></button>' +
+      '<button type="button" data-jtab="nik"' + (who === 'nik' ? ' class="on"' : '') + '>Nik’s examples<span class="n">' + (N ? N.items.length : 0) + '</span></button></div>';
+    h += who === 'aidan'
+      ? '<div class="summary"><b>' + D.items.length + '</b> judgments that Blomberg, the Wiener Logik and Busolt give as examples, found by Aidan’s judgment finder: Aidan’s rules for what counts as an example, applied to every sentence</div><div class="from">Aidan’s judgment finder, run here by Aidan’s own rules on the same texts</div></div>'
+      : '<div class="summary"><b>' + D.items.length + '</b> judgments, each filed by hand by Nik</div><div class="from">Nik’s judgment examples, stated and inferred kept apart as Nik’s Judgement Explorer keeps them</div></div>';
+  } else h += '<div class="summary"><b>' + D.items.length + '</b> passages, each filed by hand by ' + esc(personName(who)) + '</div><div class="from">' + esc(personName(who)) + '’s classification</div></div>';
   if (d.key === 'immediate') h += squareCard(D);
-  else if (d.key === 'judgement') h += tableCard(D);
+  else if (judg) h += tableCard(D, who);
   else h += '<div class="kchips">' + D.groups.map(([k, label]) => { const n = D.items.filter(it => it.labels.includes(k)).length;
     return n ? '<button type="button" class="kchip' + (S.loc === k ? ' on' : '') + '" data-loc="' + esc(k) + '">' + esc(label) + '<b>' + n + '</b></button>' : ''; }).join('') + '</div>';
   h += '<details class="bytext"><summary>Counts in each text</summary><div class="card"><table class="loc"><thead><tr><th>Kind</th><th>All</th>' +
@@ -1356,18 +1622,38 @@ function renderDoctrine(box) {
       h += '<div class="hit' + (S.sel === p.i ? ' sel' : '') + '" data-open="' + p.i + '" data-quote="' + esc(it.judgement || it.quotes[0] || '') + '">' +
         (it.judgement ? '<div class="jhead" lang="de">' + esc(it.judgement) + '</div>' + judgementChips(it) : '') +
         '<div class="cite"><b>' + esc(T.short) + ', ' + esc(p.cite) + '</b>' +
-        (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : ' · ' + esc(T.date)) + (it.sub ? ' · ' + esc(it.sub) : '') + (it.note ? ' · <i>' + esc(it.note) + '</i>' : '') + (it.quotes.length && !sp.length ? ' · <span class="warn">quote not found in the current text</span>' : '') + '</div>' +
-        '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, marks) + (b < p.text.length ? ' …' : '') + '</div>' +
-        (it.judgements ? formBadges(it) : '') + '</div>';
+        (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : ' · ' + esc(T.date)) + (it.sub ? ' · ' + esc(it.sub) : '') + (it.note ? ' · <i>' + esc(it.note) + '</i>' : '') + (it.quotes.length && !sp.length ? ' · <span class="warn">quote not found in the current text</span>' : '') + enButton(p, a, b) + '</div>' +
+        (d.key === 'immediate' ? kindChips(it, D) : '') +
+        '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, marks) + (b < p.text.length ? ' …' : '') + '</div>' + enLine(p, a, b) +
+        (it.judgements ? formBadges(it) : '') +
+        (d.key === 'immediate' && it.nid && LAYERS.nikfig ? '<div class="nikfig" data-nikfig="' + esc(it.nid) + '"></div>' : '') + '</div>';
     });
     if (its.length > lim) h += '<button type="button" class="btn more" data-expand="d:' + esc(k) + '">Show all ' + its.length + '</button>';
     h += '</div>';
   });
   h += '</div>';
   box.innerHTML = h;
+  if (d.key === 'immediate') drawNikFigures(box);
 }
 
-/* ── Nik Land's square of opposition, built from the judgments Kant's examples write out ── */
+/* Nik's figures, drawn into each immediate-inference card by Nik's own code (pinned/nik-figures.js). */
+let NIK_FIGS = null;
+function drawNikFigures(root) {
+  const F = LAYERS.nikfig;
+  if (!F) return;
+  if (!NIK_FIGS) {
+    try { NIK_FIGS = new Map(F.load().map(ex => [ex.id, ex])); }
+    catch (err) { console.warn('Nik’s figures could not be drawn', err); NIK_FIGS = new Map(); }
+  }
+  root.querySelectorAll('[data-nikfig]').forEach(box => {
+    const ex = NIK_FIGS.get(box.dataset.nikfig);
+    if (!ex || box.childElementCount) return;
+    box.append(F.figure(ex));
+    box.insertAdjacentHTML('beforeend', '<div class="from">Nik’s figure, drawn by Nik’s own code · <a href="../../Nik%20Land/immediate-inferences-drawn.html#ex-' + encodeURIComponent(ex.id) + '" target="_blank" rel="noopener" data-tool="Nik’s immediate inferences, drawn">on Nik’s page ↗</a></div>');
+  });
+}
+
+/* ── Nik's square of opposition, built from the judgments Kant's examples write out ── */
 const FORM_NAME = { A: 'universal affirmative', E: 'universal negative', I: 'particular affirmative', O: 'particular negative', 'S+': 'singular affirmative', 'S-': 'singular negative' };
 const svgClip = (s, n) => s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s;
 
@@ -1410,15 +1696,26 @@ function squareCard(D) {
     edge('subalternation', 490, 87, 490, 273, 490, 180, 90, 'subalternation') +
     box('A', 10, 15) + box('E', 390, 15) + box('I', 10, 273) + box('O', 390, 273) + '</svg>';
   const chip = (k, label) => { const n = kindN(k); return n ? '<button type="button" class="q-chip' + on(k) + '" data-loc="' + k + '"><span>' + esc(label) + '</span><b>' + n + '</b></button>' : ''; };
-  const sing = f => { const c = corner(f); return c.n ? '<button type="button" class="q-chip' + on('form:' + f) + '" data-loc="form:' + f + '"><span><span class="fb stated">' + esc(f) + '</span> ' + esc(FORM_NAME[f]) + '</span><b>' + c.n + '</b></button>' : ''; };
-  return '<section class="card sq-card"><h3>The square of opposition<span class="sub">built from the judgments Kant’s examples write out, as Nik Land reads them · click a corner or a side</span></h3>' +
+  const sing = f => { const c = corner(f); return c.n ? '<button type="button" class="q-chip' + on('form:' + f) + '" data-loc="form:' + f + '"><span><span class="fb ' + (c.stated ? 'stated' : 'inferred') + '">' + esc(f) + '</span> ' + esc(FORM_NAME[f]) + '</span><b>' + c.n + '</b></button>' : ''; };
+  return '<section class="card sq-card"><h3>The square of opposition<span class="sub">built from the judgments Kant’s examples write out, as Nik reads them · click a corner or a side</span></h3>' +
     '<div class="sq-wrap"><div class="sq">' + svg + '</div><div class="sq-side">' +
     '<div class="ph">INFERENCES THAT TRANSFORM ONE JUDGMENT</div>' + chip('conversion', 'Conversion') + chip('contraposition', 'Contraposition') + chip('aequipollentia', 'Equipollence') +
     '<div class="ph" style="margin-top:0.6rem">SINGULAR JUDGMENTS</div>' + sing('S+') + sing('S-') +
     '<div class="ph" style="margin-top:0.6rem">THE DOCTRINE ITSELF</div>' + chip('general', 'What an immediate inference is') + '</div></div>' +
     '<div class="key"><span><span class="fb stated">A</span> the passage itself names the form</span><span><span class="fb inferred">A</span> Nik’s reading of it</span>' +
+    '<span><span class="jchip inferred" style="font-size:0.75rem">kind</span> on a passage: Nik filed it there, the passage not naming the kind</span>' +
     '<span>Corners count judgments; sides and buttons count passages.</span></div>' +
-    '<div class="from">Nik Land’s immediate-inference examples, shown as his Immediate Inferences explorer shows them</div></section>';
+    '<div class="from">Drawn by the portal from Nik’s immediate-inference examples; solid and dashed as in Nik’s Immediate Inferences explorer</div></section>';
+}
+
+/* Nik's kind, solid where the passage names it and dashed where Nik assigned it, and the passages
+   Nik marks as offered as not immediate, or as an inference Kant rules out. */
+function kindChips(it, D) {
+  const name = k => (D.groups.find(g => g[0] === k) || [k, k])[1];
+  return '<div class="jchips">' + it.labels.map(k => '<span class="jchip ' + (it.named ? 'stated' : 'inferred') + '" title="' +
+      (it.named ? 'The passage itself names this kind' : 'Nik’s filing: the passage does not name the kind') + '"><span class="ax">KIND</span>' + esc(name(k)) + '</span>').join('') + '</div>' +
+    (it.counter ? '<div class="jflag"><b>Nik’s flag, not an immediate inference:</b> ' + esc(it.counter) + '</div>' : '') +
+    (it.invalid ? '<div class="jflag"><b>Nik’s flag, an inference ruled out:</b> ' + esc(it.invalid) + '</div>' : '');
 }
 
 function formBadges(it) {
@@ -1427,14 +1724,15 @@ function formBadges(it) {
     '<span lang="de">' + esc(j.t) + '</span>' + (j.supply ? ' <span class="muted small">read as <i lang="de">' + esc(j.supply) + '</i></span>' : '') + (j.role ? ' <span class="role">' + esc(j.role) + '</span>' : '') + '</span>').join('') + '</div>';
 }
 
-/* ── Nik Land's judgments, set out in the table of judgments (KrV A 70 / B 95) ── */
+/* ── Nik's judgments, set out in the table of judgments (KrV A 70 / B 95) ── */
 const TOJ = [
   ['quantity', 'Quantity', 'Quantität', [['universal', 'allgemeine'], ['particular', 'besondere'], ['singular', 'einzelne']]],
   ['quality', 'Quality', 'Qualität', [['affirmative', 'bejahende'], ['negative', 'verneinende'], ['infinite', 'unendliche']]],
   ['relation', 'Relation', 'Relation', [['categorical', 'kategorische'], ['hypothetical', 'hypothetische'], ['disjunctive', 'disjunktive']]],
   ['modality', 'Modality', 'Modalität', [['problematic', 'problematische'], ['assertoric', 'assertorische'], ['apodictic', 'apodiktische']]],
 ];
-function tableCard(D) {
+function tableCard(D, who) {
+  const aidan = who === 'aidan';
   const count = (ax, v) => {
     const its = D.items.filter(it => it.axes && (it.axes[ax] || []).includes(v));
     return { n: its.length, stated: its.filter(it => it.stated.includes(ax)).length };
@@ -1443,20 +1741,20 @@ function tableCard(D) {
   const box = ([ax, en, de, vs], area) => '<div class="toj-box" style="grid-area:' + area + '"><div class="toj-h">' + en.toUpperCase() + ' <span class="de">' + de + '</span></div>' +
     vs.map(([v, vde]) => {
       const c = count(ax, v);
-      const tip = v + ' (' + vde + '): ' + c.n + ' of Nik’s examples, the transcript itself calling ' + c.stated + ' of them so. Click to see them.';
+      const tip = v + ' (' + vde + '): ' + c.n + (aidan ? ' judgments found by Aidan’s finder, the text naming the form nearby for ' : ' of Nik’s examples, the transcript itself calling ') + c.stated + (aidan ? '' : ' of them so') + '. Click to see them.';
       return '<div class="toj-row' + (S.loc === v ? ' sel' : '') + '" data-loc="' + v + '" data-tip="' + esc(tip) + '"><span>' + v + ' <span class="de">' + vde + '</span></span>' +
         '<span class="bar"><span class="all" style="width:' + (100 * c.n / max).toFixed(1) + '%"></span><span class="st" style="width:' + (100 * c.stated / max).toFixed(1) + '%"></span></span><span class="n">' + c.n + '</span></div>';
     }).join('') + '</div>';
-  return '<section class="card"><h3>The table of judgments<span class="sub">laid out as in the Critique (A 70 / B 95), with how many of Nik’s examples have each moment · click a moment</span></h3>' +
+  return '<section class="card"><h3>The table of judgments<span class="sub">laid out as in the Critique (A 70 / B 95), with how many ' + (aidan ? 'of the judgments Aidan’s finder found' : 'of Nik’s examples') + ' have each moment · click a moment</span></h3>' +
     '<div class="toj">' + box(TOJ[0], 'q') + box(TOJ[1], 'l') + '<div class="toj-c" style="grid-area:c">' + D.items.length + ' JUDGMENTS<br>FROM THE LECTURES</div>' + box(TOJ[2], 'r') + box(TOJ[3], 'm') + '</div>' +
-    '<div class="key"><span><span class="swatch" style="background:var(--accent)"></span>the transcript names the moment</span><span><span class="swatch" style="background:var(--accent-light);opacity:0.45"></span>Nik’s reading of the sentence</span></div>' +
-    '<div class="from">Nik Land’s judgment examples, shown as his Judgement Explorer shows them</div></section>';
+    '<div class="key"><span><span class="swatch" style="background:var(--accent)"></span>' + (aidan ? 'the text names the form nearby' : 'the transcript names the moment') + '</span><span><span class="swatch" style="background:var(--accent-light);opacity:0.45"></span>' + (aidan ? 'read off the wording by Aidan’s rules' : 'Nik’s reading of the sentence') + '</span></div>' +
+    '<div class="from">' + (aidan ? 'Aidan’s judgment finder' : 'Drawn by the portal from Nik’s judgment examples; stated and inferred kept apart as in Nik’s Judgement Explorer') + '</div></section>';
 }
 
 function judgementChips(it) {
   return '<div class="jchips">' + ['quantity', 'quality', 'relation', 'modality'].map(ax => {
     const v = it.axes[ax], st = it.stated.includes(ax);
-    return '<span class="jchip ' + (v ? (st ? 'stated' : 'inferred') : 'none') + '" title="' + (v ? (st ? 'the transcript names it' : 'Nik’s reading of the sentence') : 'not read off this judgment') + '"><span class="ax">' + ax.toUpperCase() + '</span>' + (v ? esc(v.join(' / ')) : '—') + '</span>';
+    return '<span class="jchip ' + (v ? (st ? 'stated' : 'inferred') : 'none') + '" title="' + (v ? (st ? (it.who === 'aidan' ? 'the text names it nearby' : 'the transcript names it') : (it.who === 'aidan' ? 'read off the wording by Aidan’s rules' : 'Nik’s reading of the sentence')) : 'not read off this judgment') + '"><span class="ax">' + ax.toUpperCase() + '</span>' + (v ? esc(v.join(' / ')) : '—') + '</span>';
   }).join('') + '</div>';
 }
 
@@ -1488,7 +1786,7 @@ function trState(tr, style) {
   if (st.every(s => s === 'ready')) return 'ready';
   files.filter(f => !TR_FILES.has(f)).forEach(f => {
     TR_FILES.set(f, 'loading');
-    loadScript(f).then(ok => { TR_FILES.set(f, ok ? 'ready' : 'failed'); if (S.en) renderRail(); });
+    loadScript(f).then(ok => { TR_FILES.set(f, ok ? 'ready' : 'failed'); if (S.en || S.enOpen.size) enRefresh(); });
   });
   return 'loading';
 }
@@ -1526,7 +1824,81 @@ function englishNotes(tr, p) {
   let h = '';
   if (e && e.part) h += '<div class="trwarn">Jesus’s text of the Jäsche Logik divides this stretch differently, so the English begins before this passage or runs on past it.</div>';
   return h + '<div class="trwarn">' + esc(TR_WARNING) + '</div>' +
-    '<div class="from">' + esc(personName(tr.who)) + '’s translations' + (tr.map ? ', matched to Alex Li’s Jäsche by build-pins.py' : '') + '</div>';
+    '<div class="from">' + esc(personName(tr.who)) + '’s translations' + (tr.map ? ', matched to Alex’s Jäsche by build-pins.py' : '') + '</div>';
+}
+
+/* ── English mode: one switch in the header puts the English under every passage that has
+   one, in the full texts, beside Kant's notes, and under search hits. The German and Latin
+   never go. The English is Jesus's machine translation, one of his two styles. ── */
+const EN_DEFAULT = 'guyer';      // English mode starts on, in this style; `en=0` in a link turns it off
+const MARIA_DEMO = 'https://raw.githack.com/mikrishnan/kant-lab/eb15ef290b772a4e1ab1e2f4d799ca42623b8ac5/Individuals/maria/busolt-reader.html';
+function enLine(p, a, b) {
+  if (!S.en && !S.enOpen.has(p.i)) return '';
+  const style = S.en || S.enStyle;
+  const tr = trFor(TEXTS[p.t]);
+  if (!tr) return '';
+  const state = trState(tr, style);
+  if (state === 'loading') return '<div class="fen wait" lang="en" data-for="' + p.i + '">English loading…</div>';
+  const e = state === 'ready' && trEntry(tr, style, p);
+  if (!e) return S.enOpen.has(p.i) && !S.en ? '<div class="fen wait" lang="en" data-for="' + p.i + '">No English for this passage yet.</div>' : '';
+  let t = e.text;
+  // under a stretch of a long passage, roughly the same stretch of the English
+  if (a != null && t.length > 520) {
+    t = t.replace(/\*+/g, '');
+    const L = p.text.length || 1, n = t.length;
+    let x = Math.max(0, Math.floor(n * a / L) - 40), y = Math.min(n, Math.max(Math.ceil(n * b / L) + 40, x + 360));
+    if (x > 0) { const i = t.lastIndexOf(' ', x); x = i > 0 ? i + 1 : 0; }
+    if (y < n) { const i = t.indexOf(' ', y); y = i > 0 ? i : n; }
+    t = (x > 0 ? '… ' : '') + t.slice(x, y) + (y < n ? ' …' : '');
+  }
+  const st = PORTAL_TR_STYLES.find(x => x.key === style) || PORTAL_TR_STYLES[0];
+  return '<div class="fen" lang="en" data-for="' + p.i + '" title="Machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + (a != null && e.text.length > 520 ? '; the stretch shown is approximate' : '') + '">' + rich(t) + (e.part ? ' <span class="muted small">(the English runs past this passage)</span>' : '') + '</div>';
+}
+/* The switch, the bar under the header, and the translation files, kept in step with S.en. */
+function enSync() {
+  const on = !!S.en, b = $('entog'), bar = $('enbar');
+  if (!b) return;
+  b.classList.toggle('on', on);
+  b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  b.textContent = on ? 'English ✓' : 'English';
+  bar.hidden = !on;
+  document.body.classList.toggle('trmode', on);
+  if (on) S.enStyle = S.en;
+  if (!on) return;
+  (typeof PORTAL_TRANSLATIONS === 'undefined' ? [] : PORTAL_TRANSLATIONS).forEach(tr => trState(tr, S.en));
+  // one quiet line: the two styles, what the English is, and Maria's preview; the rest on hover
+  bar.innerHTML = '<span class="lab">ENGLISH</span>' +
+    '<span class="sty">' + PORTAL_TR_STYLES.map(st => '<button type="button" data-en="' + st.key + '"' + (S.en === st.key ? ' class="on"' : '') + ' title="' + esc(st.tag) + '">' + esc(st.label.replace(' principles', '')) + '</button>').join('') + '</span>' +
+    '<span class="muted" title="The German and Latin always stay. Baumgarten and Kant’s notes on him have no English yet.">Machine translation, for orientation: check it against the German</span>' +
+    '<span class="soon"><a href="' + MARIA_DEMO + '" target="_blank" rel="noopener" title="Coming soon: Maria’s sentence-by-sentence translation, across the whole portal">Maria’s translation, a preview ↗</a></span>';
+}
+function enApply() { enSync(); enRefresh(); }
+/* A small English button beside every passage that has a translation: it opens that passage's
+   English under it, in place, without redrawing the page. */
+function enButton(p, a, b) {
+  if (!trFor(TEXTS[p.t])) return '';
+  return '<button type="button" class="enb' + (S.enOpen.has(p.i) ? ' on' : '') + '" data-enp="' + p.i + '"' + (a != null ? ' data-a="' + a + '" data-b="' + b + '"' : '') +
+    ' title="Show the English under this passage">English</button>';
+}
+function enToggle(btn) {
+  const k = +btn.dataset.enp;
+  if (S.enOpen.has(k)) S.enOpen.delete(k); else S.enOpen.add(k);
+  const on = S.enOpen.has(k);
+  document.querySelectorAll('[data-enp="' + k + '"]').forEach(x => x.classList.toggle('on', on));
+  const box = btn.closest('[data-fp], .hit, .ncard');
+  if (!box) return;
+  box.querySelectorAll('.fen[data-for="' + k + '"]').forEach(x => x.remove());
+  const anchor = on && box.querySelector('.fpt, .kw, .ntext');
+  if (anchor) anchor.insertAdjacentHTML('afterend', btn.dataset.a != null ? enLine(P[k], +btn.dataset.a, +btn.dataset.b) : enLine(P[k]));
+}
+let EN_TIMER = 0;
+function enRefresh() {
+  clearTimeout(EN_TIMER);
+  EN_TIMER = setTimeout(() => {
+    renderRail();
+    ['readtext', 'railtext'].forEach(id => { const st = FT[id]; if (st && st.el.isConnected) for (let k = st.lo; k <= st.hi; k++) refreshBlock(k); });
+    if (S.view === 'ask') { const L = $('left'), top = L.scrollTop; renderResults(); L.scrollTop = top; }
+  }, 80);
 }
 
 /* The repository's Text error form, filled in with the passage. Only its text fields can be
@@ -1569,6 +1941,8 @@ function renderRail(headOnly) {
   $('app').classList.remove('no-rail');
   const p = P[S.sel], T = TEXTS[p.t];
   const readingHere = S.view === 'read' && S.readKey === T.key;
+  if (S.railW) $('app').style.gridTemplateColumns = 'minmax(0, 1fr) ' + S.railW + 'px';
+  if (readingHere && isStudyText(T)) return renderStudyRail(p, T, headOnly);
   $('railhead').innerHTML = '<div class="rhead"><div class="rwork"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
     '<button type="button" class="rclose" data-close-rail="1" title="Close">×</button></div>' +
     '<div class="pcite">' + esc(p.cite) + '</div>' +
@@ -1586,6 +1960,30 @@ function renderRail(headOnly) {
     $('app').classList.remove('en');
     body.innerHTML = '<div id="railtext" class="fulltext"></div>';
     ftOpen($('railtext'), body, p.i, p.i, 24);
+  }
+}
+
+/* In the study view the right pane is the readers' panel: Kant's notes on the § in view, the
+   tradition behind it (Meier), and the portal's connections for it. */
+function renderStudyRail(p, T, headOnly) {
+  if (!['notes', 'trad', 'conn'].includes(S.rtab)) S.rtab = 'notes';
+  const notes = notesOf(T);
+  const n = notes && notes.byPara && notes.byPara[p.para] ? notes.byPara[p.para].length : 0;
+  $('railhead').innerHTML = '<div class="rhead"><div class="rwork"><span class="layer">KANT’S NOTES</span>on ' + esc(T.short) + ' § ' + p.para + '</div>' +
+    '<button type="button" class="rclose" data-close-rail="1" title="Hide the notes">×</button></div>' +
+    '<div class="pmeta">' + esc(p.sec || '') + '</div>' +
+    '<div class="rtabs"><button type="button" data-rtab="notes"' + (S.rtab === 'notes' ? ' class="on"' : '') + '>Kant’s notes<span class="muted small"> ' + n + '</span></button>' +
+    (T.shape === 'meier' ? '<button type="button" data-rtab="trad"' + (S.rtab === 'trad' ? ' class="on"' : '') + '>Tradition</button>' : '') +
+    '<button type="button" data-rtab="conn"' + (S.rtab === 'conn' ? ' class="on"' : '') + '>Connections</button></div>';
+  if (headOnly) return;
+  const body = $('railbody');
+  delete FT.railtext;
+  $('app').classList.remove('en');
+  body.innerHTML = S.rtab === 'trad' ? traditionPanel(T, p.para) : S.rtab === 'conn' ? renderConnections(p, T) : notesPanel(T, p.para);
+  body.scrollTop = 0;
+  if (S.rtab === 'notes') {
+    const target = (S.noteFocus != null && $('note-' + S.noteFocus)) || $('nsub-' + p.para);
+    if (target) body.scrollTop += target.getBoundingClientRect().top - body.getBoundingClientRect().top - 10;
   }
 }
 
@@ -1612,7 +2010,7 @@ function renderConnections(p, T) {
     const tierWord = place.tier === 'stated' ? 'stated' : place.tier === 'interp' ? 'interpolated' : 'inferred';
     h += sec('place', 'In ' + esc(bookName), '<span class="lnk" data-para="' + place.book + ':' + place.paras[0] + '">' + esc(paraLabel(place.paras)) + '</span><span class="tier ' + place.tier + '">' + tierWord + '</span>', null,
       '<div class="how">' + esc(place.how) + '</div>' + (bp ? '<div class="preview" lang="de">' + esc(clip(bp.text, 320)) + '</div>' : ''),
-      esc(place.who === 'jesus' ? 'Jesus La Paz’s Meier–Kant concordance' + (T.key === 'jaesche' ? ', re-keyed to Alex Li’s Jäsche' : '') : 'the Academy edition’s filing, through the shared Reflexionen data'), true);
+      esc(place.who === 'jesus' ? 'Jesus’s Meier–Kant concordance' + (T.key === 'jaesche' ? ', re-keyed to Alex’s Jäsche' : '') : 'the Academy edition’s filing, through the shared Reflexionen data'), true);
     h += railForPara(place.book, place.paras[0], p);
   } else if (T.shape === 'meier' || T.shape === 'metaphysica') {
     h += railForPara(T.key, p.para, p);
@@ -1625,28 +2023,24 @@ function renderConnections(p, T) {
   const an = (ANNOT.get(p.i) || []).filter(a => !(a.links && a.links.length));
   if (an.length) {
     h += sec('seminar', 'The seminar on this passage', '', an.length, an.map(a => '<div class="ann"><div class="lab">' + esc(a.label) + '</div>' + (a.text ? '<div>' + esc(a.text) + '</div>' : '') +
-      (a.doc ? '<div class="small"><span class="lnk" data-doc="' + a.doc + '">See every passage so filed</span></div>' : '') +
+      (a.doc ? '<div class="small"><span class="lnk" data-doc="' + a.doc + '"' + (a.doc === 'judgement' ? ' data-docjt="' + esc(a.who) + '"' : '') + '>See every passage so filed</span></div>' : '') +
       '<div class="from">' + esc(personName(a.who)) + '</div></div>').join(''), '', true);
   }
   const dives = divesFor(T, p);
   if (dives.length) h += sec('deeper', 'Go deeper', '<span class="muted small">in the students’ own tools</span>', null,
-    '<div class="dives">' + dives.map(([l, u]) => '<a href="' + u + '" target="_blank" rel="noopener">' + esc(l) + ' ↗</a>').join('') + '</div>', '', false);
+    '<div class="dives">' + dives.map(([l, u]) => '<a href="' + u + '" target="_blank" rel="noopener"' + toolAttr(u, l) + '>' + esc(l) + ' ↗</a>').join('') + '</div>', '', false);
   return h;
 }
 
-/* Parallel passages: Alex's, chosen by hand, then the nearest in wording. */
+/* Parallel passages: the passages of other texts nearest in wording, found as Jessie's tool finds them. */
 function parallelsSection(p) {
-  const curated = (ANNOT.get(p.i) || []).filter(a => a.links && a.links.length);
   const sims = parallelsFor(p, 8);
-  if (!curated.length && !sims.length) return '';
-  let body = curated.map(a => '<div class="ann"><div class="lab">' + esc(a.label.replace(/^Parallel · /, '')) + '</div>' + (a.text ? '<div>' + esc(a.text) + '</div>' : '') +
-    '<ul class="items">' + a.links.map(i => '<li data-open="' + i + '"><span class="c">' + esc(TEXTS[P[i].t].short + ', ' + P[i].cite) + '</span>' + esc(clip(P[i].text.replace(/\s+/g, ' '), 90)) + '</li>').join('') + '</ul>' +
-    '<div class="from">Alex Li’s parallels, chosen by hand</div></div>').join('');
-  if (sims.length) body += '<div class="sub-h">NEAREST IN WORDING</div><ul class="items">' +
+  if (!sims.length) return '';
+  let body = '';
+  if (sims.length) body += '<ul class="items">' +
     sims.map(([q, sc]) => '<li data-open="' + q + '"><span class="c">' + esc(TEXTS[P[q].t].short + ', ' + P[q].cite) + '</span>' + esc(clip(P[q].text.replace(/\s+/g, ' '), 100)) + '<span class="simv" title="similarity of wording, 0 to 1">' + sc.toFixed(2) + '</span></li>').join('') + '</ul>' +
-    '<div class="from">the words the passages share, weighted by rarity, as Jin’s parallel passages compare the lectures, leaving out his stopwords. Found by machine, not checked by hand</div>';
-  const n = curated.reduce((a, x) => a + x.links.length, 0) + sims.length;
-  return sec('parallels', 'Parallel passages', '', n, body, '', true);
+    '<div class="from">the words the passages share, weighted by rarity, as Jessie’s parallel passages compare the lectures, leaving out Jessie’s stopwords. Found by machine, not checked by hand</div>';
+  return sec('parallels', 'Parallel passages', '', sims.length, body, '', true);
 }
 
 /* ── Full text, rendered a stretch at a time around the passage in view, and extended as the
@@ -1673,22 +2067,477 @@ function marginTag(p) {
   const pl = placeOf(p);
   return pl ? (pl.book === 'baumgarten' ? 'Baumg. ' : 'Meier ') + paraLabel(pl.paras).replace('§§ ', '§ ') + (pl.tier === 'stated' ? '' : '?') : '';
 }
+/* A lecture's untitled opening section, the title page and the contents, one short line apiece:
+   where it ends (T.first - 1 when the text has none), and the one block it is drawn as. Every line
+   keeps its own data-fp, so a search hit or a click finds it as before. */
+function frontEnd(T) {
+  if (T._fe == null) { let k = T.first; while (k <= T.last && !P[k].sec && P[k].text.length < 80) k++; T._fe = k - 1; }
+  return T._fe;
+}
+function frontBlock(st, T) {
+  const fe = frontEnd(T), rows = [];
+  for (let k = T.first; k <= fe; k++) rows.push(k);
+  const isNum = t => /^\s*\d{2,4}\s*(?:[–-]\s*\d{2,4})?\s*$/.test(t);
+  const isToc = t => /Inhaltsverzeichnis/.test(t);
+  const line = k => '<span class="frow' + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '">' + esc(P[k].text) + '</span>';
+  const ti = rows.findIndex(k => isToc(P[k].text));
+  const title = ti < 0 ? [] : rows.slice(0, ti), rest = ti < 0 ? rows : rows.slice(ti);
+  let toc = '';
+  for (let i = 0; i < rest.length; i++) {
+    const k = rest[i], t = P[k].text, nx = rest[i + 1];
+    if (isToc(t)) toc += '<div class="ftoch">' + line(k) + '</div>';
+    else if (nx != null && !isNum(t) && isNum(P[nx].text)) { toc += '<div class="ftoc"><span class="l">' + line(k) + '</span><span class="dots"></span><span class="n">' + line(nx) + '</span></div>'; i++; }
+    else toc += '<div class="ftoc"><span class="l">' + line(k) + '</span></div>';
+  }
+  const a = P[T.first].aa, b = P[fe].aaEnd || P[fe].aa;
+  return '<div class="fh fmh" title="The portal’s label: the transcription gives this opening section no title">Title page and contents</div>' +
+    '<div class="fp front"><div class="fpm"><b>AA ' + T.vol + ':' + a + (b && b !== a ? '–' + b : '') + '</b></div>' +
+    '<div class="fpt fronttext" lang="de">' + (title.length ? '<div class="ftitle">' + title.map(line).join('<br>') + '</div>' : '') + toc + '</div></div>';
+}
 function ftBlock(st, k) {
-  const p = P[k];
+  const p = P[k], T = TEXTS[p.t];
+  if (isStudyText(T)) return studyBlock(st, k);
   let spans = [];
   if (RESULT && RESULT.byPass && !S.d && RESULT.byPass.has(k)) spans = RESULT.byPass.get(k).map(m => [p.ts[m.a], p.te[m.b], false]);
   if (k === st.focus && S.quote) spans = spans.concat(quoteSpans(p.text, [S.quote]).map(z => [z[0], z[1], true]));
   const h = headingOf(k);
+  // A lecture's untitled opening (title page and contents, a line apiece) is drawn as one block
+  if (T.shape === 'logik' && k <= frontEnd(T)) return k === T.first ? frontBlock(st, T) : '';
   const head = h && (k === TEXTS[p.t].first || headingOf(k - 1) !== h) ? '<div class="fh">' + esc(h) + '</div>' : '';
   const tag = marginTag(p);
-  return head + '<div class="fp' + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm"><b>' + esc(shortCite(p)) + '</b>' + (tag ? '<i>' + esc(tag) + '</i>' : '') + '</div>' +
-    '<div class="fpt" lang="de">' + marked(p.text, 0, p.text.length, spans) + '</div></div>';
+  // A lecture's short paragraphs would each repeat the page and the Meier § in the margin. Print
+  // each where it changes, as a book prints a page number; the full reference stays on hover.
+  const lect = T.shape === 'logik';
+  const prev = lect && !head && k > T.first ? P[k - 1] : null;
+  const samePage = !!(prev && prev.t === p.t && prev.aa === p.aa);
+  const sameTag = !!(prev && prev.t === p.t && marginTag(prev) === tag);
+  const ref = shortCite(p) + (tag ? ' · ' + tag : '');
+  return head + '<div class="fp' + (samePage ? ' cont' : '') + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm" title="' + esc(ref) + '">' +
+    (samePage ? '' : '<b>' + esc(shortCite(p)) + '</b>') + (tag && !sameTag ? '<i>' + esc(tag) + '</i>' : '') + enButton(p) + '</div>' +
+    '<div class="fpt" lang="de">' + marked(p.text, 0, p.text.length, spans) + '</div>' + enLine(p) + '</div>';
+}
+
+/* ═══ THE STUDY VIEW: a textbook with Kant's notes beside it, as the Meier and Baumgarten
+   Readers had it ═══ */
+const isStudyText = T => T && (T.shape === 'meier' || T.shape === 'metaphysica');
+const notesOf = T => TEXTS.find(t => t.shape === 'refl' && t.on === T.key);
+const studyOn = () => S.view === 'read' && isStudyText(textByKey(S.readKey));
+
+/* Text with classed highlights [start, end, class] and things inserted at offsets. */
+function richText(text, spans, inserts) {
+  const cuts = new Set([0, text.length]);
+  spans.forEach(([a, b]) => { cuts.add(Math.max(0, a)); cuts.add(Math.min(text.length, b)); });
+  (inserts || []).forEach(x => cuts.add(x.at));
+  const pts = [...cuts].sort((x, y) => x - y);
+  let out = '';
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    (inserts || []).forEach(x => { if (x.at === a) out += x.html; });
+    if (i === pts.length - 1) break;
+    const b = pts[i + 1];
+    if (b <= a) continue;
+    const cls = [...new Set(spans.filter(z => z[0] <= a && z[1] >= b).map(z => z[2]))];
+    const seg = esc(text.slice(a, b));
+    out += cls.length ? '<mark class="' + cls.join(' ') + '">' + seg + '</mark>' : seg;
+  }
+  return out;
+}
+/* Cross-references in the text (§.15. 16., §.25-30, §. 14) as links to the § they name. */
+function linkXrefs(html, T) {
+  return html.split(/(<[^>]+>)/).map(seg => seg.startsWith('<') ? seg : seg.replace(/§+\.?\s?(\d+)((?:\s?[-–]\s?\d+|\.\s?\d+(?=[\s.,;:)]))*)/g, (all, first) => {
+    const nums = (all.match(/\d+/g) || []).map(Number);
+    const ok = passage(T.key, 'p' + nums[0]);
+    if (!ok) return '<span class="xref" style="cursor:help;text-decoration:none" title="§ ' + nums[0] + ' is not in this edition">' + all + '</span>';
+    return '<span class="xref" data-xref="' + nums[0] + '" title="Go to § ' + nums[0] + (nums.length > 1 ? ' (also refs: §' + nums.slice(1).join(', §') + ')' : '') + '">' + all + '</span>';
+  })).join('');
+}
+const sentencesOf = text => {
+  const out = [], re = /[.?!:](?=\s+[A-ZÄÖÜ„"»(\[])/g;
+  let start = 0, m;
+  while ((m = re.exec(text))) { out.push([start, m.index + 1]); start = m.index + 1; while (/\s/.test(text[start] || '')) start++; }
+  if (start < text.length) out.push([start, text.length]);
+  return out;
+};
+/* The headings that open before passage k: Meier's Haupttheile and Abschnitte; every one of
+   Baumgarten's part, chapter and section headings, with the AA's notes and Kant's marginalia blocks. */
+function studyHeads(k) {
+  const p = P[k], T = TEXTS[p.t], prev = k > T.first ? P[k - 1] : null;
+  let h = '';
+  if (T.shape === 'meier') {
+    const top = T.hier[p.mtop];
+    if (top && (!prev || prev.mtop !== p.mtop)) h += '<div class="fh part">' + esc(top.title_de) + (top.para_range ? ' · §§ ' + top.para_range[0] + '–' + top.para_range[1] : '') + '</div>';
+    const sub = top && top.sections && top.sections[p.msec];
+    if (sub && (!prev || prev.msec !== p.msec || prev.mtop !== p.mtop)) h += '<div class="fh">' + esc((sub.sec_num ? sub.sec_num + '. ' : '') + sub.title_de) + '</div>';
+    return h;
+  }
+  const cur = T.secIdx[p.secId], was = prev ? T.secIdx[prev.secId] : -1;
+  if (cur == null || cur === was) return '';
+  for (let i = was + 1; i <= cur; i++) {
+    const x = T.secs[i];
+    h += '<div class="fh' + (x.type === 'part' ? ' part' : x.type === 'sub' ? ' sub' : '') + '">' + esc(x.label) + '</div>';
+    if (x.note) h += '<div class="secnote">' + esc(x.note) + '</div>';
+    if (KANT_REFS[x.id]) h += '<div class="kantrefs"><div class="lab">HANDSCHRIFTLICHE BEMERKUNGEN KANTS</div>' + KANT_REFS[x.id].map(r => phaseChip(r.phase, ' · ' + r.vol + ' · ' + r.page)).join(' ') + '</div>';
+  }
+  return h;
+}
+function studyBlock(st, k) {
+  const p = P[k], T = TEXTS[p.t];
+  const spans = [];
+  if (RESULT && RESULT.byPass && !S.d && RESULT.byPass.has(k)) RESULT.byPass.get(k).forEach(m => spans.push([p.ts[m.a], p.te[m.b], 'hit']));
+  if (k === st.focus && S.quote) quoteSpans(p.text, [S.quote]).forEach(z => spans.push([z[0], z[1], 'on']));
+  if (S.find && S.find.byPass.has(k)) S.find.byPass.get(k).forEach(j => { const f = S.find.hits[j]; spans.push([f[1], f[2], j === S.find.pos ? 'find cur' : 'find']); });
+  let part = '';
+  if (S.tint && S.tint.pi === k) { S.tint.ranges.forEach(r => spans.push([r[0], r[1], S.tint.cls])); part = S.tint.part ? ' part-' + S.tint.part : ''; }
+  (p.flags || []).forEach(f => { let i = -1; while ((i = p.text.indexOf(f.w, i + 1)) >= 0) spans.push([i, i + f.w.length, 'mis']); });
+  const inserts = (p.gl || []).map(g => ({ at: g.at, html: '<span class="gloss" title="Baumgarten’s German equivalent">' + (g.mk ? '<sup>' + esc(g.mk) + '</sup>' : '') + esc(g.de) + '</span>' }));
+  const body = linkXrefs(richText(p.text, spans, inserts), T);
+  const notes = notesOf(T);
+  const n = notes && notes.byPara && notes.byPara[p.para] ? notes.byPara[p.para].length : 0;
+  const margin = '<b>§ ' + p.para + '</b>' +
+    (T.shape === 'meier' ? (p.aaCite ? '<span class="ed">' + esc(p.aaCite) + '</span>' : '') :
+      (p.aa ? '<span class="ed">AA 17:' + p.aa + (p.aaEnd && p.aaEnd !== p.aa ? '–' + p.aaEnd : '') + '</span>' : '') + (p.ed ? '<span class="ed">1757 p. ' + p.ed + (p.edEnd && p.edEnd !== p.ed ? '–' + p.edEnd : '') + '</span>' : '')) +
+    (n ? '<i>' + n + ' note' + (n === 1 ? '' : 's') + '</i>' : '') + enButton(p);
+  const mis = (p.flags || []).map(f => '<div class="misnote">' + esc(f.w) + ' so AA XVII; perhaps a misprint for ' + esc(f.r) + '. ' + esc(f.y || '') + '</div>').join('');
+  return studyHeads(k) + '<div class="fp' + (k === st.focus ? ' focus' : '') + part + '" data-fp="' + k + '" id="tb-' + T.key + '-' + p.para + '"><div class="fpm">' + margin + '</div>' +
+    '<div class="fpt"' + (T.shape === 'meier' ? ' lang="de"' : '') + '>' + body + mis + '</div>' + enLine(p) + '</div>';
+}
+function refreshBlock(k) {
+  ['readtext', 'railtext'].forEach(id => {
+    const st = FT[id];
+    if (!st || k < st.lo || k > st.hi) return;
+    const el = st.el.querySelector('[data-fp="' + k + '"]');
+    if (!el) return;
+    if (el.classList.contains('frow')) { el.classList.toggle('focus', k === st.focus); return; }
+    const tmp = document.createElement('div');
+    tmp.innerHTML = ftBlock(st, k);
+    el.replaceWith(tmp.querySelector('[data-fp]'));
+  });
+}
+
+/* ── Adickes' phases: chips coloured by decade, and his note on each ── */
+const eraOf = y => (y == null ? 'none' : y >= 1790 ? '1790' : String(Math.max(1750, Math.floor(y / 10) * 10)));
+function phaseChip(sym, extra) {
+  const info = typeof phaseInfo === 'function' ? phaseInfo(sym) : null;
+  const era = eraOf(info && info.from);
+  const col = (ERAS.find(e => e[0] === era) || ERAS[5])[2];
+  const dark = era === '1780' || era === '1790';
+  return '<span class="pchip' + (info && info.years ? '' : ' undated') + '" data-phase="' + esc(sym) + '" title="Adickes’ note on this phase" style="background:' + col + ';' + (dark ? 'color:var(--parchment)' : '') + '">' +
+    esc(sym) + (extra != null ? esc(extra) : ' ' + (info && info.years ? esc(info.years) : 'undat.')) + '</span>';
+}
+function showPhase(sym) {
+  const info = typeof phaseInfo === 'function' ? phaseInfo(sym) : null;
+  const pre = getGlobal('ADICKES_PREAMBLE'), hy = getGlobal('ADICKES_HYPHEN_NOTE'), ink = getGlobal('ADICKES_INK_NOTE');
+  const txt = v => typeof v === 'string' ? v : v && (v.text || v.note || v.body) ? (v.text || v.note || v.body) : v ? Object.values(v).filter(x => typeof x === 'string').join(' ') : '';
+  let h = '<div class="mh"><h2>Phase ' + esc(info ? info.sym : sym) + '</h2><span class="muted">' + esc(info && info.years ? info.years : 'not dated by Adickes') + '</span><button type="button" class="btn" data-close-modal="1">close</button></div>';
+  if (info) {
+    if (info.aa) h += '<div class="small muted">' + esc(info.aa) + '</div>';
+    [['covers', 'Covers'], ['relative', 'Relative dating'], ['significance', 'Significance'], ['pairedWith', 'Paired with'], ['editorial', 'Editorial note']].forEach(([k, l]) => { if (info[k]) h += '<div class="blk"><div class="lab">' + l.toUpperCase() + '</div>' + esc(String(info[k])) + '</div>'; });
+    if (info.note) h += '<div class="blk"><div class="lab">ADICKES’ NOTE, VERBATIM</div>' + esc(info.note) + '</div>';
+  }
+  [pre, hy, ink].map(txt).filter(Boolean).forEach(t => { h += '<div class="blk"><div class="lab">ON THE NOTATION</div>' + esc(t) + '</div>'; });
+  h += '<div class="from">Adickes’ chronology of Kant’s hand, AA XIV:XXXV–XLIII (data/phases-adickes.js)</div>';
+  openModal(h);
+}
+function openModal(h) { $('modal').innerHTML = '<div class="box">' + h + '</div>'; $('modal').hidden = false; }
+function closeModal() { $('modal').hidden = true; $('modal').innerHTML = ''; }
+
+/* ── A note's card ── */
+function noteCard(q, n, T) {
+  const e = TEXTS[q.t].entries[q.entry];
+  const loc = e.loc || {};
+  const kind = REFL_KIND[loc.kind];
+  const eras = (e.ph || []).map(sym => { const i = typeof phaseInfo === 'function' ? phaseInfo(sym) : null; return eraOf(i && i.from); });
+  if (!eras.length) eras.push(eraOf(q.year !== TEXTS[q.t].year ? q.year : null));
+  if (eras.every(x => S.eraOff.has(x))) return '';
+  const lemma = loc.lemma ? loc.lemma.replace(/[»«]/g, '').trim() : '';
+  const chips = [];
+  if (lemma) chips.push('<span class="lchip" data-lemma="' + q.i + '" title="Tint these words in the §">»' + esc(lemma) + '«</span>');
+  (loc.satz || []).forEach(sn => chips.push('<span class="schip" data-satz="' + q.i + ':' + sn + '" title="Tint this sentence of the § (sentence counting is approximate)">Satz ' + esc(String(sn)) + '</span>'));
+  if (loc.part) chips.push('<span class="partchip" title="Where in the § the note stands">' + esc(loc.part) + '</span>');
+  const chipsTxt = (e.ph || []).length ? (e.ph || []).map(sym => phaseChip(sym)).join(' ') : (e.phRaw ? '<span class="pchip undated">' + esc(e.phRaw) + '</span>' : '');
+  const simple = (e.ph || []).join('−');
+  return '<div class="ncard' + (q.interp ? ' interp' : '') + (S.noteFocus === q.i ? ' focus' : '') + (lemma ? ' lemma' : '') + '" data-note="' + q.i + '" id="note-' + q.i + '">' +
+    '<div class="nhead">' + (kind ? '<span class="nglyph" title="' + esc(kind.de + ' — ' + kind.en) + '">' + kind.glyph + '</span>' : '') + '<b>Refl. ' + e.r + '</b> ' + chipsTxt +
+    '<span class="aapg">' + (e.aa ? 'AA ' + (e.vol || TEXTS[q.t].vol) + ':' + e.aa : '') + '</span></div>' +
+    (e.phRaw && e.phRaw.replace(/\s/g, '') !== simple.replace(/\s/g, '') ? '<div class="naa">AA: ' + esc(e.phRaw) + '</div>' : '') +
+    (chips.length ? '<div class="chips2">' + chips.join('') + '</div>' : '') +
+    (loc.raw ? '<div class="nloc">' + esc(loc.raw) + '</div>' : '') +
+    '<div class="ntext" lang="de">' + (e.vacat ? '[Vacat — the Academy Edition records this number with no text]' : esc(e.text || '')) + '</div>' + (e.vacat ? '' : enLine(q)) +
+    '<div class="nfoot">' + (e.sig ? '<span>' + esc(e.sig) + '</span>' : '') + '<span>§ from ' + esc(PLACE_HOW[e.src] || e.src || '') + '</span>' +
+    (q.interp ? '<span class="itag">interpolated §</span>' : '') + '<span class="lnk" data-open="' + q.i + '">open in its full text</span>' + (e.vacat ? '' : enButton(q)) + '</div></div>';
+}
+
+/* ── The notes panel for § n of a textbook ── */
+function notesPanel(T, n) {
+  const notes = notesOf(T);
+  if (!notes) return '<div class="empty">No notes for this text.</div>';
+  let h = '<div class="nbar">' + ERAS.map(([k, label, col]) => '<button type="button" class="era' + (S.eraOff.has(k) ? ' off' : '') + '" data-era="' + k + '"><i style="background:' + col + ';' + (k === 'none' ? 'border:1px dashed var(--accent-light)' : '') + '"></i>' + label + '</button>').join('') +
+    '<input class="nsearch" id="nsearch" type="search" placeholder="Search these notes…" value="' + esc(S.nsearch) + '"></div>';
+  if (S.nsearch.trim().length >= 2) return h + notesSearch(T, notes);
+  if (S.noFix && T.shape === 'metaphysica') return h + noFixList(T, notes, n);
+  if (T.shape === 'meier') h += meierBlocks(T, notes, n);
+  else {
+    const order = { locus: 0, page: 1, block: 2, group: 2, none: 3 };
+    const ps = (notes.byPara[n] || []).map(k => passage(notes.key, 'r' + notes.entries[k].r)).filter(Boolean)
+      .sort((a, b) => (order[a.src] ?? 4) - (order[b.src] ?? 4) || notes.entries[a.entry].r - notes.entries[b.entry].r);
+    const cards = ps.map(q => noteCard(q, n, T)).join('');
+    h += ps.length ? (cards || '<div class="empty">The decades you have switched off hide every note here.</div>') : '<div class="empty">The Academy Edition records no Reflexion at § ' + n + '.</div>';
+    const nofix = notes.entries.filter(e => !e.paras || !e.paras.length).length;
+    h += '<button type="button" class="btn nmore" data-nofix="1">' + nofix + ' Reflexionen belong to no §</button>';
+  }
+  return h + '<div class="from">the Academy edition’s Reflexionen, through the shared data (Sophia &amp; Maria); dates from Adickes’ phases</div>';
+}
+/* Meier: the AA's blocks, each headed by its § range, with notes under the § they name. */
+function meierBlocks(T, notes, n) {
+  const span = g => g.paras[g.paras.length - 1] - g.paras[0];
+  const order = notes.groups.map((g, i) => ({ g, i })).filter(o => o.g.paras && o.g.paras.length).sort((a, b) => a.g.paras[0] - b.g.paras[0] || span(a.g) - span(b.g));
+  // the block for § n: of those that name it, the narrowest
+  let at = -1;
+  order.forEach((o, j) => { if (o.g.paras.includes(n) && (at < 0 || span(o.g) < span(order[at].g))) at = j; });
+  if (at < 0) { at = order.findIndex(o => o.g.paras[0] > n); if (at < 0) at = order.length - 1; }
+  const lo = Math.max(0, at - S.blocksBefore), hi = Math.min(order.length - 1, at + S.blocksAfter);
+  let h = lo > 0 ? '<button type="button" class="btn nmore" data-blocks="before">▲ earlier §§</button>' : '<button type="button" class="btn nmore end">— start of the volume —</button>';
+  for (let j = lo; j <= hi; j++) {
+    const { g, i } = order[j];
+    const ks = notes.byGrp.get(i) || [];
+    const ps = ks.map(k => passage(notes.key, 'r' + notes.entries[k].r)).filter(Boolean);
+    const rng = paraLabel(g.paras);
+    let body = '';
+    g.paras.forEach(m => {
+      const own = ps.filter(q => q.src === 'locus' && (q.paras || []).includes(m));
+      if (!own.length) return;
+      const cards = own.map(q => noteCard(q, m, T)).join('');
+      if (cards) body += '<div class="nsub' + (m === n ? ' cur' : '') + '" data-goto="' + m + '" id="nsub-' + m + '">§ ' + m + '</div>' + cards;
+    });
+    const rest = ps.filter(q => q.src !== 'locus');
+    const rc = rest.map(q => noteCard(q, n, T)).join('');
+    if (rc) body += '<div class="nsub">not separately located · ' + rest.length + '</div>' + rc;
+    if (!body && !ps.length) continue;
+    h += '<div class="nblock' + (j === at ? ' cur' : '') + '"><div class="nblock-h" data-goto="' + g.paras[0] + '"><b>' + rng + '</b> · ' + ps.length + ' Reflexionen' + (g.topic ? ' · ' + esc(g.topic) : '') + (g.jaesche ? ' · ' + esc(g.jaesche) : '') + '</div>' + (body || '<div class="empty small">The decades you have switched off hide every note here.</div>') + '</div>';
+  }
+  if (!(notes.byPara[n] || []).some(k => (notes.entries[k].paras || []).includes(n) && notes.entries[k].src === 'locus')) h = '<div class="empty small">No Reflexion is located at § ' + n + ' itself; the AA’s block for it follows.</div>' + h;
+  h += hi < order.length - 1 ? '<button type="button" class="btn nmore" data-blocks="after">▼ later §§</button>' : '<button type="button" class="btn nmore end">— end of the volume —</button>';
+  return h;
+}
+/* Baumgarten: the notes that belong to no §, in AA order, with what they are. */
+function noFixList(T, notes, n) {
+  const tag = e => e.other ? 'another handbook' : e.blatt ? 'loses Blatt' : e.front ? 'front matter' : 'no § stated';
+  const es = notes.entries.map((e, k) => ({ e, k })).filter(o => !o.e.paras || !o.e.paras.length);
+  const counts = {};
+  es.forEach(o => { const t = tag(o.e); counts[t] = (counts[t] || 0) + 1; });
+  let h = '<button type="button" class="btn nmore" data-nofix="0">‹ back to § ' + n + '</button><div class="small muted" style="margin-bottom:0.5rem">' + es.length + ' Reflexionen belong to no §: ' + Object.entries(counts).map(([t, c]) => c + ' ' + t).join(', ') + '.</div>';
+  const lim = S.expand.has('nofix') ? 1e9 : 60;
+  es.slice(0, lim).forEach(o => { const q = passage(notes.key, 'r' + o.e.r); if (q) h += noteCard(q, n, T).replace('<div class="nfoot">', '<div class="nfoot"><span class="itag">' + tag(o.e) + '</span>'); });
+  if (es.length > lim) h += '<button type="button" class="btn nmore" data-expand-rail="nofix">Show all ' + es.length + '</button>';
+  return h;
+}
+/* Searching the notes: their text, dating, siglum and locus note; matches in § order. */
+function notesSearch(T, notes) {
+  const q = S.nsearch.trim().toLowerCase();
+  const hits = [];
+  notes.entries.forEach((e, k) => {
+    const hay = [e.text, e.phRaw, e.sig, e.loc && e.loc.raw].filter(Boolean).join(' ').toLowerCase();
+    if (hay.includes(q)) hits.push({ e, k, para: (e.paras || [])[0] });
+  });
+  hits.sort((a, b) => (a.para ?? 1e9) - (b.para ?? 1e9) || a.e.r - b.e.r);
+  return '<div class="small muted" style="margin-bottom:0.4rem">' + hits.length + ' found</div>' + hits.slice(0, 200).map(o => {
+    const i = (o.e.text || '').toLowerCase().indexOf(q);
+    const t = o.e.text || '';
+    const snip = i >= 0 ? (i > 40 ? '… ' : '') + t.slice(Math.max(0, i - 40), i + q.length + 60) : t.slice(0, 100);
+    return '<div class="smatch" data-goto="' + (o.para || '') + '" data-gonote="' + (passage(notes.key, 'r' + o.e.r) || {}).i + '"><b>' + (o.para ? '§ ' + o.para : 'no §') + ' · Refl. ' + o.e.r + '</b>' + esc(snip.replace(/\s+/g, ' ')) + '</div>';
+  }).join('');
+}
+/* The Meier Reader's Tradition tab: Wolff, the Scholastics, Aristotle. */
+function traditionPanel(T, n) {
+  const all = LAYERS.tradition || {};
+  const strata = [['wolff', 'Wolff · Leibniz'], ['scholastic', 'Scholastic'], ['aristotle', 'Aristotle']];
+  let h = '<div class="nbar">' + strata.map(([k, l]) => '<button type="button" class="era' + (S.strataOff.has(k) ? ' off' : '') + '" data-strata="' + k + '">' + l + '</button>').join('') +
+    '<input class="nsearch" id="tsearch" type="search" placeholder="Search the tradition…" value="' + esc(S.tsearch || '') + '"></div>';
+  const q = (S.tsearch || '').trim().toLowerCase();
+  if (q.length >= 2) {
+    const hits = [];
+    Object.keys(all).map(Number).sort((a, b) => a - b).forEach(m => all[m].forEach(e => { if ([e.author, e.source, e.text, e.relation].join(' ').toLowerCase().includes(q)) hits.push({ m, e }); }));
+    return h + '<div class="small muted" style="margin-bottom:0.4rem">' + hits.length + ' found</div>' + hits.map(o => '<div class="smatch" data-goto="' + o.m + '" data-totrad="1"><b>§ ' + o.m + '</b>' + esc(o.e.author + ', ' + o.e.source) + '</div>').join('');
+  }
+  const es = (all[n] || []).filter(e => !S.strataOff.has(e.strata));
+  const tp = passage(T.key, 'p' + n);
+  h += '<div class="small" style="margin-bottom:0.5rem"><b>§ ' + n + ' · Meier, Auszug</b> <span class="muted">' + esc(tp ? clip(tp.text, 90) : '') + '</span></div>';
+  if (!(all[n] || []).length) return h + '<div class="empty">No tradition entries yet for this paragraph.</div><div class="from">the Meier Reader’s tradition passages (data/tradition-meier.js)</div>';
+  return h + es.map(e => '<div class="tcard ' + esc(e.strata) + '"><b>' + esc(e.author) + '</b> <span class="src">' + esc(e.source) + ' · ' + esc(e.relation) + '</span><div>' + esc(e.text) + '</div></div>').join('') +
+    '<div class="from">the Meier Reader’s tradition passages (data/tradition-meier.js)</div>';
+}
+
+/* ── The outline beside the textbook ── */
+function outlineHtml(T) {
+  let h = '';
+  if (T.shape === 'meier') {
+    T.hier.forEach((top, ti) => {
+      const open = S.olOpen.has(String(ti));
+      const r = top.para_range;
+      h += '<div class="ol-part" data-olpart="' + ti + '"><span class="arr">' + (top.sections && top.sections.length ? (open ? '▾' : '▸') : '') + '</span>' + esc(top.title_de) + (r ? '<span class="rng">§' + r[0] + '–' + r[1] + '</span>' : '') + '</div>';
+      if (open && top.sections) top.sections.forEach((x, si) => {
+        h += '<div class="ol-sec" data-goto="' + x.para_range[0] + '" data-olsec="' + ti + ':' + si + '">' + esc((x.sec_num ? x.sec_num + '. ' : '') + x.title_de) + ' <span class="rng">§' + x.para_range[0] + '–' + x.para_range[1] + '</span></div>';
+      });
+    });
+    return h;
+  }
+  h += '<input id="olfilter" type="search" placeholder="Filter §§ …" value="' + esc(S.olFilter) + '">';
+  const f = S.olFilter.trim().toLowerCase();
+  if (!S.olBaumInit) { T.secs.forEach((x, i) => { if (x.type === 'part') S.olOpen.add('b' + i); }); S.olBaumInit = true; }
+  // as the Baumgarten Reader labels its entries: the number and the first six words, § references left out
+  const snip = p => { const w = p.text.replace(/§\.?\s*\d+/g, '').trim().split(/\s+/); return w.slice(0, 6).join(' ') + (w.length > 6 ? '…' : ''); };
+  const paras = [];
+  for (let k = T.first; k <= T.last; k++) paras.push(P[k]);
+  let part = -1;
+  T.secs.forEach((x, i) => {
+    if (x.type === 'part') part = i;
+    const mine = paras.filter(p => p.secId === x.id);
+    const shown = f ? mine.filter(p => ('§ ' + p.para + ' ' + snip(p)).toLowerCase().includes(f) || String(p.para) === f) : mine;
+    if (f && !shown.length && x.type !== 'part') return;
+    if (x.type === 'part') h += '<div class="ol-part" data-olpart="b' + i + '"><span class="arr">' + (S.olOpen.has('b' + i) || f ? '▾' : '▸') + '</span>' + esc(x.label) + '</div>';
+    if (!(S.olOpen.has('b' + part) || f)) return;
+    if (x.type !== 'part') h += '<div class="ol-sec">' + esc(x.label) + '</div>';
+    if (x.note) h += '<div class="ol-note">' + esc(x.note) + '</div>';
+    shown.forEach(p => { h += '<div class="ol-para" data-goto="' + p.para + '" data-olpara="' + p.para + '"><b>' + p.para + '</b>' + esc(snip(p)) + '</div>'; });
+  });
+  return h;
+}
+function markOutline(k) {
+  const p = P[k], ol = $('outline');
+  if (!ol || !p) return;
+  ol.querySelectorAll('.cur').forEach(x => x.classList.remove('cur'));
+  const el = TEXTS[p.t].shape === 'meier' ? (ol.querySelector('[data-olsec="' + p.mtop + ':' + p.msec + '"]') || ol.querySelector('[data-olpart="' + p.mtop + '"]')) : ol.querySelector('[data-olpara="' + p.para + '"]');
+  if (!el) return;
+  el.classList.add('cur');
+  const r = el.getBoundingClientRect(), o = ol.getBoundingClientRect();
+  if (r.top < o.top || r.bottom > o.bottom) ol.scrollTop += r.top - o.top - o.height / 3;
+}
+
+/* ── Moving in the textbook ── */
+function studyGo(T, n, opts) {
+  const q = passage(T.key, 'p' + n);
+  if (!q) return;
+  S.sel = q.i;
+  S.readAt = q.i;
+  if (!opts || !opts.keepTab) S.rtab = (opts && opts.tab) || (['notes', 'trad', 'conn'].includes(S.rtab) ? S.rtab : 'notes');
+  const st = FT.readtext;
+  if (st && q.i >= st.lo && q.i <= st.hi) {
+    ftSetFocus(st, q.i);
+    const el = st.el.querySelector('[data-fp="' + q.i + '"]');
+    const sc = $('left');
+    if (el) sc.scrollTop += el.getBoundingClientRect().top - sc.getBoundingClientRect().top - 76;
+  } else renderRead();
+  markOutline(q.i);
+  renderRail();
+  if (!opts || !opts.noTrail) pushTrail();
+}
+/* As the textbook scrolls, the notes follow the § at the top of the column. */
+let followTimer = null;
+function studyFollow() {
+  if (!studyOn() || !FT.readtext) return;
+  if (S.sel != null && P[S.sel] && TEXTS[P[S.sel].t].key !== S.readKey) return;
+  clearTimeout(followTimer);
+  followTimer = setTimeout(() => {
+    const st = FT.readtext, sc = $('left'), top = sc.getBoundingClientRect().top + 80;
+    let k = null;
+    for (const el of st.el.querySelectorAll('.fp[data-fp], .frow')) { if (el.getBoundingClientRect().bottom > top) { k = +el.dataset.fp; break; } }
+    if (k == null || k === S.sel) return;
+    S.sel = k;
+    S.readAt = k;
+    S.noteFocus = null;
+    markOutline(k);
+    if (!['notes', 'trad', 'conn'].includes(S.rtab)) S.rtab = 'notes';
+    renderRail();
+    const sub = $('nsub-' + P[k].para);
+    if (sub && S.rtab === 'notes') $('railbody').scrollTop += sub.getBoundingClientRect().top - $('railbody').getBoundingClientRect().top - 10;
+    writeHash();
+  }, 120);
+}
+/* Tinting the words a note is on: its lemma, or its sentence. */
+function tintFor(noteI, satz) {
+  const q = P[noteI], notes = TEXTS[q.t], e = notes.entries[q.entry], loc = e.loc || {};
+  const book = textByKey(notes.on);
+  const target = (S.sel != null && P[S.sel] && TEXTS[P[S.sel].t] === book && (q.paras || []).includes(P[S.sel].para)) ? P[S.sel].para : (q.paras || [])[0];
+  const tp = book && passage(book.key, 'p' + target);
+  if (!tp) return;
+  let ranges = [], cls = 'tint-lemma';
+  if (satz != null) {
+    const ss = sentencesOf(tp.text);
+    if (ss[satz - 1]) ranges = [ss[satz - 1]];
+    cls = 'tint-satz';
+  } else if (loc.lemma) {
+    const lemma = loc.lemma.replace(/[»«]/g, '').trim();
+    const parts = lemma.split(/\s*[—–]\s*/).filter(Boolean);
+    const find = (hay, needle, from) => { let i = hay.indexOf(needle, from); if (i < 0) i = hay.toLowerCase().indexOf(needle.toLowerCase(), from); return i; };
+    if (parts.length === 2) { const a = find(tp.text, parts[0], 0), b = a < 0 ? -1 : find(tp.text, parts[1], a + parts[0].length); if (a >= 0 && b >= 0) ranges = [[a, b + parts[1].length]]; }
+    if (!ranges.length) { const a = find(tp.text, lemma, 0); if (a >= 0) ranges = [[a, a + lemma.length]]; }
+  }
+  const prev = S.tint && S.tint.pi;
+  const part = /anfang/i.test(loc.part || '') ? 'anfang' : /schluss|ende/i.test(loc.part || '') ? 'schluss' : '';
+  S.tint = ranges.length ? { pi: tp.i, ranges, cls, part: part } : null;
+  S.noteFocus = noteI;
+  if (prev != null && prev !== tp.i) refreshBlock(prev);
+  if (FT.readtext && (tp.i < FT.readtext.lo || tp.i > FT.readtext.hi)) { S.readAt = tp.i; renderRead(); }
+  else refreshBlock(tp.i);
+  document.querySelectorAll('.ncard.focus').forEach(x => x.classList.remove('focus'));
+  const card = $('note-' + noteI); if (card) card.classList.add('focus');
+  const m = document.querySelector('#readtext [data-fp="' + tp.i + '"] mark.' + cls) || document.querySelector('#readtext [data-fp="' + tp.i + '"]');
+  if (m) { const sc = $('left'); sc.scrollTop += m.getBoundingClientRect().top - sc.getBoundingClientRect().top - sc.clientHeight / 3; }
+  if (!ranges.length) { const c = $('note-' + noteI); if (c) c.insertAdjacentHTML('beforeend', '<div class="small warn">These words are not found in the printed §: the AA is not quoting it word for word.</div>'); }
+}
+/* Find in the text: every match in the whole textbook; Enter and › go to the next. */
+function runFind(qs) {
+  const T = textByKey(S.readKey);
+  const q = (qs || '').toLowerCase();
+  if (q.length < 2) { S.find = null; renderRead(); return; }
+  const hits = [], byPass = new Map();
+  for (let k = T.first; k <= T.last; k++) {
+    const t = P[k].text.toLowerCase();
+    let i = -1;
+    while ((i = t.indexOf(q, i + 1)) >= 0) { if (!byPass.has(k)) byPass.set(k, []); byPass.get(k).push(hits.length); hits.push([k, i, i + q.length]); }
+  }
+  S.find = { q: qs, hits, byPass, pos: hits.length ? 0 : -1 };
+  S.tint = null;
+  if (hits.length) { S.readAt = hits[0][0]; }
+  renderRead();
+  focusFind();
+}
+function stepFind(d) {
+  if (!S.find || !S.find.hits.length) return;
+  const old = S.find.hits[S.find.pos];
+  S.find.pos = (S.find.pos + d + S.find.hits.length) % S.find.hits.length;
+  const k = S.find.hits[S.find.pos][0];
+  if (FT.readtext && k >= FT.readtext.lo && k <= FT.readtext.hi) { refreshBlock(old[0]); refreshBlock(k); }
+  else { S.readAt = k; renderRead(); }
+  focusFind();
+}
+function focusFind() {
+  const n = document.querySelector('.findbox .n');
+  if (n && S.find) n.textContent = S.find.hits.length ? (S.find.pos + 1) + ' / ' + S.find.hits.length : 'none';
+  const m = document.querySelector('#readtext mark.find.cur');
+  if (m) { const sc = $('left'); sc.scrollTop += m.getBoundingClientRect().top - sc.getBoundingClientRect().top - sc.clientHeight / 3; }
+}
+/* Baumgarten's Synopsis, over the page; its § references go to the §. */
+function showSynopsis() {
+  const syn = getGlobal('MET_SYNOPSIS') || [];
+  let h = '<div class="mh"><h2>Synopsis</h2><span class="muted">AA 17:19–23</span><button type="button" class="btn" data-close-modal="1">close</button></div>' +
+    '<p class="note">From the front matter of the 1757 edition. The printed Synopsis is an indented outline; its indentation is not in the source transcription and is not reproduced. The markers stand in the gutter exactly as the volume letters them.</p><div class="syn">';
+  let ed = null, gapShown = false;
+  syn.forEach(x => {
+    if (x.ed && x.ed !== ed) { h += '<div class="ed">1757, p. ' + esc(x.ed) + '</div>'; ed = x.ed; }
+    if (!gapShown && x.from != null && x.from > 518) { h += '<div class="gap">§§ 280–518 — the Synopsis covers these, but the pages carrying them are not in the source transcription.</div>'; gapShown = true; }
+    const t = esc(x.t || '').replace(/§+\.?\s*\d+(?:\s*[-–]\s*\d+)?/g, m => { const first = parseInt(m.match(/\d+/)[0], 10); return passage('baumgarten', 'p' + first) ? '<span class="synref" data-syngo="' + first + '">' + m + '</span>' : '<span class="synref absent" title="AA XVII does not print this §">' + m + '</span>'; });
+    h += '<div class="m">' + esc(x.m || '') + '</div><div>' + t + '</div>';
+  });
+  openModal(h + '</div><div class="from">Baumgarten, Metaphysica, AA XVII (data/metaphysica-17.js)</div>');
 }
 function ftHtml(st, a, b) { let h = ''; for (let k = a; k <= b; k++) h += ftBlock(st, k); return h; }
 /* Open a text's full text in el (scrolled by scroller) around passage `at`, marking `focus`. */
 function ftOpen(el, scroller, at, focus, offset) {
   const T = TEXTS[P[at].t];
-  const st = { t: T.idx, lo: Math.max(T.first, at - 25), hi: Math.min(T.last, at + 60), focus: focus == null ? -1 : focus, el, scroller };
+  let lo = Math.max(T.first, at - 25);
+  if (T.shape === 'logik' && lo <= frontEnd(T)) lo = T.first;
+  const st = { t: T.idx, lo, hi: Math.min(T.last, at + 60), focus: focus == null ? -1 : focus, el, scroller };
   FT[el.id] = st;
   el.innerHTML = ftHtml(st, st.lo, st.hi);
   const f = el.querySelector('[data-fp="' + at + '"]');
@@ -1714,7 +2563,7 @@ function ftScroll(st) {
 }
 function ftSetFocus(st, k) {
   if (!st) return;
-  st.el.querySelectorAll('.fp.focus').forEach(x => x.classList.remove('focus'));
+  st.el.querySelectorAll('.fp.focus, .frow.focus').forEach(x => x.classList.remove('focus'));
   const f = st.el.querySelector('[data-fp="' + k + '"]');
   if (f) f.classList.add('focus');
   st.focus = k;
@@ -1737,7 +2586,7 @@ function railForPara(bookKey, n, from) {
     h += sec('notes', 'Kant’s notes on § ' + n, '<span class="muted small">oldest first</span>', ps.length,
       ps.length ? listItems(ps, 'notes:' + bookKey + n, q => '<span class="c">Refl. ' + q.id.slice(1) + '</span>' + esc(clip(q.text.replace(/\s+/g, ' '), 110)) + '<span class="d">' + esc(q.dateLabel) + (q.interp ? ' · interpolated §' : '') + '</span>', 6)
         : '<div class="empty">The Academy edition files no Reflexion under this §.</div>',
-      'the Academy edition’s filing, through the shared Reflexionen data (Sophia Wyatt &amp; Maria); dates from Adickes’ phases', true);
+      'the Academy edition’s filing, through the shared Reflexionen data (Sophia &amp; Maria); dates from Adickes’ phases', true);
   }
   // Lectures and Jäsche on this §
   if (bookKey === 'meier') {
@@ -1755,7 +2604,7 @@ function railForPara(bookKey, n, from) {
         }, 4);
       });
     } else body = '<div class="empty">No lecture passage is linked to this § yet.</div>';
-    h += sec('lectures', 'The lectures and Jäsche on § ' + n, '', links.length, body, 'Jesus La Paz’s Meier–Kant concordance', false);
+    h += sec('lectures', 'The lectures and Jäsche on § ' + n, '', links.length, body, 'Jesus’s Meier–Kant concordance', false);
     // The tradition behind it
     const trad = LAYERS.tradition && LAYERS.tradition[n];
     if (trad && trad.length) {
@@ -1779,7 +2628,7 @@ function divesFor(T, p) {
   if (T.key === 'meier' || (placeOf(p) || {}).book === 'meier') out.push(['Meier Reader', '../../../meier-reader/meier-reading-guide.html'], ['Jesus’s Meier–Kant comparison', '../../Jesus-La-Paz/meier-kant-comparison.html']);
   if (T.key === 'baumgarten' || T.key === 'refl-meta') out.push(['Baumgarten Reader', '../../../baumgarten-reader/baumgartenreading-guide.html']);
   if (T.key === 'jaesche') out.push(['Alex’s Jäsche reader: where this § comes from', '../../Alex%20Li/Jasche%20reader/index.html']);
-  if (T.layer === 'lecture') out.push(['Jin’s parallel passages', '../../Jin/logik-transcripts.html'], ['Maria’s reading guide', '../../maria/busolt-reader.html']);
+  if (T.layer === 'lecture') out.push(['Jessie’s parallel passages', '../../Jin/logik-transcripts.html'], ['Maria’s reading guide', '../../maria/busolt-reader.html']);
   if (T.shape === 'refl' && T.key === 'refl-logik') out.push(['Sophia’s mediate inferences', '../../Sophia%20Wyatt/mediate-inferences.html']);
   return out;
 }
@@ -1794,7 +2643,7 @@ function aboutTextsHtml() {
     TEXTS.map(t => { const tr = trFor(t); return '<tr><td><b>' + esc(t.title) + '</b></td><td class="small cz">' + esc(LAYER_LABEL[t.layer] || t.layer) + '</td><td>' + esc(t.date) + '</td><td class="n">' + t.n.toLocaleString('en') + '</td><td class="n">' + t.words.toLocaleString('en') + '</td><td class="small">' + esc(t.source) + '</td><td class="small">' + esc(t.credit) + '</td>' +
       '<td class="small">' + (tr ? 'two machine translations, by ' + esc(personName(tr.who)) + (tr.map ? '; matched to this edition by build-pins.py' : '') : '<span class="muted">none yet</span>') + '</td></tr>'; }).join('') +
     '</tbody></table>' +
-    '<p class="note">The English is machine translation, made for Jesus La Paz’s Meier–Kant comparison: one version following the stated principles of Guyer and Wood’s Cambridge translation of the Critique, one those of Kemp Smith’s. Neither translated these texts.</p>';
+    '<p class="note">The English is machine translation, made for Jesus’s Meier–Kant comparison: one version following the stated principles of Guyer and Wood’s Cambridge translation of the Critique, one those of Kemp Smith’s. Neither translated these texts.</p>';
   const missing = PORTAL_TEXTS.filter(T => !TEXTS.some(t => t.key === T.key));
   if (missing.length) h += '<p class="warn">In the catalogue but not loaded: ' + missing.map(T => esc(T.title)).join(', ') + '.</p>';
   h += '<div class="addtext"><h3>Adding a text</h3><p>Put the text in a <code>.js</code> data file in one of the shapes described at the top of ' +
@@ -1806,7 +2655,7 @@ function aboutTextsHtml() {
 
 function readIndexHtml() {
   const groups = [['textbook', 'The textbooks'], ['notes', 'Kant’s notes'], ['lecture', 'The lectures'], ['compilation', 'Jäsche'], ['published', 'Published works']];
-  let h = '<div class="explore"><h2>Read</h2><p class="intro">Every text in the corpus, in full. Click any paragraph to see what hangs on it beside the text; select words to search for them everywhere.</p>';
+  let h = '<div class="explore"><h2>Read</h2><p class="intro">Every text in the corpus, in full. Meier and Baumgarten, and Kant’s notes on either, open as the textbook with the notes beside it, following along: the Meier and Baumgarten Readers, inside the portal. Click any paragraph to see what hangs on it; select words to search for them everywhere.</p>';
   groups.forEach(([layer, label]) => {
     const ts = TEXTS.filter(t => t.layer === layer);
     if (ts.length) h += '<section><div class="ph">' + label.toUpperCase() + '</div><div class="qcards">' + ts.map(textCard).join('') + '</div></section>';
@@ -1842,11 +2691,29 @@ function findInText(T, v) {
   return null;
 }
 
+function renderStudy(el, T) {
+  const f = S.find;
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' +
+    '<button type="button" class="btn" data-outline="1" title="Show or hide the outline">☰ Outline</button>' +
+    (T.shape === 'metaphysica' ? '<button type="button" class="btn" data-synopsis="1">Synopsis</button>' : '') +
+    (S.sel == null ? '<button type="button" class="btn" data-shownotes="1">Kant’s notes</button>' : '') +
+    '<span class="spacer"></span>' +
+    '<span class="findbox"><input id="find" type="search" spellcheck="false" placeholder="Find in the text…" value="' + esc(f ? f.q : '') + '"><button type="button" data-findstep="-1" title="Previous (Shift-Enter)">‹</button><span class="n">' + (f ? (f.hits.length ? (f.pos + 1) + ' / ' + f.hits.length : 'none') : '') + '</span><button type="button" data-findstep="1" title="Next (Enter)">›</button></span>' +
+    '<input id="jump" type="text" spellcheck="false" placeholder="Go to §" aria-label="Go to §"></div>' +
+    '<div class="study' + (S.outline ? '' : ' no-outline') + '"><nav class="outline" id="outline">' + outlineHtml(T) + '</nav><div id="readtext" class="fulltext"></div></div>';
+  const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
+  const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
+  ftOpen($('readtext'), $('left'), at, focus, 76);
+  markOutline(at);
+}
+
 function renderRead() {
   const el = $('view-read');
   delete FT.readtext;
   const T = S.readKey && textByKey(S.readKey);
+  el.classList.toggle('studymode', isStudyText(T));
   if (!T) { el.innerHTML = readIndexHtml(); return; }
+  if (isStudyText(T)) return renderStudy(el, T);
   const toc = tocFor(T);
   el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span><span class="spacer"></span>' +
     (toc.length > 1 ? '<select id="toc" aria-label="Contents"><option value="">Contents…</option>' + toc.map(([l, k]) => '<option value="' + k + '">' + esc(clip(l, 64)) + '</option>').join('') + '</select>' : '') +
@@ -1857,9 +2724,14 @@ function renderRead() {
 }
 
 function renderPeople() {
-  const h = '<h2>Contributors</h2><p class="note">Every connection the portal shows comes from someone’s work in the seminar, and says whose.</p><div class="people">' +
-    PEOPLE.map(p => '<div class="person"><div class="nm">' + esc(p.name) + '</div><div class="hd">' + esc(p.handle) + '</div><p>' + esc(p.did) + '</p><p class="uses">In the portal: ' + esc(p.uses) + '</p>' +
-      '<div class="dives">' + p.tools.map(([l, u]) => '<a href="' + u + '" target="_blank" rel="noopener">' + esc(l) + ' ↗</a>').join('') + '</div></div>').join('') + '</div>';
+  const card = p => '<div class="person"><div class="nm">' + esc(p.name) + '</div><p>' + esc(p.did) + '</p>' +
+    (p.uses ? '<p class="uses">In the portal: ' + esc(p.uses) + '</p>' : '') + (p.own ? '<p class="uses">Own work: ' + esc(p.own) + '</p>' : '') +
+    '<div class="dives">' + (p.tools || []).map(([l, u]) => '<a href="' + u + '" target="_blank" rel="noopener"' + toolAttr(u, l) + '>' + esc(l) + ' ↗</a>').join('') + '</div></div>';
+  const grid = xs => '<div class="people">' + xs.slice().sort((x, y) => x.name.localeCompare(y.name)).map(card).join('') + '</div>';
+  const h = '<h2>Contributors</h2><p class="note">Every connection the portal shows comes from someone’s work in the seminar, and says whose.</p>' +
+    '<h3 class="team-h">The portal’s features</h3>' + grid(PEOPLE.filter(p => !p.team)) +
+    '<h3 class="team-h">Kant Quest, Design, and Pedagogy</h3><p class="note">Worked toward clean text files, ways of teaching the material, and ideas for the seminar’s tools.</p>' +
+    grid(PEOPLE.filter(p => p.team === 'kantquest'));
   $('view-people').innerHTML = h;
 }
 
@@ -1871,6 +2743,26 @@ function showView(v) {
   if (v === 'read') renderRead();
   if (v === 'people') renderPeople();
   if (v === 'explore') syncForm();
+}
+
+/* Another seminar tool, opened inside the portal: the portal's header stays above it, with a
+   way back, so no click in the portal leaves you on a page with no road home. Only pages in this
+   repository open here; GitHub and raw.githack will not be framed, and keep their own tab. */
+function toolAttr(url, label) {
+  return /^[a-z]+:/i.test(url) ? '' : ' data-tool="' + esc(label) + '"';
+}
+function openTool(url, label) {
+  $('toolframe').src = url;
+  $('tooltitle').textContent = label || '';
+  $('toolext').href = url;
+  $('toolview').hidden = false;
+  $('app').hidden = true;
+}
+function closeTool() {
+  if ($('toolview').hidden) return;
+  $('toolview').hidden = true;
+  $('app').hidden = false;
+  $('toolframe').src = 'about:blank';
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -1986,7 +2878,7 @@ function goStep(k) {
 
 function writeHash() {
   const u = new URLSearchParams();
-  if (S.d) u.set('d', S.d);
+  if (S.d) { u.set('d', S.d); if (S.d === 'judgement' && S.jtab === 'nik') u.set('jt', 'nik'); }
   else if (S.q) {
     u.set('q', S.q);
     u.set('w', S.w);
@@ -1996,10 +2888,11 @@ function writeHash() {
   if (S.off.size) u.set('off', [...S.off].join(','));
   if (S.loc) u.set('loc', S.loc);
   if (S.sel != null && P[S.sel]) { u.set('p', TEXTS[P[S.sel].t].key + ':' + P[S.sel].id); if (S.quote) u.set('quote', S.quote); }
-  if (S.en) u.set('en', S.en);
+  if (!S.en) u.set('en', '0');                     // English is on unless a link says otherwise
+  else if (S.en !== EN_DEFAULT) u.set('en', S.en);
   if (S.q && !S.d && S.tab === 'passages') u.set('tab', 'passages');
   if (S.view === 'read' && S.readKey) { u.set('read', S.readKey); if (S.readAt != null && P[S.readAt]) u.set('at', P[S.readAt].id); }
-  if (S.sel != null && S.rtab === 'conn') u.set('rt', 'conn');
+  if (S.sel != null && S.rtab !== 'text') u.set('rt', S.rtab);
   history.replaceState(null, '', '#' + u.toString());
 }
 function readHash() {
@@ -2011,15 +2904,18 @@ function readHash() {
   S.co = u.get('co') || '';
   S.merge = u.get('merge') !== '0';
   S.d = u.get('d') || null;
+  S.jtab = u.get('jt') === 'nik' ? 'nik' : 'aidan';
   S.off = new Set((u.get('off') || '').split(',').filter(Boolean));
   S.loc = u.get('loc') || null;
   S.quote = u.get('quote') || null;
-  S.en = PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : '';
+  S.en = u.get('en') === '0' ? '' : PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : EN_DEFAULT;
+  enSync();
   S.tab = u.get('tab') === 'passages' ? 'passages' : 'overview';
   const p = u.get('p');
   if (p) { const k = p.indexOf(':'); const i = BYID.get(p.slice(0, k) + ':' + p.slice(k + 1)); S.sel = i == null ? null : i; }
-  S.rtab = u.get('rt') === 'conn' ? 'conn' : 'text';
+  S.rtab = ['conn', 'notes', 'trad'].includes(u.get('rt')) ? u.get('rt') : 'text';
   S.readKey = u.get('read') && textByKey(u.get('read')) ? u.get('read') : null;
+  if (S.readKey && textByKey(S.readKey).shape === 'refl') S.readKey = textByKey(S.readKey).on || S.readKey;
   S.readAt = S.readKey && u.get('at') != null ? (BYID.get(S.readKey + ':' + u.get('at')) ?? null) : null;
   syncForm();
   showView(S.readKey ? 'read' : 'ask');
@@ -2077,39 +2973,66 @@ function wire() {
   document.addEventListener('change', e => {
     const t = e.target;
     if (t.id === 'sel-principle' && t.value) {
-      const pr = LAYERS.principles.find(x => x.id === t.value);
-      const q = [...new Set(pr.forms.map(f => f.t))].map(f => /\s/.test(f) ? '"' + f + '"' : f).join(' OR ');
-      ask({ q, w: 3, cm: '', co: '', preset: { label: pr.en, note: (pr.note || '') + (pr.enAlt && pr.enAlt.length ? ' Also called: ' + pr.enAlt.join(', ') + '.' : ''), who: 'feng', credit: 'Feng’s lexicon of the logical principles: every form below is one the texts attest' } });
+      askPrinciple(LAYERS.principles.find(x => x.id === t.value));
       t.value = '';
     }
     if (t.id === 'sel-concept' && t.value) {
       const c = LAYERS.concepts.find(x => x.id === t.value);
       const q = c.forms.map(([, stem]) => '/(?<![\\p{L}])(?:' + stem + ')/').join(' OR ');
-      ask({ q, w: 3, cm: '', co: '', preset: { label: c.label, note: 'Wordings: ' + c.forms.map(f => f[0]).join(', ') + '.', who: 'jin', credit: 'Jin’s list of the lectures’ concepts and their wordings' } });
+      ask({ q, w: 3, cm: '', co: '', preset: { label: c.label, note: 'Wordings: ' + c.forms.map(f => f[0]).join(', ') + '.', who: 'jin', credit: 'Jessie’s list of the lectures’ concepts and their wordings' } });
       t.value = '';
     }
     if (t.id === 'sel-form' && t.value) {
       const f = LAYERS.forms.find(x => x.id === t.value);
-      ask({ q: '/' + f.term.source + '/', w: 3, cm: '', co: '', preset: { label: 'The ' + f.en + ' judgment: where it is named', note: f.def, who: 'aidan', credit: 'Aidan Chong’s terms for the forms of judgment' } });
+      ask({ q: '/' + f.term.source + '/', w: 3, cm: '', co: '', preset: { label: 'The ' + f.en + ' judgment: where it is named', note: f.def, who: 'aidan', credit: 'Aidan’s terms for the forms of judgment' } });
       t.value = '';
     }
   });
 
   document.addEventListener('click', e => {
-    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-fp]');
+    if (e.target.closest('#modal') && (e.target.id === 'modal' || e.target.closest('[data-close-modal]'))) { closeModal(); return; }
+    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp]');
     if (!el) return;
     const d = el.dataset;
+    if (d.jtab) { S.jtab = d.jtab; S.loc = null; renderResults(); writeHash(); return; }
+    if (d.principle) { askPrinciple(LAYERS.principles.find(x => x.id === d.principle)); return; }
+    if (d.xref) { const T = TEXTS[P[+el.closest('[data-fp]').dataset.fp].t]; if (studyOn()) studyGo(T, +d.xref, {}); else { const q = passage(T.key, 'p' + d.xref); if (q) openPassage(q.i); } return; }
+    if (d.phase) { showPhase(d.phase); return; }
+    if (d.lemma) { tintFor(+d.lemma); return; }
+    if (d.satz) { const [ni, sn] = d.satz.split(':'); tintFor(+ni, +sn); return; }
+    if (d.era) { S.eraOff.has(d.era) ? S.eraOff.delete(d.era) : S.eraOff.add(d.era); renderRail(); return; }
+    if (d.strata) { S.strataOff.has(d.strata) ? S.strataOff.delete(d.strata) : S.strataOff.add(d.strata); renderRail(); return; }
+    if (d.blocks) { if (d.blocks === 'before') S.blocksBefore += 3; else S.blocksAfter += 3; const top = $('railbody').scrollTop, h0 = $('railbody').scrollHeight; renderRail(); if (d.blocks === 'before') $('railbody').scrollTop = top + $('railbody').scrollHeight - h0; else $('railbody').scrollTop = top; return; }
+    if (d.nofix) { S.noFix = d.nofix === '1'; renderRail(); return; }
+    if (d.gonote) { const ni = +d.gonote; S.nsearch = ''; S.noteFocus = ni; const T = textByKey(S.readKey); if (d.goto) studyGo(T, +d.goto, { tab: 'notes' }); return; }
+    if (d.goto) { const T = textByKey(S.readKey); if (d.totrad) { S.tsearch = ''; studyGo(T, +d.goto, { tab: 'trad' }); } else { S.nsearch = ''; studyGo(T, +d.goto, { keepTab: true }); } return; }
+    if (d.olpart != null) {
+      const k = String(d.olpart), T = textByKey(S.readKey);
+      const wasOpen = S.olOpen.has(k);
+      wasOpen ? S.olOpen.delete(k) : S.olOpen.add(k);
+      $('outline').innerHTML = outlineHtml(T);
+      const top = T.shape === 'meier' ? T.hier[+k] : null;
+      if (top && top.para_range && !wasOpen) studyGo(T, top.para_range[0], { keepTab: true });   // opening a Haupttheil goes to it, as in the Meier Reader
+      else if (S.sel != null) markOutline(S.sel);
+      return;
+    }
+    if (d.outline) { S.outline = !S.outline; const st = document.querySelector('.study'); if (st) st.classList.toggle('no-outline', !S.outline); return; }
+    if (d.synopsis) { showSynopsis(); return; }
+    if (d.syngo) { closeModal(); studyGo(textByKey('baumgarten'), +d.syngo, {}); return; }
+    if (d.findstep) { stepFind(+d.findstep); return; }
+    if (d.shownotes) { const T = textByKey(S.readKey); const k = S.readAt != null ? S.readAt : T.first; studyGo(T, P[k].para, { tab: 'notes' }); renderRead(); return; }
+    if (d.note != null && !e.target.closest('[data-open]')) { const q = P[+d.note]; const e2 = TEXTS[q.t].entries[q.entry]; if (e2 && e2.loc && e2.loc.lemma) tintFor(+d.note); return; }
     if (d.fp != null) { if (String(window.getSelection())) return; focusFromText(+d.fp, el.closest('.fulltext')); return; }
-    if (d.read != null) { S.readKey = d.read || null; S.readAt = null; showView('read'); if (S.readKey) pushTrail(); else writeHash(); return; }
-    if (d.readat != null) { const k = +d.readat; S.readKey = TEXTS[P[k].t].key; S.readAt = k; S.rtab = 'conn'; showView('read'); renderRail(); pushTrail(); return; }
+    if (d.read != null) { openRead(d.read || null, null); return; }
+    if (d.readat != null) { openRead(TEXTS[P[+d.readat].t].key, +d.readat); return; }
     if (d.rtab) { S.rtab = d.rtab; renderRail(); writeHash(); return; }
     if (d.step != null) { goStep(+d.step); return; }
     if (d.map) { $('routemap').hidden = !$('routemap').hidden; renderTrail(); return; }
-    if (d.en != null) { S.en = d.en; renderRail(); writeHash(); return; }
-    if (d.doc) { Object.assign(S, { d: d.doc, q: '', co: '', cm: '', loc: null, expand: new Set(), preset: null }); showView('ask'); syncForm(); renderResults(); pushTrail(); $('left').scrollTop = 0; return; }
+    if (d.en != null) { S.en = d.en; enApply(); writeHash(); return; }
+    if (d.doc) { if (d.docjt) S.jtab = d.docjt; Object.assign(S, { d: d.doc, q: '', co: '', cm: '', loc: null, expand: new Set(), preset: null }); showView('ask'); syncForm(); renderResults(); pushTrail(); $('left').scrollTop = 0; return; }
     if (d.home) { Object.assign(S, { d: null, q: '', co: '', cm: '', loc: null, preset: null, tab: 'overview', expand: new Set() }); showView('ask'); syncForm(); renderResults(); writeHash(); return; }
     if (d.tab) { S.tab = d.tab; renderResults(); writeHash(); return; }
-    if (d.closeRail) { S.sel = null; S.quote = null; renderRail(); document.querySelectorAll('.hit.sel').forEach(x => x.classList.remove('sel')); writeHash(); return; }
+    if (d.closeRail) { S.sel = null; S.quote = null; S.noteFocus = null; $('app').style.gridTemplateColumns = ''; renderRail(); document.querySelectorAll('.hit.sel').forEach(x => x.classList.remove('sel')); if (studyOn()) renderRead(); writeHash(); return; }
     if (d.view) { showView(d.view); if (d.view === 'read') writeHash(); return; }
     if (d.trail != null) { $('tip').hidden = true; goStep(+d.trail); return; }
     if (d.expandRail) { S.expand.add(d.expandRail); renderRail(); return; }
@@ -2129,15 +3052,36 @@ function wire() {
   });
 
   // Reading: a full text extends as it scrolls; the contents and go-to box move within it
-  $('left').addEventListener('scroll', () => { $('selbtn').hidden = true; if (S.view === 'read') ftScroll(FT.readtext); }, { passive: true });
+  $('left').addEventListener('scroll', () => { $('selbtn').hidden = true; if (S.view === 'read') { ftScroll(FT.readtext); studyFollow(); } }, { passive: true });
   $('railbody').addEventListener('scroll', () => { $('selbtn').hidden = true; if (S.rtab !== 'conn') ftScroll(FT.railtext); }, { passive: true });
   document.addEventListener('change', e => {
     if (e.target.id === 'toc' && e.target.value !== '') { S.readAt = +e.target.value; renderRead(); writeHash(); }
   });
+  document.addEventListener('input', e => {
+    if (e.target.id === 'nsearch') { S.nsearch = e.target.value; const pos = e.target.selectionStart; renderRail(); const i = $('nsearch'); if (i) { i.focus(); i.setSelectionRange(pos, pos); } }
+    if (e.target.id === 'tsearch') { S.tsearch = e.target.value; const pos = e.target.selectionStart; renderRail(); const i = $('tsearch'); if (i) { i.focus(); i.setSelectionRange(pos, pos); } }
+    if (e.target.id === 'olfilter') { S.olFilter = e.target.value; const pos = e.target.selectionStart; $('outline').innerHTML = outlineHtml(textByKey(S.readKey)); const i = $('olfilter'); i.focus(); i.setSelectionRange(pos, pos); }
+  });
+  // The divider between the text and the panel: drag to resize
+  $('divider').addEventListener('mousedown', e => {
+    e.preventDefault();
+    $('divider').classList.add('drag');
+    const move = ev => { const w = Math.max(260, Math.min(window.innerWidth * 0.7, window.innerWidth - ev.clientX)); S.railW = Math.round(w); $('app').style.gridTemplateColumns = 'minmax(0, 1fr) ' + S.railW + 'px'; };
+    const up = () => { $('divider').classList.remove('drag'); document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+  });
   document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !$('modal').hidden) { closeModal(); return; }
+    if (e.target.id === 'find') {
+      if (e.key === 'Enter') { e.preventDefault(); if (!S.find || S.find.q !== e.target.value) runFind(e.target.value); else stepFind(e.shiftKey ? -1 : 1); }
+      if (e.key === 'Escape') { e.target.value = ''; runFind(''); }
+      return;
+    }
     if (e.target.id !== 'jump' || e.key !== 'Enter') return;
     const T = textByKey(S.readKey), k = T && findInText(T, e.target.value);
     if (k == null) { e.target.style.borderColor = '#b4532a'; return; }
+    if (studyOn()) { studyGo(T, P[k].para, {}); return; }
     S.readAt = k; renderRead(); writeHash();
   });
 
@@ -2179,6 +3123,23 @@ function wire() {
     tip.style.top = (e.clientY + 16) + 'px';
   });
 
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-enp]');
+    if (!b) return;
+    e.stopPropagation(); e.preventDefault();
+    enToggle(b);
+  }, true);
+  $('entog').addEventListener('click', () => { S.en = S.en ? '' : 'guyer'; enApply(); writeHash(); });
+  // a seminar tool opens inside the portal; a modified click still gets its own tab
+  document.addEventListener('click', e => {
+    if (e.target.closest('header [data-view], header [data-home], #toolback')) closeTool();
+    const a = e.target.closest('a[data-tool]');
+    if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault(); e.stopPropagation();
+    if (!$('modal').hidden) closeModal();
+    openTool(a.getAttribute('href'), a.dataset.tool);
+  }, true);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('modal').hidden) closeTool(); });
   $('share').addEventListener('click', () => {
     writeHash();
     const done = () => { $('share').textContent = 'Link copied'; setTimeout(() => { $('share').textContent = 'Copy link'; }, 1500); };
@@ -2188,9 +3149,37 @@ function wire() {
   window.addEventListener('hashchange', () => { readHash(); });
 }
 
+/* Opening a text to read. Meier and Baumgarten, and Kant's notes on either, always open as the
+   textbook with the notes beside it. `at` is a passage to open at, if any. */
+function openRead(key, at) {
+  let T = key && textByKey(key);
+  S.find = null;
+  S.tint = null;
+  S.noFix = false;
+  S.nsearch = '';
+  if (T && T.shape === 'refl' && T.on && textByKey(T.on)) {
+    const book = textByKey(T.on), note = at != null ? P[at] : null;
+    const para = note && note.paras && note.paras.length ? note.paras[0] : (TEXTS[book.idx].first != null ? P[book.first].para : 1);
+    const tp = passage(book.key, 'p' + para) || P[book.first];
+    S.readKey = book.key; S.readAt = tp.i; S.sel = tp.i; S.rtab = 'notes'; S.noteFocus = note ? note.i : null;
+    showView('read'); renderRail(); pushTrail();
+    return;
+  }
+  S.readKey = T ? T.key : null;
+  S.readAt = at;
+  if (T && isStudyText(T)) {
+    const tp = at != null ? P[at] : P[T.first];
+    S.sel = tp.i; S.readAt = tp.i; S.rtab = 'notes'; S.noteFocus = null;
+  } else if (at != null) S.rtab = 'conn';
+  showView('read');
+  renderRail();
+  if (S.readKey) pushTrail(); else writeHash();
+}
+
 /* A paragraph clicked in a full text: on the left, its connections open on the right; on the
    right, it becomes the passage in view. */
 function focusFromText(k, box) {
+  if (box && box.id === 'readtext' && studyOn()) { S.noteFocus = null; studyGo(TEXTS[P[k].t], P[k].para, {}); return; }
   S.sel = k;
   S.quote = null;
   if (box && box.id === 'readtext') { S.readAt = k; S.rtab = 'conn'; ftSetFocus(FT.readtext, k); renderRail(); }

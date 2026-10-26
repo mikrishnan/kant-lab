@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   Jin's list of the words his parallel passages leave out of the comparison
+   Jessie's list of the words Jessie's parallel passages leave out of the comparison
    PINNED COPY for the Logic Portal, made by build-pins.py on 2026-10-25
    from Individuals/Jin/logik-transcripts.html (its `STOP_RAW`).
    The declarations verbatim, wrapped in a function so their names stay private.

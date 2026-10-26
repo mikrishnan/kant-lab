@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   Jäsche Logik: which of Jesus La Paz's blocks make up each of Alex Li's, for his English translations
+   Jäsche Logik: which of Jesus La Paz's blocks make up each of Alex Li's, for Jesus's English translations
    PINNED COPY for the Logic Portal, made by build-pins.py on 2026-10-25
    from Individuals/Jesus-La-Paz/jaesche-logik-data.js, matched to Individuals/Alex Li/logik-jasche-9.js.
    PORTAL_PIN_JAESCHE_TR[alexBlockId] = { ids: [Jesus's block ids, in order], fit: 'exact' | 'part' }. The translations themselves stay in Individuals/Jesus-La-Paz/translations/.
