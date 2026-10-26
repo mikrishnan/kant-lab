@@ -8,6 +8,21 @@ Open [index.html](index.html). It loads every text in [catalogue.js](catalogue.j
 layer of the seminar's work beside them, indexes every word (about a second and a half),
 and then answers at once.
 
+## Finding your way
+
+Four places, along the top:
+- **Search** opens on one question box and the seminar's questions.
+- **Explore** gathers every starting point the seminar has built: its questions, the doctrines
+  classified passage by passage, and the three lexicons.
+- **Texts** lists the corpus.
+- **Contributors** lists who built what.
+
+A search's results have two tabs: **Overview**, with the phrasings and where they occur, and
+**Passages**. A passage opens in a reading pane on the right, which closes with ×. Each
+connection is a section there that opens and closes, with its answer in its heading, and the
+pane remembers which ones you keep open. The search options fold away under **Options**,
+with a one-line summary of how they are set.
+
 ## What it does
 
 - **Ask.** Type a word or phrase (`form* fals*`, `"satz des widerspruchs"`). The search

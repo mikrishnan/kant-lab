@@ -12,10 +12,12 @@
     --parchment: #f5efe0;
     --parchment-dark: #e8dfc8;
     --paper: #faf6ec;
+    --card: #fbf8f1;
     --accent: #5c3d1e;
     --accent-light: #8b5e3c;
     --faded: #7a6a52;
     --line: #d9ccb0;
+    --line-soft: #e8dec9;
     --hl: #f1d98c;
     --hl-strong: #e6b84a;
   }
@@ -27,8 +29,8 @@
     background: var(--parchment);
     color: var(--ink);
     font-family: 'EB Garamond', serif;
-    font-size: 16px;
-    line-height: 1.4;
+    font-size: 16.5px;
+    line-height: 1.45;
     display: flex;
     flex-direction: column;
   }
@@ -41,56 +43,55 @@
   .small { font-size: 0.86rem; }
   [hidden] { display: none !important; }
 
-  /* ── Header and trail ─────────────────────────────────────────────── */
+  /* ── Header: the portal's name, four places, and a link to the view ─── */
   header {
     display: flex;
     align-items: center;
-    gap: 1.4rem;
-    padding: 0.5rem 1.2rem;
-    background: var(--parchment-dark);
-    border-bottom: 1px solid var(--accent-light);
+    gap: 1.8rem;
+    padding: 0.6rem 1.6rem;
+    border-bottom: 1px solid var(--line);
   }
-
-  .brand { font-family: 'Cinzel', serif; color: var(--accent); white-space: nowrap; }
-  .brand a { text-decoration: none; color: var(--faded); font-size: 0.8rem; letter-spacing: 0.1em; }
-  .brand b { font-weight: 600; font-size: 1.15rem; letter-spacing: 0.04em; margin-left: 0.4rem; }
-
-  nav { display: flex; gap: 0.3rem; }
-  nav button, .btn {
-    font-family: 'Cinzel', serif;
-    font-size: 0.78rem;
-    letter-spacing: 0.06em;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: 0.3rem 0.7rem;
-    color: var(--accent);
-    cursor: pointer;
-  }
-  nav button:hover, .btn:hover { border-color: var(--accent-light); }
-  nav button.on { background: var(--accent); color: var(--parchment); }
-  .btn.solid { background: var(--accent); color: var(--parchment); }
+  .brand { display: flex; align-items: baseline; gap: 0.5rem; white-space: nowrap; }
+  .brand a { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.12em; color: var(--faded); text-decoration: none; }
+  .brand a:hover { color: var(--accent); }
+  .brand .slash { color: var(--line); }
+  .brand b { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.12rem; letter-spacing: 0.04em; color: var(--accent); cursor: pointer; }
+  nav { display: flex; gap: 1.2rem; }
+  nav button { background: none; border: none; border-bottom: 2px solid transparent; padding: 0.3rem 0; color: var(--faded); cursor: pointer; font-size: 1rem; }
+  nav button:hover { color: var(--accent); }
+  nav button.on { color: var(--accent); border-bottom-color: var(--accent); }
   header .spacer { flex: 1; }
-  #status { font-size: 0.85rem; color: var(--faded); font-style: italic; }
 
-  /* The route: a short bar of the last few steps, and a map of the whole route on demand */
+  .btn { font-size: 0.92rem; background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 0.18rem 0.85rem; color: var(--accent); cursor: pointer; }
+  .btn:hover { border-color: var(--accent-light); background: var(--card); }
+  .btn.solid { background: var(--accent); border-color: var(--accent); color: var(--parchment); }
+  .btn.solid:hover { background: #4a3017; }
+  .linkish { background: none; border: none; padding: 0; color: var(--faded); cursor: pointer; font-size: 0.9rem; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
+  .linkish:hover, .linkish.on { color: var(--accent); }
+
+  /* ── The route: the last few steps, and a map of the whole route on demand ─ */
   #trail {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    padding: 0.3rem 1.2rem;
-    border-bottom: 1px solid var(--line);
+    gap: 0.5rem;
+    padding: 0.28rem 1.6rem;
+    border-bottom: 1px solid var(--line-soft);
     font-size: 0.86rem;
-    overflow: hidden;
     white-space: nowrap;
-    min-height: 2.1rem;
+    overflow: hidden;
   }
-  #trail .lbl { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--faded); letter-spacing: 0.08em; margin-right: 0.2rem; }
-  #trail .nav { border: 1px solid var(--line); background: var(--paper); border-radius: 4px; padding: 0 0.45rem; cursor: pointer; color: var(--accent); line-height: 1.4; }
-  #trail .nav:disabled { opacity: 0.35; cursor: default; }
-  #trail .steps { display: flex; align-items: center; gap: 0.25rem; overflow: hidden; min-width: 0; flex: 1; }
-  #trail .more-steps { color: var(--faded); font-style: italic; font-size: 0.82rem; }
-  #trail .count { color: var(--faded); font-size: 0.82rem; }
+  #trail .lbl { font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.1em; color: var(--faded); }
+  #trail .nav { border: none; background: none; padding: 0 0.2rem; cursor: pointer; color: var(--accent); font-size: 1.1rem; line-height: 1; }
+  #trail .nav:disabled { opacity: 0.3; cursor: default; }
+  #trail .steps { display: flex; align-items: center; gap: 0.4rem; overflow: hidden; min-width: 0; flex: 1; }
+  #trail .step { cursor: pointer; color: var(--faded); max-width: 16rem; overflow: hidden; text-overflow: ellipsis; }
+  #trail .step:hover { color: var(--accent); }
+  #trail .step.cur { color: var(--ink); font-weight: 600; }
+  #trail .step.p { font-style: italic; }
+  #trail .sep { color: var(--line); }
+  #trail .more-steps { color: var(--faded); font-size: 0.8rem; }
+  #trail .count { color: var(--faded); font-size: 0.8rem; }
+  #trail .btn { padding: 0.02rem 0.65rem; font-size: 0.84rem; }
   #routemap { display: flex; border-bottom: 1px solid var(--line); background: var(--paper); padding: 0.35rem 0 0.5rem 1.2rem; }
   #routemap[hidden] { display: none; }
   #routemap .rm-labels { flex: none; }
@@ -107,136 +108,134 @@
   #routemap .hitcol { fill: transparent; cursor: pointer; }
   #routemap .hitcol:hover { fill: rgba(139, 94, 60, 0.08); }
   #tip { position: fixed; z-index: 30; background: var(--ink); color: var(--parchment); font-size: 0.82rem; line-height: 1.3; padding: 0.3rem 0.55rem; border-radius: 4px; pointer-events: none; max-width: 24rem; white-space: normal; }
-  #trail .step {
-    border: 1px solid var(--line);
-    background: var(--paper);
-    border-radius: 999px;
-    padding: 0.05rem 0.6rem;
-    cursor: pointer;
-    max-width: 18rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  #trail .step.cur { border-color: var(--accent-light); background: var(--parchment-dark); }
-  #trail .step.p { font-style: italic; }
-  #trail .sep { color: var(--accent-light); }
 
-  /* ── Two panes ────────────────────────────────────────────────────── */
-  #app { flex: 1; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); min-height: 0; }
-  #left { overflow: auto; padding: 1rem 1.5rem 4rem; }
-  #rail { overflow: auto; border-left: 1px solid var(--line); background: var(--paper); padding: 1rem 1.4rem 4rem; }
+  /* ── Two panes: questions on the left, the passage being read on the right ─ */
+  #app { flex: 1; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); min-height: 0; }
+  #app.no-rail { grid-template-columns: minmax(0, 1fr); }
+  #app.en:not(.no-rail) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
+  #left { overflow: auto; padding: 1.4rem 1.8rem 5rem; }
+  #left > div { max-width: 54rem; margin: 0 auto; }
+  #rail { overflow: auto; border-left: 1px solid var(--line); background: var(--card); padding: 1.1rem 1.6rem 5rem; container-type: inline-size; }
 
-  h2 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 1.15rem; letter-spacing: 0.03em; margin: 0 0 0.3rem; }
-  h3 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 0.82rem; letter-spacing: 0.07em; text-transform: uppercase; margin: 0 0 0.45rem; }
-  h3 .sub { text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', serif; font-weight: 400; font-style: italic; color: var(--faded); font-size: 0.92rem; margin-left: 0.3rem; }
+  h2 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 1.2rem; letter-spacing: 0.03em; margin: 0 0 0.25rem; }
+  h3 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 0.5rem; }
+  h3 .sub { text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', serif; font-weight: 400; font-style: italic; color: var(--faded); font-size: 0.9rem; margin-left: 0.4rem; }
+  .from { font-size: 0.8rem; color: var(--faded); font-style: italic; margin-top: 0.45rem; }
+  .from::before { content: 'From '; }
 
-  .from { font-size: 0.8rem; color: var(--faded); margin-top: 0.35rem; }
-  .from::before { content: 'From: '; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.07em; color: var(--accent); }
-
-  /* ── Ask ──────────────────────────────────────────────────────────── */
-  form#ask { background: var(--parchment-dark); border: 1px solid var(--accent-light); border-radius: 6px; padding: 0.7rem 0.8rem; }
-  .qrow { display: flex; gap: 0.5rem; }
-  #q {
-    flex: 1;
-    font-size: 1.15rem;
-    padding: 0.35rem 0.6rem;
-    border: 1px solid var(--accent-light);
-    border-radius: 4px;
-    background: var(--paper);
-  }
-  .opts { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; margin-top: 0.5rem; font-size: 0.92rem; align-items: center; }
-  .opts input[type=number] { width: 3.2rem; padding: 0.05rem 0.2rem; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); }
-  .opts input[type=text], .opts select { padding: 0.08rem 0.3rem; border: 1px solid var(--line); border-radius: 3px; background: var(--paper); }
-  #co { width: 12rem; }
-  .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.5rem; }
-  .chip {
-    border: 1px solid var(--accent-light);
-    background: var(--paper);
-    border-radius: 999px;
-    padding: 0.05rem 0.6rem;
-    font-size: 0.86rem;
-    cursor: pointer;
-  }
+  /* ── Search ─────────────────────────────────────────────────────────── */
+  form#ask { margin: 0 0 1.1rem; }
+  .qrow { display: flex; gap: 0.5rem; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 0.25rem 0.3rem 0.25rem 1.1rem; }
+  .qrow:focus-within { border-color: var(--accent-light); box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12); }
+  #q { flex: 1; border: none; background: transparent; font-size: 1.15rem; padding: 0.3rem 0; outline: none; min-width: 0; }
+  .qrow .btn.solid { padding: 0.35rem 1.3rem; font-size: 1rem; }
+  .optline { display: flex; gap: 1.1rem; align-items: baseline; margin: 0.5rem 1.1rem 0; font-size: 0.88rem; color: var(--faded); }
+  #optsum { flex: 1; font-style: italic; }
+  #opts, #help { margin: 0.6rem 0 0; background: var(--card); border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.75rem 1.1rem; font-size: 0.93rem; }
+  .opt-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.6rem; margin: 0.3rem 0; }
+  .opt-l { color: var(--faded); min-width: 4.5rem; }
+  #opts input[type=number] { width: 3.4rem; padding: 0.08rem 0.3rem; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); }
+  #opts input[type=text], #opts select { padding: 0.1rem 0.4rem; border: 1px solid var(--line); border-radius: 5px; background: var(--paper); }
+  #co { width: 13rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .chip { border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 0.02rem 0.65rem; font-size: 0.88rem; cursor: pointer; }
+  .chip:hover { border-color: var(--accent-light); }
   .chip.off { opacity: 0.45; text-decoration: line-through; }
-  .chip .lay { font-family: 'Cinzel', serif; font-size: 0.6rem; color: var(--faded); letter-spacing: 0.06em; margin-right: 0.25rem; }
-  details.help { margin-top: 0.45rem; font-size: 0.9rem; }
-  details.help summary { cursor: pointer; color: var(--accent); }
-  details.help code { background: var(--paper); padding: 0 0.25rem; border-radius: 2px; font-size: 0.85rem; }
+  .chip .lay { font-family: 'Cinzel', serif; font-size: 0.58rem; color: var(--faded); letter-spacing: 0.06em; margin-right: 0.3rem; }
+  #help p { margin: 0.3rem 0; }
+  #help code { background: var(--paper); padding: 0 0.25rem; border-radius: 3px; font-size: 0.86rem; }
 
-  #presets-box { margin-top: 0.8rem; }
-  #presets-box > summary { cursor: pointer; font-size: 0.74rem; letter-spacing: 0.07em; color: var(--accent); }
-  .presets { margin: 0.5rem 0 0.4rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 1rem; }
-  .presets .grp { min-width: 0; }
-  .presets .grp.wide { grid-column: 1 / -1; }
-  .presets .ph { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.25rem; }
-  .presets .ph i { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-size: 0.85rem; text-transform: none; }
-  .q-chip {
-    display: inline-block;
-    border: 1px solid var(--accent-light);
-    background: var(--paper);
-    border-radius: 5px;
-    padding: 0.15rem 0.55rem;
-    margin: 0 0.25rem 0.3rem 0;
-    cursor: pointer;
-    font-size: 0.93rem;
-    text-align: left;
-  }
-  .q-chip:hover, .chip:hover { background: var(--parchment-dark); }
-  .q-chip.on { background: var(--accent); color: var(--parchment); }
-  .presets select { width: 100%; padding: 0.15rem 0.3rem; border: 1px solid var(--accent-light); border-radius: 4px; background: var(--paper); }
+  /* ── Arriving: one question box, and where to start ─────────────────── */
+  #view-ask.home { padding-top: 7vh; }
+  #welcome h1 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.9rem; color: var(--accent); letter-spacing: 0.04em; margin: 0 0 0.2rem; text-align: center; }
+  #welcome p { text-align: center; color: var(--faded); font-style: italic; font-size: 1.1rem; margin: 0 0 1.5rem; }
+  .starts { margin-top: 2.2rem; }
+  .ph { font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.1em; color: var(--faded); margin: 0 0 0.6rem; }
+  .qcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.6rem; }
+  .qcard { text-align: left; background: var(--card); border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.75rem 0.95rem; cursor: pointer; font-size: 1rem; line-height: 1.3; color: var(--ink); }
+  .qcard:hover { border-color: var(--accent-light); background: var(--paper); }
+  .qcard.on { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+  .qcard .who { display: block; margin-top: 0.35rem; font-size: 0.84rem; color: var(--faded); font-style: italic; }
+  .qcard.static { cursor: default; }
+  .qcard select { width: 100%; margin-top: 0.55rem; padding: 0.2rem 0.4rem; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
+  .starts .qcards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .more-starts { color: var(--faded); font-size: 0.95rem; margin: 1rem 0 0; }
+  .home-foot { text-align: center; color: var(--faded); font-size: 0.85rem; margin-top: 3rem; }
+  .explore section { margin: 0 0 2.2rem; }
+  .explore .intro { color: var(--faded); font-style: italic; margin: 0.2rem 0 1.8rem; }
 
-  /* ── Results ──────────────────────────────────────────────────────── */
-  .res-head { margin: 1.1rem 0 0.6rem; }
-  .summary { font-size: 1.05rem; }
-  .note { font-style: italic; color: var(--faded); margin: 0.2rem 0 0; }
-  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 0.7rem 0.85rem; margin-bottom: 0.8rem; }
+  /* ── Results ────────────────────────────────────────────────────────── */
+  .res-head { margin: 0.2rem 0 0.4rem; }
+  .res-title { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 1.22rem; letter-spacing: 0.02em; line-height: 1.3; }
+  .summary { font-size: 1.02rem; margin-top: 0.2rem; }
+  .note { font-style: italic; color: var(--faded); margin: 0.4rem 0 0; font-size: 0.95rem; max-width: 46rem; }
+  .tabs { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--line); margin: 0.9rem 0 1.1rem; }
+  .tabs button { background: none; border: none; border-bottom: 2px solid transparent; padding: 0.35rem 0; margin-bottom: -1px; color: var(--faded); cursor: pointer; font-size: 1.02rem; }
+  .tabs button:hover { color: var(--accent); }
+  .tabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
+  .tabs .n { font-size: 0.82rem; color: var(--faded); margin-left: 0.3rem; }
+  .card { background: var(--card); border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.9rem 1.05rem; margin-bottom: 1.1rem; }
 
-  table.loc { width: 100%; border-collapse: collapse; font-size: 0.93rem; }
-  table.loc th { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.64rem; letter-spacing: 0.05em; color: var(--accent); text-align: right; padding: 0.15rem 0.3rem; border-bottom: 1px solid var(--line); vertical-align: bottom; }
+  table.loc { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  table.loc th { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.62rem; letter-spacing: 0.05em; color: var(--faded); text-align: right; padding: 0.2rem 0.35rem; border-bottom: 1px solid var(--line-soft); vertical-align: bottom; }
   table.loc th:first-child { text-align: left; }
-  table.loc td { padding: 0.15rem 0.3rem; border-bottom: 1px dotted var(--line); text-align: right; font-variant-numeric: tabular-nums; }
+  table.loc td { padding: 0.22rem 0.35rem; border-bottom: 1px solid var(--line-soft); text-align: right; font-variant-numeric: tabular-nums; }
+  table.loc tr:last-child td { border-bottom: none; }
   table.loc td:first-child { text-align: left; }
   table.loc tr.row { cursor: pointer; }
-  table.loc tr.row:hover td { background: var(--parchment); }
+  table.loc tr.row:hover td { background: var(--paper); }
   table.loc tr.sel td { background: var(--hl); }
   table.loc td.z { color: var(--line); }
   table.loc td.tot { font-weight: 600; color: var(--accent); }
-  .var { font-size: 0.78rem; color: var(--faded); font-style: italic; margin-left: 0.3rem; }
+  .var { font-size: 0.78rem; color: var(--faded); font-style: italic; margin-left: 0.35rem; }
   .phr { font-style: italic; }
 
-  .dist { display: grid; grid-template-columns: auto 1fr auto; gap: 0.2rem 0.6rem; align-items: center; font-size: 0.92rem; }
+  .dist { display: grid; grid-template-columns: auto 1fr auto; gap: 0.3rem 0.7rem; align-items: center; font-size: 0.93rem; }
   .dist .nm { white-space: nowrap; }
-  .dist .nm .d { color: var(--faded); font-size: 0.82rem; margin-left: 0.3rem; }
-  .dist .bar { height: 0.7rem; background: var(--parchment-dark); border-radius: 2px; position: relative; overflow: hidden; }
-  .dist .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent-light); border-radius: 2px; }
-  .dist .num { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--faded); font-size: 0.85rem; }
+  .dist .nm .d { color: var(--faded); font-size: 0.82rem; margin-left: 0.35rem; }
+  .dist .bar { height: 0.6rem; background: var(--parchment); border-radius: 3px; position: relative; overflow: hidden; }
+  .dist .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent-light); border-radius: 3px; }
+  .dist .num { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--faded); font-size: 0.86rem; }
   .dist .num b { color: var(--ink); font-weight: 600; }
   .dist .zero { color: var(--line); }
 
-  .tgroup { margin-top: 0.7rem; }
-  .tgroup > .th { font-family: 'Cinzel', serif; font-size: 0.78rem; letter-spacing: 0.05em; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: 0.15rem; margin-bottom: 0.35rem; }
-  .tgroup > .th span { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-size: 0.88rem; margin-left: 0.4rem; }
-  .hit { padding: 0.3rem 0.45rem; border-radius: 4px; cursor: pointer; border-left: 3px solid transparent; }
-  .hit:hover { background: var(--parchment); border-left-color: var(--accent-light); }
-  .hit.sel { background: var(--parchment-dark); border-left-color: var(--accent); }
-  .hit .cite { font-size: 0.8rem; color: var(--faded); }
+  .tgroup { margin-top: 1.2rem; }
+  .tgroup:first-child { margin-top: 0.2rem; }
+  .tgroup > .th { font-family: 'Cinzel', serif; font-size: 0.76rem; letter-spacing: 0.06em; color: var(--accent); padding-bottom: 0.25rem; margin-bottom: 0.1rem; border-bottom: 1px solid var(--line); }
+  .tgroup > .th span { font-family: 'EB Garamond', serif; letter-spacing: 0; color: var(--faded); font-size: 0.88rem; margin-left: 0.45rem; }
+  .hit { padding: 0.6rem 0.7rem; cursor: pointer; border-left: 3px solid transparent; border-bottom: 1px solid var(--line-soft); }
+  .hit:last-child { border-bottom: none; }
+  .hit:hover { background: var(--card); border-left-color: var(--accent-light); }
+  .hit.sel { background: var(--card); border-left-color: var(--accent); }
+  .hit .cite { font-size: 0.82rem; color: var(--faded); margin-bottom: 0.1rem; }
   .hit .cite b { color: var(--accent); font-weight: 600; }
-  .hit .kw { font-size: 0.97rem; }
+  .hit .kw { font-size: 1rem; }
   mark { background: var(--hl); color: inherit; padding: 0 0.05rem; border-radius: 2px; }
   mark.on { background: var(--hl-strong); }
-  .more { margin: 0.3rem 0 0 0.45rem; }
-  .filterbar { background: var(--hl); border-radius: 4px; padding: 0.2rem 0.5rem; margin-bottom: 0.4rem; font-size: 0.9rem; }
-
+  .more { margin: 0.5rem 0 0 0.7rem; }
+  .filterbar { background: var(--hl); border-radius: 6px; padding: 0.25rem 0.7rem; margin-bottom: 0.6rem; font-size: 0.92rem; display: inline-block; }
   .empty { color: var(--faded); font-style: italic; padding: 0.6rem 0; }
+  .kchips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.6rem 0 1rem; }
+  .kchip { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 0.1rem 0.75rem; cursor: pointer; font-size: 0.93rem; }
+  .kchip:hover { border-color: var(--accent-light); }
+  .kchip b { font-weight: 600; color: var(--accent); margin-left: 0.35rem; font-variant-numeric: tabular-nums; }
+  .kchip.on { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  .kchip.on b { color: var(--parchment); }
+  details.bytext { margin: -0.2rem 0 1.2rem; }
+  details.bytext > summary { cursor: pointer; color: var(--faded); font-size: 0.9rem; }
+  details.bytext > .card { margin-top: 0.5rem; }
 
   /* Nik Land's views of his examples: the square of opposition, the table of judgments */
   .sq-card { container-type: inline-size; }
   .sq-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 12.5rem; gap: 0.9rem; align-items: start; }
+  .q-chip { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 0.15rem 0.6rem; cursor: pointer; text-align: left; }
+  .q-chip:hover { border-color: var(--accent-light); }
+  .q-chip.on { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
   @container (max-width: 44rem) {
     .sq-wrap { grid-template-columns: minmax(0, 1fr); }
-    .sq-side { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-    .sq-side .ph { flex-basis: 100%; margin: 0.2rem 0 0 !important; }
-    .sq-side .q-chip { width: auto; margin: 0; }
+    .sq-card .sq-side { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .sq-card .sq-side .ph { flex-basis: 100%; margin: 0.35rem 0 0 !important; }
+    .sq-card .sq-side .q-chip { width: auto; margin: 0; border-radius: 999px; }
   }
   .sq svg { width: 100%; height: auto; display: block; }
   .sq .edge { stroke: var(--accent-light); stroke-width: 1.5; }
@@ -285,55 +284,59 @@
   .swatch { display: inline-block; width: 1.4rem; height: 0.55rem; border-radius: 2px; vertical-align: middle; margin-right: 0.3rem; }
   .warn { color: #8a3b12; }
 
-  /* ── Rail: one passage and everything connected to it ─────────────── */
-  .rail-empty { color: var(--faded); font-style: italic; margin-top: 2rem; }
-  .rail-empty h2 { font-style: normal; }
-  .rail-empty ol { padding-left: 1.2rem; }
-  .ptitle { font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.8rem; letter-spacing: 0.06em; }
-  .pcite { font-size: 1.25rem; font-weight: 600; color: var(--accent); margin: 0.05rem 0; }
-  .pmeta { font-size: 0.88rem; color: var(--faded); }
-  .layer { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.08em; border: 1px solid var(--accent-light); border-radius: 3px; padding: 0 0.3rem; color: var(--accent); margin-right: 0.4rem; vertical-align: 1px; }
-  .ptext { background: var(--parchment); border: 1px solid var(--line); border-radius: 5px; padding: 0.6rem 0.75rem; margin: 0.6rem 0 0.9rem; white-space: pre-wrap; font-size: 1.02rem; max-height: 22rem; overflow: auto; }
-  .ptext.short { max-height: 9rem; }
-  .pactions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.9rem; margin-top: 0.35rem; font-size: 0.86rem; }
-  .pactions .btn { border-color: var(--accent-light); padding: 0.12rem 0.5rem; font-size: 0.7rem; }
-  .pactions .btn.on { background: var(--accent); color: var(--parchment); }
+  /* ── The reading pane: one passage, and what hangs on it ─────────────── */
+  .rhead { display: flex; align-items: center; gap: 0.5rem; }
+  .rwork { flex: 1; font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.76rem; letter-spacing: 0.06em; }
+  .rclose { background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--faded); cursor: pointer; padding: 0 0.15rem; }
+  .rclose:hover { color: var(--accent); }
+  .pcite { font-size: 1.35rem; font-weight: 600; color: var(--accent); margin: 0.1rem 0 0; }
+  .pmeta { font-size: 0.9rem; color: var(--faded); }
+  .layer { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.08em; border: 1px solid var(--accent-light); border-radius: 4px; padding: 0 0.3rem; color: var(--accent); margin-right: 0.45rem; vertical-align: 1px; }
+  .pactions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 1rem; margin-top: 0.55rem; font-size: 0.88rem; }
+  .pactions .btn { padding: 0.02rem 0.65rem; font-size: 0.84rem; }
+  .pactions .btn.on { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
   .pactions a { color: var(--faded); }
   .pactions a:hover { color: var(--accent); }
-  /* English beside the German: two columns when the rail has the room, one above the other when not.
-     While English is on the rail takes the larger share of the window. */
-  #app.en { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
-  #rail { container-type: inline-size; }
-  .pair { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 0.7rem; }
+  .ptext { background: var(--paper); border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.85rem 1rem; margin: 0.75rem 0 0.7rem; white-space: pre-wrap; font-size: 1.04rem; line-height: 1.52; max-height: 24rem; overflow: auto; }
+  .pair { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 0.8rem; }
   @container (min-width: 36rem) { .pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
   .pair .ptext { margin-bottom: 0.4rem; }
-  .pen { border: 1px dashed var(--accent-light); border-radius: 5px; padding: 0.5rem 0.75rem; margin: 0.6rem 0 0.4rem; font-size: 1rem; max-height: 22rem; overflow: auto; }
+  .pen { border: 1px dashed var(--accent-light); border-radius: 10px; padding: 0.6rem 0.85rem; margin: 0.75rem 0 0.4rem; font-size: 1rem; max-height: 24rem; overflow: auto; }
   .pen .tt { white-space: pre-wrap; }
-  .pen .lab { font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.2rem; }
+  .pen .lab { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.25rem; }
   .pen .lab i { font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: 0.82rem; color: var(--faded); text-transform: none; }
   .pen ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.86rem; color: var(--faded); }
   .pen .empty { padding: 0.2rem 0; }
-  .trwarn { font-size: 0.82rem; color: #7a4a14; font-style: italic; margin: 0.15rem 0; }
-  .conn { border-top: 1px solid var(--line); padding-top: 0.65rem; margin-top: 0.75rem; }
-  .conn h3 { margin-bottom: 0.3rem; }
-  .how { font-size: 0.86rem; color: var(--faded); font-style: italic; }
-  .tier { font-size: 0.82rem; border-radius: 3px; padding: 0 0.3rem; margin-left: 0.3rem; font-style: normal; }
-  .tier.stated { background: #dfe8d2; color: #34501f; }
-  .tier.inferred { background: #f0e1c8; color: #7a4a14; border: 1px dashed #c9a46b; }
-  .tier.interp { background: #f0e1c8; color: #7a4a14; border: 1px dashed #c9a46b; }
+  .trwarn { font-size: 0.82rem; color: #7a4a14; font-style: italic; margin: 0.15rem 0 0.6rem; }
+  details.sec { border-top: 1px solid var(--line-soft); }
+  details.sec > summary { list-style: none; display: flex; align-items: baseline; gap: 0.55rem; padding: 0.65rem 0; cursor: pointer; }
+  details.sec > summary::-webkit-details-marker { display: none; }
+  details.sec > summary::before { content: '›'; color: var(--accent-light); display: inline-block; width: 0.6rem; transition: transform 0.15s; font-size: 1.05rem; line-height: 1; }
+  details.sec[open] > summary::before { transform: rotate(90deg); }
+  details.sec > summary:hover .st { color: var(--ink); }
+  .sec .st { font-family: 'Cinzel', serif; font-size: 0.74rem; letter-spacing: 0.07em; color: var(--accent); text-transform: uppercase; }
+  .sec .sv { color: var(--ink); }
+  .sec .cnt { color: var(--faded); font-size: 0.86rem; margin-left: auto; font-variant-numeric: tabular-nums; }
+  .sec .body { padding: 0 0 0.9rem 1.15rem; }
+  .how { font-size: 0.88rem; color: var(--faded); font-style: italic; margin-top: 0.2rem; }
+  .tier { font-size: 0.8rem; border-radius: 4px; padding: 0 0.35rem; margin-left: 0.35rem; font-style: normal; }
+  .tier.stated { background: #e3ead8; color: #34501f; }
+  .tier.inferred, .tier.interp { background: #f3e6cf; color: #7a4a14; border: 1px dashed #c9a46b; }
   .lnk { cursor: pointer; color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent-light); text-underline-offset: 2px; }
   .lnk:hover { color: var(--ink); }
-  .preview { font-size: 0.93rem; margin: 0.25rem 0 0.1rem; }
-  ul.items { list-style: none; padding: 0; margin: 0.2rem 0; }
-  ul.items li { padding: 0.22rem 0.35rem; border-radius: 4px; cursor: pointer; font-size: 0.93rem; }
-  ul.items li:hover { background: var(--parchment); }
-  ul.items li .c { font-size: 0.8rem; color: var(--accent); font-weight: 600; margin-right: 0.35rem; }
-  ul.items li .d { font-size: 0.78rem; color: var(--faded); margin-left: 0.3rem; }
-  .ann { background: var(--parchment); border-radius: 4px; padding: 0.35rem 0.5rem; margin: 0.3rem 0; font-size: 0.92rem; }
-  .ann .lab { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.06em; color: var(--accent); }
-  .trad { margin: 0.3rem 0; font-size: 0.92rem; }
+  .preview { font-size: 0.95rem; margin: 0.45rem 0 0.1rem; color: #3a2c1a; }
+  ul.items { list-style: none; padding: 0; margin: 0.1rem 0; }
+  ul.items li { padding: 0.3rem 0.45rem; border-radius: 6px; cursor: pointer; font-size: 0.94rem; margin-left: -0.45rem; }
+  ul.items li:hover { background: var(--paper); }
+  ul.items li .c { font-size: 0.8rem; color: var(--accent); font-weight: 600; margin-right: 0.4rem; }
+  ul.items li .d { font-size: 0.78rem; color: var(--faded); margin-left: 0.35rem; }
+  .sub-h { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.07em; color: var(--faded); margin: 0.55rem 0 0.1rem; }
+  .ann { background: var(--paper); border-radius: 8px; padding: 0.45rem 0.65rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  .ann .lab { font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.06em; color: var(--accent); }
+  .ann .from { margin-top: 0.2rem; }
+  .trad { margin: 0.35rem 0 0.6rem; font-size: 0.93rem; }
   .trad b { color: var(--accent); font-weight: 600; }
-  .dives a { display: inline-block; margin: 0 0.6rem 0.2rem 0; font-size: 0.92rem; }
+  .dives a { display: inline-block; margin: 0 0.8rem 0.25rem 0; font-size: 0.94rem; }
 
   /* ── Texts and Contributors ───────────────────────────────────────── */
   table.cat { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin-top: 0.4rem; }
@@ -360,59 +363,65 @@
 <body>
 
 <header>
-  <div class="brand"><a href="../../../index.html">KANT LAB</a><b>The Logic Portal</b></div>
+  <div class="brand"><a href="../../../index.html">KANT LAB</a><span class="slash">/</span><b data-home="1" title="Back to the start">The Logic Portal</b></div>
   <nav>
-    <button type="button" data-view="ask" class="on">Ask</button>
+    <button type="button" data-view="ask" class="on">Search</button>
+    <button type="button" data-view="explore">Explore</button>
     <button type="button" data-view="texts">Texts</button>
     <button type="button" data-view="people">Contributors</button>
   </nav>
   <span class="spacer"></span>
-  <span id="status"></span>
   <button type="button" class="btn" id="share" title="Copy a link to exactly this view">Copy link</button>
 </header>
 
-<div id="trail"><span class="lbl">ROUTE</span><span class="muted small">Your route through the corpus appears here.</span></div>
+<div id="trail" hidden></div>
 <div id="routemap" hidden></div>
 <div id="tip" hidden></div>
 
-<div id="app">
+<div id="app" class="no-rail">
   <section id="left">
 
     <div id="view-ask">
+      <div id="welcome" hidden>
+        <h1>The Logic Portal</h1>
+        <p>Ask the whole logic corpus a question: Meier, Baumgarten, Kant’s notes, the lectures and Jäsche, all at once.</p>
+      </div>
       <form id="ask" autocomplete="off">
         <div class="qrow">
-          <input id="q" type="search" spellcheck="false" placeholder="A term or phrase: try  form* fals*  or  &quot;satz des widerspruchs&quot;">
+          <input id="q" type="search" spellcheck="false" placeholder="A word or phrase, e.g.  form* fals*  or  &quot;satz des widerspruchs&quot;">
           <button type="submit" class="btn solid">Ask</button>
         </div>
-        <div class="opts">
-          <label>Words within <input id="w" type="number" min="0" max="40" value="5"> of each other</label>
-          <label>Passages <select id="cm"><option value="">all</option><option value="with">that also mention</option><option value="without">that do not mention</option></select>
-            <input id="co" type="text" spellcheck="false" placeholder="e.g. transcend*"></label>
-          <label><input id="merge" type="checkbox" checked> merge spelling variants</label>
+        <div class="optline">
+          <button type="button" class="linkish" id="opt-toggle">Options</button>
+          <span id="optsum"></span>
+          <button type="button" class="linkish" id="help-toggle">How to ask</button>
         </div>
-        <div class="chips" id="textchips"></div>
-        <details class="help">
-          <summary>How to ask</summary>
+        <div id="opts" hidden>
+          <div class="opt-row"><span class="opt-l">Nearness</span><label>words within <input id="w" type="number" min="0" max="40" value="5"> of each other</label></div>
+          <div class="opt-row"><span class="opt-l">Filter</span><label>passages <select id="cm"><option value="">all</option><option value="with">that also mention</option><option value="without">that do not mention</option></select></label>
+            <input id="co" type="text" spellcheck="false" placeholder="e.g. transcend*"></div>
+          <div class="opt-row"><span class="opt-l">Spelling</span><label><input id="merge" type="checkbox" checked> count spelling variants as one phrasing</label></div>
+          <div class="opt-row"><span class="opt-l">Texts</span><div class="chips" id="textchips"></div></div>
+        </div>
+        <div id="help" hidden>
           <p><code>falsch</code> finds the word in every spelling the texts use: <i>Urtheil</i> and <i>Urteil</i>,
           <i>Wiederspruch</i> and <i>Widerspruch</i>, <i>Principium</i> and <i>Prinzip</i>, <i>Saz</i> and <i>Satz</i>, are one word to the search.
           <code>fals*</code> finds every word that begins so. Several words, <code>form* fals*</code>, find places where they stand
-          within the chosen number of words of each other, in any order. Quotation marks, <code>"der form nach"</code>, keep words together and in order.
+          near each other, in any order. Quotation marks, <code>"der form nach"</code>, keep words together and in order.
           <code>OR</code> joins alternatives. A regular expression between slashes, <code>/formali?ter/</code>, is matched against the text as printed.</p>
-          <p>The <b>Phrasings</b> table lists every distinct wording the search found, with how often each occurs in each text.
-          Click a phrasing to see only its passages. Click a passage to open it on the right, with the textbook § it belongs to,
-          Kant's notes there, and the other texts on the same §.</p>
-        </details>
+          <p><b>Overview</b> shows every distinct phrasing the search found and where it occurs; <b>Passages</b> lists them.
+          Open a passage to see the textbook § it belongs to, Kant’s notes there, and the other texts on the same §.</p>
+        </div>
       </form>
-
-      <details id="presets-box" open><summary class="cz">Questions, doctrines and lexicons</summary><div class="presets" id="presets"></div></details>
       <div id="results"></div>
     </div>
 
+    <div id="view-explore" hidden></div>
     <div id="view-texts" hidden></div>
     <div id="view-people" hidden></div>
   </section>
 
-  <aside id="rail"></aside>
+  <aside id="rail" hidden></aside>
 </div>
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
@@ -540,9 +549,12 @@ const DOCS = {};                  // doctrine key → { groups: [[key,label]], i
 const S = {                       // what the user is looking at; mirrored in the URL
   view: 'ask', q: '', w: 5, co: '', cm: '', merge: true, off: new Set(),
   loc: null, d: null, sel: null, quote: null, preset: null, expand: new Set(),
+  tab: 'overview',                // results: 'overview' (phrasings, where) or 'passages'
+  secOpen: new Set(), secClosed: new Set(),   // reading-pane sections the reader opened or closed
   en: '',                         // the English shown beside the German: a PORTAL_TR_STYLES key, or '' for none
 };
 let RESULT = null;
+let LOAD_FAILED = [];
 const TRAIL = [];
 let trailPos = -1;
 
@@ -602,12 +614,10 @@ async function boot() {
   console.info('Logic Portal: files loaded in ' + Math.round(t1 - t0) + ' ms, indexed in ' + Math.round(performance.now() - t1) + ' ms');
 
   $('loading').hidden = true;
-  $('status').textContent = P.length.toLocaleString('en') + ' passages · ' +
-    TEXTS.reduce((a, t) => a + t.words, 0).toLocaleString('en') + ' words · ' + TEXTS.length + ' texts' +
-    (failed.length ? ' · could not load: ' + failed.join(', ') : '');
+  LOAD_FAILED = failed;
   if (failed.length) console.warn('Not loaded:', failed);
 
-  renderPresets();
+  renderExplore();
   renderTextChips();
   readHash();
   wire();
@@ -1024,38 +1034,54 @@ function summarise(R) {
    RENDERING: the Ask pane
    ════════════════════════════════════════════════════════════════════════ */
 
-function renderPresets() {
-  let h = '<div class="grp wide"><div class="ph">QUESTIONS FROM THE SEMINAR</div>' +
-    SEMINAR.map(s => '<button type="button" class="q-chip" data-seminar="' + s.key + '">' + esc(s.label) + '</button>').join('') + '</div>';
+function statusText() {
+  return P.length.toLocaleString('en') + ' passages · ' + TEXTS.reduce((a, t) => a + t.words, 0).toLocaleString('en') + ' words · ' + TEXTS.length + ' texts' +
+    (LOAD_FAILED.length ? ' · could not load: ' + LOAD_FAILED.join(', ') : '');
+}
+
+const seminarCards = () => SEMINAR.map(s => '<button type="button" class="qcard" data-seminar="' + s.key + '">' + esc(s.label) + '</button>').join('');
+
+/* Arriving: one question box (in the page), and the seminar's questions to start from. */
+function renderHome(box) {
+  box.innerHTML = '<div class="starts"><div class="ph">START FROM A QUESTION THE SEMINAR ASKED</div><div class="qcards">' + seminarCards() + '</div>' +
+    '<p class="more-starts">Or <span class="lnk" data-view="explore">explore</span> what the seminar has classified: the kinds of inference and judgment, the logical principles, the lectures’ concepts.</p></div>' +
+    '<div class="home-foot">' + esc(statusText()) + '</div>';
+}
+
+/* Explore: every starting point the seminar has built, in one place. */
+function renderExplore() {
+  let h = '<div class="explore"><h2>Explore</h2><p class="intro">Starting points the seminar has built. Each opens in Search, ready to follow into the texts.</p>';
+  h += '<section><div class="ph">QUESTIONS THE SEMINAR HAS ASKED</div><div class="qcards">' + seminarCards() + '</div></section>';
   const docs = DOCTRINES.filter(d => DOCS[d.key] && DOCS[d.key].items.length);
-  if (docs.length) h += '<div class="grp wide"><div class="ph">DOCTRINES THE SEMINAR HAS CLASSIFIED <i>passage by passage</i></div>' +
-    docs.map(d => '<button type="button" class="q-chip" data-doc="' + d.key + '">' + esc(d.label) + ' <span class="muted small">· ' + esc(personName(d.who)) + '</span></button>').join('') + '</div>';
+  const extra = { immediate: ' · with the square of opposition', judgement: ' · with the table of judgments' };
+  if (docs.length) h += '<section><div class="ph">DOCTRINES, CLASSIFIED PASSAGE BY PASSAGE</div><div class="qcards">' +
+    docs.map(d => '<button type="button" class="qcard" data-doc="' + d.key + '">' + esc(d.label) +
+      '<span class="who">' + DOCS[d.key].items.length + ' passages · ' + esc(personName(d.who)) + (extra[d.key] || '') + '</span></button>').join('') + '</div></section>';
+  const cards = [];
   const lex = LAYERS.principles;
   if (lex) {
     const groups = getGlobal('PRINCIPLE_GROUPS') || {};
     const byG = {};
     lex.forEach(pr => { (byG[pr.group] = byG[pr.group] || []).push(pr); });
-    h += '<div class="grp"><div class="ph">LOGICAL PRINCIPLES <i>Feng’s lexicon</i></div><select id="sel-principle"><option value="">Choose a principle…</option>' +
-      Object.keys(byG).map(g => '<optgroup label="' + esc(groupName(groups, g)) + '">' + byG[g].map(pr => '<option value="' + esc(pr.id) + '">' + esc(pr.en) + '</option>').join('') + '</optgroup>').join('') +
-      '</select></div>';
+    cards.push('<div class="qcard static">The logical principles<span class="who">Feng’s lexicon: each searches every form the texts attest</span><select id="sel-principle"><option value="">Choose a principle…</option>' +
+      Object.keys(byG).map(g => '<optgroup label="' + esc(groupName(groups, g)) + '">' + byG[g].map(pr => '<option value="' + esc(pr.id) + '">' + esc(pr.en) + '</option>').join('') + '</optgroup>').join('') + '</select></div>');
   }
   const jin = LAYERS.concepts;
   if (jin) {
     const byG = {};
     jin.forEach(c => { (byG[c.group] = byG[c.group] || []).push(c); });
-    h += '<div class="grp"><div class="ph">CONCEPTS OF THE LECTURES <i>Jin’s list</i></div><select id="sel-concept"><option value="">Choose a concept…</option>' +
-      Object.keys(byG).map(g => '<optgroup label="' + esc(g) + '">' + byG[g].map(c => '<option value="' + esc(c.id) + '">' + esc(c.label) + '</option>').join('') + '</optgroup>').join('') +
-      '</select></div>';
+    cards.push('<div class="qcard static">Concepts of the lectures<span class="who">Jin’s list, with the wordings of each</span><select id="sel-concept"><option value="">Choose a concept…</option>' +
+      Object.keys(byG).map(g => '<optgroup label="' + esc(g) + '">' + byG[g].map(c => '<option value="' + esc(c.id) + '">' + esc(c.label) + '</option>').join('') + '</optgroup>').join('') + '</select></div>');
   }
   const forms = LAYERS.forms;
   if (forms) {
     const byG = {};
     forms.forEach(f => { (byG[f.group] = byG[f.group] || []).push(f); });
-    h += '<div class="grp"><div class="ph">FORMS OF JUDGMENT <i>Aidan’s terms</i></div><select id="sel-form"><option value="">Choose a form…</option>' +
-      Object.keys(byG).map(g => '<optgroup label="' + esc(g) + '">' + byG[g].map(f => '<option value="' + esc(f.id) + '">' + esc(f.en + ' (' + f.de + ', ' + f.la + ')') + '</option>').join('') + '</optgroup>').join('') +
-      '</select></div>';
+    cards.push('<div class="qcard static">Forms of judgment<span class="who">Aidan Chong’s terms for each form</span><select id="sel-form"><option value="">Choose a form…</option>' +
+      Object.keys(byG).map(g => '<optgroup label="' + esc(g) + '">' + byG[g].map(f => '<option value="' + esc(f.id) + '">' + esc(f.en + ' (' + f.de + ', ' + f.la + ')') + '</option>').join('') + '</optgroup>').join('') + '</select></div>');
   }
-  $('presets').innerHTML = h;
+  if (cards.length) h += '<section><div class="ph">LEXICONS</div><div class="qcards">' + cards.join('') + '</div></section>';
+  $('view-explore').innerHTML = h + '</div>';
 }
 function groupName(groups, g) {
   const v = groups[g] || (Array.isArray(groups) ? groups.find(x => String(x.id || x.key) === String(g)) : null);
@@ -1074,75 +1100,82 @@ function syncForm() {
   $('co').value = S.co;
   $('cm').value = S.cm;
   $('merge').checked = S.merge;
-  document.querySelectorAll('[data-seminar]').forEach(b => b.classList.toggle('on', S.preset && S.preset.key === b.dataset.seminar));
+  document.querySelectorAll('[data-seminar]').forEach(b => b.classList.toggle('on', !!(S.preset && S.preset.key === b.dataset.seminar)));
   document.querySelectorAll('[data-doc]').forEach(b => b.classList.toggle('on', S.d === b.dataset.doc));
   renderTextChips();
+  updateOptSum();
+}
+
+/* One quiet line saying what the options are set to, so that they can stay folded away. */
+function updateOptSum() {
+  const bits = ['words within ' + S.w];
+  if (S.cm && S.co.trim()) bits.push((S.cm === 'with' ? 'also mentioning ' : 'not mentioning ') + S.co.trim());
+  if (!S.merge) bits.push('spellings kept apart');
+  bits.push(S.off.size ? (TEXTS.length - S.off.size) + ' of ' + TEXTS.length + ' texts' : 'all ' + TEXTS.length + ' texts');
+  $('optsum').textContent = bits.join(' · ');
 }
 
 function renderResults() {
   const box = $('results');
+  const home = !S.d && !S.q.trim();
+  $('view-ask').classList.toggle('home', home);
+  $('welcome').hidden = !home;
   if (S.d) return renderDoctrine(box);
-  if (!S.q.trim()) {
-    box.innerHTML = '<div class="empty">Ask about a term or a phrase, or pick one of the seminar’s questions above.</div>';
-    return;
-  }
+  if (home) return renderHome(box);
   RESULT = runQuery();
   const R = RESULT;
   if (!R) { box.innerHTML = '<div class="empty">Nothing to look for in that question.</div>'; return; }
   const nPass = R.byPass.size, nTexts = R.byText.size;
   const shown = TEXTS.filter(t => !S.off.has(t.key));
-  let h = '<div class="res-head">';
-  if (S.preset) h += '<h2>' + esc(S.preset.label) + '</h2>';
-  h += '<div class="summary"><b>' + R.matches.length.toLocaleString('en') + '</b> occurrence' + (R.matches.length === 1 ? '' : 's') +
-    ' in <b>' + nPass.toLocaleString('en') + '</b> passage' + (nPass === 1 ? '' : 's') + ', in ' + nTexts + ' of ' + shown.length + ' texts';
-  if (S.cm && S.co.trim()) h += ' · only passages that ' + (S.cm === 'with' ? 'also mention' : 'do not mention') + ' <i>' + esc(S.co) + '</i> (' +
-    (S.cm === 'with' ? R.coWith + ' do, ' + R.coWithout + ' do not' : R.coWithout + ' do not, ' + R.coWith + ' do') + ')';
+  let h = '<div class="res-head"><div class="res-title">' + esc(S.preset ? S.preset.label : '“' + S.q + '”') + '</div>' +
+    '<div class="summary"><b>' + R.matches.length.toLocaleString('en') + '</b> occurrence' + (R.matches.length === 1 ? '' : 's') +
+    ' in <b>' + nPass.toLocaleString('en') + '</b> passage' + (nPass === 1 ? '' : 's') + ' · ' + nTexts + ' of ' + shown.length + ' texts';
+  if (S.cm && S.co.trim()) h += ' · only passages that ' + (S.cm === 'with' ? 'also mention' : 'do not mention') + ' <i>' + esc(S.co) + '</i>';
   h += '</div>';
   if (R.bad.length) h += '<div class="warn small">Not a regular expression the browser accepts: ' + R.bad.map(esc).join(', ') + '</div>';
   if (S.preset && S.preset.note) h += '<p class="note">' + esc(S.preset.note) + '</p>';
   if (S.preset && S.preset.who) h += '<div class="from">' + esc(S.preset.credit) + '</div>';
   h += '</div>';
+  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">No passage has it. Try a * to widen a word, or allow more words between.</div>'; return; }
 
-  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">No passage has it. Try a * to widen a word, or more words between.</div>'; return; }
+  const tab = S.tab === 'passages' ? 'passages' : 'overview';
+  h += '<div class="tabs"><button type="button" data-tab="overview"' + (tab === 'overview' ? ' class="on"' : '') + '>Overview</button>' +
+    '<button type="button" data-tab="passages"' + (tab === 'passages' ? ' class="on"' : '') + '>Passages<span class="n">' + nPass.toLocaleString('en') + '</span></button></div>';
 
-  // Phrasings
-  const cols = TEXTS.filter(t => R.byText.has(t.idx));
-  const LIM = S.expand.has('locs') ? 1e9 : 25;
-  h += '<section class="card"><h3>Phrasings<span class="sub">every distinct wording found, most frequent first · click one to see its passages</span></h3>' +
-    '<table class="loc"><thead><tr><th>Phrasing</th><th>All</th>' + cols.map(t => '<th title="' + esc(t.title) + '">' + esc(t.short) + '</th>').join('') + '</tr></thead><tbody>';
-  R.locs.slice(0, LIM).forEach(L => {
-    const vars = L.surfaces.size > 1 ? '<span class="var" title="' + esc([...L.surfaces.keys()].join(' · ')) + '">+' + (L.surfaces.size - 1) + ' spelling' + (L.surfaces.size > 2 ? 's' : '') + '</span>' : '';
-    h += '<tr class="row' + (S.loc === L.key ? ' sel' : '') + '" data-loc="' + esc(L.key) + '"><td><span class="phr">' + esc(L.label) + '</span>' + vars + '</td><td class="tot">' + L.n + '</td>' +
-      cols.map(t => { const n = L.byText.get(t.idx) || 0; return '<td class="' + (n ? '' : 'z') + '">' + (n || '·') + '</td>'; }).join('') + '</tr>';
-  });
-  h += '</tbody></table>';
-  if (R.locs.length > LIM) h += '<button type="button" class="btn more" data-expand="locs">Show all ' + R.locs.length + ' phrasings</button>';
-  h += '</section>';
-
-  // Where it occurs
-  const rates = shown.map(t => { const bt = R.byText.get(t.idx); return { t, n: bt ? bt.n : 0, ps: bt ? bt.ps.size : 0, rate: bt ? bt.n / t.words * 10000 : 0 }; });
-  const maxRate = Math.max(...rates.map(r => r.rate), 1e-9);
-  h += '<section class="card"><h3>Where it occurs<span class="sub">occurrences in each text, and how often per 10,000 words, so that long and short texts compare</span></h3><div class="dist">' +
-    rates.map(r => '<div class="nm">' + esc(r.t.short) + '<span class="d">' + esc(r.t.date) + '</span></div>' +
-      '<div class="bar"><i style="width:' + (100 * r.rate / maxRate).toFixed(1) + '%"></i></div>' +
-      '<div class="num">' + (r.n ? '<b>' + r.n + '</b> in ' + r.ps + ' passage' + (r.ps === 1 ? '' : 's') + ' · ' + r.rate.toFixed(r.rate < 1 ? 2 : 1) + ' per 10k' : '<span class="zero">none</span>') + '</div>').join('') +
-    '</div></section>';
-
-  // Passages
-  h += '<section class="card"><h3>Passages<span class="sub">in the order of the texts · click one to follow it</span></h3>';
-  if (S.loc) { const L = R.locs.find(x => x.key === S.loc); h += '<div class="filterbar">Only passages with <i>' + esc(L ? L.label : S.loc) + '</i> · <span class="lnk" data-loc="">show all</span></div>'; }
-  TEXTS.forEach(t => {
-    let ps = [...R.byPass.keys()].filter(i => P[i].t === t.idx);
-    if (S.loc) ps = ps.filter(i => R.byPass.get(i).some(m => m.loc === S.loc));
-    if (!ps.length) return;
-    ps.sort((a, b) => a - b);
-    const lim = S.expand.has(t.key) ? 1e9 : 12;
-    h += '<div class="tgroup"><div class="th">' + esc(t.title) + '<span>' + esc(t.date) + ' · ' + ps.length + ' passage' + (ps.length === 1 ? '' : 's') + '</span></div>';
-    ps.slice(0, lim).forEach(i => { h += hitCard(P[i], R.byPass.get(i)); });
-    if (ps.length > lim) h += '<button type="button" class="btn more" data-expand="' + t.key + '">Show all ' + ps.length + '</button>';
-    h += '</div>';
-  });
-  h += '</section>';
+  if (tab === 'overview') {
+    const cols = TEXTS.filter(t => R.byText.has(t.idx));
+    const LIM = S.expand.has('locs') ? 1e9 : 12;
+    h += '<section class="card"><h3>Phrasings<span class="sub">most frequent first · click one to read its passages</span></h3>' +
+      '<table class="loc"><thead><tr><th>Phrasing</th><th>All</th>' + cols.map(t => '<th title="' + esc(t.title) + '">' + esc(t.short) + '</th>').join('') + '</tr></thead><tbody>';
+    R.locs.slice(0, LIM).forEach(L => {
+      const vars = L.surfaces.size > 1 ? '<span class="var" title="' + esc([...L.surfaces.keys()].join(' · ')) + '">+' + (L.surfaces.size - 1) + ' spelling' + (L.surfaces.size > 2 ? 's' : '') + '</span>' : '';
+      h += '<tr class="row' + (S.loc === L.key ? ' sel' : '') + '" data-loc="' + esc(L.key) + '"><td><span class="phr">' + esc(L.label) + '</span>' + vars + '</td><td class="tot">' + L.n + '</td>' +
+        cols.map(t => { const n = L.byText.get(t.idx) || 0; return '<td class="' + (n ? '' : 'z') + '">' + (n || '·') + '</td>'; }).join('') + '</tr>';
+    });
+    h += '</tbody></table>';
+    if (R.locs.length > LIM) h += '<button type="button" class="btn more" data-expand="locs">Show all ' + R.locs.length + ' phrasings</button>';
+    h += '</section>';
+    const rates = shown.map(t => { const bt = R.byText.get(t.idx); return { t, n: bt ? bt.n : 0, ps: bt ? bt.ps.size : 0, rate: bt ? bt.n / t.words * 10000 : 0 }; });
+    const maxRate = Math.max(...rates.map(r => r.rate), 1e-9);
+    h += '<section class="card"><h3>Where it occurs<span class="sub">per 10,000 words, so that long and short texts compare</span></h3><div class="dist">' +
+      rates.map(r => '<div class="nm">' + esc(r.t.short) + '<span class="d">' + esc(r.t.date) + '</span></div>' +
+        '<div class="bar"><i style="width:' + (100 * r.rate / maxRate).toFixed(1) + '%"></i></div>' +
+        '<div class="num">' + (r.n ? '<b>' + r.n + '</b> in ' + r.ps + ' passage' + (r.ps === 1 ? '' : 's') + ' · ' + r.rate.toFixed(r.rate < 1 ? 2 : 1) + ' per 10k' : '<span class="zero">none</span>') + '</div>').join('') +
+      '</div></section>';
+  } else {
+    if (S.loc) { const L = R.locs.find(x => x.key === S.loc); h += '<div class="filterbar">Only passages with <i>' + esc(L ? L.label : S.loc) + '</i> · <span class="lnk" data-loc="">show all</span></div>'; }
+    TEXTS.forEach(t => {
+      let ps = [...R.byPass.keys()].filter(i => P[i].t === t.idx);
+      if (S.loc) ps = ps.filter(i => R.byPass.get(i).some(m => m.loc === S.loc));
+      if (!ps.length) return;
+      ps.sort((a, b) => a - b);
+      const lim = S.expand.has(t.key) ? 1e9 : 12;
+      h += '<div class="tgroup"><div class="th">' + esc(t.title) + '<span>' + esc(t.date) + ' · ' + ps.length + ' passage' + (ps.length === 1 ? '' : 's') + '</span></div>';
+      ps.slice(0, lim).forEach(i => { h += hitCard(P[i], R.byPass.get(i)); });
+      if (ps.length > lim) h += '<button type="button" class="btn more" data-expand="' + t.key + '">Show all ' + ps.length + '</button>';
+      h += '</div>';
+    });
+  }
   box.innerHTML = h;
 }
 
@@ -1184,11 +1217,13 @@ function renderDoctrine(box) {
   const D = d && DOCS[d.key];
   if (!D) { box.innerHTML = '<div class="empty">That classification did not load.</div>'; return; }
   const cols = TEXTS.filter(t => D.items.some(it => P[it.pi].t === t.idx));
-  let h = '<div class="res-head"><h2>' + esc(d.label) + '</h2><div class="summary"><b>' + D.items.length + '</b> passages, each filed by hand by ' + esc(personName(d.who)) + '</div>' +
-    '<div class="from">' + esc(personName(d.who)) + '’s classification · ' + esc((PEOPLE.find(x => x.key === d.who) || {}).did || '') + '</div></div>';
+  let h = '<div class="res-head"><div class="res-title">' + esc(d.label) + '</div><div class="summary"><b>' + D.items.length + '</b> passages, each filed by hand by ' + esc(personName(d.who)) + '</div>' +
+    '<div class="from">' + esc(personName(d.who)) + '’s classification</div></div>';
   if (d.key === 'immediate') h += squareCard(D);
-  if (d.key === 'judgement') h += tableCard(D);
-  h += '<section class="card"><h3>The kinds<span class="sub">how many passages are filed under each, in each text · click a kind to see only its passages</span></h3><table class="loc"><thead><tr><th>Kind</th><th>All</th>' +
+  else if (d.key === 'judgement') h += tableCard(D);
+  else h += '<div class="kchips">' + D.groups.map(([k, label]) => { const n = D.items.filter(it => it.labels.includes(k)).length;
+    return n ? '<button type="button" class="kchip' + (S.loc === k ? ' on' : '') + '" data-loc="' + esc(k) + '">' + esc(label) + '<b>' + n + '</b></button>' : ''; }).join('') + '</div>';
+  h += '<details class="bytext"><summary>Counts in each text</summary><div class="card"><table class="loc"><thead><tr><th>Kind</th><th>All</th>' +
     cols.map(t => '<th>' + esc(t.short) + '</th>').join('') + '</tr></thead><tbody>';
   D.groups.forEach(([k, label]) => {
     const its = D.items.filter(it => it.labels.includes(k));
@@ -1196,8 +1231,8 @@ function renderDoctrine(box) {
     h += '<tr class="row' + (S.loc === k ? ' sel' : '') + '" data-loc="' + esc(k) + '"><td>' + esc(label) + '</td><td class="tot">' + its.length + '</td>' +
       cols.map(t => { const n = its.filter(it => P[it.pi].t === t.idx).length; return '<td class="' + (n ? '' : 'z') + '">' + (n || '·') + '</td>'; }).join('') + '</tr>';
   });
-  h += '</tbody></table></section>';
-  h += '<section class="card"><h3>Passages</h3>';
+  h += '</tbody></table></div></details>';
+  h += '<div id="doc-passages"><h3>Passages</h3>';
   const formLoc = S.loc && S.loc.startsWith('form:') ? S.loc.slice(5) : null;
   const groups = formLoc ? [[S.loc, 'Judgments of form ' + formLoc + ' (' + (FORM_NAME[formLoc] || formLoc) + ')']] : D.groups;
   if (S.loc) h += '<div class="filterbar">Only <i>' + esc((groups.find(g => g[0] === S.loc) || [0, S.loc])[1]) + '</i> · <span class="lnk" data-loc="">show all</span></div>';
@@ -1225,7 +1260,7 @@ function renderDoctrine(box) {
     if (its.length > lim) h += '<button type="button" class="btn more" data-expand="d:' + esc(k) + '">Show all ' + its.length + '</button>';
     h += '</div>';
   });
-  h += '</section>';
+  h += '</div>';
   box.innerHTML = h;
 }
 
@@ -1409,20 +1444,31 @@ function reportUrl(T, p) {
    RENDERING: the rail, one passage and everything connected to it
    ════════════════════════════════════════════════════════════════════════ */
 
-function renderRailEmpty() {
-  $('app').classList.remove('en');
-  $('rail').innerHTML = '<div class="rail-empty"><h2>Follow</h2><p>Open any passage to see where it sits in the corpus:</p><ol>' +
-    '<li>the textbook § it is on, and how we know;</li><li>Kant’s notes on that §, dated;</li><li>the lectures and Jäsche on the same §;</li>' +
-    '<li>what the seminar has said about it.</li></ol><p>Every step goes on the route above. Its arrows step back and forward, and Map shows the whole route through the documents. Copy link gives a link to the step you are on.</p></div>';
+/* A section of the reading pane that opens and closes. Its heading carries the answer, so a
+   closed section still says what it holds; the reader's choice of open and closed is kept. */
+function sec(key, title, value, count, body, credit, defOpen) {
+  const open = S.secOpen.has(key) || (defOpen && !S.secClosed.has(key));
+  return '<details class="sec" data-sec="' + key + '"' + (open ? ' open' : '') + '><summary><span class="st">' + title + '</span>' +
+    (value ? '<span class="sv">' + value + '</span>' : '') + (count != null ? '<span class="cnt">' + count + '</span>' : '') + '</summary>' +
+    '<div class="body">' + body + (credit ? '<div class="from">' + credit + '</div>' : '') + '</div></details>';
 }
 
 function renderRail() {
-  if (S.sel == null || !P[S.sel]) return renderRailEmpty();
+  const rail = $('rail');
+  if (S.sel == null || !P[S.sel]) {
+    rail.hidden = true;
+    $('app').classList.add('no-rail');
+    $('app').classList.remove('en');
+    return;
+  }
+  rail.hidden = false;
+  $('app').classList.remove('no-rail');
   const p = P[S.sel], T = TEXTS[p.t];
   let spans = [];
   if (RESULT && RESULT.byPass && RESULT.byPass.has(p.i) && !S.d) spans = RESULT.byPass.get(p.i).map(m => [p.ts[m.a], p.te[m.b], m.loc === S.loc]);
   if (S.quote) spans = spans.concat(quoteSpans(p.text, [S.quote]).map(s => [s[0], s[1], true]));
-  let h = '<div class="ptitle"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
+  let h = '<div class="rhead"><div class="rwork"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
+    '<button type="button" class="rclose" data-close-rail="1" title="Close this passage">×</button></div>' +
     '<div class="pcite">' + esc(p.cite) + '</div>' +
     '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>';
   const tr = trFor(T);
@@ -1435,43 +1481,38 @@ function renderRail() {
   if (tr && S.en) h += '<div class="pair">' + de + englishFor(tr, p) + '</div>' + englishNotes(tr, p);
   else h += de;
 
-  // 1. Where is this in the textbook?
+  // Where is this in the textbook?
   const place = placeOf(p);
   if (place) {
     const book = textByKey(place.book);
     const bookName = book ? book.short : place.book;
-    h += '<div class="conn"><h3>Where is this in ' + esc(bookName) + '?</h3>';
-    h += '<div><span class="lnk" data-para="' + place.book + ':' + place.paras[0] + '">' + esc(bookName + ' ' + paraLabel(place.paras)) + '</span>' +
-      '<span class="tier ' + place.tier + '">' + (place.tier === 'stated' ? 'stated' : place.tier === 'interp' ? 'interpolated' : 'inferred') + '</span></div>';
-    h += '<div class="how">' + esc(place.how) + '</div>';
     const bp = book && passage(book.key, 'p' + place.paras[0]);
-    if (bp) h += '<div class="preview" lang="de">' + esc(clip(bp.text, 300)) + '</div>';
-    h += '<div class="from">' + esc(place.who === 'jesus' ? 'Jesus La Paz’s Meier–Kant concordance' + (T.key === 'jaesche' ? ', re-keyed to Alex Li’s Jäsche' : '') : 'the Academy edition, through the shared Reflexionen data') + '</div></div>';
+    const tierWord = place.tier === 'stated' ? 'stated' : place.tier === 'interp' ? 'interpolated' : 'inferred';
+    h += sec('place', 'In ' + esc(bookName), '<span class="lnk" data-para="' + place.book + ':' + place.paras[0] + '">' + esc(paraLabel(place.paras)) + '</span><span class="tier ' + place.tier + '">' + tierWord + '</span>', null,
+      '<div class="how">' + esc(place.how) + '</div>' + (bp ? '<div class="preview" lang="de">' + esc(clip(bp.text, 320)) + '</div>' : ''),
+      esc(place.who === 'jesus' ? 'Jesus La Paz’s Meier–Kant concordance' + (T.key === 'jaesche' ? ', re-keyed to Alex Li’s Jäsche' : '') : 'the Academy edition’s filing, through the shared Reflexionen data'), true);
     h += railForPara(place.book, place.paras[0], p);
   } else if (T.shape === 'meier' || T.shape === 'metaphysica') {
     h += railForPara(T.key, p.para, p);
   } else if (T.shape !== 'passages') {
-    h += '<div class="conn"><h3>Where is this in Meier?</h3><div class="empty">No link for this passage yet.</div></div>';
+    h += sec('place', 'In Meier', '<span class="muted">no link for this passage yet</span>', null, '<div class="empty">Neither the text nor the concordance places this passage.</div>', '', false);
   }
 
-  // 4. What the seminar has said about it
+  // What the seminar has said about it
   const an = ANNOT.get(p.i) || [];
   if (an.length) {
-    h += '<div class="conn"><h3>What the seminar has said about it</h3>';
-    an.forEach(a => {
-      h += '<div class="ann"><div class="lab">' + esc(a.label) + '</div>' + (a.text ? '<div>' + esc(a.text) + '</div>' : '') +
-        (a.links && a.links.length ? '<div class="small">Parallel in: ' + a.links.map(i => '<span class="lnk" data-open="' + i + '">' + esc(TEXTS[P[i].t].short + ', ' + P[i].cite) + '</span>').join(' · ') + '</div>' : '') +
-        (a.doc ? '<div class="small"><span class="lnk" data-doc="' + a.doc + '">See every passage so filed</span></div>' : '') +
-        '<div class="from">' + esc(personName(a.who)) + '</div></div>';
-    });
-    h += '</div>';
+    h += sec('seminar', 'The seminar on this passage', '', an.length, an.map(a => '<div class="ann"><div class="lab">' + esc(a.label) + '</div>' + (a.text ? '<div>' + esc(a.text) + '</div>' : '') +
+      (a.links && a.links.length ? '<div class="small">Parallel in: ' + a.links.map(i => '<span class="lnk" data-open="' + i + '">' + esc(TEXTS[P[i].t].short + ', ' + P[i].cite) + '</span>').join(' · ') + '</div>' : '') +
+      (a.doc ? '<div class="small"><span class="lnk" data-doc="' + a.doc + '">See every passage so filed</span></div>' : '') +
+      '<div class="from">' + esc(personName(a.who)) + '</div></div>').join(''), '', true);
   }
 
   // Deep dives into the students' own tools
   const dives = divesFor(T, p);
-  if (dives.length) h += '<div class="conn"><h3>Go deeper</h3><div class="dives">' + dives.map(([l, u]) => '<a href="' + u + '" target="_blank" rel="noopener">' + esc(l) + ' ↗</a>').join('') + '</div></div>';
-  $('rail').innerHTML = h;
-  $('rail').scrollTop = 0;
+  if (dives.length) h += sec('deeper', 'Go deeper', '<span class="muted small">in the students’ own tools</span>', null,
+    '<div class="dives">' + dives.map(([l, u]) => '<a href="' + u + '" target="_blank" rel="noopener">' + esc(l) + ' ↗</a>').join('') + '</div>', '', false);
+  rail.innerHTML = h;
+  rail.scrollTop = 0;
 }
 
 const clip = (s, n) => s.length > n ? s.slice(0, n).replace(/\s+\S*$/, '') + ' …' : s;
@@ -1482,43 +1523,42 @@ function railForPara(bookKey, n, from) {
   const book = textByKey(bookKey);
   if (!book || n == null) return '';
   let h = '';
-  const self = from && TEXTS[from.t].key === bookKey;
   // Kant's notes on this §
   const notes = TEXTS.find(t => t.shape === 'refl' && t.on === bookKey);
   if (notes && notes.byPara) {
     const idx = notes.byPara[n] || [];
     const ps = idx.map(k => notes.entries[k]).filter(Boolean).map(e => passage(notes.key, 'r' + e.r)).filter(q => q && (!from || q.i !== from.i));
     ps.sort((a, b) => (a.year || 9999) - (b.year || 9999) || a.i - b.i);
-    h += '<div class="conn"><h3>Kant’s notes on ' + esc(book.short) + ' § ' + n + '<span class="sub">' + ps.length + ', oldest first, dated by Adickes</span></h3>';
-    if (ps.length) h += listItems(ps, 'notes:' + bookKey + n, q => '<span class="c">Refl. ' + q.id.slice(1) + '</span>' + esc(clip(q.text.replace(/\s+/g, ' '), 110)) + '<span class="d">' + esc(q.dateLabel) + (q.interp ? ' · interpolated §' : '') + '</span>');
-    else h += '<div class="empty">The Academy edition files no Reflexion under this §.</div>';
-    h += '<div class="from">the Academy edition’s filing, through the shared Reflexionen data (Sophia Wyatt &amp; Maria); dates from Adickes’ phases</div></div>';
+    h += sec('notes', 'Kant’s notes on § ' + n, '<span class="muted small">oldest first</span>', ps.length,
+      ps.length ? listItems(ps, 'notes:' + bookKey + n, q => '<span class="c">Refl. ' + q.id.slice(1) + '</span>' + esc(clip(q.text.replace(/\s+/g, ' '), 110)) + '<span class="d">' + esc(q.dateLabel) + (q.interp ? ' · interpolated §' : '') + '</span>', 6)
+        : '<div class="empty">The Academy edition files no Reflexion under this §.</div>',
+      'the Academy edition’s filing, through the shared Reflexionen data (Sophia Wyatt &amp; Maria); dates from Adickes’ phases', true);
   }
   // Lectures and Jäsche on this §
   if (bookKey === 'meier') {
     const links = (CONC_REV.get(n) || []).map(x => ({ x, p: passage(x.key, x.id) })).filter(o => o.p && (!from || o.p.i !== from.i));
     links.sort((a, b) => a.p.t - b.p.t || a.p.i - b.p.i);
-    h += '<div class="conn"><h3>The lectures and Jäsche on Meier § ' + n + '<span class="sub">' + links.length + ' passages</span></h3>';
+    let body = '';
     if (links.length) {
       TEXTS.filter(t => links.some(o => o.p.t === t.idx)).forEach(t => {
         const ls = links.filter(o => o.p.t === t.idx);
-        h += '<div class="small cz" style="margin-top:0.35rem;color:var(--accent)">' + esc(t.short.toUpperCase()) + ' <span class="muted">' + esc(t.date) + '</span></div>';
-        h += listItems(ls.map(o => o.p), 'lec:' + t.key + n, q => {
+        body += '<div class="sub-h">' + esc(t.short.toUpperCase()) + ' · ' + esc(t.date) + '</div>';
+        body += listItems(ls.map(o => o.p), 'lec:' + t.key + n, q => {
           const o = ls.find(z => z.p === q);
           const st = o.x.code === 'S' || o.x.code === 'A';
           return '<span class="c">' + esc(q.cite) + '</span>' + esc(clip(q.text.replace(/\s+/g, ' '), 100)) + '<span class="tier ' + (st ? 'stated' : 'inferred') + '">' + (st ? 'stated' : 'inferred ' + o.x.code) + '</span>';
         }, 4);
       });
-    } else h += '<div class="empty">No lecture passage is linked to this § yet.</div>';
-    h += '<div class="from">Jesus La Paz’s Meier–Kant concordance</div></div>';
+    } else body = '<div class="empty">No lecture passage is linked to this § yet.</div>';
+    h += sec('lectures', 'The lectures and Jäsche on § ' + n, '', links.length, body, 'Jesus La Paz’s Meier–Kant concordance', false);
     // The tradition behind it
     const trad = LAYERS.tradition && LAYERS.tradition[n];
     if (trad && trad.length) {
-      h += '<div class="conn"><h3>The tradition behind Meier § ' + n + '</h3>' + trad.map(e => '<div class="trad"><b>' + esc(e.author) + '</b>, ' + esc(e.source) + ' <span class="muted small">(' + esc(e.relation) + ')</span><br>' + esc(e.text) + '</div>').join('') +
-        '<div class="from">the Meier Reader’s tradition passages (data/tradition-meier.js)</div></div>';
+      h += sec('tradition', 'The tradition behind § ' + n, '<span class="muted small">Wolff, the Scholastics, Aristotle</span>', trad.length,
+        trad.map(e => '<div class="trad"><b>' + esc(e.author) + '</b>, ' + esc(e.source) + ' <span class="muted small">(' + esc(e.relation) + ')</span><br>' + esc(e.text) + '</div>').join(''),
+        'the Meier Reader’s tradition passages', false);
     }
   }
-  if (!self) return h;
   return h;
 }
 
@@ -1544,7 +1584,7 @@ function divesFor(T, p) {
    ════════════════════════════════════════════════════════════════════════ */
 
 function renderTexts() {
-  let h = '<h2>The texts</h2><p class="note">What the portal reads today: a first, smaller corpus, from transcriptions that are not yet clean. Every passage is cited by its Academy edition page, so links will survive the move to a better edition.</p>' +
+  let h = '<h2>The texts</h2><div class="summary">' + esc(statusText()) + '</div><p class="note">What the portal reads today: a first, smaller corpus, from transcriptions that are not yet clean. Every passage is cited by its Academy edition page, so links will survive the move to a better edition.</p>' +
     '<table class="cat"><thead><tr><th>Text</th><th>Layer</th><th>Date</th><th>Passages</th><th>Words</th><th>Transcription</th><th>Brought in by</th><th>English</th></tr></thead><tbody>' +
     TEXTS.map(t => { const tr = trFor(t); return '<tr><td><b>' + esc(t.title) + '</b></td><td class="small cz">' + esc(LAYER_LABEL[t.layer] || t.layer) + '</td><td>' + esc(t.date) + '</td><td class="n">' + t.n.toLocaleString('en') + '</td><td class="n">' + t.words.toLocaleString('en') + '</td><td class="small">' + esc(t.source) + '</td><td class="small">' + esc(t.credit) + '</td>' +
       '<td class="small">' + (tr ? 'two machine translations, by ' + esc(personName(tr.who)) + (tr.map ? '; matched to this edition by build-pins.py' : '') : '<span class="muted">none yet</span>') + '</td></tr>'; }).join('') +
@@ -1568,10 +1608,11 @@ function renderPeople() {
 
 function showView(v) {
   S.view = v;
-  ['ask', 'texts', 'people'].forEach(k => { $('view-' + k).hidden = k !== v; });
+  ['ask', 'explore', 'texts', 'people'].forEach(k => { $('view-' + k).hidden = k !== v; });
   document.querySelectorAll('nav [data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === v));
   if (v === 'texts') renderTexts();
   if (v === 'people') renderPeople();
+  if (v === 'explore') syncForm();
   $('left').scrollTop = 0;
 }
 
@@ -1580,10 +1621,10 @@ function showView(v) {
    ════════════════════════════════════════════════════════════════════════ */
 
 function snapshot() {
-  return { q: S.q, w: S.w, co: S.co, cm: S.cm, merge: S.merge, off: [...S.off], loc: S.loc, d: S.d, sel: S.sel, quote: S.quote, preset: S.preset ? S.preset.key || null : null, presetObj: S.preset };
+  return { q: S.q, w: S.w, co: S.co, cm: S.cm, merge: S.merge, off: [...S.off], loc: S.loc, d: S.d, sel: S.sel, quote: S.quote, tab: S.tab, preset: S.preset ? S.preset.key || null : null, presetObj: S.preset };
 }
 function restore(snap) {
-  Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, preset: snap.presetObj || null });
+  Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, tab: snap.tab || 'overview', preset: snap.presetObj || null });
 }
 /* A step is named for what changed at it: the passage, if one was opened there, and otherwise
    the question or doctrine on the left, with the phrasing or kind picked in it. A passage left
@@ -1614,7 +1655,8 @@ function pushTrail() {
 const stepLane = s => (s.onP && P[s.sel] ? TEXTS[P[s.sel].t].key : 'q');
 
 function renderTrail() {
-  if (!TRAIL.length) return;
+  if (!TRAIL.length) { $('trail').hidden = true; return; }
+  $('trail').hidden = false;
   const n = TRAIL.length;
   const texts = new Set(TRAIL.map(stepLane).filter(k => k !== 'q'));
   const from = Math.max(0, Math.min(trailPos - 2, n - 4)), to = Math.min(n, from + 4);
@@ -1695,6 +1737,7 @@ function writeHash() {
   if (S.loc) u.set('loc', S.loc);
   if (S.sel != null && P[S.sel]) { u.set('p', TEXTS[P[S.sel].t].key + ':' + P[S.sel].id); if (S.quote) u.set('quote', S.quote); }
   if (S.en) u.set('en', S.en);
+  if (S.q && !S.d && S.tab === 'passages') u.set('tab', 'passages');
   history.replaceState(null, '', '#' + u.toString());
 }
 function readHash() {
@@ -1711,6 +1754,7 @@ function readHash() {
   S.loc = u.get('loc') || null;
   S.quote = u.get('quote') || null;
   S.en = PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : '';
+  S.tab = u.get('tab') === 'passages' ? 'passages' : 'overview';
   const p = u.get('p');
   if (p) { const k = p.indexOf(':'); const i = BYID.get(p.slice(0, k) + ':' + p.slice(k + 1)); S.sel = i == null ? null : i; }
   syncForm();
@@ -1726,8 +1770,7 @@ function readHash() {
 function seminarPreset(s) { return { key: s.key, label: s.label, note: s.note }; }
 
 function ask(opts) {
-  Object.assign(S, { d: null, loc: null, expand: new Set() }, opts);
-  $('presets-box').open = false;
+  Object.assign(S, { d: null, loc: null, tab: 'overview', expand: new Set() }, opts);
   showView('ask');
   syncForm();
   renderResults();
@@ -1750,7 +1793,21 @@ function wire() {
     e.preventDefault();
     ask({ q: $('q').value.trim(), w: +$('w').value || 0, co: $('co').value.trim(), cm: $('cm').value, merge: $('merge').checked, preset: null });
   });
-  $('merge').addEventListener('change', () => { if (S.q) ask({ merge: $('merge').checked, preset: S.preset }); });
+  $('merge').addEventListener('change', () => { if (S.q) ask({ merge: $('merge').checked, preset: S.preset }); else { S.merge = $('merge').checked; updateOptSum(); } });
+  $('w').addEventListener('change', () => { if (S.q) ask({ w: +$('w').value || 0, preset: S.preset }); else { S.w = +$('w').value || 0; updateOptSum(); } });
+  const fold = (btn, panel, other, otherBtn) => $(btn).addEventListener('click', () => {
+    $(panel).hidden = !$(panel).hidden; $(other).hidden = true;
+    $(btn).classList.toggle('on', !$(panel).hidden); $(otherBtn).classList.remove('on');
+  });
+  fold('opt-toggle', 'opts', 'help', 'help-toggle');
+  fold('help-toggle', 'help', 'opts', 'opt-toggle');
+  // Remember which reading-pane sections the reader opens and closes (toggle does not bubble)
+  document.addEventListener('toggle', e => {
+    const t = e.target;
+    if (!t.matches || !t.matches('details.sec')) return;
+    const k = t.dataset.sec;
+    if (t.open) { S.secOpen.add(k); S.secClosed.delete(k); } else { S.secClosed.add(k); S.secOpen.delete(k); }
+  }, true);
   $('cm').addEventListener('change', () => { if (S.q && $('co').value.trim()) ask({ cm: $('cm').value, co: $('co').value.trim(), preset: S.preset }); });
 
   document.addEventListener('change', e => {
@@ -1775,20 +1832,31 @@ function wire() {
   });
 
   document.addEventListener('click', e => {
-    const el = e.target.closest('[data-open],[data-loc],[data-seminar],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en]');
+    const el = e.target.closest('[data-open],[data-loc],[data-seminar],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail]');
     if (!el) return;
     const d = el.dataset;
     if (d.step != null) { goStep(+d.step); return; }
     if (d.map) { $('routemap').hidden = !$('routemap').hidden; renderTrail(); return; }
     if (d.en != null) { S.en = d.en; renderRail(); writeHash(); return; }
     if (d.seminar) { const s = SEMINAR.find(x => x.key === d.seminar); ask({ q: s.q, w: s.w, co: s.co || '', cm: s.cm || '', preset: seminarPreset(s) }); return; }
-    if (d.doc) { Object.assign(S, { d: d.doc, q: '', co: '', cm: '', loc: null, expand: new Set(), preset: null }); $('presets-box').open = false; showView('ask'); syncForm(); renderResults(); pushTrail(); $('left').scrollTop = 0; return; }
+    if (d.doc) { Object.assign(S, { d: d.doc, q: '', co: '', cm: '', loc: null, expand: new Set(), preset: null }); showView('ask'); syncForm(); renderResults(); pushTrail(); $('left').scrollTop = 0; return; }
+    if (d.home) { Object.assign(S, { d: null, q: '', co: '', cm: '', loc: null, preset: null, tab: 'overview', expand: new Set() }); showView('ask'); syncForm(); renderResults(); writeHash(); return; }
+    if (d.tab) { S.tab = d.tab; renderResults(); writeHash(); return; }
+    if (d.closeRail) { S.sel = null; S.quote = null; renderRail(); document.querySelectorAll('.hit.sel').forEach(x => x.classList.remove('sel')); writeHash(); return; }
     if (d.view) { showView(d.view); return; }
     if (d.trail != null) { $('tip').hidden = true; goStep(+d.trail); return; }
     if (d.expandRail) { S.expand.add(d.expandRail); renderRail(); return; }
     if (d.expand) { S.expand.add(d.expand); renderResults(); return; }
-    if (d.text) { S.off.has(d.text) ? S.off.delete(d.text) : S.off.add(d.text); renderTextChips(); if (S.q && !S.d) { renderResults(); writeHash(); } return; }
-    if (d.loc != null) { S.loc = d.loc && S.loc !== d.loc ? d.loc : null; renderResults(); renderRail(); pushTrail(); return; }
+    if (d.text) { S.off.has(d.text) ? S.off.delete(d.text) : S.off.add(d.text); renderTextChips(); updateOptSum(); if (S.q && !S.d) { renderResults(); writeHash(); } return; }
+    if (d.loc != null) {
+      S.loc = d.loc && S.loc !== d.loc ? d.loc : null;
+      if (!S.d && S.loc) S.tab = 'passages';
+      renderResults(); renderRail(); pushTrail();
+      const dp = S.d && S.loc && $('doc-passages');
+      if (dp) dp.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else if (!S.d && S.loc) $('left').scrollTop = 0;
+      return;
+    }
     if (d.para) { const [book, n] = d.para.split(':'); const q = passage(book, 'p' + n); if (q) openPassage(q.i); return; }
     if (d.open != null) { openPassage(+d.open, d.quote || null); return; }
   });
