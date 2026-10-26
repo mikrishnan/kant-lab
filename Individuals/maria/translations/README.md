@@ -88,3 +88,38 @@ uses `meier-phrases.js`:
 - the search finds German sentences through their English.
 
 All of it is unreviewed machine translation.
+
+## The grammar layer
+
+`grammar.json` and `grammar.js` tag every phrase of Busolt, Blomberg and Meier (7,192 sentences,
+49,648 phrases) with its role in the sentence:
+
+- subject, finite verb, object, genitive, predicative or adverbial;
+- verb part at the end (infinitive, participle, separable particle, or a subordinate clause's
+  finite verb);
+- clause opener, coordinating conjunction, or other (Latin, references).
+
+Each phrase also carries the depth of the clause it stands in: 0 for the main clause, then 1 to 3
+for subordinate clauses.
+
+The files also record 10,505 **verb brackets**: the finite verb, or the subordinate clause's
+opener, linked word to word to the verb parts German sends to the clause's end (*wird … gegeben
+werden müssen*, *wenn … angegeben werden soll*).
+
+The phrases are the reader's own, so a tag belongs to its phrase by construction. The tagging is
+a model's analysis, made by `../grammar.py` with one sentence at a time, and it is unreviewed. The
+build checks that every phrase has a role from the set, that every bracket word stands in the
+phrase it names, and that every bracket runs left to right. It reported 0 problems.
+
+In `busolt-reader.html`, the **grammar** checkbox:
+
+- colours each phrase by its role, with a legend above the text;
+- tints subordinate clauses, darker the deeper they are nested;
+- sets the bracket words in bold;
+- boxes the bracket words of the hovered or current sentence and draws an arc from each left part
+  to its right part;
+- adds the role and clause to the phrase hover.
+
+It works in all three reading modes. In `GRAMMAR[text][blockId][k]`, `r` holds two characters per
+phrase (role letter, then depth), and `b` holds the brackets as character offsets into the block
+text.
