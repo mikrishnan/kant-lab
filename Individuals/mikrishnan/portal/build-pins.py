@@ -30,7 +30,8 @@ Some things the portal needs are not yet in files a page can load on its own:
   ends where Jesus's blocks do is `exact`; one that Alex divides where Jesus does not is
   `part`, and the portal says that its English runs past the passage.
 
-* Jin's concepts (`const L` and `const CONCEPTS`, in Individuals/Jin/logik-transcripts.html)
+* Jin's concepts (`const L` and `const CONCEPTS`, in Individuals/Jin/logik-transcripts.html),
+  his stopwords (`const STOP_RAW`, the words his parallel passages leave out of the comparison)
   and Aidan's forms of judgment (`const B` and `const JF_FORMS`, in
   Individuals/Aidan/judgment-finder.html) are JavaScript, regular expressions included.
   Their declarations are copied verbatim into pinned/jin-concepts.js and
@@ -292,3 +293,5 @@ if __name__ == "__main__":
                "jin-concepts.js", "PORTAL_PIN_JIN", "Jin's concepts of the logic lectures, with their wordings")
     pin_source(os.path.join("Aidan", "judgment-finder.html"), ["B", "JF_FORMS"], "JF_FORMS",
                "aidan-forms.js", "PORTAL_PIN_AIDAN", "Aidan Chong's forms of judgment, with the terms that name them")
+    pin_source(os.path.join("Jin", "logik-transcripts.html"), ["STOP_RAW"], "STOP_RAW",
+               "jin-stopwords.js", "PORTAL_PIN_JIN_STOP", "Jin's list of the words his parallel passages leave out of the comparison")
