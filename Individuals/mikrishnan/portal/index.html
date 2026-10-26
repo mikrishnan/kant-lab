@@ -218,6 +218,25 @@
   .layer { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.08em; border: 1px solid var(--accent-light); border-radius: 3px; padding: 0 0.3rem; color: var(--accent); margin-right: 0.4rem; vertical-align: 1px; }
   .ptext { background: var(--parchment); border: 1px solid var(--line); border-radius: 5px; padding: 0.6rem 0.75rem; margin: 0.6rem 0 0.9rem; white-space: pre-wrap; font-size: 1.02rem; max-height: 22rem; overflow: auto; }
   .ptext.short { max-height: 9rem; }
+  .pactions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.9rem; margin-top: 0.35rem; font-size: 0.86rem; }
+  .pactions .btn { border-color: var(--accent-light); padding: 0.12rem 0.5rem; font-size: 0.7rem; }
+  .pactions .btn.on { background: var(--accent); color: var(--parchment); }
+  .pactions a { color: var(--faded); }
+  .pactions a:hover { color: var(--accent); }
+  /* English beside the German: two columns when the rail has the room, one above the other when not.
+     While English is on the rail takes the larger share of the window. */
+  #app.en { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
+  #rail { container-type: inline-size; }
+  .pair { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: 0.7rem; }
+  @container (min-width: 36rem) { .pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  .pair .ptext { margin-bottom: 0.4rem; }
+  .pen { border: 1px dashed var(--accent-light); border-radius: 5px; padding: 0.5rem 0.75rem; margin: 0.6rem 0 0.4rem; font-size: 1rem; max-height: 22rem; overflow: auto; }
+  .pen .tt { white-space: pre-wrap; }
+  .pen .lab { font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.07em; color: var(--accent); margin-bottom: 0.2rem; }
+  .pen .lab i { font-family: 'EB Garamond', serif; letter-spacing: 0; font-size: 0.82rem; color: var(--faded); text-transform: none; }
+  .pen ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.86rem; color: var(--faded); }
+  .pen .empty { padding: 0.2rem 0; }
+  .trwarn { font-size: 0.82rem; color: #7a4a14; font-style: italic; margin: 0.15rem 0; }
   .conn { border-top: 1px solid var(--line); padding-top: 0.65rem; margin-top: 0.75rem; }
   .conn h3 { margin-bottom: 0.3rem; }
   .how { font-size: 0.86rem; color: var(--faded); font-style: italic; }
@@ -383,8 +402,8 @@ const PEOPLE = [
     uses: 'The portal’s Jäsche is Alex’s edition of AA IX. Alex’s parallels between the lectures show beside the passages they join.',
     tools: [['Jäsche reader', '../../Alex%20Li/Jasche%20reader/index.html'], ['Logic corpus', '../../Alex%20Li/logic-corpus.html']] },
   { key: 'jesus', name: 'Jesus La Paz', handle: '@yizu6201',
-    did: 'The Meier–Kant concordance: the § of Meier each passage of the lectures and of Jäsche is on, stated or inferred, with measured confidence. And the Meier text as a data file.',
-    uses: 'Powers “Where is this in Meier?” for Blomberg, the Wiener Logik, Busolt and Jäsche, and every “Lectures on this §” list.',
+    did: 'The Meier–Kant concordance: the § of Meier each passage of the lectures and of Jäsche is on, stated or inferred, with measured confidence. The Meier text as a data file. And two machine translations of every passage of Meier, the Reflexionen on Meier, the three lectures and Jäsche.',
+    uses: 'Powers “Where is this in Meier?” for Blomberg, the Wiener Logik, Busolt and Jäsche, and every “Lectures on this §” list. His translations are the English beside the German.',
     tools: [['Meier–Kant comparison', '../../Jesus-La-Paz/meier-kant-comparison.html'], ['Logik search', '../../Jesus-La-Paz/logik-search.html']] },
   { key: 'jin', name: 'Jin', handle: '@jessiejin23',
     did: 'Parallel passages across Blomberg, the Wiener Logik and Busolt, found from a list of the lectures’ concepts and their wordings.',
@@ -417,6 +436,13 @@ const SRC_HOW = {
   none: 'no § stated anywhere: placed there by the extractor, from its neighbours',
 };
 
+/* Where a text error is reported: the repository's "Text error" issue form, and the published
+   portal, so that the report can link to the passage as the reporter saw it. */
+const REPO = 'mikrishnan/kant-lab';
+const SITE_PORTAL = 'https://mikrishnan.github.io/kant-lab/Individuals/mikrishnan/portal/index.html';
+const TR_WARNING = 'Machine translation, made for Jesus La Paz’s Meier–Kant comparison by following one translator’s stated principles. ' +
+  'Neither Guyer and Wood nor Kemp Smith translated these texts, and this is not their work. Check it against the German.';
+
 /* ════════════════════════════════════════════════════════════════════════
    STATE
    ════════════════════════════════════════════════════════════════════════ */
@@ -435,6 +461,7 @@ const DOCS = {};                  // doctrine key → { groups: [[key,label]], i
 const S = {                       // what the user is looking at; mirrored in the URL
   view: 'ask', q: '', w: 5, co: '', cm: '', merge: true, off: new Set(),
   loc: null, d: null, sel: null, quote: null, preset: null, expand: new Set(),
+  en: '',                         // the English shown beside the German: a PORTAL_TR_STYLES key, or '' for none
 };
 let RESULT = null;
 const TRAIL = [];
@@ -987,7 +1014,7 @@ function renderResults() {
   let h = '<div class="res-head">';
   if (S.preset) h += '<h2>' + esc(S.preset.label) + '</h2>';
   h += '<div class="summary"><b>' + R.matches.length.toLocaleString('en') + '</b> occurrence' + (R.matches.length === 1 ? '' : 's') +
-    ' in <b>' + nPass + '</b> passage' + (nPass === 1 ? '' : 's') + ', in ' + nTexts + ' of ' + shown.length + ' texts';
+    ' in <b>' + nPass.toLocaleString('en') + '</b> passage' + (nPass === 1 ? '' : 's') + ', in ' + nTexts + ' of ' + shown.length + ' texts';
   if (S.cm && S.co.trim()) h += ' · only passages that ' + (S.cm === 'with' ? 'also mention' : 'do not mention') + ' <i>' + esc(S.co) + '</i> (' +
     (S.cm === 'with' ? R.coWith + ' do, ' + R.coWithout + ' do not' : R.coWithout + ' do not, ' + R.coWith + ' do') + ')';
   h += '</div>';
@@ -1124,13 +1151,86 @@ function quoteSpans(text, quotes) {
 }
 
 /* ════════════════════════════════════════════════════════════════════════
+   ENGLISH BESIDE THE GERMAN, AND REPORTING A TEXT ERROR
+   ════════════════════════════════════════════════════════════════════════ */
+
+const TR_FILES = new Map();       // translation file → 'loading' | 'ready' | 'failed'
+const trFor = T => (typeof PORTAL_TRANSLATIONS === 'undefined' ? [] : PORTAL_TRANSLATIONS).find(x => x.text === T.key) || null;
+const rich = s => esc(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/\*([^*\n]+)\*/g, '<i>$1</i>');
+
+/* Whether a text's translation in one style is loaded; if not, starts loading it, and draws the
+   rail again when it arrives. */
+function trState(tr, style) {
+  const files = [tr.file.replace('STYLE', style)].concat(tr.map ? [tr.map] : []);
+  const st = files.map(f => TR_FILES.get(f));
+  if (st.includes('failed')) return 'failed';
+  if (st.every(s => s === 'ready')) return 'ready';
+  files.filter(f => !TR_FILES.has(f)).forEach(f => {
+    TR_FILES.set(f, 'loading');
+    loadScript(f).then(ok => { TR_FILES.set(f, ok ? 'ready' : 'failed'); if (S.en) renderRail(); });
+  });
+  return 'loading';
+}
+
+/* A passage's English: { text, notes, part }, `part` when the translation was made for a
+   stretch of text that is not exactly this passage. */
+function trEntry(tr, style, p) {
+  const set = window.KANT_TR && window.KANT_TR[tr.set + '/' + style];
+  if (!set) return null;
+  let keys, part = false;
+  if (tr.key === 'MAP') {
+    const m = getGlobal(tr.mapGlobal), x = m && m[p.id];
+    if (!x) return null;
+    keys = x.ids; part = x.fit !== 'exact';
+  } else keys = [tr.key === 'ID' ? p.id : tr.key.replace('N', p.id.slice(1))];
+  const es = keys.map(k => set[k]).filter(Boolean);
+  if (!es.length) return null;
+  return { text: es.map(e => e[0]).join(' '), notes: [].concat(...es.map(e => e[1] || [])), part: part || es.length < keys.length };
+}
+
+function englishFor(tr, p) {
+  const st = PORTAL_TR_STYLES.find(x => x.key === S.en) || PORTAL_TR_STYLES[0];
+  const open = '<div class="pen" lang="en"><div class="lab">ENGLISH · ' + esc(st.label) + ' <i>' + esc(st.tag) + '</i></div>';
+  const state = trState(tr, st.key);
+  if (state === 'loading') return open + '<div class="empty">Loading the English…</div></div>';
+  if (state === 'failed') return open + '<div class="empty">The translation file did not load.</div></div>';
+  const e = trEntry(tr, st.key, p);
+  if (!e) return open + '<div class="empty">' + esc(personName(tr.who)) + '’s translations have no English for this passage.</div></div>';
+  return open + '<div class="tt">' + rich(e.text) + '</div>' +
+    (e.notes.length ? '<ul>' + e.notes.map(n => '<li>' + rich(n) + '</li>').join('') + '</ul>' : '') + '</div>';
+}
+function englishNotes(tr, p) {
+  const st = PORTAL_TR_STYLES.find(x => x.key === S.en) || PORTAL_TR_STYLES[0];
+  const e = trState(tr, st.key) === 'ready' && trEntry(tr, st.key, p);
+  let h = '';
+  if (e && e.part) h += '<div class="trwarn">Jesus’s text of the Jäsche Logik divides this stretch differently, so the English begins before this passage or runs on past it.</div>';
+  return h + '<div class="trwarn">' + esc(TR_WARNING) + '</div>' +
+    '<div class="from">' + esc(personName(tr.who)) + '’s translations' + (tr.map ? ', matched to Alex Li’s Jäsche by build-pins.py' : '') + '</div>';
+}
+
+/* The repository's Text error form, filled in with the passage. Only its text fields can be
+   filled from a link; the reporter picks the tool from the form's list. */
+function reportUrl(T, p) {
+  const aa = (p.cite.match(/AA \d+:[\d–-]+/) || [''])[0];
+  const u = new URLSearchParams({
+    template: 'text-error.yml',
+    title: 'Text error: ' + T.short + ', ' + p.cite,
+    where: 'The Logic Portal: ' + T.title + ', ' + p.cite + ' (passage ' + T.key + ':' + p.id + ')',
+    shows: clip(p.text.replace(/\s+/g, ' '), 1200) + '\n\nIn the portal: ' + SITE_PORTAL + '#p=' + encodeURIComponent(T.key + ':' + p.id),
+    source: aa,
+  });
+  return 'https://github.com/' + REPO + '/issues/new?' + u.toString();
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    RENDERING: the rail, one passage and everything connected to it
    ════════════════════════════════════════════════════════════════════════ */
 
 function renderRailEmpty() {
+  $('app').classList.remove('en');
   $('rail').innerHTML = '<div class="rail-empty"><h2>Follow</h2><p>Open any passage to see where it sits in the corpus:</p><ol>' +
     '<li>the textbook § it is on, and how we know;</li><li>Kant’s notes on that §, dated;</li><li>the lectures and Jäsche on the same §;</li>' +
-    '<li>what the seminar has said about it.</li></ol><p>Every step goes on the trail above, so you can go back, or copy a link to the route.</p></div>';
+    '<li>what the seminar has said about it.</li></ol><p>Every step goes on the trail above, so you can go back to any of them. Copy link gives a link to the step you are on.</p></div>';
 }
 
 function renderRail() {
@@ -1141,8 +1241,16 @@ function renderRail() {
   if (S.quote) spans = spans.concat(quoteSpans(p.text, [S.quote]).map(s => [s[0], s[1], true]));
   let h = '<div class="ptitle"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
     '<div class="pcite">' + esc(p.cite) + '</div>' +
-    '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>' +
-    '<div class="ptext" lang="de">' + marked(p.text, 0, p.text.length, spans) + '</div>';
+    '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>';
+  const tr = trFor(T);
+  h += '<div class="pactions">' +
+    (tr ? '<span><button type="button" class="btn' + (S.en ? ' on' : '') + '" data-en="' + (S.en ? '' : 'guyer') + '">' + (S.en ? 'Hide English' : 'English') + '</button>' +
+      (S.en ? ' ' + PORTAL_TR_STYLES.map(st => '<button type="button" class="btn' + (S.en === st.key ? ' on' : '') + '" data-en="' + st.key + '" title="' + esc(st.tag) + '">' + esc(st.label.replace(/ principles$/, '')) + '</button>').join(' ') : '') + '</span>' : '') +
+    '<a href="' + esc(reportUrl(T, p)) + '" target="_blank" rel="noopener" title="Opens the repository’s Text error form, filled in with this passage">Report a text error ↗</a></div>';
+  const de = '<div class="ptext" lang="de">' + marked(p.text, 0, p.text.length, spans) + '</div>';
+  $('app').classList.toggle('en', !!(tr && S.en));
+  if (tr && S.en) h += '<div class="pair">' + de + englishFor(tr, p) + '</div>' + englishNotes(tr, p);
+  else h += de;
 
   // 1. Where is this in the textbook?
   const place = placeOf(p);
@@ -1254,9 +1362,11 @@ function divesFor(T, p) {
 
 function renderTexts() {
   let h = '<h2>The texts</h2><p class="note">What the portal reads today: a first, smaller corpus, from transcriptions that are not yet clean. Every passage is cited by its Academy edition page, so links will survive the move to a better edition.</p>' +
-    '<table class="cat"><thead><tr><th>Text</th><th>Layer</th><th>Date</th><th>Passages</th><th>Words</th><th>Transcription</th><th>Brought in by</th></tr></thead><tbody>' +
-    TEXTS.map(t => '<tr><td><b>' + esc(t.title) + '</b></td><td class="small cz">' + esc(LAYER_LABEL[t.layer] || t.layer) + '</td><td>' + esc(t.date) + '</td><td class="n">' + t.n.toLocaleString('en') + '</td><td class="n">' + t.words.toLocaleString('en') + '</td><td class="small">' + esc(t.source) + '</td><td class="small">' + esc(t.credit) + '</td></tr>').join('') +
-    '</tbody></table>';
+    '<table class="cat"><thead><tr><th>Text</th><th>Layer</th><th>Date</th><th>Passages</th><th>Words</th><th>Transcription</th><th>Brought in by</th><th>English</th></tr></thead><tbody>' +
+    TEXTS.map(t => { const tr = trFor(t); return '<tr><td><b>' + esc(t.title) + '</b></td><td class="small cz">' + esc(LAYER_LABEL[t.layer] || t.layer) + '</td><td>' + esc(t.date) + '</td><td class="n">' + t.n.toLocaleString('en') + '</td><td class="n">' + t.words.toLocaleString('en') + '</td><td class="small">' + esc(t.source) + '</td><td class="small">' + esc(t.credit) + '</td>' +
+      '<td class="small">' + (tr ? 'two machine translations, by ' + esc(personName(tr.who)) + (tr.map ? '; matched to this edition by build-pins.py' : '') : '<span class="muted">none yet</span>') + '</td></tr>'; }).join('') +
+    '</tbody></table>' +
+    '<p class="note">The English is machine translation, made for Jesus La Paz’s Meier–Kant comparison: one version following the stated principles of Guyer and Wood’s Cambridge translation of the Critique, one those of Kemp Smith’s. Neither translated these texts. Open a passage and press English to see it beside the German.</p>';
   const missing = PORTAL_TEXTS.filter(T => !TEXTS.some(t => t.key === T.key));
   if (missing.length) h += '<p class="warn">In the catalogue but not loaded: ' + missing.map(T => esc(T.title)).join(', ') + '.</p>';
   h += '<div class="addtext"><h3>Adding a text</h3><p>Put the text in a <code>.js</code> data file in one of the shapes described at the top of ' +
@@ -1292,15 +1402,23 @@ function snapshot() {
 function restore(snap) {
   Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, preset: snap.presetObj || null });
 }
+/* A step is named for what changed at it: the passage, if one was opened there, and otherwise
+   the question or doctrine on the left, with the phrasing or kind picked in it. A passage left
+   open while the left side changes does not name the step. */
 function trailLabel(snap) {
-  if (snap.sel != null && P[snap.sel]) { const p = P[snap.sel]; return TEXTS[p.t].short + ', ' + p.cite.replace(/, AA.*/, ''); }
-  if (snap.d) { const d = DOCTRINES.find(x => x.key === snap.d); return d ? d.label : snap.d; }
-  return snap.presetObj ? snap.presetObj.label : snap.q;
+  if (snap.onP && P[snap.sel]) { const p = P[snap.sel]; return TEXTS[p.t].short + ', ' + p.cite.replace(/, AA.*/, ''); }
+  const d = snap.d && DOCTRINES.find(x => x.key === snap.d);
+  const base = snap.d ? (d ? d.label : snap.d) : snap.presetObj ? snap.presetObj.label : snap.q;
+  if (!snap.loc) return base;
+  const g = d && DOCS[d.key] && DOCS[d.key].groups.find(x => x[0] === snap.loc);
+  return base + ' · ' + (g ? g[1] : snap.loc);
 }
 function pushTrail() {
   const snap = snapshot();
   const cur = TRAIL[trailPos];
-  if (cur && JSON.stringify(Object.assign({}, cur, { presetObj: 0 })) === JSON.stringify(Object.assign({}, snap, { presetObj: 0 }))) return;
+  const bare = s => JSON.stringify(Object.assign({}, s, { presetObj: 0, onP: 0 }));
+  if (cur && bare(cur) === bare(snap)) return;
+  snap.onP = snap.sel != null && (!cur || cur.sel !== snap.sel);
   TRAIL.splice(trailPos + 1);
   TRAIL.push(snap);
   if (TRAIL.length > 30) TRAIL.shift();
@@ -1311,7 +1429,7 @@ function pushTrail() {
 function renderTrail() {
   if (!TRAIL.length) return;
   $('trail').innerHTML = '<span class="lbl">TRAIL</span>' + TRAIL.map((s, k) => (k ? '<span class="sep">›</span>' : '') +
-    '<span class="step' + (s.sel != null ? ' p' : '') + (k === trailPos ? ' cur' : '') + '" data-trail="' + k + '" title="' + esc(trailLabel(s)) + '">' + esc(trailLabel(s)) + '</span>').join('');
+    '<span class="step' + (s.onP ? ' p' : '') + (k === trailPos ? ' cur' : '') + '" data-trail="' + k + '" title="' + esc(trailLabel(s)) + '">' + esc(trailLabel(s)) + '</span>').join('');
   const cur = $('trail').querySelector('.cur');
   if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
@@ -1329,6 +1447,7 @@ function writeHash() {
   if (S.off.size) u.set('off', [...S.off].join(','));
   if (S.loc) u.set('loc', S.loc);
   if (S.sel != null && P[S.sel]) { u.set('p', TEXTS[P[S.sel].t].key + ':' + P[S.sel].id); if (S.quote) u.set('quote', S.quote); }
+  if (S.en) u.set('en', S.en);
   history.replaceState(null, '', '#' + u.toString());
 }
 function readHash() {
@@ -1344,6 +1463,7 @@ function readHash() {
   S.off = new Set((u.get('off') || '').split(',').filter(Boolean));
   S.loc = u.get('loc') || null;
   S.quote = u.get('quote') || null;
+  S.en = PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : '';
   const p = u.get('p');
   if (p) { const k = p.indexOf(':'); const i = BYID.get(p.slice(0, k) + ':' + p.slice(k + 1)); S.sel = i == null ? null : i; }
   syncForm();
@@ -1408,9 +1528,10 @@ function wire() {
   });
 
   document.addEventListener('click', e => {
-    const el = e.target.closest('[data-open],[data-loc],[data-seminar],[data-doc],[data-view],[data-trail],[data-expand],[data-expand-rail],[data-para],[data-text]');
+    const el = e.target.closest('[data-open],[data-loc],[data-seminar],[data-doc],[data-view],[data-trail],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en]');
     if (!el) return;
     const d = el.dataset;
+    if (d.en != null) { S.en = d.en; renderRail(); writeHash(); return; }
     if (d.seminar) { const s = SEMINAR.find(x => x.key === d.seminar); ask({ q: s.q, w: s.w, co: s.co || '', cm: s.cm || '', preset: seminarPreset(s) }); return; }
     if (d.doc) { Object.assign(S, { d: d.doc, q: '', co: '', cm: '', loc: null, expand: new Set(), preset: null }); $('presets-box').open = false; showView('ask'); syncForm(); renderResults(); pushTrail(); $('left').scrollTop = 0; return; }
     if (d.view) { showView(d.view); return; }

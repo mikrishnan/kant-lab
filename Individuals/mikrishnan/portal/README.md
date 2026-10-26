@@ -23,6 +23,15 @@ and then answers at once.
   notes on that §, oldest first, then the lectures and Jäsche on the same §, the tradition
   behind it, and what the seminar has said about it. Every step goes on the trail, and
   **Copy link** reproduces the exact view.
+- **English.** Press **English** on a passage to see a translation beside the German, in one
+  of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
+  are Jesus La Paz's machine translations, made for his Meier–Kant comparison; neither
+  translator translated these texts, and the pane says so under every one. There is English
+  for Meier, the Reflexionen on Meier, the three lectures and Jäsche, not yet for Baumgarten.
+  Each text's translation loads only when it is first wanted.
+- **Report a text error.** Every passage has a link that opens the repository's *Text error*
+  form with the passage, its citation and a link back to it already filled in. The reporter
+  chooses the tool from the form's list and gives their source.
 - **The seminar's questions, doctrines and lexicons** are one click away:
   - the questions asked in class so far;
   - kinds of immediate inference, forms of judgment and kinds of syllogism (Nik Land);
@@ -49,6 +58,7 @@ Every connection says where it comes from; the **Contributors** page lists every
 | Forms of judgment | Aidan Chong |
 | Dates of the Reflexionen | Adickes' phases, `data/phases-adickes.js` |
 | The tradition behind Meier's §§ | the Meier Reader's `data/tradition-meier.js` |
+| English translations | Jesus La Paz's `translations/`, machine-made in two styles |
 
 ## Adding a text
 
@@ -61,11 +71,15 @@ edition arrives its text can replace these transcriptions without breaking the l
 
 ## The pinned files
 
-Four things the portal needs live inside other people's pages, or under another parse's
+Five things the portal needs live inside other people's pages, or under another parse's
 ids. [build-pins.py](build-pins.py) copies them into [pinned/](pinned/) without changing
 them, and says so at the top of each file:
 - Sophia's mediate inferences;
 - Jesus's concordance links for Jäsche, re-keyed to Alex's blocks;
+- which of Jesus's Jäsche blocks make up each of Alex's, so that his translations, keyed by
+  his own blocks, can be shown beside Alex's text. 725 of Alex's 754 passages begin and end
+  where Jesus's do. In the other 29, Alex divides what Jesus keeps whole, so the English
+  shown runs past the passage, and the pane says so;
 - Jin's concepts;
 - Aidan's forms.
 

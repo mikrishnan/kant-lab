@@ -103,3 +103,33 @@ const PORTAL_LAYERS = [
   { key: 'parallels', file: '../../Alex%20Li/annotations.js', global: 'LC_PARALLELS', who: 'alex' },
   { key: 'tradition', file: '../../../data/tradition-meier.js', global: 'TRADITION', who: 'readers' },
 ];
+
+/* English translations the portal shows beside a passage when the reader asks for English.
+   They are loaded only then, one text and one style at a time. Each file sets
+   KANT_TR['<set>/<style>'] = { entry: [English, [translator's notes]] }.
+
+     text   the PORTAL_TEXTS key it translates
+     set    the name its file files its entries under
+     file   the file, with STYLE where the style's key goes
+     key    how a passage's entry is named: 'ID' for the passage's own block id;
+            'meier:N' or 'refl:N', with N the passage's § or Reflexion number
+     map    for a text cut differently from the one the translation was made from: a pinned file
+            naming, for each of the portal's passages, the entries that make it up (mapGlobal)
+     who    the Contributors entry the portal credits for it
+
+   These are machine translations, each following one published translator's stated method;
+   neither translator translated these texts. The portal says so wherever it shows one.
+   Baumgarten and the Reflexionen on Baumgarten have none yet. */
+const PORTAL_TR_STYLES = [
+  { key: 'guyer', label: 'Guyer–Wood principles', tag: 'literal; one English word per German term; sentences kept whole' },
+  { key: 'kemp', label: 'Kemp Smith principles', tag: 'faithful to the sense; readable English; tangled sentences resolved' },
+];
+const PORTAL_TRANSLATIONS = [
+  { text: 'meier', set: 'meier', key: 'meier:N', file: '../../Jesus-La-Paz/translations/meier-STYLE.js', who: 'jesus' },
+  { text: 'refl-logik', set: 'refl', key: 'refl:N', file: '../../Jesus-La-Paz/translations/refl-STYLE.js', who: 'jesus' },
+  { text: 'blomberg', set: 'blomberg', key: 'ID', file: '../../Jesus-La-Paz/translations/blomberg-STYLE.js', who: 'jesus' },
+  { text: 'wiener', set: 'wiener', key: 'ID', file: '../../Jesus-La-Paz/translations/wiener-STYLE.js', who: 'jesus' },
+  { text: 'busolt', set: 'busolt', key: 'ID', file: '../../Jesus-La-Paz/translations/busolt-STYLE.js', who: 'jesus' },
+  { text: 'jaesche', set: 'jaesche', key: 'MAP', file: '../../Jesus-La-Paz/translations/jaesche-STYLE.js', who: 'jesus',
+    map: 'pinned/jaesche-translation-map.js', mapGlobal: 'PORTAL_PIN_JAESCHE_TR' },
+];
