@@ -38,7 +38,7 @@ header h1 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.15rem; 
 header .sub { font-size: .9rem; opacity: .85; }
 header .glink { margin-left: auto; font-family: 'Cinzel', serif; font-size: .74rem; letter-spacing: .08em; color: var(--parchment); text-decoration: none; border: 1px solid rgba(244,237,224,.5); border-radius: 12px; padding: 3px 11px; }
 header .glink:hover { background: rgba(244,237,224,.15); }
-/* reading mode: German only, interlinear, or try first (the English on demand). Glossary features are not part of it */
+/* reading mode: German only, interlinear, or With English (try the German first, the English on demand). Glossary features are not part of it */
 #mode { margin-left: auto; display: flex; border: 1px solid rgba(244,237,224,.5); border-radius: 12px; overflow: hidden; align-self: center; }
 #mode button { font-family: 'Cinzel', serif; font-size: .7rem; letter-spacing: .07em; color: var(--parchment); background: none; border: 0; padding: 3px 11px; cursor: pointer; }
 #mode button + button { border-left: 1px solid rgba(244,237,224,.5); }
@@ -265,7 +265,7 @@ body.noinf .toc-note { display: none; }
   <div id="mode" role="radiogroup" aria-label="Reading mode">
     <button type="button" role="radio" data-m="de" aria-checked="false" title="Read the German alone: no English appears over the sentences, and the search looks only at the German. Hovering an underlined glossary term still shows the glossary’s rendering of it.">German only</button>
     <button type="button" role="radio" data-m="il" aria-checked="false" title="Interlinear: each phrase of the German stands over its own short English gloss, in German word order. Click a sentence for its full English translation. Hovering an underlined glossary term shows the glossary’s rendering of it.">Interlinear</button>
-    <button type="button" role="radio" data-m="tf" aria-checked="true" class="on" title="Try first: hovering a phrase gives only that phrase’s gloss. The whole sentence’s English waits until you click the sentence, press Space or Enter, or rest on it for a few seconds. ← and → step from sentence to sentence.">Try first</button>
+    <button type="button" role="radio" data-m="tf" aria-checked="true" class="on" title="With English: hovering a phrase gives only that phrase’s gloss. The whole sentence’s English waits until you click the sentence, press Space or Enter, or rest on it for a few seconds. ← and → step from sentence to sentence.">With English</button>
   </div>
   <a class="glink" href="glossary/index.html" target="_blank" rel="noopener" title="The shared glossary: one English rendering for every Kantian term">Glossary ↗</a>
 </header>
@@ -365,7 +365,7 @@ const TOC_GROUPS = {
 /* ── state ── */
 let wi = 0;              // the text on show
 let mode = 'tf';         // reading mode: 'de' German only · 'il' interlinear glosses under the phrases ·
-                         // 'tf' try first: phrase glosses on hover, the sentence's English on demand
+                         // 'tf' With English (try first): phrase glosses on hover, the sentence's English on demand
 let hovTerm = null;      // the glossary term under the pointer, for German-only mode
 let shown = null;        // try-first mode: 'blockId:k' of the sentence whose English has been revealed
 let pauseT = null;       // try-first mode: the timer that reveals a sentence the pointer rests on
