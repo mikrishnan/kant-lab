@@ -99,6 +99,7 @@ const PORTAL_LAYERS = [
   { key: 'mediate', file: 'pinned/sophia-mediate-inferences.js', global: 'PORTAL_PIN_SOPHIA', who: 'sophia' },
   { key: 'principles', file: '../../Feng/principles-lexicon.js', global: 'PRINCIPLE_LEXICON', who: 'feng' },
   { key: 'concepts', file: 'pinned/jin-concepts.js', global: 'PORTAL_PIN_JIN', who: 'jin' },
+  { key: 'stopwords', file: 'pinned/jin-stopwords.js', global: 'PORTAL_PIN_JIN_STOP', who: 'jin' },
   { key: 'forms', file: 'pinned/aidan-forms.js', global: 'PORTAL_PIN_AIDAN', who: 'aidan' },
   { key: 'parallels', file: '../../Alex%20Li/annotations.js', global: 'LC_PARALLELS', who: 'alex' },
   { key: 'tradition', file: '../../../data/tradition-meier.js', global: 'TRADITION', who: 'readers' },

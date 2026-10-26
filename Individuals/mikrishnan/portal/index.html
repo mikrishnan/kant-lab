@@ -115,7 +115,51 @@
   #app.en:not(.no-rail) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
   #left { overflow: auto; padding: 1.4rem 1.8rem 5rem; }
   #left > div { max-width: 54rem; margin: 0 auto; }
-  #rail { overflow: auto; border-left: 1px solid var(--line); background: var(--card); padding: 1.1rem 1.6rem 5rem; container-type: inline-size; }
+  #left { container-type: inline-size; }
+  #rail { border-left: 1px solid var(--line); background: var(--card); padding: 0; display: flex; flex-direction: column; overflow: hidden; container-type: inline-size; }
+  #railhead { padding: 1rem 1.6rem 0; border-bottom: 1px solid var(--line-soft); }
+  #railbody { flex: 1; overflow: auto; padding: 0.9rem 1.6rem 5rem; }
+  .rtabs { display: flex; gap: 1.3rem; margin-top: 0.55rem; align-items: baseline; }
+  .rtabs button { background: none; border: none; border-bottom: 2px solid transparent; padding: 0.3rem 0; margin-bottom: -1px; color: var(--faded); cursor: pointer; font-size: 0.98rem; }
+  .rtabs button:hover { color: var(--accent); }
+  .rtabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
+  .rtabs .spacer { flex: 1; }
+  .rtabs .lnk { font-size: 0.86rem; }
+
+  /* ── Full text: a whole transcript, read through, its paragraphs clickable ─ */
+  .fulltext { font-size: 1.04rem; line-height: 1.6; }
+  .fulltext .fh { font-family: 'Cinzel', serif; font-size: 0.76rem; letter-spacing: 0.07em; color: var(--accent); margin: 1.5rem 0 0.4rem 7.1rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--line-soft); }
+  .fp { display: grid; grid-template-columns: 6.2rem minmax(0, 1fr); gap: 0.9rem; padding: 0.35rem 0.55rem 0.35rem 0; border-radius: 6px; cursor: pointer; border-left: 3px solid transparent; }
+  .fp:hover { background: var(--card); }
+  .fp.focus { background: #fbf1d6; border-left-color: var(--accent); }
+  .fpm { font-size: 0.78rem; color: var(--faded); text-align: right; padding-top: 0.22rem; line-height: 1.3; }
+  .fpm b { display: block; color: var(--accent); font-weight: 600; }
+  .fpm i { display: block; }
+  .fpt { white-space: pre-wrap; }
+  @container (max-width: 32rem) {
+    .fp { grid-template-columns: minmax(0, 1fr); gap: 0.05rem; padding-left: 0.5rem; }
+    .fpm { text-align: left; } .fpm b, .fpm i { display: inline; margin-right: 0.4rem; }
+    .fulltext .fh { margin-left: 0.5rem; }
+  }
+  .readbar { position: sticky; top: -1.4rem; z-index: 2; background: var(--parchment); display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.7rem 0 0.6rem; margin: -0.6rem 0 0.4rem; border-bottom: 1px solid var(--line-soft); }
+  .readbar b { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; letter-spacing: 0.03em; }
+  .readbar .spacer { flex: 1; }
+  .readbar select, .readbar input { padding: 0.14rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); font-size: 0.92rem; max-width: 15rem; }
+  .readbar input { width: 10.5rem; }
+  #selbtn { position: fixed; z-index: 40; background: var(--accent); color: var(--parchment); border: none; border-radius: 999px; padding: 0.22rem 0.8rem; font-size: 0.88rem; cursor: pointer; box-shadow: 0 2px 8px rgba(26, 18, 8, 0.25); }
+  .starts .qcards.tcards { grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
+
+  /* ── Parallel passages ─ */
+  .pset { margin: 0 0 1.5rem; }
+  .pset .ptop { font-weight: 600; font-size: 1.05rem; }
+  .pset .pnote { color: var(--faded); font-style: italic; font-size: 0.94rem; margin: 0.15rem 0 0.45rem; }
+  .pgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.55rem; }
+  .pcell { background: var(--card); border: 1px solid var(--line-soft); border-radius: 8px; padding: 0.5rem 0.7rem; cursor: pointer; font-size: 0.95rem; }
+  .pcell:hover { border-color: var(--accent-light); }
+  .pcell.sel { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+  .pcell .cite { font-size: 0.8rem; color: var(--faded); margin-bottom: 0.15rem; }
+  .pcell .cite b { color: var(--accent); font-weight: 600; }
+  .simv { font-size: 0.78rem; color: var(--faded); margin-left: 0.4rem; font-variant-numeric: tabular-nums; }
 
   h2 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 1.2rem; letter-spacing: 0.03em; margin: 0 0 0.25rem; }
   h3 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 0.5rem; }
@@ -366,8 +410,8 @@
   <div class="brand"><a href="../../../index.html">KANT LAB</a><span class="slash">/</span><b data-home="1" title="Back to the start">The Logic Portal</b></div>
   <nav>
     <button type="button" data-view="ask" class="on">Search</button>
+    <button type="button" data-view="read">Read</button>
     <button type="button" data-view="explore">Explore</button>
-    <button type="button" data-view="texts">Texts</button>
     <button type="button" data-view="people">Contributors</button>
   </nav>
   <span class="spacer"></span>
@@ -377,6 +421,7 @@
 <div id="trail" hidden></div>
 <div id="routemap" hidden></div>
 <div id="tip" hidden></div>
+<button type="button" id="selbtn" hidden></button>
 
 <div id="app" class="no-rail">
   <section id="left">
@@ -410,18 +455,19 @@
           near each other, in any order. Quotation marks, <code>"der form nach"</code>, keep words together and in order.
           <code>OR</code> joins alternatives. A regular expression between slashes, <code>/formali?ter/</code>, is matched against the text as printed.</p>
           <p><b>Overview</b> shows every distinct phrasing the search found and where it occurs; <b>Passages</b> lists them.
-          Open a passage to see the textbook § it belongs to, Kant’s notes there, and the other texts on the same §.</p>
+          Click a passage to read it in its full text on the right; <b>Connections</b> there shows the textbook § it belongs to,
+          Kant’s notes on it, the other texts on the same §, and its parallel passages. Select words in any text to search for them.</p>
         </div>
       </form>
       <div id="results"></div>
     </div>
 
+    <div id="view-read" hidden></div>
     <div id="view-explore" hidden></div>
-    <div id="view-texts" hidden></div>
     <div id="view-people" hidden></div>
   </section>
 
-  <aside id="rail" hidden></aside>
+  <aside id="rail" hidden><div id="railhead"></div><div id="railbody"></div></aside>
 </div>
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
@@ -434,23 +480,6 @@
 /* ════════════════════════════════════════════════════════════════════════
    CONTENT: the seminar's questions, the classified doctrines, the people
    ════════════════════════════════════════════════════════════════════════ */
-
-/* Questions the seminar has asked. Each is an ordinary search, so its settings can be read
-   off the form and changed. */
-const SEMINAR = [
-  { key: 'formal-falsehood', label: 'Formal falsehood: which locutions, how often?',
-    q: 'form* fals*', w: 4,
-    note: 'Every place where a word beginning form- stands within four words of one beginning fals-: formaliter falsch, der Form nach falsch, Falschheit der Form, falsitas formalis. The Phrasings table answers “which locutions, and how often”.' },
-  { key: 'sufficient-ground', label: 'The principle of sufficient ground: its formulations; is it in Meier?',
-    q: 'zureichend* grund* OR ratio* sufficien* OR "satz des grundes" OR "principium rationis" OR "nihil est sine ratione"', w: 3,
-    note: 'Its German and Latin formulations across the corpus. The Meier row of “Where it occurs” answers whether Meier has it; open his passages to read them. Feng’s lexicon, below, has the principle’s stock forms.' },
-  { key: 'contradiction-transcendental', label: 'The principle of contradiction in general and in transcendental logic',
-    q: 'satz* widerspr* OR principi* contradict* OR "satz der contradictio"', w: 3, cm: 'with', co: 'transcend* OR transzend*',
-    note: 'Statements of the principle in passages that also speak of the transcendental. Change the filter to  allgemein* logik*  to compare general logic. The published works, where Kant draws this distinction most fully, are not in the catalogue yet.' },
-  { key: 'opposition-contradiction', label: 'Opposition and contradiction: how do they relate?',
-    q: 'oppos* OR entgegengesetz* OR entgegensetz*', w: 5, cm: 'with', co: 'widerspr* OR contradict* OR contradictori*',
-    note: 'Passages that speak of opposition and of contradiction together. For contradiction as one kind of opposition of judgments, see Nik’s immediate inferences per judicia opposita, below.' },
-];
 
 /* Doctrines students have classified passage by passage. `build` turns their file into
    items { pi (passage), quotes, labels, note }. */
@@ -550,11 +579,15 @@ const S = {                       // what the user is looking at; mirrored in th
   view: 'ask', q: '', w: 5, co: '', cm: '', merge: true, off: new Set(),
   loc: null, d: null, sel: null, quote: null, preset: null, expand: new Set(),
   tab: 'overview',                // results: 'overview' (phrasings, where) or 'passages'
+  rtab: 'text',                   // the right pane: 'text' (the passage in its full text) or 'conn' (its connections)
+  readKey: null, readAt: null,    // the text being read in full on the left, and where
   secOpen: new Set(), secClosed: new Set(),   // reading-pane sections the reader opened or closed
   en: '',                         // the English shown beside the German: a PORTAL_TR_STYLES key, or '' for none
 };
 let RESULT = null;
 let LOAD_FAILED = [];
+const FT = {};                    // open full texts, by container id: { t, lo, hi, focus, el, scroller }
+const SIM = { post: null, ok: false };   // the wording index behind parallel passages
 const TRAIL = [];
 let trailPos = -1;
 
@@ -611,6 +644,7 @@ async function boot() {
   });
   buildConnections();
   buildDoctrines();
+  buildSim();
   console.info('Logic Portal: files loaded in ' + Math.round(t1 - t0) + ' ms, indexed in ' + Math.round(performance.now() - t1) + ' ms');
 
   $('loading').hidden = true;
@@ -672,6 +706,8 @@ function tokenize(p) {
    ════════════════════════════════════════════════════════════════════════ */
 
 function addPassage(T, o) {
+  if (T.first == null) T.first = P.length;
+  T.last = P.length;
   const p = Object.assign({ i: P.length, t: T.idx, sec: '', year: T.year, dateLabel: T.date }, o);
   P.push(p);
   BYID.set(T.key + ':' + p.id, p.i);
@@ -838,6 +874,47 @@ function buildDoctrines() {
     if (!D) return;
     D.groups = d.groups || [...new Set(D.items.flatMap(i => i.labels))].sort().map(k => [k, k]);
   });
+}
+
+/* Parallel passages, found as Jin's parallel passages find them: by the words two passages share,
+   each weighted by how rare it is in the corpus (tf-idf), leaving out Jin's stopwords. */
+function buildSim() {
+  const N = P.length, V = VOCAB.length;
+  const stop = new Set((LAYERS.stopwords || []).map(w => VID.get(normWord(String(w).toLowerCase()))).filter(v => v != null));
+  const df = new Uint32Array(V);
+  for (const p of P) new Set(p.ids).forEach(v => { df[v]++; });
+  const maxDf = N * 0.04;
+  const keep = v => df[v] >= 2 && df[v] <= maxDf && !stop.has(v) && VOCAB[v].length > 2;
+  const post = new Array(V);
+  for (const p of P) {
+    const tf = new Map();
+    for (const v of p.ids) if (keep(v)) tf.set(v, (tf.get(v) || 0) + 1);
+    const ws = [];
+    let norm = 0;
+    tf.forEach((c, v) => { const w = (1 + Math.log(c)) * Math.log(N / df[v]); ws.push([v, w]); norm += w * w; });
+    norm = Math.sqrt(norm) || 1;
+    ws.sort((a, b) => b[1] - a[1]);
+    p.simT = new Int32Array(ws.length);
+    p.simW = new Float32Array(ws.length);
+    ws.forEach(([v, w], j) => { p.simT[j] = v; p.simW[j] = w / norm; (post[v] = post[v] || []).push(p.i, w / norm); });
+  }
+  SIM.post = post;
+  SIM.ok = true;
+}
+/* The passages of other texts nearest p in wording: [[passage index, similarity], …]. */
+function parallelsFor(p, k) {
+  if (!SIM.ok || !p.simT || !p.simT.length) return [];
+  const scores = new Map();
+  for (let j = 0, n = Math.min(p.simT.length, 40); j < n; j++) {
+    const ps = SIM.post[p.simT[j]], w = p.simW[j];
+    if (!ps) continue;
+    for (let m = 0; m < ps.length; m += 2) {
+      const q = ps[m];
+      if (P[q].t === p.t) continue;
+      scores.set(q, (scores.get(q) || 0) + w * ps[m + 1]);
+    }
+  }
+  return [...scores.entries()].filter(e => e[1] >= 0.12).sort((a, b) => b[1] - a[1]).slice(0, k);
 }
 
 /* Where a passage sits in a textbook: { book, paras, how, tier ('stated'|'inferred'|'interp'), who }. */
@@ -1039,24 +1116,26 @@ function statusText() {
     (LOAD_FAILED.length ? ' · could not load: ' + LOAD_FAILED.join(', ') : '');
 }
 
-const seminarCards = () => SEMINAR.map(s => '<button type="button" class="qcard" data-seminar="' + s.key + '">' + esc(s.label) + '</button>').join('');
-
 /* Arriving: one question box (in the page), and the seminar's questions to start from. */
 function renderHome(box) {
-  box.innerHTML = '<div class="starts"><div class="ph">START FROM A QUESTION THE SEMINAR ASKED</div><div class="qcards">' + seminarCards() + '</div>' +
-    '<p class="more-starts">Or <span class="lnk" data-view="explore">explore</span> what the seminar has classified: the kinds of inference and judgment, the logical principles, the lectures’ concepts.</p></div>' +
+  box.innerHTML = '<div class="starts"><div class="ph">OR READ A TEXT IN FULL</div><div class="qcards tcards">' + TEXTS.map(textCard).join('') + '</div>' +
+    '<p class="more-starts">Or start from the seminar’s work in <span class="lnk" data-view="explore">Explore</span>: the kinds of inference and judgment, the logical principles, the lectures’ concepts, parallel passages.</p></div>' +
     '<div class="home-foot">' + esc(statusText()) + '</div>';
 }
+const textCard = t => '<button type="button" class="qcard" data-read="' + t.key + '">' + esc(t.title) +
+  '<span class="who">' + esc(t.date) + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + '</span></button>';
 
 /* Explore: every starting point the seminar has built, in one place. */
 function renderExplore() {
-  let h = '<div class="explore"><h2>Explore</h2><p class="intro">Starting points the seminar has built. Each opens in Search, ready to follow into the texts.</p>';
-  h += '<section><div class="ph">QUESTIONS THE SEMINAR HAS ASKED</div><div class="qcards">' + seminarCards() + '</div></section>';
+  let h = '<div class="explore"><h2>Explore</h2><p class="intro">Starting points the seminar has built. Each lists its passages; click one to read it in its full text.</p>';
   const docs = DOCTRINES.filter(d => DOCS[d.key] && DOCS[d.key].items.length);
   const extra = { immediate: ' · with the square of opposition', judgement: ' · with the table of judgments' };
   if (docs.length) h += '<section><div class="ph">DOCTRINES, CLASSIFIED PASSAGE BY PASSAGE</div><div class="qcards">' +
     docs.map(d => '<button type="button" class="qcard" data-doc="' + d.key + '">' + esc(d.label) +
       '<span class="who">' + DOCS[d.key].items.length + ' passages · ' + esc(personName(d.who)) + (extra[d.key] || '') + '</span></button>').join('') + '</div></section>';
+  if (LAYERS.parallels) h += '<section><div class="ph">PARALLEL PASSAGES</div><div class="qcards">' +
+    '<button type="button" class="qcard" data-doc="parallels">Parallels across the lectures<span class="who">' + LAYERS.parallels.length + ' sets chosen by hand · Alex Li</span></button>' +
+    '<div class="qcard static">The parallels of any passage<span class="who">Open any passage: under Connections, the passages nearest it in wording, measured as Jin’s parallel passages measure them</span></div></div></section>';
   const cards = [];
   const lex = LAYERS.principles;
   if (lex) {
@@ -1100,7 +1179,6 @@ function syncForm() {
   $('co').value = S.co;
   $('cm').value = S.cm;
   $('merge').checked = S.merge;
-  document.querySelectorAll('[data-seminar]').forEach(b => b.classList.toggle('on', !!(S.preset && S.preset.key === b.dataset.seminar)));
   document.querySelectorAll('[data-doc]').forEach(b => b.classList.toggle('on', S.d === b.dataset.doc));
   renderTextChips();
   updateOptSum();
@@ -1212,7 +1290,32 @@ function marked(text, a, b, spans) {
   return out + esc(text.slice(pos, b));
 }
 
+const VIEW_LABEL = { parallels: 'Parallels across the lectures' };
+
+function renderParallels(box) {
+  const sets = LAYERS.parallels || [];
+  const kinds = [...new Set(sets.map(x => x.kind).filter(Boolean))];
+  let h = '<div class="res-head"><div class="res-title">Parallel passages across the lectures</div>' +
+    '<div class="summary"><b>' + sets.length + '</b> sets of passages, chosen by hand by Alex Li</div><div class="from">Alex Li’s annotations of the three lectures</div>' +
+    '<p class="note">Click a passage to read it in its full text. Every passage’s own parallels, found by shared wording, are under Connections when you open it.</p></div>';
+  if (kinds.length > 1) h += '<div class="kchips">' + kinds.map(k => '<button type="button" class="kchip' + (S.loc === k ? ' on' : '') + '" data-loc="' + esc(k) + '">' + esc(k) + '<b>' + sets.filter(x => x.kind === k).length + '</b></button>').join('') + '</div>';
+  sets.filter(x => !S.loc || x.kind === S.loc).forEach(set => {
+    const cells = (set.passages || []).map(x => ({ x, p: passage(x.work, x.block) })).filter(o => o.p);
+    if (!cells.length) return;
+    h += '<div class="pset"><div class="ptop">' + esc(set.topic) + '</div>' + (set.note ? '<div class="pnote">' + esc(set.note) + '</div>' : '') + '<div class="pgrid">' +
+      cells.map(o => {
+        const T = TEXTS[o.p.t], sp = quoteSpans(o.p.text, [o.x.quote]);
+        const f = sp[0] || [0, Math.min(220, o.p.text.length)];
+        const a = Math.max(0, f[0] - 70), b = Math.min(o.p.text.length, f[1] + 70);
+        return '<div class="pcell' + (S.sel === o.p.i ? ' sel' : '') + '" data-open="' + o.p.i + '" data-quote="' + esc(o.x.quote || '') + '"><div class="cite"><b>' + esc(T.short) + '</b> · ' + esc(o.p.cite) + ' · ' + esc(T.date) + '</div>' +
+          '<div lang="de">' + (a > 0 ? '… ' : '') + marked(o.p.text, a, b, sp.map(z => [z[0], z[1], true])) + (b < o.p.text.length ? ' …' : '') + '</div></div>';
+      }).join('') + '</div></div>';
+  });
+  box.innerHTML = h;
+}
+
 function renderDoctrine(box) {
+  if (S.d === 'parallels') return renderParallels(box);
   const d = DOCTRINES.find(x => x.key === S.d);
   const D = d && DOCS[d.key];
   if (!D) { box.innerHTML = '<div class="empty">That classification did not load.</div>'; return; }
@@ -1453,26 +1556,46 @@ function sec(key, title, value, count, body, credit, defOpen) {
     '<div class="body">' + body + (credit ? '<div class="from">' + credit + '</div>' : '') + '</div></details>';
 }
 
-function renderRail() {
+function renderRail(headOnly) {
   const rail = $('rail');
   if (S.sel == null || !P[S.sel]) {
     rail.hidden = true;
     $('app').classList.add('no-rail');
     $('app').classList.remove('en');
+    delete FT.railtext;
     return;
   }
   rail.hidden = false;
   $('app').classList.remove('no-rail');
   const p = P[S.sel], T = TEXTS[p.t];
+  const readingHere = S.view === 'read' && S.readKey === T.key;
+  $('railhead').innerHTML = '<div class="rhead"><div class="rwork"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
+    '<button type="button" class="rclose" data-close-rail="1" title="Close">×</button></div>' +
+    '<div class="pcite">' + esc(p.cite) + '</div>' +
+    '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>' +
+    '<div class="rtabs"><button type="button" data-rtab="text"' + (S.rtab !== 'conn' ? ' class="on"' : '') + '>Full text</button>' +
+    '<button type="button" data-rtab="conn"' + (S.rtab === 'conn' ? ' class="on"' : '') + '>Connections</button><span class="spacer"></span>' +
+    (readingHere ? '' : '<span class="lnk" data-readat="' + p.i + '" title="Open this text on the left, to read it through">Read on the left ↙</span>') + '</div>';
+  if (headOnly) return;
+  const body = $('railbody');
+  if (S.rtab === 'conn') {
+    delete FT.railtext;
+    body.innerHTML = renderConnections(p, T);
+    body.scrollTop = 0;
+  } else {
+    $('app').classList.remove('en');
+    body.innerHTML = '<div id="railtext" class="fulltext"></div>';
+    ftOpen($('railtext'), body, p.i, p.i, 24);
+  }
+}
+
+/* The passage itself, its English, and everything that hangs on it. */
+function renderConnections(p, T) {
   let spans = [];
   if (RESULT && RESULT.byPass && RESULT.byPass.has(p.i) && !S.d) spans = RESULT.byPass.get(p.i).map(m => [p.ts[m.a], p.te[m.b], m.loc === S.loc]);
-  if (S.quote) spans = spans.concat(quoteSpans(p.text, [S.quote]).map(s => [s[0], s[1], true]));
-  let h = '<div class="rhead"><div class="rwork"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
-    '<button type="button" class="rclose" data-close-rail="1" title="Close this passage">×</button></div>' +
-    '<div class="pcite">' + esc(p.cite) + '</div>' +
-    '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>';
+  if (S.quote) spans = spans.concat(quoteSpans(p.text, [S.quote]).map(z => [z[0], z[1], true]));
   const tr = trFor(T);
-  h += '<div class="pactions">' +
+  let h = '<div class="pactions">' +
     (tr ? '<span><button type="button" class="btn' + (S.en ? ' on' : '') + '" data-en="' + (S.en ? '' : 'guyer') + '">' + (S.en ? 'Hide English' : 'English') + '</button>' +
       (S.en ? ' ' + PORTAL_TR_STYLES.map(st => '<button type="button" class="btn' + (S.en === st.key ? ' on' : '') + '" data-en="' + st.key + '" title="' + esc(st.tag) + '">' + esc(st.label.replace(/ principles$/, '')) + '</button>').join(' ') : '') + '</span>' : '') +
     '<a href="' + esc(reportUrl(T, p)) + '" target="_blank" rel="noopener" title="Opens the repository’s Text error form, filled in with this passage">Report a text error ↗</a></div>';
@@ -1481,7 +1604,6 @@ function renderRail() {
   if (tr && S.en) h += '<div class="pair">' + de + englishFor(tr, p) + '</div>' + englishNotes(tr, p);
   else h += de;
 
-  // Where is this in the textbook?
   const place = placeOf(p);
   if (place) {
     const book = textByKey(place.book);
@@ -1498,21 +1620,104 @@ function renderRail() {
     h += sec('place', 'In Meier', '<span class="muted">no link for this passage yet</span>', null, '<div class="empty">Neither the text nor the concordance places this passage.</div>', '', false);
   }
 
-  // What the seminar has said about it
-  const an = ANNOT.get(p.i) || [];
+  h += parallelsSection(p);
+
+  const an = (ANNOT.get(p.i) || []).filter(a => !(a.links && a.links.length));
   if (an.length) {
     h += sec('seminar', 'The seminar on this passage', '', an.length, an.map(a => '<div class="ann"><div class="lab">' + esc(a.label) + '</div>' + (a.text ? '<div>' + esc(a.text) + '</div>' : '') +
-      (a.links && a.links.length ? '<div class="small">Parallel in: ' + a.links.map(i => '<span class="lnk" data-open="' + i + '">' + esc(TEXTS[P[i].t].short + ', ' + P[i].cite) + '</span>').join(' · ') + '</div>' : '') +
       (a.doc ? '<div class="small"><span class="lnk" data-doc="' + a.doc + '">See every passage so filed</span></div>' : '') +
       '<div class="from">' + esc(personName(a.who)) + '</div></div>').join(''), '', true);
   }
-
-  // Deep dives into the students' own tools
   const dives = divesFor(T, p);
   if (dives.length) h += sec('deeper', 'Go deeper', '<span class="muted small">in the students’ own tools</span>', null,
     '<div class="dives">' + dives.map(([l, u]) => '<a href="' + u + '" target="_blank" rel="noopener">' + esc(l) + ' ↗</a>').join('') + '</div>', '', false);
-  rail.innerHTML = h;
-  rail.scrollTop = 0;
+  return h;
+}
+
+/* Parallel passages: Alex's, chosen by hand, then the nearest in wording. */
+function parallelsSection(p) {
+  const curated = (ANNOT.get(p.i) || []).filter(a => a.links && a.links.length);
+  const sims = parallelsFor(p, 8);
+  if (!curated.length && !sims.length) return '';
+  let body = curated.map(a => '<div class="ann"><div class="lab">' + esc(a.label.replace(/^Parallel · /, '')) + '</div>' + (a.text ? '<div>' + esc(a.text) + '</div>' : '') +
+    '<ul class="items">' + a.links.map(i => '<li data-open="' + i + '"><span class="c">' + esc(TEXTS[P[i].t].short + ', ' + P[i].cite) + '</span>' + esc(clip(P[i].text.replace(/\s+/g, ' '), 90)) + '</li>').join('') + '</ul>' +
+    '<div class="from">Alex Li’s parallels, chosen by hand</div></div>').join('');
+  if (sims.length) body += '<div class="sub-h">NEAREST IN WORDING</div><ul class="items">' +
+    sims.map(([q, sc]) => '<li data-open="' + q + '"><span class="c">' + esc(TEXTS[P[q].t].short + ', ' + P[q].cite) + '</span>' + esc(clip(P[q].text.replace(/\s+/g, ' '), 100)) + '<span class="simv" title="similarity of wording, 0 to 1">' + sc.toFixed(2) + '</span></li>').join('') + '</ul>' +
+    '<div class="from">the words the passages share, weighted by rarity, as Jin’s parallel passages compare the lectures, leaving out his stopwords. Found by machine, not checked by hand</div>';
+  const n = curated.reduce((a, x) => a + x.links.length, 0) + sims.length;
+  return sec('parallels', 'Parallel passages', '', n, body, '', true);
+}
+
+/* ── Full text, rendered a stretch at a time around the passage in view, and extended as the
+   reader scrolls, so that even the 250,000 words of the Reflexionen open at once. ── */
+function headingOf(k) {
+  const p = P[k], T = TEXTS[p.t];
+  if (T.shape === 'refl') { const book = textByKey(T.on); return p.paras && p.paras.length ? 'On ' + (book ? book.short : '') + ' ' + paraLabel(p.paras) : 'Not filed under a §'; }
+  return p.sec || '';
+}
+function shortCite(p) {
+  const T = TEXTS[p.t];
+  if (T.shape === 'meier' || T.shape === 'metaphysica') return '§ ' + p.para;
+  if (T.shape === 'refl') return 'Refl. ' + p.id.slice(1);
+  return p.cite;
+}
+function marginTag(p) {
+  const T = TEXTS[p.t];
+  if (T.shape === 'refl') { const m = /ca\. ([\d–]+)/.exec(p.dateLabel || ''); return m ? m[1] : ''; }
+  if (T.shape === 'meier' || T.shape === 'metaphysica') {
+    const notes = TEXTS.find(t => t.shape === 'refl' && t.on === T.key);
+    const n = notes && notes.byPara && notes.byPara[p.para] ? notes.byPara[p.para].length : 0;
+    return n ? n + ' note' + (n === 1 ? '' : 's') : '';
+  }
+  const pl = placeOf(p);
+  return pl ? (pl.book === 'baumgarten' ? 'Baumg. ' : 'Meier ') + paraLabel(pl.paras).replace('§§ ', '§ ') + (pl.tier === 'stated' ? '' : '?') : '';
+}
+function ftBlock(st, k) {
+  const p = P[k];
+  let spans = [];
+  if (RESULT && RESULT.byPass && !S.d && RESULT.byPass.has(k)) spans = RESULT.byPass.get(k).map(m => [p.ts[m.a], p.te[m.b], false]);
+  if (k === st.focus && S.quote) spans = spans.concat(quoteSpans(p.text, [S.quote]).map(z => [z[0], z[1], true]));
+  const h = headingOf(k);
+  const head = h && (k === TEXTS[p.t].first || headingOf(k - 1) !== h) ? '<div class="fh">' + esc(h) + '</div>' : '';
+  const tag = marginTag(p);
+  return head + '<div class="fp' + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm"><b>' + esc(shortCite(p)) + '</b>' + (tag ? '<i>' + esc(tag) + '</i>' : '') + '</div>' +
+    '<div class="fpt" lang="de">' + marked(p.text, 0, p.text.length, spans) + '</div></div>';
+}
+function ftHtml(st, a, b) { let h = ''; for (let k = a; k <= b; k++) h += ftBlock(st, k); return h; }
+/* Open a text's full text in el (scrolled by scroller) around passage `at`, marking `focus`. */
+function ftOpen(el, scroller, at, focus, offset) {
+  const T = TEXTS[P[at].t];
+  const st = { t: T.idx, lo: Math.max(T.first, at - 25), hi: Math.min(T.last, at + 60), focus: focus == null ? -1 : focus, el, scroller };
+  FT[el.id] = st;
+  el.innerHTML = ftHtml(st, st.lo, st.hi);
+  const f = el.querySelector('[data-fp="' + at + '"]');
+  if (f) scroller.scrollTop += f.getBoundingClientRect().top - scroller.getBoundingClientRect().top - offset;
+}
+function ftScroll(st) {
+  if (!st || !st.el.isConnected) return;
+  const sc = st.scroller, T = TEXTS[st.t];
+  if (sc.scrollTop + sc.clientHeight > sc.scrollHeight - 900 && st.hi < T.last) {
+    const nh = Math.min(T.last, st.hi + 60);
+    st.el.insertAdjacentHTML('beforeend', ftHtml(st, st.hi + 1, nh));
+    st.hi = nh;
+  }
+  if (sc.scrollTop < 600 && st.lo > T.first) {
+    const nl = Math.max(T.first, st.lo - 60), before = sc.scrollHeight;
+    // the first block's heading belongs to it; drop the old one if its predecessors now carry it
+    const oldHead = st.el.firstElementChild && st.el.firstElementChild.classList.contains('fh') ? st.el.firstElementChild : null;
+    st.el.insertAdjacentHTML('afterbegin', ftHtml(st, nl, st.lo - 1));
+    if (oldHead && headingOf(st.lo) === headingOf(st.lo - 1)) oldHead.remove();
+    st.lo = nl;
+    sc.scrollTop += sc.scrollHeight - before;
+  }
+}
+function ftSetFocus(st, k) {
+  if (!st) return;
+  st.el.querySelectorAll('.fp.focus').forEach(x => x.classList.remove('focus'));
+  const f = st.el.querySelector('[data-fp="' + k + '"]');
+  if (f) f.classList.add('focus');
+  st.focus = k;
 }
 
 const clip = (s, n) => s.length > n ? s.slice(0, n).replace(/\s+\S*$/, '') + ' …' : s;
@@ -1583,20 +1788,72 @@ function divesFor(T, p) {
    RENDERING: Texts and Contributors
    ════════════════════════════════════════════════════════════════════════ */
 
-function renderTexts() {
-  let h = '<h2>The texts</h2><div class="summary">' + esc(statusText()) + '</div><p class="note">What the portal reads today: a first, smaller corpus, from transcriptions that are not yet clean. Every passage is cited by its Academy edition page, so links will survive the move to a better edition.</p>' +
+function aboutTextsHtml() {
+  let h = '<div class="card" style="margin-top:0.6rem"><div class="summary">' + esc(statusText()) + '</div><p class="note">What the portal reads today: a first, smaller corpus, from transcriptions that are not yet clean. Every passage is cited by its Academy edition page, so links will survive the move to a better edition.</p>' +
     '<table class="cat"><thead><tr><th>Text</th><th>Layer</th><th>Date</th><th>Passages</th><th>Words</th><th>Transcription</th><th>Brought in by</th><th>English</th></tr></thead><tbody>' +
     TEXTS.map(t => { const tr = trFor(t); return '<tr><td><b>' + esc(t.title) + '</b></td><td class="small cz">' + esc(LAYER_LABEL[t.layer] || t.layer) + '</td><td>' + esc(t.date) + '</td><td class="n">' + t.n.toLocaleString('en') + '</td><td class="n">' + t.words.toLocaleString('en') + '</td><td class="small">' + esc(t.source) + '</td><td class="small">' + esc(t.credit) + '</td>' +
       '<td class="small">' + (tr ? 'two machine translations, by ' + esc(personName(tr.who)) + (tr.map ? '; matched to this edition by build-pins.py' : '') : '<span class="muted">none yet</span>') + '</td></tr>'; }).join('') +
     '</tbody></table>' +
-    '<p class="note">The English is machine translation, made for Jesus La Paz’s Meier–Kant comparison: one version following the stated principles of Guyer and Wood’s Cambridge translation of the Critique, one those of Kemp Smith’s. Neither translated these texts. Open a passage and press English to see it beside the German.</p>';
+    '<p class="note">The English is machine translation, made for Jesus La Paz’s Meier–Kant comparison: one version following the stated principles of Guyer and Wood’s Cambridge translation of the Critique, one those of Kemp Smith’s. Neither translated these texts.</p>';
   const missing = PORTAL_TEXTS.filter(T => !TEXTS.some(t => t.key === T.key));
   if (missing.length) h += '<p class="warn">In the catalogue but not loaded: ' + missing.map(T => esc(T.title)).join(', ') + '.</p>';
   h += '<div class="addtext"><h3>Adding a text</h3><p>Put the text in a <code>.js</code> data file in one of the shapes described at the top of ' +
     '<code>portal/catalogue.js</code>, and add one entry for it to <code>PORTAL_TEXTS</code> there. Nothing else changes: the search, the phrasings and frequencies, ' +
-    'and the reading pane pick it up on the next load. Another transcript of AA XXIV comes out of <code>scripts/parse_logik.py</code> in the right shape already; ' +
-    'a published work can use the plain <code>passages</code> shape, one passage per paragraph, each with its AA page.</p></div>';
-  $('view-texts').innerHTML = h;
+    'the reading and the connections pick it up on the next load. Another transcript of AA XXIV comes out of <code>scripts/parse_logik.py</code> in the right shape already; ' +
+    'a published work can use the plain <code>passages</code> shape, one passage per paragraph, each with its AA page.</p></div></div>';
+  return h;
+}
+
+function readIndexHtml() {
+  const groups = [['textbook', 'The textbooks'], ['notes', 'Kant’s notes'], ['lecture', 'The lectures'], ['compilation', 'Jäsche'], ['published', 'Published works']];
+  let h = '<div class="explore"><h2>Read</h2><p class="intro">Every text in the corpus, in full. Click any paragraph to see what hangs on it beside the text; select words to search for them everywhere.</p>';
+  groups.forEach(([layer, label]) => {
+    const ts = TEXTS.filter(t => t.layer === layer);
+    if (ts.length) h += '<section><div class="ph">' + label.toUpperCase() + '</div><div class="qcards">' + ts.map(textCard).join('') + '</div></section>';
+  });
+  return h + '<details class="bytext"><summary>About these transcriptions, and adding a text</summary>' + aboutTextsHtml() + '</details></div>';
+}
+
+/* A text's contents: the first passage under each heading. */
+function tocFor(T) {
+  const out = [];
+  let prev = null;
+  for (let k = T.first; k <= T.last; k++) { const h = headingOf(k); if (h && h !== prev) out.push([h, k]); prev = h; }
+  return out;
+}
+function jumpHint(T) {
+  if (T.shape === 'meier' || T.shape === 'metaphysica') return 'Go to §';
+  if (T.shape === 'refl') return 'Go to Refl. no. or §';
+  return T.key === 'jaesche' ? 'Go to § or AA page' : 'Go to AA page';
+}
+/* A passage of T named by a § number, a Reflexion number or an AA page. */
+function findInText(T, v) {
+  const isPara = /§/.test(v);
+  const num = parseInt(String(v).replace(/^\s*aa\s*\d+\s*[:,.]\s*/i, '').replace(/[^\d]/g, ''), 10);
+  if (isNaN(num)) return null;
+  if (T.shape === 'meier' || T.shape === 'metaphysica') { const q = passage(T.key, 'p' + num); return q ? q.i : null; }
+  if (T.shape === 'refl') {
+    if (!isPara) { const q = passage(T.key, 'r' + num); if (q) return q.i; }
+    for (let k = T.first; k <= T.last; k++) if ((P[k].paras || []).includes(num)) return k;
+    return null;
+  }
+  if (isPara) for (let k = T.first; k <= T.last; k++) if (P[k].para === num) return k;
+  for (let k = T.first; k <= T.last; k++) if (P[k].aa != null && P[k].aa >= num) return k;
+  return null;
+}
+
+function renderRead() {
+  const el = $('view-read');
+  delete FT.readtext;
+  const T = S.readKey && textByKey(S.readKey);
+  if (!T) { el.innerHTML = readIndexHtml(); return; }
+  const toc = tocFor(T);
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span><span class="spacer"></span>' +
+    (toc.length > 1 ? '<select id="toc" aria-label="Contents"><option value="">Contents…</option>' + toc.map(([l, k]) => '<option value="' + k + '">' + esc(clip(l, 64)) + '</option>').join('') + '</select>' : '') +
+    '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></div><div id="readtext" class="fulltext"></div>';
+  const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
+  const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
+  ftOpen($('readtext'), $('left'), at, focus, 76);
 }
 
 function renderPeople() {
@@ -1608,12 +1865,12 @@ function renderPeople() {
 
 function showView(v) {
   S.view = v;
-  ['ask', 'explore', 'texts', 'people'].forEach(k => { $('view-' + k).hidden = k !== v; });
+  ['ask', 'read', 'explore', 'people'].forEach(k => { $('view-' + k).hidden = k !== v; });
   document.querySelectorAll('nav [data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === v));
-  if (v === 'texts') renderTexts();
+  $('left').scrollTop = 0;
+  if (v === 'read') renderRead();
   if (v === 'people') renderPeople();
   if (v === 'explore') syncForm();
-  $('left').scrollTop = 0;
 }
 
 /* ════════════════════════════════════════════════════════════════════════
@@ -1621,18 +1878,22 @@ function showView(v) {
    ════════════════════════════════════════════════════════════════════════ */
 
 function snapshot() {
-  return { q: S.q, w: S.w, co: S.co, cm: S.cm, merge: S.merge, off: [...S.off], loc: S.loc, d: S.d, sel: S.sel, quote: S.quote, tab: S.tab, preset: S.preset ? S.preset.key || null : null, presetObj: S.preset };
+  return { q: S.q, w: S.w, co: S.co, cm: S.cm, merge: S.merge, off: [...S.off], loc: S.loc, d: S.d, sel: S.sel, quote: S.quote, tab: S.tab,
+    view: S.view === 'read' ? 'read' : 'ask', readKey: S.view === 'read' ? S.readKey : null, readAt: S.view === 'read' ? S.readAt : null, rtab: S.rtab,
+    preset: S.preset ? S.preset.key || null : null, presetObj: S.preset };
 }
 function restore(snap) {
-  Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, tab: snap.tab || 'overview', preset: snap.presetObj || null });
+  Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, tab: snap.tab || 'overview',
+    view: snap.view || 'ask', readKey: snap.readKey || null, readAt: snap.readAt, rtab: snap.rtab || 'text', preset: snap.presetObj || null });
 }
 /* A step is named for what changed at it: the passage, if one was opened there, and otherwise
    the question or doctrine on the left, with the phrasing or kind picked in it. A passage left
    open while the left side changes does not name the step. */
 function trailLabel(snap) {
   if (snap.onP && P[snap.sel]) { const p = P[snap.sel]; return TEXTS[p.t].short + ', ' + p.cite.replace(/, AA.*/, ''); }
+  if (snap.view === 'read' && snap.readKey) { const T = textByKey(snap.readKey); return 'Reading ' + (T ? T.short : snap.readKey); }
   const d = snap.d && DOCTRINES.find(x => x.key === snap.d);
-  const base = snap.d ? (d ? d.label : snap.d) : snap.presetObj ? snap.presetObj.label : snap.q;
+  const base = snap.d ? (d ? d.label : (VIEW_LABEL[snap.d] || snap.d)) : snap.presetObj ? snap.presetObj.label : snap.q;
   if (!snap.loc) return base;
   const g = d && DOCS[d.key] && DOCS[d.key].groups.find(x => x[0] === snap.loc);
   return base + ' · ' + (g ? g[1] : snap.loc.replace(/^form:/, 'form '));
@@ -1652,7 +1913,7 @@ function pushTrail() {
 }
 /* The bar shows only the steps around the current one; the map shows the whole route, one row
    per document, so that a long route stays readable. */
-const stepLane = s => (s.onP && P[s.sel] ? TEXTS[P[s.sel].t].key : 'q');
+const stepLane = s => (s.onP && P[s.sel] ? TEXTS[P[s.sel].t].key : (s.view === 'read' && s.readKey ? s.readKey : 'q'));
 
 function renderTrail() {
   if (!TRAIL.length) { $('trail').hidden = true; return; }
@@ -1715,7 +1976,7 @@ function goStep(k) {
   if (k < 0 || k >= TRAIL.length) return;
   trailPos = k;
   restore(TRAIL[k]);
-  showView('ask');
+  showView(S.view === 'read' ? 'read' : 'ask');
   syncForm();
   renderResults();
   renderRail();
@@ -1731,19 +1992,19 @@ function writeHash() {
     u.set('w', S.w);
     if (S.cm && S.co) { u.set('cm', S.cm); u.set('co', S.co); }
     if (!S.merge) u.set('merge', '0');
-    if (S.preset && S.preset.key) u.set('ask', S.preset.key);
   }
   if (S.off.size) u.set('off', [...S.off].join(','));
   if (S.loc) u.set('loc', S.loc);
   if (S.sel != null && P[S.sel]) { u.set('p', TEXTS[P[S.sel].t].key + ':' + P[S.sel].id); if (S.quote) u.set('quote', S.quote); }
   if (S.en) u.set('en', S.en);
   if (S.q && !S.d && S.tab === 'passages') u.set('tab', 'passages');
+  if (S.view === 'read' && S.readKey) { u.set('read', S.readKey); if (S.readAt != null && P[S.readAt]) u.set('at', P[S.readAt].id); }
+  if (S.sel != null && S.rtab === 'conn') u.set('rt', 'conn');
   history.replaceState(null, '', '#' + u.toString());
 }
 function readHash() {
   const u = new URLSearchParams(location.hash.slice(1));
   S.preset = null;
-  if (u.get('ask')) { const s = SEMINAR.find(x => x.key === u.get('ask')); if (s) S.preset = seminarPreset(s); }
   S.q = u.get('q') || '';
   S.w = u.has('w') ? +u.get('w') : 5;
   S.cm = u.get('cm') || '';
@@ -1757,17 +2018,19 @@ function readHash() {
   S.tab = u.get('tab') === 'passages' ? 'passages' : 'overview';
   const p = u.get('p');
   if (p) { const k = p.indexOf(':'); const i = BYID.get(p.slice(0, k) + ':' + p.slice(k + 1)); S.sel = i == null ? null : i; }
+  S.rtab = u.get('rt') === 'conn' ? 'conn' : 'text';
+  S.readKey = u.get('read') && textByKey(u.get('read')) ? u.get('read') : null;
+  S.readAt = S.readKey && u.get('at') != null ? (BYID.get(S.readKey + ':' + u.get('at')) ?? null) : null;
   syncForm();
+  showView(S.readKey ? 'read' : 'ask');
   renderResults();
   renderRail();
-  if (S.q || S.d || S.sel != null) pushTrail();
+  if (S.q || S.d || S.sel != null || S.readKey) pushTrail();
 }
 
 /* ════════════════════════════════════════════════════════════════════════
    ACTIONS
    ════════════════════════════════════════════════════════════════════════ */
-
-function seminarPreset(s) { return { key: s.key, label: s.label, note: s.note }; }
 
 function ask(opts) {
   Object.assign(S, { d: null, loc: null, tab: 'overview', expand: new Set() }, opts);
@@ -1779,9 +2042,10 @@ function ask(opts) {
   $('left').scrollTop = 0;
 }
 
-function openPassage(i, quote) {
+function openPassage(i, quote, rtab) {
   S.sel = i;
   S.quote = quote || null;
+  S.rtab = rtab || 'text';
   renderRail();
   document.querySelectorAll('.hit.sel').forEach(el => el.classList.remove('sel'));
   document.querySelectorAll('.hit[data-open="' + i + '"]').forEach(el => el.classList.add('sel'));
@@ -1832,18 +2096,21 @@ function wire() {
   });
 
   document.addEventListener('click', e => {
-    const el = e.target.closest('[data-open],[data-loc],[data-seminar],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail]');
+    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-fp]');
     if (!el) return;
     const d = el.dataset;
+    if (d.fp != null) { if (String(window.getSelection())) return; focusFromText(+d.fp, el.closest('.fulltext')); return; }
+    if (d.read != null) { S.readKey = d.read || null; S.readAt = null; showView('read'); if (S.readKey) pushTrail(); else writeHash(); return; }
+    if (d.readat != null) { const k = +d.readat; S.readKey = TEXTS[P[k].t].key; S.readAt = k; S.rtab = 'conn'; showView('read'); renderRail(); pushTrail(); return; }
+    if (d.rtab) { S.rtab = d.rtab; renderRail(); writeHash(); return; }
     if (d.step != null) { goStep(+d.step); return; }
     if (d.map) { $('routemap').hidden = !$('routemap').hidden; renderTrail(); return; }
     if (d.en != null) { S.en = d.en; renderRail(); writeHash(); return; }
-    if (d.seminar) { const s = SEMINAR.find(x => x.key === d.seminar); ask({ q: s.q, w: s.w, co: s.co || '', cm: s.cm || '', preset: seminarPreset(s) }); return; }
     if (d.doc) { Object.assign(S, { d: d.doc, q: '', co: '', cm: '', loc: null, expand: new Set(), preset: null }); showView('ask'); syncForm(); renderResults(); pushTrail(); $('left').scrollTop = 0; return; }
     if (d.home) { Object.assign(S, { d: null, q: '', co: '', cm: '', loc: null, preset: null, tab: 'overview', expand: new Set() }); showView('ask'); syncForm(); renderResults(); writeHash(); return; }
     if (d.tab) { S.tab = d.tab; renderResults(); writeHash(); return; }
     if (d.closeRail) { S.sel = null; S.quote = null; renderRail(); document.querySelectorAll('.hit.sel').forEach(x => x.classList.remove('sel')); writeHash(); return; }
-    if (d.view) { showView(d.view); return; }
+    if (d.view) { showView(d.view); if (d.view === 'read') writeHash(); return; }
     if (d.trail != null) { $('tip').hidden = true; goStep(+d.trail); return; }
     if (d.expandRail) { S.expand.add(d.expandRail); renderRail(); return; }
     if (d.expand) { S.expand.add(d.expand); renderResults(); return; }
@@ -1859,6 +2126,45 @@ function wire() {
     }
     if (d.para) { const [book, n] = d.para.split(':'); const q = passage(book, 'p' + n); if (q) openPassage(q.i); return; }
     if (d.open != null) { openPassage(+d.open, d.quote || null); return; }
+  });
+
+  // Reading: a full text extends as it scrolls; the contents and go-to box move within it
+  $('left').addEventListener('scroll', () => { $('selbtn').hidden = true; if (S.view === 'read') ftScroll(FT.readtext); }, { passive: true });
+  $('railbody').addEventListener('scroll', () => { $('selbtn').hidden = true; if (S.rtab !== 'conn') ftScroll(FT.railtext); }, { passive: true });
+  document.addEventListener('change', e => {
+    if (e.target.id === 'toc' && e.target.value !== '') { S.readAt = +e.target.value; renderRead(); writeHash(); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.id !== 'jump' || e.key !== 'Enter') return;
+    const T = textByKey(S.readKey), k = T && findInText(T, e.target.value);
+    if (k == null) { e.target.style.borderColor = '#b4532a'; return; }
+    S.readAt = k; renderRead(); writeHash();
+  });
+
+  // Select words in any text to search for them everywhere
+  document.addEventListener('mouseup', e => {
+    if (e.target.closest && e.target.closest('#selbtn')) return;
+    setTimeout(() => {
+      const sel = window.getSelection(), btn = $('selbtn');
+      const t = sel ? String(sel).replace(/\s+/g, ' ').trim() : '';
+      const node = sel && sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+      const inText = node && node.closest && node.closest('.fpt, .ptext, .kw, .preview, .pcell, .tt');
+      if (!t || !inText || t.length > 80 || t.split(' ').length > 6) { btn.hidden = true; return; }
+      const r = sel.getRangeAt(0).getBoundingClientRect();
+      btn.textContent = 'Search for “' + (t.length > 40 ? t.slice(0, 40) + '…' : t) + '”';
+      btn.dataset.q = t;
+      btn.hidden = false;
+      btn.style.left = Math.max(8, Math.min(r.left, window.innerWidth - btn.offsetWidth - 10)) + 'px';
+      btn.style.top = (r.top > 44 ? r.top - 36 : r.bottom + 8) + 'px';
+    }, 0);
+  });
+  $('selbtn').addEventListener('mousedown', e => e.preventDefault());
+  $('selbtn').addEventListener('click', () => {
+    const words = ($('selbtn').dataset.q || '').match(/[\p{L}\p{M}]+/gu) || [];
+    $('selbtn').hidden = true;
+    window.getSelection().removeAllRanges();
+    if (!words.length) return;
+    ask({ q: words.length > 1 ? '"' + words.join(' ') + '"' : words[0], w: 5, cm: '', co: '', preset: null });
   });
 
   // One tooltip for every mark that carries a data-tip: the route map, the square, the table
@@ -1882,8 +2188,18 @@ function wire() {
   window.addEventListener('hashchange', () => { readHash(); });
 }
 
+/* A paragraph clicked in a full text: on the left, its connections open on the right; on the
+   right, it becomes the passage in view. */
+function focusFromText(k, box) {
+  S.sel = k;
+  S.quote = null;
+  if (box && box.id === 'readtext') { S.readAt = k; S.rtab = 'conn'; ftSetFocus(FT.readtext, k); renderRail(); }
+  else { ftSetFocus(FT.railtext, k); renderRail(true); }
+  pushTrail();
+}
+
 /* Exposed for checking the page from the console. */
-window.PORTAL = { S, P, TEXTS, LAYERS, DOCS, CONC_REV, ANNOT, runQuery: () => runQuery(), parseQuery, normWord, placeOf };
+window.PORTAL = { S, P, TEXTS, LAYERS, DOCS, CONC_REV, ANNOT, FT, runQuery: () => runQuery(), parseQuery, normWord, placeOf, parallelsFor, findInText };
 
 boot();
 })();

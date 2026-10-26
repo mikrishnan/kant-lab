@@ -11,17 +11,28 @@ and then answers at once.
 ## Finding your way
 
 Four places, along the top:
-- **Search** opens on one question box and the seminar's questions.
-- **Explore** gathers every starting point the seminar has built: its questions, the doctrines
-  classified passage by passage, and the three lexicons.
-- **Texts** lists the corpus.
+- **Search** opens on one question box, with every text there to open and read in full.
+- **Read** lists the corpus. Open any text to read it through: its contents, and a box to go
+  to a §, an AA page or a Reflexion. Click any paragraph and what hangs on it opens beside the
+  text.
+- **Explore** gathers the seminar's starting points: the doctrines classified passage by
+  passage, the parallel passages, and the three lexicons.
 - **Contributors** lists who built what.
 
+Wherever you are, clicking an example (a search hit, a classified passage, a parallel) opens
+it **in its full text** on the right, scrolled to the passage and highlighted, so you can look
+through example after example in context. Its **Connections** tab beside the full text gives:
+- the textbook § it is on;
+- Kant's notes there;
+- the other texts on the same §;
+- its parallel passages;
+- what the seminar has said about it.
+
+**Read on the left** opens that text in full for reading through. Select a few words in any
+text, and a button offers to search for them everywhere.
+
 A search's results have two tabs: **Overview**, with the phrasings and where they occur, and
-**Passages**. A passage opens in a reading pane on the right, which closes with ×. Each
-connection is a section there that opens and closes, with its answer in its heading, and the
-pane remembers which ones you keep open. The search options fold away under **Options**,
-with a one-line summary of how they are set.
+**Passages**. The search options fold away under **Options**.
 
 ## What it does
 
@@ -50,8 +61,11 @@ with a one-line summary of how they are set.
 - **Report a text error.** Every passage has a link that opens the repository's *Text error*
   form with the passage, its citation and a link back to it already filled in. The reporter
   chooses the tool from the form's list and gives their source.
-- **The seminar's questions, doctrines and lexicons** are one click away:
-  - the questions asked in class so far;
+- **Parallel passages.** Every passage lists the passages of other texts nearest it in wording:
+  the words they share, weighted by how rare each is, leaving out Jin's stopwords, as his
+  parallel-passage tool compares the lectures. Alex Li's 25 sets of parallels, chosen by hand,
+  have a view of their own in Explore and show beside the passages they join.
+- **The seminar's doctrines and lexicons** are one click away:
   - kinds of immediate inference, forms of judgment and kinds of syllogism (Nik Land).
     The immediate inferences open on a **square of opposition** built from the judgments
     Kant's examples write out: A, E, I and O with their counts, and the sides with the
