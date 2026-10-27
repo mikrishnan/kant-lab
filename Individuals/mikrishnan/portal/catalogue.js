@@ -80,6 +80,32 @@ const PORTAL_TEXTS = [
     source: 'AA 24:603–686, from Textfiles/ by scripts/parse_logik.py; a student transcript',
     credit: 'shared data (Sophia & Maria)' },
 
+  // Four more AA XXIV transcripts, read off the printed volume by OCR and not corrected:
+  // about 98% of words right, checked on Busolt. See ../aa24-ocr/README.md before quoting.
+  { key: 'herder', title: 'Logik Herder (uncorrected OCR)', short: 'Herder (OCR)', layer: 'lecture',
+    date: '1762–64', year: 1762, vol: 24, shape: 'logik', on: 'meier',
+    file: '../aa24-ocr/logik-herder-24-ocr.js', global: 'LOGIK_HERDER',
+    source: 'AA 24:3–6, Herder’s notes, a fragment; uncorrected OCR of the Internet Archive’s scan of AA XXIV, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    credit: 'mikrishnan (OCR import)' },
+
+  { key: 'philippi', title: 'Logik Philippi (uncorrected OCR)', short: 'Philippi (OCR)', layer: 'lecture',
+    date: '1772', year: 1772, vol: 24, shape: 'logik', on: 'meier',
+    file: '../aa24-ocr/logik-philippi-24-ocr.js', global: 'LOGIK_PHILIPPI',
+    source: 'AA 24:311–496, a student transcript; uncorrected OCR of the Internet Archive’s scan of AA XXIV, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    credit: 'mikrishnan (OCR import)' },
+
+  { key: 'poelitz', title: 'Logik Pölitz (uncorrected OCR)', short: 'Pölitz (OCR)', layer: 'lecture',
+    date: '1780–82', year: 1780, vol: 24, shape: 'logik', on: 'meier',
+    file: '../aa24-ocr/logik-poelitz-24-ocr.js', global: 'LOGIK_POELITZ',
+    source: 'AA 24:502–602, a student transcript (its title page says 1789; dated 1780–82 by Naragon); uncorrected OCR of the Internet Archive’s scan of AA XXIV, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    credit: 'mikrishnan (OCR import)' },
+
+  { key: 'dohna', title: 'Logik Dohna-Wundlacken (uncorrected OCR)', short: 'Dohna (OCR)', layer: 'lecture',
+    date: '1792', year: 1792, vol: 24, shape: 'logik', on: 'meier',
+    file: '../aa24-ocr/logik-dohna-24-ocr.js', global: 'LOGIK_DOHNA',
+    source: 'AA 24:693–784, a student transcript, as AA XXIV reprints it from Kowalewski (1924); uncorrected OCR of the Internet Archive’s scan of AA XXIV, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    credit: 'mikrishnan (OCR import)' },
+
   { key: 'jaesche', title: 'Jäsche Logik', short: 'Jäsche', layer: 'compilation',
     date: '1800', year: 1800, vol: 9, shape: 'logik', on: 'meier',
     file: '../../Alex%20Li/logik-jasche-9.js', global: 'LOGIK_JASCHE',
