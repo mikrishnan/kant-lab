@@ -42,7 +42,7 @@ through example after example in context. Its **Connections** tab beside the ful
 - the textbook § it is on;
 - Kant's notes there;
 - the other texts on the same §;
-- its parallel passages;
+- its parallel passages, each opening beside it in **Compare**;
 - what the seminar has said about it.
 
 **Read on the left** opens that text in full for reading through. Select a few words in any
@@ -84,6 +84,21 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   strip under its heading: one line, or, opened, the § in full (with its English when English
   is on). It stays open from result to result, so you can read every note beside its Meier or
   Baumgarten § without leaving the list.
+- **Compare.** The **Compare** tab, beside Full text (or press **C**), keeps the passage in view
+  and lists under it what shares its wording. Its textbook § comes first, then Kant's notes
+  (whether the AA files them under the same § or not), the lectures and Jäsche, closest first.
+  Pick one and it opens beneath, with the words the two share marked in both, darker where the
+  same words stand in a row. So you can see at once whether a note takes Meier's words or
+  Baumgarten's, or has its counterpart in a lecture. Name any other passage in the box to
+  compare it instead: `Refl. 4086`, `16:236` or `Meier § 125`. Click a sentence to compare it
+  alone; a sentence found nearly whole elsewhere carries a small ≈ tag naming where.
+  The tab stays open from result to result, and in the Meier and Baumgarten reader it compares
+  the § in view. All of it is found by machine: words count as shared when they have the same
+  stem once the spellings are merged, leaving out Jessie's stopwords, and rare words count most
+  in the order.
+- **Go to a Reflexion.** Type its number, `Refl. 4086`, `R 4086` or `4086` alone, into the search
+  box and the note opens on the right, leaving the left as it was. In the Meier or Baumgarten
+  reader the jump box takes it too, and goes to the § the note is on, with the note picked out.
 - **English.** Press **English** on a passage to see a translation beside the German, in one
   of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
   are Jesus's machine translations, made for the Meier–Kant comparison; neither
