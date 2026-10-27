@@ -43,7 +43,12 @@ connection is used only to fetch the display fonts; it works offline with fallba
   Each entry is tagged *Source*, *Parallel*, or *Contrast*. The three buttons at the
   top of the panel filter by stratum, and the divider between the two columns can be
   dragged to rebalance them.
-- **A jump box** in the header: type a § number and press Enter.
+- **A § or page box** in the header: type a § (`92`) or a page of the Academy edition
+  (`16:236`, `AA XVI 236`) and press Enter. A page that holds only Kant's notes opens
+  them beside the § they are filed under. A page of another volume, such as a logic
+  lecture in AA 24 or Baumgarten in AA 17–18, says which text it is in, with a link to
+  where you can read it. A link ending `meier-reading-guide.html#go=16:236` opens the
+  reader at that § or page.
 - **Two searches.** The box above the text searches the work you are reading and
   highlights every match in place; the counter shows which hit you are on, and `‹ ›`
   or Enter / Shift-Enter step through them. The box under the panel tabs searches the

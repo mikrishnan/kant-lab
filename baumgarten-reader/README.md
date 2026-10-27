@@ -49,6 +49,12 @@ display fonts; it works offline with fallbacks.
   AA XVII omits their text — so it is where you can see what §§ 504–699 contain.
 - **Both paginations.** Each § carries the AA XVII page it falls on and, where the
   volume marks one, the page of Baumgarten's own 1757 edition.
+- **A § or page box** at the right of the top bar: type a § (`14`) or a page of the
+  Academy edition (`17:45`, `AA XVIII 124`) and press Enter. A page that carries only
+  Kant's notes opens them in the panel beside the § they are filed under, and `17:19–23`
+  opens the Synopsis. A page of another volume, such as Meier in AA 16 or a logic lecture
+  in AA 24, says which text it is in, with a link to where you can read it. A link ending
+  `baumgartenreading-guide.html#go=17:45` opens the reader at that § or page.
 
 Clicking a paragraph highlights it and marks the corresponding sidebar entry.
 

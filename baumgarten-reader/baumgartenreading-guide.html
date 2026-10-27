@@ -208,6 +208,79 @@ body {
 }
 #synopsis-btn:hover { color: var(--accent); border-color: var(--accent); }
 
+/* ── Lookup: a § or a page of the Academy edition ── */
+.jump-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.jump-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faded);
+}
+.jump-box input {
+  width: 7.2rem;
+  background: var(--parchment);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 2px 7px;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.88rem;
+  color: var(--ink);
+  text-align: center;
+  outline: none;
+}
+.jump-box input:focus { border-color: var(--accent); }
+.jump-go {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--faded);
+  border-radius: 2px;
+  padding: 3px 9px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+}
+.jump-go:hover { color: var(--accent); border-color: var(--accent); }
+/* What the box found, or why it found nothing: empty, and hidden, until then.
+   Fixed to the window, not to the box: while the whole page scrolls (SPEC.md, Open
+   question 1), the top bar is out of sight after a jump, and the note must not go
+   with it. */
+.jump-msg {
+  position: fixed;
+  top: 54px;
+  right: 16px;
+  width: 360px;
+  z-index: 60;
+  background: var(--panel-bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent-lt);
+  box-shadow: 0 4px 14px rgba(26, 18, 8, 0.18);
+  padding: 0.5rem 1.8rem 0.55rem 0.75rem;
+  font-family: 'EB Garamond', serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.jump-msg:empty { display: none; }
+.jump-msg a { color: var(--accent); }
+.jump-msg-close {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  border: none;
+  background: transparent;
+  color: var(--faded);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
 /* ── Baumgarten's Synopsis, as an overlay ── */
 #synopsis-overlay {
   position: fixed;
@@ -706,6 +779,8 @@ body {
 }
 
 /* one Reflexion */
+/* the Reflexion a page lookup landed on, picked out for a moment */
+.r-entry.r-target { box-shadow: 0 0 0 2px var(--accent-lt), 0 2px 10px rgba(92, 61, 30, 0.22); }
 .r-entry {
   position: relative;
   background: white;
@@ -974,6 +1049,14 @@ body {
     <span class="chip-legend">
       <span class="chip-sample">†</span> german equivalent
     </span>
+    <div class="jump-box" lang="en">
+      <span class="jump-label">§ or AA</span>
+      <input type="text" id="jumpInput" autocomplete="off" spellcheck="false" placeholder="14 or 17:45"
+             title="A § of the Metaphysica (14), or a page of the Academy edition as volume:page (17:45)"
+             aria-describedby="jumpMsg">
+      <button type="button" class="jump-go" onclick="jumpToSection()">Go</button>
+      <div class="jump-msg" id="jumpMsg" role="status" aria-live="polite"></div>
+    </div>
   </div>
   <div id="reading-row">
     <div id="text-canvas">
@@ -1445,6 +1528,7 @@ const REFL_OFFPARA = BAUM_CORPUS.entries
 
 let reflPara = null;       // the § the panel is currently showing
 let reflOpen = true;
+let panelPinned = false;   // a lookup put the panel where it is: keep it there until the reader scrolls
 
 /** Which era band a phase symbol falls in; 'none' where Adickes gives no date. */
 function eraOf(sym) {
@@ -1674,6 +1758,279 @@ function showReflPanel(on) {
   document.getElementById('refl-resizer').classList.toggle('hidden', !on);
   document.getElementById('refl-show').style.display = on ? 'none' : '';
   if (on) renderReflForPara(focusedNum === null ? (reflPara || 1) : focusedNum);
+}
+
+/* ── Lookup: a § or a page of the Academy edition ────────────────────────────
+   The box in the top bar takes a § of the Metaphysica, or a page of the Academy
+   edition written the ways people cite one: 17:45, AA 17:45, Ak. 17, 45,
+   AA XVII 45, 17 45. A range goes to its first page. A page of AA 17 is found
+   through MET_PARAGRAPHS where Baumgarten's text is printed on it, AA 17:19–23
+   is his Synopsis, and the other pages of AA 17 and 18 resolve through the
+   Reflexionen on them. A page of another volume is not here, so the box says
+   which text it belongs to and where to read it. `#go=…` in the URL runs the
+   same lookup, so that other pages can link to a § or a page of this one. */
+
+/* The §§ printed on each page of AA 17, from MET_PARAGRAPHS: [{ n, a, b }] in
+   reading order. §§ 1–3 stand before the volume's first page marker, so their
+   page is not stated and they are not here. */
+const BAUM_PAGES = MET_PARAGRAPHS.filter(p => p.aa != null).map(p => ({ n: p.num, a: p.aa, b: p.aaEnd || p.aa }));
+const BAUM_FIRST_PAGE = BAUM_PAGES[0].a;
+const BAUM_LAST_PAGE = Math.max(...BAUM_PAGES.map(x => x.b));
+const SYNOPSIS_PAGES = { from: 19, to: 23 };   // AA 17:19–23, where MET_SYNOPSIS is printed
+
+/* The logic lectures of AA 24 by the pages each occupies, as the Logic Portal's
+   catalogue gives them, and the portal's key for each. */
+const AA24_LECTURES = [
+  { from: 3,   to: 6,   key: 'herder',   name: 'Logik Herder' },
+  { from: 7,   to: 301, key: 'blomberg', name: 'Logik Blomberg' },
+  { from: 311, to: 496, key: 'philippi', name: 'Logik Philippi' },
+  { from: 502, to: 602, key: 'poelitz',  name: 'Logik Pölitz' },
+  { from: 603, to: 686, key: 'busolt',   name: 'Logik Busolt' },
+  { from: 693, to: 784, key: 'dohna',    name: 'Logik Dohna-Wundlacken' },
+  { from: 785, to: 940, key: 'wiener',   name: 'Wiener Logik' },
+];
+const PORTAL_URL = '../Individuals/mikrishnan/portal/index.html';
+const MEIER_URL  = '../meier-reader/meier-reading-guide.html';
+
+const ROMAN_DIGITS = { I: 1, V: 5, X: 10, L: 50 };
+function romanNumber(s) {
+  let n = 0;
+  for (let i = 0; i < s.length; i++) {
+    const v = ROMAN_DIGITS[s[i]], next = ROMAN_DIGITS[s[i + 1]] || 0;
+    if (!v) return 0;
+    n += v < next ? -v : v;
+  }
+  return n;
+}
+
+/* "14", "§ 14", "§§ 14–16" → { para: 14 }; "17:45", "AA XVII 45" → { vol: 17, page: 45 };
+   anything else → null. */
+function parseLookup(raw) {
+  const s = String(raw == null ? '' : raw).replace(/[   ]/g, ' ').trim()
+    .replace(/^(?:AA|Ak|KGS)\.?\s*/i, '');
+  let m = s.match(/^§§?\s*(\d+)(?:\s*[–-]\s*\d+)?\.?$/) || s.match(/^(\d+)\.?$/);
+  if (m) return { para: +m[1] };
+  m = s.match(/^([IVXL]+|\d+)\s*[:,.]?\s*(\d+)(?:\s*[–-]\s*\d+)?\.?$/i);
+  if (!m) return null;
+  const vol = /^\d/.test(m[1]) ? +m[1] : romanNumber(m[1].toUpperCase());
+  return vol ? { vol, page: +m[2] } : null;
+}
+
+const isPrinted = n => MET_BY_NUM[String(n)] !== undefined;
+
+/* Go to a § the way scrollToPara() does, then centre the § again: scrollToPara()
+   ends by bringing the §'s table-of-contents entry into view, and while the whole
+   page scrolls (SPEC.md, Open question 1) that scroll moves the page away from the §. */
+function lookupShow(n, andPanel = true) {
+  scrollToPara(n, andPanel);
+  const el = document.getElementById('para-' + n);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function jumpToSection(raw) {
+  const input = document.getElementById('jumpInput');
+  const fromBox = raw == null;
+  const text = fromBox ? input.value : raw;
+  const q = parseLookup(text);
+  if (!q) {
+    if (!String(text).trim()) return showJumpMsg('');
+    return showJumpMsg('Type a § of the <i>Metaphysica</i>, as <b>14</b>, or a page of the Academy edition as volume:page, as <b>17:45</b>.');
+  }
+  if (q.para != null) {
+    const n = q.para;
+    if (isPrinted(n)) {
+      lookupShow(n);
+      panelPinned = true;
+      if (fromBox) input.value = '';
+      return showJumpMsg('');
+    }
+    if (n >= 504 && n <= 699) {
+      const sec = MET_SECTIONS.find(s => s.note);
+      const el = sec && document.getElementById('sec-' + sec.id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return showJumpMsg('§ ' + n + ' is in the Psychologia empirica, §§ 504–699, which AA XVII does not print: the Academy edition gives them in AA XV, as its note in the text says. ' + pageGuesses(n));
+    }
+    return showJumpMsg('There is no § ' + n + ' in the <i>Metaphysica</i>, which has §§ 1–1000. ' + pageGuesses(n));
+  }
+  if (q.vol === 17 || q.vol === 18) return goToBaumPage(q.vol, q.page, fromBox ? input : null);
+  showJumpMsg(aaElsewhere(q.vol, q.page));
+}
+
+/* The Reflexionen printed on a page of AA 17 or 18, as indices into the corpus. */
+function notesOn(vol, p) {
+  const out = [];
+  BAUM_CORPUS.entries.forEach((e, i) => {
+    const a = e.aa ?? e.aaEnd, b = e.aaEnd ?? e.aa;
+    if (e.vol === vol && a != null && a <= p && p <= b) out.push(i);
+  });
+  return out;
+}
+
+/* For a number that is not a printed §: the pages it could be, as links. */
+function pageGuesses(n) {
+  const opts = [];
+  if ((n >= BAUM_FIRST_PAGE && n <= BAUM_LAST_PAGE) || notesOn(17, n).length) opts.push(['17:' + n, 'Baumgarten and Kant’s notes on him']);
+  if (notesOn(18, n).length) opts.push(['18:' + n, 'Kant’s notes on Baumgarten']);
+  const L = AA24_LECTURES.find(l => l.from <= n && n <= l.to);
+  if (L) opts.push(['24:' + n, 'the ' + L.name]);
+  if (!opts.length) return 'For a page of the Academy edition, give its volume as well, as <b>17:45</b>.';
+  return 'If ' + n + ' is a page of the Academy edition, give its volume as well: ' +
+    opts.map(([c, what]) => '<a href="#go=' + c + '">AA ' + c + '</a> (' + what + ')').join(', ') + '.';
+}
+
+function goToBaumPage(vol, p, input) {
+  const cite = 'AA ' + vol + ':' + p;
+  const done = msg => { if (input) input.value = ''; showJumpMsg(msg); };
+
+  if (vol === 17) {
+    // Baumgarten's own text on the page
+    const here = BAUM_PAGES.filter(x => x.a <= p && p <= x.b);
+    if (here.length) {
+      const n = here[0].n, m = here[here.length - 1].n;
+      lookupShow(n);
+      panelPinned = true;
+      return done(cite + ' prints ' + (n === m ? '§ ' + n + '.' : '§§ ' + n + '–' + m + '. Showing § ' + n + '.') +
+        (p === BAUM_FIRST_PAGE ? ' §§ 1–3 stand before the volume’s first page marker, so their page is not stated.' : ''));
+    }
+    // his Synopsis
+    if (p >= SYNOPSIS_PAGES.from && p <= SYNOPSIS_PAGES.to) {
+      openSynopsis();
+      return done(cite + ' is in Baumgarten’s Synopsis, his own conspectus of the whole work (AA 17:' + SYNOPSIS_PAGES.from + '–' + SYNOPSIS_PAGES.to + '), opened here.');
+    }
+  }
+
+  // Kant's notes on the page
+  const notes = notesOn(vol, p);
+  const textHere = vol === 17 && p >= BAUM_FIRST_PAGE && p <= BAUM_LAST_PAGE;
+  if (notes.length) {
+    const E = BAUM_CORPUS.entries;
+    const filed = notes.find(i => (E[i].paras || []).length);
+    if (!reflOpen) showReflPanel(true);
+    if (filed !== undefined) {
+      const e = E[filed];
+      const n = e.paras.find(isPrinted) ?? e.paras[0];
+      if (isPrinted(n)) lookupShow(n, false);
+      renderReflForPara(n);
+      panelPinned = true;
+      revealReflEntry(filed);
+      return done(cite + (textHere ? ' carries none of Baumgarten’s text, only Kant’s notes: ' : ' carries Kant’s notes ') +
+        reflNumbers(notes) + '. ' + filedPhrase(e, notes.length) + ' Showing § ' + n + ', with the notes open beside it.');
+    }
+    showReflElsewhere();
+    panelPinned = true;
+    revealReflEntry(notes[0]);
+    const one = notes.length === 1;
+    return done(cite + ' carries Kant’s ' + (one ? 'note ' : 'notes ') + reflNumbers(notes) + ', which the Academy edition files under no numbered § ' +
+      'of the <i>Metaphysica</i> (such notes are on its front matter, on loose sheets, or in Kant’s copy of Eberhard). ' +
+      (one ? 'It is' : 'They are') + ' open beside the text, among the notes that belong to no §.');
+  }
+
+  // Nothing this reader has is on the page
+  if (vol === 17 && p > BAUM_FIRST_PAGE && p < BAUM_LAST_PAGE) {
+    const before = BAUM_PAGES.filter(x => x.a <= p).pop();
+    lookupShow(before.n);
+    panelPinned = true;
+    return done('Neither Baumgarten’s text nor any Reflexion this reader has is on ' + cite + '. The nearest § before it, § ' +
+      before.n + ' on AA 17:' + before.a + ', is shown.');
+  }
+  const span = notesSpan(vol);
+  showJumpMsg('Nothing this reader has is on ' + cite + '. ' + (vol === 17
+    ? 'Baumgarten’s text is printed on AA 17:' + BAUM_FIRST_PAGE + '–' + BAUM_LAST_PAGE + ', his Synopsis on 17:' +
+      SYNOPSIS_PAGES.from + '–' + SYNOPSIS_PAGES.to + ', and Kant’s notes on him on 17:' + span[0] + '–' + span[1] + ' and in AA 18.'
+    : 'Kant’s notes on Baumgarten in AA 18 are on 18:' + span[0] + '–' + span[1] + '.'));
+}
+
+/* The first and last page of a volume that carries a Reflexion on Baumgarten. */
+function notesSpan(vol) {
+  let lo = Infinity, hi = 0;
+  BAUM_CORPUS.entries.forEach(e => {
+    if (e.vol !== vol) return;
+    const a = e.aa ?? e.aaEnd, b = e.aaEnd ?? e.aa;
+    if (a != null) { lo = Math.min(lo, a); hi = Math.max(hi, b); }
+  });
+  return [lo, hi];
+}
+
+/* How a Reflexion got its §, in the words the panel's tags use. */
+function filedPhrase(e, count) {
+  const which = count === 1 ? 'it' : 'Refl. ' + e.r;
+  if (e.interp) return 'The Academy edition names no § for ' + which + '; this reader places it at ' + paraLabel(e.paras) + ' by inference.';
+  if (e.src === 'page') return 'This reader places ' + which + ' at ' + paraLabel(e.paras) + ' from the page of Kant’s copy it is written on.';
+  if (e.src === 'block') return 'The Academy edition files ' + which + ' under ' + paraLabel(e.paras) + ', in the heading over its block.';
+  return 'The Academy edition files ' + which + ' under ' + paraLabel(e.paras) + '.';
+}
+
+/* A page of a volume other than AA 17 and 18: which text it is in, and where to read it. */
+function aaElsewhere(vol, p) {
+  const cite = 'AA ' + vol + ':' + p;
+  if (vol === 16)
+    return cite + ' is in Meier’s <i>Auszug</i> or Kant’s notes on it (AA 16), which have their own reader. ' +
+      '<a href="' + MEIER_URL + '#go=16:' + p + '">Open ' + cite + ' in the Meier reader ↗</a>';
+  if (vol === 24) {
+    const L = AA24_LECTURES.find(l => l.from <= p && p <= l.to);
+    if (L) return cite + ' is in the ' + L.name + ' (AA 24:' + L.from + '–' + L.to + '), one of Kant’s logic lectures. ' +
+      '<a href="' + PORTAL_URL + '#read=' + L.key + '&aa=' + p + '">Open it in the Logic Portal ↗</a>';
+    const prev = AA24_LECTURES.filter(l => l.to < p).pop(), next = AA24_LECTURES.find(l => l.from > p);
+    if (prev && next) return cite + ' falls between two of the logic lectures: the ' + prev.name + ' ends at AA 24:' + prev.to + ', and the ' + next.name + ' begins at 24:' + next.from + '.';
+    return cite + ' is outside the logic lectures of AA 24, which run from 24:' + AA24_LECTURES[0].from + ' to 24:' + AA24_LECTURES[AA24_LECTURES.length - 1].to + '.';
+  }
+  if (vol === 9)
+    return p >= 1 && p <= 150
+      ? cite + ' is in the Jäsche <i>Logik</i> (AA 9:1–150). <a href="' + PORTAL_URL + '#read=jaesche&aa=' + p + '">Open it in the Logic Portal ↗</a>'
+      : cite + ' is outside the Jäsche <i>Logik</i>, which is AA 9:1–150.';
+  if (vol === 15)
+    return cite + ' is in Kant’s notes on anthropology, where the Academy edition also prints the Psychologia empirica, §§ 504–699 of the <i>Metaphysica</i>. This reader does not have AA 15.';
+  return 'AA ' + vol + ' is not a volume this reader has. Baumgarten’s <i>Metaphysica</i> and Kant’s notes on it are AA 17–18; Meier’s <i>Auszug</i> and Kant’s notes on it, AA 16; the logic lectures, AA 24; the Jäsche <i>Logik</i>, AA 9.';
+}
+
+/* "§ 220", "§§ 220–222", or "§§ 3, 7, 9" for a Reflexion's paras. */
+function paraLabel(paras) {
+  const ps = [...new Set(paras)].sort((a, b) => a - b);
+  if (ps.length === 1) return '§ ' + ps[0];
+  const run = ps.every((x, k) => !k || x === ps[k - 1] + 1);
+  return '§§ ' + (run ? ps[0] + '–' + ps[ps.length - 1] : ps.join(', '));
+}
+
+/* "Refl. 3589–3592", "Refl. 3589, 3601", runs joined; long lists shortened. */
+function reflNumbers(idxs) {
+  const rs = [...new Set(idxs.map(i => BAUM_CORPUS.entries[i].r))].sort((a, b) => a - b);
+  const runs = [];
+  rs.forEach(r => { const last = runs[runs.length - 1]; if (last && r === last[1] + 1) last[1] = r; else runs.push([r, r]); });
+  const shown = runs.slice(0, 6).map(([a, b]) => a === b ? String(a) : a + '–' + b);
+  return 'Refl. ' + shown.join(', ') + (runs.length > 6 ? ' and ' + (runs.length - 6) + ' more' : '');
+}
+
+/* Bring one Reflexion's card into view in the panel, and pick it out for a moment.
+   Scrolled again on the next frame and once the webfonts land, since the cards
+   reflow when they arrive. */
+function revealReflEntry(idx) {
+  const scroll = document.getElementById('refl-scroll');
+  const card = scroll.querySelector('.r-entry[data-idx="' + idx + '"]');
+  if (!card || !card.offsetParent) return;
+  const place = () => {
+    const head = scroll.querySelector('.r-para-head');
+    const offset = (head ? head.getBoundingClientRect().height : 0) + 10;
+    scroll.scrollTop += card.getBoundingClientRect().top - scroll.getBoundingClientRect().top - offset;
+  };
+  place();
+  requestAnimationFrame(place);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => requestAnimationFrame(place));
+  card.classList.add('r-target');
+  setTimeout(() => card.classList.remove('r-target'), 2600);
+}
+
+/* The box's note. `html` is built here from numbers and fixed text only. */
+function showJumpMsg(html) {
+  const el = document.getElementById('jumpMsg');
+  el.innerHTML = html ? html + '<button type="button" class="jump-msg-close" title="Close" aria-label="Close">×</button>' : '';
+  const close = el.querySelector('.jump-msg-close');
+  if (close) close.onclick = () => showJumpMsg('');
+}
+
+/* #go=14 or #go=17:45 in the URL */
+function goFromHash() {
+  const m = location.hash.match(/(?:^#|&)go=([^&]*)/);
+  if (m) jumpToSection(decodeURIComponent(m[1].replace(/\+/g, ' ')));
 }
 
 // ── Adickes overlay ── his note on one phase of Kant's hand
@@ -1913,6 +2270,14 @@ document.getElementById('toc-filter').addEventListener('input', function() {
   });
 });
 
+// The lookup box: Enter goes, Escape closes its note, typing clears it
+document.getElementById('jumpInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') jumpToSection();
+  if (e.key === 'Escape') showJumpMsg('');
+});
+document.getElementById('jumpInput').addEventListener('input', () => showJumpMsg(''));
+window.addEventListener('hashchange', goFromHash);
+
 // TOC toggle
 document.getElementById('toc-toggle').addEventListener('click', () => {
   document.getElementById('toc-panel').classList.toggle('hidden');
@@ -1963,11 +2328,19 @@ function watchParasInView() {
       const n = +r.target.dataset.num;
       if (r.isIntersecting) visible.add(n); else visible.delete(n);
     });
-    if (!reflOpen || !visible.size) return;
+    if (!reflOpen || !visible.size || panelPinned) return;
     const top = Math.min(...visible);
     if (top !== reflPara) renderReflForPara(top);
   }, { root: canvas, rootMargin: '-80px 0px -62% 0px' });
   canvas.querySelectorAll('.para-block').forEach(b => obs.observe(b));
+  // A lookup's smooth scroll passes other §§ and ends with its § mid-canvas, so
+  // the band would hand the panel to a neighbour. The lookup pins the panel to
+  // what it found instead, and the reader's own scrolling releases it.
+  const release = () => { panelPinned = false; };
+  ['wheel', 'touchstart', 'pointerdown'].forEach(ev => canvas.addEventListener(ev, release, { passive: true }));
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName !== 'INPUT' && /^(Arrow(Up|Down)|Page(Up|Down)|Home|End| )$/.test(e.key)) release();
+  });
 }
 
 // Init
@@ -1979,6 +2352,7 @@ document.getElementById('refl-show').title =
 document.getElementById('refl-label').title = document.getElementById('refl-show').title;
 renderReflForPara(1);
 watchParasInView();
+goFromHash();
 </script>
 </body>
 </html>
