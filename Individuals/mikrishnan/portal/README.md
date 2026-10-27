@@ -42,7 +42,7 @@ through example after example in context. Its **Connections** tab beside the ful
 - the textbook § it is on;
 - Kant's notes there;
 - the other texts on the same §;
-- its parallel passages;
+- its parallel passages, each opening beside it in **Compare**;
 - what the seminar has said about it.
 
 **Read on the left** opens that text in full for reading through. Select a few words in any
@@ -69,6 +69,36 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   opens the whole route: one row per document, each step a mark, joined in order, so you can
   see how you have moved through the corpus. Click any mark to return to it. **Copy link**
   reproduces the exact view.
+- **Go to a page of the Academy edition.** Type a citation as scholars write it, `24:892`,
+  `24.892`, `AA 24:892`, `Ak. 16, 236` or `AA XVII 45`, into the search box (or the jump box
+  of any text) and the portal opens the text printed on that page, where the page begins. A
+  page of Kant's notes opens the textbook they are written in, with the note in view beside
+  it; a note filed under no § opens on its own. A page the portal has nothing on says which
+  texts end before it and begin after it. Links can do the same: `#aa=24:892`, or
+  `#read=wiener&aa=892` for a page of one text. Every text shows its pages, as `AA 24:787–940`,
+  in the Read list and above the text, worked out from the passages themselves.
+- **Go through every result.** A passage opened from a search shows "‹ 3 of 22 ›" at the top
+  of the right-hand pane. The arrows, or ← → and J K on the keyboard, open the next or
+  previous result in the Passages list's order, and each result opened gets a tick in the list,
+  so you can see what is left. A note or lecture passage with a textbook § keeps that § in a
+  strip under its heading: one line, or, opened, the § in full (with its English when English
+  is on). It stays open from result to result, so you can read every note beside its Meier or
+  Baumgarten § without leaving the list.
+- **Compare.** The **Compare** tab, beside Full text (or press **C**), keeps the passage in view
+  and lists under it what shares its wording. Its textbook § comes first, then Kant's notes
+  (whether the AA files them under the same § or not), the lectures and Jäsche, closest first.
+  Pick one and it opens beneath, with the words the two share marked in both, darker where the
+  same words stand in a row. So you can see at once whether a note takes Meier's words or
+  Baumgarten's, or has its counterpart in a lecture. Name any other passage in the box to
+  compare it instead: `Refl. 4086`, `16:236` or `Meier § 125`. Click a sentence to compare it
+  alone; a sentence found nearly whole elsewhere carries a small ≈ tag naming where.
+  The tab stays open from result to result, and in the Meier and Baumgarten reader it compares
+  the § in view. All of it is found by machine: words count as shared when they have the same
+  stem once the spellings are merged, leaving out Jessie's stopwords, and rare words count most
+  in the order.
+- **Go to a Reflexion.** Type its number, `Refl. 4086`, `R 4086` or `4086` alone, into the search
+  box and the note opens on the right, leaving the left as it was. In the Meier or Baumgarten
+  reader the jump box takes it too, and goes to the § the note is on, with the note picked out.
 - **English.** Press **English** on a passage to see a translation beside the German, in one
   of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
   are Jesus's machine translations, made for the Meier–Kant comparison; neither

@@ -163,6 +163,7 @@
   }
   .readbar { position: sticky; top: -1.4rem; z-index: 2; background: var(--parchment); display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.7rem 0 0.6rem; margin: -0.6rem 0 0.4rem; border-bottom: 1px solid var(--line-soft); }
   .readbar b { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; letter-spacing: 0.03em; }
+  .readbar .aarange { font-size: 0.82rem; color: var(--accent); border: 1px solid var(--line); border-radius: 4px; padding: 0 0.4rem; white-space: nowrap; }
   .readbar .spacer { flex: 1; }
   .readbar select, .readbar input { padding: 0.14rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); font-size: 0.92rem; max-width: 15rem; }
   .readbar input { width: 10.5rem; }
@@ -387,6 +388,9 @@
   .hit:last-child { border-bottom: none; }
   .hit:hover { background: var(--card); border-left-color: var(--accent-light); }
   .hit.sel { background: var(--card); border-left-color: var(--accent); }
+  /* A result already opened: a quiet tick, so that going through every result shows what is left. */
+  .hit.seen:not(.sel) { border-left-color: var(--line); }
+  .hit.seen:not(.sel) .cite::before { content: '✓ '; color: var(--accent-light); }
   .hit .cite { font-size: 0.82rem; color: var(--faded); margin-bottom: 0.1rem; }
   .hit .cite b { color: var(--accent); font-weight: 600; }
   .hit .kw { font-size: 1rem; }
@@ -472,6 +476,72 @@
   .rwork { flex: 1; font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.76rem; letter-spacing: 0.06em; }
   .rclose { background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--faded); cursor: pointer; padding: 0 0.15rem; }
   .rclose:hover { color: var(--accent); }
+  /* Going through the search results one by one, from the reading pane. */
+  .rstep { display: flex; align-items: center; gap: 0.15rem; font-size: 0.84rem; color: var(--faded); white-space: nowrap; }
+  .rstep button { background: none; border: 1px solid var(--line); border-radius: 4px; color: var(--accent); cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0.08rem 0.42rem; }
+  .rstep button:hover:not(:disabled) { border-color: var(--accent-light); }
+  .rstep button:disabled { color: var(--line); cursor: default; }
+  .rstep .n { padding: 0 0.35rem; }
+  .rstep .n b { color: var(--accent); font-weight: 600; }
+  /* The textbook § the passage is on, held under the passage's header so that it stays in
+     view as the reader goes from passage to passage. One line closed; the § in full open. */
+  .tbook { margin-top: 0.5rem; border: 1px solid var(--line-soft); border-radius: 8px; background: var(--paper); }
+  .tbhead { display: flex; align-items: baseline; gap: 0.45rem; width: 100%; background: none; border: none; text-align: left; cursor: pointer; padding: 0.32rem 0.6rem; font: inherit; color: var(--ink); min-width: 0; }
+  .tbhead:hover .tbname { color: var(--ink); }
+  .tbarr { color: var(--faded); font-size: 0.75rem; width: 0.7rem; flex-shrink: 0; }
+  .tbname { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--accent); flex-shrink: 0; }
+  .tbhead .tier { flex-shrink: 0; }
+  .tbfirst { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faded); font-size: 0.92rem; font-style: italic; }
+  .tbparas { display: flex; flex-wrap: wrap; gap: 0.25rem; padding: 0 0.6rem 0.3rem 1.75rem; font-size: 0.82rem; align-items: center; }
+  .tbparas button { background: none; border: 1px solid var(--line); border-radius: 4px; color: var(--accent); cursor: pointer; padding: 0 0.35rem; font: inherit; }
+  .tbparas button.on { background: var(--accent); border-color: var(--accent); color: var(--parchment); }
+  .tbbody { max-height: 34vh; overflow: auto; padding: 0 0.6rem 0.2rem 1.75rem; }
+  .tbbody .pair .pen { margin-top: 0; }
+  .tbtext { white-space: pre-wrap; font-size: 0.98rem; line-height: 1.5; }
+  .tbfoot { padding: 0.2rem 0.6rem 0.45rem 1.75rem; font-size: 0.82rem; color: var(--faded); }
+  .tbfoot a { color: var(--faded); }
+  /* Compare: the passage in view, what shares its wording, and the one picked, the shared words
+     marked in both in the portal's own sienna (search hits keep the yellow) */
+  .cmp-h { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.15rem 0.5rem; margin: 0.85rem 0 0.3rem; }
+  .cmp-h .cl { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.07em; color: var(--accent); text-transform: uppercase; }
+  .cmp-h .hint { font-size: 0.82rem; color: var(--faded); }
+  .cmp-h .spacer { flex: 1; }
+  .cmp-h .cd { font-size: 0.84rem; color: var(--faded); }
+  .cmp-h b { color: var(--accent); }
+  .cmp-text { background: var(--paper); border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.7rem 0.9rem; white-space: pre-wrap; font-size: 1.02rem; line-height: 1.58; max-height: 34vh; overflow: auto; }
+  .cmp-b .cmp-text { max-height: 46vh; }
+  .cmp-text .gl { color: var(--faded); font-style: italic; }
+  mark.cs { background: rgba(139, 94, 60, 0.15); padding: 0; }
+  mark.cr { background: rgba(139, 94, 60, 0.3); box-shadow: 0 1px 0 var(--accent-light); padding: 0; }
+  .csent { cursor: pointer; border-radius: 3px; }
+  .csent:hover { background: rgba(230, 184, 74, 0.14); }
+  .csent.on { background: rgba(230, 184, 74, 0.2); box-shadow: 0 0 0 1px var(--hl-strong); }
+  .csent.off { opacity: 0.45; }
+  .ctag { font: inherit; font-size: 0.74rem; line-height: 1.35; background: var(--card); color: var(--accent); border: 1px solid var(--line); border-radius: 999px; padding: 0 0.45rem; cursor: pointer; vertical-align: 1px; white-space: nowrap; }
+  .ctag:hover { border-color: var(--accent-light); }
+  .ctag.demo { cursor: default; }
+  .cmp-key { display: flex; flex-wrap: wrap; gap: 0.2rem 0.9rem; align-items: center; font-size: 0.8rem; color: var(--faded); margin-top: 0.3rem; }
+  .cmpgo { width: 100%; box-sizing: border-box; margin: 0.1rem 0 0.3rem; font: inherit; font-size: 0.92rem; padding: 0.22rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--ink); }
+  .cg { margin-top: 0.15rem; }
+  .cgh { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.08em; color: var(--faded); text-transform: uppercase; margin: 0.4rem 0 0.05rem; }
+  .cgh span { font-family: 'EB Garamond', serif; letter-spacing: 0; text-transform: none; font-size: 0.78rem; }
+  .crow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 0.45rem; width: calc(100% + 0.9rem); text-align: left; background: none; border: 1px solid transparent; border-radius: 6px; padding: 0.18rem 0.45rem; margin-left: -0.45rem; font: inherit; color: var(--ink); cursor: pointer; }
+  .crow:hover { background: var(--paper); }
+  .crow.on { background: var(--paper); border-color: var(--accent-light); }
+  .crow .cc { font-weight: 600; color: var(--accent); font-size: 0.9rem; }
+  .crow .cd { font-size: 0.8rem; color: var(--faded); }
+  .crow .tier { margin-left: 0; }
+  .ctie { font-size: 0.74rem; color: #34501f; background: #e3ead8; border-radius: 4px; padding: 0 0.3rem; }
+  .crow .cn { margin-left: auto; font-size: 0.8rem; color: var(--faded); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: 0.35rem; }
+  .cbar { display: inline-block; width: 2.4rem; height: 0.28rem; background: var(--line-soft); border-radius: 2px; overflow: hidden; }
+  .cbar b { display: block; height: 100%; background: var(--accent-light); }
+  .crow .cx { flex-basis: 100%; font-size: 0.84rem; color: var(--faded); }
+  .cmp-msg { font-size: 0.86rem; color: #7a4a14; margin: 0.05rem 0 0.3rem; }
+  .cmp-foot { font-size: 0.82rem; margin-top: 0.3rem; }
+  .cmp-runs { margin-top: 0.4rem; }
+  .crun { font-size: 0.9rem; margin: 0.1rem 0; }
+  .crun .lnk { font-size: 0.8rem; }
+  #railbody > .from:last-child { margin-top: 0.8rem; }
   .pcite { font-size: 1.35rem; font-weight: 600; color: var(--accent); margin: 0.1rem 0 0; }
   .pmeta { font-size: 0.9rem; color: var(--faded); }
   .layer { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.08em; border: 1px solid var(--accent-light); border-radius: 4px; padding: 0 0.3rem; color: var(--accent); margin-right: 0.45rem; vertical-align: 1px; }
@@ -608,7 +678,7 @@
       </div>
       <form id="ask" autocomplete="off">
         <div class="qrow">
-          <input id="q" type="search" spellcheck="false" placeholder="A word or phrase, e.g.  form* fals*  or  &quot;satz des widerspruchs&quot;">
+          <input id="q" type="search" spellcheck="false" placeholder="A word or phrase, e.g.  form* fals*  ·  a page, 24:892  ·  a note, Refl. 4086">
           <button type="submit" class="btn solid">Ask</button>
         </div>
         <div class="optline">
@@ -629,9 +699,17 @@
           <code>fals*</code> finds every word that begins so. Several words, <code>form* fals*</code>, find places where they stand
           near each other, in any order. Quotation marks, <code>"der form nach"</code>, keep words together and in order.
           <code>OR</code> joins alternatives. A regular expression between slashes, <code>/formali?ter/</code>, is matched against the text as printed.</p>
+          <p>A page of the Academy edition, written as scholars cite it, goes straight to that page: <code>24:892</code>, <code>24.892</code>,
+          <code>AA 24:892</code>, <code>Ak. 16, 236</code> or <code>AA XVII 45</code> opens the text printed there, where the page begins.
+          A page of Kant’s notes opens the textbook they are written in, with the note beside it.
+          A Reflexion’s number, <code>Refl. 4086</code>, <code>R 4086</code> or <code>4086</code> alone, opens that note on the right.</p>
           <p><b>Overview</b> shows every distinct phrasing the search found and where it occurs; <b>Passages</b> lists them.
           Click a passage to read it in its full text on the right; <b>Connections</b> there shows the textbook § it belongs to,
           Kant’s notes on it, the other texts on the same §, and its parallel passages. Select words in any text to search for them.</p>
+          <p><b>Compare</b>, beside Full text, keeps the passage in view and lists under it what shares its wording: its textbook §,
+          Kant’s notes (filed under the same § or not), the lectures and Jäsche. Pick one, or name one (<code>Refl. 4086</code>,
+          <code>16:236</code>, <code>Meier § 125</code>), to see it beneath with the words the two share marked in both. Click a sentence
+          to compare it alone. <kbd>C</kbd> opens Compare and goes back; the arrows keep it open from result to result.</p>
         </div>
       </form>
       <div id="results"></div>
@@ -781,6 +859,9 @@ const S = {                       // what the user is looking at; mirrored in th
   en: '',                         // the English shown beside the German: a PORTAL_TR_STYLES key, or '' for none
   enStyle: 'guyer',               // the style a single passage's English button opens in
   enOpen: new Set(),              // passages whose English was opened one at a time
+  seen: new Set(), seenFor: null, // the search results already opened, and the search they belong to
+  bookOpen: false, bookAt: null,  // the textbook § under the reading pane's header: open or not, and which § of its range
+  cmp: null,                      // the Compare tab's choices, for the passage they were made for: see cmpState
 };
 let RESULT = null;
 let LOAD_FAILED = [];
@@ -947,7 +1028,7 @@ const ADAPT = {
         if (!b.text || b.kind === 'rule' || b.kind === 'note') return;
         let cite = 'AA ' + vol + ':' + b.aa + (b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '');
         if (paraOf[b.id]) cite = '§ ' + paraOf[b.id] + ', ' + cite;
-        addPassage(T, { id: b.id, cite, aa: b.aa, text: b.text, sec, para: paraOf[b.id] || null });
+        addPassage(T, { id: b.id, cite, aa: b.aa, aaEnd: b.aaEnd, vol, text: b.text, sec, para: paraOf[b.id] || null });
       });
     });
   },
@@ -957,7 +1038,7 @@ const ADAPT = {
       const d = reflDate(e);
       const vol = e.vol || T.vol;
       addPassage(T, {
-        id: 'r' + e.r, cite: 'Refl. ' + e.r + (e.aa ? ', AA ' + vol + ':' + e.aa : ''), aa: e.aa, text: e.text,
+        id: 'r' + e.r, cite: 'Refl. ' + e.r + (e.aa ? ', AA ' + vol + ':' + e.aa : ''), aa: e.aa, aaEnd: e.aaEnd, vol, text: e.text,
         year: d.from || T.year, dateLabel: d.label, paras: e.paras || [], src: e.src, interp: !!e.interp, entry: k,
         sec: e.loc && e.loc.lemma ? '»' + e.loc.lemma + '«' : '',
       });
@@ -1327,7 +1408,7 @@ function renderHome(box) {
     '<div class="home-foot">' + esc(statusText()) + '</div>';
 }
 const textCard = t => '<button type="button" class="qcard" data-read="' + t.key + '">' + esc(t.title) +
-  '<span class="who">' + esc(t.date) + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + '</span></button>';
+  '<span class="who">' + esc(t.date) + (aaRange(t).label ? ' · ' + esc(aaRange(t).label) : '') + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + '</span></button>';
 
 /* Explore: every starting point the seminar has built, in one place. */
 function renderExplore() {
@@ -1461,7 +1542,7 @@ function hitCard(p, ms) {
   const place = placeOf(p);
   const tag = place ? ' · ' + (place.book === 'baumgarten' ? 'Baumgarten' : 'Meier') + ' ' + paraLabel(place.paras) : '';
   const qen = S.preset && S.preset.who === 'feng' ? qianxunEnglish(p) : '';
-  return '<div class="hit' + (S.sel === p.i ? ' sel' : '') + '" data-open="' + p.i + '"><div class="cite"><b>' + esc(p.cite) + '</b>' +
+  return '<div class="hit' + (S.sel === p.i ? ' sel' : '') + (S.seenFor === searchKey() && S.seen.has(p.i) ? ' seen' : '') + '" data-open="' + p.i + '"><div class="cite"><b>' + esc(p.cite) + '</b>' +
     (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : '') + esc(tag) + (ms.length > 1 ? ' · ' + ms.length + ' times' : '') + (qen ? '' : enButton(p, a, b)) + '</div>' +
     '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, spans) + (b < p.text.length ? ' …' : '') + '</div>' +
     (qen ? '' : enLine(p, a, b)) +
@@ -1928,6 +2009,78 @@ function sec(key, title, value, count, body, credit, defOpen) {
     '<div class="body">' + body + (credit ? '<div class="from">' + credit + '</div>' : '') + '</div></details>';
 }
 
+/* ── Going through the search results one by one ───────────────────────────
+   The reading pane steps through the results in the order the Passages list shows them, and
+   remembers which have been opened, for as long as the search stays the same. */
+const searchKey = () => [S.q, S.w, S.cm, S.co, S.merge, [...S.off].sort().join(','), S.loc || ''].join('|');
+function resultOrder() {
+  if (S.view !== 'ask' || S.d || !RESULT || !RESULT.byPass) return [];
+  const out = [];
+  TEXTS.forEach(t => {
+    let ps = [...RESULT.byPass.keys()].filter(i => P[i].t === t.idx);
+    if (S.loc) ps = ps.filter(i => RESULT.byPass.get(i).some(m => m.loc === S.loc));
+    out.push(...ps.sort((a, b) => a - b));
+  });
+  return out;
+}
+function resultStepper(p) {
+  const ord = resultOrder(), k = ord.indexOf(p.i);
+  if (k < 0) return '';
+  const seen = S.seenFor === searchKey() ? ord.filter(i => S.seen.has(i)).length : 0;
+  return '<div class="rstep" title="Go through the results one by one: ← → or J K">' +
+    '<button type="button" data-rstep="-1"' + (k ? '' : ' disabled') + ' aria-label="Previous result">‹</button>' +
+    '<span class="n"><b>' + (k + 1) + '</b> of ' + ord.length + (seen > 1 ? ' · ' + seen + ' seen' : '') + '</span>' +
+    '<button type="button" data-rstep="1"' + (k < ord.length - 1 ? '' : ' disabled') + ' aria-label="Next result">›</button></div>';
+}
+/* Open the next (d = 1) or previous (d = -1) result, keeping the pane on the tab it was on. */
+function stepResult(d) {
+  const ord = resultOrder(), k = ord.indexOf(S.sel);
+  if (k < 0) return false;
+  const i = ord[k + d];
+  if (i == null) return true;
+  const t = TEXTS[P[i].t], inText = ord.filter(j => P[j].t === t.idx);
+  if (inText.indexOf(i) >= 12 && !S.expand.has(t.key)) { S.expand.add(t.key); renderResults(); }
+  openPassage(i, null, S.rtab);
+  const card = document.querySelector('.hit[data-open="' + i + '"]');
+  if (card) card.scrollIntoView({ block: 'nearest' });
+  return true;
+}
+
+/* The textbook § a note or a lecture passage is on, under the reading pane's header: one line
+   closed, the § in full when open. It stays open from passage to passage, so that the reader
+   going through a list of notes can read each one beside its § without leaving the list. */
+function textbookStrip(p) {
+  const place = placeOf(p);
+  const book = place && textByKey(place.book);
+  if (!book) return '';
+  const paras = place.paras.filter(n => passage(book.key, 'p' + n));
+  if (!paras.length) return '';
+  const n = paras.includes(S.bookAt) ? S.bookAt : paras[0];
+  const bp = passage(book.key, 'p' + n);
+  const tierWord = place.tier === 'stated' ? 'stated' : place.tier === 'interp' ? 'interpolated' : 'inferred';
+  let h = '<div class="tbook' + (S.bookOpen ? ' open' : '') + '">' +
+    '<button type="button" class="tbhead" data-bookopen="1" aria-expanded="' + S.bookOpen + '" title="' + (S.bookOpen ? 'Fold the § away' : 'Read the § beside this passage') + '">' +
+    '<span class="tbarr">' + (S.bookOpen ? '▾' : '▸') + '</span>' +
+    '<span class="tbname">' + esc(book.short) + ' ' + esc(paraLabel(place.paras)) + '</span>' +
+    '<span class="tier ' + place.tier + '">' + tierWord + '</span>' +
+    (S.bookOpen ? '<span class="tbfirst">' + esc(bp.cite) + '</span>' : '<span class="tbfirst" lang="de">' + esc(clip(bp.text, 140)) + '</span>') + '</button>';
+  if (!S.bookOpen) return h + '</div>';
+  if (paras.length > 1) {
+    const k = paras.indexOf(n);
+    h += '<div class="tbparas">' + (paras.length <= 14
+      ? paras.map(x => '<button type="button" data-bookat="' + x + '"' + (x === n ? ' class="on"' : '') + '>§ ' + x + '</button>').join('')
+      : '<button type="button" data-bookat="' + paras[Math.max(0, k - 1)] + '">‹</button><span>§ ' + n + ', ' + (k + 1) + ' of ' + paras.length + '</span><button type="button" data-bookat="' + paras[Math.min(paras.length - 1, k + 1)] + '">›</button>') + '</div>';
+  }
+  const de = '<div class="tbtext" lang="de">' + esc(bp.text) + '</div>';
+  const tr = trFor(book);
+  h += '<div class="tbbody">' + (tr && S.en ? '<div class="pair">' + de + englishFor(tr, bp) + '</div>' : de) + '</div>';
+  const reader = book.key === 'meier' ? ['Meier Reader', '../../../meier-reader/meier-reading-guide.html#go=' + n]
+    : book.key === 'baumgarten' ? ['Baumgarten Reader', '../../../baumgarten-reader/baumgartenreading-guide.html#go=' + n] : null;
+  h += '<div class="tbfoot">' + esc(place.how) + ' · <span class="lnk" data-open="' + bp.i + '">open § ' + n + ' on its own</span>' +
+    (reader ? ' · <a href="' + reader[1] + '" target="_blank" rel="noopener"' + toolAttr(reader[1], reader[0]) + '>in the ' + esc(reader[0]) + ' ↗</a>' : '') + '</div>';
+  return h + '</div>';
+}
+
 function renderRail(headOnly) {
   const rail = $('rail');
   if (S.sel == null || !P[S.sel]) {
@@ -1943,30 +2096,55 @@ function renderRail(headOnly) {
   const readingHere = S.view === 'read' && S.readKey === T.key;
   if (S.railW) $('app').style.gridTemplateColumns = 'minmax(0, 1fr) ' + S.railW + 'px';
   if (readingHere && isStudyText(T)) return renderStudyRail(p, T, headOnly);
+  if (!['text', 'cmp', 'conn'].includes(S.rtab)) S.rtab = 'text';
   $('railhead').innerHTML = '<div class="rhead"><div class="rwork"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
+    resultStepper(p) +
     '<button type="button" class="rclose" data-close-rail="1" title="Close">×</button></div>' +
     '<div class="pcite">' + esc(p.cite) + '</div>' +
     '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>' +
-    '<div class="rtabs"><button type="button" data-rtab="text"' + (S.rtab !== 'conn' ? ' class="on"' : '') + '>Full text</button>' +
+    (S.rtab === 'cmp' ? '' : textbookStrip(p)) +
+    '<div class="rtabs"><button type="button" data-rtab="text"' + (S.rtab === 'text' ? ' class="on"' : '') + '>Full text</button>' +
+    '<button type="button" data-rtab="cmp"' + (S.rtab === 'cmp' ? ' class="on"' : '') + ' title="Keep this passage in view, and compare it with Kant’s notes and the other passages that share its wording (C)">Compare</button>' +
     '<button type="button" data-rtab="conn"' + (S.rtab === 'conn' ? ' class="on"' : '') + '>Connections</button><span class="spacer"></span>' +
     (readingHere ? '' : '<span class="lnk" data-readat="' + p.i + '" title="Open this text on the left, to read it through">Read on the left ↙</span>') + '</div>';
   if (headOnly) return;
   const body = $('railbody');
-  if (S.rtab === 'conn') {
+  if (S.rtab === 'cmp') {
     delete FT.railtext;
+    $('app').classList.remove('en');
+    cmpBody(body, p, T);
+  } else if (S.rtab === 'conn') {
+    delete FT.railtext;
+    CMP.shown = null;
     body.innerHTML = renderConnections(p, T);
     body.scrollTop = 0;
   } else {
+    CMP.shown = null;
     $('app').classList.remove('en');
     body.innerHTML = '<div id="railtext" class="fulltext"></div>';
     ftOpen($('railtext'), body, p.i, p.i, 24);
   }
 }
 
+/* After a pick in the Compare tab, the passage compared, brought up if it is below the fold. */
+function cmpShowB() {
+  const el = document.querySelector('.cmp-b'), rb = $('railbody');
+  if (!el) return;
+  const top = el.getBoundingClientRect().top - rb.getBoundingClientRect().top;
+  if (top > rb.clientHeight * 0.55) rb.scrollTop += top - rb.clientHeight * 0.3;
+}
+/* The Compare tab's body, kept at the same scroll while the reader picks within it. */
+function cmpBody(body, p, T) {
+  const keep = CMP.shown === p.i ? body.scrollTop : 0;
+  body.innerHTML = renderCompare(p, T);
+  body.scrollTop = keep;
+  CMP.shown = p.i;
+}
+
 /* In the study view the right pane is the readers' panel: Kant's notes on the § in view, the
-   tradition behind it (Meier), and the portal's connections for it. */
+   tradition behind it (Meier), the passages that share its wording, and the portal's connections for it. */
 function renderStudyRail(p, T, headOnly) {
-  if (!['notes', 'trad', 'conn'].includes(S.rtab)) S.rtab = 'notes';
+  if (!STUDY_TABS.includes(S.rtab)) S.rtab = 'notes';
   const notes = notesOf(T);
   const n = notes && notes.byPara && notes.byPara[p.para] ? notes.byPara[p.para].length : 0;
   $('railhead').innerHTML = '<div class="rhead"><div class="rwork"><span class="layer">KANT’S NOTES</span>on ' + esc(T.short) + ' § ' + p.para + '</div>' +
@@ -1974,11 +2152,14 @@ function renderStudyRail(p, T, headOnly) {
     '<div class="pmeta">' + esc(p.sec || '') + '</div>' +
     '<div class="rtabs"><button type="button" data-rtab="notes"' + (S.rtab === 'notes' ? ' class="on"' : '') + '>Kant’s notes<span class="muted small"> ' + n + '</span></button>' +
     (T.shape === 'meier' ? '<button type="button" data-rtab="trad"' + (S.rtab === 'trad' ? ' class="on"' : '') + '>Tradition</button>' : '') +
+    '<button type="button" data-rtab="cmp"' + (S.rtab === 'cmp' ? ' class="on"' : '') + ' title="Keep this § in view, and compare it with the notes and lectures that share its wording, filed under it or not (C)">Compare</button>' +
     '<button type="button" data-rtab="conn"' + (S.rtab === 'conn' ? ' class="on"' : '') + '>Connections</button></div>';
   if (headOnly) return;
   const body = $('railbody');
   delete FT.railtext;
   $('app').classList.remove('en');
+  if (S.rtab === 'cmp') return cmpBody(body, p, T);
+  CMP.shown = null;
   body.innerHTML = S.rtab === 'trad' ? traditionPanel(T, p.para) : S.rtab === 'conn' ? renderConnections(p, T) : notesPanel(T, p.para);
   body.scrollTop = 0;
   if (S.rtab === 'notes') {
@@ -2038,9 +2219,500 @@ function parallelsSection(p) {
   if (!sims.length) return '';
   let body = '';
   if (sims.length) body += '<ul class="items">' +
-    sims.map(([q, sc]) => '<li data-open="' + q + '"><span class="c">' + esc(TEXTS[P[q].t].short + ', ' + P[q].cite) + '</span>' + esc(clip(P[q].text.replace(/\s+/g, ' '), 100)) + '<span class="simv" title="similarity of wording, 0 to 1">' + sc.toFixed(2) + '</span></li>').join('') + '</ul>' +
-    '<div class="from">the words the passages share, weighted by rarity, as Jessie’s parallel passages compare the lectures, leaving out Jessie’s stopwords. Found by machine, not checked by hand</div>';
+    sims.map(([q, sc]) => '<li data-cmpwith="' + q + '" title="Compare it with this passage, word by word"><span class="c">' + esc(TEXTS[P[q].t].short + ', ' + P[q].cite) + '</span>' + esc(clip(P[q].text.replace(/\s+/g, ' '), 100)) + '<span class="simv" title="similarity of wording, 0 to 1">' + sc.toFixed(2) + '</span></li>').join('') + '</ul>' +
+    '<div class="from">the words the passages share, weighted by rarity, as Jessie’s parallel passages compare the lectures, leaving out Jessie’s stopwords. Found by machine, not checked by hand. Click one to compare it with this passage, word by word</div>';
   return sec('parallels', 'Parallel passages', '', sims.length, body, '', true);
+}
+
+/* ── Compare: the passage in view held at the top, and another under it ───────────────────
+   Whatever the reader is looking at stays where it is. Under it come the passages that share
+   its wording, Kant's notes among them whether or not the AA files them under the same §, and
+   under those whichever one the reader picks, or names ("Refl. 4086", "16:236", "Meier § 125"),
+   with the words the two share marked in both. Words are compared by stem once the spellings
+   are merged, so that Seele and Seelen, Urtheil and Urteile, count as one; "in a row" is the
+   same words in the same order. All of it is found by machine, and the pane says so. */
+const CMP_ENDS = ['ibus', 'orum', 'arum', 'ium', 'en', 'em', 'er', 'es', 'um', 'us', 'is', 'ae', 'am', 'as', 'os', 'e', 'n', 's', 'a', 'o', 'i'];
+const CMP_LIGHT = ('dies diese dieser dieses diesen diesem alle alles aller allen kann können muss muß müssen sondern denn dann weil also daher dadurch damit dazu darin daraus davon hier nun zwar ja viel viele kein keine keinen ihre seine selbst etwa etc ' +
+  'et est sunt esse sit sint in non quae qui quod quam quo qua quibus ad cum vel seu aut ut sed hoc haec hic hinc ergo per ex ab de pro sub inter si nec neque atque ac tamen etiam enim autem eius ita sic omnis omne omnia id ea eo nisi tam iam nam an ipse ille').split(' ');
+const CMP_GROUP = { textbook: 'Textbook', notes: 'Kant’s notes', lecture: 'Lectures', compilation: 'Jäsche', published: 'Published works' };
+const CMP = { stem: null, toks: new Map(), cands: null, bits: null, shown: null };
+const cmpFresh = i => ({ for: i, with: null, bit: null, whole: false, more: false, msg: '', pick: null });
+/* The reader's choices in the Compare tab belong to the passage they were made for. */
+function cmpState(p) { if (!S.cmp || S.cmp.for !== p.i) S.cmp = cmpFresh(p.i); return S.cmp; }
+
+function stemOf(n) {
+  for (let r = 0; r < 2; r++) {
+    const e = CMP_ENDS.find(x => n.length - x.length >= 4 && n.endsWith(x));
+    if (!e) break;
+    n = n.slice(0, n.length - e.length);
+  }
+  return n;
+}
+/* Built the first time Compare opens: a stem for every word form, which stems carry meaning, and
+   every passage's words end to end, for finding the same words in a row anywhere. */
+function cmpReady() {
+  if (CMP.stem) return;
+  const sid = new Map(), stem = new Int32Array(VOCAB.length), N = P.length;
+  for (let v = 0; v < VOCAB.length; v++) { const s = stemOf(VOCAB[v]); let k = sid.get(s); if (k === undefined) { k = sid.size; sid.set(s, k); } stem[v] = k; }
+  const df = new Uint32Array(sid.size), last = new Int32Array(sid.size).fill(-1);
+  let total = 0;
+  for (const p of P) { total += p.ids.length + 1; for (const v of p.ids) { const s = stem[v]; if (last[s] !== p.i) { last[s] = p.i; df[s]++; } } }
+  const light = new Set([...(LAYERS.stopwords || []), ...CMP_LIGHT].map(w => sid.get(stemOf(normWord(String(w).toLowerCase())))));
+  const heavy = [], idf = [];
+  sid.forEach((k, s) => { heavy[k] = s.length > 2 && !light.has(k) && df[k] < N * 0.25 ? 1 : 0; idf[k] = Math.log((N + 1) / (df[k] + 1)); });
+  const flat = new Int32Array(total), owner = new Int32Array(total);
+  let o = 0;
+  for (const p of P) { for (const v of p.ids) { flat[o] = v; owner[o++] = p.i; } flat[o] = -1; owner[o++] = p.i; }
+  Object.assign(CMP, { sid, stem, heavy, idf, flat, owner, N });
+}
+/* The stem of a word that is not in the texts' own vocabulary: Baumgarten's German equivalents. */
+function cmpStem(lower) {
+  const s = stemOf(normWord(lower));
+  let k = CMP.sid.get(s);
+  if (k === undefined) { k = CMP.sid.size; CMP.sid.set(s, k); CMP.heavy[k] = s.length > 2 ? 1 : 0; CMP.idf[k] = Math.log(CMP.N + 1); }
+  return k;
+}
+/* p's words for comparing: where each stands in the text shown (Baumgarten's German equivalents
+   back in brackets where his Latin has them), its vocabulary id (-1 for the German, which counts
+   towards shared words but not towards words in a row), and its stem. */
+function cmpToks(p) {
+  let c = CMP.toks.get(p.i);
+  if (c) return c;
+  const n = p.ids.length, st = new Int32Array(n);
+  for (let k = 0; k < n; k++) st[k] = CMP.stem[p.ids[k]];
+  c = { str: p.text, s: p.ts, e: p.te, v: p.ids, st, gl: [] };
+  if (p.gl && p.gl.some(g => g.de)) {
+    const s = [], e = [], v = [], sx = [], gl = [];
+    let str = '', pos = 0, k = 0;
+    const upTo = at => {
+      const base = str.length - pos;
+      str += p.text.slice(pos, at);
+      while (k < n && p.ts[k] < at) { s.push(p.ts[k] + base); e.push(p.te[k] + base); v.push(p.ids[k]); sx.push(st[k]); k++; }
+      pos = at;
+    };
+    p.gl.filter(g => g.de).sort((x, y) => x.at - y.at).forEach(g => {
+      upTo(g.at);
+      const a = str.length;
+      str += ' (' + g.de + ')';
+      const re = /[\p{L}\p{M}]+/gu;
+      let m;
+      while ((m = re.exec(g.de))) { s.push(a + 2 + m.index); e.push(a + 2 + m.index + m[0].length); v.push(-1); sx.push(cmpStem(m[0].toLowerCase())); }
+      gl.push([a, str.length]);
+    });
+    upTo(p.text.length);
+    c = { str, s, e, v, st: sx, gl };
+  }
+  if (CMP.toks.size > 800) CMP.toks.clear();
+  CMP.toks.set(p.i, c);
+  return c;
+}
+/* The words of c between character offsets bit[0] and bit[1], as [first, end) word indices. */
+function cmpRange(c, bit) {
+  if (!bit) return [0, c.st.length];
+  let lo = 0;
+  while (lo < c.st.length && c.e[lo] <= bit[0]) lo++;
+  let hi = lo;
+  while (hi < c.st.length && c.s[hi] < bit[1]) hi++;
+  return [lo, hi];
+}
+/* What every comparison with p needs: its words in range, their weights, and its three-word runs. */
+function cmpProbe(p, bit) {
+  const a = cmpToks(p), [lo, hi] = cmpRange(a, bit), H = CMP.heavy, I = CMP.idf, V = VOCAB.length;
+  const SA = new Map(), tri = new Map();
+  for (let k = lo; k < hi; k++) { const s = a.st[k]; if (H[s]) SA.set(s, I[s]); }
+  for (let i = lo; i + 2 < hi; i++) {
+    const x = a.v[i], y = a.v[i + 1], z = a.v[i + 2];
+    if (x < 0 || y < 0 || z < 0) continue;
+    const key = (x * V + y) * V + z, g = tri.get(key);
+    if (g) g.push(i); else tri.set(key, [i]);
+  }
+  let wA = 0;
+  SA.forEach(w => { wA += w; });
+  return { p, a, lo, hi, SA, wA, tri };
+}
+/* The runs of three words or more that p (in range) and b have in the same order, two of them at
+   least not function words: [place in p, place in b, length, words that count], the longest
+   kept wherever two overlap. */
+function cmpRuns(pr, b) {
+  const a = pr.a, V = VOCAB.length, H = CMP.heavy, out = [];
+  for (let j = 0; j + 2 < b.v.length && out.length < 300; j++) {
+    const x = b.v[j], y = b.v[j + 1], z = b.v[j + 2];
+    if (x < 0 || y < 0 || z < 0) continue;
+    const is = pr.tri.get((x * V + y) * V + z);
+    if (!is) continue;
+    for (const i of is) {
+      if (i > pr.lo && j > 0 && a.v[i - 1] >= 0 && a.v[i - 1] === b.v[j - 1]) continue;   // inside a run already found
+      let L = 3;
+      while (i + L < pr.hi && j + L < b.v.length && a.v[i + L] >= 0 && a.v[i + L] === b.v[j + L]) L++;
+      let h = 0;
+      for (let k = i; k < i + L; k++) h += H[a.st[k]];
+      if (h >= 2) out.push([i, j, L, h]);
+    }
+  }
+  out.sort((x, y) => y[2] - x[2]);
+  const used = new Uint8Array(pr.hi - pr.lo + 1), keep = [];
+  for (const r of out) {
+    let fresh = false;
+    for (let k = r[0]; k < r[0] + r[2]; k++) if (!used[k - pr.lo]) { fresh = true; break; }
+    if (!fresh) continue;
+    for (let k = r[0]; k < r[0] + r[2]; k++) used[k - pr.lo] = 1;
+    keep.push(r);
+  }
+  return keep.sort((x, y) => x[0] - y[0]);
+}
+/* p (in range) against passage B: the stretch of B that has most of p's words (all of B when B is
+   short), the words they share there, and their runs in a row. `score` is the share of p's
+   words found, each weighted by how rare it is in the corpus. */
+function cmpPair(pr, B, W) {
+  const b = cmpToks(B), H = CMP.heavy, I = CMP.idf, SA = pr.SA, nb = b.st.length;
+  W = W || Math.max(60, 2 * (pr.hi - pr.lo));
+  const runs = cmpRuns(pr, b), run = runs.reduce((m, r) => Math.max(m, r[2]), 0);
+  let w0 = 0, w1 = nb;
+  if (nb > W * 1.4) {
+    const cnt = new Map();
+    let cur = 0, best = -1;
+    for (let k = 0; k < nb; k++) {
+      const s = b.st[k];
+      if (SA.has(s)) { const c = (cnt.get(s) || 0) + 1; cnt.set(s, c); if (c === 1) cur += SA.get(s); }
+      if (k >= W) { const t = b.st[k - W]; if (SA.has(t)) { const c = cnt.get(t) - 1; cnt.set(t, c); if (!c) cur -= SA.get(t); } }
+      if (k >= W - 1 && cur > best) { best = cur; w0 = k - W + 1; w1 = k + 1; }
+    }
+    // the longest run in a row belongs in the stretch shown
+    const lr = runs.find(r => r[2] === run);
+    if (lr && run >= 4 && (lr[1] < w0 || lr[1] + lr[2] > w1)) { w0 = Math.max(0, Math.min(nb - W, lr[1] - (W >> 1))); w1 = Math.min(nb, w0 + W); }
+  }
+  const shared = new Set();
+  for (let k = w0; k < w1; k++) if (SA.has(b.st[k])) shared.add(b.st[k]);
+  runs.forEach(r => { for (let k = r[0]; k < r[0] + r[2]; k++) if (H[pr.a.st[k]]) shared.add(pr.a.st[k]); });
+  let wS = 0;
+  shared.forEach(s => { wS += I[s]; });
+  return { q: B.i, n: shared.size, m: SA.size, score: pr.wA ? wS / pr.wA : 0, run, runs, win: [w0, w1], shared };
+}
+/* The passages nearest p's words in range, as the parallel passages find them. */
+function cmpNearest(pr, k, same) {
+  if (!SIM.ok) return [];
+  const p = pr.p, tf = new Map(), N = P.length, scores = new Map();
+  for (let j = pr.lo; j < pr.hi; j++) { const v = pr.a.v[j]; if (v >= 0 && SIM.post[v]) tf.set(v, (tf.get(v) || 0) + 1); }
+  tf.forEach((c, v) => {
+    const ps = SIM.post[v], w = (1 + Math.log(c)) * Math.log(N / (ps.length / 2));
+    for (let m = 0; m < ps.length; m += 2) {
+      const q = ps[m];
+      if (q === p.i || (!same && P[q].t === p.t)) continue;
+      scores.set(q, (scores.get(q) || 0) + w * ps[m + 1]);
+    }
+  });
+  return [...scores.entries()].sort((x, y) => y[1] - x[1]).slice(0, k).map(e => e[0]);
+}
+/* Every passage in the corpus with four words or more of p's in a row: a long lecture paragraph
+   that quotes one sentence of a note is too unlike it as a whole for cmpNearest to find. */
+function cmpScan(pr, same) {
+  const a = pr.a, p = pr.p, V = VOCAB.length, H = CMP.heavy, ST = CMP.stem, grams = new Map();
+  for (let i = pr.lo; i + 2 < pr.hi; i++) {
+    const x = a.v[i], y = a.v[i + 1], z = a.v[i + 2];
+    if (x < 0 || y < 0 || z < 0 || !(H[ST[x]] || H[ST[y]] || H[ST[z]])) continue;
+    const key = (x * V + y) * V + z, g = grams.get(key);
+    if (g) g.push(i); else grams.set(key, [i]);
+  }
+  if (!grams.size) return [];
+  const F = CMP.flat, O = CMP.owner, hits = new Map();
+  for (let j = 0; j + 2 < F.length; j++) {
+    const x = F[j], y = F[j + 1], z = F[j + 2];
+    if (x < 0 || y < 0 || z < 0) continue;
+    const g = grams.get((x * V + y) * V + z);
+    if (!g) continue;
+    const q = O[j];
+    if (q === p.i || (!same && P[q].t === p.t)) continue;
+    let h = hits.get(q);
+    if (!h) hits.set(q, h = []);
+    for (const i of g) h.push(j - i, i);
+  }
+  const out = [];
+  hits.forEach((h, q) => {
+    const pairs = [];
+    for (let m = 0; m < h.length; m += 2) pairs.push([h[m], h[m + 1]]);
+    pairs.sort((u, w) => u[0] - w[0] || u[1] - w[1]);
+    let best = 0;
+    for (let m = 0; m < pairs.length;) {
+      let n = m + 1;
+      while (n < pairs.length && pairs[n][0] === pairs[m][0] && pairs[n][1] <= pairs[n - 1][1] + 3) n++;
+      const i0 = pairs[m][1], L = pairs[n - 1][1] - i0 + 3;
+      if (L >= 4 && L > best) { let hv = 0; for (let k = i0; k < i0 + L; k++) hv += H[a.st[k]]; if (hv >= 2) best = L; }
+      m = n;
+    }
+    if (best) out.push([q, best]);
+  });
+  return out.sort((u, w) => w[1] - u[1]).slice(0, 40).map(o => o[0]);
+}
+/* The passages to compare p with, best first, grouped by layer. Its textbook § always comes, and
+   what the AA or Jesus's concordance puts on the same § is weighed with the rest. */
+function cmpCands(p, bit) {
+  const key = p.i + '|' + (bit ? bit.join('-') : '');
+  if (CMP.cands && CMP.cands.key === key) return CMP.cands;
+  cmpReady();
+  const T = TEXTS[p.t], pr = cmpProbe(p, bit), tie = new Map(), isBook = isStudyText(T);
+  const place = placeOf(p);
+  const bookKey = place ? place.book : isBook ? T.key : null;
+  const paras = place ? place.paras.slice(0, 8) : isBook ? [p.para] : [];
+  if (place) paras.forEach(n => { const q = passage(place.book, 'p' + n); if (q) tie.set(q.i, 'book'); });
+  const book = bookKey && textByKey(bookKey), notes = book && notesOf(book);
+  paras.forEach(n => {
+    ((notes && notes.byPara && notes.byPara[n]) || []).forEach(k => { const e = notes.entries[k], q = e && passage(notes.key, 'r' + e.r); if (q && !tie.has(q.i)) tie.set(q.i, 'note'); });
+    if (bookKey === 'meier') (CONC_REV.get(n) || []).forEach(x => { const q = passage(x.key, x.id); if (q && !tie.has(q.i)) tie.set(q.i, 'lect'); });
+  });
+  tie.delete(p.i);
+  const same = T.shape === 'refl', pool = new Set(tie.keys());
+  cmpNearest(pr, 30, same).forEach(q => pool.add(q));
+  cmpScan(pr, same).forEach(q => pool.add(q));
+  pool.delete(p.i);
+  const rows = [];
+  pool.forEach(q => {
+    const r = cmpPair(pr, P[q]);
+    r.tie = tie.get(q) || '';
+    r.rank = r.score + Math.min(0.3, 0.03 * r.run);
+    if (r.tie === 'book' || (r.n >= (r.tie ? 2 : 3) && r.score >= 0.05) || r.run >= 4) rows.push(r);
+  });
+  // the whole passage leads with its own §; one sentence, with whatever matches it best
+  rows.sort((x, y) => (bit ? 0 : (y.tie === 'book') - (x.tie === 'book')) || y.rank - x.rank);
+  const order = isBook ? ['notes', 'lecture', 'compilation', 'published', 'textbook'] : ['textbook', 'notes', 'lecture', 'compilation', 'published'];
+  const groups = order.map(layer => ({ layer, rows: rows.filter(r => TEXTS[P[r.q].t].layer === layer) })).filter(g => g.rows.length);
+  return (CMP.cands = { key, pr, lo: pr.lo, hi: pr.hi, rows, groups });
+}
+/* p's sentences, numbered points and lines, as [start, end) offsets; a piece too short to stand
+   alone ("1.", "Nota.") goes with the next. */
+function cmpSentences(str) {
+  const raw = [], re = /[.?!;:](?=\s+[A-ZÄÖÜ„"»(\[0-9])|\n+/g;
+  let start = 0, m;
+  while ((m = re.exec(str))) {
+    const end = m[0][0] === '\n' ? m.index : m.index + 1;
+    if (end > start) raw.push([start, end]);
+    start = m.index + m[0].length;
+    while (/\s/.test(str[start] || '')) start++;
+  }
+  if (start < str.length) raw.push([start, str.length]);
+  const words = r => (str.slice(r[0], r[1]).match(/[\p{L}\p{M}]+/gu) || []).length, out = [];
+  raw.forEach(r => {
+    const prev = out[out.length - 1];
+    if (prev && words(prev) < 4) prev[1] = r[1];
+    else out.push([r[0], r[1]]);
+  });
+  return out;
+}
+/* For each sentence of p found nearly whole somewhere else, the best textbook match and the best
+   other. Nearly whole is four words or more in a row, or three that count; or else four of its
+   words at least, most of it by weight, within a stretch hardly longer than the sentence. A long
+   passage keeps its six strongest. */
+function cmpBits(p) {
+  if (CMP.bits && CMP.bits.i === p.i) return CMP.bits.tags;
+  const tags = new Map(), a = cmpToks(p), sents = cmpSentences(a.str), same = TEXTS[p.t].shape === 'refl';
+  if (sents.length > 1 && sents.length <= 40) {
+    const base = cmpCands(p, null).rows.slice(0, 12).map(r => r.q);
+    sents.forEach(([sa, sb]) => {
+      const pr = cmpProbe(p, [sa, sb]);
+      if (pr.SA.size < 4) return;
+      const pool = new Set(base), best = {};
+      cmpNearest(pr, 8, same).forEach(q => pool.add(q));
+      const W = Math.max(24, Math.round(1.5 * (pr.hi - pr.lo)));
+      pool.forEach(q => {
+        const x = cmpPair(pr, P[q], W);
+        if (!(x.runs.some(y => y[2] >= 4 || y[3] >= 3) || (x.n >= 4 && x.score >= 0.6))) return;
+        x.rank = x.score + Math.min(0.3, 0.05 * x.run);
+        const g = TEXTS[P[q].t].layer === 'textbook' ? 'book' : 'other';
+        if (!best[g] || x.rank > best[g].rank) best[g] = x;
+      });
+      const t = [best.book, best.other].filter(Boolean);
+      if (t.length) tags.set(sa, { b: sb, t, rank: Math.max(...t.map(x => x.rank)) });
+    });
+    [...tags.entries()].sort((x, y) => y[1].rank - x[1].rank).slice(6).forEach(([k]) => tags.delete(k));
+  }
+  CMP.bits = { i: p.i, tags };
+  return tags;
+}
+/* c's text from a to b, each word marked as mk says (1 a shared word, 2 in a row with the other),
+   the spaces inside a run marked with it, and Baumgarten's German set apart. */
+function cmpHtml(c, a, b, mk) {
+  if (b <= a) return '';
+  const lv = new Uint8Array(b - a), gf = new Uint8Array(b - a);
+  for (let k = 0; k < c.st.length; k++) {
+    if (c.e[k] <= a) continue;
+    if (c.s[k] >= b) break;
+    const m = mk[k];
+    if (!m) continue;
+    const to = m === 2 && mk[k + 1] === 2 && k + 1 < c.st.length ? c.s[k + 1] : c.e[k];
+    for (let x = Math.max(a, c.s[k]); x < Math.min(b, to); x++) lv[x - a] = m;
+  }
+  c.gl.forEach(([g0, g1]) => { for (let x = Math.max(a, g0); x < Math.min(b, g1); x++) gf[x - a] = 1; });
+  let h = '', start = a, g0 = gf[0], m0 = lv[0];
+  for (let x = a + 1; x <= b; x++) {
+    const g = x < b ? gf[x - a] : -1, m = x < b ? lv[x - a] : -1;
+    if (x < b && g === g0 && m === m0) continue;
+    const t = esc(c.str.slice(start, x));
+    const inner = m0 ? '<mark class="' + (m0 === 2 ? 'cr' : 'cs') + '">' + t + '</mark>' : t;
+    h += g0 ? '<span class="gl">' + inner + '</span>' : inner;
+    start = x; g0 = g; m0 = m;
+  }
+  return h;
+}
+function cmpCite(q) {
+  const T = TEXTS[q.t];
+  if (isStudyText(T)) return T.short + ' § ' + q.para;
+  if (T.shape === 'refl') return 'Refl. ' + q.id.slice(1);
+  return T.short + ', ' + q.cite.replace(/^§ \d+, /, '');
+}
+function cmpMeta(q) {
+  const T = TEXTS[q.t];
+  if (T.shape === 'refl') {
+    const m = /ca\. ([\d–]+)/.exec(q.dateLabel || ''), book = textByKey(T.on);
+    return [m ? 'ca. ' + m[1] : '', q.paras && q.paras.length ? 'on ' + (book ? book.short + ' ' : '') + paraLabel(q.paras) : 'no §'].filter(Boolean).join(' · ');
+  }
+  return isStudyText(T) ? '' : T.date;
+}
+function renderCompare(p, T) {
+  cmpReady();
+  const st = cmpState(p), a = cmpToks(p), C = cmpCands(p, st.bit), H = CMP.heavy, isBook = isStudyText(T);
+  const noun = T.layer === 'notes' ? 'note' : isBook ? '§' : 'passage';
+  let r = C.rows.find(x => x.q === st.with) || null;
+  if (!r && st.with != null && P[st.with] && st.with !== p.i) { r = cmpPair(C.pr, P[st.with]); r.tie = 'named'; }
+  if (!r) r = C.rows[0] || null;
+  const place = placeOf(p);
+  const tieChip = x => {
+    if (!x.tie || x.tie === 'named') return '';
+    if (x.tie === 'book') return '<span class="ctie" title="' + esc(place ? place.how : '') + '">its §</span>' + (place ? '<span class="tier ' + place.tier + '">' + (place.tier === 'stated' ? 'stated' : place.tier === 'interp' ? 'interpolated' : 'inferred') + '</span>' : '');
+    return '<span class="ctie" title="' + (x.tie === 'note' ? 'The Academy edition files this note under the same §' : 'Jesus’s Meier–Kant concordance puts this passage on the same §') + '">' + (isBook ? 'on this §' : 'same §') + '</span>';
+  };
+
+  // This passage, every word it shares with the one compared marked
+  const mkA = new Uint8Array(a.st.length);
+  if (r) {
+    for (let k = C.lo; k < C.hi; k++) if (H[a.st[k]] && r.shared.has(a.st[k])) mkA[k] = 1;
+    r.runs.forEach(x => { for (let k = x[0]; k < x[0] + x[2]; k++) mkA[k] = 2; });
+  }
+  const sents = cmpSentences(a.str), tags = !st.bit && sents.length > 1 ? cmpBits(p) : new Map();
+  let at = '';
+  if (sents.length > 1) {
+    let pos = 0;
+    sents.forEach(([sa, sb]) => {
+      at += cmpHtml(a, pos, sa, mkA);
+      const on = !!st.bit && st.bit[0] === sa && st.bit[1] === sb;
+      at += '<span class="csent' + (on ? ' on' : st.bit ? ' off' : '') + '" data-cbit="' + (on ? '' : sa + '-' + sb) + '" title="' + (on ? 'Compare the whole ' + noun + ' again' : 'Compare this sentence alone') + '">' + cmpHtml(a, sa, sb, mkA) + '</span>';
+      const tg = tags.get(sa);
+      if (tg) tg.t.forEach(x => {
+        at += ' <button type="button" class="ctag" data-ctag="' + sa + '-' + sb + ':' + x.q + '" title="' + x.n + ' of this sentence’s ' + x.m + ' words are in ' + esc(cmpCite(P[x.q])) + (x.run >= 3 ? ', ' + x.run + ' in a row' : '') + '. Click to compare.">≈ ' + esc(cmpCite(P[x.q])) + '</button>';
+      });
+      pos = sb;
+    });
+    at += cmpHtml(a, pos, a.str.length, mkA);
+  } else at = cmpHtml(a, 0, a.str.length, mkA);
+  let h = '<div class="cmp-a"><div class="cmp-h"><span class="cl">This ' + noun + '</span>' +
+    (sents.length > 1 ? '<span class="hint">' + (st.bit ? 'one sentence, compared alone · <span class="lnk" data-cbit="">the whole ' + noun + '</span>' : 'click a sentence to compare it alone') + '</span>' : '') + '</div>' +
+    '<div class="cmp-text" lang="de">' + at + '</div>' +
+    '<div class="cmp-key"><span><mark class="cs">shared word</mark> <mark class="cr">same words in a row</mark></span>' +
+    (tags.size ? '<span><span class="ctag demo">≈ …</span> a sentence found nearly whole elsewhere</span>' : '') + '</div></div>';
+
+  // What to compare it with
+  const row = (x, opening) => {
+    const q = P[x.q], pct = Math.min(100, Math.round(100 * x.score));
+    return '<button type="button" class="crow' + (r && x.q === r.q ? ' on' : '') + '" data-cmpwith="' + x.q + '">' +
+      '<span class="cc">' + esc(cmpCite(q)) + '</span>' + (cmpMeta(q) ? '<span class="cd">' + esc(cmpMeta(q)) + '</span>' : '') + tieChip(x) +
+      '<span class="cn" title="' + x.n + ' of the ' + x.m + ' words of this ' + (st.bit ? 'sentence' : noun) + ' that count are in it' + (x.run >= 3 ? '; ' + x.run + ' stand in a row' : '') + '. The bar weighs each word by how rare it is in the corpus, as the order does."><i class="cbar"><b style="width:' + pct + '%"></b></i>' +
+      x.n + ' of ' + x.m + (x.run >= 3 ? ' · ' + x.run + ' in a row' : '') + '</span>' +
+      (opening ? '<span class="cx" lang="de">' + esc(clip(q.text.replace(/\s+/g, ' '), 90)) + '</span>' : '') + '</button>';
+  };
+  h += '<div class="cmp-list"><div class="cmp-h"><span class="cl">Compare with</span><span class="hint">' + (st.bit ? 'what shares this sentence’s wording' : 'what shares its wording') + ', closest first, rare words counting most</span></div>' +
+    '<input id="cmpgo" class="cmpgo" type="search" spellcheck="false" placeholder="or name one: Refl. 4086 · 16:236 · Meier § 125" aria-label="Name a passage to compare with">';
+  if (st.msg) h += '<div class="cmp-msg">' + esc(st.msg) + '</div>';
+  if (st.pick) h += '<div class="cg"><div class="cgh">' + esc(st.pick.label) + ' <span>pick one</span></div>' + st.pick.ids.map(i => row(Object.assign(cmpPair(C.pr, P[i]), { tie: '' }), true)).join('') + '</div>';
+  if (r && r.tie === 'named') h += '<div class="cg"><div class="cgh">Named</div>' + row(r) + '</div>';
+  let more = false;
+  C.groups.forEach(g => {
+    const lim = st.more ? 12 : g.layer === 'notes' ? 4 : g.layer === 'textbook' ? 2 : 3;
+    const rs = g.rows.slice(0, lim);
+    if (r && g.rows.includes(r) && !rs.includes(r)) rs.push(r);   // the one compared stays in view
+    if (g.rows.length > rs.length) more = true;
+    h += '<div class="cg"><div class="cgh">' + esc(CMP_GROUP[g.layer] || g.layer) + (g.rows.length > rs.length ? ' <span>' + rs.length + ' of ' + g.rows.length + '</span>' : '') + '</div>' + rs.map(x => row(x)).join('') + '</div>';
+  });
+  if (more) h += '<button type="button" class="btn more" data-cmore="1">Show more</button>';
+  if (!r) h += '<div class="empty">Nothing else in the portal shares enough of this ' + noun + '’s wording to list. Name a passage above to compare it anyway.</div>';
+  h += '</div>';
+
+  // The one compared, the same words marked
+  if (r) {
+    const B = P[r.q], b = cmpToks(B), TB = TEXTS[B.t], nb = b.st.length;
+    const windowed = !(r.win[0] === 0 && r.win[1] === nb), whole = !windowed || st.whole;
+    const k0 = whole ? 0 : Math.max(0, r.win[0] - 12), k1 = whole ? nb : Math.min(nb, r.win[1] + 12);
+    const mkB = new Uint8Array(nb);
+    for (let k = 0; k < nb; k++) if (H[b.st[k]] && r.shared.has(b.st[k]) && (whole || (k >= r.win[0] && k < r.win[1]))) mkB[k] = 1;
+    r.runs.forEach(x => { for (let k = x[1]; k < x[1] + x[2]; k++) mkB[k] = 2; });
+    const c0 = whole || !k0 ? 0 : b.s[k0], c1 = whole || k1 >= nb ? b.str.length : b.e[k1 - 1];
+    h += '<div class="cmp-b"><div class="cmp-h"><span class="layer">' + esc(LAYER_LABEL[TB.layer] || TB.layer) + '</span><b>' + esc(TB.shape === 'refl' ? B.cite : cmpCite(B)) + '</b>' +
+      (cmpMeta(B) ? '<span class="cd">' + esc(cmpMeta(B)) + '</span>' : '') + tieChip(r) + '<span class="spacer"></span>' +
+      '<span class="lnk" data-open="' + B.i + '" title="Open it in this pane, in its full text. The route bar’s back arrow returns here.">open it ›</span></div>' +
+      '<div class="cmp-text" lang="de">' + (c0 > 0 ? '… ' : '') + cmpHtml(b, c0, c1, mkB) + (c1 < b.str.length ? ' …' : '') + '</div>' +
+      (windowed ? '<div class="cmp-foot"><span class="lnk" data-cwhole="' + (st.whole ? '0' : '1') + '">' + (st.whole ? 'only the stretch that shares its wording' : 'the whole passage, ' + nb.toLocaleString('en') + ' words') + '</span></div>' : '') + '</div>';
+    const runs = r.runs.slice(0, 8);
+    if (runs.length) h += '<div class="cmp-runs"><div class="cgh">Word for word in both</div>' + runs.map(x => {
+      const ph = a.str.slice(a.s[x[0]], a.e[x[0] + x[2] - 1]).replace(/\s+/g, ' ');
+      const words = ph.match(/[\p{L}\p{M}]+/gu) || [];
+      return '<div class="crun"><span lang="de">»' + esc(ph) + '«</span> <span class="lnk" data-askq="' + esc('"' + words.join(' ') + '"') + '" title="Search the whole portal for these words, in this order">search everywhere</span></div>';
+    }).join('') + '</div>';
+  }
+  h += '<div class="from">Found by machine, not checked by hand. Two words count as shared when they have the same stem once the portal has merged the texts’ spellings (<i>Urtheil</i>, <i>Urteile</i>), leaving out Jessie’s stopwords and the commonest Latin and German words; “in a row” means the same words in the same order. ' +
+    'A long passage shows the stretch that shares most of this one’s words.' + (p.gl || (r && P[r.q].gl) ? ' Baumgarten’s German equivalents, in brackets, count as his words.' : '') + '</div>';
+  return h;
+}
+
+/* ── Naming a passage: a Reflexion by its number, a page of the AA, or a textbook § ── */
+/* "Refl. 4086", "R 4086", "Rx 4086", "Reflexion 4086", or a number alone: { n, prefixed }. */
+function parseRefl(raw) {
+  const m = /^\s*(?:(refl(?:exion(?:en)?)?|rx?)\.?\s*(?:nr?\.?\s*)?)?(\d{1,4})\s*\.?\s*$/i.exec(String(raw || ''));
+  return m ? { n: +m[2], prefixed: !!m[1] } : null;
+}
+function reflByNo(n) {
+  for (const T of TEXTS) if (T.shape === 'refl') { const q = passage(T.key, 'r' + n); if (q) return q; }
+  return null;
+}
+function reflMissText(n) {
+  for (const T of TEXTS) {
+    if (T.shape !== 'refl' || !T.entries) continue;
+    const e = T.entries.find(x => String(x.r) === String(n));
+    if (e) return e.vacat ? 'Refl. ' + n + ' is vacat: the Academy edition gives the number no text.' : 'Refl. ' + n + ' has no text in the transcription.';
+  }
+  const have = TEXTS.filter(T => T.shape === 'refl' && T.n).map(T => 'Refl. ' + P[T.first].id.slice(1) + '–' + P[T.last].id.slice(1) + ' (' + T.title.replace(/^Kant, /, '') + ')');
+  return 'No Reflexion numbered ' + n + ' is in the portal. It has ' + have.join(' and ') + '.';
+}
+function showReflMiss(n) {
+  showView('ask');
+  $('view-ask').classList.remove('home');
+  $('welcome').hidden = true;
+  $('results').innerHTML = '<div class="res-head"><div class="res-title">Refl. ' + n + '</div></div><div class="empty">' + esc(reflMissText(n)) + '</div>';
+}
+/* Every passage printed on a page of the AA. */
+function aaAll(vol, page) {
+  const out = [];
+  TEXTS.forEach(T => {
+    const r = aaRange(T).byVol[vol];
+    if (!r || page < r[0] || page > r[1]) return;
+    for (let k = T.first; k <= T.last; k++) { const g = pageSpan(P[k]); if (g && g.vol === vol && g.a <= page && page <= g.b) out.push(k); }
+  });
+  return out;
+}
+/* The Compare tab's box: a Reflexion, a page or a § named, to compare with. */
+function cmpLookup(raw) {
+  const st = S.cmp, v = String(raw || '').trim(), here = P[st.for];
+  st.msg = ''; st.pick = null;
+  if (!v) return;
+  let found = [], label = '';
+  const rn = parseRefl(v), pm = /^(meier|m|baumgarten|baum|b)?\.?\s*§+\s*(\d+)$/i.exec(v), c = !rn && !pm && parseAA(v);
+  if (rn) { const q = reflByNo(rn.n); if (q) found = [q.i]; else st.msg = reflMissText(rn.n); }
+  else if (pm) {
+    const own = placeOf(here), key = pm[1] ? (/^m/i.test(pm[1]) ? 'meier' : 'baumgarten') : own ? own.book : isStudyText(TEXTS[here.t]) ? TEXTS[here.t].key : 'meier';
+    const q = passage(key, 'p' + pm[2]);
+    if (q) found = [q.i]; else st.msg = (textByKey(key) ? textByKey(key).short : key) + ' has no § ' + pm[2] + '.';
+  } else if (c) { found = aaAll(c.vol, c.page); if (!found.length) st.msg = 'Nothing the portal has is printed on AA ' + c.vol + ':' + c.page + '.'; else label = 'On AA ' + c.vol + ':' + c.page; }
+  else st.msg = 'Name a passage as Refl. 4086, 16:236 or Meier § 125.';
+  found = found.filter(i => i !== st.for);
+  if (found.length === 1) { st.with = found[0]; st.whole = false; }
+  else if (found.length > 1) st.pick = { label, ids: found.slice(0, 16) };
+  else if (!st.msg) st.msg = 'That is the passage itself.';
 }
 
 /* ── Full text, rendered a stretch at a time around the passage in view, and extended as the
@@ -2120,6 +2792,7 @@ function ftBlock(st, k) {
 /* ═══ THE STUDY VIEW: a textbook with Kant's notes beside it, as the Meier and Baumgarten
    Readers had it ═══ */
 const isStudyText = T => T && (T.shape === 'meier' || T.shape === 'metaphysica');
+const STUDY_TABS = ['notes', 'trad', 'cmp', 'conn'];
 const notesOf = T => TEXTS.find(t => t.shape === 'refl' && t.on === T.key);
 const studyOn = () => S.view === 'read' && isStudyText(textByKey(S.readKey));
 
@@ -2419,7 +3092,7 @@ function studyGo(T, n, opts) {
   if (!q) return;
   S.sel = q.i;
   S.readAt = q.i;
-  if (!opts || !opts.keepTab) S.rtab = (opts && opts.tab) || (['notes', 'trad', 'conn'].includes(S.rtab) ? S.rtab : 'notes');
+  if (!opts || !opts.keepTab) S.rtab = (opts && opts.tab) || (STUDY_TABS.includes(S.rtab) ? S.rtab : 'notes');
   const st = FT.readtext;
   if (st && q.i >= st.lo && q.i <= st.hi) {
     ftSetFocus(st, q.i);
@@ -2446,7 +3119,7 @@ function studyFollow() {
     S.readAt = k;
     S.noteFocus = null;
     markOutline(k);
-    if (!['notes', 'trad', 'conn'].includes(S.rtab)) S.rtab = 'notes';
+    if (!STUDY_TABS.includes(S.rtab)) S.rtab = 'notes';
     renderRail();
     const sub = $('nsub-' + P[k].para);
     if (sub && S.rtab === 'notes') $('railbody').scrollTop += sub.getBoundingClientRect().top - $('railbody').getBoundingClientRect().top - 10;
@@ -2671,7 +3344,7 @@ function tocFor(T) {
   return out;
 }
 function jumpHint(T) {
-  if (T.shape === 'meier' || T.shape === 'metaphysica') return 'Go to §';
+  if (T.shape === 'meier' || T.shape === 'metaphysica') return 'Go to §, AA page or Refl.';
   if (T.shape === 'refl') return 'Go to Refl. no. or §';
   return T.key === 'jaesche' ? 'Go to § or AA page' : 'Go to AA page';
 }
@@ -2687,19 +3360,124 @@ function findInText(T, v) {
     return null;
   }
   if (isPara) for (let k = T.first; k <= T.last; k++) if (P[k].para === num) return k;
+  for (let k = T.first; k <= T.last; k++) { const g = pageSpan(P[k]); if (g && g.a <= num && num <= g.b) return k; }
   for (let k = T.first; k <= T.last; k++) if (P[k].aa != null && P[k].aa >= num) return k;
   return null;
 }
 
+/* ── Going to a page of the Academy edition ────────────────────────────────
+   Scholars cite the AA as volume and page: "24:892", "24.892", "AA 24:892", "Ak. 16, 236",
+   "AA XXIV 892". The search box and the jump boxes take any of these and go to the text
+   printed on that page, where the page begins. */
+
+/* A passage's place in the AA: { vol, a, b }, its first and last page; null where the text gives none. */
+function pageSpan(p) {
+  if (p.pg !== undefined) return p.pg;
+  const T = TEXTS[p.t];
+  let vol = p.vol || T.vol, a = p.aa, b = p.aaEnd;
+  if (a == null && p.aaCite) {
+    const m = /(\d+)\s*:\s*(\d+)(?:\s*[–-]\s*(\d+))?/.exec(p.aaCite.replace(/[   ]/g, ' '));
+    if (m) { vol = +m[1]; a = +m[2]; b = m[3] ? +m[3] : a; }
+  }
+  if (a == null && b != null) a = b;
+  p.pg = a == null ? null : { vol: +vol, a, b: b != null && b >= a ? b : a };
+  return p.pg;
+}
+const ROMAN = { I: 1, V: 5, X: 10, L: 50 };
+function romanToInt(s) {
+  let n = 0;
+  for (let k = 0; k < s.length; k++) {
+    const v = ROMAN[s[k]], next = ROMAN[s[k + 1]] || 0;
+    if (!v) return 0;
+    n += v < next ? -v : v;
+  }
+  return n;
+}
+/* { vol, page, prefixed } from a citation, or null. A bare number is a word to search for, not a
+   page; volume and page separated by a space alone count only after "AA" or "Ak.". */
+function parseAA(raw) {
+  let s = String(raw || '').replace(/[   ]/g, ' ').trim();
+  const PRE = /^(?:AA|Ak|KGS|A\.\s?A)(?:\.?\s+|\.|(?=\d))/i;   // "AA 24", "Ak. 24", "Ak.24", "AA24"; not "Akademie"
+  const prefixed = PRE.test(s);
+  s = s.replace(PRE, '');
+  const m = /^([IVXL]+|\d{1,2})\s*?([:.,]|\s)\s*(\d{1,4})(?:\s*[–-]\s*\d{1,4})?\.?$/i.exec(s);
+  if (!m || (/\s/.test(m[2]) && !prefixed)) return null;
+  const vol = /^\d+$/.test(m[1]) ? +m[1] : romanToInt(m[1].toUpperCase());
+  return vol && vol <= 29 ? { vol, page: +m[3], prefixed } : null;
+}
+/* Each text's pages, by volume: { label: 'AA 24:785–940', byVol: { 24: [785, 940] } }. */
+function aaRange(T) {
+  if (T.aaR) return T.aaR;
+  const byVol = {};
+  for (let k = T.first; k <= T.last; k++) {
+    const g = pageSpan(P[k]);
+    if (!g) continue;
+    const r = byVol[g.vol] || (byVol[g.vol] = [g.a, g.b]);
+    if (g.a < r[0]) r[0] = g.a;
+    if (g.b > r[1]) r[1] = g.b;
+  }
+  const vols = Object.keys(byVol).map(Number).sort((x, y) => x - y);
+  const label = !vols.length ? '' : vols.length === 1 ? 'AA ' + vols[0] + ':' + byVol[vols[0]][0] + '–' + byVol[vols[0]][1]
+    : 'AA ' + vols[0] + ':' + byVol[vols[0]][0] + '–' + vols[vols.length - 1] + ':' + byVol[vols[vols.length - 1]][1];
+  return (T.aaR = { label, byVol });
+}
+/* The first passage of each text that the page falls in, the textbooks and lectures before
+   Kant's notes. `only` keeps to one text. */
+function aaHits(vol, page, only) {
+  const out = [];
+  TEXTS.forEach(T => {
+    if (only && T.key !== only) return;
+    const r = aaRange(T).byVol[vol];
+    if (!r || page < r[0] || page > r[1]) return;
+    for (let k = T.first; k <= T.last; k++) { const g = pageSpan(P[k]); if (g && g.vol === vol && g.a <= page && page <= g.b) { out.push({ T, i: k }); return; } }
+  });
+  return out.sort((x, y) => (x.T.layer === 'notes') - (y.T.layer === 'notes') || x.T.idx - y.T.idx);
+}
+function goAA(c, only) {
+  const h = aaHits(c.vol, c.page, only)[0];
+  if (!h) return false;
+  // A note filed under no § has no place in its textbook to open at: open the note itself.
+  if (h.T.shape === 'refl' && !(P[h.i].paras && P[h.i].paras.length)) { openPassage(h.i); return true; }
+  if (h.T.shape !== 'refl') S.sel = h.i;
+  openRead(h.T.key, h.i);
+  $('left').scrollTop = 0;
+  return true;
+}
+/* Nothing on the page: say what the portal has nearest it. */
+function aaMissHtml(c) {
+  const where = 'AA ' + c.vol + ':' + c.page;
+  const have = TEXTS.map(T => ({ T, r: aaRange(T).byVol[c.vol] })).filter(x => x.r);
+  if (!have.length) {
+    const vols = [...new Set(TEXTS.flatMap(T => Object.keys(aaRange(T).byVol).map(Number)))].sort((x, y) => x - y);
+    return '<div class="empty">The portal has nothing from volume ' + c.vol + ' of the Academy edition. Its texts are in ' +
+      vols.map(v => 'AA ' + v + ' (' + TEXTS.filter(T => aaRange(T).byVol[v]).map(T => esc(T.short)).join(', ') + ')').join('; ') + '.</div>';
+  }
+  const go = (v, pg, label) => '<span class="lnk" data-aago="' + v + ':' + pg + '">' + esc(label) + '</span>';
+  const inside = have.filter(x => x.r[0] <= c.page && c.page <= x.r[1]);
+  const before = have.filter(x => x.r[1] < c.page).sort((x, y) => y.r[1] - x.r[1])[0];
+  const after = have.filter(x => x.r[0] > c.page).sort((x, y) => x.r[0] - y.r[0])[0];
+  let h = '<div class="empty">Nothing the portal has is printed on ' + where + '.';
+  if (inside.length) h += ' The page falls within ' + inside.map(x => esc(x.T.title)).join(' and ') + ', but none of its passages is on it.';
+  if (before) h += ' ' + esc(before.T.title) + ' ends at ' + go(c.vol, before.r[1], 'AA ' + c.vol + ':' + before.r[1]) + '.';
+  if (after) h += ' ' + esc(after.T.title) + ' begins at ' + go(c.vol, after.r[0], 'AA ' + c.vol + ':' + after.r[0]) + '.';
+  return h + '</div>';
+}
+function showAAMiss(c) {
+  showView('ask');
+  $('view-ask').classList.remove('home');
+  $('welcome').hidden = true;
+  $('results').innerHTML = '<div class="res-head"><div class="res-title">AA ' + c.vol + ':' + c.page + '</div></div>' + aaMissHtml(c);
+}
+
 function renderStudy(el, T) {
   const f = S.find;
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (aaRange(T).label ? '<span class="aarange" title="Where the Academy edition prints it">' + esc(aaRange(T).label) + '</span>' : '') + '' +
     '<button type="button" class="btn" data-outline="1" title="Show or hide the outline">☰ Outline</button>' +
     (T.shape === 'metaphysica' ? '<button type="button" class="btn" data-synopsis="1">Synopsis</button>' : '') +
     (S.sel == null ? '<button type="button" class="btn" data-shownotes="1">Kant’s notes</button>' : '') +
     '<span class="spacer"></span>' +
     '<span class="findbox"><input id="find" type="search" spellcheck="false" placeholder="Find in the text…" value="' + esc(f ? f.q : '') + '"><button type="button" data-findstep="-1" title="Previous (Shift-Enter)">‹</button><span class="n">' + (f ? (f.hits.length ? (f.pos + 1) + ' / ' + f.hits.length : 'none') : '') + '</span><button type="button" data-findstep="1" title="Next (Enter)">›</button></span>' +
-    '<input id="jump" type="text" spellcheck="false" placeholder="Go to §" aria-label="Go to §"></div>' +
+    '<input id="jump" type="text" spellcheck="false" placeholder="§, page or Refl." aria-label="Go to a §, an AA page or a Reflexion" title="Go to a § (125), a page of the Academy edition (16:316) or a Reflexion (Refl. 2330)"></div>' +
     '<div class="study' + (S.outline ? '' : ' no-outline') + '"><nav class="outline" id="outline">' + outlineHtml(T) + '</nav><div id="readtext" class="fulltext"></div></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
   const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
@@ -2715,7 +3493,7 @@ function renderRead() {
   if (!T) { el.innerHTML = readIndexHtml(); return; }
   if (isStudyText(T)) return renderStudy(el, T);
   const toc = tocFor(T);
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span><span class="spacer"></span>' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (aaRange(T).label ? '<span class="aarange" title="Where the Academy edition prints it">' + esc(aaRange(T).label) + '</span>' : '') + '<span class="spacer"></span>' +
     (toc.length > 1 ? '<select id="toc" aria-label="Contents"><option value="">Contents…</option>' + toc.map(([l, k]) => '<option value="' + k + '">' + esc(clip(l, 64)) + '</option>').join('') + '</select>' : '') +
     '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></div><div id="readtext" class="fulltext"></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
@@ -2772,11 +3550,13 @@ function closeTool() {
 function snapshot() {
   return { q: S.q, w: S.w, co: S.co, cm: S.cm, merge: S.merge, off: [...S.off], loc: S.loc, d: S.d, sel: S.sel, quote: S.quote, tab: S.tab,
     view: S.view === 'read' ? 'read' : 'ask', readKey: S.view === 'read' ? S.readKey : null, readAt: S.view === 'read' ? S.readAt : null, rtab: S.rtab,
+    cmp: S.cmp ? Object.assign({}, S.cmp, { msg: '', pick: null }) : null,
     preset: S.preset ? S.preset.key || null : null, presetObj: S.preset };
 }
 function restore(snap) {
   Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, tab: snap.tab || 'overview',
-    view: snap.view || 'ask', readKey: snap.readKey || null, readAt: snap.readAt, rtab: snap.rtab || 'text', preset: snap.presetObj || null });
+    view: snap.view || 'ask', readKey: snap.readKey || null, readAt: snap.readAt, rtab: snap.rtab || 'text', preset: snap.presetObj || null,
+    cmp: snap.cmp ? Object.assign({}, snap.cmp) : null });
 }
 /* A step is named for what changed at it: the passage, if one was opened there, and otherwise
    the question or doctrine on the left, with the phrasing or kind picked in it. A passage left
@@ -2893,6 +3673,11 @@ function writeHash() {
   if (S.q && !S.d && S.tab === 'passages') u.set('tab', 'passages');
   if (S.view === 'read' && S.readKey) { u.set('read', S.readKey); if (S.readAt != null && P[S.readAt]) u.set('at', P[S.readAt].id); }
   if (S.sel != null && S.rtab !== 'text') u.set('rt', S.rtab);
+  if (S.sel != null && S.rtab === 'cmp' && S.cmp && S.cmp.for === S.sel) {
+    if (S.cmp.with != null && P[S.cmp.with]) u.set('cw', TEXTS[P[S.cmp.with].t].key + ':' + P[S.cmp.with].id);
+    if (S.cmp.bit) u.set('cb', S.cmp.bit.join('-'));
+  }
+  if (S.bookOpen) u.set('tb', '1');
   history.replaceState(null, '', '#' + u.toString());
 }
 function readHash() {
@@ -2911,12 +3696,30 @@ function readHash() {
   S.en = u.get('en') === '0' ? '' : PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : EN_DEFAULT;
   enSync();
   S.tab = u.get('tab') === 'passages' ? 'passages' : 'overview';
+  S.bookOpen = u.get('tb') === '1';
   const p = u.get('p');
   if (p) { const k = p.indexOf(':'); const i = BYID.get(p.slice(0, k) + ':' + p.slice(k + 1)); S.sel = i == null ? null : i; }
-  S.rtab = ['conn', 'notes', 'trad'].includes(u.get('rt')) ? u.get('rt') : 'text';
+  S.rtab = ['conn', 'cmp', 'notes', 'trad'].includes(u.get('rt')) ? u.get('rt') : 'text';
+  S.cmp = cmpFresh(S.sel);
+  const cw = u.get('cw'), cb = /^(\d+)-(\d+)$/.exec(u.get('cb') || '');
+  if (cw) { const k = cw.indexOf(':'), i = BYID.get(cw.slice(0, k) + ':' + cw.slice(k + 1)); if (i != null) S.cmp.with = i; }
+  if (cb) S.cmp.bit = [+cb[1], +cb[2]];
   S.readKey = u.get('read') && textByKey(u.get('read')) ? u.get('read') : null;
   if (S.readKey && textByKey(S.readKey).shape === 'refl') S.readKey = textByKey(S.readKey).on || S.readKey;
   S.readAt = S.readKey && u.get('at') != null ? (BYID.get(S.readKey + ':' + u.get('at')) ?? null) : null;
+  // A link to a page: #aa=24:892 anywhere, or #read=wiener&aa=892 for a page of one text, as
+  // the Meier and Baumgarten Readers link here.
+  const aaq = u.get('aa'), only = u.get('read') && textByKey(u.get('read')) ? u.get('read') : null;
+  if (aaq) {
+    let c = parseAA(aaq), within = null;
+    if (!c && only && /^\d+$/.test(aaq)) {
+      const byVol = aaRange(textByKey(only)).byVol, pg = +aaq;
+      const v = Object.keys(byVol).map(Number).find(x => byVol[x][0] <= pg && pg <= byVol[x][1]);
+      c = { vol: v != null ? v : textByKey(only).vol, page: pg };
+      within = only;
+    }
+    if (c && goAA(c, within)) { syncForm(); renderResults(); return; }
+  }
   syncForm();
   showView(S.readKey ? 'read' : 'ask');
   renderResults();
@@ -2942,15 +3745,30 @@ function openPassage(i, quote, rtab) {
   S.sel = i;
   S.quote = quote || null;
   S.rtab = rtab || 'text';
+  S.bookAt = null;
+  if (resultOrder().includes(i)) {
+    if (S.seenFor !== searchKey()) { S.seen = new Set(); S.seenFor = searchKey(); }
+    S.seen.add(i);
+  }
   renderRail();
   document.querySelectorAll('.hit.sel').forEach(el => el.classList.remove('sel'));
-  document.querySelectorAll('.hit[data-open="' + i + '"]').forEach(el => el.classList.add('sel'));
+  document.querySelectorAll('.hit[data-open="' + i + '"]').forEach(el => el.classList.add('sel', 'seen'));
   pushTrail();
 }
 
 function wire() {
   $('ask').addEventListener('submit', e => {
     e.preventDefault();
+    // An Academy page goes to that page. Without "AA" in front, a volume the portal has none of
+    // ("1.5") is taken for words to search, as it was before.
+    const c = parseAA($('q').value);
+    if (c) {
+      if (goAA(c)) return;
+      if (c.prefixed || TEXTS.some(T => aaRange(T).byVol[c.vol])) { showAAMiss(c); return; }
+    }
+    // A Reflexion by its number, "Refl. 4086" or 4086 alone, opens on the right, leaving the left as it was
+    const rn = parseRefl($('q').value);
+    if (rn) { const q = reflByNo(rn.n); if (q) { openPassage(q.i); syncForm(); } else showReflMiss(rn.n); return; }
     ask({ q: $('q').value.trim(), w: +$('w').value || 0, co: $('co').value.trim(), cm: $('cm').value, merge: $('merge').checked, preset: null });
   });
   $('merge').addEventListener('change', () => { if (S.q) ask({ merge: $('merge').checked, preset: S.preset }); else { S.merge = $('merge').checked; updateOptSum(); } });
@@ -2991,7 +3809,7 @@ function wire() {
 
   document.addEventListener('click', e => {
     if (e.target.closest('#modal') && (e.target.id === 'modal' || e.target.closest('[data-close-modal]'))) { closeModal(); return; }
-    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp]');
+    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq]');
     if (!el) return;
     const d = el.dataset;
     if (d.jtab) { S.jtab = d.jtab; S.loc = null; renderResults(); writeHash(); return; }
@@ -3025,7 +3843,28 @@ function wire() {
     if (d.fp != null) { if (String(window.getSelection())) return; focusFromText(+d.fp, el.closest('.fulltext')); return; }
     if (d.read != null) { openRead(d.read || null, null); return; }
     if (d.readat != null) { openRead(TEXTS[P[+d.readat].t].key, +d.readat); return; }
-    if (d.rtab) { S.rtab = d.rtab; renderRail(); writeHash(); return; }
+    if (d.rtab) { if (d.rtab === 'cmp' && S.rtab !== 'cmp') S.rtabBack = S.rtab; S.rtab = d.rtab; renderRail(); writeHash(); return; }
+    if (d.rstep) { stepResult(+d.rstep); return; }
+    if (d.bookopen) { S.bookOpen = !S.bookOpen; renderRail(true); writeHash(); return; }
+    if (d.bookat) { S.bookAt = +d.bookat; renderRail(true); return; }
+    if (d.aago) { const [v, pg] = d.aago.split(':').map(Number); goAA({ vol: v, page: pg }); return; }
+    // Compare: pick what to compare with, or one sentence of the passage to compare alone
+    if (d.cmpwith != null) {
+      const st = cmpState(P[S.sel]);
+      Object.assign(st, { with: +d.cmpwith, whole: false, pick: null, msg: '' });
+      const tabWas = S.rtab;
+      if (tabWas !== 'cmp') S.rtabBack = tabWas;
+      S.rtab = 'cmp';
+      renderRail();
+      writeHash();
+      if (tabWas === 'cmp') cmpShowB();
+      return;
+    }
+    if (d.cbit != null) { if (String(window.getSelection())) return; Object.assign(cmpState(P[S.sel]), { bit: d.cbit ? d.cbit.split('-').map(Number) : null, with: null, whole: false }); renderRail(); writeHash(); return; }
+    if (d.ctag) { const [bit, q] = d.ctag.split(':'); Object.assign(cmpState(P[S.sel]), { bit: bit.split('-').map(Number), with: +q, whole: false }); renderRail(); writeHash(); cmpShowB(); return; }
+    if (d.cwhole != null) { cmpState(P[S.sel]).whole = d.cwhole === '1'; renderRail(); return; }
+    if (d.cmore) { cmpState(P[S.sel]).more = true; renderRail(); return; }
+    if (d.askq) { ask({ q: d.askq, w: 5, cm: '', co: '', preset: null }); return; }
     if (d.step != null) { goStep(+d.step); return; }
     if (d.map) { $('routemap').hidden = !$('routemap').hidden; renderTrail(); return; }
     if (d.en != null) { S.en = d.en; enApply(); writeHash(); return; }
@@ -3048,12 +3887,17 @@ function wire() {
       return;
     }
     if (d.para) { const [book, n] = d.para.split(':'); const q = passage(book, 'p' + n); if (q) openPassage(q.i); return; }
-    if (d.open != null) { openPassage(+d.open, d.quote || null); return; }
+    if (d.open != null) {
+      // a search result opens on the tab the pane is showing, as the ‹ › arrows do
+      const keep = el.classList.contains('hit') && S.sel != null && ['text', 'cmp', 'conn'].includes(S.rtab) ? S.rtab : null;
+      openPassage(+d.open, d.quote || null, keep);
+      return;
+    }
   });
 
   // Reading: a full text extends as it scrolls; the contents and go-to box move within it
   $('left').addEventListener('scroll', () => { $('selbtn').hidden = true; if (S.view === 'read') { ftScroll(FT.readtext); studyFollow(); } }, { passive: true });
-  $('railbody').addEventListener('scroll', () => { $('selbtn').hidden = true; if (S.rtab !== 'conn') ftScroll(FT.railtext); }, { passive: true });
+  $('railbody').addEventListener('scroll', () => { $('selbtn').hidden = true; if (S.rtab === 'text') ftScroll(FT.railtext); }, { passive: true });
   document.addEventListener('change', e => {
     if (e.target.id === 'toc' && e.target.value !== '') { S.readAt = +e.target.value; renderRead(); writeHash(); }
   });
@@ -3078,7 +3922,43 @@ function wire() {
       if (e.key === 'Escape') { e.target.value = ''; runFind(''); }
       return;
     }
+    // ← → or J K go through the search results, unless the reader is typing or using a modifier
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+    if (!typing && !e.metaKey && !e.ctrlKey && !e.altKey && $('modal').hidden) {
+      const d = { ArrowRight: 1, j: 1, J: 1, ArrowLeft: -1, k: -1, K: -1 }[e.key];
+      if (d && stepResult(d)) { e.preventDefault(); return; }
+      // C opens Compare, and goes back to where the pane was
+      if ((e.key === 'c' || e.key === 'C') && S.sel != null && !$('rail').hidden) {
+        e.preventDefault();
+        if (S.rtab === 'cmp') S.rtab = S.rtabBack || 'text'; else { S.rtabBack = S.rtab; S.rtab = 'cmp'; }
+        renderRail(); writeHash();
+        return;
+      }
+    }
+    if (e.target.id === 'cmpgo' && e.key === 'Enter') {
+      e.preventDefault();
+      const v = e.target.value;
+      cmpLookup(v);
+      renderRail(); writeHash();
+      const box = $('cmpgo');
+      if (box && S.cmp.msg) { box.value = v; box.focus(); }
+      else if (!S.cmp.pick) cmpShowB();
+      return;
+    }
     if (e.target.id !== 'jump' || e.key !== 'Enter') return;
+    // "Refl. 2330": in its own textbook, the § it is on with the note picked out; anywhere else, the note itself
+    const rn = parseRefl(e.target.value);
+    if (rn && rn.prefixed) {
+      const q = reflByNo(rn.n);
+      if (!q) { e.target.style.borderColor = '#b4532a'; e.target.title = reflMissText(rn.n); return; }
+      const on = TEXTS[q.t].on, T = textByKey(S.readKey);
+      if (studyOn() && T && on === T.key && q.paras && q.paras.length) { S.nsearch = ''; S.noteFocus = q.i; studyGo(T, q.paras[0], { tab: 'notes' }); }
+      else openPassage(q.i);
+      return;
+    }
+    // A full citation, "24:892", may be to this text or to another: go there either way.
+    const c = parseAA(e.target.value);
+    if (c) { if (!goAA(c)) { e.target.style.borderColor = '#b4532a'; e.target.title = 'Nothing the portal has is printed on AA ' + c.vol + ':' + c.page; } return; }
     const T = textByKey(S.readKey), k = T && findInText(T, e.target.value);
     if (k == null) { e.target.style.borderColor = '#b4532a'; return; }
     if (studyOn()) { studyGo(T, P[k].para, {}); return; }
@@ -3182,7 +4062,7 @@ function focusFromText(k, box) {
   if (box && box.id === 'readtext' && studyOn()) { S.noteFocus = null; studyGo(TEXTS[P[k].t], P[k].para, {}); return; }
   S.sel = k;
   S.quote = null;
-  if (box && box.id === 'readtext') { S.readAt = k; S.rtab = 'conn'; ftSetFocus(FT.readtext, k); renderRail(); }
+  if (box && box.id === 'readtext') { S.readAt = k; S.rtab = S.rtab === 'cmp' ? 'cmp' : 'conn'; ftSetFocus(FT.readtext, k); renderRail(); }
   else { ftSetFocus(FT.railtext, k); renderRail(true); }
   pushTrail();
 }
