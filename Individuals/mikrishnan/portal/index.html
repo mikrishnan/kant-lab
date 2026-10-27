@@ -163,6 +163,7 @@
   }
   .readbar { position: sticky; top: -1.4rem; z-index: 2; background: var(--parchment); display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; padding: 0.7rem 0 0.6rem; margin: -0.6rem 0 0.4rem; border-bottom: 1px solid var(--line-soft); }
   .readbar b { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; letter-spacing: 0.03em; }
+  .readbar .aarange { font-size: 0.82rem; color: var(--accent); border: 1px solid var(--line); border-radius: 4px; padding: 0 0.4rem; white-space: nowrap; }
   .readbar .spacer { flex: 1; }
   .readbar select, .readbar input { padding: 0.14rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); font-size: 0.92rem; max-width: 15rem; }
   .readbar input { width: 10.5rem; }
@@ -387,6 +388,9 @@
   .hit:last-child { border-bottom: none; }
   .hit:hover { background: var(--card); border-left-color: var(--accent-light); }
   .hit.sel { background: var(--card); border-left-color: var(--accent); }
+  /* A result already opened: a quiet tick, so that going through every result shows what is left. */
+  .hit.seen:not(.sel) { border-left-color: var(--line); }
+  .hit.seen:not(.sel) .cite::before { content: '✓ '; color: var(--accent-light); }
   .hit .cite { font-size: 0.82rem; color: var(--faded); margin-bottom: 0.1rem; }
   .hit .cite b { color: var(--accent); font-weight: 600; }
   .hit .kw { font-size: 1rem; }
@@ -472,6 +476,30 @@
   .rwork { flex: 1; font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.76rem; letter-spacing: 0.06em; }
   .rclose { background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--faded); cursor: pointer; padding: 0 0.15rem; }
   .rclose:hover { color: var(--accent); }
+  /* Going through the search results one by one, from the reading pane. */
+  .rstep { display: flex; align-items: center; gap: 0.15rem; font-size: 0.84rem; color: var(--faded); white-space: nowrap; }
+  .rstep button { background: none; border: 1px solid var(--line); border-radius: 4px; color: var(--accent); cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0.08rem 0.42rem; }
+  .rstep button:hover:not(:disabled) { border-color: var(--accent-light); }
+  .rstep button:disabled { color: var(--line); cursor: default; }
+  .rstep .n { padding: 0 0.35rem; }
+  .rstep .n b { color: var(--accent); font-weight: 600; }
+  /* The textbook § the passage is on, held under the passage's header so that it stays in
+     view as the reader goes from passage to passage. One line closed; the § in full open. */
+  .tbook { margin-top: 0.5rem; border: 1px solid var(--line-soft); border-radius: 8px; background: var(--paper); }
+  .tbhead { display: flex; align-items: baseline; gap: 0.45rem; width: 100%; background: none; border: none; text-align: left; cursor: pointer; padding: 0.32rem 0.6rem; font: inherit; color: var(--ink); min-width: 0; }
+  .tbhead:hover .tbname { color: var(--ink); }
+  .tbarr { color: var(--faded); font-size: 0.75rem; width: 0.7rem; flex-shrink: 0; }
+  .tbname { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--accent); flex-shrink: 0; }
+  .tbhead .tier { flex-shrink: 0; }
+  .tbfirst { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faded); font-size: 0.92rem; font-style: italic; }
+  .tbparas { display: flex; flex-wrap: wrap; gap: 0.25rem; padding: 0 0.6rem 0.3rem 1.75rem; font-size: 0.82rem; align-items: center; }
+  .tbparas button { background: none; border: 1px solid var(--line); border-radius: 4px; color: var(--accent); cursor: pointer; padding: 0 0.35rem; font: inherit; }
+  .tbparas button.on { background: var(--accent); border-color: var(--accent); color: var(--parchment); }
+  .tbbody { max-height: 34vh; overflow: auto; padding: 0 0.6rem 0.2rem 1.75rem; }
+  .tbbody .pair .pen { margin-top: 0; }
+  .tbtext { white-space: pre-wrap; font-size: 0.98rem; line-height: 1.5; }
+  .tbfoot { padding: 0.2rem 0.6rem 0.45rem 1.75rem; font-size: 0.82rem; color: var(--faded); }
+  .tbfoot a { color: var(--faded); }
   .pcite { font-size: 1.35rem; font-weight: 600; color: var(--accent); margin: 0.1rem 0 0; }
   .pmeta { font-size: 0.9rem; color: var(--faded); }
   .layer { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.08em; border: 1px solid var(--accent-light); border-radius: 4px; padding: 0 0.3rem; color: var(--accent); margin-right: 0.45rem; vertical-align: 1px; }
@@ -608,7 +636,7 @@
       </div>
       <form id="ask" autocomplete="off">
         <div class="qrow">
-          <input id="q" type="search" spellcheck="false" placeholder="A word or phrase, e.g.  form* fals*  or  &quot;satz des widerspruchs&quot;">
+          <input id="q" type="search" spellcheck="false" placeholder="A word or phrase, e.g.  form* fals*  ·  or an Academy page, e.g.  24:892">
           <button type="submit" class="btn solid">Ask</button>
         </div>
         <div class="optline">
@@ -629,6 +657,9 @@
           <code>fals*</code> finds every word that begins so. Several words, <code>form* fals*</code>, find places where they stand
           near each other, in any order. Quotation marks, <code>"der form nach"</code>, keep words together and in order.
           <code>OR</code> joins alternatives. A regular expression between slashes, <code>/formali?ter/</code>, is matched against the text as printed.</p>
+          <p>A page of the Academy edition, written as scholars cite it, goes straight to that page: <code>24:892</code>, <code>24.892</code>,
+          <code>AA 24:892</code>, <code>Ak. 16, 236</code> or <code>AA XVII 45</code> opens the text printed there, where the page begins.
+          A page of Kant’s notes opens the textbook they are written in, with the note beside it.</p>
           <p><b>Overview</b> shows every distinct phrasing the search found and where it occurs; <b>Passages</b> lists them.
           Click a passage to read it in its full text on the right; <b>Connections</b> there shows the textbook § it belongs to,
           Kant’s notes on it, the other texts on the same §, and its parallel passages. Select words in any text to search for them.</p>
@@ -781,6 +812,8 @@ const S = {                       // what the user is looking at; mirrored in th
   en: '',                         // the English shown beside the German: a PORTAL_TR_STYLES key, or '' for none
   enStyle: 'guyer',               // the style a single passage's English button opens in
   enOpen: new Set(),              // passages whose English was opened one at a time
+  seen: new Set(), seenFor: null, // the search results already opened, and the search they belong to
+  bookOpen: false, bookAt: null,  // the textbook § under the reading pane's header: open or not, and which § of its range
 };
 let RESULT = null;
 let LOAD_FAILED = [];
@@ -947,7 +980,7 @@ const ADAPT = {
         if (!b.text || b.kind === 'rule' || b.kind === 'note') return;
         let cite = 'AA ' + vol + ':' + b.aa + (b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '');
         if (paraOf[b.id]) cite = '§ ' + paraOf[b.id] + ', ' + cite;
-        addPassage(T, { id: b.id, cite, aa: b.aa, text: b.text, sec, para: paraOf[b.id] || null });
+        addPassage(T, { id: b.id, cite, aa: b.aa, aaEnd: b.aaEnd, vol, text: b.text, sec, para: paraOf[b.id] || null });
       });
     });
   },
@@ -957,7 +990,7 @@ const ADAPT = {
       const d = reflDate(e);
       const vol = e.vol || T.vol;
       addPassage(T, {
-        id: 'r' + e.r, cite: 'Refl. ' + e.r + (e.aa ? ', AA ' + vol + ':' + e.aa : ''), aa: e.aa, text: e.text,
+        id: 'r' + e.r, cite: 'Refl. ' + e.r + (e.aa ? ', AA ' + vol + ':' + e.aa : ''), aa: e.aa, aaEnd: e.aaEnd, vol, text: e.text,
         year: d.from || T.year, dateLabel: d.label, paras: e.paras || [], src: e.src, interp: !!e.interp, entry: k,
         sec: e.loc && e.loc.lemma ? '»' + e.loc.lemma + '«' : '',
       });
@@ -1327,7 +1360,7 @@ function renderHome(box) {
     '<div class="home-foot">' + esc(statusText()) + '</div>';
 }
 const textCard = t => '<button type="button" class="qcard" data-read="' + t.key + '">' + esc(t.title) +
-  '<span class="who">' + esc(t.date) + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + '</span></button>';
+  '<span class="who">' + esc(t.date) + (aaRange(t).label ? ' · ' + esc(aaRange(t).label) : '') + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + '</span></button>';
 
 /* Explore: every starting point the seminar has built, in one place. */
 function renderExplore() {
@@ -1461,7 +1494,7 @@ function hitCard(p, ms) {
   const place = placeOf(p);
   const tag = place ? ' · ' + (place.book === 'baumgarten' ? 'Baumgarten' : 'Meier') + ' ' + paraLabel(place.paras) : '';
   const qen = S.preset && S.preset.who === 'feng' ? qianxunEnglish(p) : '';
-  return '<div class="hit' + (S.sel === p.i ? ' sel' : '') + '" data-open="' + p.i + '"><div class="cite"><b>' + esc(p.cite) + '</b>' +
+  return '<div class="hit' + (S.sel === p.i ? ' sel' : '') + (S.seenFor === searchKey() && S.seen.has(p.i) ? ' seen' : '') + '" data-open="' + p.i + '"><div class="cite"><b>' + esc(p.cite) + '</b>' +
     (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : '') + esc(tag) + (ms.length > 1 ? ' · ' + ms.length + ' times' : '') + (qen ? '' : enButton(p, a, b)) + '</div>' +
     '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, spans) + (b < p.text.length ? ' …' : '') + '</div>' +
     (qen ? '' : enLine(p, a, b)) +
@@ -1928,6 +1961,78 @@ function sec(key, title, value, count, body, credit, defOpen) {
     '<div class="body">' + body + (credit ? '<div class="from">' + credit + '</div>' : '') + '</div></details>';
 }
 
+/* ── Going through the search results one by one ───────────────────────────
+   The reading pane steps through the results in the order the Passages list shows them, and
+   remembers which have been opened, for as long as the search stays the same. */
+const searchKey = () => [S.q, S.w, S.cm, S.co, S.merge, [...S.off].sort().join(','), S.loc || ''].join('|');
+function resultOrder() {
+  if (S.view !== 'ask' || S.d || !RESULT || !RESULT.byPass) return [];
+  const out = [];
+  TEXTS.forEach(t => {
+    let ps = [...RESULT.byPass.keys()].filter(i => P[i].t === t.idx);
+    if (S.loc) ps = ps.filter(i => RESULT.byPass.get(i).some(m => m.loc === S.loc));
+    out.push(...ps.sort((a, b) => a - b));
+  });
+  return out;
+}
+function resultStepper(p) {
+  const ord = resultOrder(), k = ord.indexOf(p.i);
+  if (k < 0) return '';
+  const seen = S.seenFor === searchKey() ? ord.filter(i => S.seen.has(i)).length : 0;
+  return '<div class="rstep" title="Go through the results one by one: ← → or J K">' +
+    '<button type="button" data-rstep="-1"' + (k ? '' : ' disabled') + ' aria-label="Previous result">‹</button>' +
+    '<span class="n"><b>' + (k + 1) + '</b> of ' + ord.length + (seen > 1 ? ' · ' + seen + ' seen' : '') + '</span>' +
+    '<button type="button" data-rstep="1"' + (k < ord.length - 1 ? '' : ' disabled') + ' aria-label="Next result">›</button></div>';
+}
+/* Open the next (d = 1) or previous (d = -1) result, keeping the pane on the tab it was on. */
+function stepResult(d) {
+  const ord = resultOrder(), k = ord.indexOf(S.sel);
+  if (k < 0) return false;
+  const i = ord[k + d];
+  if (i == null) return true;
+  const t = TEXTS[P[i].t], inText = ord.filter(j => P[j].t === t.idx);
+  if (inText.indexOf(i) >= 12 && !S.expand.has(t.key)) { S.expand.add(t.key); renderResults(); }
+  openPassage(i, null, S.rtab);
+  const card = document.querySelector('.hit[data-open="' + i + '"]');
+  if (card) card.scrollIntoView({ block: 'nearest' });
+  return true;
+}
+
+/* The textbook § a note or a lecture passage is on, under the reading pane's header: one line
+   closed, the § in full when open. It stays open from passage to passage, so that the reader
+   going through a list of notes can read each one beside its § without leaving the list. */
+function textbookStrip(p) {
+  const place = placeOf(p);
+  const book = place && textByKey(place.book);
+  if (!book) return '';
+  const paras = place.paras.filter(n => passage(book.key, 'p' + n));
+  if (!paras.length) return '';
+  const n = paras.includes(S.bookAt) ? S.bookAt : paras[0];
+  const bp = passage(book.key, 'p' + n);
+  const tierWord = place.tier === 'stated' ? 'stated' : place.tier === 'interp' ? 'interpolated' : 'inferred';
+  let h = '<div class="tbook' + (S.bookOpen ? ' open' : '') + '">' +
+    '<button type="button" class="tbhead" data-bookopen="1" aria-expanded="' + S.bookOpen + '" title="' + (S.bookOpen ? 'Fold the § away' : 'Read the § beside this passage') + '">' +
+    '<span class="tbarr">' + (S.bookOpen ? '▾' : '▸') + '</span>' +
+    '<span class="tbname">' + esc(book.short) + ' ' + esc(paraLabel(place.paras)) + '</span>' +
+    '<span class="tier ' + place.tier + '">' + tierWord + '</span>' +
+    (S.bookOpen ? '<span class="tbfirst">' + esc(bp.cite) + '</span>' : '<span class="tbfirst" lang="de">' + esc(clip(bp.text, 140)) + '</span>') + '</button>';
+  if (!S.bookOpen) return h + '</div>';
+  if (paras.length > 1) {
+    const k = paras.indexOf(n);
+    h += '<div class="tbparas">' + (paras.length <= 14
+      ? paras.map(x => '<button type="button" data-bookat="' + x + '"' + (x === n ? ' class="on"' : '') + '>§ ' + x + '</button>').join('')
+      : '<button type="button" data-bookat="' + paras[Math.max(0, k - 1)] + '">‹</button><span>§ ' + n + ', ' + (k + 1) + ' of ' + paras.length + '</span><button type="button" data-bookat="' + paras[Math.min(paras.length - 1, k + 1)] + '">›</button>') + '</div>';
+  }
+  const de = '<div class="tbtext" lang="de">' + esc(bp.text) + '</div>';
+  const tr = trFor(book);
+  h += '<div class="tbbody">' + (tr && S.en ? '<div class="pair">' + de + englishFor(tr, bp) + '</div>' : de) + '</div>';
+  const reader = book.key === 'meier' ? ['Meier Reader', '../../../meier-reader/meier-reading-guide.html#go=' + n]
+    : book.key === 'baumgarten' ? ['Baumgarten Reader', '../../../baumgarten-reader/baumgartenreading-guide.html#go=' + n] : null;
+  h += '<div class="tbfoot">' + esc(place.how) + ' · <span class="lnk" data-open="' + bp.i + '">open § ' + n + ' on its own</span>' +
+    (reader ? ' · <a href="' + reader[1] + '" target="_blank" rel="noopener"' + toolAttr(reader[1], reader[0]) + '>in the ' + esc(reader[0]) + ' ↗</a>' : '') + '</div>';
+  return h + '</div>';
+}
+
 function renderRail(headOnly) {
   const rail = $('rail');
   if (S.sel == null || !P[S.sel]) {
@@ -1944,9 +2049,11 @@ function renderRail(headOnly) {
   if (S.railW) $('app').style.gridTemplateColumns = 'minmax(0, 1fr) ' + S.railW + 'px';
   if (readingHere && isStudyText(T)) return renderStudyRail(p, T, headOnly);
   $('railhead').innerHTML = '<div class="rhead"><div class="rwork"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
+    resultStepper(p) +
     '<button type="button" class="rclose" data-close-rail="1" title="Close">×</button></div>' +
     '<div class="pcite">' + esc(p.cite) + '</div>' +
     '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>' +
+    textbookStrip(p) +
     '<div class="rtabs"><button type="button" data-rtab="text"' + (S.rtab !== 'conn' ? ' class="on"' : '') + '>Full text</button>' +
     '<button type="button" data-rtab="conn"' + (S.rtab === 'conn' ? ' class="on"' : '') + '>Connections</button><span class="spacer"></span>' +
     (readingHere ? '' : '<span class="lnk" data-readat="' + p.i + '" title="Open this text on the left, to read it through">Read on the left ↙</span>') + '</div>';
@@ -2687,13 +2794,118 @@ function findInText(T, v) {
     return null;
   }
   if (isPara) for (let k = T.first; k <= T.last; k++) if (P[k].para === num) return k;
+  for (let k = T.first; k <= T.last; k++) { const g = pageSpan(P[k]); if (g && g.a <= num && num <= g.b) return k; }
   for (let k = T.first; k <= T.last; k++) if (P[k].aa != null && P[k].aa >= num) return k;
   return null;
 }
 
+/* ── Going to a page of the Academy edition ────────────────────────────────
+   Scholars cite the AA as volume and page: "24:892", "24.892", "AA 24:892", "Ak. 16, 236",
+   "AA XXIV 892". The search box and the jump boxes take any of these and go to the text
+   printed on that page, where the page begins. */
+
+/* A passage's place in the AA: { vol, a, b }, its first and last page; null where the text gives none. */
+function pageSpan(p) {
+  if (p.pg !== undefined) return p.pg;
+  const T = TEXTS[p.t];
+  let vol = p.vol || T.vol, a = p.aa, b = p.aaEnd;
+  if (a == null && p.aaCite) {
+    const m = /(\d+)\s*:\s*(\d+)(?:\s*[–-]\s*(\d+))?/.exec(p.aaCite.replace(/[   ]/g, ' '));
+    if (m) { vol = +m[1]; a = +m[2]; b = m[3] ? +m[3] : a; }
+  }
+  if (a == null && b != null) a = b;
+  p.pg = a == null ? null : { vol: +vol, a, b: b != null && b >= a ? b : a };
+  return p.pg;
+}
+const ROMAN = { I: 1, V: 5, X: 10, L: 50 };
+function romanToInt(s) {
+  let n = 0;
+  for (let k = 0; k < s.length; k++) {
+    const v = ROMAN[s[k]], next = ROMAN[s[k + 1]] || 0;
+    if (!v) return 0;
+    n += v < next ? -v : v;
+  }
+  return n;
+}
+/* { vol, page, prefixed } from a citation, or null. A bare number is a word to search for, not a
+   page; volume and page separated by a space alone count only after "AA" or "Ak.". */
+function parseAA(raw) {
+  let s = String(raw || '').replace(/[   ]/g, ' ').trim();
+  const PRE = /^(?:AA|Ak|KGS|A\.\s?A)(?:\.?\s+|\.|(?=\d))/i;   // "AA 24", "Ak. 24", "Ak.24", "AA24"; not "Akademie"
+  const prefixed = PRE.test(s);
+  s = s.replace(PRE, '');
+  const m = /^([IVXL]+|\d{1,2})\s*?([:.,]|\s)\s*(\d{1,4})(?:\s*[–-]\s*\d{1,4})?\.?$/i.exec(s);
+  if (!m || (/\s/.test(m[2]) && !prefixed)) return null;
+  const vol = /^\d+$/.test(m[1]) ? +m[1] : romanToInt(m[1].toUpperCase());
+  return vol && vol <= 29 ? { vol, page: +m[3], prefixed } : null;
+}
+/* Each text's pages, by volume: { label: 'AA 24:785–940', byVol: { 24: [785, 940] } }. */
+function aaRange(T) {
+  if (T.aaR) return T.aaR;
+  const byVol = {};
+  for (let k = T.first; k <= T.last; k++) {
+    const g = pageSpan(P[k]);
+    if (!g) continue;
+    const r = byVol[g.vol] || (byVol[g.vol] = [g.a, g.b]);
+    if (g.a < r[0]) r[0] = g.a;
+    if (g.b > r[1]) r[1] = g.b;
+  }
+  const vols = Object.keys(byVol).map(Number).sort((x, y) => x - y);
+  const label = !vols.length ? '' : vols.length === 1 ? 'AA ' + vols[0] + ':' + byVol[vols[0]][0] + '–' + byVol[vols[0]][1]
+    : 'AA ' + vols[0] + ':' + byVol[vols[0]][0] + '–' + vols[vols.length - 1] + ':' + byVol[vols[vols.length - 1]][1];
+  return (T.aaR = { label, byVol });
+}
+/* The first passage of each text that the page falls in, the textbooks and lectures before
+   Kant's notes. `only` keeps to one text. */
+function aaHits(vol, page, only) {
+  const out = [];
+  TEXTS.forEach(T => {
+    if (only && T.key !== only) return;
+    const r = aaRange(T).byVol[vol];
+    if (!r || page < r[0] || page > r[1]) return;
+    for (let k = T.first; k <= T.last; k++) { const g = pageSpan(P[k]); if (g && g.vol === vol && g.a <= page && page <= g.b) { out.push({ T, i: k }); return; } }
+  });
+  return out.sort((x, y) => (x.T.layer === 'notes') - (y.T.layer === 'notes') || x.T.idx - y.T.idx);
+}
+function goAA(c, only) {
+  const h = aaHits(c.vol, c.page, only)[0];
+  if (!h) return false;
+  // A note filed under no § has no place in its textbook to open at: open the note itself.
+  if (h.T.shape === 'refl' && !(P[h.i].paras && P[h.i].paras.length)) { openPassage(h.i); return true; }
+  if (h.T.shape !== 'refl') S.sel = h.i;
+  openRead(h.T.key, h.i);
+  $('left').scrollTop = 0;
+  return true;
+}
+/* Nothing on the page: say what the portal has nearest it. */
+function aaMissHtml(c) {
+  const where = 'AA ' + c.vol + ':' + c.page;
+  const have = TEXTS.map(T => ({ T, r: aaRange(T).byVol[c.vol] })).filter(x => x.r);
+  if (!have.length) {
+    const vols = [...new Set(TEXTS.flatMap(T => Object.keys(aaRange(T).byVol).map(Number)))].sort((x, y) => x - y);
+    return '<div class="empty">The portal has nothing from volume ' + c.vol + ' of the Academy edition. Its texts are in ' +
+      vols.map(v => 'AA ' + v + ' (' + TEXTS.filter(T => aaRange(T).byVol[v]).map(T => esc(T.short)).join(', ') + ')').join('; ') + '.</div>';
+  }
+  const go = (v, pg, label) => '<span class="lnk" data-aago="' + v + ':' + pg + '">' + esc(label) + '</span>';
+  const inside = have.filter(x => x.r[0] <= c.page && c.page <= x.r[1]);
+  const before = have.filter(x => x.r[1] < c.page).sort((x, y) => y.r[1] - x.r[1])[0];
+  const after = have.filter(x => x.r[0] > c.page).sort((x, y) => x.r[0] - y.r[0])[0];
+  let h = '<div class="empty">Nothing the portal has is printed on ' + where + '.';
+  if (inside.length) h += ' The page falls within ' + inside.map(x => esc(x.T.title)).join(' and ') + ', but none of its passages is on it.';
+  if (before) h += ' ' + esc(before.T.title) + ' ends at ' + go(c.vol, before.r[1], 'AA ' + c.vol + ':' + before.r[1]) + '.';
+  if (after) h += ' ' + esc(after.T.title) + ' begins at ' + go(c.vol, after.r[0], 'AA ' + c.vol + ':' + after.r[0]) + '.';
+  return h + '</div>';
+}
+function showAAMiss(c) {
+  showView('ask');
+  $('view-ask').classList.remove('home');
+  $('welcome').hidden = true;
+  $('results').innerHTML = '<div class="res-head"><div class="res-title">AA ' + c.vol + ':' + c.page + '</div></div>' + aaMissHtml(c);
+}
+
 function renderStudy(el, T) {
   const f = S.find;
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (aaRange(T).label ? '<span class="aarange" title="Where the Academy edition prints it">' + esc(aaRange(T).label) + '</span>' : '') + '' +
     '<button type="button" class="btn" data-outline="1" title="Show or hide the outline">☰ Outline</button>' +
     (T.shape === 'metaphysica' ? '<button type="button" class="btn" data-synopsis="1">Synopsis</button>' : '') +
     (S.sel == null ? '<button type="button" class="btn" data-shownotes="1">Kant’s notes</button>' : '') +
@@ -2715,7 +2927,7 @@ function renderRead() {
   if (!T) { el.innerHTML = readIndexHtml(); return; }
   if (isStudyText(T)) return renderStudy(el, T);
   const toc = tocFor(T);
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span><span class="spacer"></span>' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (aaRange(T).label ? '<span class="aarange" title="Where the Academy edition prints it">' + esc(aaRange(T).label) + '</span>' : '') + '<span class="spacer"></span>' +
     (toc.length > 1 ? '<select id="toc" aria-label="Contents"><option value="">Contents…</option>' + toc.map(([l, k]) => '<option value="' + k + '">' + esc(clip(l, 64)) + '</option>').join('') + '</select>' : '') +
     '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></div><div id="readtext" class="fulltext"></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
@@ -2893,6 +3105,7 @@ function writeHash() {
   if (S.q && !S.d && S.tab === 'passages') u.set('tab', 'passages');
   if (S.view === 'read' && S.readKey) { u.set('read', S.readKey); if (S.readAt != null && P[S.readAt]) u.set('at', P[S.readAt].id); }
   if (S.sel != null && S.rtab !== 'text') u.set('rt', S.rtab);
+  if (S.bookOpen) u.set('tb', '1');
   history.replaceState(null, '', '#' + u.toString());
 }
 function readHash() {
@@ -2911,12 +3124,26 @@ function readHash() {
   S.en = u.get('en') === '0' ? '' : PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : EN_DEFAULT;
   enSync();
   S.tab = u.get('tab') === 'passages' ? 'passages' : 'overview';
+  S.bookOpen = u.get('tb') === '1';
   const p = u.get('p');
   if (p) { const k = p.indexOf(':'); const i = BYID.get(p.slice(0, k) + ':' + p.slice(k + 1)); S.sel = i == null ? null : i; }
   S.rtab = ['conn', 'notes', 'trad'].includes(u.get('rt')) ? u.get('rt') : 'text';
   S.readKey = u.get('read') && textByKey(u.get('read')) ? u.get('read') : null;
   if (S.readKey && textByKey(S.readKey).shape === 'refl') S.readKey = textByKey(S.readKey).on || S.readKey;
   S.readAt = S.readKey && u.get('at') != null ? (BYID.get(S.readKey + ':' + u.get('at')) ?? null) : null;
+  // A link to a page: #aa=24:892 anywhere, or #read=wiener&aa=892 for a page of one text, as
+  // the Meier and Baumgarten Readers link here.
+  const aaq = u.get('aa'), only = u.get('read') && textByKey(u.get('read')) ? u.get('read') : null;
+  if (aaq) {
+    let c = parseAA(aaq), within = null;
+    if (!c && only && /^\d+$/.test(aaq)) {
+      const byVol = aaRange(textByKey(only)).byVol, pg = +aaq;
+      const v = Object.keys(byVol).map(Number).find(x => byVol[x][0] <= pg && pg <= byVol[x][1]);
+      c = { vol: v != null ? v : textByKey(only).vol, page: pg };
+      within = only;
+    }
+    if (c && goAA(c, within)) { syncForm(); renderResults(); return; }
+  }
   syncForm();
   showView(S.readKey ? 'read' : 'ask');
   renderResults();
@@ -2942,15 +3169,27 @@ function openPassage(i, quote, rtab) {
   S.sel = i;
   S.quote = quote || null;
   S.rtab = rtab || 'text';
+  S.bookAt = null;
+  if (resultOrder().includes(i)) {
+    if (S.seenFor !== searchKey()) { S.seen = new Set(); S.seenFor = searchKey(); }
+    S.seen.add(i);
+  }
   renderRail();
   document.querySelectorAll('.hit.sel').forEach(el => el.classList.remove('sel'));
-  document.querySelectorAll('.hit[data-open="' + i + '"]').forEach(el => el.classList.add('sel'));
+  document.querySelectorAll('.hit[data-open="' + i + '"]').forEach(el => el.classList.add('sel', 'seen'));
   pushTrail();
 }
 
 function wire() {
   $('ask').addEventListener('submit', e => {
     e.preventDefault();
+    // An Academy page goes to that page. Without "AA" in front, a volume the portal has none of
+    // ("1.5") is taken for words to search, as it was before.
+    const c = parseAA($('q').value);
+    if (c) {
+      if (goAA(c)) return;
+      if (c.prefixed || TEXTS.some(T => aaRange(T).byVol[c.vol])) { showAAMiss(c); return; }
+    }
     ask({ q: $('q').value.trim(), w: +$('w').value || 0, co: $('co').value.trim(), cm: $('cm').value, merge: $('merge').checked, preset: null });
   });
   $('merge').addEventListener('change', () => { if (S.q) ask({ merge: $('merge').checked, preset: S.preset }); else { S.merge = $('merge').checked; updateOptSum(); } });
@@ -2991,7 +3230,7 @@ function wire() {
 
   document.addEventListener('click', e => {
     if (e.target.closest('#modal') && (e.target.id === 'modal' || e.target.closest('[data-close-modal]'))) { closeModal(); return; }
-    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp]');
+    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago]');
     if (!el) return;
     const d = el.dataset;
     if (d.jtab) { S.jtab = d.jtab; S.loc = null; renderResults(); writeHash(); return; }
@@ -3026,6 +3265,10 @@ function wire() {
     if (d.read != null) { openRead(d.read || null, null); return; }
     if (d.readat != null) { openRead(TEXTS[P[+d.readat].t].key, +d.readat); return; }
     if (d.rtab) { S.rtab = d.rtab; renderRail(); writeHash(); return; }
+    if (d.rstep) { stepResult(+d.rstep); return; }
+    if (d.bookopen) { S.bookOpen = !S.bookOpen; renderRail(true); writeHash(); return; }
+    if (d.bookat) { S.bookAt = +d.bookat; renderRail(true); return; }
+    if (d.aago) { const [v, pg] = d.aago.split(':').map(Number); goAA({ vol: v, page: pg }); return; }
     if (d.step != null) { goStep(+d.step); return; }
     if (d.map) { $('routemap').hidden = !$('routemap').hidden; renderTrail(); return; }
     if (d.en != null) { S.en = d.en; enApply(); writeHash(); return; }
@@ -3078,7 +3321,16 @@ function wire() {
       if (e.key === 'Escape') { e.target.value = ''; runFind(''); }
       return;
     }
+    // ← → or J K go through the search results, unless the reader is typing or using a modifier
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+    if (!typing && !e.metaKey && !e.ctrlKey && !e.altKey && $('modal').hidden) {
+      const d = { ArrowRight: 1, j: 1, J: 1, ArrowLeft: -1, k: -1, K: -1 }[e.key];
+      if (d && stepResult(d)) { e.preventDefault(); return; }
+    }
     if (e.target.id !== 'jump' || e.key !== 'Enter') return;
+    // A full citation, "24:892", may be to this text or to another: go there either way.
+    const c = parseAA(e.target.value);
+    if (c) { if (!goAA(c)) { e.target.style.borderColor = '#b4532a'; e.target.title = 'Nothing the portal has is printed on AA ' + c.vol + ':' + c.page; } return; }
     const T = textByKey(S.readKey), k = T && findInText(T, e.target.value);
     if (k == null) { e.target.style.borderColor = '#b4532a'; return; }
     if (studyOn()) { studyGo(T, P[k].para, {}); return; }

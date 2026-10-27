@@ -69,6 +69,21 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   opens the whole route: one row per document, each step a mark, joined in order, so you can
   see how you have moved through the corpus. Click any mark to return to it. **Copy link**
   reproduces the exact view.
+- **Go to a page of the Academy edition.** Type a citation as scholars write it, `24:892`,
+  `24.892`, `AA 24:892`, `Ak. 16, 236` or `AA XVII 45`, into the search box (or the jump box
+  of any text) and the portal opens the text printed on that page, where the page begins. A
+  page of Kant's notes opens the textbook they are written in, with the note in view beside
+  it; a note filed under no § opens on its own. A page the portal has nothing on says which
+  texts end before it and begin after it. Links can do the same: `#aa=24:892`, or
+  `#read=wiener&aa=892` for a page of one text. Every text shows its pages, as `AA 24:787–940`,
+  in the Read list and above the text, worked out from the passages themselves.
+- **Go through every result.** A passage opened from a search shows "‹ 3 of 22 ›" at the top
+  of the right-hand pane. The arrows, or ← → and J K on the keyboard, open the next or
+  previous result in the Passages list's order, and each result opened gets a tick in the list,
+  so you can see what is left. A note or lecture passage with a textbook § keeps that § in a
+  strip under its heading: one line, or, opened, the § in full (with its English when English
+  is on). It stays open from result to result, so you can read every note beside its Meier or
+  Baumgarten § without leaving the list.
 - **English.** Press **English** on a passage to see a translation beside the German, in one
   of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
   are Jesus's machine translations, made for the Meier–Kant comparison; neither
