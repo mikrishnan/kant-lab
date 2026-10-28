@@ -218,6 +218,46 @@ keeps its meaning.*
     the other 83, Refl. 3498 among them, show the chip and no mark (Open question 7).
 37. Each new highlight clears the previous one.
 
+### Looking up a § or a page
+
+38. A `§ or AA` box at the right of the top bar takes a § of the *Metaphysica* or a page
+    of the Academy edition as it is usually cited: `17:45`, `AA 17:45`, `Ak. 17, 45`,
+    `AA XVII 45`, `17 45`; a range goes to its first page, and `§ 220` and `§§ 220–222`
+    go to § 220. Enter or `Go` looks it up. Anything else gets a line saying what the box
+    takes.
+39. A printed § goes there, as a table-of-contents entry does, and empties the box. A §
+    from 504 to 699 says these are the *Psychologia empirica*, which the Academy edition
+    prints in AA XV, scrolls to the AA's note in the text, and offers as links the pages
+    the number could be: `600` offers AA 17:600, 18:600 and 24:600. Any other number says
+    the *Metaphysica* has §§ 1–1000.
+40. A page of AA 17 that prints Baumgarten's text goes to the first § on it and says which
+    §§ the page prints: `17:45` "prints §§ 81–90". At `17:24` it adds that §§ 1–3 stand
+    before the volume's first page marker, so their page is not stated. `17:19` to `17:23`
+    open the Synopsis.
+41. A page of AA 17 or 18 that carries only Kant's notes goes to the § the first of them
+    is filed under, shows that § in the panel, and brings the note's card into view,
+    picked out for a moment. The note under the box says how the § was arrived at, in the
+    terms of the cards' tags: by the note's own locus; by the heading over its block
+    (`18:124`, Refl. 5222, §§ 19–32); from the page of Kant's copy; or by inference
+    (`17:351`, Refl. 3929, § 926). A page whose notes belong to no § (`17:229`, Refl.
+    3703) opens the panel's "belong to no §" view at the card. **Fails at present** for
+    bringing the card into view: while the whole page scrolls (Open question 1), the panel
+    does not scroll on its own, and the card can be below the window.
+42. A page with none of this says so. Within Baumgarten's text, AA 17:24–206, it also goes
+    to the nearest § before the page. Outside it, the note gives the pages the reader has:
+    for `18:900`, "Kant’s notes on Baumgarten in AA 18 are on 18:8–725."
+43. A page of another volume is not in this reader, and the note says where it is. AA 16
+    links to the Meier reader at that page. AA 24 names the logic lecture the page is in,
+    with the page ranges of the Logic Portal's catalogue, and links to it in the portal
+    (`24:892` is in the Wiener Logik, AA 24:785–940). AA 9 is the Jäsche *Logik*, also
+    linked. AA 15 is not in this reader.
+44. `#go=` and anything the box takes, at the end of the address, runs the same lookup
+    when the page opens or the address changes: `baumgartenreading-guide.html#go=18:124`.
+45. After a lookup the panel keeps showing the § it found until the reader scrolls the
+    text, so that item 28 holds for lookups. The note under the box is fixed to the window,
+    and stays readable when the top bar has scrolled out of sight (Open question 1). It
+    stays until the next lookup, typing in the box, Escape, or its `×`.
+
 ## Out of scope
 
 - **§§ 504–699.** AA XVII does not reprint the *Psychologia empirica*; it is in AA XV.
@@ -260,6 +300,13 @@ keeps its meaning.*
      stand aside while the tool's own jumps are scrolling.
 
    A fix should make items 26–29 pass and keep items 12 and 32 passing.
+
+   The `§ or AA` box (items 38–45) works round both layers for its own jumps, without
+   fixing them. It centres its § again after `scrollToPara()`, whose closing scroll to the
+   table-of-contents entry otherwise moves the whole page away from the §. It pins the
+   panel to what it found until the reader scrolls. And it fixes its note to the window.
+   But the box sits in the top bar, so after any jump it has scrolled out of sight with the
+   bar, and item 41's card can be below the window. Both come right once this is fixed.
 2. **The display turns u into v.** The page declares `<html lang="la">`, and for Latin
    the EB Garamond font substitutes v for u. The data reads *aut*, *quod*, *verum*; the
    page shows *avt*, *qvod*, *vervm*. It does the same to every German text on the page

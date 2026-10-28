@@ -67,6 +67,7 @@ header h1 {
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
+  position: relative;
 }
 .jump-label {
   font-family: var(--font-display);
@@ -76,7 +77,7 @@ header h1 {
   color: #666680;
 }
 .jump-box input {
-  width: 62px;
+  width: 108px;
   background: #252538;
   border: 1px solid #444460;
   color: var(--parchment);
@@ -100,6 +101,39 @@ header h1 {
   transition: all 0.12s;
 }
 .jump-box button:hover { border-color: var(--prussian); color: var(--parchment); }
+/* What the box found, or why it found nothing: a note under the box, empty (and
+   hidden) until a lookup needs saying something. */
+.jump-msg {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 360px;
+  z-index: 60;
+  background: var(--ink);
+  color: var(--parchment);
+  border: 1px solid var(--prussian);
+  box-shadow: 0 4px 16px rgba(28,28,46,0.35);
+  padding: 9px 30px 10px 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  white-space: normal;
+}
+.jump-msg:empty { display: none; }
+.jump-msg a { color: #AFC3DA; }
+.jump-msg a:hover { color: var(--parchment); }
+.jump-msg-close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  border: none !important;
+  padding: 2px 4px !important;
+  font-size: 13px !important;
+  color: #9999BB;
+  background: transparent;
+  cursor: pointer;
+}
+/* the Reflexion a page lookup landed on, picked out for a moment */
+.r-entry.r-target { box-shadow: 0 0 0 2px var(--prussian), 0 2px 10px rgba(59,80,104,0.25); }
 
 /* ── App body ── */
 .app-body { display: flex; flex: 1; overflow: hidden; }
@@ -207,8 +241,10 @@ header h1 {
 
 
 
-/* Part body (collapsible container) */
-.part-body { overflow: hidden; transition: none; }
+/* Part body (collapsible container). It must not shrink: the sidebar is a flex
+   column, and a shrinkable child with overflow:hidden is squeezed to fit the window
+   instead of making the sidebar scroll, which cut off the lower §§ of an open part. */
+.part-body { overflow: hidden; transition: none; flex-shrink: 0; }
 .part-body.collapsed { display: none; }
 
 /* Nav item = Abschnitt row (block layout) */
@@ -983,9 +1019,12 @@ header h1 {
   <h1>Kant Reading Guide</h1>
   <span class="header-sub">Pre-Kantian Tradition</span>
   <div class="jump-box">
-    <span class="jump-label">§</span>
-    <input type="number" id="jumpInput" min="1" max="563" placeholder="1–563">
+    <span class="jump-label">§ or AA</span>
+    <input type="text" id="jumpInput" autocomplete="off" spellcheck="false" placeholder="92 or 16:236"
+           title="A § of the Auszug (92), or a page of the Academy edition as volume:page (16:236)"
+           aria-describedby="jumpMsg">
     <button onclick="jumpToSection()">Go</button>
+    <div class="jump-msg" id="jumpMsg" role="status" aria-live="polite"></div>
   </div>
 </header>
 
@@ -1448,12 +1487,219 @@ function scrollToParaNum(num, andFocus) {
   if (andFocus) focusParagraph(num);
 }
 
-function jumpToSection() {
-  const val = parseInt(document.getElementById('jumpInput').value);
-  if (val >= WORK.min && val <= WORK.max && WORK.paras[String(val)] !== undefined) {
-    scrollToParaNum(val, true);
-    document.getElementById('jumpInput').value = '';
+/* ── Lookup: a § or a page of the Academy edition ────────────────────────────
+   The box in the header takes a § of the Auszug, or a page of the Academy
+   edition written the ways people cite one: 16:236, AA 16:236, Ak. 16, 236,
+   AA XVI 236, 16 236. A range goes to its first page. A page of AA 16 is found
+   through CITATIONS where Meier's text is printed on it, and through the
+   Reflexionen on the pages that carry only Kant's notes. A page of another
+   volume is not here, so the box says which text it belongs to and where to read
+   it. `#go=…` in the URL runs the same lookup, so that other pages can link to a
+   § or a page of this one. */
+
+/* The §§ printed on each page of AA 16, read off CITATIONS: [{ n, a, b }], § order. */
+const MEIER_PAGES = Object.keys(CITATIONS).map(n => {
+  const m = CITATIONS[n].replace(/[   ]/g, ' ').match(/(\d+):(\d+)(?:\s*[–-]\s*(\d+))?/);
+  return m && { n: +n, a: +m[2], b: +(m[3] || m[2]) };
+}).filter(Boolean).sort((x, y) => x.n - y.n);
+
+/* The logic lectures of AA 24 by the pages each occupies, as the Logic Portal's
+   catalogue gives them, and the portal's key for each. */
+const AA24_LECTURES = [
+  { from: 3,   to: 6,   key: 'herder',   name: 'Logik Herder' },
+  { from: 7,   to: 301, key: 'blomberg', name: 'Logik Blomberg' },
+  { from: 311, to: 496, key: 'philippi', name: 'Logik Philippi' },
+  { from: 502, to: 602, key: 'poelitz',  name: 'Logik Pölitz' },
+  { from: 603, to: 686, key: 'busolt',   name: 'Logik Busolt' },
+  { from: 693, to: 784, key: 'dohna',    name: 'Logik Dohna-Wundlacken' },
+  { from: 785, to: 940, key: 'wiener',   name: 'Wiener Logik' },
+];
+const PORTAL_URL     = '../Individuals/mikrishnan/portal/index.html';
+const BAUMGARTEN_URL = '../baumgarten-reader/baumgartenreading-guide.html';
+
+const ROMAN_DIGITS = { I: 1, V: 5, X: 10, L: 50 };
+function romanNumber(s) {
+  let n = 0;
+  for (let i = 0; i < s.length; i++) {
+    const v = ROMAN_DIGITS[s[i]], next = ROMAN_DIGITS[s[i + 1]] || 0;
+    if (!v) return 0;
+    n += v < next ? -v : v;
   }
+  return n;
+}
+
+/* "92", "§ 92", "§§ 92–98" → { para: 92 }; "16:236", "AA XVI 236" → { vol: 16, page: 236 };
+   anything else → null. */
+function parseLookup(raw) {
+  const s = String(raw == null ? '' : raw).replace(/[   ]/g, ' ').trim()
+    .replace(/^(?:AA|Ak|KGS)\.?\s*/i, '');
+  let m = s.match(/^§§?\s*(\d+)(?:\s*[–-]\s*\d+)?\.?$/) || s.match(/^(\d+)\.?$/);
+  if (m) return { para: +m[1] };
+  m = s.match(/^([IVXL]+|\d+)\s*[:,.]?\s*(\d+)(?:\s*[–-]\s*\d+)?\.?$/i);
+  if (!m) return null;
+  const vol = /^\d/.test(m[1]) ? +m[1] : romanNumber(m[1].toUpperCase());
+  return vol ? { vol, page: +m[2] } : null;
+}
+
+function jumpToSection(raw) {
+  const input = document.getElementById('jumpInput');
+  const fromBox = raw == null;
+  const text = fromBox ? input.value : raw;
+  const q = parseLookup(text);
+  if (!q) {
+    if (!String(text).trim()) return showJumpMsg('');
+    return showJumpMsg('Type a § of the <i>Auszug</i>, as <b>92</b>, or a page of the Academy edition as volume:page, as <b>16:236</b>.');
+  }
+  if (q.para != null) {
+    if (q.para >= WORK.min && q.para <= WORK.max && WORK.paras[String(q.para)] !== undefined) {
+      scrollToParaNum(q.para, true);
+      if (fromBox) input.value = '';
+      return showJumpMsg('');
+    }
+    return showJumpMsg('There is no § ' + q.para + ' in Meier’s <i>Auszug</i>, which has §§ ' + WORK.min + '–' + WORK.max + '. ' + pageGuesses(q.para));
+  }
+  if (q.vol === 16) return goToMeierPage(q.page, fromBox ? input : null);
+  showJumpMsg(aaElsewhere(q.vol, q.page));
+}
+
+/* For a number too large to be a §: the pages it could be, as links. */
+function pageGuesses(n) {
+  const first = MEIER_PAGES[0].a, last = MEIER_PAGES[MEIER_PAGES.length - 1].b;
+  const opts = [];
+  if (n >= first && n <= last) opts.push(['16:' + n, 'Meier and Kant’s notes on him']);
+  const L = AA24_LECTURES.find(l => l.from <= n && n <= l.to);
+  if (L) opts.push(['24:' + n, 'the ' + L.name]);
+  if (!opts.length) return 'For a page of the Academy edition, give its volume as well, as <b>16:236</b>.';
+  return 'If ' + n + ' is a page of the Academy edition, give its volume as well: ' +
+    opts.map(([c, what]) => '<a href="#go=' + c + '">AA ' + c + '</a> (' + what + ')').join(' or ') + '.';
+}
+
+function goToMeierPage(p, input) {
+  const cite = 'AA 16:' + p;
+  const first = MEIER_PAGES[0].a, last = MEIER_PAGES[MEIER_PAGES.length - 1].b;
+  const done = msg => { if (input) input.value = ''; showJumpMsg(msg); };
+
+  // Meier's own text on the page
+  const here = MEIER_PAGES.filter(x => x.a <= p && p <= x.b);
+  if (here.length) {
+    const n = here[0].n, m = here[here.length - 1].n;
+    scrollToParaNum(n, true);
+    return done(cite + ' prints ' + (n === m ? '§ ' + n + '.' : '§§ ' + n + '–' + m + '. Showing § ' + n + '.'));
+  }
+
+  // Only Kant's notes on the page: go to the § the first of them is filed under
+  const notes = [];
+  REFL_ENTRIES.forEach((e, i) => {
+    const a = e.aa ?? e.aaEnd, b = e.aaEnd ?? e.aa;
+    if (a != null && a <= p && p <= b) notes.push(i);
+  });
+  const filed = notes.find(i => (REFL_ENTRIES[i].paras || []).length);
+  if (filed !== undefined) {
+    const e = REFL_ENTRIES[filed], n = e.paras[0];
+    scrollToParaNum(n, true);
+    switchPanel('reflexionen');
+    revealReflEntry(filed);
+    const which = notes.length === 1 ? 'it' : 'Refl. ' + e.r;
+    return done(cite + ' carries none of Meier’s text, only Kant’s notes: ' + reflNumbers(notes) + '. ' +
+      (e.interp
+        ? 'The Academy edition names no § for ' + which + '; this reader places it at ' + paraLabel(e.paras) + ' by inference.'
+        : 'The Academy edition files ' + which + ' under ' + paraLabel(e.paras) + '.') +
+      ' Showing § ' + n + ', with the notes open beside it.');
+  }
+
+  // Nothing this reader has is on the page
+  const before = MEIER_PAGES.filter(x => x.a <= p).pop();
+  if (p < first || p > last || !before)
+    return showJumpMsg('Nothing in this reader is on ' + cite + ': Meier’s <i>Auszug</i> is printed on AA 16:' + first + '–' + last + '.');
+  scrollToParaNum(before.n, true);
+  done('Neither Meier’s text nor any Reflexion this reader has is on ' + cite + '. The nearest § before it, § ' +
+    before.n + ' on AA 16:' + before.a + ', is shown.');
+}
+
+/* A page of a volume other than AA 16: which text it is in, and where to read it. */
+function aaElsewhere(vol, p) {
+  const cite = 'AA ' + vol + ':' + p;
+  if (vol === 17 || vol === 18)
+    return cite + ' is in Baumgarten’s <i>Metaphysica</i> or Kant’s notes on it (AA 17–18), which have their own reader. ' +
+      '<a href="' + BAUMGARTEN_URL + '#go=' + vol + ':' + p + '">Open ' + cite + ' in the Baumgarten reader ↗</a>';
+  if (vol === 24) {
+    const L = AA24_LECTURES.find(l => l.from <= p && p <= l.to);
+    if (L) return cite + ' is in the ' + L.name + ' (AA 24:' + L.from + '–' + L.to + '), one of Kant’s logic lectures, not in Meier. ' +
+      '<a href="' + PORTAL_URL + '#read=' + L.key + '&aa=' + p + '">Open it in the Logic Portal ↗</a>';
+    const prev = AA24_LECTURES.filter(l => l.to < p).pop(), next = AA24_LECTURES.find(l => l.from > p);
+    if (prev && next) return cite + ' falls between two of the logic lectures: the ' + prev.name + ' ends at AA 24:' + prev.to + ', and the ' + next.name + ' begins at 24:' + next.from + '.';
+    return cite + ' is outside the logic lectures of AA 24, which run from 24:' + AA24_LECTURES[0].from + ' to 24:' + AA24_LECTURES[AA24_LECTURES.length - 1].to + '.';
+  }
+  if (vol === 9)
+    return p >= 1 && p <= 150
+      ? cite + ' is in the Jäsche <i>Logik</i> (AA 9:1–150). <a href="' + PORTAL_URL + '#read=jaesche&aa=' + p + '">Open it in the Logic Portal ↗</a>'
+      : cite + ' is outside the Jäsche <i>Logik</i>, which is AA 9:1–150.';
+  if (vol === 15)
+    return cite + ' is in Kant’s notes on anthropology, which also reprint Baumgarten’s Psychologia empirica (§§ 504–699 of the <i>Metaphysica</i>). Neither reader has AA 15.';
+  return 'AA ' + vol + ' is not a volume this reader has. Meier’s <i>Auszug</i> and Kant’s notes on it are AA 16; Baumgarten’s <i>Metaphysica</i> and Kant’s notes on it, AA 17–18; the logic lectures, AA 24; the Jäsche <i>Logik</i>, AA 9.';
+}
+
+/* "§ 92", "§§ 92–98", or "§§ 3, 7, 9" for a Reflexion's paras. */
+function paraLabel(paras) {
+  const ps = [...new Set(paras)].sort((a, b) => a - b);
+  if (ps.length === 1) return '§ ' + ps[0];
+  const run = ps.every((x, k) => !k || x === ps[k - 1] + 1);
+  return '§§ ' + (run ? ps[0] + '–' + ps[ps.length - 1] : ps.join(', '));
+}
+
+/* "Refl. 2104–2107", "Refl. 2104, 2110", runs joined; long lists shortened. */
+function reflNumbers(idxs) {
+  const rs = [...new Set(idxs.map(i => REFL_ENTRIES[i].r))].sort((a, b) => a - b);
+  const runs = [];
+  rs.forEach(r => { const last = runs[runs.length - 1]; if (last && r === last[1] + 1) last[1] = r; else runs.push([r, r]); });
+  const shown = runs.slice(0, 6).map(([a, b]) => a === b ? String(a) : a + '–' + b);
+  return 'Refl. ' + shown.join(', ') + (runs.length > 6 ? ' and ' + (runs.length - 6) + ' more' : '');
+}
+
+/* Bring one Reflexion's card into view in the panel, and pick it out for a moment.
+   The panel has just been pointed at its §; if the card's block fell outside the
+   window of blocks rendered around that §, widen the window to take it in. The
+   panel scrolls again on the next frame and once the webfonts land, as
+   scrollReflToFocusSettled() does, because the cards reflow when they arrive. */
+function revealReflEntry(idx) {
+  const scroll = document.getElementById('reflScroll');
+  const find = () => scroll.querySelector('.r-entry[data-idx="' + idx + '"]');
+  let card = find();
+  if (!card) {
+    const k = REFL_LIVE_GROUPS.indexOf(REFL_ENTRIES[idx].grp);
+    if (k >= 0) {
+      reflWin.lo = Math.min(reflWin.lo, k);
+      reflWin.hi = Math.max(reflWin.hi, k + 1);
+      renderReflWindow(false);
+      card = find();
+    }
+  }
+  if (!card || !card.offsetParent) return;
+  const panel = document.getElementById('traditionPanel');
+  const place = () => {
+    const header = document.querySelector('.tradition-header');
+    const offset = (header ? header.getBoundingClientRect().height : 0) + 48;
+    panel.scrollTop += card.getBoundingClientRect().top - panel.getBoundingClientRect().top - offset;
+  };
+  place();
+  requestAnimationFrame(place);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => requestAnimationFrame(place));
+  card.classList.add('r-target');
+  setTimeout(() => card.classList.remove('r-target'), 2600);
+}
+
+/* The box's note. `html` is built here from numbers and fixed text only. */
+function showJumpMsg(html) {
+  const el = document.getElementById('jumpMsg');
+  el.innerHTML = html ? html + '<button type="button" class="jump-msg-close" title="Close" aria-label="Close">×</button>' : '';
+  const close = el.querySelector('.jump-msg-close');
+  if (close) close.onclick = () => showJumpMsg('');
+}
+
+/* #go=92 or #go=16:236 in the URL */
+function goFromHash() {
+  const m = location.hash.match(/(?:^#|&)go=([^&]*)/);
+  if (m) jumpToSection(decodeURIComponent(m[1].replace(/\+/g, ' ')));
 }
 
 // ── Update sidebar active item ──
@@ -1717,7 +1963,10 @@ document.addEventListener('mouseup', () => {
 // ── Enter on jump input ──
 document.getElementById('jumpInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') jumpToSection();
+  if (e.key === 'Escape') showJumpMsg('');
 });
+document.getElementById('jumpInput').addEventListener('input', () => showJumpMsg(''));
+window.addEventListener('hashchange', goFromHash);
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Kant's handschriftliche Bemerkungen (Reflexionen)
@@ -2442,6 +2691,7 @@ buildReflFilter();
 document.getElementById('tabReflexionen').title =
   REFL_META.count + ' Reflexionen (Refl. ' + REFL_META.rMin + '–' + REFL_META.rMax +
   ') from ' + REFL_META.work.replace(/^.*?, /, '') + ', AA ' + REFL_META.volume + '.';
+goFromHash();
 </script>
 </body>
 </html>
