@@ -99,6 +99,7 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
 - **Go to a Reflexion.** Type its number, `Refl. 4086`, `R 4086` or `4086` alone, into the search
   box and the note opens on the right, leaving the left as it was. In the Meier or Baumgarten
   reader the jump box takes it too, and goes to the § the note is on, with the note picked out.
+  A link can do the same, `#refl=4086`; the box on the Kant Lab landing page makes one.
 - **English.** Press **English** on a passage to see a translation beside the German, in one
   of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
   are Jesus's machine translations, made for the Meier–Kant comparison; neither
