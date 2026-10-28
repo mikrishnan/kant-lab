@@ -568,6 +568,8 @@
   .fen { margin: 0.3rem 0 0.2rem; padding-left: 0.7rem; border-left: 2px solid var(--line); color: #3d3122; font-size: 0.94em; line-height: 1.45; white-space: pre-wrap; }
   .fen.wait { color: var(--faded); border-left-style: dashed; }
   .fp > .fen { grid-column: 2; margin-top: -0.1rem; }
+  /* in a narrow pane the margin stands above the text, in the one column, and the English under both */
+  @container (max-width: 32rem) { .fp > .fen { grid-column: 1; } }
   .enb { display: inline-block; margin-top: 0.3rem; padding: 0 0.45rem; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--faded); font-size: 0.72rem; line-height: 1.35; cursor: pointer; }
   .enb:hover { border-color: var(--accent-light); color: var(--accent); }
   .enb.on { background: var(--parchment-dark); border-color: var(--accent-light); color: var(--accent); }
@@ -862,6 +864,7 @@ const S = {                       // what the user is looking at; mirrored in th
   seen: new Set(), seenFor: null, // the search results already opened, and the search they belong to
   bookOpen: false, bookAt: null,  // the textbook § under the reading pane's header: open or not, and which § of its range
   cmp: null,                      // the Compare tab's choices, for the passage they were made for: see cmpState
+  miss: null,                     // what the left says when a page or a Reflexion named is not in the portal
 };
 let RESULT = null;
 let LOAD_FAILED = [];
@@ -1472,6 +1475,7 @@ function updateOptSum() {
 
 function renderResults() {
   const box = $('results');
+  if (S.miss && !S.d && !S.q.trim()) { $('view-ask').classList.remove('home'); $('welcome').hidden = true; box.innerHTML = S.miss; return; }
   const home = !S.d && !S.q.trim();
   $('view-ask').classList.toggle('home', home);
   $('welcome').hidden = !home;
@@ -2679,12 +2683,7 @@ function reflMissText(n) {
   const have = TEXTS.filter(T => T.shape === 'refl' && T.n).map(T => 'Refl. ' + P[T.first].id.slice(1) + '–' + P[T.last].id.slice(1) + ' (' + T.title.replace(/^Kant, /, '') + ')');
   return 'No Reflexion numbered ' + n + ' is in the portal. It has ' + have.join(' and ') + '.';
 }
-function showReflMiss(n) {
-  showView('ask');
-  $('view-ask').classList.remove('home');
-  $('welcome').hidden = true;
-  $('results').innerHTML = '<div class="res-head"><div class="res-title">Refl. ' + n + '</div></div><div class="empty">' + esc(reflMissText(n)) + '</div>';
-}
+function showReflMiss(n) { showMiss('<div class="res-head"><div class="res-title">Refl. ' + n + '</div></div><div class="empty">' + esc(reflMissText(n)) + '</div>'); }
 /* Every passage printed on a page of the AA. */
 function aaAll(vol, page) {
   const out = [];
@@ -3462,11 +3461,13 @@ function aaMissHtml(c) {
   if (after) h += ' ' + esc(after.T.title) + ' begins at ' + go(c.vol, after.r[0], 'AA ' + c.vol + ':' + after.r[0]) + '.';
   return h + '</div>';
 }
-function showAAMiss(c) {
+function showAAMiss(c) { showMiss('<div class="res-head"><div class="res-title">AA ' + c.vol + ':' + c.page + '</div></div>' + aaMissHtml(c)); }
+/* Nothing found for a page or a Reflexion named: the left says so, and goes on saying so when it is
+   drawn again (as it is when the English arrives) until the reader asks something else. */
+function showMiss(h) {
+  S.miss = h;
   showView('ask');
-  $('view-ask').classList.remove('home');
-  $('welcome').hidden = true;
-  $('results').innerHTML = '<div class="res-head"><div class="res-title">AA ' + c.vol + ':' + c.page + '</div></div>' + aaMissHtml(c);
+  renderResults();
 }
 
 function renderStudy(el, T) {
@@ -3556,7 +3557,7 @@ function snapshot() {
 function restore(snap) {
   Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, tab: snap.tab || 'overview',
     view: snap.view || 'ask', readKey: snap.readKey || null, readAt: snap.readAt, rtab: snap.rtab || 'text', preset: snap.presetObj || null,
-    cmp: snap.cmp ? Object.assign({}, snap.cmp) : null });
+    cmp: snap.cmp ? Object.assign({}, snap.cmp) : null, miss: null });
 }
 /* A step is named for what changed at it: the passage, if one was opened there, and otherwise
    the question or doctrine on the left, with the phrasing or kind picked in it. A passage left
@@ -3683,6 +3684,7 @@ function writeHash() {
 function readHash() {
   const u = new URLSearchParams(location.hash.slice(1));
   S.preset = null;
+  S.miss = null;
   S.q = u.get('q') || '';
   S.w = u.has('w') ? +u.get('w') : 5;
   S.cm = u.get('cm') || '';
@@ -3720,6 +3722,14 @@ function readHash() {
     }
     if (c && goAA(c, within)) { syncForm(); renderResults(); return; }
   }
+  // A link to a Reflexion by its number, #refl=4086, as the landing page's lookup box makes: the note
+  // opens on the right
+  const rq = u.get('refl');
+  if (rq) {
+    const rn = parseRefl(rq), q = rn && reflByNo(rn.n);
+    if (q) { S.sel = q.i; if (!u.get('rt')) S.rtab = 'text'; S.cmp = cmpFresh(q.i); }
+    else if (rn) { syncForm(); showReflMiss(rn.n); return; }
+  }
   syncForm();
   showView(S.readKey ? 'read' : 'ask');
   renderResults();
@@ -3732,7 +3742,7 @@ function readHash() {
    ════════════════════════════════════════════════════════════════════════ */
 
 function ask(opts) {
-  Object.assign(S, { d: null, loc: null, tab: 'overview', expand: new Set() }, opts);
+  Object.assign(S, { d: null, loc: null, tab: 'overview', expand: new Set(), miss: null }, opts);
   showView('ask');
   syncForm();
   renderResults();
@@ -3768,7 +3778,7 @@ function wire() {
     }
     // A Reflexion by its number, "Refl. 4086" or 4086 alone, opens on the right, leaving the left as it was
     const rn = parseRefl($('q').value);
-    if (rn) { const q = reflByNo(rn.n); if (q) { openPassage(q.i); syncForm(); } else showReflMiss(rn.n); return; }
+    if (rn) { const q = reflByNo(rn.n); if (q) { S.miss = null; openPassage(q.i); syncForm(); renderResults(); } else showReflMiss(rn.n); return; }
     ask({ q: $('q').value.trim(), w: +$('w').value || 0, co: $('co').value.trim(), cm: $('cm').value, merge: $('merge').checked, preset: null });
   });
   $('merge').addEventListener('change', () => { if (S.q) ask({ merge: $('merge').checked, preset: S.preset }); else { S.merge = $('merge').checked; updateOptSum(); } });
@@ -3869,7 +3879,7 @@ function wire() {
     if (d.map) { $('routemap').hidden = !$('routemap').hidden; renderTrail(); return; }
     if (d.en != null) { S.en = d.en; enApply(); writeHash(); return; }
     if (d.doc) { if (d.docjt) S.jtab = d.docjt; Object.assign(S, { d: d.doc, q: '', co: '', cm: '', loc: null, expand: new Set(), preset: null }); showView('ask'); syncForm(); renderResults(); pushTrail(); $('left').scrollTop = 0; return; }
-    if (d.home) { Object.assign(S, { d: null, q: '', co: '', cm: '', loc: null, preset: null, tab: 'overview', expand: new Set() }); showView('ask'); syncForm(); renderResults(); writeHash(); return; }
+    if (d.home) { Object.assign(S, { d: null, q: '', co: '', cm: '', loc: null, preset: null, tab: 'overview', expand: new Set(), miss: null }); showView('ask'); syncForm(); renderResults(); writeHash(); return; }
     if (d.tab) { S.tab = d.tab; renderResults(); writeHash(); return; }
     if (d.closeRail) { S.sel = null; S.quote = null; S.noteFocus = null; $('app').style.gridTemplateColumns = ''; renderRail(); document.querySelectorAll('.hit.sel').forEach(x => x.classList.remove('sel')); if (studyOn()) renderRead(); writeHash(); return; }
     if (d.view) { showView(d.view); if (d.view === 'read') writeHash(); return; }
