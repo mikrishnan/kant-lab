@@ -121,14 +121,16 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   Every passage that has English also has a small **English** button of its own, which opens
   that passage's English under it and nothing else.
 
-  With English on, **the search reads the English too**. An English word or phrase, such as
-  `judgment`, `"principle of contradiction"` or `certain*`, finds the German passages whose
-  translation has it, across every text with English, in the style shown. An English word also
-  finds its plain plural. A hit there is marked *found in the English*, with its English and
-  roughly the stretch of German it translates. In the full text, its English is shown with the
-  words marked. The Overview lists English phrasings apart, tagged *English*, and the summary
-  says how many hits came from the English. With English off, the search is German only, as
-  before.
+  With English on, a choice beside the search box, **German | English**, says which the question
+  is put to. **German**, the default, is the search as it always was: it reads only the German
+  and Latin, and no English ever appears among its results. **English** reads the English
+  instead, across every text that has a translation, in the style shown. An English word or
+  phrase, such as `judgment`, `"principle of contradiction"` or `certain*`, finds the German
+  passages whose translation has it, and an English word also finds its plain plural. A hit is
+  marked *found in the English*, with its English and roughly the stretch of German it
+  translates. In the full text, its English is shown with the words marked. The Overview tags
+  its phrasings *English*, and a link keeps the choice (`ql=en`). With English off, the choice
+  is hidden and the search is German.
 
   **This English is a stopgap, for the seminar of 26 October 2026.** It is to be replaced by
   Maria's translation across the whole portal, which works differently: sentence by sentence,

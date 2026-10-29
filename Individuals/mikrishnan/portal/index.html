@@ -310,6 +310,11 @@
   .qrow:focus-within { border-color: var(--accent-light); box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12); }
   #q { flex: 1; border: none; background: transparent; font-size: 1.15rem; padding: 0.3rem 0; outline: none; min-width: 0; }
   .qrow .btn.solid { padding: 0.35rem 1.3rem; font-size: 1rem; }
+  .qlang { display: inline-flex; flex: none; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .qlang[hidden] { display: none; }
+  .qlang button { font: inherit; font-size: 0.82rem; border: 0; background: transparent; color: var(--faded); padding: 0.25rem 0.75rem; cursor: pointer; }
+  .qlang button + button { border-left: 1px solid var(--line); }
+  .qlang button.on { background: var(--accent-light); color: #fff; }
   .optline { display: flex; gap: 1.1rem; align-items: baseline; margin: 0.5rem 1.1rem 0; font-size: 0.88rem; color: var(--faded); }
   #optsum { flex: 1; font-style: italic; }
   #opts, #help { margin: 0.6rem 0 0; background: var(--card); border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.75rem 1.1rem; font-size: 0.93rem; }
@@ -688,6 +693,7 @@
       <form id="ask" autocomplete="off">
         <div class="qrow">
           <input id="q" type="search" spellcheck="false" placeholder="A word or phrase, e.g.  form* fals*  ·  a page, 24:892  ·  a note, Refl. 4086">
+          <span id="qlang" class="qlang" role="radiogroup" aria-label="Search in" hidden title="Search the German texts, or their English translation"><button type="button" role="radio" data-ql="de" class="on" aria-checked="true">German</button><button type="button" role="radio" data-ql="en" aria-checked="false">English</button></span>
           <button type="submit" class="btn solid">Ask</button>
         </div>
         <div class="optline">
@@ -708,7 +714,8 @@
           <code>fals*</code> finds every word that begins so. Several words, <code>form* fals*</code>, find places where they stand
           near each other, in any order. Quotation marks, <code>"der form nach"</code>, keep words together and in order.
           <code>OR</code> joins alternatives. A regular expression between slashes, <code>/formali?ter/</code>, is matched against the text as printed.</p>
-          <p>With <b>English</b> on in the header, the search also reads the English translation of every passage that has one, so an English word, <code>judgment</code>,
+          <p>With <b>English</b> on in the header, a choice beside the box, <b>German | English</b>, says which the question is put to. German, the default, is the search
+          described above. English searches the English translation of every passage that has one, so an English word, <code>judgment</code>,
           <code>"principle of contradiction"</code>, <code>certain*</code>, finds the German passages it translates. An English word finds its plain plural too.
           Such a hit is marked <i>found in the English</i>, with its English and roughly the stretch of German it translates. The English is Jesus’s machine translation,
           and Baumgarten and Kant’s notes on Baumgarten have none yet.</p>
@@ -870,6 +877,7 @@ const S = {                       // what the user is looking at; mirrored in th
   find: null, railW: null,
   secOpen: new Set(), secClosed: new Set(),   // reading-pane sections the reader opened or closed
   en: '',                         // the English shown beside the German: a PORTAL_TR_STYLES key, or '' for none
+  ql: 'de',                       // the language a question is put in: 'de' the texts, or 'en' their English (only with English on)
   enStyle: 'guyer',               // the style a single passage's English button opens in
   enOpen: new Set(),              // passages whose English was opened one at a time
   seen: new Set(), seenFor: null, // the search results already opened, and the search they belong to
@@ -1361,7 +1369,8 @@ function runQuery() {
   const w = Math.max(0, +S.w || 0);
   const matches = [];
   let coWith = 0, coWithout = 0;
-  for (const p of P) {
+  const inEnglish = enAsked();
+  for (const p of (inEnglish ? [] : P)) {        // a question put in English reads only the English
     if (S.off.has(TEXTS[p.t].key)) continue;
     let spans = [];
     for (const alt of alts) { const s = altSpans(p, alt, w); if (s.length) spans = spans.concat(s); }
@@ -1373,14 +1382,17 @@ function runQuery() {
     }
     dedupe(spans).forEach(([a, b]) => matches.push({ p: p.i, a, b }));
   }
-  const en = enSearch(S.q, w, coAlts, matches);
+  const en = inEnglish ? enSearch(S.q, w, coAlts, matches) : null;
   return summarise({ alts, bad, matches, coWith, coWithout, en });
 }
+/* Whether the question is put to the English: only with English on, and only when the reader chose
+   English beside the box. Otherwise the search is the German search, untouched. */
+const enAsked = () => !!S.en && S.ql === 'en';
 
 /* ── The English in the search ─────────────────────────────────────────────
-   With English on, a question is also put to the English of every passage that has one (Jesus's
-   translations, in the style shown), and a hit there is listed under its German passage, marked as found
-   in the English. The German index is not touched: the English has its own, built when the English for
+   With English on and English chosen beside the box, a question is put to the English of every passage
+   that has one (Jesus's translations, in the style shown) instead of the German, and a hit there is listed
+   under its German passage, marked as found in the English. The German index is not touched: the English has its own, built when the English for
    every text has loaded and again if the style changes. An English word finds itself and its plain plural
    (judgment, judgments; property, properties); * and "…" work as in German, and a /regular expression/
    is matched against the English as written. */
@@ -1580,7 +1592,7 @@ function updateOptSum() {
   if (S.cm && S.co.trim()) bits.push((S.cm === 'with' ? 'also mentioning ' : 'not mentioning ') + S.co.trim());
   if (!S.merge) bits.push('spellings kept apart');
   bits.push(S.off.size ? (TEXTS.length - S.off.size) + ' of ' + TEXTS.length + ' texts' : 'all ' + TEXTS.length + ' texts');
-  bits.push(S.en ? 'German and English' : 'German only');
+  if (enAsked()) bits.push('in the English');
   $('optsum').textContent = bits.join(' · ');
 }
 
@@ -1604,7 +1616,7 @@ function renderResults() {
     '<div class="summary"><b>' + R.matches.length.toLocaleString('en') + '</b> occurrence' + (R.matches.length === 1 ? '' : 's') +
     ' in <b>' + nPass.toLocaleString('en') + '</b> passage' + (nPass === 1 ? '' : 's') + ' · ' + nTexts + ' of ' + shown.length + ' texts';
   if (S.cm && S.co.trim()) h += ' · only passages that ' + (S.cm === 'with' ? 'also mention' : 'do not mention') + ' <i>' + esc(S.co) + '</i>';
-  if (R.en) h += ' · <span class="ensum" title="With English on, the search also reads the English of every passage that has one (' + esc(R.en.style) + '), and lists a hit there under its German passage. Machine translation: check it against the German.">German and English' + (R.en.n ? ', <b>' + R.en.n.toLocaleString('en') + '</b> found in the English' : '') + '</span>';
+  if (R.en) h += ' · <span class="ensum" title="Searched in the English of every passage that has one (' + esc(R.en.style) + '); each hit is listed under its German passage. Machine translation: check it against the German.">in the English translation, ' + esc(R.en.style) + '</span>';
   h += '</div>';
   if (R.en && R.en.pending) h += '<div class="note small">The English of ' + R.en.pending + ' text' + (R.en.pending === 1 ? ' is' : 's are') + ' still loading; the results will fill in.</div>';
   if (R.bad.length) h += '<div class="warn small">Not a regular expression the browser accepts: ' + R.bad.map(esc).join(', ') + '</div>';
@@ -1614,7 +1626,7 @@ function renderResults() {
   const near = !S.preset && /^\s*[A-Za-zÄÖÜäöü]{1,3}\.?\s*(\d{3,4})\s*$/.exec(S.q);
   if (near && reflByNo(+near[1])) h += '<p class="note">Looking for <span class="lnk" data-askq="Refl. ' + near[1] + '">Refl. ' + near[1] + '</span>? A Reflexion goes by its number: <code>R ' + near[1] + '</code>, <code>Refl. ' + near[1] + '</code> or <code>' + near[1] + '</code> alone. As words, “' + esc(S.q.trim()) + '” is only its letters, since the search leaves numbers out.</p>';
   h += '</div>';
-  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">No passage has it' + (R.en ? ', in the German or the English' : '') + '. Try a * to widen a word, or allow more words between.</div>'; return; }
+  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">' + (R.en ? 'No passage’s English has it. To search the German, choose German beside the box.' : 'No passage has it.') + ' Try a * to widen a word, or allow more words between.</div>'; return; }
 
   const tab = S.tab === 'passages' ? 'passages' : 'overview';
   h += '<div class="tabs"><button type="button" data-tab="overview"' + (tab === 'overview' ? ' class="on"' : '') + '>Overview</button>' +
@@ -2085,6 +2097,7 @@ function enLine(p, a, b) {
 /* The switch, the bar under the header, and the translation files, kept in step with S.en. */
 function enSync() {
   const on = !!S.en, b = $('entog'), bar = $('enbar');
+  qlSync();
   if (!b) return;
   b.classList.toggle('on', on);
   b.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -2101,6 +2114,16 @@ function enSync() {
     '<span class="soon"><a href="' + MARIA_DEMO + '" target="_blank" rel="noopener" title="Coming soon: Maria’s sentence-by-sentence translation, across the whole portal">Maria’s translation, a preview ↗</a></span>';
 }
 function enApply() { enSync(); enRefresh(); }
+/* German | English beside the search box: shown only with English on; German unless the reader picks English. */
+function qlSync() {
+  const box = $('qlang');
+  if (!box) return;
+  box.hidden = !S.en;
+  const ql = enAsked() ? 'en' : 'de';
+  box.querySelectorAll('[data-ql]').forEach(x => { x.classList.toggle('on', x.dataset.ql === ql); x.setAttribute('aria-checked', x.dataset.ql === ql); });
+  $('q').placeholder = ql === 'en' ? 'An English word or phrase, e.g.  judgment  ·  "principle of contradiction"  ·  certain*'
+    : 'A word or phrase, e.g.  form* fals*  ·  a page, 24:892  ·  a note, Refl. 4086';
+}
 /* A small English button beside every passage that has a translation: it opens that passage's
    English under it, in place, without redrawing the page. */
 function enButton(p, a, b) {
@@ -2159,7 +2182,7 @@ function sec(key, title, value, count, body, credit, defOpen) {
 /* ── Going through the search results one by one ───────────────────────────
    The reading pane steps through the results in the order the Passages list shows them, and
    remembers which have been opened, for as long as the search stays the same. */
-const searchKey = () => [S.q, S.w, S.cm, S.co, S.merge, [...S.off].sort().join(','), S.loc || '', S.en].join('|');
+const searchKey = () => [S.q, S.w, S.cm, S.co, S.merge, [...S.off].sort().join(','), S.loc || '', enAsked() ? 'en:' + S.en : 'de'].join('|');
 function resultOrder() {
   if (S.view !== 'ask' || S.d || !RESULT || !RESULT.byPass) return [];
   const out = [];
@@ -3842,6 +3865,7 @@ function writeHash() {
   if (S.sel != null && P[S.sel]) { u.set('p', TEXTS[P[S.sel].t].key + ':' + P[S.sel].id); if (S.quote) u.set('quote', S.quote); }
   if (!S.en) u.set('en', '0');                     // English is on unless a link says otherwise
   else if (S.en !== EN_DEFAULT) u.set('en', S.en);
+  if (enAsked() && S.q && !S.d) u.set('ql', 'en');
   if (S.q && !S.d && S.tab === 'passages') u.set('tab', 'passages');
   if (S.view === 'read' && S.readKey) { u.set('read', S.readKey); if (S.readAt != null && P[S.readAt]) u.set('at', P[S.readAt].id); }
   if (S.sel != null && S.rtab !== 'text') u.set('rt', S.rtab);
@@ -3867,6 +3891,7 @@ function readHash() {
   S.loc = u.get('loc') || null;
   S.quote = u.get('quote') || null;
   S.en = u.get('en') === '0' ? '' : PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : EN_DEFAULT;
+  S.ql = u.get('ql') === 'en' ? 'en' : 'de';
   enSync();
   S.tab = u.get('tab') === 'passages' ? 'passages' : 'overview';
   S.bookOpen = u.get('tb') === '1';
@@ -3938,6 +3963,17 @@ function openPassage(i, quote, rtab) {
 }
 
 function wire() {
+  $('qlang').addEventListener('click', e => {
+    const x = e.target.closest('[data-ql]');
+    if (!x || x.dataset.ql === S.ql) return;
+    S.ql = x.dataset.ql;
+    qlSync();
+    S.loc = null;
+    if (S.q.trim() && !S.d) { renderResults(); pushTrail(); }
+    writeHash();
+    updateOptSum();
+    $('q').focus();
+  });
   $('ask').addEventListener('submit', e => {
     e.preventDefault();
     // An Academy page goes to that page. Without "AA" in front, a volume the portal has none of
