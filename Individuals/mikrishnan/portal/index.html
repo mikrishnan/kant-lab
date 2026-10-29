@@ -310,6 +310,11 @@
   .qrow:focus-within { border-color: var(--accent-light); box-shadow: 0 0 0 3px rgba(139, 94, 60, 0.12); }
   #q { flex: 1; border: none; background: transparent; font-size: 1.15rem; padding: 0.3rem 0; outline: none; min-width: 0; }
   .qrow .btn.solid { padding: 0.35rem 1.3rem; font-size: 1rem; }
+  .qlang { display: inline-flex; flex: none; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .qlang[hidden] { display: none; }
+  .qlang button { font: inherit; font-size: 0.82rem; border: 0; background: transparent; color: var(--faded); padding: 0.25rem 0.75rem; cursor: pointer; }
+  .qlang button + button { border-left: 1px solid var(--line); }
+  .qlang button.on { background: var(--accent-light); color: #fff; }
   .optline { display: flex; gap: 1.1rem; align-items: baseline; margin: 0.5rem 1.1rem 0; font-size: 0.88rem; color: var(--faded); }
   #optsum { flex: 1; font-style: italic; }
   #opts, #help { margin: 0.6rem 0 0; background: var(--card); border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.75rem 1.1rem; font-size: 0.93rem; }
@@ -570,6 +575,10 @@
   #enbar .soon b { font-style: normal; color: var(--accent); font-weight: 600; }
   .fen { margin: 0.3rem 0 0.2rem; padding-left: 0.7rem; border-left: 2px solid var(--line); color: #3d3122; font-size: 0.94em; line-height: 1.45; white-space: pre-wrap; }
   .fen.wait { color: var(--faded); border-left-style: dashed; }
+  .fen.enhit { border-left-color: var(--accent-light); }
+  .fen .enfound { display: block; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--faded); margin-bottom: 0.1rem; }
+  .entag { font-size: 0.66rem; letter-spacing: 0.05em; color: var(--faded); border: 1px solid var(--line); border-radius: 3px; padding: 0 0.25rem; margin-left: 0.4rem; font-style: normal; }
+  .ensum { color: var(--faded); }
   .fp > .fen { grid-column: 2; margin-top: -0.1rem; }
   /* in a narrow pane the margin stands above the text, in the one column, and the English under both */
   @container (max-width: 32rem) { .fp > .fen { grid-column: 1; } }
@@ -684,6 +693,7 @@
       <form id="ask" autocomplete="off">
         <div class="qrow">
           <input id="q" type="search" spellcheck="false" placeholder="A word or phrase, e.g.  form* fals*  ·  a page, 24:892  ·  a note, Refl. 4086">
+          <span id="qlang" class="qlang" role="radiogroup" aria-label="Search in" hidden title="Search the German texts, or their English translation"><button type="button" role="radio" data-ql="de" class="on" aria-checked="true">German</button><button type="button" role="radio" data-ql="en" aria-checked="false">English</button></span>
           <button type="submit" class="btn solid">Ask</button>
         </div>
         <div class="optline">
@@ -704,6 +714,11 @@
           <code>fals*</code> finds every word that begins so. Several words, <code>form* fals*</code>, find places where they stand
           near each other, in any order. Quotation marks, <code>"der form nach"</code>, keep words together and in order.
           <code>OR</code> joins alternatives. A regular expression between slashes, <code>/formali?ter/</code>, is matched against the text as printed.</p>
+          <p>With <b>English</b> on in the header, a choice beside the box, <b>German | English</b>, says which the question is put to. German, the default, is the search
+          described above. English searches the English translation of every passage that has one, so an English word, <code>judgment</code>,
+          <code>"principle of contradiction"</code>, <code>certain*</code>, finds the German passages it translates. An English word finds its plain plural too.
+          Such a hit is marked <i>found in the English</i>, with its English and roughly the stretch of German it translates. The English is Jesus’s machine translation,
+          and Baumgarten and Kant’s notes on Baumgarten have none yet.</p>
           <p>A page of the Academy edition, written as scholars cite it, goes straight to that page: <code>24:892</code>, <code>24.892</code>,
           <code>AA 24:892</code>, <code>Ak. 16, 236</code> or <code>AA XVII 45</code> opens the text printed there, where the page begins.
           A page of Kant’s notes opens the textbook they are written in, with the note beside it.
@@ -862,6 +877,7 @@ const S = {                       // what the user is looking at; mirrored in th
   find: null, railW: null,
   secOpen: new Set(), secClosed: new Set(),   // reading-pane sections the reader opened or closed
   en: '',                         // the English shown beside the German: a PORTAL_TR_STYLES key, or '' for none
+  ql: 'de',                       // the language a question is put in: 'de' the texts, or 'en' their English (only with English on)
   enStyle: 'guyer',               // the style a single passage's English button opens in
   enOpen: new Set(),              // passages whose English was opened one at a time
   seen: new Set(), seenFor: null, // the search results already opened, and the search they belong to
@@ -1294,9 +1310,12 @@ function unitPositions(p, u) {
 function altSpans(p, alt, w) {
   if (alt.rx) return rxSpans(p, alt.rx);
   if (!alt.units) return [];
-  const pos = alt.units.map(u => unitPositions(p, u));
+  return nearSpans(alt.units.map(u => unitPositions(p, u)), alt.units.map(u => u.masks.length), w);
+}
+/* Spans where every unit stands within `w` words of the rarest one: pos[u] are a unit's token positions,
+   len[u] its length in tokens. Shared by the German index and the English. */
+function nearSpans(pos, len, w) {
   if (pos.some(a => !a.length)) return [];
-  const len = alt.units.map(u => u.masks.length);
   if (pos.length === 1) return pos[0].map(k => [k, k + len[0] - 1]);
   let ai = 0;
   pos.forEach((a, i) => { if (a.length < pos[ai].length) ai = i; });
@@ -1350,7 +1369,8 @@ function runQuery() {
   const w = Math.max(0, +S.w || 0);
   const matches = [];
   let coWith = 0, coWithout = 0;
-  for (const p of P) {
+  const inEnglish = enAsked();
+  for (const p of (inEnglish ? [] : P)) {        // a question put in English reads only the English
     if (S.off.has(TEXTS[p.t].key)) continue;
     let spans = [];
     for (const alt of alts) { const s = altSpans(p, alt, w); if (s.length) spans = spans.concat(s); }
@@ -1362,7 +1382,105 @@ function runQuery() {
     }
     dedupe(spans).forEach(([a, b]) => matches.push({ p: p.i, a, b }));
   }
-  return summarise({ alts, bad, matches, coWith, coWithout });
+  const en = inEnglish ? enSearch(S.q, w, coAlts, matches) : null;
+  return summarise({ alts, bad, matches, coWith, coWithout, en });
+}
+/* Whether the question is put to the English: only with English on, and only when the reader chose
+   English beside the box. Otherwise the search is the German search, untouched. */
+const enAsked = () => !!S.en && S.ql === 'en';
+
+/* ── The English in the search ─────────────────────────────────────────────
+   With English on and English chosen beside the box, a question is put to the English of every passage
+   that has one (Jesus's translations, in the style shown) instead of the German, and a hit there is listed
+   under its German passage, marked as found in the English. The German index is not touched: the English has its own, built when the English for
+   every text has loaded and again if the style changes. An English word finds itself and its plain plural
+   (judgment, judgments; property, properties); * and "…" work as in German, and a /regular expression/
+   is matched against the English as written. */
+let EN_IX = null;
+function enIndex() {
+  const style = S.en;
+  const trs = typeof PORTAL_TRANSLATIONS === 'undefined' ? [] : PORTAL_TRANSLATIONS;
+  if (!style || !trs.length) return null;
+  const ready = trs.filter(tr => trState(tr, style) === 'ready');
+  const key = style + '|' + ready.map(tr => tr.text).join(',');
+  if (EN_IX && EN_IX.key === key) return EN_IX;
+  const rows = [];
+  for (const p of P) {
+    const tr = trFor(TEXTS[p.t]);
+    if (!tr || !ready.includes(tr)) continue;
+    const e = trEntry(tr, style, p);
+    if (!e || !e.text) continue;
+    const text = e.text.replace(/\*+/g, '');
+    const w = [], ts = [], te = [];
+    for (const m of text.matchAll(/[\p{L}\p{M}]+/gu)) { w.push(m[0].toLowerCase()); ts.push(m.index); te.push(m.index + m[0].length); }
+    rows.push({ p: p.i, text, w, ts, te });
+  }
+  EN_IX = { key, rows, byP: new Map(rows.map(r => [r.p, r])), pending: trs.length - ready.length, texts: ready.length };
+  return EN_IX;
+}
+function enWordTest(word) {
+  const lower = word.toLowerCase();
+  if (lower.includes('*')) {
+    const rx = new RegExp('^' + lower.split('*').map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$', 'u');
+    return t => rx.test(t);
+  }
+  const forms = new Set([lower, lower + 's', lower + 'es']);
+  if (/[^aeiou]y$/.test(lower)) forms.add(lower.slice(0, -1) + 'ies');
+  return t => forms.has(t);
+}
+function parseEnQuery(src) {
+  const alts = [];
+  let cur = [];
+  const re = /\/((?:\\.|[^\\\/])+)\/(?=\s|$)|"([^"]+)"|(\S+)/g;
+  let m;
+  const close = () => { if (cur.length) alts.push({ units: cur }); cur = []; };
+  while ((m = re.exec(src))) {
+    if (m[1] != null) { close(); try { alts.push({ rx: new RegExp(m[1], 'giu') }); } catch (e) { /* reported by the German parse */ } continue; }
+    if (m[3] === 'OR' || m[3] === '|') { close(); continue; }
+    const words = (m[2] != null ? m[2] : m[3]).match(/[\p{L}\p{M}*]+/gu) || [];
+    if (words.length) cur.push(words.map(enWordTest));
+  }
+  close();
+  return alts;
+}
+function enAltSpans(row, alt, w) {
+  if (alt.rx) {
+    const out = [];
+    alt.rx.lastIndex = 0;
+    let m;
+    while ((m = alt.rx.exec(row.text))) {
+      if (!m[0].length) { alt.rx.lastIndex++; continue; }
+      const a = row.te.findIndex(x => x > m.index), e = m.index + m[0].length;
+      let b = -1; for (let k = row.ts.length - 1; k >= 0; k--) if (row.ts[k] < e) { b = k; break; }
+      if (a >= 0 && b >= a) out.push([a, b]);
+    }
+    return out;
+  }
+  const pos = alt.units.map(u => {
+    const out = [];
+    for (let k = 0, end = row.w.length - u.length; k <= end; k++) if (u.every((test, j) => test(row.w[k + j]))) out.push(k);
+    return out;
+  });
+  return nearSpans(pos, alt.units.map(u => u.length), w);
+}
+/* Adds the English hits to `matches` ({ p, a, b, en: true }, a and b token indexes into the English);
+   returns what the summary needs to say about the English, or null when English is off. */
+function enSearch(q, w, coAlts, matches) {
+  if (!S.en) return null;
+  const ix = enIndex();
+  if (!ix) return null;
+  const alts = parseEnQuery(q);
+  let n = 0;
+  for (const row of ix.rows) {
+    const p = P[row.p];
+    if (S.off.has(TEXTS[p.t].key)) continue;
+    let spans = [];
+    for (const alt of alts) { const s = enAltSpans(row, alt, w); if (s.length) spans = spans.concat(s); }
+    if (!spans.length) continue;
+    if (coAlts && (S.cm === 'with') !== coAlts.some(alt => altSpans(p, alt, w).length > 0)) continue;
+    dedupe(spans).forEach(([a, b]) => { matches.push({ p: p.i, a, b, en: true }); n++; });
+  }
+  return { n, pending: ix.pending, texts: ix.texts, style: (PORTAL_TR_STYLES.find(x => x.key === S.en) || PORTAL_TR_STYLES[0]).label };
 }
 
 function surfaceOf(p, a, b) {
@@ -1380,10 +1498,11 @@ function summarise(R) {
     const p = P[m.p];
     const bt = byText.get(p.t) || { n: 0, ps: new Set() };
     bt.n++; bt.ps.add(m.p); byText.set(p.t, bt);
-    const surface = surfaceOf(p, m.a, m.b);
-    const key = S.merge ? normKey(p, m.a, m.b) : surface;
+    const row = m.en && EN_IX && EN_IX.byP.get(m.p);
+    const surface = m.en ? row.text.slice(row.ts[m.a], row.te[m.b]).replace(/\s+/g, ' ').toLowerCase() : surfaceOf(p, m.a, m.b);
+    const key = m.en ? 'en:' + surface : S.merge ? normKey(p, m.a, m.b) : surface;
     let L = locs.get(key);
-    if (!L) { L = { key, n: 0, byText: new Map(), surfaces: new Map() }; locs.set(key, L); }
+    if (!L) { L = { key, n: 0, byText: new Map(), surfaces: new Map(), en: !!m.en }; locs.set(key, L); }
     L.n++;
     L.byText.set(p.t, (L.byText.get(p.t) || 0) + 1);
     L.surfaces.set(surface, (L.surfaces.get(surface) || 0) + 1);
@@ -1473,6 +1592,7 @@ function updateOptSum() {
   if (S.cm && S.co.trim()) bits.push((S.cm === 'with' ? 'also mentioning ' : 'not mentioning ') + S.co.trim());
   if (!S.merge) bits.push('spellings kept apart');
   bits.push(S.off.size ? (TEXTS.length - S.off.size) + ' of ' + TEXTS.length + ' texts' : 'all ' + TEXTS.length + ' texts');
+  if (enAsked()) bits.push('in the English');
   $('optsum').textContent = bits.join(' · ');
 }
 
@@ -1496,7 +1616,9 @@ function renderResults() {
     '<div class="summary"><b>' + R.matches.length.toLocaleString('en') + '</b> occurrence' + (R.matches.length === 1 ? '' : 's') +
     ' in <b>' + nPass.toLocaleString('en') + '</b> passage' + (nPass === 1 ? '' : 's') + ' · ' + nTexts + ' of ' + shown.length + ' texts';
   if (S.cm && S.co.trim()) h += ' · only passages that ' + (S.cm === 'with' ? 'also mention' : 'do not mention') + ' <i>' + esc(S.co) + '</i>';
+  if (R.en) h += ' · <span class="ensum" title="Searched in the English of every passage that has one (' + esc(R.en.style) + '); each hit is listed under its German passage. Machine translation: check it against the German.">in the English translation, ' + esc(R.en.style) + '</span>';
   h += '</div>';
+  if (R.en && R.en.pending) h += '<div class="note small">The English of ' + R.en.pending + ' text' + (R.en.pending === 1 ? ' is' : 's are') + ' still loading; the results will fill in.</div>';
   if (R.bad.length) h += '<div class="warn small">Not a regular expression the browser accepts: ' + R.bad.map(esc).join(', ') + '</div>';
   if (S.preset && S.preset.note) h += '<p class="note">' + esc(S.preset.note) + '</p>';
   if (S.preset && S.preset.who) h += '<div class="from">' + esc(S.preset.credit) + '</div>';
@@ -1504,7 +1626,7 @@ function renderResults() {
   const near = !S.preset && /^\s*[A-Za-zÄÖÜäöü]{1,3}\.?\s*(\d{3,4})\s*$/.exec(S.q);
   if (near && reflByNo(+near[1])) h += '<p class="note">Looking for <span class="lnk" data-askq="Refl. ' + near[1] + '">Refl. ' + near[1] + '</span>? A Reflexion goes by its number: <code>R ' + near[1] + '</code>, <code>Refl. ' + near[1] + '</code> or <code>' + near[1] + '</code> alone. As words, “' + esc(S.q.trim()) + '” is only its letters, since the search leaves numbers out.</p>';
   h += '</div>';
-  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">No passage has it. Try a * to widen a word, or allow more words between.</div>'; return; }
+  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">' + (R.en ? 'No passage’s English has it. To search the German, choose German beside the box.' : 'No passage has it.') + ' Try a * to widen a word, or allow more words between.</div>'; return; }
 
   const tab = S.tab === 'passages' ? 'passages' : 'overview';
   h += '<div class="tabs"><button type="button" data-tab="overview"' + (tab === 'overview' ? ' class="on"' : '') + '>Overview</button>' +
@@ -1517,7 +1639,7 @@ function renderResults() {
       '<table class="loc"><thead><tr><th>Phrasing</th><th>All</th>' + cols.map(t => '<th title="' + esc(t.title) + '">' + esc(t.short) + '</th>').join('') + '</tr></thead><tbody>';
     R.locs.slice(0, LIM).forEach(L => {
       const vars = L.surfaces.size > 1 ? '<span class="var" title="' + esc([...L.surfaces.keys()].join(' · ')) + '">+' + (L.surfaces.size - 1) + ' spelling' + (L.surfaces.size > 2 ? 's' : '') + '</span>' : '';
-      h += '<tr class="row' + (S.loc === L.key ? ' sel' : '') + '" data-loc="' + esc(L.key) + '"><td><span class="phr">' + esc(L.label) + '</span>' + vars + '</td><td class="tot">' + L.n + '</td>' +
+      h += '<tr class="row' + (S.loc === L.key ? ' sel' : '') + '" data-loc="' + esc(L.key) + '"><td><span class="phr"' + (L.en ? ' lang="en"' : '') + '>' + esc(L.label) + '</span>' + (L.en ? '<span class="entag" title="Found in the English translation">English</span>' : '') + vars + '</td><td class="tot">' + L.n + '</td>' +
         cols.map(t => { const n = L.byText.get(t.idx) || 0; return '<td class="' + (n ? '' : 'z') + '">' + (n || '·') + '</td>'; }).join('') + '</tr>';
     });
     h += '</tbody></table>';
@@ -1548,17 +1670,25 @@ function renderResults() {
 }
 
 function hitCard(p, ms) {
-  const focus = (S.loc && ms.find(m => m.loc === S.loc)) || ms[0];
+  const focus = (S.loc && ms.find(m => m.loc === S.loc)) || ms.find(m => !m.en) || ms[0];
   const T = TEXTS[p.t];
-  const a = Math.max(0, p.ts[focus.a] - 170), b = Math.min(p.text.length, p.te[focus.b] + 170);
-  const spans = ms.map(m => [p.ts[m.a], p.te[m.b], m.loc === S.loc]);
+  const em = ms.filter(m => m.en), row = em.length && EN_IX && EN_IX.byP.get(p.i);
+  let a, b;
+  if (!focus.en) { a = Math.max(0, p.ts[focus.a] - 170); b = Math.min(p.text.length, p.te[focus.b] + 170); }
+  else {                                  // found only in the English: roughly the same stretch of the German
+    const r = p.text.length / (row.text.length || 1);
+    a = Math.max(0, Math.floor(row.ts[focus.a] * r) - 220); b = Math.min(p.text.length, Math.ceil(row.te[focus.b] * r) + 220);
+    if (a > 0) { const i = p.text.lastIndexOf(' ', a); a = i > 0 ? i + 1 : 0; }
+    if (b < p.text.length) { const i = p.text.indexOf(' ', b); b = i > 0 ? i : p.text.length; }
+  }
+  const spans = ms.filter(m => !m.en).map(m => [p.ts[m.a], p.te[m.b], m.loc === S.loc]);
   const place = placeOf(p);
   const tag = place ? ' · ' + (place.book === 'baumgarten' ? 'Baumgarten' : 'Meier') + ' ' + paraLabel(place.paras) : '';
   const qen = S.preset && S.preset.who === 'feng' ? qianxunEnglish(p) : '';
   return '<div class="hit' + (S.sel === p.i ? ' sel' : '') + (S.seenFor === searchKey() && S.seen.has(p.i) ? ' seen' : '') + '" data-open="' + p.i + '"><div class="cite"><b>' + esc(p.cite) + '</b>' +
     (T.shape === 'refl' ? ' · ' + esc(p.dateLabel) : '') + esc(tag) + (ms.length > 1 ? ' · ' + ms.length + ' times' : '') + (qen ? '' : enButton(p, a, b)) + '</div>' +
     '<div class="kw" lang="de">' + (a > 0 ? '… ' : '') + marked(p.text, a, b, spans) + (b < p.text.length ? ' …' : '') + '</div>' +
-    (qen ? '' : enLine(p, a, b)) +
+    (qen ? '' : em.length && row ? enHitLine(p, row, em) : enLine(p, a, b)) +
     (qen ? '<div class="qen" lang="en"><span class="lab">ENGLISH · MACHINE TRANSLATION BY CLAUDE, FROM QIANXUN’S PRINCIPLE SEARCH, NOT REVIEWED</span>' + esc(clip(qen, 480)) + '</div>' : '') + '</div>';
 }
 
@@ -1568,6 +1698,17 @@ function paraLabel(paras) {
   const runs = [];
   paras.forEach(n => { const l = runs[runs.length - 1]; if (l && n === l[1] + 1) l[1] = n; else runs.push([n, n]); });
   return '§§ ' + runs.map(r => r[0] === r[1] ? r[0] : r[0] + '–' + r[1]).join(', ');
+}
+
+/* The English of a passage where the search found its words, the words marked, around the first of them. */
+function enHitLine(p, row, em) {
+  const f = (S.loc && em.find(m => m.loc === S.loc)) || em[0];
+  let a = Math.max(0, row.ts[f.a] - 200), b = Math.min(row.text.length, row.te[f.b] + 200);
+  if (a > 0) { const i = row.text.lastIndexOf(' ', a); a = i > 0 ? i + 1 : 0; }
+  if (b < row.text.length) { const i = row.text.indexOf(' ', b); b = i > 0 ? i : row.text.length; }
+  const spans = em.map(m => [row.ts[m.a], row.te[m.b], m.loc === S.loc]);
+  return '<div class="fen enhit" lang="en" data-for="' + p.i + '" title="Found in the English: machine translation for ' + esc(personName(trFor(TEXTS[p.t]).who)) + '’s Meier–Kant comparison. The German above is roughly the stretch it translates.">' +
+    '<span class="enfound">FOUND IN THE ENGLISH</span>' + (a > 0 ? '… ' : '') + marked(row.text, a, b, spans) + (b < row.text.length ? ' …' : '') + '</div>';
 }
 
 /* The text between a and b, escaped, with the given [start, end, strong] spans marked. */
@@ -1946,11 +2087,17 @@ function enLine(p, a, b) {
     t = (x > 0 ? '… ' : '') + t.slice(x, y) + (y < n ? ' …' : '');
   }
   const st = PORTAL_TR_STYLES.find(x => x.key === style) || PORTAL_TR_STYLES[0];
+  // in the full text, a passage the search found in the English shows its English with the words marked
+  const em = a == null && style === S.en && RESULT && RESULT.byPass && !S.d && (RESULT.byPass.get(p.i) || []).filter(m => m.en);
+  const row = em && em.length && EN_IX && EN_IX.byP.get(p.i);
+  if (row) return '<div class="fen enhit" lang="en" data-for="' + p.i + '" title="Found in the English: machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + '">' +
+    '<span class="enfound">FOUND IN THE ENGLISH</span>' + marked(row.text, 0, row.text.length, em.map(m => [row.ts[m.a], row.te[m.b], m.loc === S.loc])) + '</div>';
   return '<div class="fen" lang="en" data-for="' + p.i + '" title="Machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + (a != null && e.text.length > 520 ? '; the stretch shown is approximate' : '') + '">' + rich(t) + (e.part ? ' <span class="muted small">(the English runs past this passage)</span>' : '') + '</div>';
 }
 /* The switch, the bar under the header, and the translation files, kept in step with S.en. */
 function enSync() {
   const on = !!S.en, b = $('entog'), bar = $('enbar');
+  qlSync();
   if (!b) return;
   b.classList.toggle('on', on);
   b.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -1967,6 +2114,16 @@ function enSync() {
     '<span class="soon"><a href="' + MARIA_DEMO + '" target="_blank" rel="noopener" title="Coming soon: Maria’s sentence-by-sentence translation, across the whole portal">Maria’s translation, a preview ↗</a></span>';
 }
 function enApply() { enSync(); enRefresh(); }
+/* German | English beside the search box: shown only with English on; German unless the reader picks English. */
+function qlSync() {
+  const box = $('qlang');
+  if (!box) return;
+  box.hidden = !S.en;
+  const ql = enAsked() ? 'en' : 'de';
+  box.querySelectorAll('[data-ql]').forEach(x => { x.classList.toggle('on', x.dataset.ql === ql); x.setAttribute('aria-checked', x.dataset.ql === ql); });
+  $('q').placeholder = ql === 'en' ? 'An English word or phrase, e.g.  judgment  ·  "principle of contradiction"  ·  certain*'
+    : 'A word or phrase, e.g.  form* fals*  ·  a page, 24:892  ·  a note, Refl. 4086';
+}
 /* A small English button beside every passage that has a translation: it opens that passage's
    English under it, in place, without redrawing the page. */
 function enButton(p, a, b) {
@@ -2025,7 +2182,7 @@ function sec(key, title, value, count, body, credit, defOpen) {
 /* ── Going through the search results one by one ───────────────────────────
    The reading pane steps through the results in the order the Passages list shows them, and
    remembers which have been opened, for as long as the search stays the same. */
-const searchKey = () => [S.q, S.w, S.cm, S.co, S.merge, [...S.off].sort().join(','), S.loc || ''].join('|');
+const searchKey = () => [S.q, S.w, S.cm, S.co, S.merge, [...S.off].sort().join(','), S.loc || '', enAsked() ? 'en:' + S.en : 'de'].join('|');
 function resultOrder() {
   if (S.view !== 'ask' || S.d || !RESULT || !RESULT.byPass) return [];
   const out = [];
@@ -2184,7 +2341,7 @@ function renderStudyRail(p, T, headOnly) {
 /* The passage itself, its English, and everything that hangs on it. */
 function renderConnections(p, T) {
   let spans = [];
-  if (RESULT && RESULT.byPass && RESULT.byPass.has(p.i) && !S.d) spans = RESULT.byPass.get(p.i).map(m => [p.ts[m.a], p.te[m.b], m.loc === S.loc]);
+  if (RESULT && RESULT.byPass && RESULT.byPass.has(p.i) && !S.d) spans = RESULT.byPass.get(p.i).filter(m => !m.en).map(m => [p.ts[m.a], p.te[m.b], m.loc === S.loc]);
   if (S.quote) spans = spans.concat(quoteSpans(p.text, [S.quote]).map(z => [z[0], z[1], true]));
   const tr = trFor(T);
   let h = '<div class="pactions">' +
@@ -2806,7 +2963,7 @@ function ftBlock(st, k) {
   const p = P[k], T = TEXTS[p.t];
   if (isStudyText(T)) return studyBlock(st, k);
   let spans = [];
-  if (RESULT && RESULT.byPass && !S.d && RESULT.byPass.has(k)) spans = RESULT.byPass.get(k).map(m => [p.ts[m.a], p.te[m.b], false]);
+  if (RESULT && RESULT.byPass && !S.d && RESULT.byPass.has(k)) spans = RESULT.byPass.get(k).filter(m => !m.en).map(m => [p.ts[m.a], p.te[m.b], false]);
   if (k === st.focus && S.quote) spans = spans.concat(quoteSpans(p.text, [S.quote]).map(z => [z[0], z[1], true]));
   const h = headingOf(k);
   // A lecture's untitled opening (title page and contents, a line apiece) is drawn as one block
@@ -2892,7 +3049,7 @@ function studyHeads(k) {
 function studyBlock(st, k) {
   const p = P[k], T = TEXTS[p.t];
   const spans = [];
-  if (RESULT && RESULT.byPass && !S.d && RESULT.byPass.has(k)) RESULT.byPass.get(k).forEach(m => spans.push([p.ts[m.a], p.te[m.b], 'hit']));
+  if (RESULT && RESULT.byPass && !S.d && RESULT.byPass.has(k)) RESULT.byPass.get(k).forEach(m => { if (!m.en) spans.push([p.ts[m.a], p.te[m.b], 'hit']); });
   if (k === st.focus && S.quote) quoteSpans(p.text, [S.quote]).forEach(z => spans.push([z[0], z[1], 'on']));
   if (S.find && S.find.byPass.has(k)) S.find.byPass.get(k).forEach(j => { const f = S.find.hits[j]; spans.push([f[1], f[2], j === S.find.pos ? 'find cur' : 'find']); });
   let part = '';
@@ -3708,6 +3865,7 @@ function writeHash() {
   if (S.sel != null && P[S.sel]) { u.set('p', TEXTS[P[S.sel].t].key + ':' + P[S.sel].id); if (S.quote) u.set('quote', S.quote); }
   if (!S.en) u.set('en', '0');                     // English is on unless a link says otherwise
   else if (S.en !== EN_DEFAULT) u.set('en', S.en);
+  if (enAsked() && S.q && !S.d) u.set('ql', 'en');
   if (S.q && !S.d && S.tab === 'passages') u.set('tab', 'passages');
   if (S.view === 'read' && S.readKey) { u.set('read', S.readKey); if (S.readAt != null && P[S.readAt]) u.set('at', P[S.readAt].id); }
   if (S.sel != null && S.rtab !== 'text') u.set('rt', S.rtab);
@@ -3733,6 +3891,7 @@ function readHash() {
   S.loc = u.get('loc') || null;
   S.quote = u.get('quote') || null;
   S.en = u.get('en') === '0' ? '' : PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : EN_DEFAULT;
+  S.ql = u.get('ql') === 'en' ? 'en' : 'de';
   enSync();
   S.tab = u.get('tab') === 'passages' ? 'passages' : 'overview';
   S.bookOpen = u.get('tb') === '1';
@@ -3804,6 +3963,17 @@ function openPassage(i, quote, rtab) {
 }
 
 function wire() {
+  $('qlang').addEventListener('click', e => {
+    const x = e.target.closest('[data-ql]');
+    if (!x || x.dataset.ql === S.ql) return;
+    S.ql = x.dataset.ql;
+    qlSync();
+    S.loc = null;
+    if (S.q.trim() && !S.d) { renderResults(); pushTrail(); }
+    writeHash();
+    updateOptSum();
+    $('q').focus();
+  });
   $('ask').addEventListener('submit', e => {
     e.preventDefault();
     // An Academy page goes to that page. Without "AA" in front, a volume the portal has none of
