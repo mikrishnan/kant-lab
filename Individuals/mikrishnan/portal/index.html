@@ -406,6 +406,18 @@
   mark.on { background: var(--hl-strong); }
   .more { margin: 0.5rem 0 0 0.7rem; }
   .filterbar { background: var(--hl); border-radius: 6px; padding: 0.25rem 0.7rem; margin-bottom: 0.6rem; font-size: 0.92rem; display: inline-block; }
+  /* With All forms: each word's forms, found by rule, for the reader to untick */
+  .fstrip { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent-light); border-radius: 6px; padding: 0.4rem 0.7rem 0.5rem; margin: 0.5rem 0 0.2rem; }
+  .fstrip + .fstrip { margin-top: 0.3rem; }
+  .fstrip .fs-head { font-size: 0.92rem; margin-bottom: 0.3rem; }
+  .fstrip .fs-how { color: var(--faded); font-style: italic; }
+  .fchips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .fchip { font: inherit; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem; border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 0.05rem 0.6rem 0.05rem 0.45rem; cursor: pointer; color: var(--ink); }
+  .fchip::before { content: ''; width: 0.7rem; height: 0.7rem; border: 1px solid var(--accent-light); border-radius: 2px; background: var(--accent-light); box-shadow: inset 0 0 0 2px var(--paper); }
+  .fchip.off { color: var(--faded); text-decoration: line-through; }
+  .fchip.off::before { background: transparent; box-shadow: none; }
+  .fchip .n { color: var(--faded); font-size: 0.8rem; }
+  .fchip:hover { border-color: var(--accent-light); }
   .empty { color: var(--faded); font-style: italic; padding: 0.6rem 0; }
   .kchips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.6rem 0 1rem; }
   .kchip { border: 1px solid var(--line); background: var(--card); border-radius: 999px; padding: 0.1rem 0.75rem; cursor: pointer; font-size: 0.93rem; }
@@ -697,6 +709,7 @@
           <button type="submit" class="btn solid">Ask</button>
         </div>
         <div class="optline">
+          <span id="qforms" class="qlang" role="radiogroup" aria-label="Word forms" title="Each word as typed, or its other declensions and conjugations too, found by rule"><button type="button" role="radio" data-fm="exact" class="on" aria-checked="true">Exact form</button><button type="button" role="radio" data-fm="all" aria-checked="false">All forms</button></span>
           <button type="button" class="linkish" id="opt-toggle">Options</button>
           <span id="optsum"></span>
           <button type="button" class="linkish" id="help-toggle">How to ask</button>
@@ -710,10 +723,19 @@
         </div>
         <div id="help" hidden>
           <p><code>falsch</code> finds the word in every spelling the texts use: <i>Urtheil</i> and <i>Urteil</i>,
-          <i>Wiederspruch</i> and <i>Widerspruch</i>, <i>Principium</i> and <i>Prinzip</i>, <i>Saz</i> and <i>Satz</i>, are one word to the search.
+          <i>Wiederspruch</i> and <i>Widerspruch</i>, <i>Principium</i> and <i>Prinzip</i>, <i>Saz</i> and <i>Satz</i>, <i>iudicium</i> and <i>judicium</i>, are one word to the search.
           <code>fals*</code> finds every word that begins so. Several words, <code>form* fals*</code>, find places where they stand
           near each other, in any order. Quotation marks, <code>"der form nach"</code>, keep words together and in order.
           <code>OR</code> joins alternatives. A regular expression between slashes, <code>/formali?ter/</code>, is matched against the text as printed.</p>
+          <p>A word finds that form of it and no other: <code>satz</code> does not find <i>Sätze</i>, nor <code>ens</code> <i>entis</i>. <b>All forms</b>, under the box,
+          finds its other declensions and conjugations as well: <code>satz</code> then finds <i>Sätze</i>, <i>Sätzen</i> and <i>Satzes</i>, <code>ens</code> <i>entis</i> and <i>entia</i>,
+          <code>ratio</code> <i>rationis</i>. A German word typed with a capital, <code>Urtheil</code>, is taken for a noun, so it leaves out <i>urtheilt</i>. The forms are found by rule,
+          from the word’s endings, not from a dictionary, and listed above the results with their counts: untick any that does not belong. The rule cannot see a
+          strong verb’s changed vowel or an irregular form, so <i>geschlossen</i> and <i>est</i> need adding with <code>OR</code>. With All forms on, <code>=Sätze</code> keeps a word
+          to its exact form, a word with a <code>*</code> stays as typed, and so do little words like <i>des</i>, <i>der</i> and <i>et</i>, or a phrase would match almost anything.
+          With <b>Exact form</b>, a <code>*</code> adds any ending, so <code>urtheil*</code> finds <i>Urtheile</i>, <i>Urtheilen</i> and <i>Urtheils</i>, though <i>Urtheilskraft</i> too,
+          and <code>OR</code> adds a form the word changes into: <code>satz* OR sätz*</code>, <code>schließ* OR geschloss*</code>, <code>ens OR ente OR enti*</code>.
+          <b>Overview</b> lists every phrasing found, so you can see what a search brought in.</p>
           <p>With <b>English</b> on in the header, a choice beside the box, <b>German | English</b>, says which the question is put to. German, the default, is the search
           described above. English searches the English translation of every passage that has one, so an English word, <code>judgment</code>,
           <code>"principle of contradiction"</code>, <code>certain*</code>, finds the German passages it translates. An English word finds its plain plural too.
@@ -878,6 +900,8 @@ const S = {                       // what the user is looking at; mirrored in th
   secOpen: new Set(), secClosed: new Set(),   // reading-pane sections the reader opened or closed
   en: '',                         // the English shown beside the German: a PORTAL_TR_STYLES key, or '' for none
   ql: 'de',                       // the language a question is put in: 'de' the texts, or 'en' their English (only with English on)
+  fm: 'exact',                    // word forms: 'exact', each word as typed, or 'all', its other forms too
+  fx: new Set(),                  // with All forms, the forms the reader unticked (normalised), for the question asked
   enStyle: 'guyer',               // the style a single passage's English button opens in
   enOpen: new Set(),              // passages whose English was opened one at a time
   seen: new Set(), seenFor: null, // the search results already opened, and the search they belong to
@@ -967,7 +991,9 @@ async function boot() {
 
 /* Applied alike to the texts and to what the user types, so it only ever widens a match.
    Urtheil = Urteil, Wiederspruch = Widerspruch, Principium = Prinzipium, Saz = Satz,
-   Erkenntniß = Erkenntnis, seyn = sein, qvoad = quoad, Categorie = Kategorie. */
+   Erkenntniß = Erkenntnis, seyn = sein, qvoad = quoad, Categorie = Kategorie, iudicium = judicium.
+   An ie that opens a word stays: there it is nearly always an i written for j (iede, iene, iemand),
+   and reducing it would make iede (jede) Idee and iedem (jedem) idem. */
 const NORM_CACHE = new Map();
 function normWord(lower) {
   const c = NORM_CACHE.get(lower);
@@ -978,7 +1004,7 @@ function normWord(lower) {
     .replace(/ſ/g, 's').replace(/ß/g, 'ss').replace(/æ/g, 'ae').replace(/œ/g, 'oe')
     .replace(/th/g, 't').replace(/qv/g, 'qu')
     .replace(/ch/g, '\u0001').replace(/ck/g, 'k').replace(/c(?=[eiy])/g, 'z').replace(/c/g, 'k').replace(/\u0001/g, 'ch')
-    .replace(/ey/g, 'ei').replace(/y/g, 'i').replace(/ie/g, 'i').replace(/dt/g, 't').replace(/tz/g, 'z')
+    .replace(/ey/g, 'ei').replace(/y/g, 'i').replace(/j/g, 'i').replace(/(?!^)ie/g, 'i').replace(/dt/g, 't').replace(/tz/g, 'z')
     .replace(/(.)\1+/g, '$1');
   NORM_CACHE.set(lower, n);
   return n;
@@ -1256,7 +1282,11 @@ function termMask(word) {
   const pieces = lower.split('*');
   const src = '^' + pieces.map((piece, k) => {
     if (!piece) return '';
-    let n = normWord(piece).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    let n = normWord(piece);
+    // A piece after a * stands inside a word, where ie is reduced, so *ieden finds verschieden. A j there
+    // is an i like any other: *jenige finds dasjenige, and einige with it.
+    if (k > 0) n = n.replace(/^ie/, 'i');
+    n = n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     // A stem cut off at c could go on as k, z or ch.
     if (k < pieces.length - 1 && /c$/.test(piece)) n = n.replace(/k$/, '(?:k|z|ch)');
     return n;
@@ -1270,11 +1300,151 @@ function termMask(word) {
   return mask;
 }
 
+/* ── WORD FORMS: what All forms beside the box adds to a word ─────────────────
+   With All forms on, a word finds its other declensions and conjugations as well: Satz finds Sätze,
+   ens entis, ratio rationis. The forms are found by rule, not from a dictionary. A word that ends as
+   Latin does (-us, -um, -io, -as, -x …) and has nothing German about it is taken for Latin, any other
+   for German. Its stem, with an ending of its own language added, must be a word in the texts; an
+   umlaut may come in only with the endings that bring one (Sätze, Gründe, Irrthümer), and a German
+   word typed with a capital is a noun, which keeps urtheilt out of Urtheil. Latin's changing stems
+   follow the declension (ens entis, lex legis, ratio rationis, veritas veritatis, genus generis,
+   ordo ordinis, nomen nominis). A form counts only if most of its occurrences, printed, end in that
+   ending on that stem, which keeps genannt out of genus and idem out of Idee. What a rule cannot see,
+   a strong verb's changed vowel (schloß, geschlossen) or an irregular form (est, fuit), is not found:
+   a table of forms made with a lemmatiser would take formsOf's place. The forms are listed above
+   the results, each with its count, for the reader to untick any that does not belong. */
+const FORM_END = {
+  deNoun: 'e en em er ern es s n ens'.split(' '),
+  deVerb: 'st est t et te ten ter tes tem tet test end ende enden ender endes endem'.split(' '),
+  deMore: 'ere eren erer eres erem ste sten ster stes este esten'.split(' '),
+  deStrip: 'e en n s es er em t et st te ten'.split(' '),
+  la: ('a ae am arum as i o um orum os is us e em es ibus ium ia u ua uum ei ebus erum ior ius ioris iori iorem iore iores iorum ioribus iora iter ' +
+    'at amus atis ant are ari atur antur avit atum atus ata ati atae ato atam ando andi andum andus anda ans antis ante antem antes antium antibus antia ' +
+    'et ent ere eri etur entur emus etis ens entis ente entem entes entium entibus entia endo endi endum endus enda it unt imus itis itur untur ire iri itum itus ita').split(' '),
+  laStrip: 'a ae am as i o um us is e em es ia ium ibus orum arum'.split(' '),
+  part: 't te ten ter tes tem et ete eten en ene enen ener enes enem'.split(' '),
+};
+const UMLAUT_OK = new Set(['', 'e', 'en', 'er', 'ern', ...FORM_END.deMore]);
+const LATIN_END = /(?:us|um|ae|a|is|io|as|x|ns|or|es|ia|ium|i|o|ibus|orum|arum|omen|imen|umen)$/;
+const GERMAN_MARK = /[äöüßkwz]|sch|ch|thum$|nis$/;
+const foldForm = n => n.replace(/ae|oe|ue/g, m => m[0]).replace(/(.)\1+/g, '$1');
+// a stem and an ending joined as the spelling rules would have joined them
+const joinForm = (b, e) => (b + e).replace(/(?!^)ie/g, 'i').replace(/dt/g, 't').replace(/tz/g, 'z').replace(/(.)\1+/g, '$1');
+
+/* Built the first time All forms is used: every form's count in each text, its printed spellings
+   with their counts, and the forms that are one once an umlaut is set aside. */
+let FORMS_IX = null;
+function formsIndex() {
+  if (FORMS_IX && FORMS_IX.n === VOCAB.length) return FORMS_IX;
+  const n = VOCAB.length, nT = TEXTS.length, byText = new Uint32Array(n * nT), spell = new Map();
+  for (const p of P) {
+    for (let k = 0; k < p.ids.length; k++) {
+      byText[p.ids[k] * nT + p.t]++;
+      const s = p.text.slice(p.ts[k], p.te[k]).toLowerCase();
+      spell.set(s, (spell.get(s) || 0) + 1);
+    }
+  }
+  const spells = Array.from({ length: n }, () => []);
+  spell.forEach((c, s) => { const v = LOWER_VID.get(s); if (v != null) spells[v].push([s, c]); });
+  spells.forEach(a => a.sort((x, y) => y[1] - x[1]));
+  const fold = new Map();
+  for (let v = 0; v < n; v++) { const f = foldForm(VOCAB[v]); const a = fold.get(f); if (a) a.push(v); else fold.set(f, [v]); }
+  const light = new Set([...(LAYERS.stopwords || []), ...CMP_LIGHT].map(w => normWord(String(w).toLowerCase())));
+  FORMS_IX = { n, nT, byText, spells, fold, light, cache: new Map() };
+  return FORMS_IX;
+}
+// A form's occurrences in the texts being searched.
+function formCount(v) {
+  const X = formsIndex();
+  let c = 0;
+  TEXTS.forEach(t => { if (!S.off.has(t.key)) c += X.byText[v * X.nT + t.idx]; });
+  return c;
+}
+// Little words stay as typed with All forms on, or "satz des widerspruchs" would match almost anything.
+const lightWord = w => w.length < 3 || formsIndex().light.has(normWord(w.toLowerCase()));
+
+function formsOf(typed) {
+  const X = formsIndex();
+  if (X.cache.has(typed)) return X.cache.get(typed);
+  const t = typed.toLowerCase(), la = LATIN_END.test(t) && !GERMAN_MARK.test(t), noun = !la && /^\p{Lu}/u.test(typed);
+  const q = normWord(t), f = foldForm(q);
+  const ends = la ? FORM_END.la : FORM_END.deNoun.concat(noun ? [] : FORM_END.deVerb, FORM_END.deMore);
+  const tries = [];                               // [the form as joined, its stem, its ending, how]
+  const bases = new Set([f]), cut = new Set();
+  for (const e of la ? FORM_END.laStrip : FORM_END.deStrip) {
+    if (!t.endsWith(e) || t.length - e.length < 3) continue;
+    const b = foldForm(normWord(t.slice(0, -e.length)));
+    if (b.length >= 3 && /[aeiou]/.test(b)) { bases.add(b); cut.add(b); }
+  }
+  if (la) {
+    const more = [];
+    if (/ns$/.test(f)) more.push(f.slice(0, -1) + 't');                                 // ens, entis
+    if (/x$/.test(f)) more.push(f.slice(0, -1) + 'g', f.slice(0, -1) + 'k');            // lex, legis; vox, vocis
+    if (/io$/.test(f)) more.push(f + 'n');                                              // ratio, rationis
+    if (/as$/.test(f) && f.length > 4) more.push(f.slice(0, -1) + 't');                 // veritas, veritatis
+    if (/us$/.test(f) && f.length >= 4) more.push(f.slice(0, -2) + 'or', f.slice(0, -2) + 'er');   // corpus, corporis; genus, generis
+    if (/men$/.test(f)) more.push(f.slice(0, -2) + 'in');                               // nomen, nominis
+    if (/[^i]o$/.test(f) && f.length >= 4) more.push(f.slice(0, -1) + 'in');            // ordo, ordinis
+    more.filter(b => b.length >= 3).forEach(b => bases.add(b));
+  } else cut.forEach(b => tries.push([b, b, '', 'end']));     // Sätze finds Satz
+  tries.push([q, q, '', 'self']);
+  for (const b of bases) {
+    // a stem cut off at c goes on as z before e and i, and as k before a, o and u
+    const vs = [b];
+    if (/k$/.test(b)) vs.push(b.slice(0, -1) + 'z');
+    if (/z$/.test(b)) vs.push(b.slice(0, -1) + 'k');
+    vs.forEach((v, i) => ends.forEach(e => {
+      if (i && /z$/.test(v) && !/^[ei]/.test(e)) return;
+      if (i && /k$/.test(v) && !/^[aou]/.test(e)) return;
+      tries.push([joinForm(v, e), v, e, 'end']);
+    }));
+    if (!la && !noun) {
+      // a participle in ge-…-en only where there is none in ge-…-t: gegeben, but not Gesetzen beside gesetzt
+      const weak = X.fold.has(foldForm(joinForm('ge' + b, 't')));
+      FORM_END.part.forEach(e => { if (!(weak && /^en/.test(e))) tries.push([joinForm('ge' + b, e), 'ge' + b, e, 'ge']); });
+    }
+  }
+  const out = [];
+  for (const [s, v, e, how] of tries) {
+    for (const n of X.fold.get(foldForm(s)) || []) {
+      if (out.includes(n)) continue;
+      const form = VOCAB[n];
+      if (how === 'self') { if (form === q || foldForm(form) === f) out.push(n); continue; }
+      if (form !== s && (how === 'ge' || !UMLAUT_OK.has(e))) continue;
+      let good = 0, all = 0;
+      for (const [sp, c] of X.spells[n]) {
+        all += c;
+        let x = sp.replace(/ſ/g, 's'), stem = v;
+        if (how === 'ge') { if (!x.startsWith('ge')) continue; x = x.slice(2); stem = v.slice(2); }
+        if (e && !x.endsWith(e)) continue;
+        const rest = e ? x.slice(0, -e.length) : x;
+        if (rest && foldForm(normWord(rest)) === foldForm(stem)) good += c;
+      }
+      if (good * 2 >= all) out.push(n);
+    }
+  }
+  const g = { word: typed, la, vids: out };
+  X.cache.set(typed, g);
+  return g;
+}
+/* A word's mask in the question: with All forms on, the forms of formsOf less those the reader unticked;
+   `=Sätze` keeps a word to its exact form whatever the switch says. `forms` collects the groups shown. */
+function wordMask(w, forms) {
+  if (w[0] === '=') return termMask(w.slice(1));
+  if (!forms || w.includes('*') || lightWord(w)) return termMask(w);
+  const g = formsOf(w);
+  if (!forms.some(x => x.word === w)) forms.push(g);
+  const mask = new Uint8Array(VOCAB.length);
+  g.vids.forEach(v => { if (!S.fx.has(VOCAB[v])) mask[v] = 1; });
+  return mask;
+}
+
 /* query  := alt ( OR alt )*
    alt    := unit+            all units within `w` words of one another, any order
-   unit   := word | "phrase"  a word may carry * ; a phrase keeps its words together, in order
-   or an alt is a /regular expression/ matched against the text as printed. */
-function parseQuery(src) {
+   unit   := word | "phrase"  a word may carry * , or = for its exact form; a phrase keeps its words together, in order
+   or an alt is a /regular expression/ matched against the text as printed.
+   `forms`, an array, turns All forms on and collects the words' groups; without it every word is as typed. */
+function parseQuery(src, forms) {
   const alts = [];
   let cur = [];
   const re = /\/((?:\\.|[^\\\/])+)\/(?=\s|$)|"([^"]+)"|(\S+)/g;
@@ -1287,10 +1457,11 @@ function parseQuery(src) {
       continue;
     }
     if (m[3] === 'OR' || m[3] === '|') { close(); continue; }
-    const words = (m[2] != null ? m[2] : m[3]).match(/[\p{L}\p{M}*]+/gu) || [];
+    const words = (m[2] != null ? m[2] : m[3]).match(/=?[\p{L}\p{M}*]+/gu) || [];
     if (!words.length) continue;
-    if (m[2] != null || words.length > 1) cur.push({ masks: words.map(termMask), label: words.join(' ') });
-    else cur.push({ masks: [termMask(words[0])], label: words[0] });
+    const label = words.map(w => w.replace(/^=/, '')).join(' ');
+    if (m[2] != null || words.length > 1) cur.push({ masks: words.map(w => wordMask(w, forms)), label });
+    else cur.push({ masks: [wordMask(words[0], forms)], label });
   }
   close();
   return alts;
@@ -1362,10 +1533,12 @@ function dedupe(spans) {
 }
 
 function runQuery() {
-  const alts = parseQuery(S.q);
+  // All forms is for the German and Latin; a question put in English keeps its own plurals
+  const forms = formsAsked() ? [] : null;
+  const alts = parseQuery(S.q, forms);
   if (!alts.length) return null;
   const bad = alts.filter(a => a.bad).map(a => a.bad);
-  const coAlts = S.cm && S.co.trim() ? parseQuery(S.co) : null;
+  const coAlts = S.cm && S.co.trim() ? parseQuery(S.co, forms && []) : null;
   const w = Math.max(0, +S.w || 0);
   const matches = [];
   let coWith = 0, coWithout = 0;
@@ -1383,11 +1556,13 @@ function runQuery() {
     dedupe(spans).forEach(([a, b]) => matches.push({ p: p.i, a, b }));
   }
   const en = inEnglish ? enSearch(S.q, w, coAlts, matches) : null;
-  return summarise({ alts, bad, matches, coWith, coWithout, en });
+  return summarise({ alts, bad, matches, coWith, coWithout, en, forms });
 }
 /* Whether the question is put to the English: only with English on, and only when the reader chose
    English beside the box. Otherwise the search is the German search, untouched. */
 const enAsked = () => !!S.en && S.ql === 'en';
+// Whether a word finds its other forms too: All forms chosen, and the question put to the German.
+const formsAsked = () => S.fm === 'all' && !enAsked();
 
 /* ── The English in the search ─────────────────────────────────────────────
    With English on and English chosen beside the box, a question is put to the English of every passage
@@ -1577,6 +1752,7 @@ function renderTextChips() {
 
 function syncForm() {
   $('q').value = S.q;
+  fmSync();
   $('w').value = S.w;
   $('co').value = S.co;
   $('cm').value = S.cm;
@@ -1594,6 +1770,27 @@ function updateOptSum() {
   bits.push(S.off.size ? (TEXTS.length - S.off.size) + ' of ' + TEXTS.length + ' texts' : 'all ' + TEXTS.length + ' texts');
   if (enAsked()) bits.push('in the English');
   $('optsum').textContent = bits.join(' · ');
+}
+
+/* With All forms, one strip per word above the results: the forms it was taken to have, most frequent
+   first, each with its count in the texts searched and a tick to take it out. The forms are the rule's,
+   and the strip says so. */
+function formsStrip(g) {
+  const X = formsIndex();
+  const rows = g.vids.map(v => ({ v, n: formCount(v), label: X.spells[v].length ? X.spells[v][0][0] : VOCAB[v] }))
+    .sort((a, b) => b.n - a.n || a.label.localeCompare(b.label));
+  const on = rows.filter(r => !S.fx.has(VOCAB[r.v]));
+  const total = on.reduce((a, r) => a + r.n, 0);
+  const how = 'found by rule, from the word’s endings' + (g.la ? ', as Latin' : ', as German') + ', not from a dictionary';
+  let h = '<div class="fstrip"><div class="fs-head"><b>All forms of <i>' + esc(g.word) + '</i></b> · ' +
+    (rows.length > 1 ? on.length + ' of ' + rows.length + ' forms · ' + total.toLocaleString('en') + ' times · <span class="fs-how">' + how + ': untick any that does not belong</span>'
+      : '<span class="fs-how">no other form ' + how + '. A strong verb’s changed vowel (geschlossen) or an irregular form (est) needs adding with OR</span>') + '</div>';
+  if (rows.length > 1) h += '<div class="fchips">' + rows.map(r => {
+    const off = S.fx.has(VOCAB[r.v]);
+    return '<button type="button" class="fchip' + (off ? ' off' : '') + '" data-fx="' + esc(VOCAB[r.v]) + '" aria-pressed="' + !off + '" title="' + esc(X.spells[r.v].map(s => s[0]).join(' · ')) + '">' +
+      esc(r.label) + ' <span class="n">' + r.n.toLocaleString('en') + '</span></button>';
+  }).join('') + '</div>';
+  return h + '</div>';
 }
 
 function renderResults() {
@@ -1626,6 +1823,7 @@ function renderResults() {
   const near = !S.preset && /^\s*[A-Za-zÄÖÜäöü]{1,3}\.?\s*(\d{3,4})\s*$/.exec(S.q);
   if (near && reflByNo(+near[1])) h += '<p class="note">Looking for <span class="lnk" data-askq="Refl. ' + near[1] + '">Refl. ' + near[1] + '</span>? A Reflexion goes by its number: <code>R ' + near[1] + '</code>, <code>Refl. ' + near[1] + '</code> or <code>' + near[1] + '</code> alone. As words, “' + esc(S.q.trim()) + '” is only its letters, since the search leaves numbers out.</p>';
   h += '</div>';
+  if (R.forms) h += R.forms.map(formsStrip).join('');
   if (!R.matches.length) { box.innerHTML = h + '<div class="empty">' + (R.en ? 'No passage’s English has it. To search the German, choose German beside the box.' : 'No passage has it.') + ' Try a * to widen a word, or allow more words between.</div>'; return; }
 
   const tab = S.tab === 'passages' ? 'passages' : 'overview';
@@ -2123,6 +2321,14 @@ function qlSync() {
   box.querySelectorAll('[data-ql]').forEach(x => { x.classList.toggle('on', x.dataset.ql === ql); x.setAttribute('aria-checked', x.dataset.ql === ql); });
   $('q').placeholder = ql === 'en' ? 'An English word or phrase, e.g.  judgment  ·  "principle of contradiction"  ·  certain*'
     : 'A word or phrase, e.g.  form* fals*  ·  a page, 24:892  ·  a note, Refl. 4086';
+  fmSync();
+}
+/* Exact form | All forms under the box: hidden while the question is put to the English, which has its own plurals. */
+function fmSync() {
+  const box = $('qforms');
+  if (!box) return;
+  box.hidden = enAsked();
+  box.querySelectorAll('[data-fm]').forEach(x => { x.classList.toggle('on', x.dataset.fm === S.fm); x.setAttribute('aria-checked', x.dataset.fm === S.fm); });
 }
 /* A small English button beside every passage that has a translation: it opens that passage's
    English under it, in place, without redrawing the page. */
@@ -2182,7 +2388,7 @@ function sec(key, title, value, count, body, credit, defOpen) {
 /* ── Going through the search results one by one ───────────────────────────
    The reading pane steps through the results in the order the Passages list shows them, and
    remembers which have been opened, for as long as the search stays the same. */
-const searchKey = () => [S.q, S.w, S.cm, S.co, S.merge, [...S.off].sort().join(','), S.loc || '', enAsked() ? 'en:' + S.en : 'de'].join('|');
+const searchKey = () => [S.q, S.w, S.cm, S.co, S.merge, [...S.off].sort().join(','), S.loc || '', enAsked() ? 'en:' + S.en : 'de', formsAsked() ? 'all:' + [...S.fx].sort().join(',') : ''].join('|');
 function resultOrder() {
   if (S.view !== 'ask' || S.d || !RESULT || !RESULT.byPass) return [];
   const out = [];
@@ -3743,13 +3949,13 @@ function closeTool() {
    ════════════════════════════════════════════════════════════════════════ */
 
 function snapshot() {
-  return { q: S.q, w: S.w, co: S.co, cm: S.cm, merge: S.merge, off: [...S.off], loc: S.loc, d: S.d, sel: S.sel, quote: S.quote, tab: S.tab,
+  return { q: S.q, w: S.w, co: S.co, cm: S.cm, merge: S.merge, fm: S.fm, fx: [...S.fx], off: [...S.off], loc: S.loc, d: S.d, sel: S.sel, quote: S.quote, tab: S.tab,
     view: S.view === 'read' ? 'read' : 'ask', readKey: S.view === 'read' ? S.readKey : null, readAt: S.view === 'read' ? S.readAt : null, rtab: S.rtab,
     cmp: S.cmp ? Object.assign({}, S.cmp, { msg: '', pick: null }) : null,
     preset: S.preset ? S.preset.key || null : null, presetObj: S.preset };
 }
 function restore(snap) {
-  Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, tab: snap.tab || 'overview',
+  Object.assign(S, { q: snap.q, w: snap.w, co: snap.co, cm: snap.cm, merge: snap.merge, fm: snap.fm || 'exact', fx: new Set(snap.fx || []), off: new Set(snap.off), loc: snap.loc, d: snap.d, sel: snap.sel, quote: snap.quote, tab: snap.tab || 'overview',
     view: snap.view || 'ask', readKey: snap.readKey || null, readAt: snap.readAt, rtab: snap.rtab || 'text', preset: snap.presetObj || null,
     cmp: snap.cmp ? Object.assign({}, snap.cmp) : null, miss: null });
 }
@@ -3859,6 +4065,7 @@ function writeHash() {
     u.set('w', S.w);
     if (S.cm && S.co) { u.set('cm', S.cm); u.set('co', S.co); }
     if (!S.merge) u.set('merge', '0');
+    if (S.fm === 'all') { u.set('fm', 'all'); if (S.fx.size) u.set('fx', [...S.fx].join(',')); }
   }
   if (S.off.size) u.set('off', [...S.off].join(','));
   if (S.loc) u.set('loc', S.loc);
@@ -3885,6 +4092,8 @@ function readHash() {
   S.cm = u.get('cm') || '';
   S.co = u.get('co') || '';
   S.merge = u.get('merge') !== '0';
+  S.fm = u.get('fm') === 'all' ? 'all' : 'exact';
+  S.fx = new Set((u.get('fx') || '').split(',').filter(Boolean));
   S.d = u.get('d') || null;
   S.jtab = u.get('jt') === 'nik' ? 'nik' : 'aidan';
   S.off = new Set((u.get('off') || '').split(',').filter(Boolean));
@@ -3938,6 +4147,8 @@ function readHash() {
    ════════════════════════════════════════════════════════════════════════ */
 
 function ask(opts) {
+  // a new question starts with every form ticked
+  if (opts && opts.q != null && opts.q !== S.q && !opts.fx) S.fx = new Set();
   Object.assign(S, { d: null, loc: null, tab: 'overview', expand: new Set(), miss: null }, opts);
   showView('ask');
   syncForm();
@@ -3963,6 +4174,16 @@ function openPassage(i, quote, rtab) {
 }
 
 function wire() {
+  $('qforms').addEventListener('click', e => {
+    const x = e.target.closest('[data-fm]');
+    if (!x || x.dataset.fm === S.fm) return;
+    S.fm = x.dataset.fm;
+    fmSync();
+    S.loc = null;
+    if (S.q.trim() && !S.d) { renderResults(); pushTrail(); }
+    writeHash();
+    $('q').focus();
+  });
   $('qlang').addEventListener('click', e => {
     const x = e.target.closest('[data-ql]');
     if (!x || x.dataset.ql === S.ql) return;
@@ -4026,9 +4247,10 @@ function wire() {
 
   document.addEventListener('click', e => {
     if (e.target.closest('#modal') && (e.target.id === 'modal' || e.target.closest('[data-close-modal]'))) { closeModal(); return; }
-    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq],[data-lookcmp]');
+    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq],[data-lookcmp],[data-fx]');
     if (!el) return;
     const d = el.dataset;
+    if (d.fx != null) { const fx = new Set(S.fx); fx.has(d.fx) ? fx.delete(d.fx) : fx.add(d.fx); S.fx = fx; S.loc = null; renderResults(); pushTrail(); return; }
     if (d.jtab) { S.jtab = d.jtab; S.loc = null; renderResults(); writeHash(); return; }
     if (d.principle) { askPrinciple(LAYERS.principles.find(x => x.id === d.principle)); return; }
     if (d.xref) { const T = TEXTS[P[+el.closest('[data-fp]').dataset.fp].t]; if (studyOn()) studyGo(T, +d.xref, {}); else { const q = passage(T.key, 'p' + d.xref); if (q) openPassage(q.i); } return; }
