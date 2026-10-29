@@ -49,7 +49,8 @@ whole seminar, so that they can approve a fix to the portal.
 To let someone approve what you approve, add them to the `*` line at the top of
 `.github/CODEOWNERS`. The people there besides you are the **default reviewers**, and any
 one of them can approve: at present Laura Benzenberg (@Benzenberg), Jeremy Weirich
-(@jweirich-globus), Jesus La Paz (@yizu6201) and Qianxun Feng (@qianxun-blip).
+(@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip) and
+@zelleznick.
 
 ## Setting up a working group
 

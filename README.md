@@ -99,7 +99,7 @@ For a group's folder, any member of the group other than the author can approve.
 Baumgarten and Meier readers, `data/`, `scripts/` and `Textfiles/`, the readers' owner who
 is not the author approves. For anything else outside `groups/` and `Individuals/`, the
 professor or one of the default reviewers approves: Laura Benzenberg, Jeremy Weirich,
-Jesus La Paz and Qianxun Feng. A pull request that touches folders with different owners needs an
+Jesus La Paz, Qianxun Feng and @zelleznick. A pull request that touches folders with different owners needs an
 approval from each.
 
 **The preview link.** The site shows only what has been merged. To see a pull request

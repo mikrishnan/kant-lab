@@ -438,7 +438,8 @@ decides who must approve it. In short:
 - `Individuals/` changes need no approval;
 - the professor approves everything else, and so can any one of the default reviewers
   beside them on the `*` line: Laura Benzenberg (@Benzenberg), Jeremy Weirich
-  (@jweirich-globus), Jesus La Paz (@yizu6201) and Qianxun Feng (@qianxun-blip).
+  (@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip) and
+  @zelleznick.
 
 A pull request that touches folders with different owners needs an approval from each,
 so keep each one within a single owner's folders where you can.
