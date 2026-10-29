@@ -349,6 +349,9 @@
   .res-head { margin: 0.2rem 0 0.4rem; }
   .res-title { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 1.22rem; letter-spacing: 0.02em; line-height: 1.3; }
   .summary { font-size: 1.02rem; margin-top: 0.2rem; }
+  /* a Reflexion looked up by its number: the ways on from it */
+  .rlook { display: flex; flex-wrap: wrap; gap: 0.35rem 1.3rem; font-size: 0.94rem; margin: 0.2rem 0 1rem; }
+  .rlook .rlnb { margin-left: auto; display: flex; gap: 1rem; }
   .note { font-style: italic; color: var(--faded); margin: 0.4rem 0 0; font-size: 0.95rem; max-width: 46rem; }
   .tabs { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--line); margin: 0.9rem 0 1.1rem; }
   .tabs button { background: none; border: none; border-bottom: 2px solid transparent; padding: 0.35rem 0; margin-bottom: -1px; color: var(--faded); cursor: pointer; font-size: 1.02rem; }
@@ -1481,6 +1484,9 @@ function renderResults() {
   $('welcome').hidden = !home;
   if (S.d) return renderDoctrine(box);
   if (home) return renderHome(box);
+  // A Reflexion named by its number is looked up, not searched for
+  const rn = !S.preset && parseRefl(S.q);
+  if (rn) return renderReflLookup(box, rn);
   RESULT = runQuery();
   const R = RESULT;
   if (!R) { box.innerHTML = '<div class="empty">Nothing to look for in that question.</div>'; return; }
@@ -1494,6 +1500,9 @@ function renderResults() {
   if (R.bad.length) h += '<div class="warn small">Not a regular expression the browser accepts: ' + R.bad.map(esc).join(', ') + '</div>';
   if (S.preset && S.preset.note) h += '<p class="note">' + esc(S.preset.note) + '</p>';
   if (S.preset && S.preset.who) h += '<div class="from">' + esc(S.preset.credit) + '</div>';
+  // "F4046", a slip for R 4046: the search reads no numbers, so as words it is only the letter
+  const near = !S.preset && /^\s*[A-Za-zÄÖÜäöü]{1,3}\.?\s*(\d{3,4})\s*$/.exec(S.q);
+  if (near && reflByNo(+near[1])) h += '<p class="note">Looking for <span class="lnk" data-askq="Refl. ' + near[1] + '">Refl. ' + near[1] + '</span>? A Reflexion goes by its number: <code>R ' + near[1] + '</code>, <code>Refl. ' + near[1] + '</code> or <code>' + near[1] + '</code> alone. As words, “' + esc(S.q.trim()) + '” is only its letters, since the search leaves numbers out.</p>';
   h += '</div>';
   if (!R.matches.length) { box.innerHTML = h + '<div class="empty">No passage has it. Try a * to widen a word, or allow more words between.</div>'; return; }
 
@@ -2683,7 +2692,35 @@ function reflMissText(n) {
   const have = TEXTS.filter(T => T.shape === 'refl' && T.n).map(T => 'Refl. ' + P[T.first].id.slice(1) + '–' + P[T.last].id.slice(1) + ' (' + T.title.replace(/^Kant, /, '') + ')');
   return 'No Reflexion numbered ' + n + ' is in the portal. It has ' + have.join(' and ') + '.';
 }
-function showReflMiss(n) { showMiss('<div class="res-head"><div class="res-title">Refl. ' + n + '</div></div><div class="empty">' + esc(reflMissText(n)) + '</div>'); }
+/* The left side for a Reflexion named in the search box: the note, where the AA files it, the way to
+   it in its textbook, and its neighbours by number. The note itself opens on the right. */
+function renderReflLookup(box, rn) {
+  RESULT = null;
+  const q = reflByNo(rn.n);
+  let h = '<div class="res-head"><div class="res-title">Refl. ' + rn.n + '</div>';
+  if (!q) { box.innerHTML = h + '</div><div class="empty">' + esc(reflMissText(rn.n)) + '</div>'; return; }
+  const T = TEXTS[q.t], place = placeOf(q), book = place && textByKey(place.book);
+  h += '<div class="summary">' + esc(T.title) + '</div>' + (rn.prefixed ? '' : '<p class="note">A number alone is taken for a Reflexion’s number.</p>') + '</div>';
+  h += '<div class="hit' + (S.sel === q.i ? ' sel' : '') + '" data-open="' + q.i + '"><div class="cite"><b>' + esc(q.cite) + '</b> · ' + esc(q.dateLabel) +
+    ' · ' + (place ? esc((book ? book.short : place.book) + ' ' + paraLabel(place.paras)) : 'filed under no §') + '</div>' +
+    '<div class="kw" lang="de">' + esc(clip(q.text, 700)) + '</div></div>';
+  const prev = q.i > T.first ? P[q.i - 1] : null, next = q.i < T.last ? P[q.i + 1] : null;
+  h += '<div class="rlook">' +
+    (place && book ? '<span class="lnk" data-readat="' + q.i + '">Read it beside ' + esc(book.short + ' ' + paraLabel(place.paras)) + ', with the other notes there</span>' : '') +
+    '<span class="lnk" data-lookcmp="' + q.i + '">Compare it with what shares its wording</span>' +
+    '<span class="rlnb">' + (prev ? '<span class="lnk" data-askq="Refl. ' + prev.id.slice(1) + '">‹ Refl. ' + prev.id.slice(1) + '</span>' : '') +
+    (next ? '<span class="lnk" data-askq="Refl. ' + next.id.slice(1) + '">Refl. ' + next.id.slice(1) + ' ›</span>' : '') + '</span></div>';
+  box.innerHTML = h;
+}
+/* A Reflexion's number from the search box or a link becomes the question: the left names it, and
+   the note opens on the right, on the tab the pane is showing. */
+function lookRefl(v) {
+  const rn = parseRefl(v), q = rn && reflByNo(rn.n);
+  const keep = S.sel != null && ['text', 'cmp', 'conn'].includes(S.rtab) ? S.rtab : null;
+  ask({ q: v, co: '', cm: '', preset: null });
+  if (q) openPassage(q.i, null, keep);
+}
+const askOrLook = v => parseRefl(v) ? lookRefl(v) : ask({ q: v, w: 5, cm: '', co: '', preset: null });
 /* Every passage printed on a page of the AA. */
 function aaAll(vol, page) {
   const out = [];
@@ -3722,13 +3759,13 @@ function readHash() {
     }
     if (c && goAA(c, within)) { syncForm(); renderResults(); return; }
   }
-  // A link to a Reflexion by its number, #refl=4086, as the landing page's lookup box makes: the note
-  // opens on the right
+  // A link to a Reflexion by its number, #refl=4086, as the landing page's lookup box makes: the left
+  // names it, and the note opens on the right
   const rq = u.get('refl');
   if (rq) {
     const rn = parseRefl(rq), q = rn && reflByNo(rn.n);
+    if (rn) S.q = 'Refl. ' + rn.n;
     if (q) { S.sel = q.i; if (!u.get('rt')) S.rtab = 'text'; S.cmp = cmpFresh(q.i); }
-    else if (rn) { syncForm(); showReflMiss(rn.n); return; }
   }
   syncForm();
   showView(S.readKey ? 'read' : 'ask');
@@ -3778,7 +3815,7 @@ function wire() {
     }
     // A Reflexion by its number, "Refl. 4086" or 4086 alone, opens on the right, leaving the left as it was
     const rn = parseRefl($('q').value);
-    if (rn) { const q = reflByNo(rn.n); if (q) { S.miss = null; openPassage(q.i); syncForm(); renderResults(); } else showReflMiss(rn.n); return; }
+    if (rn) { lookRefl($('q').value.trim()); return; }
     ask({ q: $('q').value.trim(), w: +$('w').value || 0, co: $('co').value.trim(), cm: $('cm').value, merge: $('merge').checked, preset: null });
   });
   $('merge').addEventListener('change', () => { if (S.q) ask({ merge: $('merge').checked, preset: S.preset }); else { S.merge = $('merge').checked; updateOptSum(); } });
@@ -3819,7 +3856,7 @@ function wire() {
 
   document.addEventListener('click', e => {
     if (e.target.closest('#modal') && (e.target.id === 'modal' || e.target.closest('[data-close-modal]'))) { closeModal(); return; }
-    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq]');
+    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq],[data-lookcmp]');
     if (!el) return;
     const d = el.dataset;
     if (d.jtab) { S.jtab = d.jtab; S.loc = null; renderResults(); writeHash(); return; }
@@ -3874,7 +3911,8 @@ function wire() {
     if (d.ctag) { const [bit, q] = d.ctag.split(':'); Object.assign(cmpState(P[S.sel]), { bit: bit.split('-').map(Number), with: +q, whole: false }); renderRail(); writeHash(); cmpShowB(); return; }
     if (d.cwhole != null) { cmpState(P[S.sel]).whole = d.cwhole === '1'; renderRail(); return; }
     if (d.cmore) { cmpState(P[S.sel]).more = true; renderRail(); return; }
-    if (d.askq) { ask({ q: d.askq, w: 5, cm: '', co: '', preset: null }); return; }
+    if (d.askq) { askOrLook(d.askq); return; }
+    if (d.lookcmp) { openPassage(+d.lookcmp, null, 'cmp'); return; }
     if (d.step != null) { goStep(+d.step); return; }
     if (d.map) { $('routemap').hidden = !$('routemap').hidden; renderTrail(); return; }
     if (d.en != null) { S.en = d.en; enApply(); writeHash(); return; }
