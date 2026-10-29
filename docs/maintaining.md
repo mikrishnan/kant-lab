@@ -15,11 +15,17 @@ ruleset on `main` decide who has to approve what:
 | only the Logic Portal, `Individuals/mikrishnan/portal/` | anyone in the seminar but the author | nothing, unless asked |
 | only `groups/<group>/` | another member of that group | nothing, unless asked |
 | only a tool with student owners, or `data/`, `scripts/`, `Textfiles/` | one of the owners (below) | nothing, unless asked |
+| `.github/CODEOWNERS`, the list of who approves what | you alone | review it |
 | any other top-level tool, `.github/`, root files | you, or a default reviewer | review it (below), unless a default reviewer has |
 | a new `groups/<group>/` folder | you | set the group up (below) |
 
-As a repository admin you can bypass the ruleset, which is what lets you merge your own
-pull requests. Use the bypass for housekeeping, not for routine changes to the tools.
+The ruleset on `main` (Settings → Rules → Rulesets → **main**) requires a pull request,
+blocks force pushes, and blocks deleting `main`. Its bypass list holds only the
+**Repository admin** role, which is you, so you alone can merge your own pull requests,
+push to `main` directly, or rewrite its history. Use the bypass for housekeeping, not for
+routine changes to the tools. Collaborators already cannot change settings, rulesets or
+collaborators, or delete the repository, since a repository owned by a personal account
+gives those to its owner alone.
 
 ## Weekly routine
 

@@ -22,6 +22,7 @@ Claude makes it, you can also work [on your own computer](#working-on-your-own-c
 | `data/`, `scripts/`, `Textfiles/` | **Shared data,** the texts and Reflexionen that several tools read; the extractors that produce it; the transcriptions they read | one of the readers' owners |
 | `Individuals/<you>/` | Your personal sandbox, as in the first session | you — no approval needed |
 | `Individuals/mikrishnan/portal/` | The **Logic Portal**. It sits in the professor's folder, but it is the whole seminar's | anyone in the seminar but the author |
+| `.github/CODEOWNERS` | The list of who approves what | the professor |
 | everything else | `docs/`, `.github/`, this page | the professor or a default reviewer |
 
 The Baumgarten and Meier readers, and the data they are built from, are owned by

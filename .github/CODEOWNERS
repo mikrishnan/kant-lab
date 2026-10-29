@@ -5,6 +5,9 @@
 # everything not matched below.
 *                @mikrishnan @Benzenberg @jweirich-globus @yizu6201 @qianxun-blip @zelleznick
 
+# Who approves what is the professor's decision alone, so this file needs the professor.
+/.github/CODEOWNERS  @mikrishnan
+
 # Personal sandboxes: no owner, so the author merges their own pull request.
 /Individuals/
 
