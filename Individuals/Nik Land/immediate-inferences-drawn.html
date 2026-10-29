@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Immediate Inferences, drawn — Kant's logic lectures and Reflexionen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5efe0;
+    --parchment-deep: #ece3cc;
+    --card: #fbf8ef;
+    --paper: #fffdf7;
+    --ink: #2b2118;
+    --ink-soft: #5a4a3a;
+    --muted: #857560;
+    --rule: #d6c9a8;
+    --accent: #5c3d1e;
+    --accent-soft: #e9dcc0;
+    --hilite: #f1dfae;
+    --hilite-deep: #e3c47e;
+    --warn: #8a2b1c;
+    --warn-soft: #f6e3dc;
+    --ok: #2f5a2a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 76px; }
+  body {
+    margin: 0;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    line-height: 1.45;
+  }
+  button, input { font: inherit; color: inherit; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 28px; }
+
+  /* ── Header ── */
+  header { background: var(--parchment-deep); border-bottom: 1px solid var(--rule); }
+  header .wrap { padding-top: 22px; padding-bottom: 16px; }
+  header h1 { margin: 0; font: 600 27px/1.15 'Cinzel', Georgia, serif; letter-spacing: .06em; color: var(--accent); }
+  header h1 small { font-size: 15px; letter-spacing: .12em; color: var(--ink-soft); font-weight: 400; margin-left: 8px; }
+  header p { margin: 8px 0 0; max-width: 980px; color: var(--ink-soft); font-size: 17px; }
+  header .older { font-size: 15px; }
+
+  /* ── The map of the kinds (Refl. 3170) ── */
+  #map { padding: 18px 0 4px; }
+  .map-quote { margin: 0 0 12px; font-size: 16px; color: var(--ink-soft); }
+  .map-quote q { font-style: italic; color: var(--ink); }
+  .map-quote .cite-s { font-size: 14px; white-space: nowrap; }
+  .heads { display: grid; grid-template-columns: 1fr 1.5fr 1fr 1fr; gap: 12px; }
+  .head { background: var(--card); border: 1px solid var(--rule); padding: 10px 12px 12px; display: flex; flex-direction: column; }
+  .head h2 { margin: 0; font: 600 12.5px/1.2 'Cinzel', Georgia, serif; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .head .kq { margin: 4px 0 8px; font-size: 14.5px; line-height: 1.3; font-style: italic; color: var(--ink-soft); }
+  .head .icon { display: block; margin: 0 auto 8px; height: 74px; width: 100%; }
+  .head .btns { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+  .apart { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; margin-top: 12px; align-items: stretch; }
+  .apart .head { flex-direction: row; gap: 12px; align-items: center; }
+  .apart .head.set-apart { border-style: dashed; background: transparent; }
+  .apart .head .icon { width: 190px; height: 70px; margin: 0; flex: none; }
+  .apart .head .txt { flex: 1; }
+  .kbtn { cursor: pointer; padding: 2px 11px; font-size: 15.5px; background: var(--paper); border: 1px solid var(--accent); color: var(--accent); border-radius: 2px; }
+  .kbtn .n { margin-left: 6px; font-size: 13px; opacity: .75; font-variant-numeric: tabular-nums; }
+  .kbtn[aria-pressed="true"] { background: var(--accent); color: var(--parchment); }
+  .kbtn:hover { background: var(--accent-soft); }
+  .kbtn[aria-pressed="true"]:hover { background: #4a3017; }
+  .kbtn.all { align-self: center; padding: 8px 16px; }
+
+  /* ── Filter bar ── */
+  #bar { position: sticky; top: 0; z-index: 20; background: rgba(245, 239, 224, .96); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-top: 14px; backdrop-filter: blur(3px); }
+  #bar .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding-top: 8px; padding-bottom: 8px; }
+  #bar .lab { font: 600 11.5px/1 'Cinzel', Georgia, serif; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+  .srcs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sbtn { cursor: pointer; padding: 1px 10px; font-size: 15px; background: transparent; border: 1px solid var(--rule); border-radius: 12px; color: var(--ink-soft); }
+  .sbtn[aria-pressed="true"] { background: var(--paper); border-color: var(--accent); color: var(--ink); }
+  .sbtn .d { font-size: 12.5px; color: var(--muted); margin-left: 4px; }
+  .opt { display: inline-flex; align-items: center; gap: 6px; font-size: 15.5px; cursor: pointer; }
+  #ksel { padding: 2px 6px; border: 1px solid var(--rule); background: var(--paper); font: inherit; font-size: 15.5px; color: var(--ink); }
+  #q { width: 220px; padding: 3px 9px; border: 1px solid var(--rule); background: var(--paper); font-size: 15.5px; }
+  #status { margin-left: auto; font-size: 15px; color: var(--ink-soft); }
+  #status b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  #status button { cursor: pointer; border: 0; background: none; color: var(--accent); text-decoration: underline; padding: 0 0 0 6px; }
+
+  /* ── Groups and cards ── */
+  main { padding-top: 8px; padding-bottom: 40px; }
+  .group { margin-top: 26px; }
+  .group > h2 { margin: 0; font: 600 17px/1.2 'Cinzel', Georgia, serif; letter-spacing: .07em; color: var(--accent); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .group > h2 .de { font: italic 400 16px/1.2 'EB Garamond', Georgia, serif; letter-spacing: 0; color: var(--ink-soft); }
+  .group > h2 .n { font: 400 14px/1 'EB Garamond', Georgia, serif; color: var(--muted); letter-spacing: 0; }
+  .group > .blurb { margin: 6px 0 12px; max-width: 980px; font-size: 16.5px; color: var(--ink-soft); }
+  .group > .blurb .by { font-size: 13.5px; font-style: italic; color: var(--muted); }
+
+  .card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 0; background: var(--card); border: 1px solid var(--rule); margin: 0 0 14px; scroll-margin-top: 76px; }
+  .card.rule { border-left: 4px dashed var(--rule); }
+  .card.flash { animation: flash 1.6s ease-out; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 4px var(--hilite-deep); } 100% { box-shadow: 0 0 0 0 transparent; } }
+  .card-text { padding: 12px 16px 12px; min-width: 0; }
+  .card-fig { margin: 0; padding: 12px 14px 12px; border-left: 1px solid var(--rule); background: var(--paper); min-width: 0; }
+
+  .cite { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 14.5px; color: var(--ink-soft); }
+  .cite .work { font-weight: 600; color: var(--ink); font-size: 15.5px; }
+  .cite .aa { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 600; }
+  .cite .sub { font-size: 13.5px; }
+  .cite .inferred { border-bottom: 1px dashed var(--muted); cursor: help; }
+  .cite .permalink { margin-left: auto; font-size: 13px; text-decoration: none; color: var(--muted); }
+  .cite .permalink:hover { color: var(--accent); }
+
+  blockquote { margin: 8px 0 8px; padding: 0 0 0 12px; border-left: 2px solid var(--rule); font-size: 17.5px; line-height: 1.5; }
+  blockquote mark { background: var(--hilite); color: inherit; padding: 0 1px; border-radius: 2px; cursor: pointer; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+  blockquote mark.conclusion { border-bottom: 2px solid var(--accent); }
+  blockquote mark.rejected { background: var(--warn-soft); text-decoration: line-through; text-decoration-color: var(--warn); }
+  blockquote mark.lit, blockquote mark:hover { background: var(--hilite-deep); }
+  blockquote mark sup { font: 600 11px/1 Georgia, serif; margin-left: 2px; padding: 0 2px; border: 1px solid var(--accent); color: var(--accent); vertical-align: super; border-radius: 2px; }
+  blockquote mark sup.inferred { border-style: dashed; }
+  .broken { margin: 6px 0; padding: 6px 10px; border: 1px solid var(--warn); background: var(--warn-soft); font-size: 14.5px; color: var(--warn); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 6px 0 0; }
+  .chip { display: inline-flex; align-items: baseline; gap: 4px; padding: 0 8px; font-size: 13.5px; border: 1px solid var(--rule); border-radius: 10px; background: var(--paper); color: var(--ink-soft); }
+  .chip b { font-weight: 600; color: var(--ink); }
+  .chip.inferred { border-style: dashed; }
+  .chip.bad { border-color: var(--warn); color: var(--warn); background: var(--warn-soft); }
+  .chip .arrow { margin: 0 2px; }
+  .note { margin: 8px 0 0; font-size: 15px; color: var(--ink-soft); }
+  .note::before { content: 'Note · '; font-style: italic; color: var(--muted); }
+  .why { margin: 8px 0 0; padding: 5px 10px; border-left: 3px solid var(--warn); background: var(--warn-soft); font-size: 15px; }
+  .flags { margin: 8px 0 0; }
+  .flag { margin: 4px 0 0; padding: 4px 9px; font-size: 14px; border: 1px solid var(--warn); color: var(--warn); background: var(--warn-soft); }
+  .flag q { color: var(--ink); }
+  .tools { margin-top: 10px; display: flex; gap: 8px; }
+  .tbtn { cursor: pointer; padding: 1px 10px; font-size: 14px; background: transparent; border: 1px solid var(--rule); color: var(--ink-soft); border-radius: 2px; }
+  .tbtn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Figures ── */
+  .fig-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 0 0 6px; }
+  .fig-head .ft { font: 600 11.5px/1.2 'Cinzel', Georgia, serif; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+  .fig-head .terms { font-size: 14px; color: var(--ink-soft); }
+  .fig-head .terms i { color: var(--ink); }
+  .panels { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; }
+  .panel { flex: 0 1 176px; min-width: 150px; max-width: 176px; border: 1px solid var(--rule); background: var(--card); padding: 4px 6px 6px; border-radius: 3px; transition: border-color .12s, box-shadow .12s; }
+  .pstep { display: flex; align-items: stretch; gap: 6px; }
+  .panels.few > .panel { flex: 1 1 0; max-width: 300px; }
+  .panels.few .pstep { flex: 1.25 1 0; max-width: 370px; }
+  .panels.few .pstep .panel { flex: 1 1 0; max-width: none; }
+  .panel.wide { flex: 0 1 260px; max-width: 260px; }
+  .panel.supplied { border-style: dashed; background: transparent; }
+  .panel.lit { border-color: var(--accent); box-shadow: 0 0 0 2px var(--hilite-deep); }
+  .panel svg { display: block; width: 100%; height: auto; }
+  .pcap { font-size: 14.5px; line-height: 1.3; margin-top: 2px; }
+  .pcap .role { display: block; font: 600 10.5px/1.3 'Cinzel', Georgia, serif; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-soft); }
+  .pcap .form { display: inline-block; min-width: 18px; text-align: center; font: 600 11.5px/16px Georgia, serif; border: 1px solid var(--accent); color: var(--accent); border-radius: 2px; margin-right: 4px; }
+  .pcap .form.inferred { border-style: dashed; }
+  .pcap q { font-style: italic; }
+  .pcap .gloss { display: block; color: var(--muted); font-size: 13px; }
+  .pcap .tv { font-size: 12px; padding: 0 5px; border: 1px solid var(--ink-soft); border-radius: 8px; margin-left: 4px; font-style: normal; }
+  .step { flex: 0 0 auto; align-self: center; display: flex; flex-direction: column; align-items: center; font-size: 22px; color: var(--accent); line-height: 1; padding: 0 1px; }
+  .step small { font-size: 11.5px; font-style: italic; color: var(--ink-soft); max-width: 64px; text-align: center; line-height: 1.15; margin-top: 3px; }
+  .verdict { margin-top: 5px; padding: 3px 7px; font-size: 13px; line-height: 1.3; border-radius: 2px; }
+  .verdict.ok { color: var(--ok); }
+  .verdict.ok::before { content: '✓ '; }
+  .verdict.more { background: #fbf0d4; border: 1px solid #b8862b; color: #6b4a12; }
+  .verdict.more::before { content: '⚠ '; }
+  .verdict.empty, .verdict.fails { background: var(--warn-soft); border: 1px solid var(--warn); color: var(--warn); }
+  .verdict.empty::before, .verdict.fails::before { content: '✕ '; }
+  .fig-square { border: 1px solid var(--rule); background: var(--card); border-radius: 3px; padding: 4px; }
+  .fig-square svg { display: block; width: 100%; height: auto; max-height: 300px; }
+  .fig-square .corner.lit .cbox { stroke: var(--accent); stroke-width: 2.5; }
+  .syllogism { list-style: none; margin: 6px 0 0; padding: 0; font-size: 14.5px; }
+  .syllogism li { margin: 0 0 4px; padding: 3px 8px; border: 1px solid var(--rule); background: var(--card); border-radius: 2px; }
+  .syllogism li.supplied { border-style: dashed; background: transparent; }
+  .syllogism li.lit { border-color: var(--accent); box-shadow: 0 0 0 2px var(--hilite-deep); }
+  .syllogism .rl { font: 600 10.5px/1 'Cinzel', Georgia, serif; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin-right: 6px; }
+  .syllogism .sup { font-size: 12.5px; font-style: italic; color: var(--warn); margin-left: 6px; }
+  .schema-row { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; }
+  .schema-row .panel { flex: 0 1 132px; min-width: 0; max-width: 132px; padding: 2px; }
+  .schema-row .rl { flex: 0 0 104px; font-size: 13.5px; color: var(--ink-soft); line-height: 1.25; }
+  .schema-row .rl b { color: var(--ink); font-weight: 600; }
+  figcaption { margin-top: 7px; font-size: 14px; line-height: 1.35; color: var(--ink-soft); }
+  figcaption .prov { display: block; margin-top: 3px; font-size: 12.5px; color: var(--muted); }
+
+  /* svg vocabulary */
+  svg text { font-family: 'EB Garamond', Georgia, serif; }
+  .u { fill: #fffdf7; stroke: var(--rule); stroke-width: 1; }
+  .sph, .u, .void, .icon .edge { vector-effect: non-scaling-stroke; }
+  .sph { fill: none; stroke: var(--ink-soft); stroke-width: 1.5; }
+  .sph.key { stroke: var(--accent); stroke-width: 2.4; }
+  .sph.mid { stroke: var(--accent); stroke-width: 2.4; stroke-dasharray: 6 3; }
+  .sup .sph, .sup .pt { stroke-dasharray: 4 3; }
+  .emph { fill: var(--hilite); }
+  .panel.lit .emph { fill: var(--hilite-deep); }
+  .hatch { fill: url(#hatch); }
+  .lbl { fill: var(--ink); }   /* sizes are set on each label, which wraps and shrinks long names */
+  .lbl.soft { fill: var(--ink-soft); font-style: italic; }
+  .lbl.key { fill: var(--accent); font-weight: 600; }
+  .dot { fill: var(--ink); stroke: #fffdf7; stroke-width: 1.5; }
+  .dot.open { fill: #fffdf7; stroke: #8a6a2a; stroke-width: 1.6; stroke-dasharray: 2.5 2; }
+  .qmark { font: 600 11px Georgia, serif; fill: #8a6a2a; }
+  .pt { fill: var(--ink); }
+  .void { fill: none; stroke: var(--warn); stroke-width: 1.3; stroke-dasharray: 3 2.5; }
+  .voidt { font-size: 13px; fill: var(--warn); font-style: italic; }
+  .edge { stroke: var(--rule); stroke-width: 1.3; fill: none; }
+  .edge.on { stroke: var(--accent); stroke-width: 3; }
+  .edge.no { stroke: var(--warn); stroke-width: 2.4; stroke-dasharray: 6 4; }
+  .elab { font-size: 12.5px; fill: var(--muted); font-style: italic; }
+  .elab.on { fill: var(--accent); font-weight: 600; font-style: normal; }
+  .elab.no { fill: var(--warn); font-weight: 600; font-style: normal; }
+  .cbox { fill: var(--paper); stroke: var(--accent); stroke-width: 1.4; }
+  .cbox.blank { stroke: var(--rule); fill: var(--card); }
+  .cletter { font-family: Georgia, serif; font-weight: 600; fill: var(--accent); text-anchor: middle; }
+  .cletter.blank { fill: var(--muted); }
+  .ctext { font-size: 13px; fill: var(--ink); font-style: italic; }
+  .ctext.none { fill: var(--muted); font-style: normal; font-size: 12px; }
+  .tvtag { font-size: 11px; fill: var(--ink-soft); }
+  .tvbox { fill: var(--paper); stroke: var(--ink-soft); stroke-width: .9; }
+
+  /* ── Footer: how to read ── */
+  footer { border-top: 1px solid var(--rule); background: var(--parchment-deep); padding: 18px 0 30px; font-size: 15.5px; color: var(--ink-soft); }
+  footer h2 { margin: 0 0 10px; font: 600 13px/1 'Cinzel', Georgia, serif; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px 18px; }
+  .legend div { display: flex; gap: 10px; align-items: center; }
+  .legend svg { flex: none; width: 74px; height: 46px; }
+  footer p { max-width: 1000px; }
+  #empty { padding: 30px 0; font-size: 17px; color: var(--ink-soft); }
+
+  /* ── Report dialog ── */
+  dialog { border: 1px solid var(--accent); background: var(--card); color: var(--ink); max-width: 560px; width: calc(100vw - 32px); padding: 18px 20px; }
+  dialog::backdrop { background: rgba(43, 33, 24, .35); }
+  dialog h2 { margin: 0 0 4px; font: 600 15px/1.2 'Cinzel', Georgia, serif; letter-spacing: .08em; color: var(--accent); }
+  dialog .what { font-size: 15px; color: var(--ink-soft); margin: 0 0 10px; }
+  dialog fieldset { border: 1px solid var(--rule); margin: 0 0 10px; padding: 6px 10px 8px; }
+  dialog legend { font-size: 14px; color: var(--ink-soft); padding: 0 4px; }
+  dialog label { display: inline-flex; gap: 5px; align-items: center; margin: 2px 12px 2px 0; font-size: 15.5px; cursor: pointer; }
+  dialog textarea { width: 100%; min-height: 90px; font: inherit; font-size: 15.5px; padding: 6px 8px; border: 1px solid var(--rule); background: var(--paper); }
+  dialog .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; flex-wrap: wrap; }
+  dialog .msg { font-size: 14px; color: var(--ink-soft); margin: 8px 0 0; min-height: 1.2em; }
+  .pbtn { cursor: pointer; padding: 4px 14px; border: 1px solid var(--accent); background: var(--accent); color: var(--parchment); border-radius: 2px; }
+  .pbtn.sec { background: transparent; color: var(--accent); }
+  .pbtn:disabled { opacity: .5; cursor: default; }
+
+  @media (max-width: 1080px) {
+    .card { grid-template-columns: 1fr; }
+    .card-fig { border-left: 0; border-top: 1px solid var(--rule); }
+    .heads { grid-template-columns: 1fr 1fr; }
+    .apart { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .wrap { padding: 0 14px; }
+    .heads { grid-template-columns: 1fr; }
+    #q { width: 100%; }
+    #status { margin-left: 0; }
+    .step { transform: rotate(90deg); }
+    .panels { flex-direction: column; }
+    .pstep { flex-direction: column; align-items: stretch; }
+    .panel, .panels.few > .panel, .panels.few .pstep { max-width: none; flex: 1 1 auto; }
+    .step { align-self: center; }
+  }
+  @media print {
+    #bar, .tools, dialog { display: none !important; }
+    .card { break-inside: avoid; }
+  }
+  @media (forced-colors: active) {
+    .emph { fill: Highlight; }
+    .edge.on { stroke: Highlight; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Immediate Inferences <small>drawn</small></h1>
+    <p>Kant's examples of the <i>consequentiae immediatae</i> — inferences from one judgement to another with no middle term — from the Blomberg, Wiener and Busolt logic transcripts (AA 24) and from his own Reflexionen on Meier's <i>Auszug</i> (AA 16). Each passage stands beside a figure of what the inference does. The Academy Edition prints no figures: every drawing here is a reading of the passage, and marks what it supplies.</p>
+    <p class="older">The list view, with the judgements side by side, is the <a href="immediate-inferences.html">Immediate Inferences explorer</a>.</p>
+  </div>
+</header>
+
+<section id="map" aria-label="The kinds of immediate inference, as Kant sorts them">
+  <div class="wrap">
+    <p class="map-quote">Kant sorts them by the four heads of the table of judgements: <q lang="de">Die conseqventiae immediatae als unmittelbar, d.i. Verstandesschlüsse … gehen durch alle classen der categorien.</q> <span class="cite-s">Refl. 3170, AA 16:692</span></p>
+    <div class="heads" id="heads"></div>
+    <div class="apart" id="apart"></div>
+  </div>
+</section>
+
+<div id="bar">
+  <div class="wrap">
+    <label class="lab" for="ksel">Kind</label>
+    <select id="ksel"></select>
+    <span class="lab">Sources</span>
+    <span class="srcs" id="srcs"></span>
+    <label class="opt"><input type="checkbox" id="onlyj"> with a judgement written out</label>
+    <input type="search" id="q" placeholder="Search the passages…" aria-label="Search the passages">
+    <span id="status" aria-live="polite"></span>
+  </div>
+</div>
+
+<main class="wrap" id="groups"></main>
+<div class="wrap" id="empty" hidden>Nothing fits. Tick another source, clear the search, or show all the kinds.</div>
+
+<footer>
+  <div class="wrap">
+    <h2>How to read the figures</h2>
+    <div class="legend" id="legend"></div>
+    <p>Each <b>circle</b> is the sphere of a concept. Blomberg explains the forms of judgement this way: the subject is <i lang="de">„gantz in der Sphaera des Praedicats enthalten“</i>, <i lang="de">„gantz außerhalb“</i>, or <i lang="de">„nur dem Theile nach“</i> (AA 24:275); Busolt the conversion of an A: <i lang="de">„das Subiect Mensch ist unter der Sphäre der Sterblichen“</i> (AA 24:671). In a row of panels the drawing stays the same and only the shading moves, because an immediate inference is, in the Wiener transcript's words, <i lang="de">„der Materie nach eins, nur Form verschieden“</i> (AA 24:938). The <b>square</b> sets the judgements out as Refl. 3177 does, universals above and particulars below. A green ✓ under a panel means the figure bears the judgement out; an amber ⚠ that the figure shows more than the premise says; a red ✕ that the judgement picks out an empty region, or that the figure contradicts it.</p>
+    <p><b>Attested and supplied.</b> The passage's own words are in solid boxes and are quoted exactly; a letter in a solid box is a form the passage names, in a dashed box a form read off the sentence. Dashed panels, circles and lines are supplied here, not in the passage. The short concept names over each figure are the annotator's, and so is which judgement is read as subject and predicate. Pages are the Academy pages, worked out on load from the shared transcript data, which also confirms every quotation.</p>
+  </div>
+</footer>
+
+<dialog id="report" aria-labelledby="rep-title">
+  <h2 id="rep-title">Report a problem</h2>
+  <p class="what" id="rep-what"></p>
+  <fieldset><legend>The categorisation</legend><div id="rep-cat"></div></fieldset>
+  <fieldset><legend>The figure</legend><div id="rep-fig"></div></fieldset>
+  <textarea id="rep-details" placeholder="What is wrong, and what it should be. Cite a page where you can." aria-label="Details"></textarea>
+  <p class="msg" id="rep-msg"></p>
+  <div class="row">
+    <button type="button" class="pbtn sec" id="rep-cancel">Cancel</button>
+    <button type="button" class="pbtn sec" id="rep-copy">Copy the report</button>
+    <button type="button" class="pbtn" id="rep-send">Open a GitHub issue</button>
+  </div>
+</dialog>
+
+<!-- Shared data (generated; read-only), then this tool's hand-curated examples and the readers' flags on them, shared with immediate-inferences.html. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/reflexionen-16-meier.js"></script>
+<script src="../../data/phases-adickes.js"></script>
+<script src="immediate-inference-examples.js"></script>
+<script src="miscategorisations.js"></script>
+<script src="diagram-flags.js"></script>
+
+<script>
+/* ── Data ─────────────────────────────────────────────────────────────────── */
+
+// Chronological, which is also the order the sources are listed in.
+const SOURCES = {
+  blomberg: { label: 'Logik Blomberg', short: 'Blomberg', date: 'ca. 1771',    order: 0, data: () => LOGIK_BLOMBERG },
+  wiener:   { label: 'Wiener Logik',   short: 'Wiener',   date: '1780ff.',     order: 1, data: () => LOGIK_WIENER },
+  busolt:   { label: 'Logik Busolt',   short: 'Busolt',   date: 'ca. 1789/90', order: 2, data: () => LOGIK_BUSOLT },
+  refl16:   { label: 'Reflexionen on Meier', short: 'Reflexionen', date: 'AA 16', order: 3 }
+};
+const SOURCE_KEYS = Object.keys(SOURCES);
+
+// The kinds, in the order of the map: what it is; Kant's four heads (Refl. 3170); equipollence apart.
+const KINDS = {
+  general: { label: 'What it is', title: 'What an immediate inference is', de: 'Verstandesschluß · consequentia immediata',
+    text: 'A judgement drawn from another with no middle term (“absque medio termino”). A Vernunftschluß needs one. The passages offered as counter-examples are drawn with their middle term marked, to show what makes them mediate.' },
+  subalternation: { label: 'Subalternation', title: 'Subalternation', de: 'iudicia subalternata', head: 'quantity',
+    text: 'From the universal to the particular under it: the quality is kept and only the quantity changes. Kant adds a caution in Refl. 3171: one cannot infer the falsity of the particulars from the falsity of the universal, nor the universal from the particulars.' },
+  contradictory: { label: 'Contradictory', title: 'Opposition: contradictory', de: 'iudicia opposita · contradictorie', head: 'quality', edge: 'contradictorie',
+    text: 'A against O, or E against I. Exactly one of the two is true, so the truth of one gives the falsity of the other, and conversely. The Wiener transcript calls it “die eigentliche Opposition”.' },
+  contrary: { label: 'Contrary', title: 'Opposition: contrary', de: 'iudicia opposita · contrarie', head: 'quality', edge: 'contrarie',
+    text: 'A against E. Both can be false, not both true, because each says too much (Refl. 3177: “zuviel zum Wiederstreit”).' },
+  subcontrary: { label: 'Subcontrary', title: 'Opposition: subcontrary', de: 'iudicia opposita · subcontrarie', head: 'quality', edge: 'subcontrarie',
+    text: 'I against O. Both can be true, not both false, because each says too little (Refl. 3175: “nicht genug zum Wiederstreit”).' },
+  conversion: { label: 'Conversion', title: 'Conversion', de: 'conversio · Umkehrung', head: 'relation',
+    text: 'The terms change places and the quality is kept. As the transcripts give the rule, a universal affirmative converts per accidens, to a particular; universal negatives and particulars convert simpliciter. Busolt notes that an A whose subject and predicate have equal spheres converts simply.' },
+  contraposition: { label: 'Contraposition', title: 'Contraposition', de: 'contrapositio · Entgegenstellung', head: 'modality',
+    text: 'The terms change places and the quality changes, the quantity kept: from “Alle Menschen sind sterblich” to “was nicht sterblich ist, ist kein Mensch”. In Refl. 3170 it is the inference by modality, which makes an assertoric judgement apodictic.' },
+  aequipollentia: { label: 'Equipollence', title: 'Equipollence', de: 'iudicia aequipollentia',
+    text: 'Two judgements that say the same in different words. Kant does not list it in Refl. 3170. Blomberg and Busolt deny that it is an inference at all (“gar kein Schluß”), and the Wiener transcript calls such pairs substitutions.' }
+};
+const KIND_ORDER = ['general', 'subalternation', 'contradictory', 'contrary', 'subcontrary', 'conversion', 'contraposition', 'aequipollentia'];
+const OPPOSITION = ['contradictory', 'contrary', 'subcontrary', 'subalternation'];
+
+// Refl. 3170, AA 16:692, verbatim, one line per head.
+const HEADS = [
+  { key: 'quantity', title: 'Quantität', kinds: ['subalternation'], icon: 'sub',
+    q: 'Die per iudicia subalternata gehören zur qvantitaet.' },
+  { key: 'quality', title: 'Qualität', kinds: ['contradictory', 'contrary', 'subcontrary'], icon: 'square',
+    q: 'Die per iudicia opposita gehören zur qvalitaet.' },
+  { key: 'relation', title: 'Relation', kinds: ['conversion'], icon: 'conv',
+    q: 'Die per conversionem iudicii gehören zur relation.' },
+  { key: 'modality', title: 'Modalität', kinds: ['contraposition'], icon: 'contrap',
+    q: 'Die per contrapositionem iudicii gehören zur modalitaet: aus einem assertorischen ein apodictisch Urtheil zu machen.' }
+];
+
+const FORM_NAME = { A: 'universal affirmative', E: 'universal negative', I: 'particular affirmative', O: 'particular negative',
+                    'S+': 'singular affirmative', 'S-': 'singular negative' };
+const ROLE_LABEL = { premise: 'Premise', conclusion: 'Conclusion', member: 'One of the pair', intermediate: 'Intermediate step',
+                     rejected: 'Rejected by the passage', major: 'Major premise', minor: 'Minor premise' };
+const VIA = { aequipollentia: 'equipollence', conversion: 'conversion', contraposition: 'contraposition', subalternation: 'subalternation' };
+
+// Report a problem: the same problem keys, and the same payload, as immediate-inferences.html.
+const PROBLEMS = {
+  categorisation: [['kind', 'the kind of inference'], ['named', 'whether the passage names it'], ['form', 'a judgement’s form'],
+                   ['judgements', 'which judgements are marked'], ['quote', 'the quotation or its page']],
+  diagram: [['terms', 'the concept names'], ['reading', 'how a judgement is read'], ['drawing', 'what is shaded, or where'],
+            ['type', 'the wrong kind of figure']]
+};
+const REPO = 'mikrishnan/kant-lab';
+const FLAGS_FORMAT = 'kant-lab-flags-v1';
+const URL_MAX = 7500;
+
+/* ── State ────────────────────────────────────────────────────────────────── */
+
+let kind = 'all';
+let sources = new Set(SOURCE_KEYS);   // sources shown
+let onlyJudgements = false;
+let query = '';
+let examples = [];                    // IMMEDIATE_EXAMPLES, each resolved against its source
+let blocksByWork = {};
+let reflByNumber = {};
+let uid = 0;                          // for ids inside the SVGs
+let reporting = null;                 // the example the report dialog is open on
+
+/* ── Resolving an example against its source ──────────────────────────────── */
+
+// As in immediate-inferences.html. A block's `aa` is documented as the page it
+// starts on, but where its first page break falls inside it the extractor records
+// the page it ENDS on, so the start page is worked out here: the first marker's
+// page if it stands at character 0, else the page the previous block ended on.
+function indexWork(key) {
+  const byId = {};
+  let curAA = null, curMS = null;
+  SOURCES[key].data().sections.forEach(sec => sec.blocks.forEach(b => {
+    const pg = b.pages || [], ms = b.ms || [];
+    if (pg.length && pg[0].i === 0) b._aa0 = pg[0].p;
+    else if (pg.length) b._aa0 = curAA != null ? curAA : b.aa;
+    else b._aa0 = b.aa;
+    b._ms0 = curMS;
+    curAA = pg.length ? pg[pg.length - 1].p : b.aa;
+    if (ms.length) curMS = ms[ms.length - 1].p;
+    byId[b.id] = b;
+  }));
+  return byId;
+}
+
+function pageAt(markers, off, first) {
+  let found = first;
+  (markers || []).forEach(m => { if (m.i <= off) found = m.p; });
+  return found;
+}
+
+function resolve(raw) {
+  const ex = Object.assign({}, raw);
+  ex.judgements = raw.judgements.map((j, n) => Object.assign({ n }, j));
+  let cursor = 0;
+  ex.judgements.forEach(j => {
+    let at = raw.quote.indexOf(j.t, cursor);
+    if (at < 0) at = raw.quote.indexOf(j.t);
+    j.at = at;
+    if (at >= 0) cursor = at + j.t.length;
+  });
+  const judgementsFound = ex.judgements.every(j => j.at >= 0);
+
+  if (raw.src === 'refl16') {
+    const e = reflByNumber[raw.r];
+    ex.entry = e;
+    ex.ok = !!e && e.text.indexOf(raw.quote) >= 0 && judgementsFound;
+    if (e) {
+      ex.pageFrom = e.aa != null ? e.aa : e.aaEnd;
+      ex.pageTo = e.aaEnd != null ? e.aaEnd : ex.pageFrom;
+    }
+    return ex;
+  }
+  const b = (blocksByWork[raw.src] || {})[raw.block];
+  const start = b ? b.text.indexOf(raw.quote) : -1;
+  ex.ok = start >= 0 && judgementsFound;
+  if (start < 0) return ex;
+  ex.pageFrom = pageAt(b.pages, start, b._aa0);
+  ex.pageTo = pageAt(b.pages, start + raw.quote.length - 1, b._aa0);
+  ex.msFrom = pageAt(b.ms, start, b._ms0);
+  ex.msTo = pageAt(b.ms, start + raw.quote.length - 1, b._ms0);
+  return ex;
+}
+
+function loadExamples() {
+  ['blomberg', 'wiener', 'busolt'].forEach(w => { blocksByWork[w] = indexWork(w); });
+  REFL_ENTRIES.forEach(e => { reflByNumber[e.r] = e; });
+  examples = IMMEDIATE_EXAMPLES.map(resolve);
+  examples.forEach((ex, n) => { ex.n = n; ex.fig = planFigure(ex); });
+  examples.sort((a, b) => SOURCES[a.src].order - SOURCES[b.src].order || (a.pageFrom || 0) - (b.pageFrom || 0) || a.n - b.n);
+}
+
+/* ── The logic of the figures ─────────────────────────────────────────────── */
+
+// A figure is drawn from the premise, and every other judgement is checked on
+// the same drawing, since the inference changes the form and not the matter.
+// The drawing divides the frame into cells, one per combination of in and out of
+// each sphere. Each cell is 'given' (the premise says something is there),
+// 'open' (drawn, but the premise says nothing of it) or 'empty' (not drawn).
+// Cells are keyed by one bit per term, in the order of `terms`.
+const CONFIGS = {
+  A:   { terms: ['S', 'P'], cells: { '11': 'given', '10': 'empty', '01': 'open', '00': 'open' } },
+  EQ:  { terms: ['S', 'P'], cells: { '11': 'given', '10': 'empty', '01': 'empty', '00': 'open' } },
+  E:   { terms: ['S', 'P'], cells: { '11': 'empty', '10': 'given', '01': 'given', '00': 'open' } },
+  I:   { terms: ['S', 'P'], cells: { '11': 'given', '10': 'open', '01': 'open', '00': 'open' } },
+  O:   { terms: ['S', 'P'], cells: { '11': 'open', '10': 'given', '01': 'open', '00': 'open' } },
+  PT:  { terms: ['S', 'P'], point: true, cells: { '11': 'given', '10': 'empty', '01': 'open', '00': 'open' } },
+  PTN: { terms: ['S', 'P'], point: true, cells: { '11': 'empty', '10': 'given', '01': 'open', '00': 'open' } },
+  MED: { terms: ['S', 'M', 'P'], cells: { '111': 'given', '011': 'open', '001': 'open', '000': 'open',
+                                          '100': 'empty', '101': 'empty', '110': 'empty', '010': 'empty' } },
+  MEDPT: { terms: ['S', 'M', 'P'], point: true, cells: { '111': 'given', '011': 'open', '001': 'open', '000': 'open',
+                                          '100': 'empty', '101': 'empty', '110': 'empty', '010': 'empty' } }
+};
+
+// Which cells a term covers: S, P, M a sphere; nonP what lies outside P; SP what is both.
+function termTest(cfg, term) {
+  const ix = t => cfg.terms.indexOf(t);
+  if (term === 'nonP') return k => k[ix('P')] === '0';
+  if (term === 'SP') return k => k[ix('S')] === '1' && k[ix('P')] === '1';
+  return k => k[ix(term)] === '1';
+}
+
+// Obversion, to normalise a judgement onto S and P: A(S, nonP) = E(S, P), and so on.
+const OBVERT = { A: 'E', E: 'A', I: 'O', O: 'I', 'S+': 'S-', 'S-': 'S+' };
+
+// The drawing for a set of judgements: from the premise, else the first judgement.
+function configFor(ex) {
+  const d = ex.diagram || {};
+  if (d.config === 'S=P') return 'EQ';
+  if (d.config === 'S<P') return 'A';
+  if (d.config === 'mediate') {
+    const con = ex.judgements.filter(j => j.role === 'conclusion')[0];
+    return con && con.form.charAt(0) === 'S' ? 'MEDPT' : 'MED';
+  }
+  const J = ex.judgements;
+  const base = J.filter(j => j.role === 'premise')[0] || J.filter(j => j.role === 'member' && j.form === 'A')[0] || J[0];
+  let form = base.form, sp = base.sp || ['S', 'P'];
+  if (sp[1] === 'nonP') { form = OBVERT[form]; sp = [sp[0], 'P']; }
+  if (sp[0] === 'P' && sp[1] === 'S' && (form === 'E' || form === 'I')) sp = ['S', 'P'];
+  return { A: 'A', E: 'E', I: 'I', O: 'O', 'S+': 'PT', 'S-': 'PTN' }[form] || 'I';
+}
+
+// What the figure says of one judgement drawn on it.
+//   ok     the figure bears it out
+//   more   it says something is in a region the premise leaves open
+//   empty  it says something is in a region with nothing in it
+//   fails  it says a region is empty that the figure leaves open, or fills
+function verdict(cfgKey, form, sp) {
+  const cfg = CONFIGS[cfgKey];
+  const inX = termTest(cfg, sp[0]), inY = termTest(cfg, sp[1]);
+  const keys = Object.keys(cfg.cells);
+  const f = form.charAt(0) === 'S' ? (form === 'S-' ? 'E' : 'A') : form;
+  const region = keys.filter(k => inX(k) && (f === 'A' || f === 'O' ? !inY(k) : inY(k)));
+  const states = region.map(k => cfg.cells[k]);
+  if (f === 'A' || f === 'E') {
+    if (states.indexOf('given') >= 0) return { v: 'fails', region };
+    if (states.indexOf('open') >= 0) return { v: 'fails', open: true, region };
+    return { v: 'ok', region };
+  }
+  if (states.indexOf('given') >= 0) return { v: 'ok', region };
+  if (states.indexOf('open') >= 0) return { v: 'more', region };
+  return { v: 'empty', region };
+}
+
+function termName(ex, t) {
+  const T = (ex.diagram && ex.diagram.terms) || {};
+  if (t === 'SP') return (T.P || 'P') + ' ' + (T.S || 'S');
+  if (t === 'nonP') return T.nonP || 'nicht ' + (T.P || 'P');
+  return T[t] || t;
+}
+
+function verdictText(ex, j, res) {
+  const X = '“' + termName(ex, j.sp[0]) + '”', Y = '“' + termName(ex, j.sp[1]) + '”';
+  const f = j.form.charAt(0);
+  if (res.v === 'ok') return j.role === 'premise' ? '' : 'The figure bears this out.';
+  if (res.v === 'more') return 'The figure shows more than the premise says. Nothing in the premise says there is anything ' +
+    X + ' that is ' + (f === 'O' ? 'not ' : '') + Y + '; the figure has room for it only because one sphere is drawn larger than the other.';
+  if (res.v === 'empty') return 'This picks out an empty region: on the premise there is nothing ' + X + ' that is ' +
+    (f === 'O' ? 'not ' : '') + Y + '.' + (j.role === 'rejected' ? ' Hence the passage rejects it.' : '');
+  return res.open ? 'Does not follow from the figure: it leaves room for something ' + X + ' that is ' + (f === 'A' ? 'not ' : '') + Y + '.'
+                  : 'The figure contradicts this.';
+}
+
+// Which figure a passage gets, and what goes in it.
+function planFigure(ex) {
+  const J = ex.judgements, d = ex.diagram || {};
+  if (!J.length) return { type: 'schema', families: schemaFamilies(ex) };
+  if (d.config === 'mediate') return { type: 'mediate', cfg: configFor(ex) };
+  const square = ex.kinds.some(k => OPPOSITION.indexOf(k) >= 0) || d.type === 'square';
+  if (J.length === 1 && J[0].form.charAt(0) === 'S') return { type: 'singular', cfg: configFor(ex) };
+  if (square && J.every(j => 'AEIO'.indexOf(j.form) >= 0 && j.sp[0] === 'S' && j.sp[1] === 'P')) return { type: 'square' };
+  return { type: 'spheres', cfg: configFor(ex) };
+}
+
+function schemaFamilies(ex) {
+  if ((ex.diagram || {}).type === 'square') return ['vowels'];
+  const fam = [];
+  ex.kinds.forEach(k => {
+    const f = OPPOSITION.indexOf(k) >= 0 ? 'square' : k;
+    if (fam.indexOf(f) < 0) fam.push(f);
+  });
+  return fam.length > 1 ? fam.filter(f => f !== 'general') : fam;
+}
+
+// Corner of the square for a form, and the relation two corners stand in.
+const CORNER = { A: 0, E: 1, I: 2, O: 3 };
+function relationOf(a, b) {
+  const p = [a, b].sort().join('');
+  return { AE: 'contrary', IO: 'subcontrary', AO: 'contradictory', EI: 'contradictory', AI: 'subalternation', EO: 'subalternation' }[p];
+}
+
+/* ── Drawing: the spheres ─────────────────────────────────────────────────── */
+
+const NS = 'http://www.w3.org/2000/svg';
+const PW = 240, PH = 150;                       // a panel's drawing
+const FRAME = { x: 4, y: 4, width: 232, height: 142, rx: 10 };
+
+// Where each sphere stands in each drawing, where its name goes, and where a
+// mark of "something is here" goes in each cell. The geometry repeats from
+// panel to panel, so that figures can be compared across the sources.
+const GEO = {
+  A:   { S: { cx: 104, cy: 90, r: 30 }, P: { cx: 128, cy: 78, r: 60 },
+         lab: { S: [104, 90, 54], P: [152, 38, 74] }, non: [12, 138],
+         dot: { '11': [114, 110], '01': [166, 100], '00': [22, 22] } },
+  EQ:  { S: { cx: 120, cy: 76, r: 56 }, P: { cx: 120, cy: 76, r: 56 },
+         lab: { S: [120, 50, 96], P: [120, 104, 96] }, non: [12, 138], eq: [120, 79],
+         dot: { '11': [120, 122], '00': [22, 22] } },
+  E:   { S: { cx: 64, cy: 74, r: 44 }, P: { cx: 176, cy: 74, r: 44 },
+         lab: { S: [64, 70, 78], P: [176, 70, 78] }, non: [120, 140],
+         dot: { '10': [64, 98], '01': [176, 98], '00': [120, 24] } },
+  I:   { S: { cx: 92, cy: 74, r: 50 }, P: { cx: 148, cy: 74, r: 50 },
+         lab: { S: [66, 52, 56], P: [174, 52, 56] }, non: [120, 140],
+         dot: { '11': [120, 92], '10': [64, 96], '01': [176, 96], '00': [20, 22] } },
+  PT:  { S: { pt: [106, 92] }, P: { cx: 128, cy: 78, r: 60 },
+         lab: { S: [116, 96, 70, 'start'], P: [152, 38, 74] }, non: [12, 138],
+         dot: { '11': [106, 92], '01': [168, 108], '00': [22, 22] } },
+  PTN: { S: { pt: [34, 78] }, P: { cx: 152, cy: 78, r: 58 },
+         lab: { S: [26, 98, 60, 'start'], P: [152, 78, 90] }, non: [12, 138],
+         dot: { '10': [34, 78], '01': [152, 104], '00': [22, 22] } },
+  MED: { S: { cx: 100, cy: 100, r: 21 }, M: { cx: 110, cy: 88, r: 42 }, P: { cx: 124, cy: 77, r: 64 },
+         lab: { S: [100, 100, 38], M: [116, 63, 60], P: [160, 31, 64] }, non: [12, 138],
+         dot: { '111': [100, 112], '011': [136, 104], '001': [168, 72], '000': [22, 22] } }
+};
+GEO.O = GEO.I;
+GEO.MEDPT = Object.assign({}, GEO.MED, { S: { pt: [98, 102] }, lab: { S: [106, 106, 50, 'start'], M: [116, 63, 60], P: [160, 31, 64] } });
+
+function S(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+function flat(t) { return t.replace(/\s*\|?\s*\n\s*/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+// A label on a shape: wrapped onto two lines, and shrunk, if it is long.
+function label(svg, x, y, text, cls, maxw, anchor, big) {
+  let size = big && text.length <= 7 ? (text.length <= 2 ? 30 : 22) : 15, lines = [text];
+  const fits = (ls, s) => ls.every(l => l.length * s * 0.5 <= maxw);
+  if (!fits(lines, size)) {
+    const w = text.split(' ');
+    if (w.length > 1) {
+      let best = null;
+      for (let i = 1; i < w.length; i++) {
+        const ls = [w.slice(0, i).join(' '), w.slice(i).join(' ')];
+        const m = Math.max(ls[0].length, ls[1].length);
+        if (!best || m < best.m) best = { ls, m };
+      }
+      lines = best.ls;
+    }
+    while (size > 11 && !fits(lines, size)) size -= 0.5;
+  }
+  const t = S('text', { x, y: y - (lines.length - 1) * size * 0.55 + size * 0.35, class: 'lbl' + (cls ? ' ' + cls : ''),
+                        'text-anchor': anchor || 'middle', 'font-size': size }, svg);
+  lines.forEach((l, i) => { const ts = S('tspan', { x, dy: i ? size * 1.1 : 0 }, t); ts.textContent = l; });
+  S('title', {}, t).textContent = text;
+  return t;
+}
+
+// Fill one cell of a drawing: inside its own spheres, outside the others.
+function fillCell(svg, defs, geo, cfg, key, cls) {
+  const id = 'c' + (++uid);
+  const ins = [], outs = [];
+  cfg.terms.forEach((t, i) => {
+    const c = geo[t];
+    if (!c || c.pt) return;
+    (key[i] === '1' ? ins : outs).push(c);
+  });
+  let parent = svg;
+  ins.slice(1).forEach((c, n) => {
+    const cp = S('clipPath', { id: id + 'k' + n }, defs);
+    S('circle', { cx: c.cx, cy: c.cy, r: c.r }, cp);
+    parent = S('g', { 'clip-path': 'url(#' + id + 'k' + n + ')' }, parent);
+  });
+  let mask = null;
+  if (outs.length) {
+    mask = S('mask', { id: id + 'm' }, defs);
+    S('rect', { x: 0, y: 0, width: PW, height: PH, fill: '#fff' }, mask);
+    outs.forEach(c => S('circle', { cx: c.cx, cy: c.cy, r: c.r, fill: '#000' }, mask));
+  }
+  const shape = ins.length ? S('circle', { cx: ins[0].cx, cy: ins[0].cy, r: ins[0].r }) : S('rect', FRAME);
+  shape.setAttribute('class', cls);
+  if (mask) shape.setAttribute('mask', 'url(#' + id + 'm)');
+  parent.appendChild(shape);
+}
+
+// Normalise a judgement's form for drawing: a singular counts as a universal.
+function drawForm(form) { return form.charAt(0) === 'S' ? (form === 'S-' ? 'E' : 'A') : form; }
+
+// Draw one judgement on its figure.
+//   j      { form, sp: [X, Y] }
+//   names  term -> concept name
+//   opts   { supplied, small, nonP: whether to name what lies outside P }
+function sphereSVG(cfgKey, j, names, opts) {
+  opts = opts || {};
+  const cfg = CONFIGS[cfgKey], geo = GEO[cfgKey];
+  const svg = S('svg', { viewBox: '0 0 ' + PW + ' ' + PH, role: 'img' });
+  const defs = S('defs', {}, svg);
+  S('rect', Object.assign({ class: 'u' }, FRAME), svg);
+  const body = S('g', { class: opts.supplied ? 'sup' : null }, svg);
+  const f = drawForm(j.form), X = j.sp[0], Y = j.sp[1];
+  const inX = termTest(cfg, X);
+  const res = verdict(cfgKey, j.form, j.sp);
+  const live = k => cfg.cells[k] !== 'empty';
+  const cells = Object.keys(cfg.cells);
+  const pointX = cfg.point && X === 'S';
+
+  // What is shaded: the whole subject for A and E, the region claimed for I and O.
+  const shaded = (f === 'A' || f === 'E') ? cells.filter(k => inX(k) && live(k)) : res.region.filter(live);
+  if (!pointX) shaded.forEach(k => fillCell(body, defs, geo, cfg, k, 'emph'));
+
+  // The spheres, the one the judgement turns on drawn heavier.
+  const keyTerm = (f === 'A' || f === 'E') ? Y : X;
+  const keySphere = keyTerm === 'nonP' ? 'P' : keyTerm === 'SP' ? null : keyTerm;
+  cfg.terms.slice().reverse().forEach(t => {
+    const c = geo[t];
+    if (c.pt) return;
+    if (cfgKey === 'EQ' && t === 'S') return;    // one circle for two equal spheres
+    const cls = 'sph' + (t === 'M' ? ' mid' : t === keySphere || (cfgKey === 'EQ' && keySphere) ? ' key' : '');
+    S('circle', { cx: c.cx, cy: c.cy, r: c.r, class: cls }, body);
+  });
+  if (cfg.point) {
+    const p = geo.S.pt;
+    if (pointX) S('circle', { cx: p[0], cy: p[1], r: 9, class: 'emph' }, body);
+    S('circle', { cx: p[0], cy: p[1], r: 4.5, class: 'pt' }, body);
+  }
+
+  // A mark of "something is here", for I and O: solid where the premise puts it
+  // there, hollow with a query where the figure only leaves room for it.
+  if ((f === 'I' || f === 'O') && !pointX) {
+    const given = res.region.filter(k => cfg.cells[k] === 'given')[0];
+    const open = res.region.filter(k => cfg.cells[k] === 'open')[0];
+    const k = given || open;
+    if (k && geo.dot[k]) {
+      const d = geo.dot[k];
+      S('circle', { cx: d[0], cy: d[1], r: opts.small ? 8 : 4.5, class: given ? 'dot' : 'dot open' }, body);
+      if (!given) S('text', { x: d[0] + 7, y: d[1] + 4, class: 'qmark' }, body).textContent = '?';
+    }
+    if (!k) {
+      S('rect', { x: 62, y: 6, width: 116, height: 17, rx: 8.5, class: 'void' }, svg);
+      S('text', { x: 120, y: 19, 'text-anchor': 'middle', class: 'voidt' }, svg).textContent = '∅ no such region';
+    }
+  }
+
+  // Names on the shapes.
+  cfg.terms.forEach(t => {
+    const L = geo.lab[t];
+    if (!L) return;
+    label(svg, L[0], L[1], names[t] || t, t === keyTerm ? 'key' : t === 'M' ? 'key' : null, L[2], L[3], opts.small);
+  });
+  if (cfgKey === 'EQ') S('text', { x: geo.eq[0], y: geo.eq[1] + 4, 'text-anchor': 'middle', class: 'lbl soft' }, svg).textContent = '=';
+  if (opts.nonP) label(svg, geo.non[0], geo.non[1] - (opts.small ? 6 : 0), names.nonP, 'soft' + (keyTerm === 'nonP' ? ' key' : ''), 120,
+                       geo.non[0] < 60 ? 'start' : 'middle', opts.small);
+
+  svg.setAttribute('aria-label', describe(cfgKey, names) + ' Shaded: ' + describeShade(f, X, Y, names) + '.');
+  return { svg, res };
+}
+
+function describe(cfgKey, n) {
+  const s = n.S, p = n.P;
+  return {
+    A: 'The sphere of ' + s + ' lies inside the sphere of ' + p + '.',
+    EQ: 'The spheres of ' + s + ' and ' + p + ' coincide.',
+    E: 'The spheres of ' + s + ' and ' + p + ' lie apart.',
+    I: 'The spheres of ' + s + ' and ' + p + ' overlap.',
+    O: 'The spheres of ' + s + ' and ' + p + ' overlap.',
+    PT: s + ' is a point inside the sphere of ' + p + '.',
+    PTN: s + ' is a point outside the sphere of ' + p + '.',
+    MED: 'The sphere of ' + s + ' lies inside that of ' + n.M + ', which lies inside that of ' + p + '.',
+    MEDPT: s + ' is a point inside the sphere of ' + n.M + ', which lies inside that of ' + p + '.'
+  }[cfgKey];
+}
+function describeShade(f, X, Y, n) {
+  const x = X === 'SP' ? n.P + ' ' + n.S : n[X], y = n[Y];
+  return f === 'A' || f === 'E' ? 'all of ' + x + (f === 'A' ? ', within ' : ', apart from ') + y
+       : 'what is ' + x + ' and ' + (f === 'O' ? 'not ' : '') + y;
+}
+
+// The names to draw: the example's terms, else the bare letters.
+function namesOf(ex) {
+  const T = (ex && ex.diagram && ex.diagram.terms) || {};
+  return { S: T.S || 'S', P: T.P || 'P', M: T.M || 'M', nonP: T.nonP || (T.P ? 'nicht ' + T.P : 'nicht-P') };
+}
+
+/* ── Drawing: the square of opposition ────────────────────────────────────── */
+
+const SQ = { w: 360, h: 252, c: [[104, 82], [256, 82], [104, 178], [256, 178]] };   // A E I O
+const SCHEMA_TEXT = { A: 'alle S sind P', E: 'kein S ist P', I: 'einige S sind P', O: 'einige S sind nicht P' };
+
+// A small Euler figure for a form, at a corner.
+function miniEuler(svg, x, y, form, k) {
+  const g = S('g', { transform: 'translate(' + x + ',' + y + ')' + (k ? ' scale(' + k + ')' : '') }, svg);
+  const c = (cx, cy, r, cls) => S('circle', { cx, cy, r, class: cls || 'sph' }, g);
+  if (form === 'A') { c(0, 0, 15); S('circle', { cx: -4, cy: 3, r: 7, class: 'emph' }, g); c(-4, 3, 7); }
+  if (form === 'E') { c(-11, 0, 9); c(11, 0, 9); }
+  if (form === 'I' || form === 'O') { c(-6, 0, 11); c(6, 0, 11); S('circle', { cx: form === 'I' ? 0 : -11, cy: 2, r: 2.6, class: 'dot' }, g); }
+  S('title', {}, g).textContent = FORM_NAME[form] + ': ' + SCHEMA_TEXT[form];
+}
+
+function wrapLines(text, max) {
+  const words = text.split(' '), lines = [''];
+  words.forEach(w => {
+    const cur = lines[lines.length - 1];
+    if (cur && (cur + ' ' + w).length > max) lines.push(w); else lines[lines.length - 1] = cur ? cur + ' ' + w : w;
+  });
+  if (lines.length > 2) { lines.length = 2; lines[1] = lines[1].replace(/\s*\S*$/, '') + ' …'; }
+  return lines;
+}
+
+// spec: { at: { A: [judgement...], ... }, on: [relation keys], no: [relation keys],
+//         arrow: [fromCorner, toCorner], schematic, actual }
+function squareSVG(spec) {
+  const svg = S('svg', { viewBox: '0 0 ' + SQ.w + ' ' + SQ.h, role: 'img' });
+  const P = SQ.c, F = ['A', 'E', 'I', 'O'];
+  const defs = S('defs', {}, svg);
+  const mk = 'a' + (++uid);
+  const m = S('marker', { id: mk, viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto' }, defs);
+  S('path', { d: 'M1 1L8 5L1 9', fill: 'none', stroke: '#5c3d1e', 'stroke-width': 1.8, 'stroke-linecap': 'round' }, m);
+
+  const EDGES = [
+    ['contrary', 0, 1, 'contrarie', [180, 74]],
+    ['subcontrary', 2, 3, 'subcontrarie', [180, 196]],
+    ['contradictory', 0, 3, 'contradictorie', [180, 126]],
+    ['contradictory', 1, 2, null, null],
+    ['subalternation', 0, 2, 'subalternae', [88, 132, 'end']],
+    ['subalternation', 1, 3, 'subalternae', [272, 132, 'start']]
+  ];
+  EDGES.forEach(([rel, a, b, text, at]) => {
+    const pair = F[a] + F[b];
+    const on = spec.on.indexOf(pair) >= 0 || spec.on.indexOf(rel) >= 0;
+    const no = spec.no.indexOf(pair) >= 0;
+    const pa = P[a], pb = P[b];
+    const shrink = (p, q, d) => { const dx = q[0] - p[0], dy = q[1] - p[1], L = Math.hypot(dx, dy); return [p[0] + dx * d / L, p[1] + dy * d / L]; };
+    const s = shrink(pa, pb, 17), e = shrink(pb, pa, 17);
+    const line = S('line', { x1: s[0], y1: s[1], x2: e[0], y2: e[1], class: 'edge' + (no ? ' no' : on ? ' on' : '') }, svg);
+    const arrow = spec.arrow && ((spec.arrow[0] === a && spec.arrow[1] === b) || (spec.arrow[0] === b && spec.arrow[1] === a));
+    if (arrow) {
+      if (spec.arrow[0] === b) { line.setAttribute('x1', e[0]); line.setAttribute('y1', e[1]); line.setAttribute('x2', s[0]); line.setAttribute('y2', s[1]); }
+      line.setAttribute('marker-end', 'url(#' + mk + ')');
+    }
+    if (no) {
+      const mx = (pa[0] + pb[0]) / 2, my = (pa[1] + pb[1]) / 2;
+      const g = S('g', { stroke: '#8a2b1c', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, svg);
+      S('line', { x1: mx - 6, y1: my - 6, x2: mx + 6, y2: my + 6 }, g);
+      S('line', { x1: mx + 6, y1: my - 6, x2: mx - 6, y2: my + 6 }, g);
+    }
+    if (text && rel !== 'contradictory') {
+      const t = S('text', { x: at[0], y: at[1], 'text-anchor': at[2] || 'middle', class: 'elab' + (no ? ' no' : on ? ' on' : '') }, svg);
+      t.textContent = no ? 'no inference' : text;
+    }
+  });
+  // The diagonals share one label, at the crossing; left out when another relation is the point.
+  const dOn = ['AO', 'EI'].some(p => spec.on.indexOf(p) >= 0) || spec.on.indexOf('contradictory') >= 0;
+  const dNo = ['AO', 'EI'].some(p => spec.no.indexOf(p) >= 0);
+  if (dOn || dNo || spec.schematic || !spec.on.length) {
+    S('rect', { x: 136, y: 115, width: 88, height: 15, fill: '#fbf8ef' }, svg);
+    S('text', { x: 180, y: 126, 'text-anchor': 'middle', class: 'elab' + (dNo ? ' no' : dOn ? ' on' : '') }, svg)
+      .textContent = dNo ? 'no inference' : 'contradictorie';
+  }
+
+  F.forEach((form, i) => {
+    const [x, y] = P[i];
+    const js = spec.at[form] || [];
+    const g = S('g', { class: 'corner' + (js.length ? '' : ' empty') }, svg);
+    if (js.length) g.dataset.n = js.map(j => j.n).join(' ');
+    S('rect', { x: x - 14, y: y - 14, width: 28, height: 28, rx: 3, class: 'cbox' + (js.length || spec.schematic ? '' : ' blank') }, g);
+    S('text', { x, y: y + 5.5, 'font-size': 15, class: 'cletter' + (js.length || spec.schematic ? '' : ' blank') }, g).textContent = form;
+    miniEuler(svg, x + (i % 2 ? 42 : -42), y, form);
+    // The passage's own judgement at its corner; or, in a schematic square, the bare form.
+    let lines = [], cls = 'ctext';
+    if (js.length) lines = wrapLines(js.map(j => flat(j.t)).join(' / '), 25);
+    else if (spec.schematic) { lines = [SCHEMA_TEXT[form]]; cls = 'ctext none'; }
+    // A truth value the passage states goes on a line of its own.
+    const tv = js.filter(j => j.tv)[0];
+    const n = lines.length + (tv ? 1 : 0);
+    const y0 = i < 2 ? y - 31 - 15 * (n - 1) : y + 36;
+    const tx = S('text', { x, y: y0, 'text-anchor': 'middle', class: cls }, g);
+    lines.forEach((l, k) => { const ts = S('tspan', { x, dy: k ? 15 : 0 }, tx); ts.textContent = l; });
+    if (tv) {
+      const ts = S('tspan', { x, dy: lines.length ? 15 : 0, class: 'tvtag' }, tx);
+      ts.textContent = tv.tv === 'false' ? '— said to be false' : '— said to be true';
+    }
+    if (js.length) S('title', {}, g).textContent = js.map(j => flat(j.t) + ' (' + FORM_NAME[j.form] + ')').join('; ');
+  });
+  return svg;
+}
+
+// The square for a passage: its judgements at their corners, and its relation drawn.
+function squareFigure(ex) {
+  const at = {};
+  ex.judgements.forEach(j => { (at[j.form] = at[j.form] || []).push(j); });
+  const forms = Object.keys(at);
+  const on = [], actual = [];
+  for (let a = 0; a < forms.length; a++) for (let b = a + 1; b < forms.length; b++) {
+    const pair = [forms[a], forms[b]].sort().join('');     // as the edges are named: AE IO AO EI AI EO
+    const rel = relationOf(forms[a], forms[b]);
+    actual.push({ rel, pair });
+    if (ex.kinds.indexOf(rel) >= 0) on.push(pair);
+  }
+  // The passage's kinds pick the relation; where the judgements written out stand
+  // in another one, the square shows the one they stand in, and says so.
+  let mismatch = null;
+  if (!on.length && actual.length) { actual.forEach(r => on.push(r.pair)); mismatch = actual.map(r => r.rel); }
+  const no = ex.invalid ? on.splice(0) : [];
+  const pre = ex.judgements.filter(j => j.role === 'premise')[0], con = ex.judgements.filter(j => j.role === 'conclusion')[0];
+  // An arrow only where the passage goes down from a universal to its particular:
+  // between opposites the square says what is compatible, not what follows.
+  const arrow = pre && con && relationOf(pre.form, con.form) === 'subalternation' ? [CORNER[pre.form], CORNER[con.form]] : null;
+  const svg = squareSVG({ at, on, no, arrow, schematic: false });
+  svg.setAttribute('aria-label', 'Square of opposition. ' + forms.map(f => f + ': ' + at[f].map(j => flat(j.t)).join(' / ')).join('. ') +
+    '. Relation drawn: ' + (mismatch || ex.kinds.filter(k => OPPOSITION.indexOf(k) >= 0)).join(', ') + '.');
+  return { svg, mismatch };
+}
+
+/* ── Figures for a passage ────────────────────────────────────────────────── */
+
+const ROLE_ORDER = { premise: 0, member: 0, major: 0, minor: 1, intermediate: 1, conclusion: 2, rejected: 3 };
+const STEP = { conversion: ['→', 'per conversionem'], contraposition: ['→', 'per contra­positionem'],
+               aequipollentia: ['≡', 'gleich­geltend'], subalternation: ['↓', 'subalternatio'] };
+const PROV = 'Solid: in the passage. Dashed: supplied here. The concept names, and which judgement is read as subject and predicate, are the annotator’s.';
+
+function stepEl(sym, words) {
+  const s = el('div', 'step', sym);
+  s.setAttribute('aria-hidden', 'true');
+  if (words) s.append(el('small', null, words));
+  return s;
+}
+
+function formBadge(form, stated) {
+  const f = el('span', 'form' + (stated ? '' : ' inferred'), form);
+  f.title = FORM_NAME[form] + (stated ? ', as the passage says' : ', read off the sentence; the passage does not say');
+  return f;
+}
+
+// The caption under one panel: who it is, what it says, and what the figure says of it.
+function panelCaption(ex, it, res, isBase) {
+  const j = it.j, cap = el('div', 'pcap');
+  cap.append(el('span', 'role', it.supplied ? 'Supplied · not in the passage' : (ROLE_LABEL[j.role] || j.role) + (j.via ? ' · by ' + VIA[j.via] : '')));
+  if (it.supplied) {
+    cap.append(formBadge(j.form, false), el('span', 'gloss', it.supplied));
+    return cap;
+  }
+  cap.append(formBadge(j.form, j.formStated), el('q', null, flat(j.t)));
+  if (j.tv) cap.append(el('span', 'tv', j.tv === 'false' ? 'said to be false' : 'said to be true'));
+  if (j.supply) cap.append(el('span', 'gloss', 'read as “' + j.supply + '”'));
+  if (!isBase && res) {
+    let text = verdictText(ex, j, res);
+    if (res.v === 'ok' && ex.kinds.indexOf('aequipollentia') >= 0) text = 'Same figure, same claim: the two say the same thing.';
+    if (text) cap.append(el('div', 'verdict ' + res.v, text));
+  }
+  return cap;
+}
+
+function panelFor(ex, cfgKey, it, names, nonP, isBase) {
+  const out = sphereSVG(cfgKey, it.j, names, { supplied: !!it.supplied, nonP });
+  const p = el('div', 'panel' + (it.supplied ? ' supplied' : ''));
+  if (!it.supplied && it.j.n != null) p.dataset.n = it.j.n;
+  p.append(out.svg, panelCaption(ex, it, out.res, isBase));
+  return { p, res: out.res };
+}
+
+// Conversion, contraposition, equipollence: one drawing, a panel per judgement.
+function spheresFigure(ex, fig) {
+  const names = namesOf(ex), d = ex.diagram || {};
+  const J = ex.judgements.slice().sort((a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role] || a.n - b.n);
+  const base = J.filter(j => j.role === 'premise')[0] || J.filter(j => j.role === 'member' && j.form === 'A')[0] || J[0];
+  const nonP = J.some(j => j.sp.indexOf('nonP') >= 0);
+  const items = [];
+  if (d.config === 'S<P' && !J.some(j => j.role === 'premise'))
+    items.push({ j: { form: 'A', sp: ['S', 'P'], role: 'premise' },
+                 supplied: 'The premise the figure assumes, which this passage does not repeat: every “' + names.S + '” is “' + names.P + '”.' });
+  J.forEach(j => items.push({ j }));
+  if (ex.kinds.indexOf('conversion') >= 0 && J.length === 1 && J[0].role === 'premise') {
+    const p = J[0], conv = { A: 'I', E: 'E', I: 'I' }[p.form];
+    if (conv) items.push({ j: { form: conv, sp: [p.sp[1], p.sp[0]], role: 'conclusion' },
+                           supplied: 'The converse, which the passage does not write out.' });
+  }
+  const kindKey = ex.kinds.filter(k => STEP[k])[0];
+  const box = el('div', 'panels');
+  const verdicts = [];
+  items.forEach((it, i) => {
+    const isBase = it.j === base || (it.supplied && it.j.role === 'premise');
+    const { p, res } = panelFor(ex, fig.cfg, it, names, nonP, isBase);
+    if (!isBase && !it.supplied) verdicts.push({ id: ex.id, n: it.j.n, role: it.j.role, v: res.v });
+    if (!i) { box.append(p); return; }
+    // The step travels with the panel it leads to, so a wrapped row never ends on an arrow.
+    const j = it.j;
+    const step = j.role === 'rejected' ? stepEl('↛', 'rejected')
+               : j.via ? stepEl(STEP[j.via] ? STEP[j.via][0] : '→', STEP[j.via] ? STEP[j.via][1] : '')
+               : kindKey ? stepEl(STEP[kindKey][0], STEP[kindKey][1]) : stepEl('→');
+    const w = el('div', 'pstep');
+    w.append(step, p);
+    box.append(w);
+  });
+  fig.verdicts = verdicts;
+  if (items.length <= 2) box.classList.add('few');
+  return { body: box, title: 'Spheres', caption: 'One drawing for every panel; only the shading moves: “der Materie nach eins, nur Form verschieden” (Wiener Logik, AA 24:938).' };
+}
+
+// A counter-example: nested spheres, the middle term marked.
+function mediateFigure(ex, fig) {
+  const names = namesOf(ex), d = ex.diagram || {};
+  const con = ex.judgements.filter(j => j.role === 'conclusion')[0] || ex.judgements[0];
+  const out = sphereSVG(fig.cfg, { form: con.form, sp: ['S', 'P'] }, names, {});
+  const L = GEO[fig.cfg].lab.M;
+  S('text', { x: L[0], y: L[1] + 15, 'text-anchor': 'middle', class: 'lbl soft', 'font-size': 11.5 }, out.svg).textContent = 'middle term';
+  const p = el('div', 'panel wide');
+  p.dataset.n = con.n;
+  p.append(out.svg);
+  const rows = ex.judgements.map(j => ({ j, role: j.role === 'premise' ? (j.sp.indexOf('M') >= 0 && j.sp.indexOf('P') >= 0 ? 'major' : 'minor') : j.role }))
+    .concat((d.supplied || []).map(s => ({ j: s, role: s.role, supplied: true })));
+  rows.sort((a, b) => ROLE_ORDER[a.role] - ROLE_ORDER[b.role]);
+  const ul = el('ul', 'syllogism');
+  rows.forEach(r => {
+    const li = el('li', r.supplied ? 'supplied' : '');
+    li.append(el('span', 'rl', ROLE_LABEL[r.role] || r.role));
+    if (r.supplied) { li.append(el('i', null, r.j.t), el('span', 'sup', 'supplied, not in the passage')); }
+    else { li.dataset.n = r.j.n; li.append(el('q', null, flat(r.j.t))); if (r.j.supply) li.append(el('span', 'sup', 'read as “' + r.j.supply + '”')); }
+    ul.append(li);
+  });
+  const box = el('div', 'panels');
+  const right = el('div');
+  right.style.flex = '1 1 220px';
+  right.append(ul);
+  box.append(p, right);
+  return { body: box, title: 'Spheres, with a middle term',
+           caption: 'Not immediate: to reach “' + flat(con.supply || con.t) + '” the figure needs a third sphere, “' + names.M + '”, between “' + names.S + '” and “' + names.P + '”.' };
+}
+
+// A singular judgement: its subject is one thing, drawn as a point.
+function singularFigure(ex, fig) {
+  const names = namesOf(ex), j = ex.judgements[0];
+  const box = el('div', 'panels');
+  box.append(panelFor(ex, fig.cfg, { j }, names, false, true).p);
+  if (ex.kinds.indexOf('contradictory') >= 0) {
+    const w = el('div', 'pstep');
+    box.append(w);
+    w.append(stepEl('⟷', 'contra­dictorie'));
+    const neg = { form: j.form === 'S+' ? 'S-' : 'S+', sp: j.sp, role: 'member' };
+    w.append(panelFor(ex, j.form === 'S+' ? 'PTN' : 'PT', { j: neg,
+      supplied: 'Its contradictory, which the passage does not write out: the same subject, “' + names.S + '”, ' + (j.form === 'S+' ? 'outside' : 'inside') + ' “' + names.P + '”.' },
+      names, false, true).p);
+  }
+  box.classList.add('few');
+  return { body: box, title: 'Spheres, singular', caption: 'A singular judgement: its subject is one thing, drawn as a point. Its contradictory keeps the same subject.' };
+}
+
+function squareFigureBox(ex) {
+  const { svg, mismatch } = squareFigure(ex);
+  const box = el('div', 'fig-square');
+  box.append(svg);
+  const rels = ex.kinds.filter(k => OPPOSITION.indexOf(k) >= 0);
+  let cap = 'The passage’s own judgements at their corners, universals above and particulars below; the ' +
+            (mismatch || rels).join(' and ') + ' relation drawn heavy.';
+  if (mismatch) cap += ' The judgements written out stand in this relation, though the passage is filed under ' + rels.join(' and ') +
+                       '; the square shows the relation they actually stand in.';
+  if (ex.invalid) cap += ' Crossed: the inference the passage rules out.';
+  return { body: box, title: 'Square of opposition', caption: cap };
+}
+
+// No instance: the kind in general, with bare letters, all of it supplied.
+function schemaFigure(ex, fig) {
+  const box = el('div');
+  const L = { S: 'S', P: 'P', M: 'M', nonP: 'nicht-P' };
+  const row = (label, pairs, sym, words) => {
+    const r = el('div', 'schema-row');
+    const lab = el('div', 'rl');
+    lab.innerHTML = label;
+    r.append(lab);
+    pairs.forEach((pr, i) => {
+      if (i) r.append(stepEl(sym, words));
+      const p = el('div', 'panel supplied');
+      p.append(sphereSVG(pr[0], { form: pr[1], sp: pr[2] }, L, { supplied: true, nonP: pr[3], small: true }).svg);
+      r.append(p);
+    });
+    box.append(r);
+  };
+  fig.families.forEach(f => {
+    if (f === 'square' || f === 'vowels') {
+      const on = f === 'square' ? ex.kinds.filter(k => OPPOSITION.indexOf(k) >= 0) : [];
+      const sq = el('div', 'fig-square');
+      const svg = squareSVG({ at: {}, on, no: [], schematic: true });
+      svg.setAttribute('aria-label', 'Schematic square of opposition, ' + (on.length ? on.join(', ') + ' drawn heavy' : 'the four forms'));
+      sq.append(svg);
+      box.append(sq);
+    }
+    if (f === 'conversion') {
+      row('<b>A → I</b><br>per accidens', [['A', 'A', ['S', 'P']], ['A', 'I', ['P', 'S']]], '→');
+      row('<b>E → E</b><br>simpliciter', [['E', 'E', ['S', 'P']], ['E', 'E', ['P', 'S']]], '→');
+      row('<b>I → I</b><br>simpliciter', [['I', 'I', ['S', 'P']], ['I', 'I', ['P', 'S']]], '→');
+    }
+    if (f === 'contraposition') row('<b>A → E</b><br>alle S sind P; was nicht P ist, ist nicht S', [['A', 'A', ['S', 'P'], true], ['A', 'E', ['nonP', 'S'], true]], '→');
+    if (f === 'aequipollentia') row('<b>A ≡ E</b><br>alle S sind P; kein S ist nicht-P', [['A', 'A', ['S', 'P'], true], ['A', 'E', ['S', 'nonP'], true]], '≡');
+    if (f === 'general') {
+      row('<b>unmittelbar</b><br>absque medio termino', [['A', 'A', ['S', 'P']], ['A', 'I', ['P', 'S']]], '→');
+      row('<b>mittelbar</b><br>per terminum medium', [['MED', 'A', ['S', 'P']]], '');
+    }
+  });
+  return { body: box, title: 'Schematic',
+           caption: 'The passage writes out no instance, so the letters stand for any concepts. This is the kind in general, not a reading of the passage.' };
+}
+
+function buildFigure(ex) {
+  const fig = ex.fig;
+  const fe = el('figure', 'card-fig');
+  let made;
+  try {
+    made = fig.type === 'spheres' ? spheresFigure(ex, fig) : fig.type === 'square' ? squareFigureBox(ex)
+         : fig.type === 'mediate' ? mediateFigure(ex, fig) : fig.type === 'singular' ? singularFigure(ex, fig) : schemaFigure(ex, fig);
+  } catch (err) {
+    fig.error = err.message;
+    fe.append(el('p', 'broken', 'The figure could not be drawn: ' + err.message));
+    return fe;
+  }
+  const head = el('div', 'fig-head');
+  head.append(el('span', 'ft', made.title));
+  const T = (ex.diagram && ex.diagram.terms) || null;
+  if (T && fig.type !== 'schema') {
+    const t = el('span', 'terms');
+    t.title = 'The concept names are the annotator’s short forms';
+    ['S', 'M', 'P', 'nonP'].forEach((k, i) => {
+      if (!T[k]) return;
+      if (t.childNodes.length) t.append(' · ');
+      t.append((k === 'nonP' ? 'nicht-P' : k) + ' = ', el('i', null, T[k]));
+    });
+    head.append(t);
+  }
+  fe.append(head, made.body);
+  const cap = el('figcaption', null, made.caption);
+  cap.append(el('span', 'prov', fig.type === 'schema' ? 'Dashed throughout: nothing in this figure is from the passage.' : PROV));
+  fe.append(cap);
+  return fe;
+}
+
+/* ── Cards ────────────────────────────────────────────────────────────────── */
+
+function pageRange(a, b) { return a === b || b == null ? String(a) : a + '–' + b; }
+
+function parasLabel(paras) {
+  if (!paras || !paras.length) return '';
+  const p = paras.slice().sort((a, b) => a - b);
+  if (p.length === 1) return '§ ' + p[0];
+  const run = p.every((v, i) => i === 0 || v === p[i - 1] + 1);
+  return '§§ ' + (run ? p[0] + '–' + p[p.length - 1] : p.join(', '));
+}
+
+function phaseTip(e) {
+  try { return 'Adickes’ phase ' + e.phRaw + ' — ' + (e.ph || []).map(s => s + ': ' + phaseYears(s)).join('; '); }
+  catch (err) { return 'Adickes’ phase ' + e.phRaw; }
+}
+
+function citation(ex) {
+  const src = SOURCES[ex.src];
+  const cite = el('div', 'cite');
+  if (ex.src === 'refl16') {
+    cite.append(el('span', 'work', 'Refl. ' + ex.r));
+    if (ex.pageFrom != null) cite.append(el('span', 'aa', 'AA 16:' + pageRange(ex.pageFrom, ex.pageTo)));
+    const e = ex.entry;
+    if (e) {
+      const lab = parasLabel(e.paras);
+      if (lab) {
+        const own = e.src === 'locus';
+        const a = el('span', 'sub' + (own ? '' : ' inferred'), 'on Meier ' + lab);
+        a.title = own ? 'From the Reflexion’s own locus note: ' + (e.loc && e.loc.raw)
+                : e.src === 'group' ? 'From the Academy’s block heading, not from a locus note of this Reflexion'
+                                    : 'No § is stated; interpolated from the neighbouring Reflexionen';
+        cite.append(a);
+      }
+      const ph = el('span', 'sub', 'phase ' + e.phRaw);
+      ph.title = phaseTip(e);
+      cite.append(ph);
+    }
+  } else {
+    cite.append(el('span', 'work', src.label));
+    if (ex.pageFrom != null) cite.append(el('span', 'aa', 'AA 24:' + pageRange(ex.pageFrom, ex.pageTo)));
+    cite.append(el('span', 'sub', src.date));
+    if (ex.msFrom != null) cite.append(el('span', 'sub', 'Ms. p. ' + pageRange(ex.msFrom, ex.msTo)));
+  }
+  const a = el('a', 'permalink', '¶ ' + ex.id);
+  a.href = '#ex-' + ex.id;
+  a.title = 'Link to this passage';
+  cite.append(a);
+  return cite;
+}
+
+function chip(label, value, cls, title) {
+  const c = el('span', 'chip' + (cls ? ' ' + cls : ''));
+  if (title) c.title = title;
+  if (label) c.append(el('b', null, label));
+  c.append(value);
+  return c;
+}
+
+function chips(ex) {
+  const box = el('div', 'chips');
+  ex.kinds.forEach(k => box.append(chip('', KINDS[k].label.toLowerCase(), ex.named ? '' : 'inferred',
+    ex.named ? 'The passage itself names this kind' : 'Filed here from the shape of the example or its place in Meier; the passage does not name the kind')));
+  if (ex.sub) box.append(chip('', ex.sub, ex.named ? '' : 'inferred', 'The species'));
+  const pre = ex.judgements.filter(j => j.role === 'premise')[0], con = ex.judgements.filter(j => j.role === 'conclusion')[0];
+  const pair = ex.judgements.filter(j => j.role === 'member');
+  if (pre && con) { const c = chip('', '', '', 'The forms of premise and conclusion'); c.append(pre.form, el('span', 'arrow', '→'), con.form); box.append(c); }
+  else if (pair.length > 1) box.append(chip('', pair.map(j => j.form).join(' · '), '', 'The forms of the judgements set against each other'));
+  if (!ex.judgements.length) box.append(chip('', 'rule, no instance', '', 'The passage states a rule or names the kind, and writes out no judgement'));
+  if (ex.counter) box.append(chip('', 'not immediate', 'bad', 'Offered as a counter-example'));
+  if (ex.invalid) box.append(chip('', 'inference ruled out', 'bad', 'The passage rules an inference out'));
+  return box;
+}
+
+function buildQuote(ex) {
+  const q = el('blockquote');
+  q.lang = 'de';
+  const marks = ex.judgements.filter(j => j.at >= 0).map(j => ({ j, at: j.at, end: j.at + j.t.length })).sort((a, b) => a.at - b.at);
+  let pos = 0;
+  marks.forEach(m => {
+    if (m.at < pos) return;
+    if (m.at > pos) q.append(ex.quote.slice(pos, m.at));
+    const mk = el('mark', m.j.role === 'conclusion' || m.j.role === 'rejected' ? m.j.role : '');
+    mk.append(ex.quote.slice(m.at, m.end));
+    const sup = el('sup', m.j.formStated ? '' : 'inferred', m.j.form);
+    mk.append(sup);
+    mk.dataset.n = m.j.n;
+    mk.tabIndex = 0;
+    mk.title = (ROLE_LABEL[m.j.role] || '') + ' · ' + FORM_NAME[m.j.form] + (m.j.formStated ? '' : ' (form read off the sentence)');
+    q.append(mk);
+    pos = m.end;
+  });
+  if (pos < ex.quote.length) q.append(ex.quote.slice(pos));
+  return q;
+}
+
+function flagsFor(id) {
+  const out = [];
+  const mis = typeof MISCATEGORISATIONS !== 'undefined' ? MISCATEGORISATIONS : [];
+  const dia = typeof DIAGRAM_FLAGS !== 'undefined' ? DIAGRAM_FLAGS : [];
+  mis.filter(e => e.id === id).forEach(e => (e.reports || []).forEach(r => out.push({ about: 'categorisation', r })));
+  dia.filter(e => e.id === id).forEach(e => (e.reports || []).forEach(r => out.push({ about: 'diagram', r })));
+  return out;
+}
+function problemLabel(about, key) {
+  const p = (PROBLEMS[about] || []).filter(x => x[0] === key)[0];
+  return p ? p[1] : key;
+}
+
+// Light up a judgement everywhere it appears in its card: the quote, the panel, the corner.
+function light(card, n) {
+  const want = n == null ? [] : String(n).split(' ');
+  card.querySelectorAll('[data-n]').forEach(x => {
+    const has = x.dataset.n.split(' ').some(v => want.indexOf(v) >= 0);
+    x.classList.toggle('lit', has);
+  });
+}
+
+function buildCard(ex) {
+  const card = el('article', 'card' + (ex.judgements.length ? '' : ' rule'));
+  card.id = 'ex-' + ex.id;
+  const text = el('div', 'card-text');
+  text.append(citation(ex));
+  if (!ex.ok) text.append(el('p', 'broken', 'This quotation was not found in the shared transcript data, so its page may be wrong. It is shown as the examples file gives it.'));
+  text.append(buildQuote(ex), chips(ex));
+  if (ex.counter) text.append(el('p', 'why', ex.counter));
+  if (ex.invalid) text.append(el('p', 'why', ex.invalid));
+  if (ex.note) text.append(el('p', 'note', ex.note));
+  const fl = flagsFor(ex.id);
+  if (fl.length) {
+    const box = el('div', 'flags');
+    fl.forEach(f => {
+      const d = el('div', 'flag');
+      d.append('⚑ Flagged: ' + (f.about === 'diagram' ? 'the figure' : 'miscategorised') +
+               (f.r.problem && f.r.problem.length ? ' (' + f.r.problem.map(p => problemLabel(f.about, p)).join(', ') + ')' : '') +
+               (f.r.flaggedOn ? ', ' + f.r.flaggedOn : '') + (f.r.details ? ' — ' : ''));
+      if (f.r.details) d.append(el('q', null, f.r.details.length > 240 ? f.r.details.slice(0, 240) + '…' : f.r.details));
+      box.append(d);
+    });
+    text.append(box);
+  }
+  const tools = el('div', 'tools');
+  const rb = el('button', 'tbtn', 'Report a problem');
+  rb.type = 'button';
+  rb.addEventListener('click', () => openReport(ex));
+  tools.append(rb);
+  text.append(tools);
+  card.append(text, buildFigure(ex));
+  card.addEventListener('mouseover', e => { const t = e.target.closest('[data-n]'); light(card, t ? t.dataset.n : null); });
+  card.addEventListener('mouseleave', () => light(card, null));
+  card.addEventListener('focusin', e => { const t = e.target.closest('[data-n]'); light(card, t ? t.dataset.n : null); });
+  return card;
+}
+
+/* ── The map of the kinds ──────────────────────────────────────────────────── */
+
+function iconSVG(type) {
+  const svg = S('svg', { viewBox: '0 0 200 74', class: 'icon', 'aria-hidden': 'true' });
+  const txt = (x, y, s, size, cls, anchor) => {
+    const t = S('text', { x, y, 'text-anchor': anchor || 'middle', 'font-size': size || 13, class: cls || 'lbl' }, svg);
+    t.textContent = s;
+    return t;
+  };
+  const arrow = (x1, x2, y) => {
+    S('line', { x1, y1: y, x2, y2: y, stroke: '#5c3d1e', 'stroke-width': 1.6 }, svg);
+    S('path', { d: 'M' + (x2 - 6) + ' ' + (y - 4) + 'L' + x2 + ' ' + y + 'L' + (x2 - 6) + ' ' + (y + 4), fill: 'none', stroke: '#5c3d1e', 'stroke-width': 1.6 }, svg);
+  };
+  if (type === 'sub') {
+    miniEuler(svg, 56, 30, 'A', 1.5); miniEuler(svg, 144, 30, 'I', 1.5); arrow(86, 114, 30);
+    txt(62, 66, 'alle', 12.5, 'lbl soft'); txt(138, 66, 'einige', 12.5, 'lbl soft');
+  }
+  if (type === 'square') {
+    const c = [[56, 13], [144, 13], [56, 61], [144, 61]], L = ['A', 'E', 'I', 'O'];
+    [[0, 1], [2, 3], [0, 3], [1, 2], [0, 2], [1, 3]].forEach(([a, b]) =>
+      S('line', { x1: c[a][0], y1: c[a][1], x2: c[b][0], y2: c[b][1], class: 'edge', 'stroke-width': 1.2 }, svg));
+    c.forEach((p, i) => {
+      S('rect', { x: p[0] - 11, y: p[1] - 11, width: 22, height: 22, rx: 2, class: 'cbox' }, svg);
+      S('text', { x: p[0], y: p[1] + 5, class: 'cletter', 'font-size': 14 }, svg).textContent = L[i];
+    });
+  }
+  if (type === 'conv' || type === 'contrap') {
+    txt(44, 42, 'S', 24, 'lbl key'); txt(66, 42, 'P', 24, 'lbl key');
+    if (type === 'conv') arrow(86, 116, 34); else arrow(78, 102, 34);
+    if (type === 'conv') { txt(138, 42, 'P', 24, 'lbl key'); txt(160, 42, 'S', 24, 'lbl key'); }
+    else { txt(140, 42, 'nicht-P', 19, 'lbl key'); txt(188, 42, 'S', 24, 'lbl key'); }
+    txt(100, 66, type === 'conv' ? 'metathesis terminorum' : 'terms transposed, quality changed', 12, 'lbl soft');
+  }
+  if (type === 'general') {
+    S('circle', { cx: 40, cy: 28, r: 17, class: 'sph' }, svg); S('circle', { cx: 36, cy: 32, r: 8, class: 'sph key' }, svg);
+    txt(40, 64, 'unmittelbar', 12, 'lbl soft');
+    S('circle', { cx: 150, cy: 28, r: 19, class: 'sph' }, svg); S('circle', { cx: 147, cy: 31, r: 12, class: 'sph mid' }, svg);
+    S('circle', { cx: 145, cy: 33, r: 5, class: 'sph key' }, svg);
+    txt(150, 64, 'mittelbar', 12, 'lbl soft');
+
+  }
+  if (type === 'aeq') {
+    txt(72, 42, 'A', 26, 'lbl key'); txt(100, 42, '≡', 26, 'lbl key'); txt(128, 42, 'E', 26, 'lbl key');
+    txt(100, 64, 'the same, in other words', 12, 'lbl soft');
+  }
+  return svg;
+}
+
+function kindButton(k) {
+  const b = el('button', 'kbtn');
+  b.type = 'button';
+  b.dataset.kind = k;
+  b.append(KINDS[k].label, el('span', 'n', ''));
+  b.addEventListener('click', () => { setKind(kind === k ? 'all' : k); document.getElementById('groups').scrollIntoView({ behavior: 'smooth' }); });
+  return b;
+}
+
+function buildMap() {
+  const heads = document.getElementById('heads');
+  HEADS.forEach(h => {
+    const d = el('div', 'head');
+    d.append(el('h2', null, h.title));
+    const q = el('p', 'kq', '„' + h.q + '“');
+    q.lang = 'de';
+    d.append(q, iconSVG(h.icon));
+    const btns = el('div', 'btns');
+    h.kinds.forEach(k => btns.append(kindButton(k)));
+    d.append(btns);
+    heads.append(d);
+  });
+  const apart = document.getElementById('apart');
+  [['general', 'general', 'What an immediate inference is, and the counter-examples offered against it.', false],
+   ['aequipollentia', 'aeq', 'Not in Kant’s list. “Gar kein Schluß”, says Blomberg.', true]].forEach(([k, icon, words, setApart]) => {
+    const d = el('div', 'head' + (setApart ? ' set-apart' : ''));
+    d.append(iconSVG(icon));
+    const t = el('div', 'txt');
+    t.append(el('h2', null, KINDS[k].label), el('p', 'kq', words));
+    const btns = el('div', 'btns');
+    btns.append(kindButton(k));
+    t.append(btns);
+    d.append(t);
+    apart.append(d);
+  });
+  const all = el('button', 'kbtn all');
+  all.type = 'button';
+  all.dataset.kind = 'all';
+  all.append('All kinds', el('span', 'n', ''));
+  all.addEventListener('click', () => setKind('all'));
+  apart.append(all);
+}
+
+/* ── Filters and rendering ────────────────────────────────────────────────── */
+
+const fold = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/ß/g, 'ss');
+
+function haystack(ex) {
+  if (ex._hay) return ex._hay;
+  const T = (ex.diagram && ex.diagram.terms) || {};
+  const parts = [ex.id, ex.quote, ex.note || '', ex.counter || '', ex.invalid || '', ex.sub || '', SOURCES[ex.src].label,
+    ex.r ? 'refl. ' + ex.r + ' refl ' + ex.r : '', ex.pageFrom != null ? 'aa ' + (ex.src === 'refl16' ? 16 : 24) + ':' + ex.pageFrom : '']
+    .concat(ex.judgements.map(j => j.t + ' ' + (j.supply || ''))).concat(Object.keys(T).map(k => T[k]));
+  ex._hay = fold(parts.join(' \n '));
+  return ex._hay;
+}
+
+function passes(ex, ignoreKind, ignoreSource) {
+  if (!ignoreKind && kind !== 'all' && ex.kinds.indexOf(kind) < 0) return false;
+  if (!ignoreSource && !sources.has(ex.src)) return false;
+  if (onlyJudgements && !ex.judgements.length) return false;
+  if (query && haystack(ex).indexOf(fold(query)) < 0) return false;
+  return true;
+}
+
+const cardCache = new Map();
+function cardFor(ex) {
+  if (!cardCache.has(ex.id)) cardCache.set(ex.id, buildCard(ex));
+  return cardCache.get(ex.id);
+}
+
+function render() {
+  const hits = examples.filter(ex => passes(ex));
+  const main = document.getElementById('groups');
+  const nodes = [];
+  const order = kind === 'all' ? KIND_ORDER : [kind];
+  order.forEach(g => {
+    const mine = hits.filter(ex => kind === 'all' ? ex.kinds[0] === g : true);
+    if (!mine.length) return;
+    const sec = el('section', 'group');
+    sec.id = 'group-' + g;
+    const h = el('h2', null, KINDS[g].title);
+    h.append(el('span', 'de', KINDS[g].de), el('span', 'n', mine.length + (mine.length === 1 ? ' passage' : ' passages')));
+    const blurb = el('p', 'blurb', KINDS[g].text + ' ');
+    blurb.append(el('span', 'by', 'A summary of what the passages say, not the Academy Edition’s words.'));
+    sec.append(h, blurb);
+    mine.forEach(ex => sec.append(cardFor(ex)));
+    nodes.push(sec);
+  });
+  main.replaceChildren(...nodes);
+  document.getElementById('empty').hidden = hits.length > 0;
+  refreshCounts(hits);
+}
+
+function refreshCounts(hits) {
+  document.querySelectorAll('.kbtn').forEach(b => {
+    const k = b.dataset.kind;
+    const n = examples.filter(ex => passes(ex, true) && (k === 'all' || ex.kinds.indexOf(k) >= 0)).length;
+    b.querySelector('.n').textContent = n;
+    b.setAttribute('aria-pressed', String(kind === k));
+  });
+  document.querySelectorAll('.sbtn').forEach(b => {
+    const s = b.dataset.src;
+    b.setAttribute('aria-pressed', String(sources.has(s)));
+    b.querySelector('.c').textContent = examples.filter(ex => ex.src === s && passes(ex, false, true)).length;
+  });
+  const st = document.getElementById('status');
+  st.replaceChildren();
+  const b = el('b', null, String(hits.length));
+  st.append(b, ' of ' + examples.length + ' passages');
+  if (kind !== 'all') {
+    st.append(' · ' + KINDS[kind].label);
+    const x = el('button', null, 'show all kinds');
+    x.type = 'button';
+    x.addEventListener('click', () => setKind('all'));
+    st.append(x);
+  }
+  document.getElementById('ksel').value = kind;
+}
+
+function setKind(k) {
+  kind = k;
+  history.replaceState(null, '', k === 'all' ? location.pathname + location.search : '#' + k);
+  render();
+}
+
+function buildBar() {
+  const box = document.getElementById('srcs');
+  SOURCE_KEYS.forEach(s => {
+    const b = el('button', 'sbtn');
+    b.type = 'button';
+    b.dataset.src = s;
+    b.title = SOURCES[s].label + ', ' + SOURCES[s].date + '. Click to show or hide; double-click to show it alone.';
+    b.append(SOURCES[s].short, el('span', 'd c', ''));
+    b.addEventListener('click', () => {
+      if (sources.has(s) && sources.size > 1) sources.delete(s); else sources.add(s);
+      render();
+    });
+    b.addEventListener('dblclick', () => { sources = new Set([s]); render(); });
+    box.append(b);
+  });
+  const sel = document.getElementById('ksel');
+  sel.append(new Option('All kinds', 'all'));
+  KIND_ORDER.forEach(k => sel.append(new Option(KINDS[k].label, k)));
+  sel.addEventListener('change', () => setKind(sel.value));
+  document.getElementById('onlyj').addEventListener('change', e => { onlyJudgements = e.target.checked; render(); });
+  let t = null;
+  document.getElementById('q').addEventListener('input', e => {
+    clearTimeout(t);
+    t = setTimeout(() => { query = e.target.value.trim(); render(); }, 140);
+  });
+}
+
+function jumpTo(id) {
+  const ex = examples.filter(e => e.id === id)[0];
+  if (!ex) return;
+  if (!passes(ex)) { kind = 'all'; sources = new Set(SOURCE_KEYS); query = ''; onlyJudgements = false;
+                     document.getElementById('q').value = ''; document.getElementById('onlyj').checked = false; render(); }
+  const card = document.getElementById('ex-' + id);
+  if (!card) return;
+  card.scrollIntoView({ block: 'start' });
+  card.classList.remove('flash');
+  void card.offsetWidth;
+  card.classList.add('flash');
+}
+
+function readHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (KINDS[h]) { kind = h; return null; }
+  if (h.indexOf('ex-') === 0) return h.slice(3);
+  return null;
+}
+
+/* ── Reporting a problem, through a GitHub issue ──────────────────────────── */
+
+function buildReportForm() {
+  [['categorisation', 'rep-cat'], ['diagram', 'rep-fig']].forEach(([about, id]) => {
+    const box = document.getElementById(id);
+    PROBLEMS[about].concat([['other', 'something else']]).forEach(([key, words]) => {
+      const l = el('label');
+      const c = el('input');
+      c.type = 'checkbox';
+      c.value = key;
+      c.dataset.about = about;
+      l.append(c, words);
+      box.append(l);
+    });
+  });
+  const dlg = document.getElementById('report');
+  document.getElementById('rep-cancel').addEventListener('click', () => dlg.close());
+  document.getElementById('rep-send').addEventListener('click', sendReport);
+  document.getElementById('rep-copy').addEventListener('click', async () => {
+    const r = reportText();
+    if (!r) return;
+    try { await navigator.clipboard.writeText(r.body); msg('Copied. Paste it into a new issue at github.com/' + REPO + '/issues.'); }
+    catch (e) { msg('The browser would not copy it. Select the text you typed and copy it by hand.'); }
+  });
+}
+
+function msg(t) { document.getElementById('rep-msg').textContent = t; }
+
+function openReport(ex) {
+  reporting = ex;
+  const where = ex.src === 'refl16' ? 'Refl. ' + ex.r + ', AA 16:' + pageRange(ex.pageFrom, ex.pageTo)
+                                    : SOURCES[ex.src].label + ', AA 24:' + pageRange(ex.pageFrom, ex.pageTo);
+  document.getElementById('rep-what').textContent = ex.id + ' · ' + where + ' · filed under ' +
+    ex.kinds.map(k => KINDS[k].label.toLowerCase()).join(', ') + ' · figure: ' + ex.fig.type;
+  document.querySelectorAll('#report input[type=checkbox]').forEach(c => { c.checked = false; });
+  document.getElementById('rep-details').value = '';
+  msg('This opens a filled-in issue on GitHub, where you press Submit. You need a GitHub account.');
+  document.getElementById('report').showModal();
+}
+
+function reportText() {
+  const ex = reporting;
+  const details = document.getElementById('rep-details').value.trim();
+  const picked = about => Array.from(document.querySelectorAll('#report input[data-about=' + about + ']:checked')).map(c => c.value);
+  const cat = picked('categorisation'), fig = picked('diagram');
+  if (!cat.length && !fig.length && !details) { msg('Tick what is wrong, or say so in the box.'); return null; }
+  const flags = [];
+  if (cat.length || (!fig.length && details)) flags.push({ about: 'categorisation', id: ex.id, problem: cat.length ? cat : ['other'], details });
+  if (fig.length) flags.push({ about: 'diagram', id: ex.id, kind: ex.kinds[0], type: ex.fig.type, problem: fig, details });
+  const payload = { format: FLAGS_FORMAT, tool: 'immediate-inferences-drawn', flags };
+  const summary = flags.map(f => '- `' + f.id + '` — ' + (f.about === 'diagram' ? 'figure (' + f.type + ')' : 'categorisation') + ': ' +
+    f.problem.map(p => p === 'other' ? 'something else' : problemLabel(f.about, p)).join(', ')).join('\n');
+  const body = summary + (details ? '\n\n> ' + details.replace(/\n+/g, '\n> ') : '') +
+    '\n\n```json\n' + JSON.stringify(payload, null, 1) + '\n```\n\nSent from `Individuals/Nik Land/immediate-inferences-drawn.html`. ' +
+    'Accepted flags go into `miscategorisations.js` or `diagram-flags.js` beside it.';
+  return { title: 'Flag: ' + ex.id + (fig.length ? ' (figure)' : ''), body };
+}
+
+function sendReport() {
+  const r = reportText();
+  if (!r) return;
+  let url = 'https://github.com/' + REPO + '/issues/new?title=' + encodeURIComponent(r.title) + '&body=' + encodeURIComponent(r.body);
+  if (url.length > URL_MAX) {
+    url = 'https://github.com/' + REPO + '/issues/new?title=' + encodeURIComponent(r.title);
+    navigator.clipboard.writeText(r.body).catch(() => {});
+    msg('Too long for one link: the report is copied, so paste it into the issue.');
+  }
+  const w = window.open(url, '_blank');
+  if (w) w.opener = null;
+  if (!w) {
+    const a = el('a', null, 'Open the GitHub issue');
+    a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    const m = document.getElementById('rep-msg');
+    m.replaceChildren('The browser blocked the new tab. ', a, '.');
+    return;
+  }
+  document.getElementById('report').close();
+}
+
+/* ── Legend ───────────────────────────────────────────────────────────────── */
+
+function buildLegend() {
+  const box = document.getElementById('legend');
+  const item = (draw, words) => {
+    const d = el('div');
+    const svg = S('svg', { viewBox: '0 0 74 46', 'aria-hidden': 'true' });
+    draw(svg);
+    d.append(svg, el('span', null, words));
+    box.append(d);
+  };
+  const c = (svg, cx, cy, r, cls) => S('circle', { cx, cy, r, class: cls }, svg);
+  item(s => { c(s, 37, 23, 18, 'sph'); }, 'The sphere of a concept: everything it applies to.');
+  item(s => { c(s, 37, 23, 18, 'emph'); c(s, 37, 23, 18, 'sph'); }, 'Shaded: what the judgement is about.');
+  item(s => { c(s, 30, 23, 16, 'sph key'); c(s, 46, 23, 16, 'sph'); c(s, 38, 25, 3.5, 'dot'); }, 'A heavy circle is the sphere the judgement turns on; a dot, that something is there (“einige”).');
+  item(s => { c(s, 30, 23, 16, 'sph'); c(s, 46, 23, 16, 'sph'); c(s, 54, 25, 3.5, 'dot open'); S('text', { x: 60, y: 29, class: 'qmark' }, s).textContent = '?'; },
+       'A hollow dot with a query: the figure has room for something there, but the premise does not say there is.');
+  item(s => { const g = S('g', { class: 'sup' }, s); c(g, 37, 23, 18, 'sph'); }, 'Dashed: supplied here, not in the passage.');
+  item(s => { S('rect', { x: 6, y: 15, width: 62, height: 16, rx: 8, class: 'void' }, s); S('text', { x: 37, y: 27, 'text-anchor': 'middle', class: 'voidt' }, s).textContent = '∅'; },
+       'An empty region: nothing can be there.');
+  item(s => { S('line', { x1: 6, y1: 16, x2: 68, y2: 16, class: 'edge on' }, s); S('line', { x1: 6, y1: 32, x2: 68, y2: 32, class: 'edge' }, s); },
+       'In the square, a heavy edge is the relation the passage turns on.');
+  item(s => { S('line', { x1: 6, y1: 23, x2: 68, y2: 23, class: 'edge no' }, s);
+              const g = S('g', { stroke: '#8a2b1c', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, s);
+              S('line', { x1: 31, y1: 17, x2: 43, y2: 29 }, g); S('line', { x1: 43, y1: 17, x2: 31, y2: 29 }, g); },
+       'A red crossed edge: an inference the passage rules out.');
+}
+
+/* ── For checking the page from a script ──────────────────────────────────── */
+
+window.selfCheck = function () {
+  const types = {}, verdicts = [], errors = [];
+  examples.forEach(ex => {
+    cardFor(ex);
+    types[ex.fig.type] = (types[ex.fig.type] || 0) + 1;
+    (ex.fig.verdicts || []).forEach(v => { if (v.v !== 'ok') verdicts.push(v); });
+    if (ex.fig.error) errors.push(ex.id + ': ' + ex.fig.error);
+  });
+  return { total: examples.length, quotesFound: examples.filter(ex => ex.ok).length,
+           notFound: examples.filter(ex => !ex.ok).map(ex => ex.id), types, verdicts, errors };
+};
+
+/* ── Init ─────────────────────────────────────────────────────────────────── */
+
+function init() {
+  loadExamples();
+  buildMap();
+  buildBar();
+  buildLegend();
+  buildReportForm();
+  const target = readHash();
+  render();
+  if (target) jumpTo(target);
+  window.addEventListener('hashchange', () => {
+    const t = readHash();
+    if (t) jumpTo(t); else render();
+  });
+}
+
+init();
+</script>
+</body>
+</html>

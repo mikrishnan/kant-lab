@@ -111,9 +111,25 @@ A pull request that changes a pipeline's commands or what an extractor knows upd
 this section in the same pull request. Since this file is outside the owners' folders,
 that also brings in the professor's approval.
 
-`textutil` is macOS-only, so as things stand **regenerating needs a Mac**. Committing its
-`.txt` output, so that the Python steps run anywhere, is the open task in
-[docs/todo-in-repo.md](docs/todo-in-repo.md).
+`textutil` is macOS-only. Committing its `.txt` output, so that the Python steps run
+anywhere, is the open task in [docs/todo-in-repo.md](docs/todo-in-repo.md).
+
+**Without a Mac**, LibreOffice's text conversion serves for the Logik transcripts and the
+Reflexionen, once three things it adds and `textutil` does not are removed: a byte-order
+mark, the two InteLex link-image lines (`previous.png ¬`, `next.png ¬`), and
+`Attachment.png ¬` wherever the transcription has an embedded image, which `textutil`
+drops without trace. From files cleaned that way the extractors reproduced the
+`textutil`-built data byte for byte (October 2026). That has **not** been checked for the
+*Metaphysica* itself (`parse_baum.py`), which leans on `textutil`'s U+2028 line separators.
+
+```sh
+mkdir -p /tmp/rtf && cp Textfiles/Vol16reflexionenMeier.rtfd/TXT.rtf /tmp/rtf/vol16.rtf   # and so on
+soffice --headless --convert-to 'txt:Text (encoded):UTF8' --outdir /tmp/rtf /tmp/rtf/*.rtf
+sed -e '1s/^\xEF\xBB\xBF//' -e '/^\(previous\|next\)\.png ¬$/d' -e 's/Attachment\.png ¬//g' \
+  /tmp/rtf/vol16.txt > /tmp/vol16.txt
+```
+
+Then run the pipeline's Python steps below on the cleaned files.
 
 ### The Reflexionen on Meier
 
@@ -211,6 +227,11 @@ Things the extractor knows about the AA's conventions, which are easy to break:
   (`γ? η? κ? λ? ν−ξ?? L 3'.`), so the sigla has to be peeled back off.
 - A capital `Α` (U+0391) in the transcription is an OCR artefact of Latin `A` ("Αus"),
   not a phase.
+- The sigla can go on past a page with no letter of its own: `L 95. 95'.` (the note runs
+  from p. 95 onto the interleaf), `M 147'. E II 797. 771.` (two Erdmann numbers),
+  `M. 277'.`. When the header line ends in bare numbers like these, they belong to the
+  sigla. Until October 2026 they were taken as the first line of the text, which opened
+  249 Reflexionen (50 in AA XVI, 199 in XVII–XVIII) with a stray `95'.`.
 
 ### The Logik transcripts of AA XXIV
 
@@ -254,6 +275,11 @@ What the extractor knows about these transcriptions, which is easy to break:
   page-sized fragments or runs unrelated paragraphs together. Tight against the
   preceding character it rejoins a split word (`Gewiß|heit` → `Gewißheit`); with a space
   before it, it fell between two whole words and becomes a space.
+- A paragraph that runs on across a page marker **starts on the page before it**, and
+  that is its `aa`. Until October 2026 the extractor gave it the page it runs *into*,
+  because the current page had already moved on when the paragraph was written out.
+  That put 290 paragraphs (148 Blomberg, 47 Busolt, 95 Wiener) a page late, and every
+  quotation from their opening part was cited one page too high.
 - `||` is not that. In the Wiener Logik `|| V` marks 57 passages and is kept verbatim.
 - `[471]` is the manuscript's own pagination, lifted out of the text into `ms` with the
   offset it stood at, as the AA pages are. Every other bracket is editorial and stays:

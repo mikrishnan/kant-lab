@@ -35,12 +35,12 @@ for its tool.
 
 | Lines | Contents |
 | --- | --- |
-| 1–950 | `<head>`, Google Fonts import, `:root` palette, all CSS |
-| 952–1015 | Markup: `#toc-panel` sidebar, `#top-bar`, `#reading-row` (= `#text-canvas` + `#refl-panel`), `#synopsis-overlay`, `#adickesVeil`; the three `<script src>` tags |
-| 1017–1100 | `KANT_REFS`, and the `SECTIONS` / `PARAGRAPHS` adapter over the generated data |
-| 1101–1400 | Text rendering, TOC building, the Synopsis overlay |
-| 1400–1870 | The Reflexionen layer: corpus, cards, panel, Adickes overlay, text highlighting |
-| 1870–1960 | Event wiring and init |
+| 1–1025 | `<head>`, Google Fonts import, `:root` palette, all CSS |
+| 1027–1104 | Markup: `#toc-panel` sidebar, `#top-bar` (with the lookup box and its `#jumpMsg` note), `#reading-row` (= `#text-canvas` + `#refl-panel`), `#synopsis-overlay`, `#adickesVeil`; the three `<script src>` tags |
+| 1105–1143 | `KANT_REFS`, and the `SECTIONS` / `PARAGRAPHS` adapter over the generated data |
+| 1144–1464 | Text rendering, TOC building, the Synopsis overlay |
+| 1465–2272 | The Reflexionen layer: corpus, cards, panel; the § and AA-page lookup (1763–2035); Adickes overlay, text highlighting |
+| 2273–end | Event wiring and init |
 
 Everything is rendered by JS into three empty containers (`#toc-scroll`, `#text-inner`,
 `#refl-scroll`); there is no static content in the markup.
@@ -195,6 +195,20 @@ before the text, flat and in reading order:
   panel rebuilt under them.
 - The sidebar filter matches the typed string against TOC item text, or an exact
   paragraph number.
+- `jumpToSection(raw)` — the top bar's `§ or AA` box, and `#go=…` in the address through
+  `goFromHash()`, on load and on `hashchange`. `parseLookup()` reads a § (`14`,
+  `§§ 220–222`) or an AA citation (`17:45`, `AA XVII 45`, `Ak. 17, 45`) into `{ para }`
+  or `{ vol, page }`. A printed § goes through `lookupShow()`, which calls
+  `scrollToPara()` and then centres the § again (see Gotchas). A page of AA 17 or 18 goes
+  through `goToBaumPage()`: `BAUM_PAGES`, the §§ on each page read off `MET_PARAGRAPHS`'
+  `aa`/`aaEnd`; AA 17:19–23 to `openSynopsis()`; then `notesOn()`, the Reflexionen whose
+  `aa`–`aaEnd` covers the page, shown at their first printed `paras` § through
+  `renderReflForPara()`, or in `showReflElsewhere()` when they have no §, with
+  `revealReflEntry()` bringing the card into view. `filedPhrase()` says how the § was
+  arrived at, in the terms of `provenance()`. Any other volume goes to `aaElsewhere()`,
+  which names the text and links to the Meier reader or the Logic Portal.
+  `showJumpMsg(html)` writes the note, from numbers and fixed text only: never echo what
+  was typed into it.
 
 ### The Reflexionen panel
 
@@ -210,7 +224,11 @@ before the text, flat and in reading order:
 - `watchParasInView()` keeps the panel on the § being read. It is an
   `IntersectionObserver` with a root margin that narrows the root to a band across
   the top of the canvas, **not** a scroll handler: there are 804 §§ and measuring
-  them all per frame is not affordable. The lowest § number in the band wins.
+  them all per frame is not affordable. The lowest § number in the band wins. While
+  `panelPinned` is set, by a lookup, it does nothing: the lookup's smooth scroll passes
+  other §§ and ends with its § mid-canvas, where the band would hand the panel to a
+  neighbour. A wheel, a touch, a pointer-down on the canvas, or a scrolling key releases
+  the pin.
 - `openAdickes(sym)` / `closeAdickes()` — Adickes' note on one phase of Kant's hand,
   from `phaseInfo()`, opened by a phase chip. Every qualification he attaches to a
   dating (`inherited`, `relative`, `covers`, `unlisted`, …) gets its own flag block;
@@ -229,7 +247,17 @@ before the text, flat and in reading order:
   the Academy Edition's, not the tool's, and the section carries the AA's own note
   saying so. Do not "fill it in" from another source without marking the provenance.
 - `scrollToPara` is called from an inline `onclick` in generated HTML, so it must stay a
-  global function declaration.
+  global function declaration. So is `jumpToSection`, from the `Go` button.
+- While the whole page scrolls (SPEC.md, Open question 1), `scrollToPara()`'s closing
+  `scrollIntoView` on the §'s table-of-contents entry moves the page to the entry and
+  away from the §. `lookupShow()` centres the § again afterwards; the other jumps (TOC,
+  cross-references, Synopsis links) do not yet.
+- The lookup box carries `lang="en"`. Without it the page's `lang="la"` turns u into v
+  in its English note too ("Bavmgarten", "conspectvs"); see SPEC.md, Open question 2.
+- `AA24_LECTURES`, the page ranges of the logic lectures in AA 24, repeats what the Logic
+  Portal's catalogue says (`Individuals/mikrishnan/portal/catalogue.js`), and the Meier
+  reader has the same table. If the portal gains a lecture or a range moves, change all
+  three.
 - Paragraph text goes through `innerHTML`. That is fine for this trusted, generated
   data; escape first if the source ever becomes dynamic.
 - A cross-reference to a § in the 504–699 gap (§ 700 opens with `Mutor, §. 505-699`)

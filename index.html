@@ -91,6 +91,57 @@
     line-height: 1.4;
   }
 
+  /* Look up a Reflexion: opens it in the Logic Portal */
+  form.lookup {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.6rem;
+    margin-top: 0.9rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(139, 94, 60, 0.35);
+  }
+
+  form.lookup label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+
+  form.lookup input {
+    flex: 1;
+    min-width: 12rem;
+    font: inherit;
+    font-size: 1rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--accent-light);
+    border-radius: 4px;
+    background: var(--parchment);
+    color: var(--ink);
+  }
+
+  form.lookup button {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    padding: 0.32rem 0.9rem;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background: var(--accent);
+    color: var(--parchment);
+    cursor: pointer;
+  }
+
+  form.lookup button:hover { background: var(--accent-light); }
+
+  form.lookup .hint {
+    flex-basis: 100%;
+    color: var(--faded);
+    font-size: 0.88rem;
+    font-style: italic;
+  }
+
   /* Works in progress: dashed, the suite's mark for what is not yet settled */
   ul.apps.wip li { border-style: dashed; }
 
@@ -117,6 +168,20 @@
 <main>
   <h1>Kant Lab</h1>
   <p class="tagline">Digital-humanities tools for reading the pre-Kantian German school philosophy that Kant lectured from.</p>
+
+  <h2>For the seminar</h2>
+  <ul class="apps">
+    <li>
+      <a href="Individuals/mikrishnan/portal/index.html">The Logic Portal</a>
+      <p>Ask the whole logic corpus a question at once: Meier, Baumgarten, the Reflexionen, the Blomberg, Wiener and Busolt lectures, and Jäsche, in every spelling. Any passage leads to the Meier § it is on, Kant's dated notes there and the other lectures on it. Built from the seminar's own tools.</p>
+      <form class="lookup" id="refl-lookup" action="Individuals/mikrishnan/portal/index.html">
+        <label for="refl-no">Look up a Reflexion</label>
+        <input id="refl-no" type="search" autocomplete="off" spellcheck="false" placeholder="4086, or a page: 16:236" aria-describedby="refl-hint">
+        <button type="submit">Open</button>
+        <span class="hint" id="refl-hint">Its number (Refl. 1619–6455) or its page in the Academy edition. It opens in the Logic Portal, beside the textbook § it is on.</span>
+      </form>
+    </li>
+  </ul>
 
   <h2>Tools</h2>
   <ul class="apps">
@@ -149,5 +214,18 @@
 
   <footer>Source on <a href="https://github.com/mikrishnan/kant-lab">GitHub</a> &middot; <a href="https://github.com/mikrishnan/kant-lab#how-work-happens">How to contribute</a>.</footer>
 </main>
+<script>
+  // The lookup box: a Reflexion's number, or a page of the Academy edition, opened in the Logic
+  // Portal (#refl=4086, #aa=16:236); anything else is searched for there.
+  document.getElementById('refl-lookup').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = document.getElementById('refl-no').value.trim();
+    if (!v) return;
+    var hash = /^(?:(?:refl(?:exion)?|rx?)\.?\s*(?:nr?\.?\s*)?)?\d{1,4}\.?$/i.test(v) ? 'refl=' + encodeURIComponent(v.replace(/\D/g, ''))
+      : /^(?:AA|Ak|KGS)\b|^([IVXL]+|\d{1,2})\s*[:.,]\s*\d{1,4}/i.test(v) ? 'aa=' + encodeURIComponent(v)
+      : 'q=' + encodeURIComponent(v);
+    location.href = this.getAttribute('action') + '#' + hash;
+  });
+</script>
 </body>
 </html>

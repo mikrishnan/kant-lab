@@ -117,9 +117,10 @@ keeps its meaning.*
    `§.25-30`). Clicking one goes to the first § it names and highlights it. Its tooltip
    names the others, as in "Jump to § 17 (also refs: §18)". At § 4, `§.1` goes to § 1.
 10. Clicking a § highlights it and fills both of the panel's tabs for it.
-11. Typing a number from 1 to 563 into the `§` box in the header and pressing Enter or
-    `Go` goes to that § and highlights it, and empties the box. Any other number does
-    nothing.
+11. Typing a number from 1 to 563 into the `§ or AA` box in the header and pressing Enter
+    or `Go` goes to that § and highlights it, and empties the box. A larger number says
+    there is no such §, and offers as links the pages of the Academy edition it could be:
+    `892` offers AA 24:892, in the Wiener Logik. The box also takes a page (items 38–44).
 
 ### Searching the text
 
@@ -212,6 +213,39 @@ keeps its meaning.*
 
 37. Dragging the bar between the text and the panel resizes the panel, between about 200
     and 600 pixels wide.
+
+### Looking up a § or a page
+
+38. The `§ or AA` box reads a page of the Academy edition as it is usually cited:
+    `16:236`, `AA 16:236`, `Ak. 16, 236`, `AA XVI 236`, `16 236`. A range, `16:712–713`,
+    goes to its first page; `§ 92` and `§§ 92–98` go to § 92. Anything else gets a line
+    saying what the box takes.
+39. A page of AA 16 that prints Meier's text goes to the first § on it and says which §§
+    the page prints: `16:870` gives "AA 16:870 prints §§ 542–549. Showing § 542."
+40. A page that prints only Kant's notes goes to the § the first of them is filed under,
+    opens the Reflexionen tab, and brings that note's card into view, picked out for a
+    moment. The note under the box says how the § was arrived at: `16:250` is Refl.
+    2141–2142, which "the Academy edition files … under §§ 92–98"; at `16:39`, Refl.
+    1619–1620, "the Academy edition names no § for Refl. 1619; this reader places it at
+    § 1 by inference."
+41. A page with neither says so, and goes to the nearest § before it: `16:7` goes to § 4.
+42. A page of another volume is not in this reader, and the note says where it is. AA 17
+    and 18 link to the Baumgarten reader at that page. AA 24 names the logic lecture the
+    page is in, with the page ranges of the Logic Portal's catalogue, and links to it in
+    the portal (`24:892` is in the Wiener Logik, AA 24:785–940), or says which two
+    lectures it falls between. AA 9 is the Jäsche *Logik*, also linked. AA 15 is in
+    neither reader.
+43. `#go=` and anything the box takes, at the end of the address, runs the same lookup
+    when the page opens or the address changes: `meier-reading-guide.html#go=16:250`.
+44. The note under the box stays until the next lookup, typing in the box, Escape, or its
+    `×`.
+
+### The sidebar at any window height
+
+45. With a Haupttheil open, the sidebar scrolls down to its last Abschnitt whatever the
+    window's height, and nothing at the bottom is cut off. At 1280 × 720 before October
+    2026, an open Erster Haupttheil was squeezed to fit the window and showed 231 of its
+    755 pixels.
 
 ## Out of scope
 

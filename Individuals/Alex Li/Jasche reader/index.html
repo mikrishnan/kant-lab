@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jäsche reader · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --rule: #cfc3a6;
+    --hit: rgba(214, 170, 60, 0.45);
+    /* dating classes: one blue, dark to light by decade (an ordinal ramp, checked on #fffaf0);
+       mixed dating is a hatched warm grey so that it cannot be read as a decade */
+    --d-early: 29, 53, 87;
+    --d-70s: 47, 93, 138;
+    --d-80s: 90, 139, 189;
+    --d-90s: 147, 181, 216;
+    --d-mixed: 156, 143, 120;
+    --d-undated: 190, 182, 168;
+    --hatch: repeating-linear-gradient(135deg, rgb(156,143,120) 0 2px, rgb(214,206,190) 2px 4px);
+    --panel-w: 480px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: var(--parchment); color: var(--ink); font-family: 'EB Garamond', serif; font-size: 1.05rem; line-height: 1.5; display: flex; flex-direction: column; overflow: hidden; }
+  button, select, input { font: inherit; color: inherit; }
+  a { color: var(--accent-light); }
+
+  header { border-bottom: 1px solid var(--accent-light); background: var(--parchment-dark); padding: 0.55rem 1.2rem; display: flex; align-items: baseline; gap: 1rem; flex: none; }
+  header h1 { font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: 0.04em; font-size: 1.12rem; color: var(--accent); }
+  header .sub { color: var(--faded); font-size: 0.9rem; font-style: italic; }
+  header nav { margin-left: auto; display: flex; gap: 1rem; font-size: 0.85rem; }
+  header nav a { color: var(--faded); }
+
+  .app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) var(--panel-w); }
+  .app.panel-off { grid-template-columns: minmax(0, 1fr) 2rem; }
+  .app.panel-off .panel { display: none; }
+  .reader, .panel { min-height: 0; display: flex; flex-direction: column; }
+  .panel { border-left: 1px solid var(--accent-light); background: #f9f4e8; }
+
+  /* ── left: toolbar, contents, text ─────────────────────────────────── */
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.8rem; padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--accent-light); background: var(--parchment); flex: none; }
+  .find { display: flex; align-items: center; gap: 0.3rem; flex: 1 1 14rem; min-width: 12rem; }
+  .bar input[type="search"] { flex: 1; min-width: 0; padding: 0.28rem 0.5rem; background: #fffaf0; border: 1px solid var(--accent-light); border-radius: 2px; }
+  .bar input[type="search"]:focus { outline: 2px solid rgba(139, 94, 60, 0.4); }
+  .btn { padding: 0.2rem 0.55rem; background: transparent; border: 1px solid var(--accent-light); border-radius: 2px; cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+  .btn:hover { background: var(--parchment-dark); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .count { font-size: 0.84rem; color: var(--faded); min-width: 4rem; text-align: center; white-space: nowrap; }
+  .opt { font-size: 0.85rem; color: var(--faded); display: inline-flex; gap: 0.25rem; align-items: center; cursor: pointer; white-space: nowrap; }
+  .goto { position: relative; }
+  .goto input { width: 11.5rem; padding: 0.28rem 0.5rem; background: #fffaf0; border: 1px solid var(--accent-light); border-radius: 2px; }
+  .goto input:focus { outline: 2px solid rgba(139, 94, 60, 0.4); }
+  .golist { position: absolute; left: 0; top: calc(100% + 3px); width: 17rem; background: #fffaf0; border: 1px solid var(--accent-light); box-shadow: 0 8px 22px rgba(60, 40, 10, 0.22); z-index: 20; font-size: 0.86rem; }
+  .golist button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 0.22rem 0.55rem; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .golist button:hover, .golist button.on { background: rgba(139, 94, 60, 0.18); }
+  .golist b { font-weight: 600; }
+  .golist .none { padding: 0.3rem 0.55rem; color: var(--faded); font-style: italic; white-space: normal; }
+  .xray { display: inline-flex; align-items: center; gap: 0.55rem; font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.07em; padding: 0.38rem 0.8rem; border: 1px solid rgb(var(--d-early)); border-radius: 2px; background: transparent; color: rgb(var(--d-early)); cursor: pointer; }
+  .xray i { width: 1.7rem; height: 0.9rem; border-radius: 0.45rem; background: var(--rule); position: relative; display: inline-block; transition: background 0.15s; }
+  .xray i::after { content: ''; position: absolute; left: 0.12rem; top: 0.12rem; width: 0.66rem; height: 0.66rem; border-radius: 50%; background: #fff; transition: left 0.15s; }
+  .xray[aria-pressed="true"] { background: rgb(var(--d-early)); color: #fff; }
+  .xray[aria-pressed="true"] i { background: rgb(var(--d-90s)); }
+  .xray[aria-pressed="true"] i::after { left: 0.92rem; }
+
+  .body { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.8rem 280px minmax(0, 1fr); }
+  .body.toc-off { grid-template-columns: 1.8rem minmax(0, 1fr); }
+  .body.toc-off .toc { display: none; }
+  /* rails: each side opens and closes from its own tab button */
+  .rail { background: var(--parchment); display: flex; flex-direction: column; align-items: center; gap: 0.4rem; padding-top: 0.55rem; min-height: 0; }
+  .rail.l { border-right: 1px solid var(--rule); }
+  .rail.r { border-left: 1px solid var(--accent-light); display: none; }
+  .app.panel-off .rail.r { display: flex; }
+  .vt { writing-mode: vertical-rl; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--accent); border: 1px solid var(--accent-light); border-radius: 3px; padding: 0.6rem 0.18rem; background: #efe7d4; cursor: pointer; }
+  .vt:hover { background: var(--parchment-dark); }
+  .vt[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .toc { border-right: 1px solid var(--rule); background: #f9f4e8; overflow-y: auto; padding: 0.7rem 0.4rem 3rem 0.7rem; font-size: 0.92rem; }
+  .toc h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.7rem; letter-spacing: 0.07em; color: var(--faded); }
+  .tochead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem; padding-right: 0.3rem; }
+  .seg { display: inline-flex; border: 1px solid var(--accent); border-radius: 2px; overflow: hidden; }
+  .seg button { background: transparent; border: none; padding: 0.08rem 0.45rem; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.05em; color: var(--accent); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .tocnote { font-size: 0.76rem; color: var(--faded); font-style: italic; line-height: 1.3; margin: 0 0.3rem 0.3rem 0; }
+  .tb { display: block; position: relative; height: 0.5rem; background: #ece3cf; border-radius: 1px; margin: 0.18rem 0 0.12rem; overflow: hidden; }
+  .tb span { position: absolute; top: 0; bottom: 0; }
+  .tb[data-stat]:hover { box-shadow: 0 0 0 1.5px var(--accent); }
+  .tip { position: fixed; z-index: 30; width: 16.5rem; background: #fffaf0; border: 1px solid var(--accent); box-shadow: 0 6px 18px rgba(60, 40, 10, 0.28); padding: 0.4rem 0.6rem 0.45rem; font-size: 0.84rem; line-height: 1.3; pointer-events: none; }
+  .tip .th { font-weight: 600; margin-bottom: 0.1rem; }
+  .tip .ts { font-size: 0.75rem; color: var(--faded); font-style: italic; margin: 0.1rem 0 0.2rem; }
+  .tip .tr { display: flex; align-items: center; gap: 0.1rem; padding: 0.05rem 0; }
+  .tip .tr b { margin-left: auto; font-weight: 600; min-width: 2.3rem; text-align: right; }
+  .tip .tr small { color: var(--faded); font-size: 0.75rem; min-width: 3.3rem; text-align: right; }
+  .tip .tr.un { border-top: 1px solid var(--rule); margin-top: 0.15rem; padding-top: 0.2rem; color: var(--faded); }
+  .toc .part { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--accent); margin: 0.8rem 0 0.2rem; }
+  .toc .row { display: flex; align-items: baseline; }
+  .toc button.t { flex: 1; text-align: left; background: transparent; border: none; cursor: pointer; padding: 0.1rem 0.35rem; border-radius: 2px; line-height: 1.3; color: var(--ink); }
+  .toc button.t:hover { background: var(--parchment-dark); }
+  .toc button.t.active { background: rgba(139, 94, 60, 0.18); font-weight: 600; }
+  .toc button.d { width: 1.1rem; background: transparent; border: none; cursor: pointer; color: var(--faded); font-size: 0.7rem; }
+  .toc .paras { margin: 0 0 0.3rem 1.1rem; border-left: 1px solid var(--rule); padding-left: 0.3rem; display: none; }
+  .toc .paras.open { display: block; }
+  .toc .paras button.t { font-size: 0.85rem; color: #4b3a22; }
+  .toc .rng { color: var(--faded); font-size: 0.78rem; }
+
+  .text { overflow-y: auto; padding: 1rem 1.5rem 5rem; background: #fffaf0; scroll-behavior: smooth; }
+  .inner { max-width: 44rem; margin: 0 auto; }
+  .work-meta { color: var(--faded); font-size: 0.86rem; margin-bottom: 0.8rem; }
+  .partlabel { font-family: 'Cinzel', serif; font-size: 0.78rem; letter-spacing: 0.08em; color: var(--accent-light); margin: 2.3rem 0 0.2rem; text-transform: uppercase; }
+  h2.sec { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.1rem; letter-spacing: 0.03em; color: var(--accent); margin: 1.5rem 0 0.2rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--rule); }
+  .secnote { color: var(--faded); font-size: 0.85rem; font-style: italic; margin-bottom: 0.7rem; }
+  h3.par { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.04em; color: var(--accent); margin: 1.4rem 0 0.4rem 3.4rem; }
+  h3.par span { font-family: 'EB Garamond', serif; font-weight: 500; font-size: 1.02rem; letter-spacing: 0; color: var(--ink); }
+  .blk { position: relative; padding-left: 3.4rem; margin-bottom: 0.8rem; border-radius: 3px; }
+  .blk .gut { position: absolute; left: 0; top: 0.4rem; width: 3rem; text-align: right; font-family: 'Cinzel', serif; font-size: 0.62rem; color: var(--faded); text-decoration: none; }
+  .blk .gut:hover { color: var(--accent); text-decoration: underline; }
+  .blk p { font-size: 1.1rem; line-height: 1.7; hyphens: auto; }
+  .blk.ctr p { text-align: center; font-style: italic; color: #4b3a22; }
+  .blk.flash { animation: flash 2.6s ease-out; }
+  @keyframes flash { 0% { background: rgba(214, 170, 60, 0.5); } 100% { background: transparent; } }
+  hr.rule { border: none; border-top: 1px solid var(--rule); margin: 0.9rem 0 0.9rem 3.4rem; }
+  .pg { font-family: 'Cinzel', serif; font-size: 0.6rem; color: var(--faded); vertical-align: 0.18em; white-space: nowrap; padding: 0 0.15rem; border: 1px solid var(--rule); border-radius: 2px; margin: 0 0.15rem; background: var(--parchment); }
+  .unset { color: #b3261e; font-weight: 600; }
+  mark.hit, .hit { background: var(--hit); color: inherit; border-radius: 2px; }
+  .hit.cur { outline: 2px solid var(--accent); }
+
+  /* X-Ray marks: the tint is the dating class, the underline the strength */
+  .m { background: rgba(var(--pc), 0.2); border-radius: 2px; cursor: pointer; }
+  .m.v { border-bottom: 3px solid rgb(var(--pc)); }
+  .m.c { border-bottom: 2px dashed rgb(var(--pc)); }
+  .m.k-mixed { background: repeating-linear-gradient(135deg, rgba(156,143,120,0.32) 0 3px, rgba(156,143,120,0.08) 3px 6px); }
+  .m:hover { filter: brightness(0.94); }
+  .m.sel { outline: 2px solid var(--ink); outline-offset: 1px; }
+  .rf { font-family: 'Cinzel', serif; font-size: 0.55rem; color: #fff; background: rgb(var(--pc)); padding: 0 0.22rem; border-radius: 2px; margin-left: 0.15rem; vertical-align: 0.55em; white-space: nowrap; letter-spacing: 0.02em; cursor: pointer; }
+  .rf.light { color: var(--ink); }
+  .rf.k-mixed { background: rgb(226,220,206); color: var(--ink); box-shadow: inset 0 0 0 1px rgb(156,143,120); }
+
+  /* ── right: tabs and their bodies ──────────────────────────────────── */
+  .tabs { display: flex; gap: 0.25rem; padding: 0.55rem 0.7rem 0; border-bottom: 1px solid var(--accent-light); background: var(--parchment); flex: none; }
+  .tab { flex: 1; text-align: center; padding: 0.35rem 0.2rem 0.4rem; font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.05em; color: var(--accent); border: 1px solid var(--accent-light); border-bottom: none; border-radius: 3px 3px 0 0; background: #efe7d4; cursor: pointer; line-height: 1.25; }
+  .tab:hover { background: var(--parchment-dark); }
+  .tab[aria-selected="true"] { background: #f9f4e8; position: relative; top: 1px; font-weight: 600; }
+  .tab .x { display: none; font-family: 'EB Garamond', serif; font-weight: 400; color: var(--faded); margin-left: 0.25rem; }
+  .tab[aria-selected="true"] .x { display: inline; }
+  .follow { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.9rem; background: #eef2f7; border-bottom: 1px solid #c9d6e6; font-size: 0.84rem; color: rgb(var(--d-early)); flex: none; }
+  .follow .dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: rgb(var(--d-70s)); box-shadow: 0 0 0 3px rgba(47, 93, 138, 0.18); flex: none; }
+  .follow.held { background: #f3ede2; border-bottom-color: var(--rule); color: var(--accent); }
+  .follow.held .dot { background: var(--accent); box-shadow: 0 0 0 3px rgba(92, 61, 30, 0.18); border-radius: 1px; }
+  .follow .hold { margin-left: auto; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.05em; padding: 0.12rem 0.5rem; border: 1px solid currentColor; border-radius: 2px; color: inherit; background: #fff; cursor: pointer; white-space: nowrap; }
+  .tab small { display: block; font-family: 'EB Garamond', serif; font-size: 0.74rem; letter-spacing: 0; color: var(--faded); font-weight: 400; }
+  .leg { display: flex; flex-wrap: wrap; gap: 0.15rem 0.75rem; padding: 0.4rem 0.9rem; border-bottom: 1px solid var(--rule); font-size: 0.8rem; color: var(--faded); align-items: center; flex: none; }
+  .sw { display: inline-block; width: 0.72rem; height: 0.72rem; border-radius: 2px; vertical-align: -0.08em; margin-right: 0.22rem; }
+  .sw.hatch { background: var(--hatch); }
+  .ls { display: inline-block; width: 1.3rem; height: 0; vertical-align: 0.2em; margin-right: 0.2rem; }
+  .pbody { flex: 1; min-height: 0; overflow-y: auto; padding: 0.75rem 0.95rem 3rem; scroll-behavior: smooth; }
+  .foot { padding: 0.4rem 0.95rem; border-top: 1px solid var(--rule); font-size: 0.74rem; color: var(--faded); background: var(--parchment); flex: none; }
+  .ptitle { font-family: 'Cinzel', serif; font-size: 0.78rem; letter-spacing: 0.04em; color: var(--accent); }
+  .ptitle span { font-family: 'EB Garamond', serif; font-size: 0.98rem; letter-spacing: 0; color: var(--ink); }
+  .summ { font-size: 0.88rem; color: #3d2e18; margin: 0.2rem 0 0.6rem; }
+  .lede { font-size: 0.86rem; color: var(--faded); font-style: italic; margin-bottom: 0.6rem; }
+  .box { background: #fffaf0; border: 1px solid var(--rule); border-radius: 3px; padding: 0.5rem 0.65rem; margin-bottom: 0.6rem; }
+  .box h5 { font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.06em; color: var(--faded); font-weight: 600; margin-bottom: 0.25rem; display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+  .tg { font-family: 'EB Garamond', serif; font-size: 0.74rem; letter-spacing: 0; padding: 0 0.35rem; border-radius: 2px; border: 1px dashed var(--accent-light); color: var(--accent-light); font-weight: 400; }
+  .tg.att { border-style: solid; border-color: var(--accent); color: var(--accent); }
+  .meta { font-size: 0.8rem; color: var(--faded); }
+  .muted { color: var(--faded); }
+  .empty { color: var(--faded); font-style: italic; padding: 0.5rem 0; }
+  svg text { font-family: 'EB Garamond', serif; }
+  svg .hov { cursor: pointer; }
+  svg .hov:hover { opacity: 0.8; }
+
+  .pair { border-left: 4px solid rgb(var(--pc)); padding: 0.25rem 0 0.3rem 0.6rem; margin: 0.35rem 0 0.7rem; border-radius: 2px; }
+  .pair.k-mixed { border-image: var(--hatch) 1; }
+  .pair.flash { animation: flash 2.6s ease-out; }
+  .pair .ph { display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+  .rnum { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.8rem; color: var(--accent); }
+  .phx { font-size: 0.95rem; font-weight: 600; }
+  .yrs { font-size: 0.8rem; color: var(--faded); }
+  .per { font-family: 'Cinzel', serif; font-size: 0.6rem; color: #fff; background: rgb(var(--pc)); padding: 0 0.32rem; border-radius: 2px; letter-spacing: 0.03em; }
+  .per.light { color: var(--ink); } .per.k-mixed { background: rgb(226,220,206); color: var(--ink); box-shadow: inset 0 0 0 1px rgb(156,143,120); }
+  .lab { font-family: 'Cinzel', serif; font-size: 0.58rem; letter-spacing: 0.06em; color: var(--faded); text-transform: uppercase; margin-top: 0.2rem; }
+  .jt, .rt { font-size: 0.92rem; line-height: 1.45; }
+  .jt { cursor: pointer; } .jt:hover { color: var(--accent); }
+  .rt { color: #3d2e18; font-style: italic; }
+  .miss { background: rgba(179,38,30,0.15); border-bottom: 1px solid rgba(179,38,30,0.6); font-style: normal; }
+  .extra { color: #a89a80; }
+  .linkbtn { background: none; border: none; color: var(--accent-light); text-decoration: underline; cursor: pointer; font-size: 0.8rem; padding: 0; }
+
+  /* one type scale for every chart and table: labels 0.62rem Cinzel, figures 0.84rem Garamond */
+  .tl { width: 100%; height: auto; display: block; }
+  .donut { width: 7.5rem; height: 7.5rem; flex: none; display: block; }
+  .ovrow { display: flex; gap: 0.9rem; align-items: center; }
+  .ovrow table.tot { flex: 1; margin-top: 0; }
+  .sub2 { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.06em; color: var(--faded); font-weight: 600; margin: 1rem 0 0.35rem; }
+  .sub2.first { margin-top: 0.1rem; }
+  .muted2 { font-family: 'EB Garamond', serif; font-weight: 400; letter-spacing: 0; font-size: 0.78rem; }
+  .meta.note { margin-top: 0.8rem; line-height: 1.4; }
+  .txopt { display: flex; margin: 0 0 0.6rem; }
+  .txs { border-top: 1px dashed #e2d8c2; padding-top: 0.35rem; margin-top: 0.4rem; }
+  .xcard { background: #f4f1ea; border: 1px dashed #9c8f78; border-left: 4px solid #9c8f78; border-radius: 3px; padding: 0.35rem 0.55rem; margin: 0.3rem 0 0.4rem; }
+  .xcard .ph { display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+  .xcard .wl { font-family: 'Cinzel', serif; font-weight: 600; font-size: 0.74rem; color: #4b3a22; }
+  .meter { margin-top: 0.6rem; }
+  .mtrack { height: 0.65rem; background: #ece3cf; border-radius: 3px; display: flex; overflow: hidden; }
+  .mtrack span { display: block; height: 100%; border-right: 2px solid #f9f4e8; }
+  .mkey { display: flex; flex-wrap: wrap; gap: 0.1rem 0.7rem; font-size: 0.84rem; color: #3d2e18; margin-top: 0.25rem; }
+  .mkey i { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 2px; margin-right: 0.2rem; vertical-align: -0.05em; }
+  table.tot { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-top: 0.2rem; }
+  table.tot th { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.05em; color: var(--faded); text-align: left; font-weight: 600; border-bottom: 1px solid var(--rule); padding: 0.15rem 0.25rem; }
+  table.tot td { padding: 0.12rem 0.25rem; border-bottom: 1px solid #ece3cf; }
+  table.tot td:nth-child(n+2), table.tot th:nth-child(n+2) { text-align: right; }
+
+  .fg { background: #fffaf0; border: 1px solid var(--rule); border-radius: 3px; padding: 0.45rem 0.65rem; margin-bottom: 0.55rem; }
+  .fg.hot { border-color: var(--ink); }
+  .fg h4 { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.05em; color: var(--accent); display: flex; gap: 0.45rem; align-items: center; }
+  .fg .cnt { margin-left: auto; font-family: 'EB Garamond', serif; font-size: 0.86rem; color: var(--ink); }
+  .fdot { width: 0.7rem; height: 0.7rem; border-radius: 50%; display: inline-block; flex: none; }
+  .fd { font-size: 0.8rem; color: var(--faded); font-style: italic; margin-bottom: 0.2rem; }
+  .fi { display: block; width: 100%; text-align: left; background: transparent; border: none; border-top: 1px dashed #e2d8c2; padding: 0.2rem 0; cursor: pointer; font-size: 0.88rem; }
+  .fi:hover { background: var(--parchment-dark); }
+  .fi .meta { display: block; font-size: 0.76rem; }
+  .busy { color: var(--faded); font-style: italic; padding: 0.4rem 0; }
+  .progress { height: 0.45rem; background: var(--parchment-dark); border-radius: 2px; overflow: hidden; margin: 0.5rem 0; }
+  .progress i { display: block; height: 100%; background: var(--accent-light); width: 0; transition: width 0.1s; }
+
+  @media (max-width: 1050px) {
+    body { overflow: auto; }
+    .app { display: block; }
+    .reader { height: 75vh; } .panel { height: 90vh; border-left: none; border-top: 1px solid var(--accent-light); }
+    .body, .body.toc-off { grid-template-columns: 1fr; } .toc, .rail { display: none !important; }
+    .app.panel-off .panel { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Jäsche reader</h1>
+  <span class="sub">Kant, Logik, ed. Jäsche (1800), AA IX · its sources in Kant’s Reflexionen, AA XVI</span>
+  <nav><a href="SPEC.md">spec</a><a href="mockup.html">design mockup</a><a href="../logic-corpus.html">Logic Corpus ↗</a></nav>
+</header>
+
+<div class="app" id="app">
+  <section class="reader" aria-label="Jäsche Logik">
+    <div class="bar">
+      <div class="find">
+        <input type="search" id="q" placeholder="Search the Jäsche text…" autocomplete="off" spellcheck="false" aria-label="Search the Jäsche text">
+        <button class="btn" id="prev" title="Previous hit (Shift+Enter)" disabled>↑</button>
+        <button class="btn" id="next" title="Next hit (Enter)" disabled>↓</button>
+        <span class="count" id="count"></span>
+      </div>
+      <label class="opt" title="Let one printed spelling find the others: Schluß · Schlüsse, Logik · Logic, Begriff · Begrif"><input type="checkbox" id="loose" checked> spelling-tolerant</label>
+      <div class="goto"><input type="search" id="goto" placeholder="Go to § or AA page…" autocomplete="off" spellcheck="false" aria-label="Go to a §, an AA 9 page, or a heading"><div class="golist" id="golist" hidden></div></div>
+      <button class="xray" id="xray" aria-pressed="false" title="Mark every sentence traced to one of Kant’s Reflexionen, coloured by the note’s dating">X-RAY MODE <i></i></button>
+    </div>
+    <div class="body" id="body">
+      <div class="rail l"><button class="vt" id="railToc" aria-pressed="true" title="Open or fold the contents">Contents</button></div>
+      <nav class="toc" id="toc" aria-label="Contents"></nav>
+      <div class="text" id="text"><div class="inner" id="inner"></div></div>
+    </div>
+  </section>
+
+  <aside class="panel" aria-label="Sources">
+    <div class="tabs" id="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="ov" aria-selected="true">Overview<span class="x" aria-hidden="true">×</span><small>the whole book</small></button>
+      <button class="tab" role="tab" data-tab="src" aria-selected="false">Sources<span class="x" aria-hidden="true">×</span><small id="tab-src">the § in view</small></button>
+      <button class="tab" role="tab" data-tab="fl" aria-selected="false">Flags<span class="x" aria-hidden="true">×</span><small id="tab-fl">places to look at</small></button>
+    </div>
+    <div class="follow" id="followbar" hidden></div>
+    <div class="leg" id="legend"></div>
+    <div class="pbody" id="pbody"></div>
+    <div class="foot" id="foot">A machine reading, not a finding. A sentence is traced to a Reflexion when at least 70% of its words appear in that note in the same order, after folding spelling; Adickes’ datings are his, shown as he gives them.</div>
+  </aside>
+  <div class="rail r" id="railR" aria-label="Open the panel">
+    <button class="vt" data-tab="ov">Overview</button><button class="vt" data-tab="src">Sources</button><button class="vt" data-tab="fl">Flags</button>
+  </div>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<!-- Shared data, as plain <script src> includes so the page still opens from a file:// URL.
+     The Jäsche Logik is Alex Li's own extraction (../logik-jasche-9.js); everything else is data/.
+     The three transcripts are read only when the Sources tab is asked for transcript parallels. -->
+<script src="../../../data/reflexionen-16-meier.js"></script>
+<script src="../../../data/phases-adickes.js"></script>
+<script src="../../../data/logik-blomberg-24.js"></script>
+<script src="../../../data/logik-busolt-24.js"></script>
+<script src="../../../data/logik-wiener-24.js"></script>
+<script src="../logik-jasche-9.js"></script>
+<script>
+/* Function words, left out when a sentence is compared with the transcripts by its content words alone */
+const JR_STOP_RAW = `der die das den dem des ein eine einer einem einen eines und oder aber auch als wie so zu zur zum von vom mit bei nach aus auf an in im ist sind war waren wird werden wurde wurden sein seine seiner seinem seinen seines ihr ihre ihrer ihren ihrem ihm ihn sie es er wir ich du man nicht nur noch schon wenn weil dass daß da dann denn doch dieser diese dieses diesem diesen jeder jede jedes jedem jeden welche welcher welches welchen welchem wo wer was dabei dadurch daher dafür dagegen damit dazu hier hin her über unter vor für gegen durch ohne um bis sich selbst kann können müssen muß soll sollen will wollen mehr mehrere viel viele allen alle aller alles einige einigen andere anderen anderer anderes anders sehr nun also ob oder sowohl noch entweder zwar nämlich eben ganz gar immer schon doch wohl bloß blos bloße bloßen nur sondern denn weiter weit hat haben hatte hatten habe hast gibt giebt geben gegeben gehört gehören gehen geht kommt kommen kommt lassen läßt läßt lässt machen macht gemacht sagen sagt gesagt sagen heißt heißen heissen nennen genannt ist sei seien wäre wären würde würden kann könnte könnten mag mögen möge muss müssen musste mussten soll sollte sollten darf dürfen will wollte wollten zwei drei vier fünf erst erste ersten erstes zweite dritte dritten letzte letzten nach vor bei seit bis während wegen zwischen innerhalb außer außerhalb sofern sofern insofern wiefern wieweit weshalb warum wozu wonach woraus worin womit wodurch worauf wovon dieselbe derselbe dasselbe denselben demselben desselben derselben solche solcher solches solchen solchem solch gewisse gewissen gewisser gewisses etwas nichts jemand niemand kein keine keiner keinen keinem keines mein dein unser unsere unsrer unsre unsrem unserem unserer unserer eurer ihnen euch uns mir mich dir dich et est in ad de ex ut non quod sed si cum vel aut per qui quae quid quo sunt esse sit sint fuit enim autem ergo igitur atqui ita sic nec neque vero etiam quam tam hoc haec hic ille illa illud ipse ipsa ipsum eius eorum aliis alii alia alius ab ab cui quibus quam quem quas quos id ea eam eum eos eas ei ii pro sub super inter ante post contra sine apud ob propter sine tantum quoque beispiel beyspiel beispiele beyspiele exempel exempeln exemplum z b e d h i u s w f usw etc vgl nr s o bzw ganz recht eigentlich besonders überhaupt zuerst zuletzt endlich übrigens bisweilen oft öfters öfter zuweilen jederzeit niemals allemal allezeit hiermit hierzu hierbei hierin hierdurch hieraus hiervon hiebei hiedurch dadurch darum deswegen deßwegen deshalb folglich mithin demnach daraus darin darauf darüber davon dabei dazu wirklich gleichfalls ebenfalls`;
+
+/* ── words ──────────────────────────────────────────────────────────────── */
+/* One spelling for the many the printings use, so that Erkenntniß, Erkentniß and erkenntnis meet */
+function jrNorm(w) {
+  return w.toLowerCase().replace(/ß/g, 'ss').replace(/ä/g, 'a').replace(/ö/g, 'o').replace(/ü/g, 'u').replace(/æ/g, 'ae')
+    .replace(/gelahr/g, 'gelehr').replace(/ch/g, '\u0001').replace(/ph/g, 'f').replace(/th/g, 't')
+    .replace(/c/g, 'k').replace(/\u0001/g, 'ch').replace(/y/g, 'i').replace(/tz|zz/g, 'z').replace(/(.)\1+/g, '$1');
+}
+const JR_STOP = new Set(JR_STOP_RAW.split(/\s+/).filter(Boolean).map(jrNorm));
+function jrSentences(text) {
+  const out = []; let start = 0, m;
+  const re = /[.!?]+["»”’)\]]*\s+(?=["«„“(\[]?[A-ZÄÖÜ0-9])/g;
+  const abbr = /(?:^|[\s(])(?:d\.\s?h|d\.\s?i|z\.\s?b|z\.\s?e|u\.\s?s\.\s?w|u\.\s?s\.\s?f|u\.\s?dgl|u\.\s?a|s\.\s?w|s\.\s?o|v\.\s?a|bzw|etc|vgl|nr|dgl|dr|prof|st)\.$/i;
+  while ((m = re.exec(text))) {
+    const end = m.index + m[0].trimEnd().length;
+    if (abbr.test(text.slice(start, end))) continue;
+    out.push([start, end]); start = m.index + m[0].length;
+  }
+  if (start < text.length) out.push([start, text.length]);
+  return out;
+}
+
+/* ═══ the page ════════════════════════════════════════════════════════════ */
+
+/* ── data ───────────────────────────────────────────────────────────────── */
+const J = LOGIK_JASCHE;
+const JR_MIN_WORDS = 6;         // a sentence shorter than this is not compared
+const JR_CLOSE = 0.7;           // traced: this share of its words, in order, in the note
+const JR_NEAR = 0.9;            // near-verbatim
+const JR_REWORK = 0.5;          // reworked (counted in the Overview, not marked)
+const JR_GRAM = 3;              // a shared run of words that nominates a note
+const JR_STOP_GRAM = 200;       // a run found this often is too common to nominate by
+const JR_CLASSES = [
+  { k: 'early',   label: 'before 1770',  rgb: '29,53,87' },
+  { k: '70s',     label: '1770s',        rgb: '47,93,138' },
+  { k: '80s',     label: '1780s',        rgb: '90,139,189',  light: true },
+  { k: '90s',     label: '1790s',        rgb: '147,181,216', light: true },
+  { k: 'mixed',   label: 'mixed dating', rgb: '156,143,120', light: true, hatch: true },
+  { k: 'undated', label: 'undated',      rgb: '190,182,168', light: true }
+];
+const JR_CLASS = {};  JR_CLASSES.forEach(c => { JR_CLASS[c.k] = c; });
+/* the dated transcripts, oldest first, for the transcript matches; the same shape as LOGIK_ data, so another is one line */
+const JR_LECTURES = [
+  { key: 'blomberg', label: 'Blomberg',     date: 'ca. 1771',    data: LOGIK_BLOMBERG },
+  { key: 'wiener',   label: 'Wiener Logik', date: '1780ff.',     data: LOGIK_WIENER },
+  { key: 'busolt',   label: 'Busolt',       date: 'ca. 1789/90', data: LOGIK_BUSOLT }
+];
+const JR_TX_ORDER = 0.6;        // a transcript match: this share of the sentence's words in order,
+const JR_TX_LOOSE = 0.7;        // or this share of its content words within one passage twice its length
+const JR_TX_MINCW = 4;          // with fewer content words than this the looser test is not tried
+const JR_PREFS = 'kant-lab.jasche-reader';   // where the layout is remembered between visits
+const EINL = J.sections.filter(s => s.part === 'Einleitung').map(s => s.id);
+const JR_PARTS = [
+  { label: 'Einleitung I–V',          has: s => EINL.indexOf(s.sec) >= 0 && EINL.indexOf(s.sec) < 5 },
+  { label: 'Einleitung VI–X, Anhang', has: s => EINL.indexOf(s.sec) >= 5 },
+  { label: 'Elementarlehre',          has: s => /Elementarlehre/.test(jb[s.id].s.part) },
+  { label: 'Methodenlehre',           has: s => /Methodenlehre/.test(jb[s.id].s.part) }
+];
+
+/* ── state ──────────────────────────────────────────────────────────────── */
+let xray = false, tab = 'ov', panelOpen = true, tocOpen = true, tocView = 'titles', showTx = false;   // remembered
+let hold = false;                 // Sources held on one § instead of following the text
+let unitKey = null;               // the § ('p21') or Einleitung section ('ss07') the panel shows
+let selSent = null;               // a sentence clicked in the text
+let jrReady = false, jrProgress = 0;
+let SENTS = [], byBlock = {};     // every compared Jäsche sentence; those of each block
+let STATS = {};                   // per contents entry: its words, and those traced, by dating class
+let TXI = null, txReady = false, txBusy = false, txProgress = 0;   // the transcript matches, made when first asked for
+let query = '', loose = true, HITS = [], hitCur = -1, hitsByBlock = {};
+let GO = [], goCur = 0;           // the Go to suggestions
+const openSecs = new Set();       // contents sections opened to show their §§
+const jb = {};  J.sections.forEach((s, si) => s.blocks.forEach(b => { jb[b.id] = { b, s, si }; }));
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const pageAt = (b, off) => { let p = b.aa; (b.pages || []).forEach(x => { if (x.i <= off) p = x.p; }); return p; };
+
+/* the layout, kept in the browser between visits; a page opened from file:// may refuse, and then starts fresh */
+function loadPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem(JR_PREFS) || '{}');
+    if (typeof p.xray === 'boolean') xray = p.xray;
+    if (['ov', 'src', 'fl'].indexOf(p.tab) >= 0) tab = p.tab;
+    if (typeof p.panelOpen === 'boolean') panelOpen = p.panelOpen;
+    if (typeof p.tocOpen === 'boolean') tocOpen = p.tocOpen;
+    if (p.tocView === 'dating' || p.tocView === 'titles') tocView = p.tocView;
+    if (typeof p.showTx === 'boolean') showTx = p.showTx;
+  } catch (e) { /* nothing remembered */ }
+}
+function savePrefs() {
+  try { localStorage.setItem(JR_PREFS, JSON.stringify({ xray, tab, panelOpen, tocOpen, tocView, showTx })); } catch (e) { /* not kept */ }
+}
+
+/* ── Adickes' datings → a dating class ──────────────────────────────────── */
+function jrSpan(sym) {
+  const t = String(phaseYears(sym) || '');
+  if (!t || /nicht datirt/.test(t)) return null;
+  const m = t.match(/1[78]\d\d/g); if (!m) return null;
+  let a = +m[0], b = m[1] ? +m[1] : null;
+  if (!b) { const m2 = t.match(/1[78]\d\d\s*[–-]\s*(\d\d)\b/); if (m2) b = Math.floor(a / 100) * 100 + +m2[1]; }
+  if (/1[78]\d0er/.test(t)) b = a + 9;
+  return [a, b || a];
+}
+const jrDecade = y => y < 1770 ? 'early' : y < 1780 ? '70s' : y < 1790 ? '80s' : '90s';
+const jrFirstExpr = e => String(e.phRaw || '').trim().split(/\s+/)[0].replace(/[?()]/g, '');
+/* The class of a note: the decade of Adickes' first dating of it, or "mixed" where that first
+   dating itself (a phase, or a range like ψ−θ) spans two decades. A span reaching only one year
+   past a boundary keeps the first decade, so κ−λ (1769–70) is "before 1770". */
+function jrDating(e) {
+  if (!e || !e.ph || !e.ph.length || e.prose) return { k: 'undated', lo: null, hi: null };
+  const parts = jrFirstExpr(e).split(/[−-]/).map(jrSpan).filter(Boolean);
+  if (!parts.length) return { k: 'undated', lo: null, hi: null };
+  const lo = Math.min(...parts.map(p => p[0])); let hi = Math.max(...parts.map(p => p[1]));
+  const bnd = Math.floor(lo / 10) * 10 + 10, hiT = hi === bnd ? bnd - 1 : hi;
+  return { k: jrDecade(lo) === jrDecade(hiT) ? jrDecade(lo) : 'mixed', lo, hi };
+}
+const jrYears = e => (e.ph || []).map(p => p + ' ' + phaseYears(p)).join(' · ');
+const DAT = REFL_ENTRIES.map(jrDating);
+
+/* ── the comparison with the Reflexionen ────────────────────────────────── */
+function jrTokens(text) {
+  const out = [], re = /[A-Za-zÄÖÜäöüßæœ]+/g; let m;
+  while ((m = re.exec(text))) out.push({ w: jrNorm(m[0]), s: m.index, e: m.index + m[0].length });
+  return out;
+}
+function lcsLen(a, b) {
+  const n = a.length, m = b.length; let p = new Uint16Array(m + 1), c = new Uint16Array(m + 1);
+  for (let i = 1; i <= n; i++) { for (let j = 1; j <= m; j++) c[j] = a[i - 1] === b[j - 1] ? p[j - 1] + 1 : Math.max(p[j], c[j - 1]); const t = p; p = c; c = t; }
+  return p[m];
+}
+function lcsPairs(a, b) {
+  const n = a.length, m = b.length, dp = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
+  for (let i = 1; i <= n; i++) for (let j = 1; j <= m; j++) dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
+  const out = []; let i = n, j = m;
+  while (i > 0 && j > 0) { if (a[i - 1] === b[j - 1]) { out.push([i - 1, j - 1]); i--; j--; } else if (dp[i - 1][j] >= dp[i][j - 1]) i--; else j--; }
+  return out.reverse();
+}
+const RT = [];  const GRAM = new Map();
+REFL_ENTRIES.forEach((e, ei) => {
+  if (!e.text || e.vacat) return;
+  const text = e.text.replace(/\n/g, ' '), t = jrTokens(text);
+  RT[ei] = { text, t, w: t.map(x => x.w) };
+  for (let k = 0; k + JR_GRAM <= t.length; k++) { const key = RT[ei].w.slice(k, k + JR_GRAM).join(' '); let a = GRAM.get(key); if (!a) GRAM.set(key, a = []); a.push(ei, k); }
+});
+/* the passage, and the stretch of it, that holds the largest share of a sentence's words in order */
+function bestInOrder(jw, gram, words) {
+  const n = jw.length, cand = new Map();
+  for (let j = 0; j + JR_GRAM <= n; j++) {
+    const a = gram.get(jw.slice(j, j + JR_GRAM).join(' '));
+    if (!a || a.length > 2 * JR_STOP_GRAM) continue;
+    for (let h = 0; h < a.length; h += 2) cand.set(a[h] + ':' + Math.round((a[h + 1] - j) / 3), [a[h], a[h + 1] - j]);
+  }
+  const sl = Math.max(4, Math.ceil(n * 0.25)); let best = null;
+  cand.forEach(([ei, d]) => {
+    const w = words(ei), lo = Math.max(0, d - sl), hi = Math.min(w.length, d + n + sl);
+    if (hi <= lo) return;
+    const cov = lcsLen(jw, w.slice(lo, hi)) / n;
+    if (!best || cov > best.cov) best = { ei, cov, lo, hi };
+  });
+  return best;
+}
+const jrBest = jw => bestInOrder(jw, GRAM, ei => RT[ei].w);
+/* run a job over a list a slice at a time, so that the page stays responsive */
+function inSlices(list, each, onStep) {
+  let k = 0;
+  return new Promise(resolve => {
+    (function step() {
+      const stop = Math.min(list.length, k + 90);
+      for (; k < stop; k++) each(list[k]);
+      onStep(k / list.length);
+      if (k < list.length) setTimeout(step, 0); else resolve();
+    })();
+  });
+}
+function jrRun() {
+  const todo = [];
+  J.sections.forEach(sec => {
+    if (sec.part === 'Vorrede') return;
+    sec.blocks.forEach(b => {
+      if (b.kind !== 'text') return;
+      jrSentences(b.text).forEach(([s, e]) => {
+        const t = jrTokens(b.text.slice(s, e));
+        if (t.length < JR_MIN_WORDS) return;
+        todo.push({ i: todo.length, id: b.id, s, e, t, jw: t.map(x => x.w), page: pageAt(b, s), para: b.para || null, sec: sec.id });
+      });
+    });
+  });
+  return inSlices(todo, sn => {
+    const m = jrBest(sn.jw);
+    sn.cov = m ? m.cov : 0;
+    if (m && m.cov >= JR_CLOSE) { sn.m = m; sn.cls = DAT[m.ei].k; sn.v = m.cov >= JR_NEAR; }
+  }, f => { jrProgress = f; paintProgress(); }).then(() => {
+    SENTS = todo; byBlock = {}; SENTS.forEach(sn => { (byBlock[sn.id] = byBlock[sn.id] || []).push(sn); });
+    buildStats(); jrReady = true;
+  });
+}
+const traced = () => SENTS.filter(s => s.m);
+/* per contents entry (a section 's…', a § 'p…'): its words, those traced by dating class, and the notes */
+function buildStats() {
+  STATS = {};
+  const add = (key, s) => {
+    const u = STATS[key] = STATS[key] || { w: 0, n: 0, t: 0, c: {}, cs: {}, R: new Set() };
+    u.w += s.jw.length; u.n++;
+    if (s.m) { u.t += s.jw.length; u.c[s.cls] = (u.c[s.cls] || 0) + s.jw.length; u.cs[s.cls] = (u.cs[s.cls] || 0) + 1; u.R.add(s.m.ei); }
+  };
+  SENTS.forEach(s => { add('s' + s.sec, s); if (s.para) add('p' + s.para, s); });
+}
+
+/* ── the transcript matches: sentence by sentence, never section by section ── */
+function txIndex(L) {
+  const src = [], gram = new Map(), uni = new Map();
+  L.data.sections.forEach(sec => sec.blocks.forEach(b => {
+    if (b.kind !== 'text' || !b.text) return;
+    const t = jrTokens(b.text), w = t.map(x => x.w), id = src.length;
+    src.push({ b, sec, t, w });
+    for (let k = 0; k < t.length; k++) {
+      if (k + JR_GRAM <= t.length) { const key = w.slice(k, k + JR_GRAM).join(' '); let a = gram.get(key); if (!a) gram.set(key, a = []); a.push(id, k); }
+      if (!JR_STOP.has(w[k]) && w[k].length >= 4) { let a = uni.get(w[k]); if (!a) uni.set(w[k], a = []); a.push(id, k); }
+    }
+  }));
+  return { L, src, gram, uni };
+}
+const contentWords = jw => [...new Set(jw.filter(x => !JR_STOP.has(x) && x.length >= 4))];
+/* the looser test: most of the sentence's content words, in any order, within one passage twice its length */
+function bestLoose(I, jw) {
+  const cw = contentWords(jw), n = jw.length;
+  if (cw.length < JR_TX_MINCW) return null;
+  const hits = new Map();
+  cw.forEach(x => { const h = I.uni.get(x); if (!h || h.length > 6000) return; for (let q = 0; q < h.length; q += 2) { const key = h[q] + ':' + Math.floor(h[q + 1] / n); let s = hits.get(key); if (!s) hits.set(key, s = new Set()); s.add(x); } });
+  let best = null;
+  hits.forEach((s, key) => {
+    const [id, k] = key.split(':').map(Number), nx = hits.get(id + ':' + (k + 1)), u = nx ? new Set([...s, ...nx]) : s;
+    if (!best || u.size > best.got) best = { ei: id, got: u.size, of: cw.length, cov: u.size / cw.length, lo: k * n, hi: Math.min(I.src[id].w.length, (k + 2) * n) };
+  });
+  return best;
+}
+function txMatch(I, jw) {
+  const o = bestInOrder(jw, I.gram, id => I.src[id].w);
+  if (o && o.cov >= JR_TX_ORDER) return Object.assign(o, { how: 'order' });
+  const l = bestLoose(I, jw);
+  if (l && l.cov >= JR_TX_LOOSE) return Object.assign(l, { how: 'loose' });
+  return null;
+}
+function txRun() {
+  if (txReady || txBusy || !jrReady) return;
+  txBusy = true;
+  setTimeout(() => {
+    TXI = JR_LECTURES.map(txIndex);
+    inSlices(SENTS, sn => { sn.tx = TXI.map(I => txMatch(I, sn.jw)); }, f => { txProgress = f; const el = document.querySelector('#pbody .txprog i'); if (el) el.style.width = Math.round(f * 100) + '%'; })
+      .then(() => { txReady = true; txBusy = false; if (tab === 'src') renderPanel(); });
+  }, 30);
+}
+
+/* ── units: a § of the Elementar- and Methodenlehre, or a section of the Einleitung ── */
+function unitOf(blockId) {
+  const r = jb[blockId]; if (!r) return null;
+  if (r.s.part === 'Vorrede') return 'v';
+  return r.b.para ? 'p' + r.b.para : 's' + r.s.id;
+}
+function unitInfo(key) {
+  if (!key || key === 'v') return null;
+  if (key[0] === 'p') { const p = J.paras[+key.slice(1) - 1]; return { key, label: '§ ' + p.n, title: p.title, aa: p.aa, aaEnd: p.aaEnd, anchor: 'para-' + p.n, sents: SENTS.filter(s => s.para === p.n), para: p.n, sec: p.sec }; }
+  const sec = J.sections.find(s => s.id === key.slice(1)), txt = sec.blocks.filter(b => b.kind === 'text');
+  return { key, label: sec.title.replace(/\.$/, ''), title: '', aa: txt[0].aa, aaEnd: txt[txt.length - 1].aaEnd || txt[txt.length - 1].aa, anchor: 'sec-' + sec.id, sents: SENTS.filter(s => s.sec === sec.id && !s.para), sec: sec.id };
+}
+/* the Meier §§ behind a unit: the AA's own concordance where it gives one, else the matches */
+function meierOf(u) {
+  const groups = REFL_GROUPS.filter(g => {
+    if (!g.jaesche) return false;
+    const m = g.jaesche.match(/9:(\d+)(?:-(\d+))?/); if (!m) return false;
+    const a = +m[1], z = +(m[2] || m[1]);
+    return a <= u.aaEnd && z >= u.aa;
+  });
+  if (groups.length) return { attested: true, groups, paras: [...new Set(groups.flatMap(g => g.paras))] };
+  const paras = [...new Set(u.sents.filter(s => s.m).flatMap(s => REFL_ENTRIES[s.m.ei].paras || []))].sort((a, b) => a - b);
+  return { attested: false, groups: [], paras };
+}
+const rangeList = ns => { const out = []; ns.forEach(n => { const l = out[out.length - 1]; if (l && n === l[1] + 1) l[1] = n; else out.push([n, n]); }); return out.map(([a, b]) => a === b ? '' + a : a + '–' + b).join(', '); };
+
+/* ── left: the Jäsche text ──────────────────────────────────────────────── */
+const parts = [];
+J.sections.forEach(s => { let p = parts.find(x => x.name === s.part); if (!p) parts.push(p = { name: s.part, secs: [] }); p.secs.push(s); });
+const parasBySec = {};  J.paras.forEach(p => { (parasBySec[p.sec] = parasBySec[p.sec] || []).push(p); });
+
+function rangesHtml(text, ranges, marks) {
+  const cuts = new Set([0, text.length]); marks = marks || {};
+  ranges.forEach(r => { cuts.add(r.s); cuts.add(r.e); });
+  Object.keys(marks).forEach(k => cuts.add(+k));
+  const pts = [...cuts].filter(x => x >= 0 && x <= text.length).sort((a, c) => a - c);
+  let html = '';
+  for (let k = 0; k < pts.length; k++) {
+    const s = pts[k], e = pts[k + 1];
+    if (marks[s]) html += marks[s].join('');
+    if (e === undefined || e <= s) continue;
+    const act = ranges.filter(r => r.s <= s && r.e >= e);
+    let piece = esc(text.slice(s, e)).replace(/￼/g, '<span class="unset" title="A figure or glyph the transcription could not set">⬚</span>');
+    if (!act.length) { html += piece; continue; }
+    act.filter(r => r.tag).forEach(r => { piece = '<' + r.tag + '>' + piece + '</' + r.tag + '>'; });
+    const sp = act.filter(r => !r.tag);
+    if (sp.length) {
+      const cls = sp.map(r => r.cls).join(' '), st = sp.map(r => r.style).filter(Boolean).join(';');
+      const hit = sp.find(r => r.hit !== undefined), sn = sp.find(r => r.sent !== undefined);
+      piece = '<span class="' + cls + '"' + (st ? ' style="' + st + '"' : '') + (hit ? ' data-hit="' + hit.hit + '"' : '') + (sn ? ' data-sent="' + sn.sent + '"' : '') + '>' + piece + '</span>';
+    }
+    html += piece;
+  }
+  return html;
+}
+function blockHtml(b) {
+  if (b.kind === 'rule') return '<hr class="rule" id="' + esc(b.id) + '">';
+  const text = b.text, ranges = [], marks = {};
+  (b.em || []).forEach(([s, e]) => ranges.push({ s, e, tag: 'i' }));
+  (hitsByBlock[b.id] || []).forEach(hi => { const h = HITS[hi]; ranges.push({ s: h.s, e: h.e, cls: 'hit' + (hi === hitCur ? ' cur' : ''), hit: hi }); });
+  if (xray && jrReady) (byBlock[b.id] || []).forEach(sn => {
+    if (!sn.m) return;
+    const c = JR_CLASS[sn.cls], r = REFL_ENTRIES[sn.m.ei];
+    ranges.push({ s: sn.s, e: sn.e, cls: 'm k-' + sn.cls + ' ' + (sn.v ? 'v' : 'c') + (selSent === sn.i ? ' sel' : ''), style: '--pc:' + c.rgb, sent: sn.i });
+    (marks[sn.e] = marks[sn.e] || []).push('<sup class="rf k-' + sn.cls + (c.light ? ' light' : '') + '" style="--pc:' + c.rgb + '" data-sent="' + sn.i + '" title="R ' + r.r + ' · ' + esc(r.phRaw || '') + ' · ' + c.label + ' · ' + Math.round(sn.m.cov * 100) + '%">R ' + r.r + '</sup>');
+  });
+  (b.pages || []).forEach(x => { if (x.i > 0) (marks[x.i] = marks[x.i] || []).push('<span class="pg" title="Academy Edition page begins here">‹' + x.p + '›</span>'); });
+  return '<div class="blk' + (b.align === 'center' ? ' ctr' : '') + '" id="' + esc(b.id) + '"' + (b.indent ? ' style="margin-left:' + (b.indent * 1.1) + 'rem"' : '') +
+    '><a class="gut" href="#' + esc(b.id) + '" title="' + esc(b.id) + '">' + b.aa + '</a><p>' + rangesHtml(text, ranges, marks) + '</p></div>';
+}
+function renderText() {
+  const m = J.meta;
+  let html = '<div class="work-meta">' + esc(m.work) + ' · ' + esc(m.date) + ' · ed. ' + esc(m.editor) + ' · AA ' + m.volume + ':' + m.aa[0] + '–' + m.aa[1] + '</div>';
+  let lastPart = null, lastPara = null;
+  J.sections.forEach(sec => {
+    if (sec.part !== lastPart) { lastPart = sec.part; html += '<div class="partlabel">' + esc(sec.part) + '</div>'; }
+    html += '<h2 class="sec" id="sec-' + sec.id + '">' + esc(sec.title) + '</h2>';
+    const note = [sec.running, sec.range && sec.range.raw].filter(Boolean).join(' · ');
+    if (note) html += '<div class="secnote">' + esc(note) + '</div>';
+    sec.blocks.forEach(b => {
+      if (b.para && b.para !== lastPara) { lastPara = b.para; const p = J.paras[b.para - 1]; html += '<h3 class="par" id="para-' + p.n + '">§. ' + p.n + '. <span>' + esc(p.title) + '</span></h3>'; }
+      html += blockHtml(b);
+    });
+  });
+  const box = $('text'), keep = box.scrollTop;
+  $('inner').innerHTML = html;
+  box.style.scrollBehavior = 'auto'; box.scrollTop = keep; box.style.scrollBehavior = '';
+}
+
+/* ── the contents, with its Dating view ─────────────────────────────────── */
+function bgOf(k) { const c = JR_CLASS[k]; return c.hatch ? 'background:var(--hatch)' : 'background:rgb(' + c.rgb + ')'; }
+/* a bar: the entry's words, coloured where they are traced to a Reflexion, by the note's dating */
+function barHtml(key) {
+  const u = STATS[key]; if (!u || !u.w) return '<span class="tb" aria-hidden="true"></span>';
+  let x = 0, h = '';
+  ORDER.concat(['undated']).forEach(k => { const v = u.c[k] || 0; if (!v) return; const w = 100 * v / u.w; h += '<span style="left:' + x.toFixed(2) + '%;width:' + w.toFixed(2) + '%;' + bgOf(k) + '"></span>'; x += w; });
+  return '<span class="tb" data-stat="' + key + '">' + h + '</span>';
+}
+function tipHtml(key) {
+  const u = STATS[key], pc = v => { const p = 100 * v / u.w; return p > 0 && p < 1 ? '<1%' : Math.round(p) + '%'; };
+  const label = key[0] === 'p' ? '§ ' + key.slice(1) + ' ' + J.paras[+key.slice(1) - 1].title : J.sections.find(s => s.id === key.slice(1)).title;
+  let h = '<div class="th">' + esc(label) + '</div>';
+  if (!u.t) return h + '<div class="ts">No sentence here is traced to a Reflexion at 70% or more. ' + u.n + ' sentences compared.</div>';
+  h += '<div class="ts">Share of its words in sentences taken from a Reflexion, by Adickes’ dating of the note</div>';
+  ORDER.concat(['undated']).forEach(k => { if (u.c[k]) h += '<div class="tr">' + swatch(k) + esc(JR_CLASS[k].label) + '<b>' + pc(u.c[k]) + '</b><small>' + u.cs[k] + ' sent.</small></div>'; });
+  h += '<div class="tr un"><span class="sw" style="background:#ece3cf;box-shadow:inset 0 0 0 1px #cfc3a6"></span>not traced<b>' + pc(u.w - u.t) + '</b><small></small></div>';
+  return h + '<div class="ts">' + u.n + ' sentences compared, ' + u.R.size + ' Reflexion' + (u.R.size === 1 ? '' : 'en') + '</div>';
+}
+function renderToc() {
+  const dating = tocView === 'dating';
+  let html = '<div class="tochead"><h2>CONTENTS</h2><span class="seg" role="group" aria-label="Contents view"><button data-view="titles" aria-pressed="' + !dating + '">Titles</button><button data-view="dating" aria-pressed="' + dating + '">Dating</button></span></div>';
+  if (dating) html += '<div class="tocnote">' + (jrReady ? 'Each bar is the entry’s text, coloured where it is taken from a Reflexion, by the note’s decade. Hover a bar for the shares.' : 'Reading Jäsche against the Reflexionen…') + '</div>';
+  parts.forEach(p => {
+    html += '<div class="part">' + esc(p.name) + '</div>';
+    p.secs.forEach(sec => {
+      const ps = parasBySec[sec.id] || [], open = openSecs.has(sec.id), bar = dating && sec.part !== 'Vorrede' ? barHtml('s' + sec.id) : '';
+      html += '<div class="row">' + (ps.length ? '<button class="d" data-open="' + sec.id + '" aria-label="Show the §§">' + (open ? '▾' : '▸') + '</button>' : '<span style="width:1.1rem;flex:none"></span>') +
+        '<button class="t" data-sec="' + sec.id + '" id="toc-' + sec.id + '">' + esc(sec.title) + (sec.range ? ' <span class="rng">' + esc(sec.range.raw.replace(/[\[\]]/g, '')) + '</span>' : '') + bar + '</button></div>';
+      if (ps.length) html += '<div class="paras' + (open ? ' open' : '') + '" id="paras-' + sec.id + '">' + ps.map(q => '<button class="t" data-para="' + q.n + '" id="toc-p' + q.n + '">§ ' + q.n + ' ' + esc(q.title) + (dating ? barHtml('p' + q.n) : '') + '</button>').join('') + '</div>';
+    });
+  });
+  const box = $('toc'), keep = box.scrollTop;
+  box.innerHTML = html; box.scrollTop = keep;
+  markToc();
+}
+function showTip(el) {
+  const tip = $('tip'); if (!STATS[el.dataset.stat]) return;
+  tip.innerHTML = tipHtml(el.dataset.stat); tip.hidden = false;
+  const r = el.getBoundingClientRect(), h = tip.offsetHeight, w = tip.offsetWidth;
+  tip.style.left = Math.max(6, Math.min(r.left, innerWidth - w - 6)) + 'px';
+  tip.style.top = (r.bottom + 6 + h > innerHeight ? r.top - h - 6 : r.bottom + 6) + 'px';
+}
+
+function flash(el) { if (!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2800); }
+function scrollToId(id, fl) {
+  const el = document.getElementById(id); if (!el) return;
+  el.scrollIntoView({ block: fl ? 'center' : 'start' });
+  if (fl) flash(el.closest('.blk') || el);
+}
+const blockAtPage = p => { for (const sec of J.sections) for (const b of sec.blocks) { if (b.kind === 'text' && (b.aa === p || (b.pages || []).some(x => x.p === p))) return b; } return null; };
+function scrollToPage(p) { const b = blockAtPage(p); if (b) scrollToId(b.id, true); }
+/* the section and § at the top of the text decide the contents highlight and the panel's unit */
+let tick = 0, followTimer = 0, viewSec = null, viewPara = null;
+function inView() {
+  const top = $('text').getBoundingClientRect().top + 70;
+  let sec = null, para = null;
+  document.querySelectorAll('#inner h2.sec, #inner h3.par').forEach(h => {
+    if (h.getBoundingClientRect().top <= top) { if (h.classList.contains('sec')) { sec = h.id.slice(4); para = null; } else para = +h.id.slice(5); }
+  });
+  if (!sec) sec = J.sections[0].id;
+  viewSec = sec; viewPara = para && J.paras[para - 1].sec === sec ? para : null;
+  if (parasBySec[sec] && !openSecs.has(sec)) { openSecs.add(sec); const ps = $('paras-' + sec); if (ps) ps.classList.add('open'); const d = document.querySelector('[data-open="' + sec + '"]'); if (d) d.textContent = '▾'; }
+  markToc();
+  const s = J.sections.find(x => x.id === sec);
+  return s.part === 'Vorrede' ? 'v' : viewPara ? 'p' + viewPara : 's' + sec;
+}
+function markToc() {
+  document.querySelectorAll('#toc button.t.active').forEach(b => b.classList.remove('active'));
+  const t = viewSec && $('toc-' + viewSec); if (t) t.classList.add('active');
+  const tp = viewPara && $('toc-p' + viewPara); if (tp) tp.classList.add('active');
+}
+function onScroll() {
+  const k = inView();
+  if (!hold && k !== unitKey) {
+    unitKey = k; paintTabs();
+    if (tab === 'src' && panelOpen) { clearTimeout(followTimer); followTimer = setTimeout(renderPanel, 180); }
+  }
+}
+
+/* ── search ─────────────────────────────────────────────────────────────── */
+function qRegex(q, flags) {
+  const t = q.trim().toLowerCase().replace(/\s+/g, ' ');
+  if (!t) return null;
+  if (!loose) return new RegExp(escRe(t).replace(/ /g, '\\s+'), flags);
+  let out = '';
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i], two = t.slice(i, i + 2);
+    if (c === ' ') out += '\\s+';
+    else if (two === 'ss' || c === 'ß') { out += '(?:ss|ß)'; if (two === 'ss') i++; }
+    else if (two === 'tz' || two === 'zz' || c === 'z') { out += '(?:tz|zz|z)'; if (two === 'tz' || two === 'zz') i++; }
+    else if (two === 'th') { out += 'th?'; i++; }
+    else if (c === 'c' || c === 'k') out += '[ck]';
+    else if (c === 'y' || c === 'i') out += '[iy]';
+    else if (c === 'a' || c === 'ä') out += '[aä]';
+    else if (c === 'o' || c === 'ö') out += '[oö]';
+    else if (c === 'u' || c === 'ü') out += '[uü]';
+    else if ('flmnprt'.indexOf(c) >= 0) { out += c + '{1,2}'; if (t[i + 1] === c) i++; }
+    else out += escRe(c);
+  }
+  return new RegExp(out, flags);
+}
+function runSearch() {
+  HITS = []; hitCur = -1; hitsByBlock = {};
+  const re = query.trim().length >= 2 ? qRegex(query, 'gi') : null;
+  if (re) J.sections.forEach(sec => sec.blocks.forEach(b => {
+    if (b.kind !== 'text') return;
+    re.lastIndex = 0; let m;
+    while ((m = re.exec(b.text))) { if (!m[0].length) { re.lastIndex++; continue; } (hitsByBlock[b.id] = hitsByBlock[b.id] || []).push(HITS.length); HITS.push({ id: b.id, s: m.index, e: m.index + m[0].length }); }
+  }));
+  $('count').textContent = query.trim().length < 2 ? '' : HITS.length ? HITS.length + ' hits' : 'no hits';
+  $('prev').disabled = $('next').disabled = !HITS.length;
+}
+function gotoHit(d) {
+  if (!HITS.length) return;
+  hitCur = hitCur < 0 ? (d > 0 ? 0 : HITS.length - 1) : (hitCur + d + HITS.length) % HITS.length;
+  renderText(); $('count').textContent = (hitCur + 1) + ' / ' + HITS.length;
+  const el = document.querySelector('#inner .hit.cur'); if (el) el.scrollIntoView({ block: 'center' });
+}
+
+/* ── Go to: a § number, an AA 9 page, or words of a heading ─────────────── */
+function gotoMatches(q) {
+  q = q.trim(); const out = [], pages = J.meta.aa;
+  if (!q) return out;
+  const num = q.match(/^(?:§\s*)?(\d{1,3})$/), pg = q.match(/^(?:aa\s*)?(?:ix|9)\s*[:,.]\s*(\d{1,3})$/i);
+  const addPara = n => { const p = J.paras[n - 1]; if (p && !out.some(o => o.id === 'para-' + n)) out.push({ id: 'para-' + n, html: '<b>§ ' + n + '</b> ' + esc(p.title) }); };
+  const addPage = n => { if (n < pages[0] || n > pages[1]) return; const b = blockAtPage(n); if (!b) return; const u = unitInfo(unitOf(b.id)); out.push({ page: n, html: '<b>AA 9:' + n + '</b> <span class="muted">' + esc(u ? u.label : 'Vorrede') + '</span>' }); };
+  if (pg) addPage(+pg[1]);
+  else if (num) {
+    const n = +num[1];
+    addPara(n);
+    if (!/§/.test(q)) addPage(n);
+    J.paras.forEach(p => { if (out.length < 6 && String(p.n).startsWith(num[1]) && p.n !== n) addPara(p.n); });
+  } else if (q.length >= 2) {
+    const re = qRegex(q, 'i');
+    J.sections.forEach(s => { if (out.length < 6 && re.test(s.title)) out.push({ id: 'sec-' + s.id, html: esc(s.title) }); });
+    J.paras.forEach(p => { if (out.length < 6 && re.test(p.title)) addPara(p.n); });
+  }
+  return out.slice(0, 6);
+}
+function paintGoto() {
+  const box = $('golist');
+  if (!GO.length) { box.hidden = !$('goto').value.trim(); box.innerHTML = '<div class="none">Nothing matches. Type a § number, an AA 9 page (9:57) or words of a heading.</div>'; return; }
+  box.innerHTML = GO.map((g, i) => '<button data-gi="' + i + '"' + (i === goCur ? ' class="on"' : '') + '>' + g.html + '</button>').join('');
+  box.hidden = false;
+}
+function gotoPick(i) {
+  const g = GO[i]; if (!g) return;
+  if (g.page) scrollToPage(g.page); else scrollToId(g.id);
+  $('goto').value = ''; GO = []; $('golist').hidden = true;
+}
+
+/* ── right: shared pieces ───────────────────────────────────────────────── */
+function swatch(k) { const c = JR_CLASS[k]; return '<span class="sw' + (c.hatch ? ' hatch' : '') + '"' + (c.hatch ? '' : ' style="background:rgb(' + c.rgb + ')"') + '></span>'; }
+function chipCls(k) { const c = JR_CLASS[k]; return '<span class="per k-' + k + (c.light ? ' light' : '') + '" style="--pc:' + c.rgb + '">' + esc(c.label) + '</span>'; }
+function paintLegend() {
+  $('legend').innerHTML = JR_CLASSES.filter(c => c.k !== 'undated').map(c => '<span>' + swatch(c.k) + esc(c.label) + '</span>').join('') +
+    '<span><span class="ls" style="border-top:3px solid #7a6a52"></span>≥ 90%</span><span><span class="ls" style="border-top:2px dashed #7a6a52"></span>≥ 70%</span>';
+}
+function paintTabs() {
+  document.querySelectorAll('#tabs .tab, #railR .vt').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab && panelOpen)));
+  document.querySelectorAll('#tabs .tab').forEach(b => { b.title = b.dataset.tab === tab ? 'Click to fold the panel away' : ''; });
+  const u = unitInfo(unitKey);
+  $('tab-src').textContent = u ? (u.label.length > 24 ? u.label.slice(0, 22) + '…' : u.label) : 'the § in view';
+  if (jrReady) { const f = flagsOf(); $('tab-fl').textContent = (new Set([...f.early, ...f.decades].map(x => x.key))).size + ' places'; }
+  const fb = $('followbar');
+  fb.hidden = tab !== 'src';
+  if (tab === 'src') {
+    const where = u ? esc(u.label) + ', AA 9:' + u.aa : unitKey === 'v' ? 'the Vorrede' : '—';
+    fb.classList.toggle('held', hold);
+    fb.innerHTML = hold ? '<span class="dot"></span><span><b>Held</b> at ' + where + '</span><button id="hold" class="hold">RELEASE</button>'
+      : '<span class="dot"></span><span><b>Following the text</b> · now at ' + where + '</span><button id="hold" class="hold" title="Keep the panel on this § while you scroll">HOLD HERE</button>';
+  }
+}
+function paintLayout() {
+  $('app').classList.toggle('panel-off', !panelOpen);
+  $('body').classList.toggle('toc-off', !tocOpen);
+  $('railToc').setAttribute('aria-pressed', String(tocOpen));
+  $('xray').setAttribute('aria-pressed', String(xray));
+}
+function paintProgress() { const el = document.querySelector('#pbody .progress i'); if (el) el.style.width = Math.round(jrProgress * 100) + '%'; }
+
+/* ── Overview ───────────────────────────────────────────────────────────── */
+const ORDER = ['early', '70s', '80s', '90s', 'mixed'];
+function hatchDef(id, w) { return '<pattern id="' + id + '" width="' + w + '" height="' + w + '" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="' + w + '" height="' + w + '" fill="rgb(214,206,190)"/><rect width="' + (w / 2) + '" height="' + w + '" fill="rgb(156,143,120)"/></pattern>'; }
+const fillOf = (k, hid) => JR_CLASS[k].hatch ? 'url(#' + hid + ')' : 'rgb(' + JR_CLASS[k].rgb + ')';
+function donutSvg(cnt, tot) {
+  const cx = 60, cy = 60, R1 = 56, R0 = 34, pt = (r, a) => (cx + r * Math.cos(a)).toFixed(2) + ' ' + (cy + r * Math.sin(a)).toFixed(2);
+  let h = '<svg viewBox="0 0 120 120" class="donut" role="img" aria-label="Traced sentences by the dating of the note"><defs>' + hatchDef('hd', 4) + '</defs>', a0 = -Math.PI / 2;
+  ORDER.forEach(k => {
+    if (!cnt[k]) return;
+    const a1 = a0 + cnt[k] / tot * 2 * Math.PI, lg = a1 - a0 > Math.PI ? 1 : 0;
+    h += '<path d="M' + pt(R1, a0) + ' A' + R1 + ' ' + R1 + ' 0 ' + lg + ' 1 ' + pt(R1, a1) + ' L' + pt(R0, a1) + ' A' + R0 + ' ' + R0 + ' 0 ' + lg + ' 0 ' + pt(R0, a0) + ' Z" fill="' + fillOf(k, 'hd') + '" stroke="#f9f4e8" stroke-width="1.5"><title>' + JR_CLASS[k].label + ': ' + cnt[k] + ' sentences</title></path>';
+    a0 = a1;
+  });
+  return h + '<text x="60" y="61" font-size="20" text-anchor="middle" fill="#1a1208">' + tot + '</text><text x="60" y="75" font-size="10" text-anchor="middle" fill="#7a6a52">sentences</text></svg>';
+}
+function renderOverview() {
+  if (!jrReady) return '<div class="busy">Reading Jäsche against Kant’s 1,870 Reflexionen zur Logik…</div><div class="progress"><i></i></div>';
+  const T = traced(), words = ss => ss.reduce((a, s) => a + s.jw.length, 0), W = words(SENTS) || 1;
+  const pc = x => Math.round(x * 100) + '%';
+  const cnt = {}; ORDER.concat(['undated']).forEach(k => { cnt[k] = T.filter(s => s.cls === k).length; });
+  const tot = ORDER.reduce((a, k) => a + cnt[k], 0) || 1;
+  let h = '<div class="sub2 first">TRACED SENTENCES, BY THE DATING OF THE NOTE</div><div class="ovrow">' + donutSvg(cnt, tot) + '<table class="tot"><tr><th>Note first dated</th><th>Sentences</th><th>Share</th><th>Reflexionen</th></tr>' +
+    ORDER.concat(['undated']).map(k => cnt[k] ? '<tr><td>' + swatch(k) + esc(JR_CLASS[k].label) + '</td><td>' + cnt[k] + '</td><td>' + (k === 'undated' ? '—' : pc(cnt[k] / tot)) + '</td><td>' + new Set(T.filter(s => s.cls === k).map(s => s.m.ei)).size + '</td></tr>' : '').join('') + '</table></div>';
+  const w90 = words(SENTS.filter(s => s.cov >= JR_NEAR)) / W, w70 = words(SENTS.filter(s => s.cov >= JR_CLOSE)) / W, w50 = words(SENTS.filter(s => s.cov >= JR_REWORK)) / W;
+  h += '<div class="sub2">HOW MUCH OF JÄSCHE IS TRACED AT ALL <span class="muted2">share of words</span></div><div class="mtrack" role="img" aria-label="Share of Jäsche’s words traced">' +
+    '<span style="width:' + (w90 * 100).toFixed(1) + '%;background:#5c3d1e" title="near-verbatim"></span><span style="width:' + ((w70 - w90) * 100).toFixed(1) + '%;background:#a07b56" title="close"></span><span style="width:' + ((w50 - w70) * 100).toFixed(1) + '%;background:#d7c2a6" title="reworked"></span></div>' +
+    '<div class="mkey"><span><i style="background:#5c3d1e"></i>near-verbatim ≥ 90% · ' + pc(w90) + '</span><span><i style="background:#a07b56"></i>close ≥ 70% · ' + pc(w70 - w90) + '</span><span><i style="background:#d7c2a6"></i>reworked ≥ 50% · ' + pc(w50 - w70) + '</span><span><i style="background:#ece3cf;box-shadow:inset 0 0 0 1px #cfc3a6"></i>not traced · ' + pc(1 - w50) + '</span></div>';
+  h += '<div class="sub2">BY PART</div><table class="tot"><tr><th></th><th>Words</th><th>≥ 70%</th><th>≥ 50%</th></tr>' + JR_PARTS.map(P => {
+    const ss = SENTS.filter(P.has), w = words(ss) || 1;
+    return '<tr><td>' + P.label + '</td><td>' + words(ss).toLocaleString('en') + '</td><td>' + pc(words(ss.filter(s => s.cov >= JR_CLOSE)) / w) + '</td><td>' + pc(words(ss.filter(s => s.cov >= JR_REWORK)) / w) + '</td></tr>';
+  }).join('') + '</table>';
+  h += '<div class="meta note">' + T.length + ' of ' + SENTS.length.toLocaleString('en') + ' sentences (≥ ' + JR_MIN_WORDS + ' words) are traced at ≥ 70%, and marked in X-Ray mode; ' + SENTS.filter(s => s.cov >= JR_NEAR).length + ' at ≥ 90%. The reworked band (50–70%) is counted here but not marked. The Vorrede is not compared. ' +
+    'Mixed dating: Adickes’ first dating of the note spans two decades, a span reaching one year past a boundary keeping the first decade (κ−λ, 1769–70, counts as before 1770). Einleitung I–V is almost untraced; the spec says what that may mean. ' +
+    'The book page by page: switch the contents to Dating.</div>';
+  return h;
+}
+
+/* ── Sources ────────────────────────────────────────────────────────────── */
+function timelineSvg(filed, used) {
+  const W0 = 1750, W1 = 1805, X0 = 30, X1 = 400, xof = y => X0 + (Math.max(W0, Math.min(W1, y)) - W0) / (W1 - W0) * (X1 - X0);
+  let h = '<svg viewBox="0 0 420 122" class="tl" role="img" aria-label="Timeline of the Reflexionen filed under these Meier §§"><defs>' + hatchDef('ht', 4) + '</defs>';
+  h += '<line x1="' + X0 + '" y1="100" x2="' + X1 + '" y2="100" stroke="#8b5e3c"/>';
+  for (let y = 1750; y <= 1800; y += 10) h += '<line x1="' + xof(y) + '" y1="100" x2="' + xof(y) + '" y2="104" stroke="#8b5e3c"/><text x="' + xof(y) + '" y="115" font-size="9" text-anchor="middle" fill="#7a6a52">' + y + '</text>';
+  h += '<line x1="' + xof(1781) + '" y1="6" x2="' + xof(1781) + '" y2="100" stroke="#5c3d1e" stroke-dasharray="3 3"/><text x="' + (xof(1781) + 3) + '" y="12" font-size="8.5" fill="#5c3d1e">1781 · KrV</text>';
+  h += '<text x="2" y="32" font-size="8" fill="#7a6a52">used</text><text x="2" y="78" font-size="8" fill="#7a6a52">filed</text>';
+  const st = {}, maxStack = 7;
+  filed.forEach(ei => {
+    if (used.has(ei)) return;
+    const d = DAT[ei]; if (d.lo == null) return;
+    const y = d.lo, k = st[y] = (st[y] || 0) + 1, col = Math.floor((k - 1) / maxStack), row = (k - 1) % maxStack;
+    h += '<circle cx="' + (xof(y) + col * 3).toFixed(1) + '" cy="' + (92 - row * 5.5) + '" r="2.5" fill="#b9ad96"><title>R ' + REFL_ENTRIES[ei].r + ' · ' + esc(REFL_ENTRIES[ei].phRaw || '') + ' — filed here, not traced in Jäsche</title></circle>';
+  });
+  const su = {}, label = used.size <= 10;
+  [...used.entries()].sort((a, b) => (DAT[a[0]].lo || 0) - (DAT[b[0]].lo || 0)).forEach(([ei, k]) => {
+    const d = DAT[ei]; if (d.lo == null) return;
+    const n = su[d.lo] = (su[d.lo] || 0) + 1, cx = xof(d.lo) + (n - 1) * 9, cy = 38 - ((n - 1) % 2) * 13;
+    h += '<g class="hov" data-ei="' + ei + '"><circle cx="' + cx.toFixed(1) + '" cy="' + cy + '" r="5" fill="' + fillOf(k, 'ht') + '" stroke="#fff" stroke-width="1.5"/><title>R ' + REFL_ENTRIES[ei].r + ' · ' + esc(REFL_ENTRIES[ei].phRaw || '') + ' · ' + JR_CLASS[k].label + ' — click for the passage</title></g>';
+    if (label) h += '<text x="' + cx.toFixed(1) + '" y="' + (n % 2 ? cy + 14 : cy - 8) + '" font-size="7.5" text-anchor="middle" fill="#3d2e18">' + REFL_ENTRIES[ei].r + '</text>';
+  });
+  return h + '</svg>';
+}
+function pairHtml(sn) {
+  const e = REFL_ENTRIES[sn.m.ei], rt = RT[sn.m.ei], c = JR_CLASS[sn.cls], b = jb[sn.id].b;
+  const win = rt.w.slice(sn.m.lo, sn.m.hi), pairs = lcsPairs(sn.jw, win), mj = new Set(pairs.map(p => p[0])), mr = new Set(pairs.map(p => p[1] + sn.m.lo));
+  const jtext = b.text.slice(sn.s, sn.e);
+  let jh = '', last = 0;
+  sn.t.forEach((t, i) => { if (mj.has(i)) return; jh += esc(jtext.slice(last, t.s)) + '<span class="miss">' + esc(jtext.slice(t.s, t.e)) + '</span>'; last = t.e; });
+  jh += esc(jtext.slice(last));
+  const used = [...mr].sort((a, b2) => a - b2), i0 = Math.max(0, (used[0] || sn.m.lo) - 3), i1 = Math.min(rt.t.length - 1, (used[used.length - 1] || sn.m.hi - 1) + 3);
+  const lo = rt.t[i0].s, hi = rt.t[i1].e;
+  let rh = lo > 0 ? '… ' : '', l2 = lo;
+  for (let i = i0; i <= i1; i++) { if (mr.has(i)) continue; const t = rt.t[i]; rh += esc(rt.text.slice(l2, t.s)) + '<span class="extra">' + esc(rt.text.slice(t.s, t.e)) + '</span>'; l2 = t.e; }
+  rh += esc(rt.text.slice(l2, hi)) + (hi < rt.text.length ? ' …' : '');
+  rh = rh.replace(/ {2,}/g, m => ' <span class="unset" title="a gap in the transcription — where Jäsche prints a figure, Kant drew one">⬚</span> ');
+  return '<div class="pair k-' + sn.cls + '" id="pr-' + sn.i + '" style="--pc:' + c.rgb + '"><div class="ph"><span class="rnum">R ' + e.r + '</span><span class="phx">' + esc(e.phRaw || '—') + '</span><span class="yrs">' + esc(jrYears(e)) + '</span>' + chipCls(sn.cls) + '</div>' +
+    '<div class="meta">AA 16:' + e.aa + ' · filed under Meier § ' + esc((e.paras || []).join(', ')) + (e.loc && e.loc.raw ? ' · ' + esc(e.loc.raw) : '') + ' · <b>' + Math.round(sn.m.cov * 100) + '%</b> of the Jäsche sentence’s words, in order — ' + (sn.v ? 'near-verbatim' : 'close') + '</div>' +
+    '<div class="lab">Jäsche · AA 9:' + sn.page + '</div><p class="jt" data-go="' + sn.i + '" title="Show it in the text">' + jh + '</p><div class="lab">Kant, R ' + e.r + '</div><p class="rt">' + rh + '</p></div>';
+}
+/* a transcript passage beside a Jäsche sentence; its words that are not in the sentence greyed */
+function txCard(sn, li) {
+  const x = sn.tx[li], L = JR_LECTURES[li], s = TXI[li].src[x.ei], b = s.b, jw = new Set(sn.jw);
+  const i0 = Math.max(0, x.lo - 3), i1 = Math.min(s.t.length - 1, x.hi + 2), lo = s.t[i0].s, hi = s.t[i1].e;
+  let th = lo > 0 ? '… ' : '', l2 = lo;
+  for (let i = i0; i <= i1; i++) { const t = s.t[i]; if (jw.has(t.w)) continue; th += esc(b.text.slice(l2, t.s)) + '<span class="extra">' + esc(b.text.slice(t.s, t.e)) + '</span>'; l2 = t.e; }
+  th += esc(b.text.slice(l2, hi)) + (hi < b.text.length ? ' …' : '');
+  const how = x.how === 'order' ? Math.round(x.cov * 100) + '% of the sentence’s words, in order' : x.got + ' of its ' + x.of + ' content words within one passage';
+  return '<div class="xcard"><div class="ph"><span class="wl">' + esc(L.label) + '</span><span class="yrs">' + esc(L.date) + ' · AA 24:' + pageAt(b, lo) + '</span></div>' +
+    '<div class="meta">' + esc((s.sec.title || '').trim() || '(title page)') + ' · ' + how + '</div><div class="lab">' + esc(L.label) + '</div><p class="rt">' + th + '</p></div>';
+}
+function txBox(u) {
+  let h = '<div class="box"><h5>PARALLELS IN THE STUDENT TRANSCRIPTS <span class="tg">a parallel, not one of Jäsche’s sources</span></h5>';
+  if (!txReady) { txRun(); return h + '<div class="busy">Reading Blomberg, the Wiener Logik and Busolt, sentence by sentence… (a few seconds, once)</div><div class="progress txprog"><i style="width:' + Math.round(txProgress * 100) + '%"></i></div></div>'; }
+  const ss = u.sents.filter(s => s.tx && s.tx.some(Boolean));
+  if (!ss.length) return h + '<div class="empty">No sentence here has a close parallel in Blomberg, the Wiener Logik or Busolt.</div></div>';
+  h += '<div class="meta">A transcript records what a student heard in one semester. A parallel shows the matter was taught then; it does not date Jäsche’s sentence.</div>';
+  ss.forEach(sn => {
+    const b = jb[sn.id].b;
+    h += '<div class="txs"><div class="lab">Jäsche · AA 9:' + sn.page + (sn.m ? ' · also traced to R ' + REFL_ENTRIES[sn.m.ei].r : '') + '</div><p class="jt" data-go="' + sn.i + '" title="Show it in the text">' + esc(b.text.slice(sn.s, sn.e)) + '</p>' +
+      sn.tx.map((x, li) => x ? txCard(sn, li) : '').join('') + '</div>';
+  });
+  return h + '</div>';
+}
+function renderSources() {
+  if (!jrReady) return renderOverview();
+  if (unitKey === 'v') return '<div class="ptitle">VORREDE</div><div class="lede">Jäsche’s own preface. It is not compared with Kant’s notes.</div>';
+  const u = unitInfo(unitKey); if (!u) return '<div class="empty">Scroll the text to a § or a section.</div>';
+  const T = u.sents.filter(s => s.m), rs = new Set(T.map(s => s.m.ei));
+  let h = '<div class="ptitle">' + esc(u.label) + (u.title ? ' · <span>' + esc(u.title) + '</span>' : '') + '</div>';
+  const byCls = ORDER.concat(['undated']).map(k => { const r = [...new Set(T.filter(s => s.cls === k).map(s => REFL_ENTRIES[s.m.ei].r))]; return r.length ? r.length + ' ' + JR_CLASS[k].label + ' (R ' + r.join(', ') + ')' : ''; }).filter(Boolean);
+  h += '<div class="summ">AA 9:' + u.aa + (u.aaEnd !== u.aa ? '–' + u.aaEnd : '') + ' · <b>' + T.length + ' of ' + u.sents.length + ' sentences</b> traced' + (T.length ? ', to <b>' + rs.size + ' Reflexion' + (rs.size === 1 ? '' : 'en') + '</b>: ' + byCls.join('; ') : '') + '.</div>';
+  h += '<label class="opt txopt"><input type="checkbox" id="showtx"' + (showTx ? ' checked' : '') + '> also show parallels in the student transcripts</label>';
+  h += '<div class="box"><h5>EACH TRACED SENTENCE BESIDE ITS NOTE <span class="tg">machine match</span></h5>' + (T.length ? T.map(pairHtml).join('') : '<div class="empty">No sentence here is traced to a Reflexion at 70% or more. Jäsche may have reworked Kant’s notes beyond what word matching sees, or drawn on something else.</div>') + '</div>';
+  if (showTx) h += txBox(u);
+  const me = meierOf(u);
+  const filed = [...new Set(me.paras.flatMap(p => REFL_BY_PARA[p] || []))].filter(ei => REFL_ENTRIES[ei] && !REFL_ENTRIES[ei].vacat);
+  const used = new Map(); T.forEach(s => used.set(s.m.ei, s.cls));
+  const meier = me.attested ? me.groups.map(g => 'Meier § ' + esc(rangeList(g.paras)) + ' · ' + esc(g.jaesche) + (g.topic ? ' · <i>' + esc(g.topic) + '</i>' : '')).join('<br>') + ' <span class="tg att">AA concordance</span>'
+    : me.paras.length ? 'Meier §§ ' + rangeList(me.paras) + ' <span class="tg">inferred from the matches</span>' : '<span class="muted">No Meier § known: no sentence here is traced, and the AA gives no concordance.</span>';
+  h += '<div class="box"><h5>WHEN KANT WROTE ON THESE §§ <span class="tg att">Adickes’ dates</span></h5>' + (filed.length || used.size ? timelineSvg(filed, used) : '') +
+    '<div class="meta">' + meier + (filed.length ? ' · ' + filed.length + ' notes filed there; the ' + used.size + ' Jäsche’s text is traced to are coloured (hatched = mixed dating), placed by the start of Adickes’ first dating.' : '') + '</div></div>';
+  return h;
+}
+
+/* ── Flags ──────────────────────────────────────────────────────────────── */
+let flagMemo = null;
+function flagsOf() {
+  if (flagMemo) return flagMemo;
+  const units = new Map();
+  traced().forEach(s => { const key = s.para ? 'p' + s.para : 's' + s.sec; let u = units.get(key); if (!u) units.set(key, u = { key, rs: new Map() }); u.rs.set(s.m.ei, s.cls); });
+  const early = [], decades = [];
+  units.forEach(u => {
+    const cs = new Set(u.rs.values()), info = unitInfo(u.key), rs = [...u.rs.keys()].map(ei => 'R ' + REFL_ENTRIES[ei].r + ' (' + (REFL_ENTRIES[ei].phRaw || '—') + ')');
+    const item = { key: u.key, label: info.label, title: info.title, rs, page: info.aa };
+    if (cs.size === 1 && cs.has('early')) early.push(item);
+    if ([...cs].filter(c => c !== 'undated').length >= 3) decades.push(item);
+  });
+  const ord = (a, b) => a.page - b.page;
+  return (flagMemo = { early: early.sort(ord), decades: decades.sort(ord) });
+}
+function flagItem(f) { return '<button class="fi" data-unit="' + f.key + '"><b>' + esc(f.label) + '</b> ' + esc((f.title || '').slice(0, 46)) + '<span class="meta">AA 9:' + f.page + ' · ' + esc(f.rs.slice(0, 3).join(', ') + (f.rs.length > 3 ? ' …' : '')) + '</span></button>'; }
+function renderFlags() {
+  if (!jrReady) return renderOverview();
+  const F = flagsOf();
+  let h = '<div class="ptitle">PLACES TO LOOK AT</div><div class="lede">Conditions the page computes. Observations, not verdicts: an early note may still say what the critical Kant held. Click one to go there.</div>';
+  h += '<div class="fg"><h4><span class="fdot" style="background:rgb(29,53,87)"></span>Early only<span class="cnt">' + F.early.length + '</span></h4><div class="fd">Every Reflexion traced here is dated before 1770.</div>' + F.early.map(flagItem).join('') + '</div>';
+  h += '<div class="fg"><h4><span class="fdot" style="background:linear-gradient(90deg,rgb(29,53,87),rgb(147,181,216))"></span>Sources from three or more decades<span class="cnt">' + F.decades.length + '</span></h4><div class="fd">The notes traced in one § or section fall in three or more dating classes.</div>' + F.decades.map(flagItem).join('') + '</div>';
+  return h;
+}
+
+/* ── the panel ──────────────────────────────────────────────────────────── */
+function renderPanel() {
+  paintTabs();
+  if (!panelOpen) return;
+  $('pbody').innerHTML = tab === 'ov' ? renderOverview() : tab === 'src' ? renderSources() : renderFlags();
+  paintProgress();
+}
+function openTab(t) { tab = t; panelOpen = true; paintLayout(); renderPanel(); $('pbody').scrollTop = 0; savePrefs(); }
+function openSentence(i) {
+  const sn = SENTS[i]; if (!sn) return;
+  selSent = i; unitKey = sn.para ? 'p' + sn.para : 's' + sn.sec; tab = 'src'; panelOpen = true; paintLayout(); savePrefs();
+  renderText(); renderPanel();
+  const el = $('pr-' + i); if (el) { el.scrollIntoView({ block: 'center' }); flash(el); }
+}
+function openUnit(key) {
+  hold = false; unitKey = key; tab = 'src'; panelOpen = true; paintLayout(); savePrefs();
+  const u = unitInfo(key); if (u) scrollToId(u.anchor);
+  renderPanel();
+}
+
+/* ── events ─────────────────────────────────────────────────────────────── */
+$('xray').addEventListener('click', () => { xray = !xray; paintLayout(); renderText(); savePrefs(); });
+$('tabs').addEventListener('click', ev => {
+  const b = ev.target.closest('[data-tab]'); if (!b) return;
+  if (b.dataset.tab === tab) { panelOpen = false; paintLayout(); paintTabs(); savePrefs(); } else openTab(b.dataset.tab);
+});
+$('railR').addEventListener('click', ev => { const b = ev.target.closest('[data-tab]'); if (b) openTab(b.dataset.tab); });
+$('railToc').addEventListener('click', () => { tocOpen = !tocOpen; paintLayout(); savePrefs(); });
+$('followbar').addEventListener('click', ev => {
+  if (!ev.target.closest('#hold')) return;
+  hold = !hold;
+  if (!hold) { const k = inView(); if (k !== unitKey) { unitKey = k; renderPanel(); return; } }
+  paintTabs();
+});
+$('toc').addEventListener('click', ev => {
+  const v = ev.target.closest('[data-view]'); if (v) { tocView = v.dataset.view; renderToc(); savePrefs(); return; }
+  const d = ev.target.closest('[data-open]'); if (d) { const id = d.dataset.open, el = $('paras-' + id); if (openSecs.has(id)) openSecs.delete(id); else openSecs.add(id); el.classList.toggle('open', openSecs.has(id)); d.textContent = openSecs.has(id) ? '▾' : '▸'; return; }
+  const s = ev.target.closest('[data-sec]'); if (s) { scrollToId('sec-' + s.dataset.sec); return; }
+  const p = ev.target.closest('[data-para]'); if (p) scrollToId('para-' + p.dataset.para);
+});
+$('toc').addEventListener('mouseover', ev => { const t = ev.target.closest('.tb[data-stat]'); if (t) showTip(t); else $('tip').hidden = true; });
+$('toc').addEventListener('mouseleave', () => { $('tip').hidden = true; });
+$('toc').addEventListener('scroll', () => { $('tip').hidden = true; });
+$('goto').addEventListener('input', () => { GO = gotoMatches($('goto').value); goCur = 0; paintGoto(); });
+$('goto').addEventListener('keydown', ev => {
+  if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { ev.preventDefault(); if (GO.length) { goCur = (goCur + (ev.key === 'ArrowDown' ? 1 : GO.length - 1)) % GO.length; paintGoto(); } }
+  else if (ev.key === 'Enter') { ev.preventDefault(); gotoPick(goCur); }
+  else if (ev.key === 'Escape') { $('goto').value = ''; GO = []; $('golist').hidden = true; }
+});
+$('goto').addEventListener('blur', () => setTimeout(() => { $('golist').hidden = true; }, 150));
+$('goto').addEventListener('focus', () => { if ($('goto').value.trim()) paintGoto(); });
+$('golist').addEventListener('mousedown', ev => { const b = ev.target.closest('[data-gi]'); if (b) { ev.preventDefault(); gotoPick(+b.dataset.gi); } });
+$('text').addEventListener('scroll', () => { if (!tick) tick = requestAnimationFrame(() => { tick = 0; onScroll(); }); });
+$('inner').addEventListener('click', ev => {
+  const g = ev.target.closest('.gut'); if (g) { ev.preventDefault(); history.replaceState(null, '', g.getAttribute('href')); return; }
+  if (window.getSelection().toString()) return;
+  const s = ev.target.closest('[data-sent]'); if (s) openSentence(+s.dataset.sent);
+});
+$('pbody').addEventListener('change', ev => { if (ev.target.id === 'showtx') { showTx = ev.target.checked; savePrefs(); const keep = $('pbody').scrollTop; renderPanel(); $('pbody').scrollTop = keep; } });
+$('pbody').addEventListener('click', ev => {
+  const t = ev.target;
+  const ei = t.closest('[data-ei]'); if (ei) { const sn = SENTS.find(s => s.m && s.m.ei === +ei.dataset.ei && (s.para ? 'p' + s.para : 's' + s.sec) === unitKey); if (sn) { const el = $('pr-' + sn.i); el.scrollIntoView({ block: 'center' }); flash(el); } return; }
+  const go = t.closest('[data-go]'); if (go) { const sn = SENTS[+go.dataset.go]; selSent = sn.i; renderText(); scrollToId(sn.id, true); return; }
+  const u = t.closest('[data-unit]'); if (u) openUnit(u.dataset.unit);
+});
+let qTimer = 0;
+$('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => { query = $('q').value; runSearch(); renderText(); if (HITS.length) gotoHit(1); }, 160); });
+$('q').addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); gotoHit(ev.shiftKey ? -1 : 1); } });
+$('prev').addEventListener('click', () => gotoHit(-1));
+$('next').addEventListener('click', () => gotoHit(1));
+$('loose').addEventListener('change', ev => { loose = ev.target.checked; runSearch(); renderText(); });
+window.addEventListener('hashchange', () => { const id = location.hash.slice(1); if (document.getElementById(id)) scrollToId(id, true); });
+
+/* ── init ───────────────────────────────────────────────────────────────── */
+loadPrefs(); paintLayout(); paintLegend(); renderToc(); renderText(); unitKey = inView(); renderPanel();
+if (location.hash && document.getElementById(location.hash.slice(1))) scrollToId(location.hash.slice(1), true);
+setTimeout(() => jrRun().then(() => { flagMemo = null; if (xray) renderText(); if (tocView === 'dating') renderToc(); renderPanel(); }), 30);
+</script>
+</body>
+</html>

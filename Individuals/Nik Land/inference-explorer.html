@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inference Explorer — Kant's Logik transcripts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5efe0;
+    --parchment-deep: #ece3cc;
+    --card: #fbf8ef;
+    --ink: #2b2118;
+    --ink-soft: #5a4a3a;
+    --rule: #d6c9a8;
+    --accent: #5c3d1e;
+    --accent-soft: #e9dcc0;
+    --warn: #8a2b1c;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex;
+    flex-direction: column;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    line-height: 1.45;
+  }
+
+  header {
+    padding: 18px 28px 14px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--parchment-deep);
+  }
+  header h1 {
+    margin: 0;
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 600;
+    font-size: 21px;
+    letter-spacing: .06em;
+    color: var(--accent);
+  }
+  header p { margin: 4px 0 0; color: var(--ink-soft); font-size: 16px; }
+
+  /* ── The four buttons ─────────────────────────────────────────────────── */
+  nav#kinds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 28px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--parchment);
+  }
+  nav#kinds button {
+    font: inherit;
+    font-size: 17px;
+    padding: 7px 18px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    cursor: pointer;
+  }
+  nav#kinds button .n {
+    margin-left: 8px;
+    font-size: 14px;
+    opacity: .75;
+    font-variant-numeric: tabular-nums;
+  }
+  nav#kinds button:hover { background: var(--accent-soft); }
+  nav#kinds button[aria-pressed="true"] { background: var(--accent); color: var(--parchment); }
+  nav#kinds button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Results (left) ───────────────────────────────────────────────────── */
+  #results { overflow-y: auto; padding: 18px 28px 40px; }
+  #blurb { margin: 0 0 6px; color: var(--ink-soft); font-size: 17px; max-width: 46em; }
+  #count {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+  }
+  #empty {
+    border: 1px dashed var(--rule);
+    padding: 22px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  .group {
+    margin: 22px 0 10px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--rule);
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 14px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .group:first-child { margin-top: 0; }
+  .group small { margin-left: 8px; text-transform: none; letter-spacing: 0; font-family: 'EB Garamond', Georgia, serif; font-size: 15px; color: var(--ink-soft); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px 12px;
+    margin: 0 0 14px;
+  }
+  .card.rule { border-left-style: dashed; }
+  .card.unresolved { border-left-color: var(--warn); }
+  .example {
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin: 0 0 9px;
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 11px; }
+  .chip {
+    font-size: 14px;
+    padding: 1px 9px;
+    border: 1px solid var(--accent);
+    border-radius: 11px;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .chip b {
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 400;
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-right: 5px;
+    opacity: .75;
+  }
+  .chip.inferred {
+    border-style: dashed;
+    background: transparent;
+    color: var(--ink-soft);
+    border-color: var(--ink-soft);
+    font-style: italic;
+  }
+  .chip.hit { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  .chip.hit b { opacity: .85; }
+  .chip.plain { background: transparent; border-color: var(--rule); color: var(--ink-soft); }
+  .chip.faulty { background: transparent; border-color: var(--warn); color: var(--warn); }
+
+  blockquote {
+    margin: 0 0 9px;
+    padding: 0 0 0 12px;
+    border-left: 2px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: 17px;
+  }
+  blockquote mark {
+    background: #f1dfae;
+    color: var(--ink);
+    padding: 0 2px;
+  }
+  .cite {
+    font-size: 15px;
+    color: var(--ink);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 14px;
+  }
+  .cite .work { font-family: 'Cinzel', Georgia, serif; font-size: 13px; letter-spacing: .06em; color: var(--accent); }
+  .cite .aa { font-weight: 600; }
+  .cite .sub { color: var(--ink-soft); }
+  .note { margin: 7px 0 0; font-size: 15px; font-style: italic; color: var(--ink-soft); }
+  .warn { margin: 7px 0 0; font-size: 15px; color: var(--warn); }
+
+  /* ── Filters (right) ──────────────────────────────────────────────────── */
+  aside {
+    border-left: 1px solid var(--rule);
+    background: var(--parchment-deep);
+    overflow-y: auto;
+    padding: 16px 22px 30px;
+  }
+  aside h2 {
+    margin: 0 0 6px;
+    font-family: 'Cinzel', Georgia, serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  fieldset { border: 0; border-top: 1px solid var(--rule); margin: 0; padding: 11px 0 9px; }
+  legend {
+    padding: 0 8px 0 0;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 13px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .opt { display: flex; align-items: baseline; gap: 8px; padding: 2px 0; cursor: pointer; }
+  .opt input { accent-color: var(--accent); width: 16px; height: 16px; flex: none; transform: translateY(2px); cursor: pointer; }
+  .opt .de { color: var(--ink-soft); font-style: italic; font-size: 16px; }
+  .opt .n { margin-left: auto; color: var(--ink-soft); font-size: 15px; font-variant-numeric: tabular-nums; }
+  .only { border-top: 1px solid var(--rule); padding-top: 12px; }
+  .only .hint { margin: 2px 0 0 24px; font-size: 15px; color: var(--ink-soft); }
+  .legend { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--rule); font-size: 15px; color: var(--ink-soft); }
+  .legend p { margin: 0 0 7px; }
+  .legend .chip { font-size: 13px; padding: 0 7px; }
+
+  @media (max-width: 860px) {
+    body { display: block; height: auto; }
+    .layout { grid-template-columns: 1fr; }
+    aside { order: -1; border-left: 0; border-bottom: 1px solid var(--rule); overflow: visible; }
+    #results { overflow: visible; padding: 16px; }
+    nav#kinds { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Inference Explorer</h1>
+  <p>Syllogisms and immediate inferences from Kant's logic lectures — the Blomberg, Wiener and Busolt transcripts, Academy Edition vol. 24 — with the page and transcript each comes from.</p>
+</header>
+
+<nav id="kinds" aria-label="Kind of inference"></nav>
+
+<div class="layout">
+  <main id="results" aria-live="polite">
+    <p id="blurb"></p>
+    <p id="count"></p>
+    <div id="list"></div>
+    <div id="empty" hidden>Nothing in the selected transcripts fits. Tick another transcript, or untick “Worked examples only”.</div>
+  </main>
+
+  <aside>
+    <h2>Narrow the search</h2>
+    <fieldset>
+      <legend>Transcript</legend>
+      <div id="works"></div>
+    </fieldset>
+    <div class="only">
+      <label class="opt">
+        <input type="checkbox" id="only">
+        <span>Worked examples only</span>
+      </label>
+      <p class="hint">Leave out passages that state a rule or name the kind without giving an instance of their own.</p>
+    </div>
+
+    <div class="legend">
+      <p>Each passage is filed under one kind, or under two where it covers both (a Dilemma is hypothetical with a disjunctive consequent). The four buttons show one kind at a time.</p>
+      <p><span class="chip"><b>Kind</b>categorical</span> the transcript itself names this.</p>
+      <p><span class="chip inferred"><b>Form</b>second figure</span> assigned here from the shape of the argument, and not named by the transcript.</p>
+      <p><span class="chip plain"><b>Rule only</b></span> the passage states a rule and gives no instance; its card has a dashed edge.</p>
+      <p><span class="chip faulty"><b>Faulty</b></span> the lecturer offers the argument as a mistake.</p>
+    </div>
+  </aside>
+</div>
+
+<!-- The three transcripts, shared data (generated; read-only), then this tool's own examples. -->
+<script src="../../data/logik-blomberg-24.js"></script>
+<script src="../../data/logik-busolt-24.js"></script>
+<script src="../../data/logik-wiener-24.js"></script>
+<script src="inference-examples.js"></script>
+
+<script>
+/* ── Data ─────────────────────────────────────────────────────────────────── */
+
+// Chronological, which is also the order the examples are listed in.
+const WORK_INFO = {
+  blomberg: { label: 'Logik Blomberg', date: 'ca. 1771',    data: () => LOGIK_BLOMBERG, order: 0 },
+  wiener:   { label: 'Wiener Logik',   date: '1780ff.',     data: () => LOGIK_WIENER,   order: 1 },
+  busolt:   { label: 'Logik Busolt',   date: 'ca. 1789/90', data: () => LOGIK_BUSOLT,   order: 2 }
+};
+
+const KINDS = [
+  { key: 'categorical',  label: 'Categorical syllogism',
+    blurb: 'The major premise is a categorical judgement, and there is a middle term: the four figures, the mood names, and the rules of the syllogistic.' },
+  { key: 'hypothetical', label: 'Hypothetical syllogism',
+    blurb: 'The major premise is a conditional, with an antecedent and a consequent: the modus ponens and the modus tollens, and the Dilemma.' },
+  { key: 'disjunctive',  label: 'Disjunctive syllogism',
+    blurb: 'The major premise is a logical division into opposed members: from the denial of all but one to the assertion of that one, and conversely.' },
+  { key: 'immediate',    label: 'Immediate inference',
+    blurb: 'A consequentia immediata, with no middle term: opposition, subalternation, conversion, contraposition. The lecturers call these Verstandesschlüsse and say they are not properly Vernunftschlüsse.' }
+];
+const KIND_LABEL = {};
+KINDS.forEach(k => { KIND_LABEL[k.key] = k.label; });
+
+/* ── State ────────────────────────────────────────────────────────────────── */
+
+let kind = 'categorical';
+let works = new Set();      // transcripts ticked; empty means all three
+let onlyInstances = false;
+let examples = [];          // INFERENCE_EXAMPLES, each resolved against its block
+
+/* ── Resolving an example against the transcript ──────────────────────────── */
+
+function indexBlocks(work) {
+  const byId = {};
+  WORK_INFO[work].data().sections.forEach(sec => sec.blocks.forEach(b => { byId[b.id] = b; }));
+  return byId;
+}
+
+// The page (AA or manuscript) that stands at character offset `off` of a block's
+// text: the last marker at or before it. Null if none has begun yet.
+function markerAt(markers, off) {
+  let found = null;
+  (markers || []).forEach(mk => { if (mk.i <= off) found = mk.p; });
+  return found;
+}
+
+function resolve(raw, blocks) {
+  const ex = Object.assign({}, raw);
+  const b = blocks[raw.work][raw.block];
+  const start = b ? b.text.indexOf(raw.quote) : -1;
+  ex.ok = start >= 0 && raw.quote.indexOf(raw.example) >= 0;
+  if (!ex.ok) return ex;
+  const end = start + raw.quote.length - 1;
+  ex.aaFrom = markerAt(b.pages, start) || b.aa;
+  ex.aaTo = markerAt(b.pages, end) || b.aa;
+  ex.msFrom = markerAt(b.ms, start);
+  ex.msTo = markerAt(b.ms, end);
+  return ex;
+}
+
+function loadExamples() {
+  const blocks = {};
+  Object.keys(WORK_INFO).forEach(w => { blocks[w] = indexBlocks(w); });
+  examples = INFERENCE_EXAMPLES.map(raw => resolve(raw, blocks));
+  examples.sort((a, b) =>
+    WORK_INFO[a.work].order - WORK_INFO[b.work].order ||
+    (a.aaFrom || 0) - (b.aaFrom || 0) ||
+    a.id.localeCompare(b.id));
+}
+
+/* ── Matching ─────────────────────────────────────────────────────────────── */
+
+function ofKind(ex, k) {
+  return ex.kind.indexOf(k) >= 0;
+}
+
+function fits(ex) {
+  if (!ofKind(ex, kind)) return false;
+  if (works.size && !works.has(ex.work)) return false;
+  return !onlyInstances || ex.level === 'instance';
+}
+
+/* ── Rendering ────────────────────────────────────────────────────────────── */
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+
+function pageRange(a, b) {
+  return a === b ? String(a) : a + '–' + b;
+}
+
+function chip(label, value, cls, title) {
+  const c = el('span', 'chip' + (cls ? ' ' + cls : ''));
+  if (title) c.title = title;
+  c.append(el('b', null, label), value);
+  return c;
+}
+
+function buildChips(ex) {
+  const box = el('div', 'chips');
+  const kindNamed = ex.named.indexOf('kind') >= 0;
+  ex.kind.forEach(k => {
+    const cls = (kindNamed ? '' : 'inferred') + (k === kind ? ' hit' : '');
+    box.append(chip('Kind', k, cls.trim(),
+      kindNamed ? 'Named by the transcript' : 'Assigned from the shape of the argument; not named by the transcript'));
+  });
+  if (ex.form) {
+    const formNamed = ex.named.indexOf('form') >= 0;
+    box.append(chip('Form', ex.form, formNamed ? '' : 'inferred',
+      formNamed ? 'Named by the transcript' : 'Assigned from the shape of the argument; not named by the transcript'));
+  }
+  if (ex.level === 'rule') box.append(chip('Rule only', '', 'plain', 'States a rule or names the kind; gives no instance of its own'));
+  if (ex.faulty) box.append(chip('Faulty', '', 'faulty', ex.faulty));
+  return box;
+}
+
+function buildQuote(ex) {
+  const q = el('blockquote');
+  q.lang = 'de';
+  const at = ex.quote.indexOf(ex.example);
+  q.append(
+    ex.quote.slice(0, at),
+    el('mark', null, ex.example),
+    ex.quote.slice(at + ex.example.length)
+  );
+  return q;
+}
+
+function buildCard(ex) {
+  const w = WORK_INFO[ex.work];
+  const card = el('article', 'card' + (ex.level === 'rule' ? ' rule' : '') + (ex.ok ? '' : ' unresolved'));
+
+  const head = el('p', 'example', ex.example);
+  head.lang = 'de';
+  card.append(head, buildChips(ex));
+
+  if (ex.ok) {
+    // Where the quote is only the example, the quotation would say it twice.
+    if (ex.quote !== ex.example) card.append(buildQuote(ex));
+    const cite = el('div', 'cite');
+    cite.append(el('span', 'work', w.label), el('span', 'aa', 'AA 24:' + pageRange(ex.aaFrom, ex.aaTo)));
+    cite.append(el('span', 'sub', 'vol. 24 · ' + w.label + ', ' + w.date));
+    if (ex.msFrom != null) cite.append(el('span', 'sub', 'Ms. p. ' + pageRange(ex.msFrom, ex.msTo != null ? ex.msTo : ex.msFrom)));
+    cite.append(el('span', 'sub', ex.block));
+    card.append(cite);
+  } else {
+    card.append(el('p', 'warn', 'The quotation could not be found in ' + ex.block + '. The data file may have been regenerated; check inference-examples.js.'));
+  }
+  if (ex.faulty) card.append(el('p', 'note', 'Faulty: ' + ex.faulty));
+  if (ex.note) card.append(el('p', 'note', ex.note));
+  return card;
+}
+
+function render() {
+  const hits = examples.filter(fits);
+  const nodes = [];
+  let lastWork = null;
+  hits.forEach(ex => {
+    if (ex.work !== lastWork) {
+      lastWork = ex.work;
+      const w = WORK_INFO[ex.work];
+      const n = hits.filter(h => h.work === ex.work).length;
+      const g = el('h3', 'group', w.label);
+      g.append(el('small', null, w.date + ' · ' + n));
+      nodes.push(g);
+    }
+    nodes.push(buildCard(ex));
+  });
+  document.getElementById('list').replaceChildren(...nodes);
+  document.getElementById('empty').hidden = hits.length > 0;
+
+  const instances = hits.filter(h => h.level === 'instance').length;
+  document.getElementById('count').textContent =
+    hits.length + ' passage' + (hits.length === 1 ? '' : 's') + ' · ' +
+    instances + ' with an example, ' + (hits.length - instances) + ' rule only';
+  document.getElementById('blurb').textContent = KINDS.filter(k => k.key === kind)[0].blurb;
+  refreshCounts();
+}
+
+/* ── Buttons and filter panel ─────────────────────────────────────────────── */
+
+// Counts under the ticked transcripts and the worked-examples setting, so that
+// each button says what it would show.
+function refreshCounts() {
+  KINDS.forEach(k => {
+    const n = examples.filter(ex => ofKind(ex, k.key) &&
+      (!works.size || works.has(ex.work)) &&
+      (!onlyInstances || ex.level === 'instance')).length;
+    document.querySelector('#kinds button[data-kind="' + k.key + '"] .n').textContent = n;
+  });
+  Object.keys(WORK_INFO).forEach(w => {
+    const n = examples.filter(ex => ex.work === w && ofKind(ex, kind) &&
+      (!onlyInstances || ex.level === 'instance')).length;
+    document.querySelector('#works input[value="' + w + '"]').closest('label').querySelector('.n').textContent = n;
+  });
+}
+
+function setKind(k) {
+  kind = k;
+  document.querySelectorAll('#kinds button').forEach(b => {
+    b.setAttribute('aria-pressed', b.dataset.kind === k ? 'true' : 'false');
+  });
+  // The hash lets a link open on one kind; a browser that refuses to set it loses only that.
+  try { if (location.hash.slice(1) !== k) history.replaceState(null, '', '#' + k); } catch (e) { /* not essential */ }
+  render();
+  document.getElementById('results').scrollTop = 0;
+}
+
+function buildButtons() {
+  const nav = document.getElementById('kinds');
+  KINDS.forEach(k => {
+    const b = el('button', null, k.label);
+    b.type = 'button';
+    b.dataset.kind = k.key;
+    b.setAttribute('aria-pressed', 'false');
+    b.append(el('span', 'n', '0'));
+    b.addEventListener('click', () => setKind(k.key));
+    nav.append(b);
+  });
+}
+
+function buildWorks() {
+  const host = document.getElementById('works');
+  Object.keys(WORK_INFO).forEach(w => {
+    const lab = el('label', 'opt');
+    const box = document.createElement('input');
+    box.type = 'checkbox';
+    box.value = w;
+    box.addEventListener('change', () => {
+      if (box.checked) works.add(w); else works.delete(w);
+      render();
+    });
+    lab.append(box, el('span', null, WORK_INFO[w].label), el('span', 'de', WORK_INFO[w].date), el('span', 'n', '0'));
+    host.append(lab);
+  });
+}
+
+/* ── Wiring and init ──────────────────────────────────────────────────────── */
+
+document.getElementById('only').addEventListener('change', e => { onlyInstances = e.target.checked; render(); });
+window.addEventListener('hashchange', () => {
+  const k = location.hash.slice(1);
+  if (KIND_LABEL[k] && k !== kind) setKind(k);
+});
+
+loadExamples();
+buildButtons();
+buildWorks();
+setKind(KIND_LABEL[location.hash.slice(1)] ? location.hash.slice(1) : kind);
+</script>
+</body>
+</html>

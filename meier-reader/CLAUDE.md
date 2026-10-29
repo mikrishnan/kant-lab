@@ -54,20 +54,20 @@ for its tool.
 
 | Lines | Contents |
 | --- | --- |
-| 1–978 | `<head>`, fonts, `:root` palette, all CSS |
-| 980–1065 | Markup: header, `#sidebar`, `#primaryPanel`, `#resizer`, `#traditionPanel`, `#adickesVeil` |
-| 1072–1074 | `<script src>` for `../data/phases-adickes.js`, `../data/reflexionen-16-meier.js` and `../data/tradition-meier.js` |
-| 1078 | `MEIER` — the full text (~288 KB, **one line**) |
-| 1079 | `HIERARCHY` — the outline (~2.7 KB, one line) |
-| 1081 | `CITATIONS` — § → AA reference (~12 KB, one line) |
-| 1083–1720 | State, builders, tradition rendering, event wiring |
-| 1722–2437 | The Reflexionen panel: kind/era tables, filter, cards, windowing, Adickes overlay, text highlighting |
-| 2438–end | Init |
+| 1–1014 | `<head>`, fonts, `:root` palette, all CSS |
+| 1016–1105 | Markup: header (with the lookup box and its `#jumpMsg` note), `#sidebar`, `#primaryPanel`, `#resizer`, `#traditionPanel`, `#adickesVeil` |
+| 1111–1113 | `<script src>` for `../data/phases-adickes.js`, `../data/reflexionen-16-meier.js` and `../data/tradition-meier.js` |
+| 1117 | `MEIER` — the full text (~288 KB, **one line**) |
+| 1118 | `HIERARCHY` — the outline (~2.7 KB, one line) |
+| 1120 | `CITATIONS` — § → AA reference (~12 KB, one line) |
+| 1122–1970 | State, builders, the § and AA-page lookup (from about 1490), tradition rendering, event wiring |
+| 1971–2686 | The Reflexionen panel: kind/era tables, filter, cards, windowing, Adickes overlay, text highlighting |
+| 2687–end | Init |
 
 `TRADITION`, the hand-written parallel passages, is no longer in this file: it is
 [../data/tradition-meier.js](../data/tradition-meier.js).
 
-**Do not reformat lines 1078, 1079, or 1081.** They are machine-generated JSON dumps.
+**Do not reformat lines 1117, 1118, or 1120.** They are machine-generated JSON dumps.
 Pretty-printing them turns any subsequent one-word correction into a 20,000-line diff.
 Make targeted string replacements, or regenerate the whole line from a script.
 
@@ -218,6 +218,16 @@ selected layer, so the same term can be carried across in one click without rety
   over from the removed Baumgarten tab, and is always empty.
 - `focusParagraph(n)` — highlights, syncs the sidebar, and repopulates the tradition
   panel. `scrollToParaNum(n, andFocus)` is the navigation entry point.
+- `jumpToSection(raw)` — the header's `§ or AA` box, and `#go=…` in the address through
+  `goFromHash()`, on load and on `hashchange`. `parseLookup()` reads a § (`92`, `§§ 92–98`)
+  or an AA citation (`16:236`, `AA XVI 236`, `Ak. 16, 236`) into `{ para }` or
+  `{ vol, page }`. A § goes through `scrollToParaNum()`. A page of AA 16 goes through
+  `goToMeierPage()`: first `MEIER_PAGES`, the §§ on each page read off `CITATIONS`; then,
+  for the 413 pages that print only Reflexionen, the entries whose `aa`–`aaEnd` covers the
+  page, whose first `paras` § it shows with `switchPanel('reflexionen')` and
+  `revealReflEntry()`. Any other volume goes to `aaElsewhere()`, which names the text and
+  links to the Baumgarten reader or the Logic Portal. `showJumpMsg(html)` writes the note
+  under the box, from numbers and fixed text only: never echo what was typed into it.
 - `toggleFilter(btn)` — flips one stratum in `activeFilters` and re-renders the panel.
 - The resizer is a `mousedown`/`mousemove`/`mouseup` trio clamping the tradition panel
   to 200–600 px.
@@ -228,8 +238,18 @@ selected layer, so the same term can be carried across in one click without rety
   [../baumgarten-reader/](../baumgarten-reader/), and both `TRADITION` and the
   Reflexionen here are indexed to Meier's §§ — they say nothing about Baumgarten's.
   A Baumgarten tab was tried here and removed; do not reintroduce one.
-- `WORK.min`/`WORK.max` drive `jumpToSection()` and `renderParaText()`. The
-  `min`/`max` on `#jumpInput` in the markup repeat them and must be kept in step.
+- `WORK.min`/`WORK.max` drive `jumpToSection()`'s § check and `renderParaText()`.
+  `#jumpInput` is a text box, since it takes AA pages too, so it carries no `min`/`max`.
+- `AA24_LECTURES`, the page ranges of the logic lectures in AA 24, repeats what the Logic
+  Portal's catalogue says (`Individuals/mikrishnan/portal/catalogue.js`), and the
+  Baumgarten reader has the same table. If the portal gains a lecture or a range moves,
+  change all three.
+- `revealReflEntry()` scrolls the panel after `scrollReflToFocusSettled()` has. That
+  function's later re-scrolls give up once the panel has moved more than 4 px, which is
+  what lets the card stay in view; call it after `focusParagraph()`, never before.
+- `.part-body` must keep `flex-shrink: 0`. The sidebar is a flex column, and a shrinkable
+  part with `overflow: hidden` is squeezed to the window's height instead of making the
+  sidebar scroll, which cut off the lower Abschnitte of an open Haupttheil.
 - `MEIER.nav` and `HIERARCHY` overlap. If you correct a section title or range, fix it
   in `HIERARCHY` (what renders) and consider whether `nav` should follow.
 - The scroll-sync handler on `#primaryPanel` no-ops whenever a paragraph is focused, and

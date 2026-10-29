@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal: The Logic Portal · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+  }
+
+  @page { size: letter; margin: 0; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { background: var(--parchment); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  body {
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'EB Garamond', serif;
+    font-size: 10.4pt;
+    line-height: 1.3;
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+  }
+
+  main { max-width: 7.3in; width: 100%; }
+
+  .kicker {
+    font-family: 'Cinzel', serif;
+    font-size: 8pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--faded);
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    font-size: 19pt;
+    color: var(--accent);
+    margin: 0.1rem 0 0.15rem;
+  }
+
+  p.tagline {
+    color: var(--faded);
+    font-style: italic;
+    font-size: 11.5pt;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--accent-light);
+    margin-bottom: 0.6rem;
+  }
+
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    font-size: 10pt;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0.62rem 0 0.28rem;
+  }
+
+  p + p { margin-top: 0.3rem; }
+
+  b { color: var(--accent); font-weight: 600; }
+
+  /* The four questions */
+  ol.qs {
+    list-style: none;
+    counter-reset: q;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    margin-top: 0.3rem;
+  }
+
+  ol.qs li {
+    counter-increment: q;
+    background: var(--parchment-dark);
+    border: 1px solid var(--accent-light);
+    border-radius: 5px;
+    padding: 0.35rem 0.55rem 0.35rem 1.9rem;
+    position: relative;
+    font-size: 9.7pt;
+    line-height: 1.25;
+  }
+
+  ol.qs li::before {
+    content: counter(q);
+    position: absolute;
+    left: 0.5rem;
+    top: 0.4rem;
+    width: 1.05rem;
+    height: 1.05rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--parchment);
+    font-family: 'Cinzel', serif;
+    font-size: 7.5pt;
+    text-align: center;
+    line-height: 1.05rem;
+  }
+
+  ol.qs .q { display: block; font-style: italic; font-weight: 600; color: var(--accent); font-size: 10.4pt; margin-bottom: 0.1rem; }
+  ol.qs .via { display: block; margin-top: 0.18rem; color: var(--faded); font-size: 9pt; }
+  ol.qs .via::before { content: 'From: '; font-family: 'Cinzel', serif; font-size: 7pt; letter-spacing: 0.06em; color: var(--accent); }
+
+  p.after { margin-top: 0.35rem; }
+
+  ul.plain { padding-left: 1rem; }
+  ul.plain li { margin-bottom: 0.18rem; }
+
+  /* Monday / later */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.45rem;
+    margin-top: 0.3rem;
+  }
+
+  .grid > div {
+    border: 1px solid var(--accent-light);
+    border-radius: 5px;
+    padding: 0.4rem 0.55rem;
+    background: var(--parchment-dark);
+    font-size: 9.6pt;
+  }
+
+  .grid > div.later { border-style: dashed; background: transparent; }
+
+  .grid h3 {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 8pt;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.2rem;
+  }
+
+  .grid ul { padding-left: 0.9rem; }
+  .grid li { margin-bottom: 0.12rem; }
+
+  ol.decisions { padding-left: 1.1rem; }
+  ol.decisions li { margin-bottom: 0.22rem; }
+
+  footer {
+    margin-top: 0.6rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid var(--parchment-dark);
+    color: var(--faded);
+    font-size: 8.5pt;
+    font-style: italic;
+  }
+
+  @media print {
+    body { padding: 0.4in 0.6in 0.3in; display: block; }
+    main { max-width: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">Kant Lab · Proposal for review, revision 4 · Sunday 25 October 2026</div>
+  <h1>The Logic Portal</h1>
+  <p class="tagline">A research instrument for the seminar: put a question to the whole logic corpus the moment it comes up in class.</p>
+
+  <h2>What it is for</h2>
+  <p>We are a seminar of researchers trying to work out how Kant's logic works. Whatever passage we hit, in a
+  lecture, in Jäsche or in a published text, the same few questions come up, and today each one takes a different
+  tool or a round of Ctrl-F. The portal answers them in one place, from any passage or term. Every answer is a set of
+  passages, and from any of them you can ask again. So you move from lecture to textbook to annotation and back
+  without leaving the instrument, and a trail keeps your route.</p>
+
+  <h2>The questions it answers</h2>
+  <ol class="qs">
+    <li><span class="q">How is this formulated across the corpus?</span>Every version of a doctrine, term or sentence
+    in every text, dated, in German and Latin and in the old spellings.
+    <span class="via">Feng's lexicon of forms · Jin's parallel passages · Alex's sentence matching</span></li>
+    <li><span class="q">Where is this in Meier?</span>The § of the <em>Auszug</em> a passage is on, and how we know:
+    stated by Blomberg's own headings, or inferred with a measured confidence.
+    <span class="via">Jesus's Meier–Kant concordance</span></li>
+    <li><span class="q">What are the associated Reflexionen?</span>Kant's notes on that §, dated by Adickes, and the
+    notes that share its wording, including the ones Jäsche drew on.
+    <span class="via">the Meier Reader (Sophia &amp; Maria) · Alex's Jäsche tracing</span></li>
+    <li><span class="q">What kinds does Kant distinguish?</span>For the doctrines students have classified: the kinds,
+    with passages from every layer under each.
+    <span class="via">Nik (immediate inferences) · Sophia (mediate) · Aidan (judgments) · Feng (principles)</span></li>
+  </ol>
+  <p class="after"><b>Every answer is signed.</b> Each result says whose work produced it and whether it is stated or
+  inferred. A Contributors page shows each person's part. On Monday the demo walks one question through everyone's work.</p>
+
+  <h2>Built to take much more data</h2>
+  <ul class="plain">
+    <li><b>One catalogue of texts.</b> Each text is registered once: what it is (textbook, notes, lecture, published),
+    its date, its AA volume, and where its transcription came from. Every question reads the catalogue, so a new text
+    shows up everywhere without changing the app.</li>
+    <li><b>Converters, not hand work.</b> The lecture extractor already keeps a table of works, so the other logic
+    lectures in AA XXIV (Herder, Philippi, Pölitz, Dohna-Wundlacken) should need little more than an entry each.
+    Published texts get a converter that writes the same shape.</li>
+    <li><b>Ready for a better edition.</b> Links are stored as AA citations plus the quoted words, as Nik's examples
+    already are, not as positions in a file. When a clean digital edition arrives, its text can replace ours and every
+    link survives.</li>
+  </ul>
+
+  <h2>Monday, and after</h2>
+  <div class="grid">
+    <div>
+      <h3>Must have for Monday</h3>
+      <ul>
+        <li>The four questions, from any passage in today's texts</li>
+        <li>Signed answers, and the Contributors page</li>
+        <li>The catalogue, with today's texts in it</li>
+      </ul>
+    </div>
+    <div>
+      <h3>If time allows</h3>
+      <ul>
+        <li>The trail, shareable as a link</li>
+        <li>“Report a text error” on every passage</li>
+        <li>English beside the German, where students have translated</li>
+      </ul>
+    </div>
+    <div class="later">
+      <h3>After Monday</h3>
+      <ul>
+        <li>The other AA XXIV logic lectures</li>
+        <li>Published texts</li>
+        <li>The digital edition, when it comes</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Three decisions for you</h2>
+  <ol class="decisions">
+    <li><b>Your questions for tomorrow.</b> Send me three to five real ones. I will make sure each works from start to
+    finish, and build the demo around one of them.</li>
+    <li><b>What to load first after Monday:</b> more lecture notes, or published texts?</li>
+    <li><b>Ask: concept search or Claude?</b> Concept search works offline and traces every answer to its source.
+    Answers from Claude to plain-language questions would need an API key and checking. I would use concept search
+    for Monday.</li>
+  </ol>
+
+  <footer>The portal makes no scholarly claims of its own. It shows only connections that the texts, the Academy
+  edition or the seminar's work already make, each with its source.</footer>
+</main>
+</body>
+</html>
