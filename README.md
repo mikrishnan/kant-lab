@@ -17,11 +17,11 @@ Claude makes it, you can also work [on your own computer](#working-on-your-own-c
 | Path | What it is | Changes approved by |
 | --- | --- | --- |
 | `baumgarten-reader/`, `meier-reader/` | **Tools** with student owners. Finished and approved; listed first on the site | one of the tools' owners |
-| `porphyrian-tree/` | **Tool.** Finished and approved; listed first on the site | the professor |
+| `porphyrian-tree/` | **Tool.** Finished and approved; listed first on the site | the professor or a default reviewer |
 | `groups/<group>/` | **Works in progress.** One folder per working group, each the group's own playground | another member of that group |
 | `data/`, `scripts/`, `Textfiles/` | **Shared data,** the texts and Reflexionen that several tools read; the extractors that produce it; the transcriptions they read | one of the readers' owners |
 | `Individuals/<you>/` | Your personal sandbox, as in the first session | you — no approval needed |
-| everything else | `docs/`, `.github/`, this page | the professor |
+| everything else | `docs/`, `.github/`, this page | the professor or a default reviewer |
 
 The Baumgarten and Meier readers, and the data they are built from, are owned by
 **Sophia Wyatt** (@sophia-wyatt) and **Maria** (@mari637-pixel).
@@ -95,7 +95,8 @@ You do not need to read the code. A reviewer:
 For a group's folder, any member of the group other than the author can approve. For the
 Baumgarten and Meier readers, `data/`, `scripts/` and `Textfiles/`, the readers' owner who
 is not the author approves. For anything else outside `groups/` and `Individuals/`, the
-professor approves. A pull request that touches folders with different owners needs an
+professor or one of the default reviewers approves: Laura Benzenberg, Jeremy Weirich,
+Jesus La Paz and Qianxun Feng. A pull request that touches folders with different owners needs an
 approval from each.
 
 **The preview link.** The site shows only what has been merged. To see a pull request

@@ -1,8 +1,9 @@
 # Who must approve a pull request, by path. The LAST matching line wins.
 # Everyone listed must have Write access to the repository, or the line is ignored.
 
-# Default: the professor reviews everything not matched below.
-*                @mikrishnan @Benzenberg @jweirich-globus
+# Default: the professor, or any one of the default reviewers beside them, approves
+# everything not matched below.
+*                @mikrishnan @Benzenberg @jweirich-globus @yizu6201 @qianxun-blip
 
 # Personal sandboxes: no owner, so the author merges their own pull request.
 /Individuals/
