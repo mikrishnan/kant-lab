@@ -147,7 +147,10 @@ const PORTAL_LAYERS = [
 
    These are machine translations, each following one published translator's stated method;
    neither translator translated these texts. The portal says so wherever it shows one.
-   Baumgarten and the Reflexionen on Baumgarten have none yet. */
+   Baumgarten and the Reflexionen on Baumgarten have English made for the portal itself (baum-translate.py,
+   with Jesus's Guyer–Wood brief), in that style only:
+     styles the styles a translation was made in, when not all; the portal shows the first for any other
+     made   what it was made for, where that is not Jesus's Meier–Kant comparison */
 const PORTAL_TR_STYLES = [
   { key: 'guyer', label: 'Guyer–Wood principles', tag: 'literal; one English word per German term; sentences kept whole' },
   { key: 'kemp', label: 'Kemp Smith principles', tag: 'faithful to the sense; readable English; tangled sentences resolved' },
@@ -160,4 +163,8 @@ const PORTAL_TRANSLATIONS = [
   { text: 'busolt', set: 'busolt', key: 'ID', file: '../../Jesus-La-Paz/translations/busolt-STYLE.js', who: 'jesus' },
   { text: 'jaesche', set: 'jaesche', key: 'MAP', file: '../../Jesus-La-Paz/translations/jaesche-STYLE.js', who: 'jesus',
     map: 'pinned/jaesche-translation-map.js', mapGlobal: 'PORTAL_PIN_JAESCHE_TR' },
+  { text: 'baumgarten', set: 'met', key: 'met:N', file: 'translations/metaphysica-STYLE.js', who: 'maria', styles: ['guyer'],
+    made: 'for the Logic Portal, with Jesus’s Guyer–Wood brief' },
+  { text: 'refl-meta', set: 'reflm', key: 'reflm:N', file: 'translations/reflm-STYLE.js', who: 'maria', styles: ['guyer'],
+    made: 'for the Logic Portal, with Jesus’s Guyer–Wood brief' },
 ];

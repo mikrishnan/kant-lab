@@ -718,7 +718,7 @@
           described above. English searches the English translation of every passage that has one, so an English word, <code>judgment</code>,
           <code>"principle of contradiction"</code>, <code>certain*</code>, finds the German passages it translates. An English word finds its plain plural too.
           Such a hit is marked <i>found in the English</i>, with its English and roughly the stretch of German it translates. The English is Jesus’s machine translation,
-          and Baumgarten and Kant’s notes on Baumgarten have none yet.</p>
+          and for Baumgarten and Kant’s notes on Baumgarten it is the portal’s own, in the Guyer–Wood style only.</p>
           <p>A page of the Academy edition, written as scholars cite it, goes straight to that page: <code>24:892</code>, <code>24.892</code>,
           <code>AA 24:892</code>, <code>Ak. 16, 236</code> or <code>AA XVII 45</code> opens the text printed there, where the page begins.
           A page of Kant’s notes opens the textbook they are written in, with the note beside it.
@@ -745,7 +745,7 @@
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
-<script src="catalogue.js?v=2026-10-27a"></script>
+<script src="catalogue.js?v=2026-10-29a"></script>
 <script>
 (() => {
 'use strict';
@@ -903,7 +903,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&am
 /* Inserted with async = false, the files download side by side but run in the order given. */
 /* Bump this, and the catalogue's ?v= in the page's <script> tag, whenever the portal's files change,
    so that a browser holding yesterday's copies fetches today's. */
-const PORTAL_V = '2026-10-27a';
+const PORTAL_V = '2026-10-29a';
 function loadScript(src) {
   return new Promise(res => {
     const el = document.createElement('script');
@@ -1707,7 +1707,7 @@ function enHitLine(p, row, em) {
   if (a > 0) { const i = row.text.lastIndexOf(' ', a); a = i > 0 ? i + 1 : 0; }
   if (b < row.text.length) { const i = row.text.indexOf(' ', b); b = i > 0 ? i : row.text.length; }
   const spans = em.map(m => [row.ts[m.a], row.te[m.b], m.loc === S.loc]);
-  return '<div class="fen enhit" lang="en" data-for="' + p.i + '" title="Found in the English: machine translation for ' + esc(personName(trFor(TEXTS[p.t]).who)) + '’s Meier–Kant comparison. The German above is roughly the stretch it translates.">' +
+  return '<div class="fen enhit" lang="en" data-for="' + p.i + '" title="Found in the English: machine translation ' + esc(trMade(trFor(TEXTS[p.t]))) + '. The German above is roughly the stretch it translates.">' +
     '<span class="enfound">FOUND IN THE ENGLISH</span>' + (a > 0 ? '… ' : '') + marked(row.text, a, b, spans) + (b < row.text.length ? ' …' : '') + '</div>';
 }
 
@@ -2012,9 +2012,20 @@ const TR_FILES = new Map();       // translation file → 'loading' | 'ready' | 
 const trFor = T => (typeof PORTAL_TRANSLATIONS === 'undefined' ? [] : PORTAL_TRANSLATIONS).find(x => x.text === T.key) || null;
 const rich = s => esc(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/\*([^*\n]+)\*/g, '<i>$1</i>');
 
+/* A translation made in fewer styles than the portal offers (`styles` in its catalogue entry) is shown in the
+   style it has, whichever the reader picks, and the label says so. What it was made for, likewise. */
+const trStyle = (tr, style) => tr.styles && !tr.styles.includes(style) ? tr.styles[0] : style;
+const trMade = tr => tr.made || 'for ' + personName(tr.who) + '’s Meier–Kant comparison';
+const trWarning = tr => tr.made ? 'Machine translation, made ' + tr.made + ', following Guyer and Wood’s stated principles. ' +
+  'Guyer and Wood did not translate these texts, and this is not their work. Check it against the Latin and German.' : TR_WARNING;
+function styleLabel(tr, style) {
+  const st = PORTAL_TR_STYLES.find(x => x.key === trStyle(tr, style)) || PORTAL_TR_STYLES[0];
+  return st.label + (trStyle(tr, style) !== style ? ' (the only style made for this text)' : '');
+}
 /* Whether a text's translation in one style is loaded; if not, starts loading it, and draws the
    rail again when it arrives. */
 function trState(tr, style) {
+  style = trStyle(tr, style);
   const files = [tr.file.replace('STYLE', style)].concat(tr.map ? [tr.map] : []);
   const st = files.map(f => TR_FILES.get(f));
   if (st.includes('failed')) return 'failed';
@@ -2029,6 +2040,7 @@ function trState(tr, style) {
 /* A passage's English: { text, notes, part }, `part` when the translation was made for a
    stretch of text that is not exactly this passage. */
 function trEntry(tr, style, p) {
+  style = trStyle(tr, style);
   const set = window.KANT_TR && window.KANT_TR[tr.set + '/' + style];
   if (!set) return null;
   let keys, part = false;
@@ -2044,7 +2056,8 @@ function trEntry(tr, style, p) {
 
 function englishFor(tr, p) {
   const st = PORTAL_TR_STYLES.find(x => x.key === S.en) || PORTAL_TR_STYLES[0];
-  const open = '<div class="pen" lang="en"><div class="lab">ENGLISH · ' + esc(st.label) + ' <i>' + esc(st.tag) + '</i></div>';
+  const ust = PORTAL_TR_STYLES.find(x => x.key === trStyle(tr, st.key)) || st;
+  const open = '<div class="pen" lang="en"><div class="lab">ENGLISH · ' + esc(styleLabel(tr, st.key)) + ' <i>' + esc(ust.tag) + '</i></div>';
   const state = trState(tr, st.key);
   if (state === 'loading') return open + '<div class="empty">Loading the English…</div></div>';
   if (state === 'failed') return open + '<div class="empty">The translation file did not load.</div></div>';
@@ -2058,7 +2071,7 @@ function englishNotes(tr, p) {
   const e = trState(tr, st.key) === 'ready' && trEntry(tr, st.key, p);
   let h = '';
   if (e && e.part) h += '<div class="trwarn">Jesus’s text of the Jäsche Logik divides this stretch differently, so the English begins before this passage or runs on past it.</div>';
-  return h + '<div class="trwarn">' + esc(TR_WARNING) + '</div>' +
+  return h + '<div class="trwarn">' + esc(trWarning(tr)) + '</div>' +
     '<div class="from">' + esc(personName(tr.who)) + '’s translations' + (tr.map ? ', matched to Alex’s Jäsche by build-pins.py' : '') + '</div>';
 }
 
@@ -2090,9 +2103,9 @@ function enLine(p, a, b) {
   // in the full text, a passage the search found in the English shows its English with the words marked
   const em = a == null && style === S.en && RESULT && RESULT.byPass && !S.d && (RESULT.byPass.get(p.i) || []).filter(m => m.en);
   const row = em && em.length && EN_IX && EN_IX.byP.get(p.i);
-  if (row) return '<div class="fen enhit" lang="en" data-for="' + p.i + '" title="Found in the English: machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + '">' +
+  if (row) return '<div class="fen enhit" lang="en" data-for="' + p.i + '" title="Found in the English: machine translation ' + esc(trMade(tr)) + ', ' + esc(styleLabel(tr, style)) + '">' +
     '<span class="enfound">FOUND IN THE ENGLISH</span>' + marked(row.text, 0, row.text.length, em.map(m => [row.ts[m.a], row.te[m.b], m.loc === S.loc])) + '</div>';
-  return '<div class="fen" lang="en" data-for="' + p.i + '" title="Machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + (a != null && e.text.length > 520 ? '; the stretch shown is approximate' : '') + '">' + rich(t) + (e.part ? ' <span class="muted small">(the English runs past this passage)</span>' : '') + '</div>';
+  return '<div class="fen" lang="en" data-for="' + p.i + '" title="Machine translation ' + esc(trMade(tr)) + ', ' + esc(styleLabel(tr, style)) + (a != null && e.text.length > 520 ? '; the stretch shown is approximate' : '') + '">' + rich(t) + (e.part ? ' <span class="muted small">(the English runs past this passage)</span>' : '') + '</div>';
 }
 /* The switch, the bar under the header, and the translation files, kept in step with S.en. */
 function enSync() {
@@ -2110,7 +2123,7 @@ function enSync() {
   // one quiet line: the two styles, what the English is, and Maria's preview; the rest on hover
   bar.innerHTML = '<span class="lab">ENGLISH</span>' +
     '<span class="sty">' + PORTAL_TR_STYLES.map(st => '<button type="button" data-en="' + st.key + '"' + (S.en === st.key ? ' class="on"' : '') + ' title="' + esc(st.tag) + '">' + esc(st.label.replace(' principles', '')) + '</button>').join('') + '</span>' +
-    '<span class="muted" title="The German and Latin always stay. Baumgarten and Kant’s notes on him have no English yet.">Machine translation, for orientation: check it against the German</span>' +
+    '<span class="muted" title="The German and Latin always stay. Baumgarten and Kant’s notes on him have English in the Guyer–Wood style only, made for the portal.">Machine translation, for orientation: check it against the German</span>' +
     '<span class="soon"><a href="' + MARIA_DEMO + '" target="_blank" rel="noopener" title="Coming soon: Maria’s sentence-by-sentence translation, across the whole portal">Maria’s translation, a preview ↗</a></span>';
 }
 function enApply() { enSync(); enRefresh(); }
