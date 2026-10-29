@@ -12,6 +12,7 @@ ruleset on `main` decide who has to approve what:
 | Change touches | Who approves | What you do |
 | --- | --- | --- |
 | only `Individuals/<name>/` | nobody — the author merges | nothing |
+| only the Logic Portal, `Individuals/mikrishnan/portal/` | anyone in the seminar but the author | nothing, unless asked |
 | only `groups/<group>/` | another member of that group | nothing, unless asked |
 | only a tool with student owners, or `data/`, `scripts/`, `Textfiles/` | one of the owners (below) | nothing, unless asked |
 | any other top-level tool, `.github/`, root files | you, or a default reviewer | review it (below), unless a default reviewer has |
@@ -41,6 +42,9 @@ pull requests. Use the bypass for housekeeping, not for routine changes to the t
 Invite them as a collaborator with **Write** access (Settings → Collaborators). They
 connect their own GitHub account at claude.ai/code the first time they use it. Anyone
 named in `CODEOWNERS` must have Write access, or GitHub silently ignores their line.
+
+Add them, too, to the Logic Portal's line in `.github/CODEOWNERS`, which lists the
+whole seminar, so that they can approve a fix to the portal.
 
 To let someone approve what you approve, add them to the `*` line at the top of
 `.github/CODEOWNERS`. The people there besides you are the **default reviewers**, and any
