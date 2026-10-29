@@ -17,14 +17,17 @@ Claude makes it, you can also work [on your own computer](#working-on-your-own-c
 | Path | What it is | Changes approved by |
 | --- | --- | --- |
 | `baumgarten-reader/`, `meier-reader/` | **Tools** with student owners. Finished and approved; listed first on the site | one of the tools' owners |
-| `porphyrian-tree/` | **Tool.** Finished and approved; listed first on the site | the professor |
+| `porphyrian-tree/` | **Tool.** Finished and approved; listed first on the site | the professor or a default reviewer |
 | `groups/<group>/` | **Works in progress.** One folder per working group, each the group's own playground | another member of that group |
 | `data/`, `scripts/`, `Textfiles/` | **Shared data,** the texts and Reflexionen that several tools read; the extractors that produce it; the transcriptions they read | one of the readers' owners |
 | `Individuals/<you>/` | Your personal sandbox, as in the first session | you — no approval needed |
-| everything else | `docs/`, `.github/`, this page | the professor |
+| `Individuals/mikrishnan/portal/` | The **Logic Portal**. It sits in the professor's folder, but it is the whole seminar's | anyone in the seminar but the author |
+| everything else | `docs/`, `.github/`, this page | the professor or a default reviewer |
 
 The Baumgarten and Meier readers, and the data they are built from, are owned by
-**Sophia Wyatt** (@sophia-wyatt) and **Maria** (@mari637-pixel).
+**Sophia Wyatt** (@sophia-wyatt) and **Maria** (@mari637-pixel). The Logic Portal is
+everyone's: [Fixing the Logic Portal in seminar](#fixing-the-logic-portal-in-seminar)
+says how to change it.
 
 The repository is public, and the site publishes all of it.
 
@@ -95,7 +98,8 @@ You do not need to read the code. A reviewer:
 For a group's folder, any member of the group other than the author can approve. For the
 Baumgarten and Meier readers, `data/`, `scripts/` and `Textfiles/`, the readers' owner who
 is not the author approves. For anything else outside `groups/` and `Individuals/`, the
-professor approves. A pull request that touches folders with different owners needs an
+professor or one of the default reviewers approves: Laura Benzenberg, Jeremy Weirich,
+Jesus La Paz, Qianxun Feng and @zelleznick. A pull request that touches folders with different owners needs an
 approval from each.
 
 **The preview link.** The site shows only what has been merged. To see a pull request
@@ -113,11 +117,40 @@ updates within a few minutes, at `https://mikrishnan.github.io/kant-lab/groups/<
 If a merged change breaks something, the merged pull request has a **Revert** button.
 Press it first and ask questions afterwards.
 
+## Fixing the Logic Portal in seminar
+
+The [Logic Portal](https://mikrishnan.github.io/kant-lab/Individuals/mikrishnan/portal/)
+belongs to the whole seminar. When discussion turns up a problem with it, such as a wrong
+citation, a missing link or a search that finds the wrong thing, fix it there and then.
+This is the loop above, made quick:
+
+1. **Say that you are taking it**, out loud, so that two people do not fix the same thing.
+   If it cannot be done in the room, open an issue and assign it to yourself instead.
+2. **Ask Claude.** At [claude.ai/code](https://claude.ai/code), on the
+   **mikrishnan/kant-lab** repository:
+
+   > In the Logic Portal (Individuals/mikrishnan/portal/), X happens when it should be Y.
+   > Fix only that, push the branch, and give me the preview link.
+
+3. **Share the preview link.** Someone else in the room opens it, tries what was fixed,
+   and looks for red errors in the console, as in step 4 above.
+4. **Ask Claude to open the pull request.** That person approves it, and you press
+   **Squash and merge**. The site has the fix within a few minutes. If you still see the
+   old page, reload it with ⇧⌘R (Ctrl+Shift+R on Windows).
+
+Several people can fix different things in the portal at the same time. Each works on a
+branch of their own, and GitHub combines changes to the same file as long as they touch
+different lines. Problems come only when two changes touch the same lines, which GitHub
+reports as conflicts. In that case, close the later pull request and ask Claude for the
+change again, as the rules below say. Merge the same day: a pull request left open is the
+one that ends up in conflict. If a merged fix breaks something, press **Revert** first.
+
 ## Rules worth keeping
 
 - **One driver per tool at a time.** Whoever is assigned the issue makes the change; the
   others work on the spec and review. Two people asking Claude to change the same file at
-  once is how conflicts happen.
+  once is how conflicts happen. The Logic Portal in seminar is the exception: there it is
+  one person per problem, each fix kept small and merged straight away.
 - **If GitHub says a pull request has conflicts, do not try to resolve them.** Close it,
   and ask Claude for the same change again, starting from the current version. Redoing
   the change is quicker and safer than merging it.

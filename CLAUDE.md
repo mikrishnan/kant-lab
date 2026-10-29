@@ -18,7 +18,7 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | [scripts/](scripts/) | One-off Python extractors that produce `data/` from `Textfiles/` |
 | [Textfiles/](Textfiles/) | RTF source transcriptions the SPAs' embedded data was extracted from |
 | [groups/](groups/) | Working groups' playgrounds, one folder per group, each with a `SPEC.md` as its source of truth. Team work, at the works-in-progress tier; the rules for a group folder are in [groups/_template/CLAUDE.md](groups/_template/CLAUDE.md) |
-| [Individuals/](Individuals/) | Participants' own projects, one folder each and belonging to its owner. Nothing in `Individuals/` is loaded by the shared tools |
+| [Individuals/](Individuals/) | Participants' own projects, one folder each and belonging to its owner. Nothing in `Individuals/` is loaded by the shared tools. The exception to ownership is the Logic Portal, `Individuals/mikrishnan/portal/`, which the whole seminar keeps |
 | [docs/](docs/) | Notes for maintainers: [docs/maintaining.md](docs/maintaining.md) |
 | [.github/](.github/) | `CODEOWNERS` (who approves what), the issue forms, the pull request template |
 | [.claude/launch.json](.claude/launch.json) | The preview server for the Claude desktop app's Browser pane: `python3 -m http.server` at the repository root |
@@ -432,8 +432,14 @@ decides who must approve it. In short:
   their student owners, Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), either
   of whom approves the other's changes;
 - another member of the group approves changes to a group's folder;
+- anyone in the seminar other than the author approves changes to the Logic Portal,
+  `Individuals/mikrishnan/portal/`, which is the whole seminar's although it sits in the
+  professor's folder. The README's "Fixing the Logic Portal in seminar" is the workflow;
 - `Individuals/` changes need no approval;
-- the professor approves everything else.
+- the professor approves everything else, and so can any one of the default reviewers
+  beside them on the `*` line: Laura Benzenberg (@Benzenberg), Jeremy Weirich
+  (@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip) and
+  @zelleznick.
 
 A pull request that touches folders with different owners needs an approval from each,
 so keep each one within a single owner's folders where you can.
