@@ -194,6 +194,57 @@ PHASE_CHARS = 'α-ωµϕ'   # µ = U+00B5 micro sign, ϕ = U+03D5, both as trans
 PHASE_HEAD_RE = re.compile(
     r'^(?P<phases>[^.,]*?[' + PHASE_CHARS + r'][^.,]*?)\s*[.,]\s*(?P<rest>.*)$'
 )
+# Nothing but phase notation: symbols, query marks, parentheses, dashes.
+PHASE_ONLY_RE = re.compile(r'[' + PHASE_CHARS + r'\d?!()\[\]«»\s−–-]*'
+                           r'[' + PHASE_CHARS + r'][' + PHASE_CHARS + r'\d?!()\[\]«»\s−–-]*')
+# One phase symbol opening a stretch of text — "ψ−χ??", "(ν−ξ?)" — as against
+# a Greek word, whose letter is followed by another letter.
+PHASE_SYMBOL_RE = re.compile(r'\(?[' + PHASE_CHARS + r']\d?[?!)]*(?:[\s.,−–-]|$)'
+                             # or Adickes' dating of the phase, in parentheses:
+                             # "ω4. (Sommer 1797.)"
+                             r'|\((?=[^)]*\b1[78]\d\d\b)')
+
+# What can follow the first page in the sigla, when the header line ends in
+# nothing else: a second page, `95'.` or `121.`; a page letter, `b.`; an
+# Erdmann number, `E II 1736.`, `I 356.`; and on a loose sheet its number,
+# sides and Reicke's page, `7. S. I, II. R I 200-202.`, `36. Bogen 1. 2.`,
+# `R II 254f`. The transcription sometimes prints the last period as a colon.
+SIGLA_TAIL_RE = re.compile(
+    r"(?:(?:\d+[\w']*|[a-z]\b|(?:E\s+)?[IV]+\s+\d+[\w']*"
+    r"|R\s+(?:[IV]+\s+)?\d+[\w−–-]*|S\.\s*(?:\d+|[IVX]+(?:\s*,\s*[IVX]+)*)"
+    r"|Bogen\s+\d+|R\.-Sch\.\s*[IVX]+\s+\d+)\s*[.:]?\s*)+")
+BARE_SIGLUM_RE = re.compile(r"\s*[A-Z]\s*[\dIVXLC][\w']*\s*[:,]?\s*")
+# The AA describing what Kant wrote on, where the sigla would stand.
+DESCRIPTION = r'(?:(?:Bemerkung|Anmerkung)(?:en)?\s+Kants\b|In\s+Kants\s+Handexemplar\b)'
+
+
+def phase_head(s):
+    """Where the phase expression opening `s` ends: (end, start of what
+    follows), or None when `s` does not open with one.
+
+    It ends at a period or comma, but not at one inside parentheses — Adickes
+    dates the late phases in prose, "θ4 (nach dem 13. Oct. 1788)", and a query
+    can carry a period of its own, "(κ3?.)" — and not at one followed by
+    another phase symbol, or by the dating: "θ. ψ−χ?? M 16.", "π−ρ. (ν−ξ?)
+    L 23.", "ω4. (Sommer 1797.)". Such a period is kept in the expression,
+    as printed."""
+    depth = 0
+    for i, c in enumerate(s):
+        if c == '(':
+            depth += 1
+        elif c == ')':
+            depth = max(depth - 1, 0)
+        elif c in '.,' and depth == 0:
+            if not re.search('[' + PHASE_CHARS + ']', s[:i]):
+                return None
+            j = i + 1
+            while j < len(s) and s[j].isspace():
+                j += 1
+            if not PHASE_SYMBOL_RE.match(s, j):
+                return i, j
+    # a parenthesis never closed: fall back on the first period
+    m = PHASE_HEAD_RE.match(s)
+    return (m.end('phases'), m.start('rest')) if m else None
 
 
 def parse_entry_header(rest, siglum):
@@ -216,36 +267,57 @@ def parse_entry_header(rest, siglum):
         out['proseDating'] = True
         rest = pm.group(2)
 
-    if not PHASE_HEAD_RE.match(rest):
+    # A note with no sigla at all — on a student's essay, on a letter — can
+    # end its header on the phase expression, with no period after it:
+    # "ε2? ι2? κ3? (µ? ρ2? ψ?)". Close it as the AA closes the others.
+    if out['phaseRaw'] is None and PHASE_ONLY_RE.fullmatch(rest):
+        rest = rest.strip() + '.'
+
+    if phase_head(rest) is None:
         sm2 = re.match(r'^(?P<phases>[^.]*?[' + PHASE_CHARS + r'][^.]*?)'
                        r'\s+(?P<rest>[A-Z]\s*[\dIVXLC][^\n]*)$', rest)
         if sm2:
             rest = sm2.group('phases').strip() + '. ' + sm2.group('rest')
 
-    m = PHASE_HEAD_RE.match(rest)
-    if m:
+    term = '.'
+    ph = phase_head(rest)
+    if ph:
         if out['phaseRaw'] is None:
-            out['phaseRaw'] = m.group('phases').strip()
-        rest = m.group('rest')
+            out['phaseRaw'] = rest[:ph[0]].strip()
+        term = rest[ph[0]:ph[1]].strip()[:1] or '.'
+        rest = rest[ph[1]:]
     # "γ? η? κ? λ? ν−ξ?? L 3'" — the phase expression and the sigla share a
     # terminating period, so peel a trailing sigla back off into `rest`.
     if out['phaseRaw']:
         # AA XVI separates the two with a space; AA XVII and XVIII often do not,
         # running the sigla straight on — "ε−ι? (ξ?)M 63" — so allow the split
         # after a closing paren or a query mark with no space at all.
-        peel = re.match(r'^(?P<ph>.*?[' + PHASE_CHARS + r'][^A-Z]*?)'
-                        r'(?:\s+|(?<=[)?]))(?P<sig>[A-Z]\s*[\dIVXLC].*)$',
+        # Not every sigla opens on a letter and a number: a loose sheet is
+        # `L Bl. D 18.`, a library can come first, `Berliner Staatsbibliothek.
+        # L Bl. 29.`, the AA can say what Kant wrote on instead, `Bemerkungen
+        # Kants auf seiner Elfenbein-Schreibtafel.`, and the siglum can carry a
+        # period of its own, `M. 60.`, leaving a lone letter at the end here.
+        # A dating in parentheses may come between, capitals and all:
+        # "ω3. (2. Hälfte Juni-Anfang August 1795) L Bl. F 4." The period or
+        # comma that ended the expression is put back as printed.
+        peel = re.match(r'^(?P<ph>.*?[' + PHASE_CHARS + r'](?:[^A-Z(]|\([^)]*\))*?)'
+                        r'(?:\s+|(?<=[)?]))(?P<sig>(?:[A-Z]\s*[\dIVXLC]|L\s*Bl\b'
+                        r'|Berliner\s+Staatsbibliothek\b|' + DESCRIPTION + r'|[A-Z]$).*)$',
                         out['phaseRaw'])
         if peel:
             out['phaseRaw'] = peel.group('ph').strip()
-            rest = peel.group('sig').strip() + '. ' + rest
+            rest = peel.group('sig').strip() + term + ' ' + rest
 
     out['phases'] = re.findall(r'[' + PHASE_CHARS + r']\d?', out['phaseRaw'] or '')
     seen = set()
     out['phases'] = [x for x in out['phases'] if not (x in seen or seen.add(x))]
 
     # sigla: "L 5'. 8." or "M 190d. E II 421."
-    sm = re.match(r'^((?:[A-Z][^\n]{0,40}?\.\s*)+)(.*)$', rest)
+    # A description of what Kant wrote on, standing in for the sigla, is the
+    # AA's prose and goes to the text whole. Read as sigla, it was cut at the
+    # first initial: "Anmerkungen Kants auf dem Brief D.F. | von Lossows …".
+    sm = None if re.match(DESCRIPTION, rest) else \
+        re.match(r'^((?:[A-Z][^\n]{0,40}?\.\s*)+)(.*)$', rest)
     if sm:
         out['siglaRaw'] = sm.group(1).strip()
         out['trailing'] = sm.group(2).strip()
@@ -253,9 +325,12 @@ def parse_entry_header(rest, siglum):
         # the sigla without a letter of its own: "L 95. 95'.", "M 147'. E II 797.
         # 771.", "M. 277'.". When that is all the header line has left, it is
         # sigla, not the first line of the text.
-        if re.fullmatch(r"(?:\d+[\w']*\.\s*)+", out['trailing']):
+        if SIGLA_TAIL_RE.fullmatch(out['trailing']):
             out['siglaRaw'] += ' ' + out['trailing']
             out['trailing'] = ''
+    elif BARE_SIGLUM_RE.fullmatch(rest):
+        # a siglum alone, closed by a colon, a comma or nothing: "L 51:", "L 6,"
+        out['siglaRaw'] = rest.strip()
     else:
         out['trailing'] = rest.strip()
     return out

@@ -62,11 +62,11 @@ the locus note verbatim, and Kant's page siglum.
 
   | Tag | Meaning | Entries |
   | --- | --- | --- |
-  | `§ attested` | the § is named in the note's own locus note | 1648 |
-  | `§ from handbook page` | the AA gives only a page of Kant's copy; these are all the §§ the 1757 edition prints on that page | 31 |
+  | `§ attested` | the § is named in the note's own locus note | 1657 |
+  | `§ from handbook page` | the AA gives only a page of Kant's copy; these are all the §§ the 1757 edition prints on that page | 30 |
   | `§ from AA block` | the § range comes from the AA block heading the note stands under | 557 |
   | `interpolated §` | the AA states no §; the tool inferred one from the neighbouring entries. The card also has a dashed left border | 23 |
-  | `front matter`, `loses Blatt`, `another handbook`, `no § stated` | the note belongs to no § and is filed under none | 459, 91, 107, 51 |
+  | `front matter`, `loses Blatt`, `another handbook`, `no § stated` | the note belongs to no § and is filed under none | 460, 118, 104, 18 |
 
 - **A suspected misprint** is underlined, never corrected. The conjecture is printed
   beneath the § as "so AA XVII; perhaps a misprint for …".
@@ -167,8 +167,8 @@ keeps its meaning.*
     has six of them, Refl. 3929–3934.
 22. A § with no Reflexion says so: at § 33, "The Academy Edition records no Reflexion at
     §33."
-23. At the foot of the panel, `708 Reflexionen belong to no §` opens all 708 in AA order:
-    459 tagged `front matter`, 91 `loses Blatt`, 107 `another handbook` and 51 `no §
+23. At the foot of the panel, `700 Reflexionen belong to no §` opens all 700 in AA order:
+    460 tagged `front matter`, 118 `loses Blatt`, 104 `another handbook` and 18 `no §
     stated`. `‹ back to §N` returns to the § the panel was showing.
 24. `×` in the panel's header hides the panel. A `Reflexionen` button then appears in the
     top bar, and pressing it brings the panel back.
@@ -317,15 +317,15 @@ keeps its meaning.*
    all? If not, setting `lang="la"` on the Latin text only, and `lang="de"` on the
    German, would end it. Either way, the hard rule says the reader must be able to see
    what the edition prints.
-3. **Ten notes say `no § stated` while their own locus note names a §**: Refl. 3531
-   (`ZuM §. 58 Schluss`), 3629, 3630, 3646, 3694, 3709, 3806, 4058, 4266 and 4660. All
-   ten are filed under no §. They are part of the 51 that the docs count as having no §.
-   Eight of them show a second symptom: the end of the entry's header (part of the phase
-   expression and the siglum, such as `ψ−χ?? M 16.`) has run into the text of the note,
-   and the phase expression is cut short (`δ?η2? (κ3?`). About 40 entries in all have
-   this header debris: 4 in the Erläuterungen, 12 in AA XVII and 24 in AA XVIII. The fix
-   belongs in `scripts/parse_refl.py` or `scripts/emit_baum_refl.py`. After it, the ten
-   should be filed under their §s and leave the 51.
+3. **One note is on the front matter, but its locus note names a §**: Refl. 3709
+   (`M LIV. E II 479.`, `ZuM § 1-3`), Kant's "Prolegomena Metaphysicorum." on the last
+   Roman-numbered page. The rule that front matter gets no § files it under none and
+   tags it `front matter`. Should a locus note override that rule? Nine more notes like
+   it, and 125 entries in all whose header had run into the text or whose sigla had run
+   into the dating, were fixed in `scripts/parse_refl.py` in October 2026. That filed
+   Refl. 3531, 3629, 3630, 3646, 3694, 3806, 4058, 4266 and 4660 under the § their
+   locus note names, and moved 27 notes to `loses Blatt` whose `L Bl.` had been read
+   as part of the dating.
 4. **Should the table of contents follow the scrolling too?** Its highlight moves only on
    a jump or a click, never on scrolling. The handoff notes assumed it followed. Once
    Open question 1 is settled, decide whether it should.

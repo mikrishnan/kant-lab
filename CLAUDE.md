@@ -165,8 +165,8 @@ decade datings are written four ways.
 `emit_baum_refl.py` does the anchoring and records `src` on every entry —
 `locus`, `block`, `page`, or `none`. **Not everything in these volumes is on
 Baumgarten**: 104 entries are in Kant's copy of Eberhard's *Vorbereitung zur
-natürlichen Theologie*, 91 are loose sheets (where `L Bl.` is *loses Blatt*, **not**
-Meier's siglum L), and 459 are on the Roman-numbered front matter. None of those gets
+natürlichen Theologie*, 118 are loose sheets (where `L Bl.` is *loses Blatt*, **not**
+Meier's siglum L), and 460 are on the Roman-numbered front matter. None of those gets
 a §, and they must not be given one.
 
 ### Baumgarten's Metaphysica
@@ -225,13 +225,35 @@ Things the extractor knows about the AA's conventions, which are easy to break:
   which is in the `α-ω` range. A naive `[α-ω]` class silently drops 133 entries.
 - The phase expression and the sigla often share one terminating period
   (`γ? η? κ? λ? ν−ξ?? L 3'.`), so the sigla has to be peeled back off.
+- The phase expression does not always end at its first period. A period inside
+  parentheses belongs to it — a query's own, `(κ3?.)`, and those of Adickes' prose
+  datings of the late phases, `θ4 (nach dem 13. Oct. 1788)`; so does one followed by
+  another phase symbol or by the dating, `θ. ψ−χ?? M 16.`, `ω4. (Sommer 1797.)`. Such
+  periods stay in `phRaw` as printed. A note with no sigla, on a student's essay or on
+  a letter, can end its header on the phase expression with no period at all:
+  `ε2? ι2? κ3? (µ? ρ2? ψ?)`.
+- The sigla do not always open on a letter and a number: a loose sheet is `L Bl. D 18.`,
+  a library can come first, `Berliner Staatsbibliothek. L Bl. 29.`, and the siglum can
+  carry a period of its own, `M. 60.`. Where the AA describes what Kant wrote on instead
+  — `Bemerkungen Kants auf seiner Elfenbein-Schreibtafel.`, `In Kants Handexemplar von
+  J.N. Tetens: …` — that is prose, and goes whole to the text.
+- Until October 2026 each of these ran part of the header into the text or the dating
+  into the sigla, in 125 entries (8 in AA XVI). The worst cost was the loose sheets: 27
+  had their `L Bl.` caught in `phRaw`, so they counted as written in a handbook. `L Bl.
+  M 22.` was filed under §§ 76–80 as page 22 of the *Metaphysica*, and `L Bl. K 10.`
+  as a "Kants Handexemplar".
 - A capital `Α` (U+0391) in the transcription is an OCR artefact of Latin `A` ("Αus"),
   not a phase.
 - The sigla can go on past a page with no letter of its own: `L 95. 95'.` (the note runs
   from p. 95 onto the interleaf), `M 147'. E II 797. 771.` (two Erdmann numbers),
   `M. 277'.`. When the header line ends in bare numbers like these, they belong to the
   sigla. Until October 2026 they were taken as the first line of the text, which opened
-  249 Reflexionen (50 in AA XVI, 199 in XVII–XVIII) with a stray `95'.`.
+  249 Reflexionen (50 in AA XVI, 199 in XVII–XVIII) with a stray `95'.`. So do an
+  Erdmann number after the second page, `M 5'. 5. E II 1369.`, a loose sheet's sides
+  and Reicke's page, `L Bl. D. 7. S. I, II. R I 200-202.`, and a siglum closed by a
+  colon or a comma, or by nothing, `L 51:`, `L 6,`. The period or comma between the
+  phase expression and the sigla is kept as printed, `M XXV, XXVI.`; until then it was
+  always given back as a period.
 
 ### The Logik transcripts of AA XXIV
 
@@ -385,9 +407,9 @@ Editing guidance:
   Filling them in would mean transcribing AA XV, which is not in `Textfiles/`.
   Baumgarten's three prefaces are also not shown, the reader being keyed to § numbers.
 - The Reflexionen on Baumgarten now have a side panel in the **Baumgarten reader**
-  itself, tracking the § in view. 708 of the 2967 belong to no numbered § — 459 the
-  Roman-numbered front matter, 91 loose sheets, 107 another handbook (104 of those
-  Kant's copy of Eberhard), and 51 that fall into none of the three and are tagged
+  itself, tracking the § in view. 700 of the 2967 belong to no numbered § — 460 the
+  Roman-numbered front matter, 118 loose sheets, 104 Kant's copy of Eberhard, and 18
+  that fall into none of the three and are tagged
   only "no § stated" — and are reachable only through
   that panel's "belong to no §" view, not by clicking a §. The AA also files notes
   against §§ 655–662, which AA XVII does not print; every one of those is filed

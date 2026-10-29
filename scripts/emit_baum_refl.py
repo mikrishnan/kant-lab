@@ -47,8 +47,9 @@ HANDBOOKS = {
     'K':  'Kants Handexemplar, unspecified',
 }
 # `M 392'.` — Arabic pages are the text; `M XXXI.` — Roman pages are the front
-# matter, the prefaces and the Synopsis, which precede § 1.
-SIG_RE = re.compile(r"\b(M|Th|K)\s+(\d+|[IVXLC]+)\s*('|’)?")
+# matter, the prefaces and the Synopsis, which precede § 1. The siglum
+# sometimes carries a period of its own, `M. 277'.`.
+SIG_RE = re.compile(r"\b(M|Th|K)\.?\s+(\d+|[IVXLC]+)\s*('|’)?")
 # `L Bl. D 17.` is a *loses Blatt*, a loose sheet — not Meier's siglum L, which
 # is what it looks like coming from the AA XVI pipeline.
 LOOSE_SHEET = re.compile(r'\bL\s*Bl\.|\bLoses?\s+Blatt')

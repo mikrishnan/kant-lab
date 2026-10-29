@@ -154,17 +154,18 @@ before the text, flat and in reading order:
 ```
 
 - `src` is how the § was arrived at, and is the whole point of the footer tag:
-  `locus` (1648) from the entry's own locus note, `block` (557) from the AA block
-  heading above it, `page` (31) off the page of Kant's copy, `none` (731) not stated.
+  `locus` (1657) from the entry's own locus note, `block` (557) from the AA block
+  heading above it, `page` (30) off the page of Kant's copy, `none` (723) not stated.
   `interp` (23) marks a § this tool interpolated from the surrounding entries.
-- `paras` is absent or empty on **708** entries. They are not filed against any §
-  and must never be: `front` (459) is the Roman-numbered front matter, `blatt` (91)
-  a *loses Blatt*, and `other` (107) names another handbook — 104 of those Kant's
-  copy of Eberhard's *Vorbereitung*. The three flags do **not** account for all 708:
-  51 entries carry none of them, 27 of those having no siglum at all and the rest
-  sitting on a letter or a library shelfmark. They are why `provenance()` must stay
+- `paras` is absent or empty on **700** entries. They are not filed against any §
+  and must never be: `front` (460) is the Roman-numbered front matter, `blatt` (118)
+  a *loses Blatt*, and `other` (104) names another handbook — at present always Kant's
+  copy of Eberhard's *Vorbereitung*. The three flags do **not** account for all 700:
+  18 entries carry none of them, 17 with no siglum at all. They are Kant's notes on
+  letters, on a student's essay and on his ivory writing tablet, and in his copies
+  of Tetens, Meiners and Lichtenberg. They are why `provenance()` must stay
   exhaustive — an entry with `src: 'none'` and no flag still gets the "no § stated"
-  tag. `REFL_OFFPARA` collects all 708 for the panel's no-§ view.
+  tag. `REFL_OFFPARA` collects all 700 for the panel's no-§ view.
 - `phRaw` is Adickes' dating **verbatim**; `ph` is the parse. The card prints `phRaw`
   whenever it says more than the symbols do, because the query marks and parentheses
   are Adickes' own uncertainty. Same for `loc.raw` against the rest of `loc`.
