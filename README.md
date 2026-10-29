@@ -101,7 +101,7 @@ Baumgarten and Meier readers, `data/`, `scripts/` and `Textfiles/`, the readers'
 is not the author approves. A change to the Logic Portal needs nobody's approval. For
 anything else outside `groups/` and `Individuals/`, the professor or one of the default
 reviewers approves: Laura Benzenberg, Jeremy Weirich, Jesus La Paz, Qianxun Feng, Alex Li,
-Aidan Chong and @zelleznick. A pull request that touches folders with different owners
+Aidan Chong, Sophia Wyatt and @zelleznick. A pull request that touches folders with different owners
 needs an approval from each.
 
 **The preview link.** The site shows only what has been merged. To see a pull request

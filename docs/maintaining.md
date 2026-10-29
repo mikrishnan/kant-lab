@@ -53,7 +53,7 @@ To let someone approve what you approve, add them to the `*` line at the top of
 `.github/CODEOWNERS`. The people there besides you are the **default reviewers**, and any
 one of them can approve: at present Laura Benzenberg (@Benzenberg), Jeremy Weirich
 (@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip), Alex Li
-(@Alexynli), Aidan Chong (@AidanC973) and @zelleznick.
+(@Alexynli), Aidan Chong (@AidanC973), Sophia Wyatt (@sophia-wyatt) and @zelleznick.
 
 ## Setting up a working group
 

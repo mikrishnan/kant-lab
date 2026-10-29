@@ -441,7 +441,7 @@ Only the professor, as repository admin, is on the ruleset's bypass list. In sho
 - the professor approves everything else, and so can any one of the default reviewers
   beside them on the `*` line: Laura Benzenberg (@Benzenberg), Jeremy Weirich
   (@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip), Alex Li
-  (@Alexynli), Aidan Chong (@AidanC973) and @zelleznick;
+  (@Alexynli), Aidan Chong (@AidanC973), Sophia Wyatt (@sophia-wyatt) and @zelleznick;
 - only the professor approves a change to `.github/CODEOWNERS` itself, since it decides
   all of the above.
 
