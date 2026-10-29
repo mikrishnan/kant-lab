@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the Logic Portal's pinned files from the students' own data.
 
-    python3 Individuals/mikrishnan/portal/build-pins.py
+    python3 logic-portal/build-pins.py
 
 Run it from anywhere; paths are worked out from this file's place in the repository.
 Rerun it whenever one of the sources below changes. Nothing in pinned/ is edited by hand.
@@ -56,7 +56,7 @@ import sys
 from datetime import date
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-IND = os.path.normpath(os.path.join(HERE, "..", ".."))
+IND = os.path.normpath(os.path.join(HERE, "..", "Individuals"))
 OUT = os.path.join(HERE, "pinned")
 _dec = json.JSONDecoder()
 

@@ -603,7 +603,7 @@ def build(key, leaves_by_vol, report):
     meta = {
         "work": cfg["work"], "label": cfg["label"], "volume": 24, "date": cfg["date"],
         "provenance": cfg["provenance"],
-        "source": "OCR of the printed AA XXIV (Internet Archive item %s), by Individuals/mikrishnan/aa24-ocr/parse_aa24_ocr.py" % vol["item"],
+        "source": "OCR of the printed AA XXIV (Internet Archive item %s), by logic-portal/aa24-ocr/parse_aa24_ocr.py" % vol["item"],
         "ocr": True,
         "quality": "uncorrected machine reading of the printed page: expect misread letters, never added or reworded text. Check any quotation against the page image (meta.scan).",
         "aa": cfg["aa"],
@@ -627,7 +627,7 @@ HEADER = """/* ─────────────────────�
    {work}, Academy Edition XXIV ({date}) — AA 24:{a}–{b}
    UNCORRECTED OCR. Machine-extracted from the Internet Archive's OCR of the
    printed volume (item {item}) by
-   Individuals/mikrishnan/aa24-ocr/parse_aa24_ocr.py — do not hand-edit.
+   logic-portal/aa24-ocr/parse_aa24_ocr.py — do not hand-edit.
 
    Every word here is the OCR engine's reading of the AA's printed page. Letters
    are misread in places (`Tbat`, `rnüße`); nothing has been added, reworded or

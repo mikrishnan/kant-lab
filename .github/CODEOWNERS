@@ -3,7 +3,7 @@
 
 # Default: the professor, or any one of the default reviewers beside them, approves
 # everything not matched below.
-*                @mikrishnan @Benzenberg @jweirich-globus @yizu6201 @qianxun-blip @zelleznick
+*                @mikrishnan @Benzenberg @jweirich-globus @yizu6201 @qianxun-blip @zelleznick @Alexynli @AidanC973
 
 # Who approves what is the professor's decision alone, so this file needs the professor.
 /.github/CODEOWNERS  @mikrishnan
@@ -11,9 +11,9 @@
 # Personal sandboxes: no owner, so the author merges their own pull request.
 /Individuals/
 
-# The Logic Portal sits in the professor's folder but is the whole seminar's: anyone
-# on this line other than the author approves a change to it. Add each new participant.
-/Individuals/mikrishnan/portal/  @mikrishnan @AidanC973 @Alexynli @BridgeOfDestiny @emilyshein @harperyifeisun @hmckeown @jessiejin23 @jmbruceuchicago @jweirich-globus @kaiyapalmer1 @kavyavaid @mari637-pixel @nickrichardson152-svg @nikolasland @qianxun-blip @RamseyKA @sophia-wyatt @srehman-puffu @yizu6201 @zelleznick
+# The Logic Portal is the whole seminar's and has no owner, so whoever makes a change
+# to it merges it without waiting for an approval.
+/logic-portal/
 
 # Working groups: one line per group, added when the group is created.
 # Always include @mikrishnan, so that a stuck group can be unblocked.

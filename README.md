@@ -16,12 +16,12 @@ Claude makes it, you can also work [on your own computer](#working-on-your-own-c
 
 | Path | What it is | Changes approved by |
 | --- | --- | --- |
+| `logic-portal/` | The **Logic Portal**, the whole seminar's tool; listed first on the site | nobody — whoever makes a change merges it |
 | `baumgarten-reader/`, `meier-reader/` | **Tools** with student owners. Finished and approved; listed first on the site | one of the tools' owners |
 | `porphyrian-tree/` | **Tool.** Finished and approved; listed first on the site | the professor or a default reviewer |
 | `groups/<group>/` | **Works in progress.** One folder per working group, each the group's own playground | another member of that group |
 | `data/`, `scripts/`, `Textfiles/` | **Shared data,** the texts and Reflexionen that several tools read; the extractors that produce it; the transcriptions they read | one of the readers' owners |
 | `Individuals/<you>/` | Your personal sandbox, as in the first session | you — no approval needed |
-| `Individuals/mikrishnan/portal/` | The **Logic Portal**. It sits in the professor's folder, but it is the whole seminar's | anyone in the seminar but the author |
 | `.github/CODEOWNERS` | The list of who approves what | the professor |
 | everything else | `docs/`, `.github/`, this page | the professor or a default reviewer |
 
@@ -98,10 +98,11 @@ You do not need to read the code. A reviewer:
 
 For a group's folder, any member of the group other than the author can approve. For the
 Baumgarten and Meier readers, `data/`, `scripts/` and `Textfiles/`, the readers' owner who
-is not the author approves. For anything else outside `groups/` and `Individuals/`, the
-professor or one of the default reviewers approves: Laura Benzenberg, Jeremy Weirich,
-Jesus La Paz, Qianxun Feng and @zelleznick. A pull request that touches folders with different owners needs an
-approval from each.
+is not the author approves. A change to the Logic Portal needs nobody's approval. For
+anything else outside `groups/` and `Individuals/`, the professor or one of the default
+reviewers approves: Laura Benzenberg, Jeremy Weirich, Jesus La Paz, Qianxun Feng, Alex Li,
+Aidan Chong and @zelleznick. A pull request that touches folders with different owners
+needs an approval from each.
 
 **The preview link.** The site shows only what has been merged. To see a pull request
 before that, copy the latest commit's ID from the pull request's **Commits** tab and open
@@ -120,7 +121,7 @@ Press it first and ask questions afterwards.
 
 ## Fixing the Logic Portal in seminar
 
-The [Logic Portal](https://mikrishnan.github.io/kant-lab/Individuals/mikrishnan/portal/)
+The [Logic Portal](https://mikrishnan.github.io/kant-lab/logic-portal/)
 belongs to the whole seminar. When discussion turns up a problem with it, such as a wrong
 citation, a missing link or a search that finds the wrong thing, fix it there and then.
 This is the loop above, made quick:
@@ -130,21 +131,27 @@ This is the loop above, made quick:
 2. **Ask Claude.** At [claude.ai/code](https://claude.ai/code), on the
    **mikrishnan/kant-lab** repository:
 
-   > In the Logic Portal (Individuals/mikrishnan/portal/), X happens when it should be Y.
+   > In the Logic Portal (logic-portal/), X happens when it should be Y.
    > Fix only that, push the branch, and give me the preview link.
 
-3. **Share the preview link.** Someone else in the room opens it, tries what was fixed,
-   and looks for red errors in the console, as in step 4 above.
-4. **Ask Claude to open the pull request.** That person approves it, and you press
-   **Squash and merge**. The site has the fix within a few minutes. If you still see the
-   old page, reload it with ⇧⌘R (Ctrl+Shift+R on Windows).
+3. **Try the preview link.** Check that the fix does what you asked, and look for red
+   errors in the console, as in step 4 above. For anything bigger than a small fix, post
+   the link where the others can try it too.
+4. **Ask Claude to open the pull request, and press Squash and merge.** Nobody needs to
+   approve a change to the portal. The site has the fix within a few minutes. If you still
+   see the old page, reload it with ⇧⌘R (Ctrl+Shift+R on Windows).
 
 Several people can fix different things in the portal at the same time. Each works on a
 branch of their own, and GitHub combines changes to the same file as long as they touch
 different lines. Problems come only when two changes touch the same lines, which GitHub
 reports as conflicts. In that case, close the later pull request and ask Claude for the
 change again, as the rules below say. Merge the same day: a pull request left open is the
-one that ends up in conflict. If a merged fix breaks something, press **Revert** first.
+one that ends up in conflict.
+
+With no approvals, the safety net is history. If a merged fix breaks something, press
+**Revert** on its pull request first and ask questions afterwards. Git keeps every version
+that was ever merged, so nothing is lost, and nobody but the professor can overwrite
+`main` or delete it.
 
 ## Rules worth keeping
 

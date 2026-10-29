@@ -85,7 +85,7 @@ mkdir -p /tmp/aa24 && cd /tmp/aa24
 curl -LO https://archive.org/download/kantsgesammeltes241imma/kantsgesammeltes241imma_djvu.xml
 curl -LO https://archive.org/download/kantsgesammeltes242imma/kantsgesammeltes242imma_djvu.xml
 cd -
-python3 Individuals/mikrishnan/aa24-ocr/parse_aa24_ocr.py all /tmp/aa24 Individuals/mikrishnan/aa24-ocr
+python3 logic-portal/aa24-ocr/parse_aa24_ocr.py all /tmp/aa24 logic-portal/aa24-ocr
 ```
 
 The extractor prints a report per text: sections, blocks, words, line numbers dropped,
@@ -96,8 +96,8 @@ layout.
 To measure the OCR against a clean transcription of the same pages:
 
 ```sh
-python3 Individuals/mikrishnan/aa24-ocr/parse_aa24_ocr.py busolt /tmp/aa24 /tmp/busolt-ocr.js
-python3 Individuals/mikrishnan/aa24-ocr/compare_ocr.py data/logik-busolt-24.js /tmp/busolt-ocr.js
+python3 logic-portal/aa24-ocr/parse_aa24_ocr.py busolt /tmp/aa24 /tmp/busolt-ocr.js
+python3 logic-portal/aa24-ocr/compare_ocr.py data/logik-busolt-24.js /tmp/busolt-ocr.js
 ```
 
 ## Later

@@ -27,10 +27,6 @@ page press **Squash and merge** — nobody else needs to approve a change that t
 only your own folder. The root [README](../README.md) explains why, and how the shared
 tools and the working groups are run.
 
-One folder here is the seminar's rather than its owner's: the Logic Portal,
-`mikrishnan/portal/`. Anyone may change it, and someone other than the author approves
-the change. The root README's *Fixing the Logic Portal in seminar* says how.
-
 The site publishes this folder along with everything else, so **published readings,
 books and other PDFs do not belong here.** Course readings belong on the course site.
 

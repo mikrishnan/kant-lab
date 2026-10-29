@@ -13,12 +13,13 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | [index.html](index.html) | GitHub Pages landing page: the approved tools, then the working groups' works in progress |
 | [baumgarten-reader/](baumgarten-reader/) | Single-file SPA: Latin reading guide for Baumgarten's *Metaphysica* with inline German glosses |
 | [meier-reader/](meier-reader/) | Single-file SPA: German reading guide for Meier's *Auszug*, with a side panel of parallel passages from the tradition |
+| [logic-portal/](logic-portal/) | The Logic Portal: search and reading across the whole logic corpus, the whole seminar's tool. It loads the shared data, its own OCR of four AA XXIV lectures (`aa24-ocr/`), and some participants' work from `Individuals/`, all listed in its `catalogue.js`; `pinned/` holds frozen copies made by `build-pins.py`. Its [README.md](logic-portal/README.md) describes it |
 | [porphyrian-tree/](porphyrian-tree/) | Single-file SPA: a configurator for building genus–species trees under user-chosen division rules |
 | [data/](data/) | Shared `.js` data files the tools read — the *Metaphysica*, the Reflexionen, Adickes' phase chronology, the Meier tradition passages. [data/README.md](data/README.md) lists their globals and who reads them |
 | [scripts/](scripts/) | One-off Python extractors that produce `data/` from `Textfiles/` |
 | [Textfiles/](Textfiles/) | RTF source transcriptions the SPAs' embedded data was extracted from |
 | [groups/](groups/) | Working groups' playgrounds, one folder per group, each with a `SPEC.md` as its source of truth. Team work, at the works-in-progress tier; the rules for a group folder are in [groups/_template/CLAUDE.md](groups/_template/CLAUDE.md) |
-| [Individuals/](Individuals/) | Participants' own projects, one folder each and belonging to its owner. Nothing in `Individuals/` is loaded by the shared tools. The exception to ownership is the Logic Portal, `Individuals/mikrishnan/portal/`, which the whole seminar keeps |
+| [Individuals/](Individuals/) | Participants' own projects, one folder each and belonging to its owner. Nothing in `Individuals/` is loaded by the readers or the Porphyrian tree; the Logic Portal reads some participants' files, which its `catalogue.js` lists |
 | [docs/](docs/) | Notes for maintainers: [docs/maintaining.md](docs/maintaining.md) |
 | [.github/](.github/) | `CODEOWNERS` (who approves what), the issue forms, the pull request template |
 | [.claude/launch.json](.claude/launch.json) | The preview server for the Claude desktop app's Browser pane: `python3 -m http.server` at the repository root |
@@ -433,14 +434,14 @@ Only the professor, as repository admin, is on the ruleset's bypass list. In sho
   their student owners, Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), either
   of whom approves the other's changes;
 - another member of the group approves changes to a group's folder;
-- anyone in the seminar other than the author approves changes to the Logic Portal,
-  `Individuals/mikrishnan/portal/`, which is the whole seminar's although it sits in the
-  professor's folder. The README's "Fixing the Logic Portal in seminar" is the workflow;
+- changes to the Logic Portal, `logic-portal/`, need no approval: it is the whole
+  seminar's, and whoever makes a change merges it. The README's "Fixing the Logic Portal
+  in seminar" is the workflow;
 - `Individuals/` changes need no approval;
 - the professor approves everything else, and so can any one of the default reviewers
   beside them on the `*` line: Laura Benzenberg (@Benzenberg), Jeremy Weirich
-  (@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip) and
-  @zelleznick;
+  (@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip), Alex Li
+  (@Alexynli), Aidan Chong (@AidanC973) and @zelleznick;
 - only the professor approves a change to `.github/CODEOWNERS` itself, since it decides
   all of the above.
 

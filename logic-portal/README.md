@@ -199,7 +199,7 @@ them, and says so at the top of each file:
 Rerun it when any of those sources changes:
 
 ```sh
-python3 Individuals/mikrishnan/portal/build-pins.py
+python3 logic-portal/build-pins.py
 ```
 
 The page asks for its data files with a version number (`PORTAL_V` in index.html, and the

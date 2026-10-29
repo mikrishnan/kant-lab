@@ -12,7 +12,7 @@ ruleset on `main` decide who has to approve what:
 | Change touches | Who approves | What you do |
 | --- | --- | --- |
 | only `Individuals/<name>/` | nobody — the author merges | nothing |
-| only the Logic Portal, `Individuals/mikrishnan/portal/` | anyone in the seminar but the author | nothing, unless asked |
+| only the Logic Portal, `logic-portal/` | nobody — the author merges | nothing |
 | only `groups/<group>/` | another member of that group | nothing, unless asked |
 | only a tool with student owners, or `data/`, `scripts/`, `Textfiles/` | one of the owners (below) | nothing, unless asked |
 | `.github/CODEOWNERS`, the list of who approves what | you alone | review it |
@@ -49,14 +49,11 @@ Invite them as a collaborator with **Write** access (Settings → Collaborators)
 connect their own GitHub account at claude.ai/code the first time they use it. Anyone
 named in `CODEOWNERS` must have Write access, or GitHub silently ignores their line.
 
-Add them, too, to the Logic Portal's line in `.github/CODEOWNERS`, which lists the
-whole seminar, so that they can approve a fix to the portal.
-
 To let someone approve what you approve, add them to the `*` line at the top of
 `.github/CODEOWNERS`. The people there besides you are the **default reviewers**, and any
 one of them can approve: at present Laura Benzenberg (@Benzenberg), Jeremy Weirich
-(@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip) and
-@zelleznick.
+(@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip), Alex Li
+(@Alexynli), Aidan Chong (@AidanC973) and @zelleznick.
 
 ## Setting up a working group
 
@@ -168,10 +165,15 @@ To promote `groups/<name>/` to a top-level `<name>/`, ask a Claude session to:
    <!DOCTYPE html>
    <meta charset="utf-8">
    <title>Moved</title>
-   <meta http-equiv="refresh" content="0; url=../../<name>/">
-   <link rel="canonical" href="../../<name>/">
-   <p>This tool has moved to <a href="../../<name>/">its new home</a>.</p>
+   <script>location.replace('../../<name>/index.html' + location.search + location.hash);</script>
+   <meta http-equiv="refresh" content="0; url=../../<name>/index.html">
+   <link rel="canonical" href="../../<name>/index.html">
+   <p>This tool has moved to <a href="../../<name>/index.html">its new home</a>.</p>
    ```
+
+   The script carries over the part of the address after `#`, which a tool that keeps its
+   place there (as the Logic Portal does) needs; the refresh alone would drop it. Naming
+   `index.html` keeps the redirect working from a file opened on disk too.
 
 4. move the tool from *Works in progress* to the tools list in `index.html`;
 5. either remove the group's line from `.github/CODEOWNERS`, so that the new top-level
