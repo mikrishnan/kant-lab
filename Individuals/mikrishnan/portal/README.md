@@ -106,7 +106,9 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
   are Jesus's machine translations, made for the Meier–Kant comparison; neither
   translator translated these texts, and the pane says so under every one. There is English
-  for Meier, the Reflexionen on Meier, the three lectures and Jäsche, not yet for Baumgarten.
+  for Meier, the Reflexionen on Meier, the three lectures and Jäsche. Baumgarten's *Metaphysica*
+  and the Reflexionen on Baumgarten have English made for the portal itself, in the Guyer–Wood
+  style only (see *The English of Baumgarten and the Reflexionen on him* below).
   Each text's translation loads only when it is first wanted.
 - **Report a text error.** Every passage has a link that opens the repository's *Text error*
   form with the passage, its citation and a link back to it already filled in. The reporter
@@ -116,7 +118,7 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   and classified passages, where a long passage shows roughly the stretch of English that
   matches the German shown. The German and Latin never go. A bar under the header says what the
   English is, switches between the two styles, and notes that Baumgarten and Kant's notes on
-  Baumgarten have no English yet. It also announces Maria's sentence-by-sentence translation,
+  Baumgarten have English in the Guyer–Wood style only. It also announces Maria's sentence-by-sentence translation,
   which is coming to the whole portal, and links to a preview of it from Maria's branch.
   Every passage that has English also has a small **English** button of its own, which opens
   that passage's English under it and nothing else.
@@ -136,8 +138,7 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   Maria's translation across the whole portal, which works differently: sentence by sentence,
   with a shared glossary, and with modes that let a reader try the German first. When that
   happens, remove the header switch, the bar, the per-passage buttons and `enLine`, rather than
-  running both side by side. Until then, Baumgarten's *Metaphysica* and Kant's notes on it have
-  no English at all.
+  running both side by side.
 - **Parallel passages.** Every passage lists the passages of other texts nearest it in wording:
   the words they share, weighted by how rare each is, leaving out Jessie's stopwords, as Jessie's
   parallel-passage tool compares the lectures.
@@ -218,6 +219,27 @@ The page asks for its data files with a version number (`PORTAL_V` in index.html
 data file or a pin changes.
 
 When that data moves into `data/`, the pins can go.
+
+## The English of Baumgarten and the Reflexionen on him
+
+All 804 §§ of the *Metaphysica* and all 2,967 of Kant's Reflexionen on it have English in
+[translations/](translations/): `metaphysica-guyer.js` and `reflm-guyer.js`.
+[baum-translate.py](baum-translate.py) made it, in the shape of Jesus's translation files, so the
+portal reads them as it reads his. It follows Jesus's own brief for the Guyer–Wood style
+(`Individuals/Jesus-La-Paz/translation-briefs.js`), read from that file, so the method is the
+one behind every other English text here.
+
+- A § is translated from the Latin. Baumgarten's German equivalents stay German, in parentheses
+  after the English term: "Ontology (Die Grund-Wissenschaft)".
+- The AA's brackets and `|` are carried over where they stand. The build checks that every
+  passage has English, that none of the apparatus was lost, and that no English is wildly shorter
+  or longer than its source. It reported 0 problems.
+- There is no Kemp Smith English for these two texts. The catalogue entries say
+  `styles: ['guyer']`, and the portal shows the Guyer–Wood English whichever style is chosen,
+  with the label "(the only style made for this text)".
+
+It is machine translation, unreviewed: check it against the Latin and German. To redo it, see the
+commands at the top of `baum-translate.py`.
 
 ## Limits
 
