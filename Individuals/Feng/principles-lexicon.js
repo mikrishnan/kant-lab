@@ -59,14 +59,36 @@ const PRINCIPLE_LEXICON = [
     forms: [
       { t: 'Satz des Wiederspruchs',   lang: 'de', kind: 'name' },  // Refl. 2172
       { t: 'Satze des Wiederspruchs',  lang: 'de', kind: 'name' },  // Refl. 4035
-      { t: 'Satzes des Wiederspruchs', lang: 'de', kind: 'name' },  // Refl. 2093
+      { t: 'Satzes des Wiederspruchs', lang: 'de', kind: 'name' },  // Refl. 3031
       { t: 'Satz des Widerspruchs',    lang: 'de', kind: 'name' },  // Jäsche AA 9:52
       { t: 'Satz des Widerspruches',   lang: 'de', kind: 'name' },  // Wiener AA 24:826
       { t: 'Saz des Wiederspruchs',    lang: 'de', kind: 'name' },  // Busolt AA 24:673
       { t: 'Satz der contradictio',    lang: 'de', kind: 'name' },  // Refl. 5686
       { t: 'Principium der Contradiction', lang: 'de', kind: 'name' },  // Busolt
+      { t: 'Satzes des Widerspruchs',  lang: 'de', kind: 'name' },  // Jäsche AA 9:147
+      { t: 'Satzes [des Wiederspruchs]', lang: 'de', kind: 'name' },  // Refl. 2093, the last two words struck out by Kant
+      { t: 'Princip des Widerspruchs', lang: 'de', kind: 'name' },  // Jäsche AA 9:6 (Jäsche's Preface)
+      { t: 'Grundsatze. 1. Des Wiederspruchs', lang: 'de', kind: 'name' },  // Refl. 5148
+      { t: 'Grundsatze aller Urtheile: den des Wiederspruchs', lang: 'de', kind: 'name' },  // Refl. 5562
+      // Named together with identity, identity first. Added 30 October 2026
+      { t: 'Satz der Identitaet und des Wiederspruchs', lang: 'de', kind: 'name' },  // Refl. 3928
+      { t: 'Satz der Identitaet und des Widerspruchs',  lang: 'de', kind: 'name' },  // Refl. 4370
+      { t: 'Satz der Identitaet und Wiederspruchs',     lang: 'de', kind: 'name' },  // Refl. 4676
+      { t: 'Satz der Identitaet und contradiction',     lang: 'de', kind: 'name' },  // Refl. 4872
+      { t: 'Satze der Identitaet und des Wiederspruch', lang: 'de', kind: 'name' },  // Refl. 3745
+      { t: 'Sätzen der Identitaet und des Wiederspruchs', lang: 'de', kind: 'name' },  // Refl. 3716
+      { t: 'Satz der Identität und des Widerspruchs',   lang: 'de', kind: 'name' },  // Jäsche AA 9:7 (Preface)
+      { t: 'Principien der Identität und des Widerspruchs', lang: 'de', kind: 'name' },  // Jäsche AA 9:6 (Preface)
+      { t: 'Grundsätze der Identität und des Widerspruches', lang: 'de', kind: 'name' },  // Jäsche AA 9:7 (Preface)
       { t: 'principium contradictionis', lang: 'la', kind: 'name' },  // Met. § 7
       { t: 'principio contradictionis',  lang: 'la', kind: 'name' },  // Refl. 2142
+      { t: 'princip contradictionis',    lang: 'la', kind: 'name' },  // Refl. 5274
+      // Named together with identity, identity first. Added 30 October 2026
+      { t: 'principium identitatis vel contradictionis', lang: 'la', kind: 'name' },  // Refl. 3741
+      { t: 'principium identitatis und contradictionis', lang: 'la', kind: 'name' },  // Refl. 4655
+      { t: 'principia identitatis et contradictionis',   lang: 'la', kind: 'name' },  // Refl. 3935
+      { t: 'principio identitatis et contradictionis',   lang: 'la', kind: 'name' },  // Refl. 5176
+      { t: 'principium der identitaet und der contradiction', lang: 'la', kind: 'name' },  // Refl. 3716
       { t: 'Principium Identitatis, und Contradictionis', lang: 'la', kind: 'name' },  // Blomberg AA 24:233
     ] },
 
