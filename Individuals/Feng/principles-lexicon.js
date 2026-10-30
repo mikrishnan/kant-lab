@@ -104,12 +104,28 @@ const PRINCIPLE_LEXICON = [
       { t: 'Gesez in der Identitaet', lang: 'de', kind: 'name' },  // Blomberg AA 24:233
       { t: 'Satz des Widerspruchs und der Identität', lang: 'de', kind: 'name' },  // Jäsche AA 9:52
       { t: 'Satz der Identität',    lang: 'de', kind: 'name' },  // Jäsche
+      // Named together with contradiction, identity first. Added 30 October 2026
+      { t: 'Satz der Identitaet und des Wiederspruchs', lang: 'de', kind: 'name' },  // Refl. 3928
+      { t: 'Satz der Identitaet und des Widerspruchs',  lang: 'de', kind: 'name' },  // Refl. 4370
+      { t: 'Satz der Identitaet und Wiederspruchs',     lang: 'de', kind: 'name' },  // Refl. 4676
+      { t: 'Satz der Identitaet und contradiction',     lang: 'de', kind: 'name' },  // Refl. 4872
+      { t: 'Satze der Identitaet und des Wiederspruch', lang: 'de', kind: 'name' },  // Refl. 3745
+      { t: 'Sätzen der Identitaet und des Wiederspruchs', lang: 'de', kind: 'name' },  // Refl. 3716
+      { t: 'Satz der Identität und des Widerspruchs',   lang: 'de', kind: 'name' },  // Jäsche AA 9:7 (Preface)
+      { t: 'Principien der Identität und des Widerspruchs', lang: 'de', kind: 'name' },  // Jäsche AA 9:6 (Preface)
+      { t: 'Grundsätze der Identität und des Widerspruches', lang: 'de', kind: 'name' },  // Jäsche AA 9:7 (Preface)
       { t: 'principium identitatis', lang: 'la', kind: 'name', not: 'indiscernibilium' },  // Blomberg AA 24:279
       { t: 'principio identitatis',  lang: 'la', kind: 'name', not: 'indiscernibilium' },
       { t: 'principia identitatis',  lang: 'la', kind: 'name' },
       { t: 'principium positionis',  lang: 'la', kind: 'name' },  // Met. § 11
       { t: 'principium contradictionis und identitatis', lang: 'la', kind: 'name' },  // Jäsche AA 9:52
       { t: 'Principium Identitatis, und Contradictionis', lang: 'la', kind: 'name' },  // Blomberg AA 24:233
+      // Named together with contradiction, identity first. Added 30 October 2026
+      { t: 'principium identitatis vel contradictionis', lang: 'la', kind: 'name' },  // Refl. 3741
+      { t: 'principium identitatis und contradictionis', lang: 'la', kind: 'name' },  // Refl. 4655
+      { t: 'principia identitatis et contradictionis',   lang: 'la', kind: 'name' },  // Refl. 3935
+      { t: 'principio identitatis et contradictionis',   lang: 'la', kind: 'name' },  // Refl. 5176
+      { t: 'principium der identitaet und der contradiction', lang: 'la', kind: 'name' },  // Refl. 3716
     ] },
 
   { id: 'sufficient-reason', group: '1',
