@@ -3883,6 +3883,7 @@ function goAB(c) {
   if (k == null) return false;
   S.sel = k;
   openRead(T.key, k);            // which scrolls the text to the page
+  alignRead();
   return true;
 }
 /* A passage of T named by a § number, a Reflexion number or an AA page. */
@@ -3974,14 +3975,22 @@ function aaHits(vol, page, only) {
   });
   return out.sort((x, y) => (x.T.layer === 'notes') - (y.T.layer === 'notes') || x.T.idx - y.T.idx);
 }
+/* The text on the left is scrolled to its passage as it is drawn; the right-hand pane, opening
+   beside it just after, narrows it, and the text above the passage reflows taller. Bring the
+   passage back to where it was put. */
+function alignRead() {
+  const st = FT.readtext, at = S.readAt;
+  const f = st && at != null && st.el.querySelector('[data-fp="' + at + '"]');
+  if (f) st.scroller.scrollTop += f.getBoundingClientRect().top - st.scroller.getBoundingClientRect().top - 76;
+}
 function goAA(c, only) {
   const h = aaHits(c.vol, c.page, only)[0];
   if (!h) return false;
   // A note filed under no § has no place in its textbook to open at: open the note itself.
   if (h.T.shape === 'refl' && !(P[h.i].paras && P[h.i].paras.length)) { openPassage(h.i); return true; }
   if (h.T.shape !== 'refl') S.sel = h.i;
-  openRead(h.T.key, h.i);
-  $('left').scrollTop = 0;
+  openRead(h.T.key, h.i);        // which draws the text scrolled to the page (showView resets it first)
+  alignRead();
   return true;
 }
 /* Nothing on the page: say what the portal has nearest it. */
