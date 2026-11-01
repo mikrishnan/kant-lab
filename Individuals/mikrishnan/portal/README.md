@@ -92,6 +92,16 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   texts end before it and begin after it. Links can do the same: `#aa=24:892`, or
   `#read=wiener&aa=892` for a page of one text. Every text shows its pages, as `AA 24:787–940`,
   in the Read list and above the text, worked out from the passages themselves.
+- **How accurate a text is.** Where it has been measured, a text says so on its bar, in the Read
+  list and under the citation of every passage opened on the right: *Clean text*, or for a machine
+  reading (OCR) the share of words right in the whole text and on the passage's page, with a link
+  to the page image. The figures and their grounds are the catalogue's `accuracy` field; see
+  [../published/](../published/README.md).
+- **Go to a page of the Critique.** `A 51`, `B 75`, `B xvi`, `A51/B75` or `KrV A 51` in the search
+  box opens that edition at that page; in either edition's jump box, `51` is a page of that
+  edition and `B 75` a page of the other. Each passage of the Critique shows its own pages and,
+  where the matching found the same words, the other edition's beside them (`A 50–51 = B 74–75`).
+  Pages that begin inside a passage are marked in the line, in all of Kant's published works.
 - **Go through every result.** A passage opened from a search shows "‹ 3 of 22 ›" at the top
   of the right-hand pane. The arrows, or ← → and J K on the keyboard, open the next or
   previous result in the Passages list's order, and each result opened gets a tick in the list,
@@ -193,6 +203,7 @@ Every connection says where it comes from; the **Contributors** page lists every
 | Dates of the Reflexionen | Adickes' phases, `data/phases-adickes.js` |
 | The tradition behind Meier's §§ | the Meier Reader's `data/tradition-meier.js` |
 | English translations | Jesus's `translations/`, machine-made in two styles |
+| Kant's published works: AA I, AA II, the *Critique* in A and B | [../published/](../published/README.md): the BBAW's new edition of AA I, the Deutsches Textarchiv's 1781 *Critique*, and OCR of the old Academy edition's AA II and AA III |
 
 ## Adding a text
 
@@ -202,6 +213,9 @@ else changes. A further transcript of AA XXIV comes out of `scripts/parse_logik.
 right shape already. A published work can use the plain `passages` shape: one passage per
 paragraph, each with its AA page. Passages are cited by AA page, so when a clean digital
 edition arrives its text can replace these transcriptions without breaking the links.
+[../published/](../published/README.md) has four such texts, and the fields they add (the
+work in a volume, Kant's notes, the pages that begin inside a passage, the Critique's A and B
+pages) are listed in the catalogue's header.
 
 ## The pinned files
 
@@ -236,9 +250,12 @@ When that data moves into `data/`, the pins can go.
 
 ## Limits
 
-- The corpus is small and its transcriptions are not clean: four lectures and notes, two
-  textbooks, Jäsche. The published works are not in it yet, so questions about
-  transcendental logic have little to go on.
+- Many of its transcriptions are not clean. Of Kant's published works only AA I and the A
+  edition of the *Critique* are; AA II and the B edition are OCR of the old Academy edition,
+  about 96% and 98% of words right, and B's pages are uncertain where shown with a query (see
+  [../published/](../published/README.md)). Check quotations from OCR texts against the page image.
+- Loading and indexing take about four seconds now that the published works are in (about
+  1.5 before), on a recent laptop.
 - The spelling rules widen a match; they never narrow it. Now and then they join two
   different words. A regular expression between slashes (`/formali?ter/`) matches the
   text exactly as printed.
