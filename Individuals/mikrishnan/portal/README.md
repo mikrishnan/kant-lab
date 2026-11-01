@@ -55,12 +55,27 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
 
 - **Ask.** Type a word or phrase (`form* fals*`, `"satz des widerspruchs"`). The search
   treats the texts' many spellings as one word (*Urtheil* and *Urteil*, *Wiederspruch* and
-  *Widerspruch*, *Principium* and *Prinzipium*, *Saz* and *Satz*). It returns:
+  *Widerspruch*, *Principium* and *Prinzipium*, *Saz* and *Satz*, *iudicium* and *judicium*,
+  *Subiect* and *Subject*). A word is that form of it alone, unless **All forms** is chosen
+  under the box. It returns:
   - **Phrasings:** every distinct wording it found, with counts in each text;
   - **Where it occurs:** counts per text, and per 10,000 words so that long and short texts compare;
   - **Passages:** in the order of the texts, each opening on the right.
 
   A second box keeps only passages that also mention, or do not mention, something else.
+- **All forms of a word.** **Exact form | All forms**, under the search box, says whether a word
+  finds only itself or its other declensions and conjugations as well. With All forms, `satz`
+  finds *Sätze*, *Sätzen* and *Satzes*, `ens` *entis* and *entia*, `ratio` *rationis*, `genus`
+  *generis*. The forms are found by rule, from the word's endings, not from a dictionary: a word
+  ending as Latin does (`-us`, `-um`, `-io`, `-as`, `-x` …) is taken for Latin, any other for
+  German, and a German word typed with a capital for a noun. Above the results a strip lists each
+  word's forms, most frequent first, with their counts, and the reader unticks any that does not
+  belong; the link keeps the choice (`fm=all`, and `fx=` for the forms unticked). The rule cannot
+  see a strong verb's changed vowel or an irregular form, so *geschlossen* and *est* need adding
+  with `OR`; a table of forms made with a lemmatiser would replace the rule. `=Sätze` keeps a
+  word to its exact form, a word with a `*` stays as typed, and so do little words (*des*, *der*,
+  *et*), so that a phrase such as `"satz des widerspruchs"` finds *Satze des Widerspruchs* and no
+  more. All forms is for the German and Latin: a question put to the English keeps its plurals.
 - **Follow.** Any passage opens in the right-hand pane with the textbook § it is on and how
   that is known (stated, or inferred with a measured confidence). Below that come Kant's
   notes on that §, oldest first, then the lectures and Jäsche on the same §, the tradition
