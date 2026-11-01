@@ -70,6 +70,19 @@ reading. **Licence: public domain**; the extraction is CC0.
   A 51/B 75, A 425/B 453, A 805/B 833, B 626 (*Sein ist offenbar kein reales Prädicat*), B xvi,
   B 1, B 131, B 274. All right.
 
+## How accurate each text is, in the portal
+
+The portal says so wherever a text is read. The text's bar carries a badge (*Clean text*, or
+*OCR · about 96% of words right*), the Read list gives the same, and every passage opened on the
+right shows a line under its citation: for a machine reading, the share of words right in the whole
+text and on the page the passage begins on, with a link to that page's scan. The whole-text
+figures and what they rest on are the catalogue's `accuracy` field. The page figures are each
+file's `meta.agreement`, from [measure_ocr.py](measure_ocr.py), which compares every page with
+the Bonner Kant-Korpus's text of it (kept as [ocr-agreement.json](ocr-agreement.json), which
+holds percentages only, none of the corpus's text): AA II 96.3% over 409 pages, 20 of them under
+90% (mostly the early pages cut at the gutter); B 98.1% over 542 pages, 5 under 90%. The AA XXIV
+lectures from OCR show their figure too (about 98%, measured on Busolt) and their page images.
+
 ## What is not clean yet
 
 **AA II and B are OCR.** Check every quotation against the page image (each file's `meta.scan`).
@@ -116,6 +129,9 @@ python3 Individuals/mikrishnan/published/build_published.py all /tmp/telota-kant
   gesammelteschrif0002kant_djvu.xml gesammelteschrif0003kant_djvu.xml \
   Individuals/mikrishnan/published
 ```
+
+To refresh the page figures after a change to the OCR texts, run `measure_ocr.py` on a folder of
+saved korpora.org pages (see its docstring) and build again.
 
 The run takes about ten seconds and prints a report: passages and words per work, the pages
 the new edition leaves unmarked, the repairs, and B's page counts. **Read it.** The DTA's

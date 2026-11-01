@@ -92,6 +92,11 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   texts end before it and begin after it. Links can do the same: `#aa=24:892`, or
   `#read=wiener&aa=892` for a page of one text. Every text shows its pages, as `AA 24:787–940`,
   in the Read list and above the text, worked out from the passages themselves.
+- **How accurate a text is.** Where it has been measured, a text says so on its bar, in the Read
+  list and under the citation of every passage opened on the right: *Clean text*, or for a machine
+  reading (OCR) the share of words right in the whole text and on the passage's page, with a link
+  to the page image. The figures and their grounds are the catalogue's `accuracy` field; see
+  [../published/](../published/README.md).
 - **Go to a page of the Critique.** `A 51`, `B 75`, `B xvi`, `A51/B75` or `KrV A 51` in the search
   box opens that edition at that page; in either edition's jump box, `51` is a page of that
   edition and `B 75` a page of the other. Each passage of the Critique shows its own pages and,

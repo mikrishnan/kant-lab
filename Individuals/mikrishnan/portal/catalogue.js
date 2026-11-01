@@ -26,6 +26,10 @@
      credit   whose work brought the text into the repository, for the Texts page
      cite     for a work cited by the pages of its own printing rather than the AA's: the
               letter they go by (the Critique: 'A' for 1781, 'B' for 1787)
+     accuracy how accurate the text is, where that has been measured, shown on the text and
+              beside every passage: { ocr: true, words: <percent of words right>, how } for a
+              machine reading, { label, how } for a clean text. A data file's meta.agreement
+              ({ AA page: percent }) adds the figure for each page, and meta.scan the page images
 
    Shapes
      logik        { meta: { volume }, sections: [{ title, blocks: [{ id, kind, aa, aaEnd, text }] }] }
@@ -102,24 +106,28 @@ const PORTAL_TEXTS = [
     date: '1762–64', year: 1762, vol: 24, shape: 'logik', on: 'meier',
     file: '../aa24-ocr/logik-herder-24-ocr.js', global: 'LOGIK_HERDER',
     source: 'AA 24:3–6, Herder’s notes, a fragment; uncorrected OCR of the Internet Archive’s scan of AA XXIV, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    accuracy: { ocr: true, words: 98, how: 'Measured on Logik Busolt, run through the same OCR and compared with the InteLex transcription the portal also has: about 98% of words right with case and punctuation set aside, 96.5% exactly as printed. Not corrected.' },
     credit: 'mikrishnan (OCR import)' },
 
   { key: 'philippi', title: 'Logik Philippi (uncorrected OCR)', short: 'Philippi (OCR)', layer: 'lecture',
     date: '1772', year: 1772, vol: 24, shape: 'logik', on: 'meier',
     file: '../aa24-ocr/logik-philippi-24-ocr.js', global: 'LOGIK_PHILIPPI',
     source: 'AA 24:311–496, a student transcript; uncorrected OCR of the Internet Archive’s scan of AA XXIV, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    accuracy: { ocr: true, words: 98, how: 'Measured on Logik Busolt, run through the same OCR and compared with the InteLex transcription the portal also has: about 98% of words right with case and punctuation set aside, 96.5% exactly as printed. Not corrected.' },
     credit: 'mikrishnan (OCR import)' },
 
   { key: 'poelitz', title: 'Logik Pölitz (uncorrected OCR)', short: 'Pölitz (OCR)', layer: 'lecture',
     date: '1780–82', year: 1780, vol: 24, shape: 'logik', on: 'meier',
     file: '../aa24-ocr/logik-poelitz-24-ocr.js', global: 'LOGIK_POELITZ',
     source: 'AA 24:502–602, a student transcript (its title page says 1789; dated 1780–82 by Naragon); uncorrected OCR of the Internet Archive’s scan of AA XXIV, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    accuracy: { ocr: true, words: 98, how: 'Measured on Logik Busolt, run through the same OCR and compared with the InteLex transcription the portal also has: about 98% of words right with case and punctuation set aside, 96.5% exactly as printed. Not corrected.' },
     credit: 'mikrishnan (OCR import)' },
 
   { key: 'dohna', title: 'Logik Dohna-Wundlacken (uncorrected OCR)', short: 'Dohna (OCR)', layer: 'lecture',
     date: '1792', year: 1792, vol: 24, shape: 'logik', on: 'meier',
     file: '../aa24-ocr/logik-dohna-24-ocr.js', global: 'LOGIK_DOHNA',
     source: 'AA 24:693–784, a student transcript, as AA XXIV reprints it from Kowalewski (1924); uncorrected OCR of the Internet Archive’s scan of AA XXIV, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    accuracy: { ocr: true, words: 98, how: 'Measured on Logik Busolt, run through the same OCR and compared with the InteLex transcription the portal also has: about 98% of words right with case and punctuation set aside, 96.5% exactly as printed. Not corrected.' },
     credit: 'mikrishnan (OCR import)' },
 
   { key: 'jaesche', title: 'Jäsche Logik', short: 'Jäsche', layer: 'compilation',
@@ -135,24 +143,28 @@ const PORTAL_TEXTS = [
     date: '1747–1756', year: 1747, vol: 1, shape: 'passages',
     file: '../published/kant-aa01.js', global: 'KANT_AA01',
     source: 'The text of the Berlin Academy’s new edition of AA I (kant-digital.bbaw.de, 2024–26), cited by the old Academy edition’s pages, which it marks; eleven works. CC BY-NC-SA 4.0',
+    accuracy: { label: 'Clean text: a critical edition (the BBAW’s new AA I)', how: 'The text of the Berlin Academy’s new critical edition. Its marks of the old Academy edition’s pages were checked against that edition: 1,458 of 1,499 page breaks agree, and the rest are text the old edition prints elsewhere (instalment notices, mottos).' },
     credit: 'mikrishnan (import of the BBAW’s TEI)' },
 
   { key: 'aa02', title: 'Kant, Schriften 1757–1777 (AA II, OCR)', short: 'AA II (OCR)', layer: 'published',
     date: '1757–1777', year: 1757, vol: 2, shape: 'passages',
     file: '../published/kant-aa02-ocr.js', global: 'KANT_AA02',
     source: 'AA II (1905/1912), OCR of the Internet Archive’s scan, spelling repaired by rule: about 96% of words agree with the Bonner Kant-Korpus. Seventeen works. Check quotations against the page image',
+    accuracy: { ocr: true, words: 96, how: 'Measured on every page against the Bonner Kant-Korpus’s text of the same page, with spelling differences set aside. The OCR’s commonest misreadings were repaired by rule; each repaired word keeps the OCR’s reading in the data.' },
     credit: 'mikrishnan (OCR import)' },
 
   { key: 'krv-a', title: 'Kritik der reinen Vernunft, 1st ed. (A, 1781)', short: 'KrV A', layer: 'published',
     date: '1781', year: 1781, cite: 'A', shape: 'passages',
     file: '../published/kant-krv-a.js', global: 'KANT_KRV_A',
     source: 'The 1781 print as the Deutsches Textarchiv transcribed it (double-keyed), cited by A pages; B pages beside it found by matching the editions. CC BY-SA 4.0',
+    accuracy: { label: 'Clean text: typed twice and compared (Deutsches Textarchiv)', how: 'Keyed twice by the Deutsches Textarchiv and the two compared. Checked here word for word against Wikisource’s proofread transcription of the same print: a few hundred small differences in 176,000 words, almost all of them Wikisource’s slips or modernisations.' },
     credit: 'mikrishnan (import of the DTA’s TEI)' },
 
   { key: 'krv-b', title: 'Kritik der reinen Vernunft, 2nd ed. (B, 1787; OCR of AA III)', short: 'KrV B (OCR)', layer: 'published',
     date: '1787', year: 1787, vol: 3, cite: 'B', shape: 'passages',
     file: '../published/kant-krv-b-ocr.js', global: 'KANT_KRV_B',
     source: 'The 1787 text as AA III (1904/1911) prints it, OCR of the Internet Archive’s scan, spelling repaired by rule: about 98% of words agree with the Bonner Kant-Korpus. B pages from AA III’s margin, a query where uncertain. Check quotations against the page image',
+    accuracy: { ocr: true, words: 98, how: 'Measured on every page against the Bonner Kant-Korpus’s text of AA III, with spelling differences set aside. The OCR’s commonest misreadings were repaired by rule; each repaired word keeps the OCR’s reading in the data. B pages shown with a query are uncertain.' },
     credit: 'mikrishnan (OCR import)' },
 ];
 

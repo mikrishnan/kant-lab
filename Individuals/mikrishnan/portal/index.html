@@ -215,6 +215,12 @@
   .fp.k-margin .fpt { font-style: italic; }
   .pbm { font-size: 0.68em; color: var(--accent-light); vertical-align: 0.35em; margin: 0 0.15em; user-select: none; white-space: nowrap; }
   .pbm::before { content: '|'; margin-right: 0.1em; color: var(--line); }
+  /* how accurate a text is: on the text's bar, and under a passage's citation */
+  .acc { font-size: 0.72rem; padding: 0.05rem 0.45rem; border-radius: 999px; border: 1px solid var(--line); color: var(--faded); white-space: nowrap; cursor: help; }
+  .acc.ocr { border-color: #d9a77c; color: #8a3b12; background: #fbf0e4; }
+  .pacc { font-size: 0.78rem; color: var(--faded); margin: 0.15rem 0 0.35rem; line-height: 1.35; }
+  .pacc.ocr { color: #8a3b12; background: #fbf0e4; border: 1px solid #ecd2b8; border-radius: 6px; padding: 0.3rem 0.5rem; }
+  .pacc.ocr a { color: #8a3b12; }
   .findbox { display: inline-flex; align-items: center; gap: 0.2rem; }
   .findbox input { width: 9.5rem; }
   .findbox .n { font-size: 0.8rem; color: var(--faded); min-width: 3.5rem; text-align: center; }
@@ -775,7 +781,7 @@
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
-<script src="catalogue.js?v=2026-11-01a"></script>
+<script src="catalogue.js?v=2026-11-01b"></script>
 <script>
 (() => {
 'use strict';
@@ -935,7 +941,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&am
 /* Inserted with async = false, the files download side by side but run in the order given. */
 /* Bump this, and the catalogue's ?v= in the page's <script> tag, whenever the portal's files change,
    so that a browser holding yesterday's copies fetches today's. */
-const PORTAL_V = '2026-11-01a';
+const PORTAL_V = '2026-11-01b';
 function loadScript(src) {
   return new Promise(res => {
     const el = document.createElement('script');
@@ -1076,6 +1082,7 @@ function reflDate(e) {
 const ADAPT = {
   logik(T, D) {
     const vol = (D.meta && D.meta.volume) || T.vol;
+    T.meta = D.meta || {};
     const paraOf = {};
     (D.paras || []).forEach(p => (p.blocks || []).forEach(id => { paraOf[id] = p.n; }));
     D.sections.forEach(s => {
@@ -1741,7 +1748,7 @@ function renderHome(box) {
     '<div class="home-foot">' + esc(statusText()) + '</div>';
 }
 const textCard = t => '<button type="button" class="qcard" data-read="' + t.key + '">' + esc(t.title) +
-  '<span class="who">' + esc(t.date) + (rangeLabel(t) ? ' · ' + esc(rangeLabel(t)) : '') + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + '</span></button>';
+  '<span class="who">' + esc(t.date) + (rangeLabel(t) ? ' · ' + esc(rangeLabel(t)) : '') + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + (accShort(t) ? ' · ' + esc(accShort(t)) : '') + '</span></button>';
 /* Where a text is printed: its AA pages, or for the Critique its own edition's (B i–884, AA 3:1–552). */
 function rangeLabel(T) {
   if (!T.cite) return aaRange(T).label;
@@ -2406,6 +2413,39 @@ function enRefresh() {
 
 /* The repository's Text error form, filled in with the passage. Only its text fields can be
    filled from a link; the reporter picks the tool from the form's list. */
+/* ── How accurate a text is, where that has been measured (the catalogue's `accuracy`), shown on
+   the text and beside each of its passages: for a machine reading, the share of words right in
+   the whole text and, where measured, on the passage's page, with a link to the page image. ── */
+function accShort(T) {
+  const a = T.accuracy;
+  return !a ? '' : a.ocr ? 'OCR · about ' + a.words + '% of words right' : 'Clean text';
+}
+function accBadge(T) {
+  const a = T.accuracy;
+  return a ? '<span class="acc' + (a.ocr ? ' ocr' : '') + '" title="' + esc((a.label ? a.label + '. ' : '') + a.how) + '">' + esc(accShort(T)) + '</span>' : '';
+}
+/* The share of words right on the page a passage begins on, where it was measured. */
+function pageAgreement(p) {
+  const M = TEXTS[p.t].meta, ag = M && M.agreement;
+  return ag && p.aa != null && ag[p.aa] != null ? ag[p.aa] : null;
+}
+/* The scan of the page a passage begins on: archive.org's page/n<leaf>. */
+function pageImage(p) {
+  const sc = (TEXTS[p.t].meta || {}).scan;
+  if (!sc || !sc.item || !sc.url || p.aa == null) return '';
+  let n = sc.leaf ? sc.leaf[p.aa] : null;
+  if (n == null && sc.n) { const m = /([+-])\s*(-?\d+)\s*$/.exec(sc.n); if (m) n = p.aa + (m[1] === '-' ? -1 : 1) * +m[2]; }
+  return n == null ? '' : sc.url.replace('{item}', sc.item).replace('{n}', n);
+}
+function accLine(p, T) {
+  const a = T.accuracy;
+  if (!a) return '';
+  if (!a.ocr) return '<div class="pacc" title="' + esc(a.how) + '">' + esc(a.label || 'Clean text') + '</div>';
+  const pg = pageAgreement(p), img = pageImage(p);
+  return '<div class="pacc ocr" title="' + esc(a.how) + '"><b>Machine-read (OCR).</b> About ' + a.words + '% of the words in this text are right' +
+    (pg != null ? ', about ' + pg + '% on this page' : '') + '. Check quotations against the ' +
+    (img ? '<a href="' + esc(img) + '" target="_blank" rel="noopener" title="The scan of the page this passage begins on">page image ↗</a>' : 'page image') + '.</div>';
+}
 function reportUrl(T, p) {
   const aa = (p.cite.match(/AA \d+:[\d–-]+/) || [''])[0];
   const u = new URLSearchParams({
@@ -2524,6 +2564,7 @@ function renderRail(headOnly) {
     '<button type="button" class="rclose" data-close-rail="1" title="Close">×</button></div>' +
     '<div class="pcite">' + esc(p.cite) + '</div>' +
     '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>' +
+    accLine(p, T) +
     (S.rtab === 'cmp' ? '' : textbookStrip(p)) +
     '<div class="rtabs"><button type="button" data-rtab="text"' + (S.rtab === 'text' ? ' class="on"' : '') + '>Full text</button>' +
     '<button type="button" data-rtab="cmp"' + (S.rtab === 'cmp' ? ' class="on"' : '') + ' title="Keep this passage in view, and compare it with Kant’s notes and the other passages that share its wording (C)">Compare</button>' +
@@ -3769,7 +3810,7 @@ function divesFor(T, p) {
 function aboutTextsHtml() {
   let h = '<div class="card" style="margin-top:0.6rem"><div class="summary">' + esc(statusText()) + '</div><p class="note">What the portal reads today: a first, smaller corpus, from transcriptions that are not all clean (the OCR texts say so in their titles). Every passage is cited by its Academy edition page, or the Critique by its A and B pages, so links will survive the move to a better edition.</p>' +
     '<table class="cat"><thead><tr><th>Text</th><th>Layer</th><th>Date</th><th>Passages</th><th>Words</th><th>Transcription</th><th>Brought in by</th><th>English</th></tr></thead><tbody>' +
-    TEXTS.map(t => { const tr = trFor(t); return '<tr><td><b>' + esc(t.title) + '</b></td><td class="small cz">' + esc(LAYER_LABEL[t.layer] || t.layer) + '</td><td>' + esc(t.date) + '</td><td class="n">' + t.n.toLocaleString('en') + '</td><td class="n">' + t.words.toLocaleString('en') + '</td><td class="small">' + esc(t.source) + '</td><td class="small">' + esc(t.credit) + '</td>' +
+    TEXTS.map(t => { const tr = trFor(t); return '<tr><td><b>' + esc(t.title) + '</b></td><td class="small cz">' + esc(LAYER_LABEL[t.layer] || t.layer) + '</td><td>' + esc(t.date) + '</td><td class="n">' + t.n.toLocaleString('en') + '</td><td class="n">' + t.words.toLocaleString('en') + '</td><td class="small">' + esc(t.source) + (t.accuracy ? '<br><b>' + esc(t.accuracy.ocr ? accShort(t) : t.accuracy.label) + '</b>' : '') + '</td><td class="small">' + esc(t.credit) + '</td>' +
       '<td class="small">' + (tr ? 'two machine translations, by ' + esc(personName(tr.who)) + (tr.map ? '; matched to this edition by build-pins.py' : '') : '<span class="muted">none yet</span>') + '</td></tr>'; }).join('') +
     '</tbody></table>' +
     '<p class="note">The English is machine translation, made for Jesus’s Meier–Kant comparison: one version following the stated principles of Guyer and Wood’s Cambridge translation of the Critique, one those of Kemp Smith’s. Neither translated these texts.</p>';
@@ -3973,7 +4014,7 @@ function showMiss(h) {
 
 function renderStudy(el, T) {
   const f = S.find;
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '' +
     '<button type="button" class="btn" data-outline="1" title="Show or hide the outline">☰ Outline</button>' +
     (T.shape === 'metaphysica' ? '<button type="button" class="btn" data-synopsis="1">Synopsis</button>' : '') +
     (S.sel == null ? '<button type="button" class="btn" data-shownotes="1">Kant’s notes</button>' : '') +
@@ -3995,7 +4036,7 @@ function renderRead() {
   if (!T) { el.innerHTML = readIndexHtml(); return; }
   if (isStudyText(T)) return renderStudy(el, T);
   const toc = tocFor(T);
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="spacer"></span>' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="spacer"></span>' +
     (toc.length > 1 ? '<select id="toc" aria-label="Contents"><option value="">Contents…</option>' + toc.map(([l, k]) => '<option value="' + k + '">' + esc(clip(l, 64)) + '</option>').join('') + '</select>' : '') +
     '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></div><div id="readtext" class="fulltext"></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
