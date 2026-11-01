@@ -35,7 +35,7 @@ The repository is public, and the site publishes all of it.
 
 The loop is the one software teams use:
 
-**issue → spec → change → review → merge → live**
+**issue → change → review → merge → live**
 
 ### 1. Ideas, bugs and text errors start as an issue
 
@@ -49,35 +49,32 @@ Open the **Issues** tab, press **New issue**, and pick a form:
 
 Discussion happens in the issue's comments. Comment on other people's issues freely.
 
-### 2. A group writes its spec before its code
+### 2. Say what you want in plain words
 
-Every group folder has a `SPEC.md`, written in plain language:
+There is no spec to write first. Tell Claude what you want as you would tell a colleague:
+what the tool does now, what it should do instead, and what that would help you read or
+see. Anything a reader can check by clicking makes a good request, e.g. *"Clicking a §
+number on a card should scroll the text to that §."* For a bigger piece of work, write a
+short brief in the issue, broken into steps, and ask for one step at a time.
 
-- **Question** — the scholarly question the tool helps with.
-- **Sources** — which texts, and which files in `data/`, it uses.
-- **Attested vs. inferred** — what the tool works out for itself, and how it shows that.
-- **Behaviour** — numbered statements anyone can check by clicking, e.g. *"4. Clicking a
-  § number on a card scrolls the text to that §."*
-- **Out of scope** — what it deliberately does not do.
-
-The spec is the part of the project you own and argue about. Claude writes the code; the
-spec is how you tell Claude what to build, and how everyone else checks that it did.
-When behaviour changes, the spec changes in the same pull request.
+The pull request's description is the record of what changed and why. Some folders
+still have a `SPEC.md` from October 2026. Read it if it helps, but nobody keeps it up
+to date.
 
 ### 3. Claude makes the change and opens a pull request
 
 Open [claude.ai/code](https://claude.ai/code), choose the **mikrishnan/kant-lab**
 repository, and ask for one thing at a time:
 
-> Read groups/porphyry/SPEC.md and groups/porphyry/CLAUDE.md. Implement Behaviour item 4.
-> Only change files in groups/porphyry/. When you are done, push your branch and open a
-> pull request that says which Behaviour items it implements.
+> In groups/porphyry/, clicking a § number on a card should scroll the text to that §.
+> Only change files in groups/porphyry/. When you are done, push your branch and give me
+> the preview link.
 
 Claude works on a branch of its own, so nothing in the session touches the live site.
 After each change it pushes the branch and replies with a **preview link** to the page as
 it now stands: open it, look, and ask for the next change. When the change is right, ask
 Claude to open the pull request. Every session reads the repository's `CLAUDE.md` files automatically, so the house
-conventions apply without your repeating them. Keep each request small — one spec item,
+conventions apply without your repeating them. Keep each request small — one change,
 one bug — so the pull request is small enough to review.
 
 **Without Claude Code** (visiting professors, for instance): open the file on github.com,
@@ -89,11 +86,11 @@ start a pull request**.
 You do not need to read the code. A reviewer:
 
 1. opens the pull request's **preview link** (below);
-2. checks each Behaviour item the pull request says it implements;
+2. tries each thing the pull request says it changes;
 3. opens the browser console — in Chrome, ⌥⌘J on a Mac, Ctrl+Shift+J on Windows — and
    looks for red errors;
-4. either approves (**Files changed → Review changes → Approve**) or comments saying which
-   item failed and how.
+4. either approves (**Files changed → Review changes → Approve**) or comments saying what
+   failed and how.
 
 For a group's folder, any member of the group other than the author can approve. For the
 Baumgarten and Meier readers, `data/`, `scripts/` and `Textfiles/`, the readers' owner who
@@ -148,7 +145,7 @@ one that ends up in conflict. If a merged fix breaks something, press **Revert**
 ## Rules worth keeping
 
 - **One driver per tool at a time.** Whoever is assigned the issue makes the change; the
-  others work on the spec and review. Two people asking Claude to change the same file at
+  others try the preview and review. Two people asking Claude to change the same file at
   once is how conflicts happen. The Logic Portal in seminar is the exception: there it is
   one person per problem, each fix kept small and merged straight away.
 - **If GitHub says a pull request has conflicts, do not try to resolve them.** Close it,
@@ -175,7 +172,6 @@ a folder:
 ```
 groups/<group-name>/
   README.md    who is in the group, and where the tool stands
-  SPEC.md      what the tool is for and what it does
   CLAUDE.md    instructions every Claude session in this folder follows
   index.html   the tool itself
 ```
@@ -187,26 +183,22 @@ listed under *Works in progress* on the site from then on.
 **Starting from something in `Individuals/`.** If one of you has already built a version
 of the tool in your own folder, give its path in the issue's **Starting from** field.
 The professor still creates the folder from the template. The group's first pull request
-then brings the prototype in and drafts the spec from it, both in one request:
+then brings the prototype in:
 
 > Read groups/porphyry/CLAUDE.md. Bring in Individuals/your-name/porphyrian-tree.html
-> as groups/porphyry/index.html, and draft SPEC.md from what the page does now. Only
-> change files in groups/porphyry/.
+> as groups/porphyry/index.html. Only change files in groups/porphyry/.
 
-Whoever reviews that pull request checks each drafted Behaviour item against the page,
-so it is the first review of the spec as well. The original stays in your
+Whoever reviews that pull request checks that the page works as it did in your folder.
+The original stays in your
 `Individuals/` folder, yours to keep or delete.
 
 **Building on an existing tool.** A small fix to one of the approved tools goes straight
 to it, as a pull request its owners review — the professor, for a tool with no student
 owners. A larger rework starts as a copy in a group folder and replaces the original
-once it is ready. The Baumgarten and Meier readers have specs of their own,
-[baumgarten-reader/SPEC.md](baumgarten-reader/SPEC.md) and
-[meier-reader/SPEC.md](meier-reader/SPEC.md). A pull request on either names the
-Behaviour items it implements, just as a group's does.
+once it is ready.
 
 **From work in progress to tool.** When a group thinks its tool is done, it files a
-**Proposal** issue asking for promotion. The professor checks the tool against its spec
+**Proposal** issue asking for promotion. The professor tries the tool
 and, if it is ready, moves it to the top level beside the other tools. Its old address
 keeps working.
 
@@ -247,16 +239,16 @@ request, the review and the merge are the same.
    press **Fetch origin**, then **Pull origin**. Other people push all the time, so do
    this every time.
 2. **Make a branch** with **Branch → New branch**, named for the change
-   (`porphyry-item-4`). `main` does not accept changes directly.
+   (`porphyry-section-links`). `main` does not accept changes directly.
 3. **Start a session in the Code tab.** Choose **Local** as the environment and your
    `kant-lab` folder as the project folder. GitHub Desktop's **Repository → Show in
    Finder** (**Show in Explorer** on Windows) tells you where it is. Leave the
    **worktree** option off, so that Claude's changes show up in GitHub Desktop.
 4. **Ask for one thing at a time,** as in step 3 but without the pushing:
 
-   > Read groups/porphyry/SPEC.md and groups/porphyry/CLAUDE.md. Implement Behaviour
-   > item 4, changing only files in groups/porphyry/, and show me
-   > groups/porphyry/index.html in the preview.
+   > In groups/porphyry/, clicking a § number on a card should scroll the text to that §.
+   > Change only files in groups/porphyry/, and show me groups/porphyry/index.html in the
+   > preview.
 
    Look at the page, click through it, and ask for the next change. Nothing is on GitHub
    yet.

@@ -38,15 +38,12 @@ would be needed in the pull request description instead.
 
 ## SPEC.md
 
-[SPEC.md](SPEC.md) is the source of truth for what this tool does, as a group's spec is
-for its tool.
+[SPEC.md](SPEC.md) was drafted on 10 October 2026 from what the page did then. Specs are
+no longer kept up to date, so it is a record, not the source of truth.
 
-- Implement what the request names and nothing more. If the request contradicts
-  `SPEC.md`, say so rather than guessing which one is right.
-- If the tool's behaviour changes, update `SPEC.md` in the same pull request. Never
-  renumber Behaviour items; strike a dropped one through instead.
-- A pull request that makes an item marked **Fails at present** pass removes the mark.
-  One that settles an Open question moves it into Behaviour or Out of scope.
+- Implement what the request names and nothing more.
+- Do not update `SPEC.md` or check the request against it. Its Open questions are still
+  worth reading before changing the parts of the page they describe.
 - The pull request description lists the Behaviour items it implements or changes, and
   says plainly what was not checked in a browser.
 

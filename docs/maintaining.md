@@ -65,9 +65,8 @@ When a **New working group** issue arrives:
    ```text
    Set up the working group requested in issue #NUMBER. Copy groups/_template/ to
    groups/GROUP-NAME/ and replace its GROUP NAME, GROUP-NAME and TOOL NAME
-   placeholders. In README.md, list these members: NAMES AND GITHUB USERNAMES. In
-   SPEC.md, fill in the Question section from the issue and leave the rest as the
-   template has it. Add the line
+   placeholders. In README.md, list these members: NAMES AND GITHUB USERNAMES. Add
+   the line
        /groups/GROUP-NAME/  @mikrishnan @USER1 @USER2
    to the end of .github/CODEOWNERS. Add the group to the Works in progress list in
    index.html, linking to groups/GROUP-NAME/ and replacing the "No working groups yet"
@@ -107,21 +106,16 @@ Keep `@mikrishnan` on every line, as for groups. Create a `tool:<tool>` label fo
 issues. Taking a tool back is the same change in reverse: delete its lines, and it falls
 under the `*` line again.
 
-A tool handed over needs a `SPEC.md`, since the original tools predate the working
-groups. The two readers' specs were drafted on 10 October 2026 from what each page did
-then, with every item checked in headless Chrome. They follow the group template, with
-one addition: an item the page does not yet satisfy is marked **Fails at present** and
-points to the Open question that explains why. The owners' first job is to review their
-spec. They check each item against the page, and settle or reword the Open questions.
-For any other tool, drafting its spec from the page is the first pull request, as a group
-does when it brings in a prototype.
+Specs are no longer written, so a tool handed over needs none. The two readers'
+`SPEC.md` files, drafted on 10 October 2026 from what each page did then, stay as a
+record; nobody keeps them up to date.
 
 ## Reviewing a pull request
 
 For any pull request waiting on you:
 
-1. **Read the description.** It should name the issue, the spec items it implements, and
-   anything the author did not check.
+1. **Read the description.** It should name the issue, if there is one, say what changed
+   and how to try it, and say anything the author did not check.
 2. **Open the preview** (see the README for the link format) and click through what it
    claims to do. Keep the console open.
 3. **Skim the list of changed files** before reading any code. That list is where most
@@ -144,7 +138,7 @@ address the comment in the same session or a new one.
 
 A tool is ready to promote when:
 
-- its `SPEC.md` is complete, and every Behaviour item that is not struck through passes;
+- it does what the group set out to do, when you click through it;
 - it loads shared data with `<script src>`, with no copies;
 - it uses the suite's palette and fonts, from the `:root` block;
 - the console is clean;

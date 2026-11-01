@@ -4,11 +4,19 @@ Handoff notes, written 3 October 2026 and updated 10 October 2026. Read this alo
 the root [CLAUDE.md](CLAUDE.md), which is the standing description of the repository —
 this file is only the state of play.
 
-How the repository is now run — working groups, specs, pull requests, review — is in
+How the repository is now run — working groups, pull requests, review — is in
 [README.md](README.md); keeping it in order is in
 [docs/maintaining.md](docs/maintaining.md). What is left of that rollout is in
 [docs/todo-in-repo.md](docs/todo-in-repo.md) and
 [docs/todo-outside-repo.md](docs/todo-outside-repo.md).
+
+## 1 November 2026: no more specs
+
+Nobody writes a `SPEC.md` any more. You ask Claude for a change in plain words, and the
+pull request's description records what changed. The README, the root `CLAUDE.md`, the
+readers' and groups' `CLAUDE.md` files, the pull request and proposal templates,
+[docs/maintaining.md](docs/maintaining.md) and the how-to-contribute page now say so.
+The specs that exist stay as a record, and the group template no longer has one.
 
 ## 9–10 October 2026: student owners for the readers, and their specs
 

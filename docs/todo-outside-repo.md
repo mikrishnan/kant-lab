@@ -126,14 +126,14 @@ from Code Owners" has nothing to enforce.
   as in "Setting up a working group" in [maintaining.md](maintaining.md). The likely
   first candidates:
   - the 11 or more independent Porphyrian trees in `Individuals/`, consolidated into
-    one spec;
+    one tool;
   - the Jäsche *Logik* as a dataset;
   - annotating the Meier reader's `TRADITION` map, which is now in
     `data/tradition-meier.js`, so passages can be added without touching the reader.
-- [ ] **O16. Each group's first pull request is its `SPEC.md`,** reviewed within the
+- [x] ~~**O16. Each group's first pull request is its `SPEC.md`,** reviewed within the
   group before anyone asks Claude for code. A group starting from a prototype in
   `Individuals/` instead brings it in and drafts the spec from it in that first pull
-  request.
+  request.~~ Dropped on 1 November 2026: groups no longer write specs.
 
 ## After that
 
