@@ -12,8 +12,11 @@ and then answers at once.
 
 Four places, along the top (pressing **Read** again while reading goes back to the list of texts):
 - **Search** opens on one question box, with every text there to open and read in full.
-- **Read** lists the corpus. Open any text to read it through: its contents, and a box to go
-  to a §, an AA page or a Reflexion. Click any paragraph and what hangs on it opens beside the
+- **Read** lists the corpus. Open any text to read it through: its contents, a box to go
+  to a §, an AA page or a Reflexion, and **Find in this text**, which marks every place a word
+  or words stand in that text, with ‹ › (or Enter and Shift-Enter) to go from one to the next.
+  Its spellings count as one word, as in the search (*Urteil* finds *Urtheil*), and a * ends a
+  word any way (*urth\**); a part of a word finds its letters as typed. Click any paragraph and what hangs on it opens beside the
   text.
 - **Meier and Baumgarten, and Kant's notes on either,** open as the textbook with Kant's notes
   beside it, the notes following the § at the top as you scroll. This is everything the Meier

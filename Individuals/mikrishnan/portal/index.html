@@ -3467,7 +3467,7 @@ function frontBlock(st, T) {
   for (let k = T.first; k <= fe; k++) rows.push(k);
   const isNum = t => /^\s*\d{2,4}\s*(?:[–-]\s*\d{2,4})?\s*$/.test(t);
   const isToc = t => /Inhaltsverzeichnis/.test(t);
-  const line = k => '<span class="frow' + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '">' + esc(P[k].text) + '</span>';
+  const line = k => '<span class="frow' + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '">' + richText(P[k].text, findSpans(k), []) + '</span>';
   const ti = rows.findIndex(k => isToc(P[k].text));
   const title = ti < 0 ? [] : rows.slice(0, ti), rest = ti < 0 ? rows : rows.slice(ti);
   let toc = '';
@@ -3502,11 +3502,18 @@ function ftBlock(st, k) {
   const ref = shortCite(p) + (tag ? ' · ' + tag : '') + (p.edl && p.other != null ? ' (the other edition’s page, found by matching the two texts word for word; printed in neither)' : '');
   return head + '<div class="fp' + (samePage ? ' cont' : '') + (pub ? ' k-' + p.kind : '') + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm" title="' + esc(ref) + '">' +
     (samePage ? '' : '<b>' + esc(shortCite(p)) + '</b>') + (tag && !sameTag ? '<i>' + esc(tag) + '</i>' : '') + enButton(p) + '</div>' +
-    '<div class="fpt" lang="de">' + lexWrap(pagedText(p, spans)) + '</div>' + enLine(p) + '</div>';
+    '<div class="fpt" lang="de">' + lexWrap(pagedText(p, spans, findSpans(k))) + '</div>' + enLine(p) + '</div>';
+}
+/* What "Find in the text" found in passage k, as highlights: [start, end, class]. */
+function findSpans(k) {
+  if (!S.find || !S.find.byPass.has(k) || !S.readKey || P[k].t !== textByKey(S.readKey).idx) return [];
+  return S.find.byPass.get(k).map(j => { const f = S.find.hits[j]; return [f[1], f[2], j === S.find.pos ? 'find cur' : 'find']; });
 }
 /* A passage's text with its highlights, and, where a page begins inside it (Kant's published
    works), the page's number set in the line, as an edition prints it in the margin. */
-function pagedText(p, spans) {
+function pagedText(p, spans, found) {
+  if (found && found.length) return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']).concat(found),
+    (p.pbm || []).map(([at, l]) => ({ at, html: '<span class="pbm" title="' + esc(p.edl ? l : 'AA ' + p.vol + ':' + l) + ' begins here">' + esc(l) + '</span>' })));
   if (!p.pbm) return marked(p.text, 0, p.text.length, spans);
   const label = l => p.edl ? l : 'AA ' + p.vol + ':' + l;
   return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']),
@@ -3604,7 +3611,7 @@ function refreshBlock(k) {
     if (!st || k < st.lo || k > st.hi) return;
     const el = st.el.querySelector('[data-fp="' + k + '"]');
     if (!el) return;
-    if (el.classList.contains('frow')) { el.classList.toggle('focus', k === st.focus); return; }
+    if (el.classList.contains('frow')) { el.classList.toggle('focus', k === st.focus); el.innerHTML = richText(P[k].text, findSpans(k), []); return; }
     const tmp = document.createElement('div');
     tmp.innerHTML = ftBlock(st, k);
     el.replaceWith(tmp.querySelector('[data-fp]'));
@@ -3889,16 +3896,41 @@ function tintFor(noteI, satz) {
   if (!ranges.length) { const c = $('note-' + noteI); if (c) c.insertAdjacentHTML('beforeend', '<div class="small warn">These words are not found in the printed §: the AA is not quoting it word for word.</div>'); }
 }
 /* Find in the text: every match in the whole textbook; Enter and › go to the next. */
+/* Find in the open text: whole words with their spellings merged, as the search merges them
+   (Urteil finds Urtheil), a * ending a word for any ending (urth*); where that finds nothing, as a
+   part of a word, the letters as typed. [[passage, start, end], …] */
+function findHits(T, qs) {
+  const q = String(qs || '').replace(/\s+/g, ' ').trim(), hits = [];
+  const words = q.match(/[\p{L}\p{M}]+\*?/gu) || [];
+  if (words.length && words.join(' ') === q) {
+    const want = words.map(w => { const star = w.endsWith('*'), n = normWord(w.replace(/\*$/, '').toLowerCase()); return { n, star, v: VID.get(n) }; });
+    if (want.every(w => w.star || w.v != null)) {
+      for (let k = T.first; k <= T.last; k++) {
+        const p = P[k], ids = p.ids;
+        for (let t = 0; t + want.length <= ids.length; t++) {
+          let ok = true;
+          for (let j = 0; j < want.length && ok; j++) ok = want[j].star ? VOCAB[ids[t + j]].startsWith(want[j].n) : ids[t + j] === want[j].v;
+          if (ok) hits.push([k, p.ts[t], p.te[t + want.length - 1]]);
+        }
+      }
+    }
+  }
+  if (!hits.length) {
+    const lq = q.toLowerCase();
+    for (let k = T.first; k <= T.last; k++) {
+      const t = P[k].text.toLowerCase();
+      let i = -1;
+      while ((i = t.indexOf(lq, i + 1)) >= 0) hits.push([k, i, i + lq.length]);
+    }
+  }
+  return hits;
+}
 function runFind(qs) {
   const T = textByKey(S.readKey);
   const q = (qs || '').toLowerCase();
   if (q.length < 2) { S.find = null; renderRead(); return; }
-  const hits = [], byPass = new Map();
-  for (let k = T.first; k <= T.last; k++) {
-    const t = P[k].text.toLowerCase();
-    let i = -1;
-    while ((i = t.indexOf(q, i + 1)) >= 0) { if (!byPass.has(k)) byPass.set(k, []); byPass.get(k).push(hits.length); hits.push([k, i, i + q.length]); }
-  }
+  const hits = findHits(T, qs), byPass = new Map();
+  hits.forEach(([k], j) => { if (!byPass.has(k)) byPass.set(k, []); byPass.get(k).push(j); });
   S.find = { q: qs, hits, byPass, pos: hits.length ? 0 : -1 };
   S.tint = null;
   if (hits.length) { S.readAt = hits[0][0]; }
@@ -4301,6 +4333,12 @@ function renderStudy(el, T) {
   markOutline(at);
 }
 
+/* The "Find in the text" box, on every text's bar. */
+function findBox() {
+  const f = S.find;
+  return '<span class="findbox"><input id="find" type="search" spellcheck="false" placeholder="Find in this text…" value="' + esc(f ? f.q : '') + '" title="A word or words in this text: its spellings count as one, as in the search (Urteil finds Urtheil), and a * ends a word any way (urth*). Enter for the next, Shift-Enter for the one before">' +
+    '<button type="button" data-findstep="-1" title="Previous (Shift-Enter)">‹</button><span class="n">' + (f ? (f.hits.length ? (f.pos + 1) + ' / ' + f.hits.length : 'none') : '') + '</span><button type="button" data-findstep="1" title="Next (Enter)">›</button></span>';
+}
 function renderRead() {
   const el = $('view-read');
   delete FT.readtext;
@@ -4311,6 +4349,7 @@ function renderRead() {
   const toc = tocFor(T);
   el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="spacer"></span>' +
     (toc.length > 1 ? '<select id="toc" aria-label="Contents"><option value="">Contents…</option>' + toc.map(([l, k]) => '<option value="' + k + '">' + esc(clip(l, 64)) + '</option>').join('') + '</select>' : '') +
+    findBox() +
     '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></div><div id="readtext" class="fulltext"></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
   const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
