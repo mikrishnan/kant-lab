@@ -10,8 +10,8 @@ the Baumgarten reader and the shared data in [`../data/`](../data/). Text errors
 proposals go to them, through the issue forms described in the
 [root README](../README.md).
 
-**Spec:** [SPEC.md](SPEC.md) — what the tool does, item by item, and the questions it
-leaves open.
+**Spec:** [SPEC.md](SPEC.md) — what the tool did on 10 October 2026, item by item, and
+the questions it left open. It is a record, no longer kept up to date.
 
 ## Running it
 

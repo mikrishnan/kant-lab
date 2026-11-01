@@ -9,7 +9,7 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 
 | Path | What it is |
 | --- | --- |
-| [README.md](README.md) | The contributor workflow — issue → spec → pull request → review → merge — written for participants |
+| [README.md](README.md) | The contributor workflow — issue → pull request → review → merge — written for participants |
 | [index.html](index.html) | GitHub Pages landing page: the approved tools, then the working groups' works in progress |
 | [baumgarten-reader/](baumgarten-reader/) | Single-file SPA: Latin reading guide for Baumgarten's *Metaphysica* with inline German glosses |
 | [meier-reader/](meier-reader/) | Single-file SPA: German reading guide for Meier's *Auszug*, with a side panel of parallel passages from the tradition |
@@ -17,7 +17,7 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 | [data/](data/) | Shared `.js` data files the tools read — the *Metaphysica*, the Reflexionen, Adickes' phase chronology, the Meier tradition passages. [data/README.md](data/README.md) lists their globals and who reads them |
 | [scripts/](scripts/) | One-off Python extractors that produce `data/` from `Textfiles/` |
 | [Textfiles/](Textfiles/) | RTF source transcriptions the SPAs' embedded data was extracted from |
-| [groups/](groups/) | Working groups' playgrounds, one folder per group, each with a `SPEC.md` as its source of truth. Team work, at the works-in-progress tier; the rules for a group folder are in [groups/_template/CLAUDE.md](groups/_template/CLAUDE.md) |
+| [groups/](groups/) | Working groups' playgrounds, one folder per group. Team work, at the works-in-progress tier; the rules for a group folder are in [groups/_template/CLAUDE.md](groups/_template/CLAUDE.md) |
 | [Individuals/](Individuals/) | Participants' own projects, one folder each and belonging to its owner. Nothing in `Individuals/` is loaded by the shared tools. The exception to ownership is the Logic Portal, `Individuals/mikrishnan/portal/`, which the whole seminar keeps |
 | [docs/](docs/) | Notes for maintainers: [docs/maintaining.md](docs/maintaining.md) |
 | [.github/](.github/) | `CODEOWNERS` (who approves what), the issue forms, the pull request template |
@@ -25,9 +25,10 @@ Aristotelian–Scholastic genus/species tree those texts presuppose.
 
 Each SPA directory has its own `CLAUDE.md` with the data shapes and function map for
 that app, and a `README.md` aimed at a human opening it for the first time. The two
-readers also have a `SPEC.md`, which is the source of truth for what each does, as a
-group's spec is for its tool. Each spec numbers the tool's behaviours, marks those that
-fail at present, and keeps a list of open questions.
+readers and the first two groups also have a `SPEC.md` from October 2026. Specs are no
+longer written or kept up to date: implement what the request asks, and neither check it
+against a `SPEC.md` nor update one. An old spec's open questions can still be worth
+reading.
 
 ## Architecture: one HTML file per app, plus shared generated data
 
@@ -359,8 +360,8 @@ the Reflexionen on each are in those same volumes, Adickes' chronology of Kant's
 AA XIV, and the Jäsche *Logik* is AA IX.
 
 **Working groups.** Work in progress lives in `groups/<group>/`, one folder per group:
-a `SPEC.md` that is the source of truth for what the tool does, a `CLAUDE.md` of rules
-for sessions in that folder, and the tool itself as a single `index.html`. A group's
+a `CLAUDE.md` of rules for sessions in that folder, and the tool itself as a single
+`index.html`. A group's
 tool loads shared data from `../../data/` and never copies it, and changes nothing
 outside its own folder. The full rules are in
 [groups/_template/CLAUDE.md](groups/_template/CLAUDE.md), which every group's
