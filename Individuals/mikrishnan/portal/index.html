@@ -207,6 +207,14 @@
   .misnote { font-size: 0.88rem; color: #7a4a14; font-style: italic; margin-top: 0.25rem; }
   .fp.part-anfang .fpt::before, .fp.part-schluss .fpt::after { content: '⌐'; color: var(--accent); margin: 0 0.25rem; }
   .fpm .ed { display: block; font-size: 0.72rem; }
+  /* Kant's published works: headings, his footnotes and marginal notes, and the pages that begin
+     inside a passage */
+  .fp.k-head .fpt { font-weight: 600; text-align: center; }
+  .fp.k-title .fpt { text-align: center; font-style: italic; }
+  .fp.k-note .fpt, .fp.k-margin .fpt { font-size: 0.9em; color: var(--faded); }
+  .fp.k-margin .fpt { font-style: italic; }
+  .pbm { font-size: 0.68em; color: var(--accent-light); vertical-align: 0.35em; margin: 0 0.15em; user-select: none; white-space: nowrap; }
+  .pbm::before { content: '|'; margin-right: 0.1em; color: var(--line); }
   .findbox { display: inline-flex; align-items: center; gap: 0.2rem; }
   .findbox input { width: 9.5rem; }
   .findbox .n { font-size: 0.8rem; color: var(--faded); min-width: 3.5rem; text-align: center; }
@@ -767,7 +775,7 @@
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
-<script src="catalogue.js?v=2026-10-27a"></script>
+<script src="catalogue.js?v=2026-11-01a"></script>
 <script>
 (() => {
 'use strict';
@@ -927,7 +935,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&am
 /* Inserted with async = false, the files download side by side but run in the order given. */
 /* Bump this, and the catalogue's ?v= in the page's <script> tag, whenever the portal's files change,
    so that a browser holding yesterday's copies fetches today's. */
-const PORTAL_V = '2026-10-27a';
+const PORTAL_V = '2026-11-01a';
 function loadScript(src) {
   return new Promise(res => {
     const el = document.createElement('script');
@@ -1130,8 +1138,33 @@ const ADAPT = {
         text, gl, flags: m.flags || [], sec: label[m.section] || '', secId: m.section, para: m.num });
     });
   },
+  /* Kant's published works (../published/) bring their pages along: an AA volume its AA pages,
+     the Critique the pages of its own edition (T.cite, 'A' or 'B'), with the other edition's pages
+     beside them where the matching found the same words, and B also AA III's. */
   passages(T, D) {
-    (D.passages || []).forEach(x => addPassage(T, { id: x.id, cite: x.cite, aa: x.aa, text: x.text, year: x.year || T.year, sec: x.sec || '' }));
+    const M = D.meta || {}, vol = M.volume || T.vol, ed = T.cite || null;
+    const oT = M.otherFrom && PORTAL_TEXTS.find(x => x.key === M.otherFrom), oed = oT ? oT.cite : '';
+    const query = new Set(M.query || []);
+    const span = (a, b) => a == null ? '' : a + (b != null && b !== a ? '–' + b : '');
+    const q = l => l + (query.has(String(l)) ? '?' : '');
+    T.meta = M;
+    T.works = M.works || null;
+    (D.passages || []).forEach(x => {
+      let cite = x.cite || '', pbm = null, aaEnd = x.aaEnd;
+      if (ed) {
+        const end = x.pgMay || x.pgEnd;
+        cite = ed + ' ' + q(x.pg) + (end != null && end !== x.pg ? '–' + q(end) + (x.pgMay && !query.has(String(end)) ? '?' : '') : '');
+        if (x.other != null) cite += ' / ' + oed + ' ' + span(x.other, x.otherEnd);
+        pbm = (x.pb || []).map(([o, n]) => [o, ed + ' ' + q(n)]);
+        aaEnd = x.aapb && x.aapb.length ? x.aapb[x.aapb.length - 1][1] : x.aa;
+      } else if (x.aa != null) {
+        cite = 'AA ' + vol + ':' + span(x.aa, x.aaEnd);
+        pbm = (x.pb || []).map(([o, n]) => [o, String(n)]);
+      }
+      addPassage(T, { id: x.id, cite, aa: x.aa != null ? x.aa : null, aaEnd, vol: ed ? (M.volume || null) : vol, text: x.text,
+        year: x.year || T.year, sec: x.sec || '', kind: x.kind || 'p', work: x.work || null, pbm: pbm && pbm.length ? pbm : null,
+        edl: ed, edPg: x.pg, edPgEnd: x.pgMay || x.pgEnd || x.pg, other: x.other, otherEnd: x.otherEnd || x.other, fix: x.fix || null });
+    });
   },
 };
 
@@ -1708,7 +1741,20 @@ function renderHome(box) {
     '<div class="home-foot">' + esc(statusText()) + '</div>';
 }
 const textCard = t => '<button type="button" class="qcard" data-read="' + t.key + '">' + esc(t.title) +
-  '<span class="who">' + esc(t.date) + (aaRange(t).label ? ' · ' + esc(aaRange(t).label) : '') + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + '</span></button>';
+  '<span class="who">' + esc(t.date) + (rangeLabel(t) ? ' · ' + esc(rangeLabel(t)) : '') + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + '</span></button>';
+/* Where a text is printed: its AA pages, or for the Critique its own edition's (B i–884, AA 3:1–552). */
+function rangeLabel(T) {
+  if (!T.cite) return aaRange(T).label;
+  let lo = null, hi = null;
+  for (let k = T.first; k <= T.last; k++) {
+    const p = P[k];
+    if (p.edPg == null) continue;
+    if (lo == null || edOrder(p.edPg) < edOrder(lo)) lo = p.edPg;
+    if (hi == null || edOrder(p.edPgEnd) > edOrder(hi)) hi = p.edPgEnd;
+  }
+  const own = lo == null ? '' : T.cite + ' ' + String(lo).replace(/\?$/, '') + '–' + String(hi).replace(/\?$/, '');
+  return own + (aaRange(T).label ? (own ? ' · ' : '') + aaRange(T).label : '');
+}
 
 /* Explore: every starting point the seminar has built, in one place. */
 function renderExplore() {
@@ -3125,11 +3171,14 @@ function shortCite(p) {
   const T = TEXTS[p.t];
   if (T.shape === 'meier' || T.shape === 'metaphysica') return '§ ' + p.para;
   if (T.shape === 'refl') return 'Refl. ' + p.id.slice(1);
+  if (p.edl) return p.cite.split(' / ')[0];
   return p.cite;
 }
 function marginTag(p) {
   const T = TEXTS[p.t];
   if (T.shape === 'refl') { const m = /ca\. ([\d–]+)/.exec(p.dateLabel || ''); return m ? m[1] : ''; }
+  // the Critique: the other edition's pages for the same words; a published work: what a passage is
+  if (T.shape === 'passages') return p.edl && p.other != null ? '= ' + p.cite.split(' / ')[1] : ({ note: 'Kant’s note', margin: 'margin note' }[p.kind] || '');
   if (T.shape === 'meier' || T.shape === 'metaphysica') {
     const notes = TEXTS.find(t => t.shape === 'refl' && t.on === T.key);
     const n = notes && notes.byPara && notes.byPara[p.para] ? notes.byPara[p.para].length : 0;
@@ -3178,14 +3227,22 @@ function ftBlock(st, k) {
   const tag = marginTag(p);
   // A lecture's short paragraphs would each repeat the page and the Meier § in the margin. Print
   // each where it changes, as a book prints a page number; the full reference stays on hover.
-  const lect = T.shape === 'logik';
-  const prev = lect && !head && k > T.first ? P[k - 1] : null;
-  const samePage = !!(prev && prev.t === p.t && prev.aa === p.aa);
+  const lect = T.shape === 'logik', pub = T.shape === 'passages';
+  const prev = (lect || pub) && !head && k > T.first ? P[k - 1] : null;
+  const samePage = !!(prev && prev.t === p.t && (pub ? shortCite(prev) === shortCite(p) : prev.aa === p.aa));
   const sameTag = !!(prev && prev.t === p.t && marginTag(prev) === tag);
-  const ref = shortCite(p) + (tag ? ' · ' + tag : '');
-  return head + '<div class="fp' + (samePage ? ' cont' : '') + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm" title="' + esc(ref) + '">' +
+  const ref = shortCite(p) + (tag ? ' · ' + tag : '') + (p.edl && p.other != null ? ' (the other edition’s page, found by matching the two texts word for word; printed in neither)' : '');
+  return head + '<div class="fp' + (samePage ? ' cont' : '') + (pub ? ' k-' + p.kind : '') + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm" title="' + esc(ref) + '">' +
     (samePage ? '' : '<b>' + esc(shortCite(p)) + '</b>') + (tag && !sameTag ? '<i>' + esc(tag) + '</i>' : '') + enButton(p) + '</div>' +
-    '<div class="fpt" lang="de">' + marked(p.text, 0, p.text.length, spans) + '</div>' + enLine(p) + '</div>';
+    '<div class="fpt" lang="de">' + pagedText(p, spans) + '</div>' + enLine(p) + '</div>';
+}
+/* A passage's text with its highlights, and, where a page begins inside it (Kant's published
+   works), the page's number set in the line, as an edition prints it in the margin. */
+function pagedText(p, spans) {
+  if (!p.pbm) return marked(p.text, 0, p.text.length, spans);
+  const label = l => p.edl ? l : 'AA ' + p.vol + ':' + l;
+  return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']),
+    p.pbm.map(([at, l]) => ({ at, html: '<span class="pbm" title="' + esc(label(l)) + ' begins here">' + esc(l) + '</span>' })));
 }
 
 /* ═══ THE STUDY VIEW: a textbook with Kant's notes beside it, as the Meier and Baumgarten
@@ -3710,7 +3767,7 @@ function divesFor(T, p) {
    ════════════════════════════════════════════════════════════════════════ */
 
 function aboutTextsHtml() {
-  let h = '<div class="card" style="margin-top:0.6rem"><div class="summary">' + esc(statusText()) + '</div><p class="note">What the portal reads today: a first, smaller corpus, from transcriptions that are not yet clean. Every passage is cited by its Academy edition page, so links will survive the move to a better edition.</p>' +
+  let h = '<div class="card" style="margin-top:0.6rem"><div class="summary">' + esc(statusText()) + '</div><p class="note">What the portal reads today: a first, smaller corpus, from transcriptions that are not all clean (the OCR texts say so in their titles). Every passage is cited by its Academy edition page, or the Critique by its A and B pages, so links will survive the move to a better edition.</p>' +
     '<table class="cat"><thead><tr><th>Text</th><th>Layer</th><th>Date</th><th>Passages</th><th>Words</th><th>Transcription</th><th>Brought in by</th><th>English</th></tr></thead><tbody>' +
     TEXTS.map(t => { const tr = trFor(t); return '<tr><td><b>' + esc(t.title) + '</b></td><td class="small cz">' + esc(LAYER_LABEL[t.layer] || t.layer) + '</td><td>' + esc(t.date) + '</td><td class="n">' + t.n.toLocaleString('en') + '</td><td class="n">' + t.words.toLocaleString('en') + '</td><td class="small">' + esc(t.source) + '</td><td class="small">' + esc(t.credit) + '</td>' +
       '<td class="small">' + (tr ? 'two machine translations, by ' + esc(personName(tr.who)) + (tr.map ? '; matched to this edition by build-pins.py' : '') : '<span class="muted">none yet</span>') + '</td></tr>'; }).join('') +
@@ -3745,10 +3802,54 @@ function tocFor(T) {
 function jumpHint(T) {
   if (T.shape === 'meier' || T.shape === 'metaphysica') return 'Go to §, AA page or Refl.';
   if (T.shape === 'refl') return 'Go to Refl. no. or §';
+  if (T.cite) return 'Go to A or B page (A 51, B xvi)';
   return T.key === 'jaesche' ? 'Go to § or AA page' : 'Go to AA page';
+}
+/* ── The Critique's pages: A for 1781, B for 1787, Roman for the front matter (A xvi) ── */
+const ROMAN_LC = { i: 1, v: 5, x: 10, l: 50, c: 100 };
+/* A page label's place in its edition's order: the Roman front matter before page 1. */
+function edOrder(lab) {
+  const s = String(lab == null ? '' : lab).replace(/\?$/, '').toLowerCase();
+  if (/^\d+$/.test(s)) return 1000 + +s;
+  let n = 0;
+  for (let k = 0; k < s.length; k++) { const v = ROMAN_LC[s[k]] || 0, nx = ROMAN_LC[s[k + 1]] || 0; n += v < nx ? -v : v; }
+  return n;
+}
+/* "A 51", "B75", "B xvi", "KrV A 51", "A51/B75" (the first is taken): { ed, page }, or null. A capital
+   A or B, or KrV before it, so that a search for the letter b is not taken for a page. */
+function parseAB(raw) {
+  const m = /^\s*(krv\.?\s*)?([AaBb])\s*\.?\s*(\d{1,3}|[ivxlc]{1,7})\b(?:\s*[–-]\s*\S+)?(?:\s*\/\s*[AaBb]\s*\.?\s*(?:\d{1,3}|[ivxlc]{1,7}))?\s*$/i.exec(String(raw || ''));
+  if (!m || (!m[1] && !/[AB]/.test(m[2]))) return null;
+  return { ed: m[2].toUpperCase(), page: m[3].toLowerCase() };
+}
+/* The first passage of T on page `page` of edition `ed`: its own pages, or the other edition's
+   where the matching found them. */
+function findOnEdPage(T, ed, page) {
+  const want = edOrder(page);
+  const own = ed === T.cite;
+  for (let k = T.first; k <= T.last; k++) {
+    const p = P[k];
+    const a = own ? p.edPg : p.other, b = own ? p.edPgEnd : p.otherEnd;
+    if (a == null) continue;
+    if (edOrder(a) <= want && want <= edOrder(b)) return k;
+  }
+  return null;
+}
+/* "A 51" in the search box: the edition named, at that page. */
+function goAB(c) {
+  const T = TEXTS.find(t => t.cite === c.ed);
+  const k = T && findOnEdPage(T, c.ed, c.page);
+  if (k == null) return false;
+  S.sel = k;
+  openRead(T.key, k);            // which scrolls the text to the page
+  return true;
 }
 /* A passage of T named by a § number, a Reflexion number or an AA page. */
 function findInText(T, v) {
+  if (T.cite) {
+    const ab = parseAB(/^\s*[AaBb]/.test(v) ? v.replace(/^\s*([ab])/, (x, l) => l.toUpperCase()) : T.cite + ' ' + v);
+    return ab ? findOnEdPage(T, ab.ed, ab.page) : null;
+  }
   const isPara = /§/.test(v);
   const num = parseInt(String(v).replace(/^\s*aa\s*\d+\s*[:,.]\s*/i, '').replace(/[^\d]/g, ''), 10);
   if (isNaN(num)) return null;
@@ -3872,7 +3973,7 @@ function showMiss(h) {
 
 function renderStudy(el, T) {
   const f = S.find;
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (aaRange(T).label ? '<span class="aarange" title="Where the Academy edition prints it">' + esc(aaRange(T).label) + '</span>' : '') + '' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '' +
     '<button type="button" class="btn" data-outline="1" title="Show or hide the outline">☰ Outline</button>' +
     (T.shape === 'metaphysica' ? '<button type="button" class="btn" data-synopsis="1">Synopsis</button>' : '') +
     (S.sel == null ? '<button type="button" class="btn" data-shownotes="1">Kant’s notes</button>' : '') +
@@ -3894,7 +3995,7 @@ function renderRead() {
   if (!T) { el.innerHTML = readIndexHtml(); return; }
   if (isStudyText(T)) return renderStudy(el, T);
   const toc = tocFor(T);
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (aaRange(T).label ? '<span class="aarange" title="Where the Academy edition prints it">' + esc(aaRange(T).label) + '</span>' : '') + '<span class="spacer"></span>' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="spacer"></span>' +
     (toc.length > 1 ? '<select id="toc" aria-label="Contents"><option value="">Contents…</option>' + toc.map(([l, k]) => '<option value="' + k + '">' + esc(clip(l, 64)) + '</option>').join('') + '</select>' : '') +
     '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></div><div id="readtext" class="fulltext"></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
@@ -4199,6 +4300,8 @@ function wire() {
     e.preventDefault();
     // An Academy page goes to that page. Without "AA" in front, a volume the portal has none of
     // ("1.5") is taken for words to search, as it was before.
+    const ab = parseAB($('q').value);
+    if (ab && goAB(ab)) return;
     const c = parseAA($('q').value);
     if (c) {
       if (goAA(c)) return;

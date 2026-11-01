@@ -24,6 +24,8 @@
               comments on, so "Where is this in …?" knows which textbook to name
      source   where the transcription came from, and how clean it is
      credit   whose work brought the text into the repository, for the Texts page
+     cite     for a work cited by the pages of its own printing rather than the AA's: the
+              letter they go by (the Critique: 'A' for 1781, 'B' for 1787)
 
    Shapes
      logik        { meta: { volume }, sections: [{ title, blocks: [{ id, kind, aa, aaEnd, text }] }] }
@@ -35,6 +37,20 @@
      metaphysica  MET_PARAGRAPHS: [{ num, section, aa, text }], with MET_SECTIONS for titles
      passages     the plain shape for anything new:
                   { meta: { work, volume }, passages: [{ id, cite, aa, text, year }] }
+                  Kant's published works (../published/) add, all optional:
+                    aaEnd, pb      the AA page a passage ends on; the pages that begin inside it,
+                                   [[character offset, page]], shown in the text where they begin
+                    kind           p | head | note (Kant's footnote) | margin (his marginal note) | title
+                    sec            the heading the reading pane and its contents list show
+                    work           which work of a volume the passage belongs to; meta.works lists
+                                   them: [{ key, title, short, year, aa: [first, last] }]
+                    pg, pgEnd, pb  with `cite` in the catalogue, the pages of the work's own printing
+                                   instead (A 51; Roman for front matter, A xvi)
+                    other, otherEnd  the other edition's pages for the same words, found by matching
+                                   the two (meta.otherFrom names that text); not in either print
+                    aa, aapb       beside B's pages, AA III's own
+                    fix            words an OCR text's extractor repaired: [[offset, the OCR's reading]]
+                  meta.query lists pages read uncertainly, which are shown with a query.
    ───────────────────────────────────────────────────────────────────────────── */
 
 const PORTAL_TEXTS = [
@@ -111,6 +127,33 @@ const PORTAL_TEXTS = [
     file: '../../Alex%20Li/logik-jasche-9.js', global: 'LOGIK_JASCHE',
     source: 'AA 9:3–150, from Textfiles/Vol9Logic.rtfd by Alex’s parse_jasche.py; compiled by G. B. Jäsche from Kant’s notes',
     credit: 'Alex' },
+
+  // Kant's published works. Where each text comes from, its licence and how clean it is:
+  // ../published/README.md. AA I and the A edition are clean texts; AA II and the B edition are
+  // OCR of the old Academy edition, repaired by rule: check quotations against the page image.
+  { key: 'aa01', title: 'Kant, Schriften 1747–1756 (AA I)', short: 'AA I', layer: 'published',
+    date: '1747–1756', year: 1747, vol: 1, shape: 'passages',
+    file: '../published/kant-aa01.js', global: 'KANT_AA01',
+    source: 'The text of the Berlin Academy’s new edition of AA I (kant-digital.bbaw.de, 2024–26), cited by the old Academy edition’s pages, which it marks; eleven works. CC BY-NC-SA 4.0',
+    credit: 'mikrishnan (import of the BBAW’s TEI)' },
+
+  { key: 'aa02', title: 'Kant, Schriften 1757–1777 (AA II, OCR)', short: 'AA II (OCR)', layer: 'published',
+    date: '1757–1777', year: 1757, vol: 2, shape: 'passages',
+    file: '../published/kant-aa02-ocr.js', global: 'KANT_AA02',
+    source: 'AA II (1905/1912), OCR of the Internet Archive’s scan, spelling repaired by rule: about 96% of words agree with the Bonner Kant-Korpus. Seventeen works. Check quotations against the page image',
+    credit: 'mikrishnan (OCR import)' },
+
+  { key: 'krv-a', title: 'Kritik der reinen Vernunft, 1st ed. (A, 1781)', short: 'KrV A', layer: 'published',
+    date: '1781', year: 1781, cite: 'A', shape: 'passages',
+    file: '../published/kant-krv-a.js', global: 'KANT_KRV_A',
+    source: 'The 1781 print as the Deutsches Textarchiv transcribed it (double-keyed), cited by A pages; B pages beside it found by matching the editions. CC BY-SA 4.0',
+    credit: 'mikrishnan (import of the DTA’s TEI)' },
+
+  { key: 'krv-b', title: 'Kritik der reinen Vernunft, 2nd ed. (B, 1787; OCR of AA III)', short: 'KrV B (OCR)', layer: 'published',
+    date: '1787', year: 1787, vol: 3, cite: 'B', shape: 'passages',
+    file: '../published/kant-krv-b-ocr.js', global: 'KANT_KRV_B',
+    source: 'The 1787 text as AA III (1904/1911) prints it, OCR of the Internet Archive’s scan, spelling repaired by rule: about 98% of words agree with the Bonner Kant-Korpus. B pages from AA III’s margin, a query where uncertain. Check quotations against the page image',
+    credit: 'mikrishnan (OCR import)' },
 ];
 
 /* The seminar's annotation layers: connections and classifications the portal shows beside
