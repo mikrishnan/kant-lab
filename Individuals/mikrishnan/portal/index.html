@@ -2123,7 +2123,8 @@ function lexWrap(html) {
   const T = lexTips();
   return html.split(/(<[^>]+>)/).map(part => {
     if (!part || part[0] === '<') return part;
-    return part.replace(/(?<![&#\wÄÖÜäöüß])([A-Za-z]{3,})(?![\wÄÖÜäöüß;])(\s+([A-Za-z]{2,})(?![\wÄÖÜäöüß]))?/g, (m, w1, sp, w2) => {
+    // w1, then (if there is one) the space after it and the next word, as two groups
+    return part.replace(/(?<![&#\wÄÖÜäöüß])([A-Za-z]{3,})(?![\wÄÖÜäöüß;])(?:(\s+)([A-Za-z]{2,})(?![\wÄÖÜäöüß]))?/g, (m, w1, sp, w2) => {
       const two = w2 && T.two.get((w1 + ' ' + w2).toLowerCase());
       if (two != null) return lxSpan(two, w1 + sp + w2);
       const one = T.one.get(w1.toLowerCase());
