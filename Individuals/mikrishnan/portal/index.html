@@ -167,6 +167,7 @@
   .readbar .spacer { flex: 1; }
   .readbar select, .readbar input { padding: 0.14rem 0.5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); font-size: 0.92rem; max-width: 15rem; }
   .readbar input { width: 10.5rem; }
+  .readbar .jumpmsg { flex-basis: 100%; text-align: right; font-size: 0.84rem; color: #b4532a; font-style: italic; }
   #selbtn { position: fixed; z-index: 40; background: var(--accent); color: var(--parchment); border: none; border-radius: 999px; padding: 0.22rem 0.8rem; font-size: 0.88rem; cursor: pointer; box-shadow: 0 2px 8px rgba(26, 18, 8, 0.25); }
   .starts .qcards.tcards { grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
 
@@ -196,6 +197,13 @@
   .kantrefs { margin: 0.2rem 0 0.8rem 7.1rem; background: #efe6f3; border: 1px solid #c9b3d6; border-radius: 8px; padding: 0.4rem 0.7rem; }
   .kantrefs .lab { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.06em; color: #5a3d6e; margin-bottom: 0.2rem; }
   .gloss { display: inline-block; background: #f6e4b8; border: 1px solid #d9b56a; color: #6b4a12; border-radius: 4px; font-size: 0.84rem; padding: 0 0.3rem; margin: 0 0.15rem; line-height: 1.35; }
+  .lx { border-bottom: 1px dotted #9a7428; cursor: help; }
+  .lx:hover { background: #f6e4b8; }
+  .lexcard { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent-light); border-radius: 6px; padding: 0.45rem 0.75rem; margin: 0.45rem 0 0; max-width: 46rem; font-size: 0.97rem; }
+  .lexcard .la { font-weight: 600; font-style: italic; font-size: 1.05rem; }
+  .lexcard .row { margin: 0.1rem 0; }
+  .lexcard .l { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.1em; color: var(--faded); text-transform: uppercase; display: inline-block; min-width: 4.4rem; }
+  .ennote { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; padding: 0.45rem 0.75rem; margin: 0.5rem 0 0; max-width: 46rem; font-size: 0.97rem; }
   .gloss sup { font-size: 0.66rem; margin-right: 0.15rem; color: #9a7428; }
   .xref { text-decoration: underline dotted var(--accent-light); text-underline-offset: 3px; cursor: pointer; color: var(--accent); }
   .xref:hover { color: var(--ink); }
@@ -578,6 +586,8 @@
   #railbody > .from:last-child { margin-top: 0.8rem; }
   .pcite { font-size: 1.35rem; font-weight: 600; color: var(--accent); margin: 0.1rem 0 0; }
   .pmeta { font-size: 0.9rem; color: var(--faded); }
+  .pmeta a.rep { color: var(--faded); white-space: nowrap; }
+  .pmeta a.rep:hover { color: var(--accent); }
   .layer { font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.08em; border: 1px solid var(--accent-light); border-radius: 4px; padding: 0 0.3rem; color: var(--accent); margin-right: 0.45rem; vertical-align: 1px; }
   .pactions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 1rem; margin-top: 0.55rem; font-size: 0.88rem; }
   .pactions .btn { padding: 0.02rem 0.65rem; font-size: 0.84rem; }
@@ -679,6 +689,33 @@
   #loading .t { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); margin-bottom: 0.6rem; }
   #loading .bar { height: 0.4rem; background: var(--parchment-dark); border-radius: 3px; overflow: hidden; margin-top: 0.6rem; }
   #loading .bar i { display: block; height: 100%; width: 0; background: var(--accent-light); transition: width 0.2s; }
+
+  /* ── A narrow window (a phone): one column. The passage opened covers the list, under the
+     header, and its × goes back to the list. ── */
+  @media (max-width: 760px) {
+    header { flex-wrap: wrap; gap: 0.3rem 1rem; padding: 0.45rem 0.8rem; }
+    header .spacer { display: none; }
+    nav { gap: 0.9rem; order: 3; flex-basis: 100%; }
+    #app, #app.en:not(.no-rail), #app:not(.no-rail) { grid-template-columns: minmax(0, 1fr) !important; position: relative; }
+    #rail { position: absolute; inset: 0; z-index: 6; border-left: none; }
+    #divider { display: none; }
+    #left { padding: 1rem 0.9rem 4rem; }
+    #railhead { padding: 0.7rem 0.9rem 0; }
+    #railbody { padding: 0.7rem 0.9rem 4rem; }
+    .rtabs { gap: 0.9rem; flex-wrap: wrap; }
+    #trail { flex-wrap: wrap; padding-left: 0.8rem; padding-right: 0.8rem; }
+    #trail .count { display: none; }
+    #enbar { flex-wrap: wrap; white-space: normal; padding: 0.3rem 0.8rem; }
+    #enbar .soon { margin-left: 0; }
+    /* the textbook stays in view above, Kant's notes below it */
+    #app.studyrail:not(.no-rail) #rail { top: auto; height: 46%; border-top: 2px solid var(--line); box-shadow: 0 -4px 14px rgba(26, 18, 8, 0.12); }
+    #app.studyrail:not(.no-rail) #left { padding-bottom: 50vh; }
+    .study { grid-template-columns: minmax(0, 1fr); }
+    .study .outline { position: static; max-height: 12rem; }
+    .readbar { top: -1rem; }
+    .readbar input, .findbox input { width: 8rem; }
+    table.loc { display: block; overflow-x: auto; }
+  }
 </style>
 <link rel="stylesheet" href="pinned/nik-figures.css?v=2026-10-27a">
 </head>
@@ -754,11 +791,14 @@
           described above. English searches the English translation of every passage that has one, so an English word, <code>judgment</code>,
           <code>"principle of contradiction"</code>, <code>certain*</code>, finds the German passages it translates. An English word finds its plain plural too.
           Such a hit is marked <i>found in the English</i>, with its English and roughly the stretch of German it translates. The English is Jesus’s machine translation,
-          and Baumgarten and Kant’s notes on Baumgarten have none yet.</p>
+          now also of Baumgarten and of Kant’s notes on Baumgarten.</p>
           <p>A page of the Academy edition, written as scholars cite it, goes straight to that page: <code>24:892</code>, <code>24.892</code>,
           <code>AA 24:892</code>, <code>Ak. 16, 236</code> or <code>AA XVII 45</code> opens the text printed there, where the page begins.
           A page of Kant’s notes opens the textbook they are written in, with the note beside it.
-          A Reflexion’s number, <code>Refl. 4086</code>, <code>R 4086</code> or <code>4086</code> alone, opens that note on the right.</p>
+          A Reflexion’s number, <code>Refl. 4086</code>, <code>R 4086</code> or <code>4086</code> alone, opens that note on the right.
+          A § of a textbook or of Jäsche, <code>Meier § 125</code>, <code>Baumgarten § 55</code> or <code>Jäsche § 3</code> (<code>§ 125</code> alone is Meier’s), opens it to read.</p>
+          <p>The search reads the German and Latin of the texts, not the English beside them: ask for <code>Urtheil</code>, not <i>judgment</i>.
+          An English word the portal knows is offered the German and Latin words to ask for instead.</p>
           <p><b>Overview</b> shows every distinct phrasing the search found and where it occurs; <b>Passages</b> lists them.
           Click a passage to read it in its full text on the right; <b>Connections</b> there shows the textbook § it belongs to,
           Kant’s notes on it, the other texts on the same §, and its parallel passages. Select words in any text to search for them.</p>
@@ -1858,11 +1898,16 @@ function renderResults() {
   const rn = !S.preset && parseRefl(S.q);
   if (rn) return renderReflLookup(box, rn);
   RESULT = runQuery();
-  const R = RESULT;
+  let R = RESULT;
+  // An English question that finds nothing as printed is asked again in the German and Latin the texts use for it
+  if (R && !R.matches.length && !S.preset && !S.enFrom && !R.en) {
+    const ex = englishExpansion(S.q);
+    if (ex && ex.query) { S.enFrom = S.q; S.q = ex.query; syncForm(); RESULT = runQuery(); R = RESULT; }
+  }
   if (!R) { box.innerHTML = '<div class="empty">Nothing to look for in that question.</div>'; return; }
   const nPass = R.byPass.size, nTexts = R.byText.size;
   const shown = TEXTS.filter(t => !S.off.has(t.key));
-  let h = '<div class="res-head"><div class="res-title">' + esc(S.preset ? S.preset.label : '“' + S.q + '”') + '</div>' +
+  let h = '<div class="res-head"><div class="res-title">' + esc(S.preset ? S.preset.label : S.enFrom ? '“' + S.enFrom + '” in the texts’ German and Latin' : '“' + S.q + '”') + '</div>' +
     '<div class="summary"><b>' + R.matches.length.toLocaleString('en') + '</b> occurrence' + (R.matches.length === 1 ? '' : 's') +
     ' in <b>' + nPass.toLocaleString('en') + '</b> passage' + (nPass === 1 ? '' : 's') + ' · ' + nTexts + ' of ' + shown.length + ' texts';
   if (S.cm && S.co.trim()) h += ' · only passages that ' + (S.cm === 'with' ? 'also mention' : 'do not mention') + ' <i>' + esc(S.co) + '</i>';
@@ -1875,9 +1920,10 @@ function renderResults() {
   // "F4046", a slip for R 4046: the search reads no numbers, so as words it is only the letter
   const near = !S.preset && /^\s*[A-Za-zÄÖÜäöü]{1,3}\.?\s*(\d{3,4})\s*$/.exec(S.q);
   if (near && reflByNo(+near[1])) h += '<p class="note">Looking for <span class="lnk" data-askq="Refl. ' + near[1] + '">Refl. ' + near[1] + '</span>? A Reflexion goes by its number: <code>R ' + near[1] + '</code>, <code>Refl. ' + near[1] + '</code> or <code>' + near[1] + '</code> alone. As words, “' + esc(S.q.trim()) + '” is only its letters, since the search leaves numbers out.</p>';
-  h += '</div>';
+  const enHint = S.preset || R.en ? '' : (S.enFrom ? englishNote(S.enFrom) : englishHint(S.q, true));
+  h += enHint + (S.preset || S.enFrom || R.en ? '' : lexHint(S.q)) + '</div>';
   if (R.forms) h += R.forms.map(formsStrip).join('');
-  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">' + (R.en ? 'No passage’s English has it. To search the German, choose German beside the box.' : 'No passage has it.') + ' Try a * to widen a word, or allow more words between.</div>'; return; }
+  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">' + (R.en ? 'No passage’s English has it. To search the German, choose German beside the box.' : 'No passage has it.') + ' Try a * to widen a word, or allow more words between.</div>' + (enHint || S.preset || R.en ? '' : englishHint(S.q)); return; }
 
   const tab = S.tab === 'passages' ? 'passages' : 'overview';
   h += '<div class="tabs"><button type="button" data-tab="overview"' + (tab === 'overview' ? ' class="on"' : '') + '>Overview</button>' +
@@ -1918,6 +1964,148 @@ function renderResults() {
     });
   }
   box.innerHTML = h;
+}
+
+/* The search reads the German and Latin, not the English beside it. A question in English that
+   finds nothing is offered the German and Latin words the logic texts use: a list of the portal's
+   own, for finding one's way, not a translation drawn from the texts. */
+const EN_TERMS = {
+  judgment: 'urtheil*', judgement: 'urtheil*', judgments: 'urtheil*', concept: 'begriff*', concepts: 'begriff*',
+  inference: 'schluß* OR schlus* OR ratiocinium', syllogism: 'vernunftschluß* OR syllogism*', cognition: 'erkenntni*', knowledge: 'erkenntni*',
+  truth: 'wahrheit*', true: 'wahr', false: 'falsch*', falsehood: 'falschheit*', error: 'irrthum*', understanding: 'verstand*', reason: 'vernunft*',
+  sensibility: 'sinnlichkeit*', intuition: 'anschauung*', experience: 'erfahrung*', certainty: 'gewißheit*', probability: 'wahrscheinlich*',
+  opinion: 'meinung* OR meinen', belief: 'glaube*', faith: 'glaube*', prejudice: 'vorurtheil*', doubt: 'zweifel*', hypothesis: 'hypothes*',
+  definition: 'definition* OR erklärung*', mark: 'merkmal*', marks: 'merkmal*', proof: 'beweis*', method: 'method*', logic: 'logik* OR logic*',
+  principle: 'grundsatz* OR principium', contradiction: 'widerspruch*', identity: 'identität* OR identitatis', subject: 'subject*', predicate: 'prädicat* OR praedicat*',
+  premise: 'prämisse* OR praemiss* OR vordersatz*', conclusion: 'schlußsatz* OR conclusio*', universal: 'allgemein*', particular: 'besonder* OR particular*',
+  affirmative: 'bejahend*', negative: 'verneinend*', hypothetical: 'hypothetisch*', disjunctive: 'disjunctiv*', categorical: 'categorisch* OR kategorisch*',
+  clarity: 'klarheit*', distinctness: 'deutlichkeit*', abstraction: 'abstraction*', reflection: 'reflexion*', learned: 'gelehrt*', scholarship: 'gelehrsamkeit*',
+};
+function englishHint(q, strict) {
+  const words = String(q || '').toLowerCase().match(/[a-z]+/g) || [];
+  const hits = words.filter(w => EN_TERMS[w]);
+  // strict: shown above results, only when every word asked is one of the list's English words
+  if (strict ? !hits.length || hits.length !== words.length || /[^a-z\s]/i.test(q) : !hits.length && !/^[\x00-\x7f]+$/.test(q)) return '';
+  return '<p class="note">The search reads the German and Latin of the texts, not the English shown beside them.' +
+    (hits.length ? ' Words the logic texts use for ' + hits.map(w => '<i>' + esc(w) + '</i>: <span class="lnk" data-askq="' + esc(EN_TERMS[w]) + '">' + esc(EN_TERMS[w]) + '</span>').join('; ') +
+      ' <span class="muted small">(the portal’s own list, for finding one’s way; not drawn from the texts)</span>' : '') + '</p>';
+}
+
+/* ── Latin, German, English: Jesus's lexicon of the school Latin (latin-lexicon.js: each term's
+   English, the German Kant uses for it, a definition and its related terms) and the glosses of the
+   word list (wordlist.js). Both made by machine; the portal says so where it shows them. ── */
+let LXEN_IX = null, LX_FORMS = null;
+const LX_SMALL = new Set(['of', 'the', 'a', 'an', 'to', 'and', 'for', 'with', 'by', 'from', 'as', 'is', 'be', 'on', 'in']);
+function lxEnIndex() {
+  if (LXEN_IX) return LXEN_IX;
+  LXEN_IX = new Map();
+  const norm = en => String(en).toLowerCase().replace(/\(.*?\)/g, '').replace(/^(to|the|a|an) /, '').trim();
+  const get = en => { en = norm(en); if (!en || /[^a-z '-]/.test(en)) return null; let e = LXEN_IX.get(en); if (!e) LXEN_IX.set(en, e = { forms: new Set(), lex: new Set(), rel: new Set() }); return e; };
+  const W = LAYERS.words || {};
+  for (const [form, g] of Object.entries(W)) {
+    if (form.length < 4) continue;
+    String(g).split(/[;,]/).forEach(x => { x = x.trim(); if (x && x.split(' ').length <= 3 && !LX_SMALL.has(norm(x))) { const e = get(x); if (e) e.forms.add(form); } });
+  }
+  (LAYERS.lexicon || []).forEach((L, i) => {
+    (L.en || []).forEach(x => { const e = get(x); if (e) e.lex.add(i); });
+    (L.en_search || []).forEach(x => { const e = get(x); if (e && !e.lex.has(i)) e.rel.add(i); });
+  });
+  return LXEN_IX;
+}
+function lxEnEntry(w) {
+  const I = lxEnIndex(); w = w.toLowerCase();
+  for (const t of [w, w.replace(/ies$/, 'y'), w.replace(/es$/, ''), w.replace(/s$/, '')]) if (I.has(t)) return I.get(t);
+  return null;
+}
+function lexForms() {
+  if (LX_FORMS) return LX_FORMS;
+  LX_FORMS = new Map();
+  (LAYERS.lexicon || []).forEach((L, i) => [L.la].concat(L.forms || []).forEach(f => { f = f.toLowerCase(); if (!LX_FORMS.has(f)) LX_FORMS.set(f, i); }));
+  return LX_FORMS;
+}
+const q1 = f => /\s/.test(f) ? '"' + f + '"' : f;
+/* An English question → { query, main: [lexicon entries], rel: [entries] }, or null. One English word, or
+   a phrase the glossaries know whole ("judgment of taste"). */
+function englishExpansion(q) {
+  const LX = LAYERS.lexicon || [];
+  if (!LX.length && !LAYERS.words) return null;
+  const words = String(q || '').trim().toLowerCase();
+  if (!/^[a-z][a-z' -]*$/.test(words)) return null;
+  let e = lxEnEntry(words);
+  if (!e) { const ws = words.split(/\s+/).filter(w => !LX_SMALL.has(w)); if (ws.length === 1) e = lxEnEntry(ws[0]); }
+  if (!e) return null;
+  const main = [...e.lex].map(i => LX[i]);
+  const forms = new Set();
+  main.forEach(L => { [L.la].concat(L.forms || []).forEach(f => forms.add(f)); (L.de || []).forEach(d => { d = d.replace(/^(der|die|das) /i, ''); if (!/[,;(]/.test(d) && d.split(' ').length <= 2) forms.add(d); }); });
+  e.forms.forEach(f => forms.add(f));
+  if (!forms.size) return null;
+  // related: the terms an English word points to loosely, and the terms the main ones name as related, one step out
+  const relSet = new Set([...e.rel]);
+  main.forEach(L => (L.related || []).forEach(r => { const i = lexForms().get(r.toLowerCase()); if (i != null) relSet.add(i); }));
+  [...e.rel].forEach(i => (LX[i].related || []).slice(0, 8).forEach(r => { const j = lexForms().get(r.toLowerCase()); if (j != null) relSet.add(j); }));
+  main.forEach(L => relSet.delete(LX.indexOf(L)));
+  const rel = [...relSet].map(i => LX[i]).slice(0, 40);
+  return { query: [...forms].slice(0, 30).map(q1).join(' OR '), main, rel, forms: [...forms] };
+}
+function lexCardHTML(L) {
+  return '<div class="lexcard"><div><span class="la">' + esc(L.la) + '</span> <span class="muted small">' + esc(L.field || '') + '</span></div>' +
+    '<div class="row"><span class="l">English</span>' + esc((L.en || []).join('; ')) + '</div>' +
+    (L.de && L.de.length ? '<div class="row"><span class="l">German</span>' + esc(L.de.join('; ')) + '</div>' : '') +
+    (L.def ? '<div class="row">' + esc(L.def) + '</div>' : '') +
+    (L.related && L.related.length ? '<div class="row small"><span class="l">See</span>' + L.related.slice(0, 10).map(r => '<span class="lnk" data-askq="' + esc(q1(r)) + '"><i>' + esc(r) + '</i></span>').join(', ') + '</div>' : '') +
+    '<div class="row small"><span class="lnk" data-askq="' + esc(lexQuery(L)) + '">Find it in the texts, in its Latin and German forms</span></div></div>';
+}
+function lexQuery(L) {
+  const f = [L.la].concat(L.forms || []);
+  (L.de || []).forEach(d => { d = d.replace(/^(der|die|das) /i, ''); if (!/[,;(]/.test(d) && d.split(' ').length <= 2) f.push(d); });
+  return [...new Set(f)].slice(0, 30).map(q1).join(' OR ');
+}
+const LEX_NOTE = '<div class="from">Latin–German–English terms: Jesus’s lexicon, made by machine (Claude) from the texts’ Latin; check what matters</div>';
+function englishNote(en) {
+  const ex = englishExpansion(en); if (!ex) return '';
+  return '<div class="ennote"><b>' + esc(en) + '</b> is English, and the texts are German and Latin, so the search looked for the words they use for it: ' +
+    ex.forms.slice(0, 30).map(f => '<span class="lnk" data-askq="' + esc(q1(f)) + '">' + (lexForms().has(f.toLowerCase()) ? '<i>' + esc(f) + '</i>' : esc(f)) + '</span>').join(', ') + '.' +
+    (ex.rel.length ? '<div style="margin-top:0.3rem">Related terms: ' + ex.rel.map(L => '<span class="lnk" data-askq="' + esc(lexQuery(L)) + '" title="' + esc((L.en || []).join('; ')) + '"><i>' + esc(L.la) + '</i></span>').join(', ') + '</div>' : '') +
+    '</div>' + ex.main.slice(0, 3).map(lexCardHTML).join('') + ex.rel.slice(0, 2).map(lexCardHTML).join('') + LEX_NOTE;
+}
+/* A Latin term asked for: its English, German and definition above the results */
+function lexHint(q) {
+  const LX = LAYERS.lexicon; if (!LX || !q) return '';
+  const k = String(q).replace(/"/g, '').replace(/\*/g, '').trim().toLowerCase();
+  let i = lexForms().get(k);
+  if (i == null) { const ws = k.split(/\s+/); if (ws.length > 1 && !/\bor\b/.test(k)) return ''; i = lexForms().get(ws[0]); }
+  if (i == null) {
+    // a German word: the Latin terms that give it
+    const hits = LX.filter(L => (L.de || []).some(d => d.toLowerCase().replace(/^(der|die|das) /, '') === k)).slice(0, 3);
+    return hits.length ? hits.map(lexCardHTML).join('') + LEX_NOTE : '';
+  }
+  return lexCardHTML(LX[i]) + LEX_NOTE;
+}
+/* the Latin terms in a passage, underlined: hover for the English, click for the whole entry */
+let LX_TIP = null;
+function lexTips() {
+  if (LX_TIP) return LX_TIP;
+  LX_TIP = { one: new Map(), two: new Map() };
+  (LAYERS.lexicon || []).forEach((L, i) => (L.tip || []).forEach(f => { f = f.toLowerCase(); const m = f.includes(' ') ? LX_TIP.two : LX_TIP.one; if (!m.has(f)) m.set(f, i); }));
+  return LX_TIP;
+}
+function lexWrap(html) {
+  const LX = LAYERS.lexicon; if (!LX) return html;
+  const T = lexTips();
+  return html.split(/(<[^>]+>)/).map(part => {
+    if (!part || part[0] === '<') return part;
+    return part.replace(/(?<![&#\wÄÖÜäöüß])([A-Za-z]{3,})(?![\wÄÖÜäöüß;])(\s+([A-Za-z]{2,})(?![\wÄÖÜäöüß]))?/g, (m, w1, sp, w2) => {
+      const two = w2 && T.two.get((w1 + ' ' + w2).toLowerCase());
+      if (two != null) return lxSpan(two, w1 + sp + w2);
+      const one = T.one.get(w1.toLowerCase());
+      const rest = w2 ? sp + (T.one.has(w2.toLowerCase()) ? lxSpan(T.one.get(w2.toLowerCase()), w2) : w2) : '';
+      return (one != null ? lxSpan(one, w1) : w1) + rest;
+    });
+  }).join('');
+}
+function lxSpan(i, txt) {
+  const L = LAYERS.lexicon[i];
+  return '<span class="lx" data-lx="' + i + '" title="' + esc(L.la + ': ' + (L.en || []).slice(0, 3).join('; ') + ((L.de || []).length ? ' · German: ' + L.de.slice(0, 2).join('; ') : '')) + '">' + txt + '</span>';
 }
 
 function hitCard(p, ms) {
@@ -2361,7 +2549,7 @@ function enSync() {
   // one quiet line: the two styles, what the English is, and Maria's preview; the rest on hover
   bar.innerHTML = '<span class="lab">ENGLISH</span>' +
     '<span class="sty">' + PORTAL_TR_STYLES.map(st => '<button type="button" data-en="' + st.key + '"' + (S.en === st.key ? ' class="on"' : '') + ' title="' + esc(st.tag) + '">' + esc(st.label.replace(' principles', '')) + '</button>').join('') + '</span>' +
-    '<span class="muted" title="The German and Latin always stay. Baumgarten and Kant’s notes on him have no English yet.">Machine translation, for orientation: check it against the German</span>' +
+    '<span class="muted" title="The German and Latin always stay. Baumgarten and the Reflexionen on him are translated whole.">Machine translation, for orientation: check it against the German</span>' +
     '<span class="soon"><a href="' + MARIA_DEMO + '" target="_blank" rel="noopener" title="Coming soon: Maria’s sentence-by-sentence translation, across the whole portal">Maria’s translation, a preview ↗</a></span>';
 }
 function enApply() { enSync(); enRefresh(); }
@@ -2405,10 +2593,31 @@ let EN_TIMER = 0;
 function enRefresh() {
   clearTimeout(EN_TIMER);
   EN_TIMER = setTimeout(() => {
+    // The English arriving lengthens every passage above the one in view. Keep the one in view
+    // where it was, or the page drifts back by many passages (and the Meier reader's notes, which
+    // follow the § at the top, change to an earlier §).
+    const L = $('left'), mark = placeMark(L, S.view === 'ask' ? '.hit[data-open]' : '#readtext .fp[data-fp], #readtext .frow');
     renderRail();
     ['readtext', 'railtext'].forEach(id => { const st = FT[id]; if (st && st.el.isConnected) for (let k = st.lo; k <= st.hi; k++) refreshBlock(k); });
-    if (S.view === 'ask') { const L = $('left'), top = L.scrollTop; renderResults(); L.scrollTop = top; }
+    if (S.view === 'ask') renderResults();
+    placeRestore(L, mark);
   }, 80);
+}
+/* The first block showing at the top of a scrolling pane, chosen as studyFollow chooses it, and
+   how far down the pane it stands; and putting it back there after the pane is redrawn. */
+function placeMark(sc, sel, inSight) {
+  const top = sc.getBoundingClientRect().top, bottom = sc.getBoundingClientRect().bottom;
+  for (const el of sc.querySelectorAll(sel)) {
+    const r = el.getBoundingClientRect();
+    if (inSight && (r.top < top || r.top > bottom - 40)) continue;
+    if (r.bottom > top + readOffset() + 4) return { sel, key: el.dataset.fp != null ? 'fp' : 'open', id: el.dataset.fp != null ? el.dataset.fp : el.dataset.open, off: r.top - top, at: sc.scrollTop };
+  }
+  return inSight ? null : { at: sc.scrollTop };
+}
+function placeRestore(sc, m, minOff) {
+  const el = m.id != null && sc.querySelector('[data-' + m.key + '="' + m.id + '"]');
+  if (!el) { sc.scrollTop = m.at; return; }
+  sc.scrollTop += el.getBoundingClientRect().top - sc.getBoundingClientRect().top - Math.max(m.off, minOff || 0);
 }
 
 /* The repository's Text error form, filled in with the passage. Only its text fields can be
@@ -2543,7 +2752,22 @@ function textbookStrip(p) {
   return h + '</div>';
 }
 
+/* Opening, closing or widening the right pane narrows or widens the left, and its text reflows:
+   keep the passage at the top of the left where it was. */
 function renderRail(headOnly) {
+  const L = $('left'), w = L.clientWidth;
+  // the passage just clicked, if it is in sight; otherwise the one at the top
+  const m = S.view === 'read' && FT.readtext ? placeMark(L, '#readtext .fp[data-fp="' + S.sel + '"], #readtext .frow[data-fp="' + S.sel + '"]', true) || placeMark(L, '#readtext .fp[data-fp], #readtext .frow')
+    : S.view === 'ask' ? placeMark(L, '.hit[data-open="' + S.sel + '"]', true) || placeMark(L, '.hit[data-open]') : null;
+  drawRail(headOnly);
+  // (a narrower column can wrap the reading bar onto another line: keep the passage clear of it)
+  if (m && L.clientWidth !== w) {
+    // in the Meier and Baumgarten reader the § in view is the one at the top, under the bar
+    if (studyOn() && m.id != null && +m.id === S.sel) m.off = readOffset();
+    placeRestore(L, m, S.view === 'read' ? readOffset() : 0);
+  }
+}
+function drawRail(headOnly) {
   const rail = $('rail');
   if (S.sel == null || !P[S.sel]) {
     rail.hidden = true;
@@ -2557,13 +2781,16 @@ function renderRail(headOnly) {
   const p = P[S.sel], T = TEXTS[p.t];
   const readingHere = S.view === 'read' && S.readKey === T.key;
   if (S.railW) $('app').style.gridTemplateColumns = 'minmax(0, 1fr) ' + S.railW + 'px';
+  $('app').classList.toggle('studyrail', readingHere && isStudyText(T));
   if (readingHere && isStudyText(T)) return renderStudyRail(p, T, headOnly);
   if (!['text', 'cmp', 'conn'].includes(S.rtab)) S.rtab = 'text';
   $('railhead').innerHTML = '<div class="rhead"><div class="rwork"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
     resultStepper(p) +
     '<button type="button" class="rclose" data-close-rail="1" title="Close">×</button></div>' +
     '<div class="pcite">' + esc(p.cite) + '</div>' +
-    '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') + '</div>' +
+    '<div class="pmeta">' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + (p.sec ? ' · ' + esc(p.sec) : '') +
+    // the Connections tab carries the link among the passage's actions; the other tabs carry it here
+    (S.rtab === 'conn' ? '' : ' · <a class="rep" href="' + esc(reportUrl(T, p)) + '" target="_blank" rel="noopener" title="Opens the repository’s Text error form, filled in with this passage">Report a text error ↗</a>') + '</div>' +
     accLine(p, T) +
     (S.rtab === 'cmp' ? '' : textbookStrip(p)) +
     '<div class="rtabs"><button type="button" data-rtab="text"' + (S.rtab === 'text' ? ' class="on"' : '') + '>Full text</button>' +
@@ -3275,7 +3502,7 @@ function ftBlock(st, k) {
   const ref = shortCite(p) + (tag ? ' · ' + tag : '') + (p.edl && p.other != null ? ' (the other edition’s page, found by matching the two texts word for word; printed in neither)' : '');
   return head + '<div class="fp' + (samePage ? ' cont' : '') + (pub ? ' k-' + p.kind : '') + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm" title="' + esc(ref) + '">' +
     (samePage ? '' : '<b>' + esc(shortCite(p)) + '</b>') + (tag && !sameTag ? '<i>' + esc(tag) + '</i>' : '') + enButton(p) + '</div>' +
-    '<div class="fpt" lang="de">' + pagedText(p, spans) + '</div>' + enLine(p) + '</div>';
+    '<div class="fpt" lang="de">' + lexWrap(pagedText(p, spans)) + '</div>' + enLine(p) + '</div>';
 }
 /* A passage's text with its highlights, and, where a page begins inside it (Kant's published
    works), the page's number set in the line, as an edition prints it in the margin. */
@@ -3360,7 +3587,7 @@ function studyBlock(st, k) {
   if (S.tint && S.tint.pi === k) { S.tint.ranges.forEach(r => spans.push([r[0], r[1], S.tint.cls])); part = S.tint.part ? ' part-' + S.tint.part : ''; }
   (p.flags || []).forEach(f => { let i = -1; while ((i = p.text.indexOf(f.w, i + 1)) >= 0) spans.push([i, i + f.w.length, 'mis']); });
   const inserts = (p.gl || []).map(g => ({ at: g.at, html: '<span class="gloss" title="Baumgarten’s German equivalent">' + (g.mk ? '<sup>' + esc(g.mk) + '</sup>' : '') + esc(g.de) + '</span>' }));
-  const body = linkXrefs(richText(p.text, spans, inserts), T);
+  const body = lexWrap(linkXrefs(richText(p.text, spans, inserts), T));
   const notes = notesOf(T);
   const n = notes && notes.byPara && notes.byPara[p.para] ? notes.byPara[p.para].length : 0;
   const margin = '<b>§ ' + p.para + '</b>' +
@@ -3595,11 +3822,17 @@ function studyGo(T, n, opts) {
     ftSetFocus(st, q.i);
     const el = st.el.querySelector('[data-fp="' + q.i + '"]');
     const sc = $('left');
-    if (el) sc.scrollTop += el.getBoundingClientRect().top - sc.getBoundingClientRect().top - 76;
+    if (el) sc.scrollTop += el.getBoundingClientRect().top - sc.getBoundingClientRect().top - readOffset();
   } else renderRead();
   markOutline(q.i);
   renderRail();
   if (!opts || !opts.noTrail) pushTrail();
+}
+/* How far below the top of the left a passage gone to stands: clear of the reading bar, which
+   is taller when a narrow window wraps it. */
+function readOffset() {
+  const bar = document.querySelector('#view-read .readbar');
+  return Math.max(76, bar ? bar.offsetHeight + 14 : 0);
 }
 /* As the textbook scrolls, the notes follow the § at the top of the column. */
 let followTimer = null;
@@ -3608,7 +3841,7 @@ function studyFollow() {
   if (S.sel != null && P[S.sel] && TEXTS[P[S.sel].t].key !== S.readKey) return;
   clearTimeout(followTimer);
   followTimer = setTimeout(() => {
-    const st = FT.readtext, sc = $('left'), top = sc.getBoundingClientRect().top + 80;
+    const st = FT.readtext, sc = $('left'), top = sc.getBoundingClientRect().top + readOffset() + 4;
     let k = null;
     for (const el of st.el.querySelectorAll('.fp[data-fp], .frow')) { if (el.getBoundingClientRect().bottom > top) { k = +el.dataset.fp; break; } }
     if (k == null || k === S.sel) return;
@@ -3846,6 +4079,15 @@ function jumpHint(T) {
   if (T.cite) return 'Go to A or B page (A 51, B xvi)';
   return T.key === 'jaesche' ? 'Go to § or AA page' : 'Go to AA page';
 }
+/* The jump box could not go where it was asked: say why beside it, until the next try. */
+function jumpMiss(box, msg) {
+  box.style.borderColor = '#b4532a';
+  box.title = msg;
+  let m = box.parentNode.querySelector('.jumpmsg');
+  if (!m) { m = document.createElement('span'); m.className = 'jumpmsg'; box.insertAdjacentElement('afterend', m); }
+  m.textContent = msg;
+  box.addEventListener('input', () => { box.style.borderColor = ''; m.remove(); }, { once: true });
+}
 /* ── The Critique's pages: A for 1781, B for 1787, Roman for the front matter (A xvi) ── */
 const ROMAN_LC = { i: 1, v: 5, x: 10, l: 50, c: 100 };
 /* A page label's place in its edition's order: the Roman front matter before page 1. */
@@ -3981,7 +4223,7 @@ function aaHits(vol, page, only) {
 function alignRead() {
   const st = FT.readtext, at = S.readAt;
   const f = st && at != null && st.el.querySelector('[data-fp="' + at + '"]');
-  if (f) st.scroller.scrollTop += f.getBoundingClientRect().top - st.scroller.getBoundingClientRect().top - 76;
+  if (f) st.scroller.scrollTop += f.getBoundingClientRect().top - st.scroller.getBoundingClientRect().top - readOffset();
 }
 function goAA(c, only) {
   const h = aaHits(c.vol, c.page, only)[0];
@@ -4012,13 +4254,35 @@ function aaMissHtml(c) {
   if (after) h += ' ' + esc(after.T.title) + ' begins at ' + go(c.vol, after.r[0], 'AA ' + c.vol + ':' + after.r[0]) + '.';
   return h + '</div>';
 }
-function showAAMiss(c) { showMiss('<div class="res-head"><div class="res-title">AA ' + c.vol + ':' + c.page + '</div></div>' + aaMissHtml(c)); }
+const aaMissPage = c => '<div class="res-head"><div class="res-title">AA ' + c.vol + ':' + c.page + '</div></div>' + aaMissHtml(c);
+function showAAMiss(c) { showMiss(aaMissPage(c)); }
+/* "Meier § 125", "M § 125", "Baumgarten § 55", "Jäsche § 3", or "§ 125" alone (Meier, the logic
+   textbook): { key, n }. Only with the § sign, so that words and numbers are still searched as before. */
+function parseParaRef(raw) {
+  const m = /^\s*(meier|m|baumgarten|baum|b|j(?:ä|ae|a)sche|j)?\.?\s*§+\s*(\d{1,4})\s*\.?\s*$/i.exec(String(raw || ''));
+  if (!m) return null;
+  const w = (m[1] || 'meier').toLowerCase();
+  return { key: /^m/.test(w) ? 'meier' : /^b/.test(w) ? 'baumgarten' : 'jaesche', n: +m[2] };
+}
+function goPara(pm) {
+  const T = textByKey(pm.key);
+  const k = !T ? null : isStudyText(T) ? (passage(T.key, 'p' + pm.n) || {}).i : findInText(T, '§ ' + pm.n);
+  if (k == null || (T.key === 'jaesche' && P[k].para !== pm.n)) {
+    showMiss('<div class="res-head"><div class="res-title">' + esc((T ? T.short : pm.key) + ' § ' + pm.n) + '</div></div><div class="empty">' +
+      esc((T ? T.title : pm.key) + ' has no § ' + pm.n + '.') + '</div>');
+    return;
+  }
+  if (!isStudyText(T)) S.sel = k;
+  openRead(T.key, k);
+}
 /* Nothing found for a page or a Reflexion named: the left says so, and goes on saying so when it is
    drawn again (as it is when the English arrives) until the reader asks something else. */
 function showMiss(h) {
-  S.miss = h;
+  // the question asked before gives way, or the left would go on showing its results instead
+  Object.assign(S, { miss: h, q: '', d: null, loc: null, preset: null, tab: 'overview' });
   showView('ask');
   renderResults();
+  writeHash();
 }
 
 function renderStudy(el, T) {
@@ -4033,7 +4297,7 @@ function renderStudy(el, T) {
     '<div class="study' + (S.outline ? '' : ' no-outline') + '"><nav class="outline" id="outline">' + outlineHtml(T) + '</nav><div id="readtext" class="fulltext"></div></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
   const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
-  ftOpen($('readtext'), $('left'), at, focus, 76);
+  ftOpen($('readtext'), $('left'), at, focus, readOffset());
   markOutline(at);
 }
 
@@ -4050,7 +4314,7 @@ function renderRead() {
     '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></div><div id="readtext" class="fulltext"></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
   const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
-  ftOpen($('readtext'), $('left'), at, focus, 76);
+  ftOpen($('readtext'), $('left'), at, focus, readOffset());
 }
 
 function renderPeople() {
@@ -4126,7 +4390,7 @@ function pushTrail() {
   const snap = snapshot();
   const cur = TRAIL[trailPos];
   const bare = s => JSON.stringify(Object.assign({}, s, { presetObj: 0, onP: 0 }));
-  if (cur && bare(cur) === bare(snap)) return;
+  if (cur && bare(cur) === bare(snap)) { writeHash(); return; }   // the same step again; the URL may still have lagged
   snap.onP = snap.sel != null && (!cur || cur.sel !== snap.sel);
   TRAIL.splice(trailPos + 1);
   TRAIL.push(snap);
@@ -4277,6 +4541,7 @@ function readHash() {
       within = only;
     }
     if (c && goAA(c, within)) { syncForm(); renderResults(); return; }
+    if (c && !S.q) S.miss = aaMissPage(c);           // a link to a page the portal has nothing on says so
   }
   // A link to a Reflexion by its number, #refl=4086, as the landing page's lookup box makes: the left
   // names it, and the note opens on the right
@@ -4300,7 +4565,7 @@ function readHash() {
 function ask(opts) {
   // a new question starts with every form ticked
   if (opts && opts.q != null && opts.q !== S.q && !opts.fx) S.fx = new Set();
-  Object.assign(S, { d: null, loc: null, tab: 'overview', expand: new Set(), miss: null }, opts);
+  Object.assign(S, { d: null, loc: null, tab: 'overview', expand: new Set(), miss: null, enFrom: null }, opts);
   showView('ask');
   syncForm();
   renderResults();
@@ -4357,6 +4622,9 @@ function wire() {
       if (goAA(c)) return;
       if (c.prefixed || TEXTS.some(T => aaRange(T).byVol[c.vol])) { showAAMiss(c); return; }
     }
+    // A textbook's §, "Meier § 125", "Baumgarten § 55", "Jäsche § 3" or "§ 125" (Meier), opens it to read
+    const pm = parseParaRef($('q').value);
+    if (pm) { goPara(pm); return; }
     // A Reflexion by its number, "Refl. 4086" or 4086 alone, opens on the right, leaving the left as it was
     const rn = parseRefl($('q').value);
     if (rn) { lookRefl($('q').value.trim()); return; }
@@ -4400,7 +4668,7 @@ function wire() {
 
   document.addEventListener('click', e => {
     if (e.target.closest('#modal') && (e.target.id === 'modal' || e.target.closest('[data-close-modal]'))) { closeModal(); return; }
-    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq],[data-lookcmp],[data-fx]');
+    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq],[data-lookcmp],[data-fx],[data-lx]');
     if (!el) return;
     const d = el.dataset;
     if (d.fx != null) { const fx = new Set(S.fx); fx.has(d.fx) ? fx.delete(d.fx) : fx.add(d.fx); S.fx = fx; S.loc = null; renderResults(); pushTrail(); return; }
@@ -4456,7 +4724,8 @@ function wire() {
     if (d.ctag) { const [bit, q] = d.ctag.split(':'); Object.assign(cmpState(P[S.sel]), { bit: bit.split('-').map(Number), with: +q, whole: false }); renderRail(); writeHash(); cmpShowB(); return; }
     if (d.cwhole != null) { cmpState(P[S.sel]).whole = d.cwhole === '1'; renderRail(); return; }
     if (d.cmore) { cmpState(P[S.sel]).more = true; renderRail(); return; }
-    if (d.askq) { askOrLook(d.askq); return; }
+    if (d.askq) { $('modal').hidden = true; askOrLook(d.askq); return; }
+    if (d.lx != null && LAYERS.lexicon) { openModal(lexCardHTML(LAYERS.lexicon[+d.lx]) + LEX_NOTE); return; }
     if (d.lookcmp) { openPassage(+d.lookcmp, null, 'cmp'); return; }
     if (d.step != null) { goStep(+d.step); return; }
     if (d.map) { $('routemap').hidden = !$('routemap').hidden; renderTrail(); return; }
@@ -4465,6 +4734,8 @@ function wire() {
     if (d.home) { Object.assign(S, { d: null, q: '', co: '', cm: '', loc: null, preset: null, tab: 'overview', expand: new Set(), miss: null }); showView('ask'); syncForm(); renderResults(); writeHash(); return; }
     if (d.tab) { S.tab = d.tab; renderResults(); writeHash(); return; }
     if (d.closeRail) { S.sel = null; S.quote = null; S.noteFocus = null; $('app').style.gridTemplateColumns = ''; renderRail(); document.querySelectorAll('.hit.sel').forEach(x => x.classList.remove('sel')); if (studyOn()) renderRead(); writeHash(); return; }
+    // Read, pressed again while reading a text, goes back to the list of texts
+    if (d.view === 'read' && S.view === 'read' && S.readKey && el.closest('nav')) { openRead(null, null); return; }
     if (d.view) { showView(d.view); if (d.view === 'read') writeHash(); return; }
     if (d.trail != null) { $('tip').hidden = true; goStep(+d.trail); return; }
     if (d.expandRail) { S.expand.add(d.expandRail); renderRail(); return; }
@@ -4541,9 +4812,11 @@ function wire() {
     if (e.target.id !== 'jump' || e.key !== 'Enter') return;
     // "Refl. 2330": in its own textbook, the § it is on with the note picked out; anywhere else, the note itself
     const rn = parseRefl(e.target.value);
-    if (rn && rn.prefixed) {
+    // A bare number in a textbook is its §; one past the textbook's last § can only be a Reflexion's number
+    const reflNo = rn && (rn.prefixed || (studyOn() && !passage(S.readKey, 'p' + rn.n) && !/§/.test(e.target.value) && reflByNo(rn.n)));
+    if (reflNo) {
       const q = reflByNo(rn.n);
-      if (!q) { e.target.style.borderColor = '#b4532a'; e.target.title = reflMissText(rn.n); return; }
+      if (!q) { jumpMiss(e.target, reflMissText(rn.n)); return; }
       const on = TEXTS[q.t].on, T = textByKey(S.readKey);
       if (studyOn() && T && on === T.key && q.paras && q.paras.length) { S.nsearch = ''; S.noteFocus = q.i; studyGo(T, q.paras[0], { tab: 'notes' }); }
       else openPassage(q.i);
@@ -4551,11 +4824,13 @@ function wire() {
     }
     // A full citation, "24:892", may be to this text or to another: go there either way.
     const c = parseAA(e.target.value);
-    if (c) { if (!goAA(c)) { e.target.style.borderColor = '#b4532a'; e.target.title = 'Nothing the portal has is printed on AA ' + c.vol + ':' + c.page; } return; }
+    if (c) { if (!goAA(c)) jumpMiss(e.target, 'Nothing the portal has is printed on AA ' + c.vol + ':' + c.page + '.'); return; }
     const T = textByKey(S.readKey), k = T && findInText(T, e.target.value);
-    if (k == null) { e.target.style.borderColor = '#b4532a'; return; }
+    if (k == null) { jumpMiss(e.target, T ? 'No ' + (/§/.test(e.target.value) || isStudyText(T) ? '§ ' : 'page ') + (e.target.value.replace(/[^\d]/g, '') || e.target.value.trim()) + ' in ' + T.short + (aaRange(T).label ? ' (' + aaRange(T).label + ')' : '') + '.' : ''); return; }
     if (studyOn()) { studyGo(T, P[k].para, {}); return; }
-    S.readAt = k; renderRead(); writeHash();
+    // The passage gone to is marked and opens on the right, as a page named by a full citation does
+    S.readAt = k; S.sel = k; S.quote = null; S.rtab = S.rtab === 'cmp' ? 'cmp' : 'conn';
+    renderRead(); renderRail(); pushTrail();
   });
 
   // Select words in any text to search for them everywhere
@@ -4624,6 +4899,7 @@ function wire() {
 
 /* Opening a text to read. Meier and Baumgarten, and Kant's notes on either, always open as the
    textbook with the notes beside it. `at` is a passage to open at, if any. */
+let lastReadKey = null;           // the text read last, while the Read list is showing
 function openRead(key, at) {
   let T = key && textByKey(key);
   S.find = null;
@@ -4638,6 +4914,12 @@ function openRead(key, at) {
     showView('read'); renderRail(); pushTrail();
     return;
   }
+  // A passage picked while reading the previous text belongs to that reading: opening another
+  // text from the list closes it, rather than leaving it beside a text it has nothing to do with.
+  // A search result open on the right stays.
+  const was = S.readKey || lastReadKey;
+  if (T && at == null && S.sel != null && P[S.sel] && was && TEXTS[P[S.sel].t].key === was && was !== T.key) S.sel = null;
+  if (S.readKey) lastReadKey = S.readKey;
   S.readKey = T ? T.key : null;
   S.readAt = at;
   if (T && isStudyText(T)) {
