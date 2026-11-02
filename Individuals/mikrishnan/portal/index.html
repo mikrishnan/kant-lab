@@ -690,6 +690,31 @@
   #loading .bar { height: 0.4rem; background: var(--parchment-dark); border-radius: 3px; overflow: hidden; margin-top: 0.6rem; }
   #loading .bar i { display: block; height: 100%; width: 0; background: var(--accent-light); transition: width 0.2s; }
 
+  /* ── One look for the controls ─────────────────────────────────────
+     Every dropdown in the page's colours, with a small caret in place of the system's; the
+     reading bar's fields and buttons one height; the find box one piece with its ‹ ›. */
+  select { -webkit-appearance: none; appearance: none; cursor: pointer; background-color: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 0.12rem 1.7rem 0.12rem 0.5rem; }
+  select, .readbar select, #opts select, .qcard select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235c3d1e' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.55rem center; background-size: 0.62rem 0.38rem; padding-right: 1.7rem;
+  }
+  select:hover { border-color: var(--accent-light); }
+  .readbar .rtools { flex-basis: 100%; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .readbar .rtools select { flex: 1 1 9rem; max-width: 15rem; min-width: 7rem; }
+  .readbar .rtools #jump { flex: 0 1 8.5rem; min-width: 6rem; }
+  .readbar select, .readbar input, .readbar .findbox { height: 1.95rem; }
+  .findbox { border: 1px solid var(--line); border-radius: 6px; background: var(--card); overflow: hidden; align-items: stretch; gap: 0; }
+  .findbox:focus-within { border-color: var(--accent-light); }
+  .readbar .findbox input { height: auto; border: none; border-radius: 0; background: transparent; width: 9rem; max-width: none; }
+  .readbar .findbox input:focus { outline: none; }
+  .findbox .n { align-self: center; min-width: 0; padding: 0 0.45rem; white-space: nowrap; }
+  .findbox .n:empty { display: none; }
+  .findbox button { border: none; border-left: 1px solid var(--line-soft); border-radius: 0; padding: 0 0.6rem; font-size: 1rem; line-height: 1; }
+  .findbox button:hover { background: var(--paper); }
+  /* Cards: their words start at the top, so that the titles in a row line up. */
+  .qcard { display: flex; flex-direction: column; justify-content: flex-start; }
+  .ol-part .rng, .ol-sec .rng { white-space: nowrap; }
+
   /* ── A narrow window (a phone): one column. The passage opened covers the list, under the
      header, and its × goes back to the list. ── */
   @media (max-width: 760px) {
@@ -1933,7 +1958,7 @@ function renderResults() {
     const cols = TEXTS.filter(t => R.byText.has(t.idx));
     const LIM = S.expand.has('locs') ? 1e9 : 12;
     h += '<section class="card"><h3>Phrasings<span class="sub">most frequent first · click one to read its passages</span></h3>' +
-      '<table class="loc"><thead><tr><th>Phrasing</th><th>All</th>' + cols.map(t => '<th title="' + esc(t.title) + '">' + esc(t.short) + '</th>').join('') + '</tr></thead><tbody>';
+      '<table class="loc"><thead><tr><th>Phrasing</th><th>All</th>' + cols.map(t => '<th title="' + esc(t.title) + '">' + esc(t.short).replace(/ (?=[^\s(]{1,3}(\s|$))/g, '&nbsp;') + '</th>').join('') + '</tr></thead><tbody>';
     R.locs.slice(0, LIM).forEach(L => {
       const vars = L.surfaces.size > 1 ? '<span class="var" title="' + esc([...L.surfaces.keys()].join(' · ')) + '">+' + (L.surfaces.size - 1) + ' spelling' + (L.surfaces.size > 2 ? 's' : '') + '</span>' : '';
       h += '<tr class="row' + (S.loc === L.key ? ' sel' : '') + '" data-loc="' + esc(L.key) + '"><td><span class="phr"' + (L.en ? ' lang="en"' : '') + '>' + esc(L.label) + '</span>' + (L.en ? '<span class="entag" title="Found in the English translation">English</span>' : '') + vars + '</td><td class="tot">' + L.n + '</td>' +
@@ -4318,14 +4343,12 @@ function showMiss(h) {
 }
 
 function renderStudy(el, T) {
-  const f = S.find;
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="rtools">' +
     '<button type="button" class="btn" data-outline="1" title="Show or hide the outline">☰ Outline</button>' +
     (T.shape === 'metaphysica' ? '<button type="button" class="btn" data-synopsis="1">Synopsis</button>' : '') +
     (S.sel == null ? '<button type="button" class="btn" data-shownotes="1">Kant’s notes</button>' : '') +
-    '<span class="spacer"></span>' +
-    '<span class="findbox"><input id="find" type="search" spellcheck="false" placeholder="Find in the text…" value="' + esc(f ? f.q : '') + '"><button type="button" data-findstep="-1" title="Previous (Shift-Enter)">‹</button><span class="n">' + (f ? (f.hits.length ? (f.pos + 1) + ' / ' + f.hits.length : 'none') : '') + '</span><button type="button" data-findstep="1" title="Next (Enter)">›</button></span>' +
-    '<input id="jump" type="text" spellcheck="false" placeholder="§, page or Refl." aria-label="Go to a §, an AA page or a Reflexion" title="Go to a § (125), a page of the Academy edition (16:316) or a Reflexion (Refl. 2330)"></div>' +
+    findBox() +
+    '<input id="jump" type="text" spellcheck="false" placeholder="§, page or Refl." aria-label="Go to a §, an AA page or a Reflexion" title="Go to a § (125), a page of the Academy edition (16:316) or a Reflexion (Refl. 2330)"></span></div>' +
     '<div class="study' + (S.outline ? '' : ' no-outline') + '"><nav class="outline" id="outline">' + outlineHtml(T) + '</nav><div id="readtext" class="fulltext"></div></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
   const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
@@ -4347,10 +4370,10 @@ function renderRead() {
   if (!T) { el.innerHTML = readIndexHtml(); return; }
   if (isStudyText(T)) return renderStudy(el, T);
   const toc = tocFor(T);
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="spacer"></span>' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="rtools">' +
     (toc.length > 1 ? '<select id="toc" aria-label="Contents"><option value="">Contents…</option>' + toc.map(([l, k]) => '<option value="' + k + '">' + esc(clip(l, 64)) + '</option>').join('') + '</select>' : '') +
     findBox() +
-    '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></div><div id="readtext" class="fulltext"></div>';
+    '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></span></div><div id="readtext" class="fulltext"></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
   const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
   ftOpen($('readtext'), $('left'), at, focus, readOffset());
