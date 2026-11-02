@@ -43,6 +43,18 @@ Four places, along the top (pressing **Read** again while reading goes back to t
   passage, the parallel passages, and the three lexicons.
 - **Contributors** lists who built what.
 
+**Class sessions.** The header's **Session** button keeps a record of the passages a class
+looks at together. Turn on **Recording** in its panel, then press **+ Session** on each passage
+the class examines: on a search hit, on a paragraph of a full text, or beside the passage open
+on the right. The panel lists them in order, to rename, reorder or take out, with a place for
+the link to the class's discussion in Canvas or Teams, where comments are kept. The portal
+stores no comments: the site is public and has nowhere to keep them. **Save for the class**
+opens GitHub with the session as a file in [sessions/](sessions/), and you press *Commit
+changes*. Students then find it under **Read**, as a class session, or at
+`…/portal/?session=<name>`: every passage drawn live from the portal, numbered so that comments
+can name it, with **Read it in context** and the link to the discussion. Until it is saved, a
+session is kept in your own browser. The code is [class-sessions.js](class-sessions.js).
+
 Wherever you are, clicking an example (a search hit, a classified passage, a parallel) opens
 it **in its full text** on the right, scrolled to the passage and highlighted, so you can look
 through example after example in context. Its **Connections** tab beside the full text gives:
