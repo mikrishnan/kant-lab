@@ -17,7 +17,11 @@ Four places, along the top (pressing **Read** again while reading goes back to t
   or words stand in that text, with ‹ › (or Enter and Shift-Enter) to go from one to the next.
   Its spellings count as one word, as in the search (*Urteil* finds *Urtheil*), and a * ends a
   word any way (*urth\**); a part of a word finds its letters as typed. Click any paragraph and what hangs on it opens beside the
-  text.
+  text. In the lecture notes, whose paragraphs run from a line to several pages, a long
+  paragraph is shown in pieces of about ten lines, broken at the ends of sentences (its English
+  too), and a run of one-line paragraphs is closed up into one block. This is only how they are
+  shown: the paragraphs, and every link to them, are as the transcripts have them. Kant's
+  published works, Jäsche's Logik and the Reflexionen are shown as they are.
 - **Meier and Baumgarten, and Kant's notes on either,** open as the textbook with Kant's notes
   beside it, the notes following the § at the top as you scroll. This is everything the Meier
   and Baumgarten Readers did, inside the portal:

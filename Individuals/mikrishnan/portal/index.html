@@ -139,6 +139,10 @@
   .fp:hover { background: var(--card); }
   .fp.focus { background: #fbf1d6; border-left-color: var(--accent); }
   .fp.cont { padding-top: 0.05rem; }   /* a further paragraph on the same page: closed up, no repeated reference */
+  /* the lecture notes: a run of short paragraphs as one block, and a long one in pieces (chunkBreaks) */
+  .fp.short + .fp.short.cont { padding-top: 0; }
+  .fp.short:has(+ .fp.short.cont) { padding-bottom: 0; }
+  .fbrk { display: block; height: 0.65em; }
   /* a lecture's title page and contents, drawn as one block: the title page, then a contents list */
   .fp.front { cursor: default; }
   .fp.front:hover { background: none; }
@@ -2514,7 +2518,7 @@ function englishFor(tr, p) {
   if (state === 'failed') return open + '<div class="empty">The translation file did not load.</div></div>';
   const e = trEntry(tr, st.key, p);
   if (!e) return open + '<div class="empty">' + esc(personName(tr.who)) + '’s translations have no English for this passage.</div></div>';
-  return open + '<div class="tt">' + rich(e.text) + '</div>' +
+  return open + '<div class="tt">' + chunkedRich(p, e.text) + '</div>' +
     (e.notes.length ? '<ul>' + e.notes.map(n => '<li>' + rich(n) + '</li>').join('') + '</ul>' : '') + '</div>';
 }
 function englishNotes(tr, p) {
@@ -2556,7 +2560,7 @@ function enLine(p, a, b) {
   const row = em && em.length && EN_IX && EN_IX.byP.get(p.i);
   if (row) return '<div class="fen enhit" lang="en" data-for="' + p.i + '" title="Found in the English: machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + '">' +
     '<span class="enfound">FOUND IN THE ENGLISH</span>' + marked(row.text, 0, row.text.length, em.map(m => [row.ts[m.a], row.te[m.b], m.loc === S.loc])) + '</div>';
-  return '<div class="fen" lang="en" data-for="' + p.i + '" title="Machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + (a != null && e.text.length > 520 ? '; the stretch shown is approximate' : '') + '">' + rich(t) + (e.part ? ' <span class="muted small">(the English runs past this passage)</span>' : '') + '</div>';
+  return '<div class="fen" lang="en" data-for="' + p.i + '" title="Machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + (a != null && e.text.length > 520 ? '; the stretch shown is approximate' : '') + '">' + (a == null ? chunkedRich(p, t) : rich(t)) + (e.part ? ' <span class="muted small">(the English runs past this passage)</span>' : '') + '</div>';
 }
 /* The switch, the bar under the header, and the translation files, kept in step with S.en. */
 function enSync() {
@@ -2893,7 +2897,7 @@ function renderConnections(p, T) {
     (tr ? '<span><button type="button" class="btn' + (S.en ? ' on' : '') + '" data-en="' + (S.en ? '' : 'guyer') + '">' + (S.en ? 'Hide English' : 'English') + '</button>' +
       (S.en ? ' ' + PORTAL_TR_STYLES.map(st => '<button type="button" class="btn' + (S.en === st.key ? ' on' : '') + '" data-en="' + st.key + '" title="' + esc(st.tag) + '">' + esc(st.label.replace(/ principles$/, '')) + '</button>').join(' ') : '') + '</span>' : '') +
     '<a href="' + esc(reportUrl(T, p)) + '" target="_blank" rel="noopener" title="Opens the repository’s Text error form, filled in with this passage">Report a text error ↗</a></div>';
-  const de = '<div class="ptext" lang="de">' + marked(p.text, 0, p.text.length, spans) + '</div>';
+  const de = '<div class="ptext" lang="de">' + chunkedMarked(p, spans) + '</div>';
   $('app').classList.toggle('en', !!(tr && S.en));
   if (tr && S.en) h += '<div class="pair">' + de + englishFor(tr, p) + '</div>' + englishNotes(tr, p);
   else h += de;
@@ -3525,7 +3529,7 @@ function ftBlock(st, k) {
   const samePage = !!(prev && prev.t === p.t && (pub ? shortCite(prev) === shortCite(p) : prev.aa === p.aa));
   const sameTag = !!(prev && prev.t === p.t && marginTag(prev) === tag);
   const ref = shortCite(p) + (tag ? ' · ' + tag : '') + (p.edl && p.other != null ? ' (the other edition’s page, found by matching the two texts word for word; printed in neither)' : '');
-  return head + '<div class="fp' + (samePage ? ' cont' : '') + (pub ? ' k-' + p.kind : '') + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm" title="' + esc(ref) + '">' +
+  return head + '<div class="fp' + (samePage ? ' cont' : '') + (pub ? ' k-' + p.kind : '') + (lectureNotes(T) && p.text.length < SHORT ? ' short' : '') + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm" title="' + esc(ref) + '">' +
     (samePage ? '' : '<b>' + esc(shortCite(p)) + '</b>') + (tag && !sameTag ? '<i>' + esc(tag) + '</i>' : '') + enButton(p) + '</div>' +
     '<div class="fpt" lang="de">' + lexWrap(pagedText(p, spans, findSpans(k))) + '</div>' + enLine(p) + '</div>';
 }
@@ -3537,12 +3541,63 @@ function findSpans(k) {
 /* A passage's text with its highlights, and, where a page begins inside it (Kant's published
    works), the page's number set in the line, as an edition prints it in the margin. */
 function pagedText(p, spans, found) {
-  if (found && found.length) return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']).concat(found),
-    (p.pbm || []).map(([at, l]) => ({ at, html: '<span class="pbm" title="' + esc(p.edl ? l : 'AA ' + p.vol + ':' + l) + ' begins here">' + esc(l) + '</span>' })));
-  if (!p.pbm) return marked(p.text, 0, p.text.length, spans);
+  found = found || [];
+  const br = chunkBreaks(p, spans.concat(found));
+  if (!p.pbm && !br.length && !found.length) return marked(p.text, 0, p.text.length, spans);
   const label = l => p.edl ? l : 'AA ' + p.vol + ':' + l;
-  return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']),
-    p.pbm.map(([at, l]) => ({ at, html: '<span class="pbm" title="' + esc(label(l)) + ' begins here">' + esc(l) + '</span>' })));
+  return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']).concat(found),
+    br.map(at => ({ at, html: BRK })).concat((p.pbm || []).map(([at, l]) => ({ at, html: '<span class="pbm" title="' + esc(label(l)) + ' begins here">' + esc(l) + '</span>' }))));
+}
+
+/* The lecture notes in readable lengths. Their paragraphs run from a line to several pages. On
+   screen a long one is broken at the sentence starts nearest to even stretches of about CHUNK
+   characters (its English in as many pieces), and a run of short ones is closed up into one
+   block (.fp.short in the CSS). Only the drawing changes: the passage, its words and offsets, and
+   every link to it stay as they are, and a break is an empty element, so finds, marks and
+   selections are untouched. Kant's published works, Jäsche's Logik and the Reflexionen keep the
+   breaks they have. */
+const CHUNK = 600, CHUNK_FROM = 900, SHORT = 140;
+const BRK = '<span class="fbrk"></span>';
+const lectureNotes = T => !!T && T.shape === 'logik' && T.key !== 'jaesche';
+// Where sentences begin: after a . ? or ! that ends a word of three letters or more (so not after
+// z.E., d. i., u. s. w. or §. 5.), and not before a number, a § or a bracket.
+function sentenceStarts(t) {
+  const out = [], re = /[.?!]["»«“”’)\]]*\s+(?=[^\s\d§(\[])/g;
+  let m;
+  while ((m = re.exec(t))) if (/[A-Za-zÄÖÜäöüßſ]{3}$/.test(t.slice(Math.max(0, m.index - 6), m.index).replace(/[*"»«“”’)\]]/g, ''))) out.push(m.index + m[0].length);
+  return out;
+}
+// Up to n - 1 places to break t, each the sentence start nearest an even share of it, with no piece
+// under 250 characters, and none where no sentence ends near enough.
+function evenBreaks(t, n) {
+  const L = t.length, starts = sentenceStarts(t), out = [];
+  let last = 0;
+  for (let j = 1; j < n; j++) {
+    const want = L * j / n;
+    let best = -1;
+    for (const s of starts) if (s - last >= 250 && L - s >= 250 && (best < 0 || Math.abs(s - want) < Math.abs(best - want))) best = s;
+    if (best > last && Math.abs(best - want) <= 0.6 * L / n) { out.push(best); last = best; }
+  }
+  return out;
+}
+const chunkCount = p => lectureNotes(TEXTS[p.t]) && p.text.length >= CHUNK_FROM ? Math.round(p.text.length / CHUNK) : 1;
+// The breaks for a passage's German, leaving alone any marked stretch they would cut.
+const chunkBreaks = (p, spans) => chunkCount(p) < 2 ? [] : evenBreaks(p.text, chunkCount(p)).filter(x => !(spans || []).some(z => z[0] < x && x < z[1]));
+// Its English, broken before the same sentences as the German (the translations keep sentences
+// whole, so the nth sentence of one is the nth of the other; where the counts differ, the
+// sentence as far along), never inside an *italic*.
+function chunkedRich(p, t) {
+  const n = chunkCount(p);
+  if (n < 2) return rich(t);
+  const gs = sentenceStarts(p.text), es = sentenceStarts(t);
+  const br = [...new Set(evenBreaks(p.text, n).map(b => es[Math.round((gs.indexOf(b) + 1) * (es.length + 1) / (gs.length + 1)) - 1]))]
+    .filter(x => x > 0 && (t.slice(0, x).match(/\*/g) || []).length % 2 === 0).sort((x, y) => x - y);
+  return br.length ? [0, ...br].map((a, j) => rich(t.slice(a, j < br.length ? br[j] : t.length))).join(BRK) : rich(t);
+}
+// A passage's German with its marks, broken in the same places (for the passage on the right).
+function chunkedMarked(p, spans) {
+  const br = chunkBreaks(p, spans);
+  return br.length ? richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']), br.map(at => ({ at, html: BRK }))) : marked(p.text, 0, p.text.length, spans);
 }
 
 /* ═══ THE STUDY VIEW: a textbook with Kant's notes beside it, as the Meier and Baumgarten
