@@ -139,6 +139,10 @@
   .fp:hover { background: var(--card); }
   .fp.focus { background: #fbf1d6; border-left-color: var(--accent); }
   .fp.cont { padding-top: 0.05rem; }   /* a further paragraph on the same page: closed up, no repeated reference */
+  /* the lecture notes: a run of short paragraphs as one block, and a long one in pieces (chunkBreaks) */
+  .fp.short + .fp.short.cont { padding-top: 0; }
+  .fp.short:has(+ .fp.short.cont) { padding-bottom: 0; }
+  .fbrk { display: block; height: 0.65em; }
   /* a lecture's title page and contents, drawn as one block: the title page, then a contents list */
   .fp.front { cursor: default; }
   .fp.front:hover { background: none; }
@@ -689,6 +693,31 @@
   #loading .t { font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); margin-bottom: 0.6rem; }
   #loading .bar { height: 0.4rem; background: var(--parchment-dark); border-radius: 3px; overflow: hidden; margin-top: 0.6rem; }
   #loading .bar i { display: block; height: 100%; width: 0; background: var(--accent-light); transition: width 0.2s; }
+
+  /* ── One look for the controls ─────────────────────────────────────
+     Every dropdown in the page's colours, with a small caret in place of the system's; the
+     reading bar's fields and buttons one height; the find box one piece with its ‹ ›. */
+  select { -webkit-appearance: none; appearance: none; cursor: pointer; background-color: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 0.12rem 1.7rem 0.12rem 0.5rem; }
+  select, .readbar select, #opts select, .qcard select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235c3d1e' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 0.55rem center; background-size: 0.62rem 0.38rem; padding-right: 1.7rem;
+  }
+  select:hover { border-color: var(--accent-light); }
+  .readbar .rtools { flex-basis: 100%; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .readbar .rtools select { flex: 1 1 9rem; max-width: 15rem; min-width: 7rem; }
+  .readbar .rtools #jump { flex: 0 1 8.5rem; min-width: 6rem; }
+  .readbar select, .readbar input, .readbar .findbox { height: 1.95rem; }
+  .findbox { border: 1px solid var(--line); border-radius: 6px; background: var(--card); overflow: hidden; align-items: stretch; gap: 0; }
+  .findbox:focus-within { border-color: var(--accent-light); }
+  .readbar .findbox input { height: auto; border: none; border-radius: 0; background: transparent; width: 9rem; max-width: none; }
+  .readbar .findbox input:focus { outline: none; }
+  .findbox .n { align-self: center; min-width: 0; padding: 0 0.45rem; white-space: nowrap; }
+  .findbox .n:empty { display: none; }
+  .findbox button { border: none; border-left: 1px solid var(--line-soft); border-radius: 0; padding: 0 0.6rem; font-size: 1rem; line-height: 1; }
+  .findbox button:hover { background: var(--paper); }
+  /* Cards: their words start at the top, so that the titles in a row line up. */
+  .qcard { display: flex; flex-direction: column; justify-content: flex-start; }
+  .ol-part .rng, .ol-sec .rng { white-space: nowrap; }
 
   /* ── A narrow window (a phone): one column. The passage opened covers the list, under the
      header, and its × goes back to the list. ── */
@@ -1933,7 +1962,7 @@ function renderResults() {
     const cols = TEXTS.filter(t => R.byText.has(t.idx));
     const LIM = S.expand.has('locs') ? 1e9 : 12;
     h += '<section class="card"><h3>Phrasings<span class="sub">most frequent first · click one to read its passages</span></h3>' +
-      '<table class="loc"><thead><tr><th>Phrasing</th><th>All</th>' + cols.map(t => '<th title="' + esc(t.title) + '">' + esc(t.short) + '</th>').join('') + '</tr></thead><tbody>';
+      '<table class="loc"><thead><tr><th>Phrasing</th><th>All</th>' + cols.map(t => '<th title="' + esc(t.title) + '">' + esc(t.short).replace(/ (?=[^\s(]{1,3}(\s|$))/g, '&nbsp;') + '</th>').join('') + '</tr></thead><tbody>';
     R.locs.slice(0, LIM).forEach(L => {
       const vars = L.surfaces.size > 1 ? '<span class="var" title="' + esc([...L.surfaces.keys()].join(' · ')) + '">+' + (L.surfaces.size - 1) + ' spelling' + (L.surfaces.size > 2 ? 's' : '') + '</span>' : '';
       h += '<tr class="row' + (S.loc === L.key ? ' sel' : '') + '" data-loc="' + esc(L.key) + '"><td><span class="phr"' + (L.en ? ' lang="en"' : '') + '>' + esc(L.label) + '</span>' + (L.en ? '<span class="entag" title="Found in the English translation">English</span>' : '') + vars + '</td><td class="tot">' + L.n + '</td>' +
@@ -2489,7 +2518,7 @@ function englishFor(tr, p) {
   if (state === 'failed') return open + '<div class="empty">The translation file did not load.</div></div>';
   const e = trEntry(tr, st.key, p);
   if (!e) return open + '<div class="empty">' + esc(personName(tr.who)) + '’s translations have no English for this passage.</div></div>';
-  return open + '<div class="tt">' + rich(e.text) + '</div>' +
+  return open + '<div class="tt">' + chunkedRich(p, e.text) + '</div>' +
     (e.notes.length ? '<ul>' + e.notes.map(n => '<li>' + rich(n) + '</li>').join('') + '</ul>' : '') + '</div>';
 }
 function englishNotes(tr, p) {
@@ -2531,7 +2560,7 @@ function enLine(p, a, b) {
   const row = em && em.length && EN_IX && EN_IX.byP.get(p.i);
   if (row) return '<div class="fen enhit" lang="en" data-for="' + p.i + '" title="Found in the English: machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + '">' +
     '<span class="enfound">FOUND IN THE ENGLISH</span>' + marked(row.text, 0, row.text.length, em.map(m => [row.ts[m.a], row.te[m.b], m.loc === S.loc])) + '</div>';
-  return '<div class="fen" lang="en" data-for="' + p.i + '" title="Machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + (a != null && e.text.length > 520 ? '; the stretch shown is approximate' : '') + '">' + rich(t) + (e.part ? ' <span class="muted small">(the English runs past this passage)</span>' : '') + '</div>';
+  return '<div class="fen" lang="en" data-for="' + p.i + '" title="Machine translation for ' + esc(personName(tr.who)) + '’s Meier–Kant comparison, ' + esc(st.label) + (a != null && e.text.length > 520 ? '; the stretch shown is approximate' : '') + '">' + (a == null ? chunkedRich(p, t) : rich(t)) + (e.part ? ' <span class="muted small">(the English runs past this passage)</span>' : '') + '</div>';
 }
 /* The switch, the bar under the header, and the translation files, kept in step with S.en. */
 function enSync() {
@@ -2868,7 +2897,7 @@ function renderConnections(p, T) {
     (tr ? '<span><button type="button" class="btn' + (S.en ? ' on' : '') + '" data-en="' + (S.en ? '' : 'guyer') + '">' + (S.en ? 'Hide English' : 'English') + '</button>' +
       (S.en ? ' ' + PORTAL_TR_STYLES.map(st => '<button type="button" class="btn' + (S.en === st.key ? ' on' : '') + '" data-en="' + st.key + '" title="' + esc(st.tag) + '">' + esc(st.label.replace(/ principles$/, '')) + '</button>').join(' ') : '') + '</span>' : '') +
     '<a href="' + esc(reportUrl(T, p)) + '" target="_blank" rel="noopener" title="Opens the repository’s Text error form, filled in with this passage">Report a text error ↗</a></div>';
-  const de = '<div class="ptext" lang="de">' + marked(p.text, 0, p.text.length, spans) + '</div>';
+  const de = '<div class="ptext" lang="de">' + chunkedMarked(p, spans) + '</div>';
   $('app').classList.toggle('en', !!(tr && S.en));
   if (tr && S.en) h += '<div class="pair">' + de + englishFor(tr, p) + '</div>' + englishNotes(tr, p);
   else h += de;
@@ -3467,7 +3496,7 @@ function frontBlock(st, T) {
   for (let k = T.first; k <= fe; k++) rows.push(k);
   const isNum = t => /^\s*\d{2,4}\s*(?:[–-]\s*\d{2,4})?\s*$/.test(t);
   const isToc = t => /Inhaltsverzeichnis/.test(t);
-  const line = k => '<span class="frow' + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '">' + esc(P[k].text) + '</span>';
+  const line = k => '<span class="frow' + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '">' + richText(P[k].text, findSpans(k), []) + '</span>';
   const ti = rows.findIndex(k => isToc(P[k].text));
   const title = ti < 0 ? [] : rows.slice(0, ti), rest = ti < 0 ? rows : rows.slice(ti);
   let toc = '';
@@ -3500,17 +3529,75 @@ function ftBlock(st, k) {
   const samePage = !!(prev && prev.t === p.t && (pub ? shortCite(prev) === shortCite(p) : prev.aa === p.aa));
   const sameTag = !!(prev && prev.t === p.t && marginTag(prev) === tag);
   const ref = shortCite(p) + (tag ? ' · ' + tag : '') + (p.edl && p.other != null ? ' (the other edition’s page, found by matching the two texts word for word; printed in neither)' : '');
-  return head + '<div class="fp' + (samePage ? ' cont' : '') + (pub ? ' k-' + p.kind : '') + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm" title="' + esc(ref) + '">' +
+  return head + '<div class="fp' + (samePage ? ' cont' : '') + (pub ? ' k-' + p.kind : '') + (lectureNotes(T) && p.text.length < SHORT ? ' short' : '') + (k === st.focus ? ' focus' : '') + '" data-fp="' + k + '"><div class="fpm" title="' + esc(ref) + '">' +
     (samePage ? '' : '<b>' + esc(shortCite(p)) + '</b>') + (tag && !sameTag ? '<i>' + esc(tag) + '</i>' : '') + enButton(p) + '</div>' +
-    '<div class="fpt" lang="de">' + lexWrap(pagedText(p, spans)) + '</div>' + enLine(p) + '</div>';
+    '<div class="fpt" lang="de">' + lexWrap(pagedText(p, spans, findSpans(k))) + '</div>' + enLine(p) + '</div>';
+}
+/* What "Find in the text" found in passage k, as highlights: [start, end, class]. */
+function findSpans(k) {
+  if (!S.find || !S.find.byPass.has(k) || !S.readKey || P[k].t !== textByKey(S.readKey).idx) return [];
+  return S.find.byPass.get(k).map(j => { const f = S.find.hits[j]; return [f[1], f[2], j === S.find.pos ? 'find cur' : 'find']; });
 }
 /* A passage's text with its highlights, and, where a page begins inside it (Kant's published
    works), the page's number set in the line, as an edition prints it in the margin. */
-function pagedText(p, spans) {
-  if (!p.pbm) return marked(p.text, 0, p.text.length, spans);
+function pagedText(p, spans, found) {
+  found = found || [];
+  const br = chunkBreaks(p, spans.concat(found));
+  if (!p.pbm && !br.length && !found.length) return marked(p.text, 0, p.text.length, spans);
   const label = l => p.edl ? l : 'AA ' + p.vol + ':' + l;
-  return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']),
-    p.pbm.map(([at, l]) => ({ at, html: '<span class="pbm" title="' + esc(label(l)) + ' begins here">' + esc(l) + '</span>' })));
+  return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']).concat(found),
+    br.map(at => ({ at, html: BRK })).concat((p.pbm || []).map(([at, l]) => ({ at, html: '<span class="pbm" title="' + esc(label(l)) + ' begins here">' + esc(l) + '</span>' }))));
+}
+
+/* The lecture notes in readable lengths. Their paragraphs run from a line to several pages. On
+   screen a long one is broken at the sentence starts nearest to even stretches of about CHUNK
+   characters (its English in as many pieces), and a run of short ones is closed up into one
+   block (.fp.short in the CSS). Only the drawing changes: the passage, its words and offsets, and
+   every link to it stay as they are, and a break is an empty element, so finds, marks and
+   selections are untouched. Kant's published works, Jäsche's Logik and the Reflexionen keep the
+   breaks they have. */
+const CHUNK = 600, CHUNK_FROM = 900, SHORT = 140;
+const BRK = '<span class="fbrk"></span>';
+const lectureNotes = T => !!T && T.shape === 'logik' && T.key !== 'jaesche';
+// Where sentences begin: after a . ? or ! that ends a word of three letters or more (so not after
+// z.E., d. i., u. s. w. or §. 5.), and not before a number, a § or a bracket.
+function sentenceStarts(t) {
+  const out = [], re = /[.?!]["»«“”’)\]]*\s+(?=[^\s\d§(\[])/g;
+  let m;
+  while ((m = re.exec(t))) if (/[A-Za-zÄÖÜäöüßſ]{3}$/.test(t.slice(Math.max(0, m.index - 6), m.index).replace(/[*"»«“”’)\]]/g, ''))) out.push(m.index + m[0].length);
+  return out;
+}
+// Up to n - 1 places to break t, each the sentence start nearest an even share of it, with no piece
+// under 250 characters, and none where no sentence ends near enough.
+function evenBreaks(t, n) {
+  const L = t.length, starts = sentenceStarts(t), out = [];
+  let last = 0;
+  for (let j = 1; j < n; j++) {
+    const want = L * j / n;
+    let best = -1;
+    for (const s of starts) if (s - last >= 250 && L - s >= 250 && (best < 0 || Math.abs(s - want) < Math.abs(best - want))) best = s;
+    if (best > last && Math.abs(best - want) <= 0.6 * L / n) { out.push(best); last = best; }
+  }
+  return out;
+}
+const chunkCount = p => lectureNotes(TEXTS[p.t]) && p.text.length >= CHUNK_FROM ? Math.round(p.text.length / CHUNK) : 1;
+// The breaks for a passage's German, leaving alone any marked stretch they would cut.
+const chunkBreaks = (p, spans) => chunkCount(p) < 2 ? [] : evenBreaks(p.text, chunkCount(p)).filter(x => !(spans || []).some(z => z[0] < x && x < z[1]));
+// Its English, broken before the same sentences as the German (the translations keep sentences
+// whole, so the nth sentence of one is the nth of the other; where the counts differ, the
+// sentence as far along), never inside an *italic*.
+function chunkedRich(p, t) {
+  const n = chunkCount(p);
+  if (n < 2) return rich(t);
+  const gs = sentenceStarts(p.text), es = sentenceStarts(t);
+  const br = [...new Set(evenBreaks(p.text, n).map(b => es[Math.round((gs.indexOf(b) + 1) * (es.length + 1) / (gs.length + 1)) - 1]))]
+    .filter(x => x > 0 && (t.slice(0, x).match(/\*/g) || []).length % 2 === 0).sort((x, y) => x - y);
+  return br.length ? [0, ...br].map((a, j) => rich(t.slice(a, j < br.length ? br[j] : t.length))).join(BRK) : rich(t);
+}
+// A passage's German with its marks, broken in the same places (for the passage on the right).
+function chunkedMarked(p, spans) {
+  const br = chunkBreaks(p, spans);
+  return br.length ? richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']), br.map(at => ({ at, html: BRK }))) : marked(p.text, 0, p.text.length, spans);
 }
 
 /* ═══ THE STUDY VIEW: a textbook with Kant's notes beside it, as the Meier and Baumgarten
@@ -3604,7 +3691,7 @@ function refreshBlock(k) {
     if (!st || k < st.lo || k > st.hi) return;
     const el = st.el.querySelector('[data-fp="' + k + '"]');
     if (!el) return;
-    if (el.classList.contains('frow')) { el.classList.toggle('focus', k === st.focus); return; }
+    if (el.classList.contains('frow')) { el.classList.toggle('focus', k === st.focus); el.innerHTML = richText(P[k].text, findSpans(k), []); return; }
     const tmp = document.createElement('div');
     tmp.innerHTML = ftBlock(st, k);
     el.replaceWith(tmp.querySelector('[data-fp]'));
@@ -3889,16 +3976,41 @@ function tintFor(noteI, satz) {
   if (!ranges.length) { const c = $('note-' + noteI); if (c) c.insertAdjacentHTML('beforeend', '<div class="small warn">These words are not found in the printed §: the AA is not quoting it word for word.</div>'); }
 }
 /* Find in the text: every match in the whole textbook; Enter and › go to the next. */
+/* Find in the open text: whole words with their spellings merged, as the search merges them
+   (Urteil finds Urtheil), a * ending a word for any ending (urth*); where that finds nothing, as a
+   part of a word, the letters as typed. [[passage, start, end], …] */
+function findHits(T, qs) {
+  const q = String(qs || '').replace(/\s+/g, ' ').trim(), hits = [];
+  const words = q.match(/[\p{L}\p{M}]+\*?/gu) || [];
+  if (words.length && words.join(' ') === q) {
+    const want = words.map(w => { const star = w.endsWith('*'), n = normWord(w.replace(/\*$/, '').toLowerCase()); return { n, star, v: VID.get(n) }; });
+    if (want.every(w => w.star || w.v != null)) {
+      for (let k = T.first; k <= T.last; k++) {
+        const p = P[k], ids = p.ids;
+        for (let t = 0; t + want.length <= ids.length; t++) {
+          let ok = true;
+          for (let j = 0; j < want.length && ok; j++) ok = want[j].star ? VOCAB[ids[t + j]].startsWith(want[j].n) : ids[t + j] === want[j].v;
+          if (ok) hits.push([k, p.ts[t], p.te[t + want.length - 1]]);
+        }
+      }
+    }
+  }
+  if (!hits.length) {
+    const lq = q.toLowerCase();
+    for (let k = T.first; k <= T.last; k++) {
+      const t = P[k].text.toLowerCase();
+      let i = -1;
+      while ((i = t.indexOf(lq, i + 1)) >= 0) hits.push([k, i, i + lq.length]);
+    }
+  }
+  return hits;
+}
 function runFind(qs) {
   const T = textByKey(S.readKey);
   const q = (qs || '').toLowerCase();
   if (q.length < 2) { S.find = null; renderRead(); return; }
-  const hits = [], byPass = new Map();
-  for (let k = T.first; k <= T.last; k++) {
-    const t = P[k].text.toLowerCase();
-    let i = -1;
-    while ((i = t.indexOf(q, i + 1)) >= 0) { if (!byPass.has(k)) byPass.set(k, []); byPass.get(k).push(hits.length); hits.push([k, i, i + q.length]); }
-  }
+  const hits = findHits(T, qs), byPass = new Map();
+  hits.forEach(([k], j) => { if (!byPass.has(k)) byPass.set(k, []); byPass.get(k).push(j); });
   S.find = { q: qs, hits, byPass, pos: hits.length ? 0 : -1 };
   S.tint = null;
   if (hits.length) { S.readAt = hits[0][0]; }
@@ -4286,14 +4398,12 @@ function showMiss(h) {
 }
 
 function renderStudy(el, T) {
-  const f = S.find;
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="rtools">' +
     '<button type="button" class="btn" data-outline="1" title="Show or hide the outline">☰ Outline</button>' +
     (T.shape === 'metaphysica' ? '<button type="button" class="btn" data-synopsis="1">Synopsis</button>' : '') +
     (S.sel == null ? '<button type="button" class="btn" data-shownotes="1">Kant’s notes</button>' : '') +
-    '<span class="spacer"></span>' +
-    '<span class="findbox"><input id="find" type="search" spellcheck="false" placeholder="Find in the text…" value="' + esc(f ? f.q : '') + '"><button type="button" data-findstep="-1" title="Previous (Shift-Enter)">‹</button><span class="n">' + (f ? (f.hits.length ? (f.pos + 1) + ' / ' + f.hits.length : 'none') : '') + '</span><button type="button" data-findstep="1" title="Next (Enter)">›</button></span>' +
-    '<input id="jump" type="text" spellcheck="false" placeholder="§, page or Refl." aria-label="Go to a §, an AA page or a Reflexion" title="Go to a § (125), a page of the Academy edition (16:316) or a Reflexion (Refl. 2330)"></div>' +
+    findBox() +
+    '<input id="jump" type="text" spellcheck="false" placeholder="§, page or Refl." aria-label="Go to a §, an AA page or a Reflexion" title="Go to a § (125), a page of the Academy edition (16:316) or a Reflexion (Refl. 2330)"></span></div>' +
     '<div class="study' + (S.outline ? '' : ' no-outline') + '"><nav class="outline" id="outline">' + outlineHtml(T) + '</nav><div id="readtext" class="fulltext"></div></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
   const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
@@ -4301,6 +4411,12 @@ function renderStudy(el, T) {
   markOutline(at);
 }
 
+/* The "Find in the text" box, on every text's bar. */
+function findBox() {
+  const f = S.find;
+  return '<span class="findbox"><input id="find" type="search" spellcheck="false" placeholder="Find in this text…" value="' + esc(f ? f.q : '') + '" title="A word or words in this text: its spellings count as one, as in the search (Urteil finds Urtheil), and a * ends a word any way (urth*). Enter for the next, Shift-Enter for the one before">' +
+    '<button type="button" data-findstep="-1" title="Previous (Shift-Enter)">‹</button><span class="n">' + (f ? (f.hits.length ? (f.pos + 1) + ' / ' + f.hits.length : 'none') : '') + '</span><button type="button" data-findstep="1" title="Next (Enter)">›</button></span>';
+}
 function renderRead() {
   const el = $('view-read');
   delete FT.readtext;
@@ -4309,9 +4425,10 @@ function renderRead() {
   if (!T) { el.innerHTML = readIndexHtml(); return; }
   if (isStudyText(T)) return renderStudy(el, T);
   const toc = tocFor(T);
-  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="spacer"></span>' +
+  el.innerHTML = '<div class="readbar"><span class="lnk" data-read="">All texts</span><span class="muted">/</span><b>' + esc(T.title) + '</b><span class="muted small">' + esc(T.date) + '</span>' + accBadge(T) + (rangeLabel(T) ? '<span class="aarange" title="' + (T.cite ? 'The pages of this edition' : 'Where the Academy edition prints it') + '">' + esc(rangeLabel(T)) + '</span>' : '') + '<span class="rtools">' +
     (toc.length > 1 ? '<select id="toc" aria-label="Contents"><option value="">Contents…</option>' + toc.map(([l, k]) => '<option value="' + k + '">' + esc(clip(l, 64)) + '</option>').join('') + '</select>' : '') +
-    '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></div><div id="readtext" class="fulltext"></div>';
+    findBox() +
+    '<input id="jump" type="text" spellcheck="false" placeholder="' + esc(jumpHint(T)) + '" aria-label="' + esc(jumpHint(T)) + '"></span></div><div id="readtext" class="fulltext"></div>';
   const at = S.readAt != null && P[S.readAt] && P[S.readAt].t === T.idx ? S.readAt : T.first;
   const focus = S.sel != null && P[S.sel] && P[S.sel].t === T.idx ? S.sel : null;
   ftOpen($('readtext'), $('left'), at, focus, readOffset());
