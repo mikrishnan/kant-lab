@@ -43,6 +43,38 @@ Four places, along the top (pressing **Read** again while reading goes back to t
   passage, the parallel passages, and the three lexicons.
 - **Contributors** lists who built what.
 
+**Class sessions and investigations.** A *session* is the record of one class: the passages the
+class looked at, in order, with the notes and questions it came up with. An *investigation* is
+a question the class wants to look into, bundled with the passages and notes that bear on it.
+It outlives the session that started it: later sessions add to it.
+
+- **In class.** The header's **Session** button opens a small panel at the bottom right. Turn on
+  **Recording**, then press **+ Session** on each passage the class examines: on a search hit,
+  on a paragraph of a full text, or beside the passage open on the right. Type a note or
+  question into the panel and press Enter.
+- **Afterwards: Organize and save.** This opens the session page over the portal, as the
+  Handouts page does. Tick items and press **+ New investigation from the ticked**, or **Add
+  the ticked** to an investigation already there. *Or add to one begun earlier* continues an
+  investigation from an earlier session. Each investigation has a line saying what the question
+  is, and can have its own Canvas discussion; ✎ gives a passage a note. **Save for the class**
+  opens GitHub with the session as a file in [sessions/](sessions/), and you press *Commit
+  changes*.
+- **For students, inside the portal**, every passage is drawn live, with **Read it in
+  context**. `…/portal/?session=<name>` is a session, numbered, with its investigations and the
+  link to its Canvas discussion. `…/portal/?investigation=<name>` is an investigation, with what
+  each session added to it. `…/portal/?investigate` lists every investigation, newest first.
+  Under **Read** are the sessions and investigations.
+- **For Canvas.** Every page, and the session page, has **Copy for Canvas**. It copies rich text
+  for the forum: each passage cited, with its opening words, its note, and a link back to it in
+  the portal. The portal keeps no comments, and cannot post to Canvas itself, since that would
+  need a Canvas login and the site is public: paste the copy into the discussion.
+- **Export to Word**, on the session page (and **Word** in the panel), downloads the session as
+  a .docx: every passage whole, with its citation, its note, and its English when the English
+  is on, then the investigations with their items. It needs no saving for the class.
+
+Until it is saved, a session is kept in your own browser. The code is
+[class-sessions.js](class-sessions.js).
+
 Wherever you are, clicking an example (a search hit, a classified passage, a parallel) opens
 it **in its full text** on the right, scrolled to the passage and highlighted, so you can look
 through example after example in context. Its **Connections** tab beside the full text gives:
