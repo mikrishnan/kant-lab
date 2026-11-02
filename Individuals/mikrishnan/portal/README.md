@@ -55,6 +55,16 @@ changes*. Students then find it under **Read**, as a class session, or at
 can name it, with **Read it in context** and the link to the discussion. Until it is saved, a
 session is kept in your own browser. The code is [class-sessions.js](class-sessions.js).
 
+A session holds more than passages. **+ Note or question** adds a note, such as a question the
+class came up with. ✎ gives a passage a note of its own, and **?** marks anything to
+investigate later. **Copy for Canvas** copies a passage or note, the whole session, or what is
+marked to investigate, as rich text for the class discussion. Each passage comes with its
+citation, its opening words, its note and a link back to it in the portal. The portal cannot
+post to Canvas itself: that would need a Canvas login, which a public site cannot keep. Paste
+it in. Students see the notes and marks in the saved session. **To investigate**, under
+**Read** or at `…/portal/?investigate`, gathers everything marked from every saved session,
+newest first, as a list for research, which can be copied for Canvas in turn.
+
 Wherever you are, clicking an example (a search hit, a classified passage, a parallel) opens
 it **in its full text** on the right, scrolled to the passage and highlighted, so you can look
 through example after example in context. Its **Connections** tab beside the full text gives:

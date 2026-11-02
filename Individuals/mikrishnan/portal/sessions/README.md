@@ -19,4 +19,7 @@ The file's shape, written by `class-sessions.js`:
 ```
 
 `ref` is the passage's address in the portal (`textKey:id`, as in a `#p=` link); the rest is
-there so the file can be read without the portal.
+there so the file can be read without the portal. A passage may also carry a `note`, and
+anything marked to investigate later carries `"q": true`. A note or question of the class's
+own is an item `{ "kind": "note", "text": "…", "q": true }`, in its place among the passages.
+`…/portal/?investigate` lists every item marked `q`, from every session here.
