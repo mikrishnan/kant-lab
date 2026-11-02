@@ -12,7 +12,8 @@
    the session page, as the Handouts page opens over the portal. There the items are ticked and
    bundled into investigations, new ones or ones begun in earlier sessions; there are notes on
    passages, links to the class's discussions in Canvas, Copy for Canvas, Export to Word (also in
-   the panel), and Save for the class.
+   the panel), and Save for the class. Each passage there folds open (▸) to the whole text, and its
+   citation, like each passage in the panel, links to it in the portal.
 
    Saving publishes the session as a file in sessions/, through GitHub's own new-file page, as
    handouts are published. Students then have, inside the portal, every passage drawn live:
@@ -68,6 +69,7 @@ let D = (() => {
 })();
 let rec = localStorage.getItem(KEY + '-rec') === 'on';
 let open = false, pageOpen = false, picked = new Set(), newInv = false;
+const unfolded = new Set();   // passages shown whole on the session page (the view only, not saved)
 function save() { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { toast('This browser would not keep the session. Use Save to file.'); } }
 function setRec(on) { rec = on; try { if (on) localStorage.setItem(KEY + '-rec', 'on'); else localStorage.removeItem(KEY + '-rec'); } catch (e) { /* this visit only */ } document.body.classList.toggle('csrec', on); redraw(); }
 const has = i => D.items.some(x => x.ref === refOf(P[i]));
@@ -149,7 +151,8 @@ function drawPanel() {
   panel.innerHTML = '<div class="csbar"><b class="cz">Session</b><span class="muted small">' + esc(D.title) + '</span><span class="spacer"></span>' +
     '<button type="button" class="linkish" data-c="close" title="Hide the panel; the session is kept">Hide</button></div>' +
     '<label class="csrow"><input type="checkbox" data-c="rec"' + (rec ? ' checked' : '') + '> <b>Recording</b> <span class="muted small">' + (rec ? 'press + Session on a passage' : 'turn on to add passages') + '</span></label>' +
-    (n ? '<ol class="cslast" start="' + (n - last.length + 1) + '">' + last.map(x => '<li>' + itemLine(x) + '</li>').join('') + '</ol>'
+    (n ? '<ol class="cslast" start="' + (n - last.length + 1) + '">' + last.map(x => '<li>' + (isNote(x) ? itemLine(x)
+        : '<a href="#p=' + encodeURIComponent(x.ref) + '&amp;rt=conn" title="Open it in the portal">' + itemLine(x) + '</a>') + '</li>').join('') + '</ol>'
       : '<p class="muted small">No passages yet. Turn on recording, then press <b>+ Session</b> on a passage: a search hit, a paragraph of a text, or the passage open on the right.</p>') +
     '<form class="csquick" data-c="quick"><input data-f="quick" placeholder="A note or question, then Enter…" spellcheck="true"><button type="submit" class="btn">+ Note</button></form>' +
     '<p class="csopen"><button type="button" class="btn solid" data-c="page">Organize and save ›</button><span class="muted small">' + plural(n, 'item') + (D.invs.length ? ' · ' + plural(D.invs.length, 'investigation') : '') + '</span>' +
@@ -175,8 +178,26 @@ panel.addEventListener('click', e => {
 /* ── The session page: tick items, bundle them into investigations, and save ── */
 function openPage() { pageOpen = true; open = false; page.hidden = false; hideHover(); drawPanel(); drawPage(); published().then(() => { if (pageOpen) drawPage(); }); }
 function closePage() { pageOpen = false; page.hidden = true; open = true; redraw(); }
+/* A passage opened on the session page, as an accordion: the whole text, and its English when
+   the English is on (filled in where it is still loading, without redrawing what is typed). */
+function wholeOf(p, id) {
+  const e = englishOf(p);
+  if (e === 'loading') setTimeout(fillEnglish, 600);
+  return '<div class="cswhole" lang="de" data-c="fold" data-i="' + esc(id) + '" title="Fold the passage">' + esc(p.text) + '</div>' +
+    (e === 'loading' ? '<div class="csen muted" data-enwait="' + esc(id) + '">English loading…</div>' : e ? '<div class="csen" lang="en">' + rich(e) + '</div>' : '');
+}
+function fillEnglish() {
+  page.querySelectorAll('[data-enwait]').forEach(d => {
+    const x = itemById(d.dataset.enwait), p = x && pOf(x.ref), e = p ? englishOf(p) : null;
+    if (e === 'loading') { setTimeout(fillEnglish, 600); return; }
+    if (!e) { d.remove(); return; }
+    d.removeAttribute('data-enwait'); d.classList.remove('muted'); d.lang = 'en'; d.innerHTML = rich(e);
+  });
+}
 function drawPage() {
   const n = D.items.length, pub = publication(), choices = invChoices();
+  const body = page.querySelector('.cspbody'), scrolled = body ? body.scrollTop : 0;   // kept across the redraw
+  const np = D.items.filter(x => !isNote(x)).length, nOpen = D.items.filter(x => !isNote(x) && unfolded.has(x.id)).length;
   const ticked = D.items.filter(x => picked.has(x.id)).length;
   const itemRow = (x, k) => {
     const vs = invsOf(x.id);
@@ -189,8 +210,11 @@ function drawPage() {
     return '<li class="csit' + (picked.has(x.id) ? ' on' : '') + (isNote(x) ? ' note' : '') + '"><label class="cstick"><input type="checkbox" data-c="tick" data-i="' + esc(x.id) + '"' + (picked.has(x.id) ? ' checked' : '') + '><span class="csnum">' + (k + 1) + '</span></label>' +
       '<div class="csmain">' + (isNote(x)
         ? '<textarea data-f="ntext" data-i="' + esc(x.id) + '" rows="2" placeholder="A note or a question…">' + esc(x.text) + '</textarea>'
-        : '<button type="button" class="linkish cscite" data-c="go" data-i="' + esc(x.id) + '" title="Open it in the portal">' + itemLine(x) + '</button>' +
-          (p ? '<div class="csword" lang="de">' + esc(clip(flat(p.text), 180)) + '</div>' : '<div class="muted small">(not in the portal)</div>') +
+        : '<div class="cshead"><button type="button" class="csfold" data-c="fold" data-i="' + esc(x.id) + '" title="' + (unfolded.has(x.id) ? 'Fold the passage' : 'Show the whole passage') + '">' + (unfolded.has(x.id) ? '▾' : '▸') + '</button>' +
+            '<button type="button" class="linkish cscite" data-c="go" data-i="' + esc(x.id) + '" title="Open it in the portal, in its full text">' + itemLine(x) + ' ›</button></div>' +
+          (!p ? '<div class="muted small">(not in the portal)</div>'
+            : unfolded.has(x.id) ? wholeOf(p, x.id)
+            : '<div class="csword" lang="de" data-c="fold" data-i="' + esc(x.id) + '" title="Show the whole passage">' + esc(clip(flat(p.text), 180)) + '</div>') +
           (x.note != null ? '<textarea data-f="pnote" data-i="' + esc(x.id) + '" rows="2" placeholder="Why it matters, or the question it raises…">' + esc(x.note) + '</textarea>' : '')) +
       (chips ? '<div class="cschips">' + chips + '</div>' : '') + '</div>' + tools + '</li>';
   };
@@ -217,7 +241,9 @@ function drawPage() {
     '<div class="cspbody"><div class="cspcol">' +
       '<input class="cstitle" data-f="title" value="' + esc(D.title) + '" aria-label="Title of the session" spellcheck="false">' +
       '<div class="csmeta"><span class="muted">' + esc(longDate(D.date)) + '</span><input class="csdisc" data-f="discussion" type="url" value="' + esc(D.discussion) + '" placeholder="The class’s Canvas discussion, for comments: https://…" spellcheck="false"></div>' +
-      '<h3 class="csh">In this session <span class="muted small">' + plural(n, 'item') + (ticked ? ' · ' + ticked + ' ticked <button type="button" class="linkish" data-c="untick">untick</button>' : '') + '</span></h3>' +
+      '<h3 class="csh">In this session <span class="muted small">' + plural(n, 'item') + (ticked ? ' · ' + ticked + ' ticked <button type="button" class="linkish" data-c="untick">untick</button>' : '') +
+        (np ? ' · ' + (nOpen < np ? '<button type="button" class="linkish" data-c="openall">open all</button>' : '') + (nOpen && nOpen < np ? ' · ' : '') +
+          (nOpen ? '<button type="button" class="linkish" data-c="foldall">fold all</button>' : '') : '') + '</span></h3>' +
       '<ol class="csitems">' + (n ? D.items.map(itemRow).join('') : '<li class="muted">Nothing yet. Turn on recording and press <b>+ Session</b> on passages in the portal, or add a note below.</li>') + '</ol>' +
       '<p><button type="button" class="btn" data-c="addnote">+ Note or question</button></p>' +
     '</div><div class="cspcol inv"><h3 class="csh">Investigations <span class="muted small">questions to look into, bundled with what bears on them</span></h3>' +
@@ -233,6 +259,7 @@ function drawPage() {
         ' A minute or two later students find the session and its investigations under <b>Read</b>, or at <a href="' + esc(pub.link) + '" target="_blank" rel="noopener">' + esc(pub.link.replace(/^https?:\/\//, '')) + '</a>. ' +
         'The repository is public, so put no student’s name in a title or note.</p>' : '') +
     '</div></div>';
+  const b2 = page.querySelector('.cspbody'); if (b2 && scrolled) b2.scrollTop = scrolled;
 }
 page.addEventListener('input', e => {
   const t = e.target, f = t.dataset.f;
@@ -282,6 +309,10 @@ page.addEventListener('click', e => {
       return;
     }
     case 'untick': picked.clear(); drawPage(); return;
+    case 'fold': { if (window.getSelection && String(window.getSelection()).length && b.matches('.cswhole, .csword')) return;   // selecting words, not folding
+      const id = b.dataset.i; if (unfolded.has(id)) unfolded.delete(id); else unfolded.add(id); drawPage(); return; }
+    case 'openall': D.items.forEach(x => { if (!isNote(x)) unfolded.add(x.id); }); drawPage(); return;
+    case 'foldall': unfolded.clear(); drawPage(); return;
     case 'startnew': newInv = true; drawPage(); { const t = page.querySelector('[data-f="newtitle"]'); if (t) t.focus(); } return;
     case 'nonew': newInv = false; drawPage(); return;
     case 'bundle': D.items.filter(x => picked.has(x.id) && !v.items.includes(x.id)).forEach(x => v.items.push(x.id)); picked.clear(); save(); drawPage(); return;
@@ -718,6 +749,8 @@ css.textContent = `
   .csrow { display: flex; align-items: baseline; gap: 0.35rem; margin: 0.1rem 0 0.4rem; cursor: pointer; }
   #cspanel .cslast { margin: 0 0 0.45rem; padding-left: 1.6rem; font-size: 0.88rem; line-height: 1.3; }
   #cspanel .cslast li { margin: 0.1rem 0; }
+  #cspanel .cslast a { color: inherit; text-decoration: none; }
+  #cspanel .cslast a:hover { color: var(--accent); text-decoration: underline; }
   .csnl { font-style: italic; }
   #cspanel .csquick { display: flex; gap: 0.35rem; margin: 0 0 0.5rem; }
   #cspanel .csquick input { flex: 1; min-width: 0; padding: 0.2rem 0.5rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-size: 0.88rem; }
@@ -745,8 +778,15 @@ css.textContent = `
   #cspage .csit.note { background: var(--paper); }
   #cspage .cstick { display: flex; align-items: baseline; gap: 0.3rem; cursor: pointer; }
   .csnum { font-family: 'Cinzel', serif; color: var(--accent-light); font-size: 0.9rem; }
-  #cspage .cscite { text-align: left; color: var(--ink); font-size: 0.98rem; }
-  #cspage .csword { font-size: 0.86rem; color: #4b4034; margin-top: 0.15rem; }
+  #cspage .cshead { display: flex; align-items: baseline; gap: 0.25rem; }
+  #cspage .csfold { background: none; border: none; color: var(--accent-light); cursor: pointer; padding: 0 0.1rem; font-size: 0.85rem; width: 1rem; flex: none; }
+  #cspage .csfold:hover { color: var(--accent); }
+  #cspage .cscite { text-align: left; color: var(--accent); font-size: 0.98rem; }
+  #cspage .cscite:hover { text-decoration: underline; }
+  #cspage .csword { font-size: 0.86rem; color: #4b4034; margin: 0.15rem 0 0 1.25rem; cursor: pointer; }
+  #cspage .csword:hover { color: var(--ink); }
+  #cspage .cswhole { white-space: pre-wrap; line-height: 1.5; font-size: 0.95rem; margin: 0.25rem 0 0 1.25rem; cursor: pointer; }
+  #cspage .csen { margin: 0.4rem 0 0 1.25rem; padding-left: 0.6rem; border-left: 2px solid var(--line); color: #4b4034; font-size: 0.9rem; white-space: pre-wrap; }
   #cspage .csit textarea { display: block; width: 100%; margin-top: 0.25rem; resize: vertical; }
   #cspage .csit.note textarea { margin-top: 0; }
   #cspage .cschips { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-top: 0.3rem; }
