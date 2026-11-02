@@ -10,7 +10,7 @@ and then answers at once.
 
 ## Finding your way
 
-Four places, along the top:
+Four places, along the top (pressing **Read** again while reading goes back to the list of texts):
 - **Search** opens on one question box, with every text there to open and read in full.
 - **Read** lists the corpus. Open any text to read it through: its contents, and a box to go
   to a §, an AA page or a Reflexion. Click any paragraph and what hangs on it opens beside the
@@ -76,6 +76,13 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   word to its exact form, a word with a `*` stays as typed, and so do little words (*des*, *der*,
   *et*), so that a phrase such as `"satz des widerspruchs"` finds *Satze des Widerspruchs* and no
   more. All forms is for the German and Latin: a question put to the English keeps its plurals.
+- **English, German and Latin.** A question in English that finds nothing as printed is asked
+  again in the German and Latin the texts use for it: `impossible` finds *impossibile* and
+  *unmöglich*, and the related terms (*nihil negativum*, *ens rationis* …) are offered beside it.
+  The terms come from a Latin–German–English lexicon of 1,076 terms with definitions
+  (`Individuals/Jesus-La-Paz/latin-lexicon.js`); its Latin words are underlined in the texts, and
+  a click on one opens its entry. The lexicon and the English of Baumgarten and of Kant's notes on
+  Baumgarten are machine-made, and the page says so.
 - **Follow.** Any passage opens in the right-hand pane with the textbook § it is on and how
   that is known (stated, or inferred with a measured confidence). Below that come Kant's
   notes on that §, oldest first, then the lectures and Jäsche on the same §, the tradition
@@ -127,13 +134,16 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
   A slip such as `F4086` is offered Refl. 4086, since as words it would find only the letter. In the Meier or Baumgarten
   reader the jump box takes it too, and goes to the § the note is on, with the note picked out.
   A link can do the same, `#refl=4086`; the box on the Kant Lab landing page makes one.
+- **Go to a §.** `Meier § 125`, `Baumgarten § 55` or `Jäsche § 3` in the search box opens that §
+  to read (`§ 125` alone is Meier's). Without the § sign, words and numbers are searched as before.
 - **English.** Press **English** on a passage to see a translation beside the German, in one
   of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
   are Jesus's machine translations, made for the Meier–Kant comparison; neither
   translator translated these texts, and the pane says so under every one. There is English
   for Meier, the Reflexionen on Meier, the three lectures and Jäsche, not yet for Baumgarten.
   Each text's translation loads only when it is first wanted.
-- **Report a text error.** Every passage has a link that opens the repository's *Text error*
+- **Report a text error.** Every passage has a link, under its citation at the top of the
+  right-hand pane (among the passage's actions in Connections), that opens the repository's *Text error*
   form with the passage, its citation and a link back to it already filled in. The reporter
   chooses the tool from the form's list and gives their source.
   The **English** switch in the header turns on the English for the whole portal at once: under
@@ -183,6 +193,10 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
     Qianxun's English beside the passages that have it;
   - the lectures' concepts (Jessie's list);
   - the forms of judgment (Aidan's terms).
+
+- **On a phone.** In a narrow window the portal is one column: a passage opened covers the list,
+  and its × goes back; in the Meier and Baumgarten reader Kant's notes take the lower part of the
+  screen, under the text.
 
 ## Whose work it reads
 

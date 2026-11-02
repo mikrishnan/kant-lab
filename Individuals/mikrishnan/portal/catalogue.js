@@ -185,6 +185,8 @@ const PORTAL_LAYERS = [
   { key: 'finder', file: 'pinned/aidan-finder.js', global: 'PORTAL_PIN_AIDAN_FINDER', who: 'aidan' },
   { key: 'ptrans', file: '../../Feng/principles-translations.js', global: 'PRINCIPLE_TRANSLATIONS', who: 'feng' },
   { key: 'tradition', file: '../../../data/tradition-meier.js', global: 'TRADITION', who: 'readers' },
+  { key: 'lexicon', file: '../../Jesus-La-Paz/latin-lexicon.js', global: 'KANT_LEXICON', who: 'jesus' },
+  { key: 'words', file: '../../Jesus-La-Paz/wordlist.js', global: 'KANT_WORDS', who: 'jesus' },
 ];
 
 /* English translations the portal shows beside a passage when the reader asks for English.
@@ -202,7 +204,7 @@ const PORTAL_LAYERS = [
 
    These are machine translations, each following one published translator's stated method;
    neither translator translated these texts. The portal says so wherever it shows one.
-   Baumgarten and the Reflexionen on Baumgarten have none yet. */
+   Baumgarten's Latin is translated whole, with the Latin of each technical term beside its English. */
 const PORTAL_TR_STYLES = [
   { key: 'guyer', label: 'Guyer–Wood principles', tag: 'literal; one English word per German term; sentences kept whole' },
   { key: 'kemp', label: 'Kemp Smith principles', tag: 'faithful to the sense; readable English; tangled sentences resolved' },
@@ -215,4 +217,6 @@ const PORTAL_TRANSLATIONS = [
   { text: 'busolt', set: 'busolt', key: 'ID', file: '../../Jesus-La-Paz/translations/busolt-STYLE.js', who: 'jesus' },
   { text: 'jaesche', set: 'jaesche', key: 'MAP', file: '../../Jesus-La-Paz/translations/jaesche-STYLE.js', who: 'jesus',
     map: 'pinned/jaesche-translation-map.js', mapGlobal: 'PORTAL_PIN_JAESCHE_TR' },
+  { text: 'baumgarten', set: 'baum', key: 'baum:N', file: '../../Jesus-La-Paz/translations/baum-STYLE.js', who: 'jesus' },
+  { text: 'refl-meta', set: 'reflm', key: 'reflm:N', file: '../../Jesus-La-Paz/translations/reflm-STYLE.js', who: 'jesus' },
 ];
