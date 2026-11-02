@@ -11,7 +11,8 @@
    the right adds it to the session; + Note adds a note or a question. "Organize and save" opens
    the session page, as the Handouts page opens over the portal. There the items are ticked and
    bundled into investigations, new ones or ones begun in earlier sessions; there are notes on
-   passages, links to the class's discussions in Canvas, Copy for Canvas, and Save for the class.
+   passages, links to the class's discussions in Canvas, Copy for Canvas, Export to Word (also in
+   the panel), and Save for the class.
 
    Saving publishes the session as a file in sessions/, through GitHub's own new-file page, as
    handouts are published. Students then have, inside the portal, every passage drawn live:
@@ -151,7 +152,8 @@ function drawPanel() {
     (n ? '<ol class="cslast" start="' + (n - last.length + 1) + '">' + last.map(x => '<li>' + itemLine(x) + '</li>').join('') + '</ol>'
       : '<p class="muted small">No passages yet. Turn on recording, then press <b>+ Session</b> on a passage: a search hit, a paragraph of a text, or the passage open on the right.</p>') +
     '<form class="csquick" data-c="quick"><input data-f="quick" placeholder="A note or question, then Enter…" spellcheck="true"><button type="submit" class="btn">+ Note</button></form>' +
-    '<p class="csopen"><button type="button" class="btn solid" data-c="page">Organize and save ›</button><span class="muted small">' + plural(n, 'item') + (D.invs.length ? ' · ' + plural(D.invs.length, 'investigation') : '') + '</span></p>';
+    '<p class="csopen"><button type="button" class="btn solid" data-c="page">Organize and save ›</button><span class="muted small">' + plural(n, 'item') + (D.invs.length ? ' · ' + plural(D.invs.length, 'investigation') : '') + '</span>' +
+      (n ? '<span class="spacer"></span><button type="button" class="linkish" data-c="word" title="Download the session as a Word file">Word</button>' : '') + '</p>';
 }
 panel.addEventListener('change', e => { if (e.target.dataset.c === 'rec') setRec(e.target.checked); });
 panel.addEventListener('submit', e => {
@@ -167,6 +169,7 @@ panel.addEventListener('click', e => {
   if (!b || b.dataset.c === 'rec' || b.dataset.c === 'quick') return;
   if (b.dataset.c === 'close') { open = false; redraw(); }
   if (b.dataset.c === 'page') openPage();
+  if (b.dataset.c === 'word') exportWord();
 });
 
 /* ── The session page: tick items, bundle them into investigations, and save ── */
@@ -209,6 +212,7 @@ function drawPage() {
     (n ? (pub.viaNew && !D.saved ? '<a class="btn solid" href="' + esc(pub.newUrl) + '" target="_blank" rel="noopener" data-c="pubgo">Save for the class</a>'
       : '<button type="button" class="btn solid" data-c="pubfile">' + (D.saved ? 'Save again' : 'Save for the class') + '</button>') : '') +
     '<button type="button" class="linkish" data-c="copyall"' + (n ? '' : ' disabled') + '>Copy for Canvas</button>' +
+    '<button type="button" class="btn" data-c="word"' + (n ? '' : ' disabled') + ' title="Download the session as a Word file, to keep or rework">Export to Word</button>' +
     '<button type="button" class="linkish" data-c="file">Save to file</button><button type="button" class="linkish" data-c="new">New session</button></div>' +
     '<div class="cspbody"><div class="cspcol">' +
       '<input class="cstitle" data-f="title" value="' + esc(D.title) + '" aria-label="Title of the session" spellcheck="false">' +
@@ -285,6 +289,7 @@ page.addEventListener('click', e => {
     case 'vdrop': { const j = D.invs.indexOf(v); D.invs.splice(j, 1); save(); drawPage(); toast('“' + (v.title || 'The investigation') + '” is no longer in this session.', [['Undo', () => { D.invs.splice(j, 0, v); save(); drawPage(); }]]); return; }
     case 'vcopy': copyForCanvas(invBlock(v, D)); return;
     case 'copyall': if (D.items.length) copyForCanvas(sessionBlock(sessionData(), D.saved && D.saved.slug)); return;
+    case 'word': exportWord(); return;
     case 'file': download(publication().json, publication().slug + '.json'); return;
     case 'pubfile': download(publication().json, publication().slug + '.json'); markSaved(); return;
     case 'pubgo': {   // the link is drawn with the page: fill it with what is there now, typed since included
@@ -304,7 +309,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && pageOpen &
 function markSaved() { D.saved = { slug: publication().slug, at: new Date().toISOString() }; D.invs.forEach(remember); PUBLISHED = null; save(); setTimeout(redraw, 300); }
 function download(text, name) {
   const a = el('a');
-  a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  a.href = URL.createObjectURL(text instanceof Blob ? text : new Blob([text], { type: 'application/json' }));
   a.download = name;
   document.body.appendChild(a);
   a.click();
@@ -433,6 +438,113 @@ async function copyForCanvas(c) {
     else await navigator.clipboard.writeText(c.text);
     toast('Copied for Canvas: paste it into the class discussion.');
   } catch (e) { window.prompt('Copy this, then paste it into the class discussion:', c.text); }
+}
+
+/* ── Word: the session as a .docx, to keep or rework without saving it for the class ──
+   Written here with no library, as the handout tray writes one. Every paragraph names a style,
+   and Normal is the default style, so that Pages does not carry one paragraph's look into the
+   next. Each passage comes whole, with its English when the portal's English is on. */
+const xml = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const runOf = (t, pr) => String(t).split('\n').map((line, j) => '<w:r>' + (pr ? '<w:rPr>' + pr + '</w:rPr>' : '') + (j ? '<w:br/>' : '') + '<w:t xml:space="preserve">' + xml(line) + '</w:t></w:r>').join('');
+// with marks, *italic* and **bold** (as the English has them) become real italics and bold
+const runs = (s, marks, base) => (marks ? String(s).split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g) : [String(s)]).filter(Boolean).map(part =>
+  marks && /^\*\*[^*]+\*\*$/.test(part) ? runOf(part.slice(2, -2), (base || '') + '<w:b/>')
+    : marks && /^\*[^*]+\*$/.test(part) ? runOf(part.slice(1, -1), (base || '') + '<w:i/>') : runOf(part, base || '')).join('');
+const para = (style, body) => '<w:p><w:pPr><w:pStyle w:val="' + style + '"/></w:pPr>' + body + '</w:p>';
+const paras = s => String(s || '').split(/\n\s*\n/).map(x => x.trim()).filter(Boolean);
+const citeRuns = x => runs(x.author + ', ') + runs(x.work, false, '<w:i/>') + runs(', ' + x.cite);
+function docxBlob() {
+  const d = sessionData(), state = { waiting: 0 };
+  const B = [para('Title', runs(d.title)), para('Subtitle', runs(longDate(d.date) + (d.discussion ? ' · Class discussion: ' + d.discussion : '')))];
+  B.push(para('Heading1', runs('In this session')));
+  d.items.forEach((x, k) => {
+    if (isNote(x)) { (paras(x.text).length ? paras(x.text) : ['(an empty note)']).forEach((t, j) => B.push(para('Note', (j ? '' : runs((k + 1) + '. ', false, '<w:b/>')) + runs(t)))); return; }
+    const p = pOf(x.ref), e = p ? englishOf(p) : null;
+    if (e === 'loading') state.waiting++;
+    const en = e && e !== 'loading';
+    B.push(para('Label', runs((k + 1) + '. ', false, '<w:b/>') + citeRuns(x) + (en ? runs(' · English: machine translation') : '')));
+    B.push(para('Passage', p ? runs(p.text) : runs('(This passage is no longer in the portal.)', false, '<w:i/>')));
+    if (en) B.push(para('PassageEnglish', runs(e, true)));
+    paras(x.note).forEach(t => B.push(para('PassageNote', runs(t))));
+  });
+  if (d.investigations.length) {
+    B.push(para('Heading1', runs('To investigate')));
+    d.investigations.forEach(v => {
+      B.push(para('Heading2', runs(v.title)));
+      if (v.continues) B.push(para('Small', runs('Continues an investigation begun in an earlier session.')));
+      paras(v.about).forEach(t => B.push(para('Normal', runs(t))));
+      v.items.forEach(n => { const x = d.items[n - 1]; if (x) B.push(para('ListItem', runs(n + '. ', false, '<w:b/>') + (isNote(x) ? runs(clip(flat(x.text), 140) || '(an empty note)', false, '<w:i/>') : citeRuns(x)))); });
+      if (v.discussion) B.push(para('Small', runs('Its discussion: ' + v.discussion)));
+    });
+  }
+  const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+  const font = '<w:rFonts w:ascii="Hoefler Text" w:hAnsi="Hoefler Text" w:cs="Hoefler Text" w:eastAsia="Hoefler Text"/>';
+  const style = (id, name, ppr, rpr) => '<w:style w:type="paragraph" w:styleId="' + id + '"><w:name w:val="' + name + '"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/>' +
+    (ppr ? '<w:pPr>' + ppr + '</w:pPr>' : '') + (rpr ? '<w:rPr>' + rpr + '</w:rPr>' : '') + '</w:style>';
+  const styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ' + W + '>' +
+    '<w:docDefaults><w:rPrDefault><w:rPr>' + font + '<w:sz w:val="22"/><w:szCs w:val="22"/><w:lang w:val="en-US"/></w:rPr></w:rPrDefault>' +
+    '<w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
+    '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/><w:rPr>' + font + '<w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:style>' +
+    style('Title', 'Title', '<w:jc w:val="center"/><w:spacing w:after="80"/>', '<w:b/><w:sz w:val="34"/><w:szCs w:val="34"/>') +
+    style('Subtitle', 'Subtitle', '<w:jc w:val="center"/><w:spacing w:after="320"/>', '<w:i/><w:color w:val="555555"/>') +
+    style('Heading1', 'heading 1', '<w:keepNext/><w:spacing w:before="320" w:after="140"/><w:outlineLvl w:val="0"/>', '<w:b/><w:sz w:val="26"/><w:szCs w:val="26"/>') +
+    style('Heading2', 'heading 2', '<w:keepNext/><w:spacing w:before="240" w:after="80"/><w:outlineLvl w:val="1"/>', '<w:b/>') +
+    style('Label', 'Passage Label', '<w:keepNext/><w:spacing w:before="200" w:after="60"/>', '<w:sz w:val="20"/><w:szCs w:val="20"/>') +
+    style('Passage', 'Passage', '<w:keepNext/><w:ind w:left="567" w:right="567"/><w:spacing w:after="60"/>', '') +
+    style('PassageEnglish', 'Passage English', '<w:keepNext/><w:ind w:left="567" w:right="567"/><w:spacing w:before="60" w:after="60"/>', '<w:color w:val="333333"/><w:sz w:val="21"/><w:szCs w:val="21"/>') +
+    style('PassageNote', 'Passage Note', '<w:ind w:left="567" w:right="567"/><w:spacing w:before="60" w:after="120"/>', '<w:i/>') +
+    style('Note', 'Note', '<w:spacing w:before="200" w:after="120"/>', '') +
+    style('ListItem', 'List Item', '<w:ind w:left="567" w:hanging="340"/><w:spacing w:after="40"/>', '') +
+    style('Small', 'Small', '<w:spacing w:after="80"/>', '<w:color w:val="555555"/><w:sz w:val="19"/><w:szCs w:val="19"/>') +
+    '</w:styles>';
+  const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + W + '><w:body>' + B.join('') +
+    '<w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>';
+  const rels = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">';
+  return { waiting: state.waiting, blob: zip([
+    ['[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+      '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>'],
+    ['_rels/.rels', rels + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>'],
+    ['word/_rels/document.xml.rels', rels + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+    ['word/document.xml', doc],
+    ['word/styles.xml', styles],
+  ], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') };
+}
+function exportWord() {
+  if (!D.items.length) return;
+  const w = docxBlob(), name = publication().slug + '.docx';
+  download(w.blob, name);
+  toast(w.waiting ? 'Saved as ' + name + ', but the English was still loading for ' + plural(w.waiting, 'passage') + ': export again in a moment to include it.'
+    : 'Saved as ' + name + ', in your Downloads.');
+}
+/* A .zip with every file stored uncompressed: all a .docx needs. */
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(b) { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zip(files, type) {
+  const enc = new TextEncoder(), parts = [], dir = [];
+  let off = 0;
+  files.forEach(([name, text]) => {
+    const nb = enc.encode(name), db = enc.encode(text), c = crc32(db);
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+    lh.setUint16(10, 0, true); lh.setUint16(12, 0x21, true); lh.setUint32(14, c, true); lh.setUint32(18, db.length, true);
+    lh.setUint32(22, db.length, true); lh.setUint16(26, nb.length, true); lh.setUint16(28, 0, true);
+    parts.push(new Uint8Array(lh.buffer), nb, db);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+    ch.setUint16(10, 0, true); ch.setUint16(12, 0, true); ch.setUint16(14, 0x21, true); ch.setUint32(16, c, true);
+    ch.setUint32(20, db.length, true); ch.setUint32(24, db.length, true); ch.setUint16(28, nb.length, true);
+    ch.setUint16(30, 0, true); ch.setUint16(32, 0, true); ch.setUint16(34, 0, true); ch.setUint16(36, 0, true);
+    ch.setUint32(38, 0, true); ch.setUint32(42, off, true);
+    dir.push(new Uint8Array(ch.buffer), nb);
+    off += 30 + nb.length + db.length;
+  });
+  const size = dir.reduce((a, b) => a + b.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, size, true); end.setUint32(16, off, true);
+  return new Blob([...parts, ...dir, new Uint8Array(end.buffer)], { type });
 }
 
 /* ── For students: a session, an investigation, every investigation ─────── */
@@ -611,6 +723,7 @@ css.textContent = `
   #cspanel .csquick input { flex: 1; min-width: 0; padding: 0.2rem 0.5rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); font-size: 0.88rem; }
   #cspanel .csquick .btn { font-size: 0.84rem; padding: 0.05rem 0.6rem; }
   #cspanel .csopen { display: flex; align-items: baseline; gap: 0.6rem; margin: 0; }
+  #cspanel .csopen .spacer { flex: 1; }
   #cspage { position: fixed; inset: 0; z-index: 31; background: var(--parchment); display: flex; flex-direction: column; }
   #cspage .cspbar { display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 1.6rem; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   #cspage .cspbar .cz { font-size: 1.05rem; }

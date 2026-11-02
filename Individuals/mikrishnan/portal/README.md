@@ -68,6 +68,9 @@ It outlives the session that started it: later sessions add to it.
   for the forum: each passage cited, with its opening words, its note, and a link back to it in
   the portal. The portal keeps no comments, and cannot post to Canvas itself, since that would
   need a Canvas login and the site is public: paste the copy into the discussion.
+- **Export to Word**, on the session page (and **Word** in the panel), downloads the session as
+  a .docx: every passage whole, with its citation, its note, and its English when the English
+  is on, then the investigations with their items. It needs no saving for the class.
 
 Until it is saved, a session is kept in your own browser. The code is
 [class-sessions.js](class-sessions.js).
