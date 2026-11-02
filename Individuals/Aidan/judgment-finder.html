@@ -234,7 +234,7 @@ mark.form { background: var(--mark-form); box-shadow: 0 0 0 1px #b9cfa6; }
     </div>
     <div id="summary"></div>
     <div id="results"></div>
-    <div id="note">An <b>example</b> is a <b>simple sentence</b> — one subject and predicate, no subordinate clause (only a hypothetical or disjunctive may have two, for ground–consequence or division) — whose content carries no weight in the lecture — it is about men, bodies, souls, God, gold, triangles, Caius, not about cognition, reason or truth — so that it shows a form rather than making a point. What its form rests on is then one of three things: <b>named</b>, the text calls it that form; <b>premise / conclusion</b>, it stands in a syllogism that goes through, which fixes its quantity and quality; or <b>speculated</b>, nothing says what it is and the form is read off the wording alone. A label <u>underlined</u> is named in the text, one with a green foot is required by the inference, a <i>dashed</i> one is speculated and can be wrong. <b>Click any sentence on the left</b> to read it the same way. The German is the transcription's, the English is machine translation.</div>
+    <div id="note">An <b>example</b> is a <b>simple sentence</b> whose content carries no weight in the lecture, so that it shows a form rather than making a point. What its form rests on is one of three things: <b>named</b>, the text calls it that form; <b>premise / conclusion</b>, it stands in a syllogism that goes through; or <b>speculated</b>, nothing says what it is and the form follows from the criteria alone. A label <u>underlined</u> is named in the text, one with a green foot is required by the inference, a <i>dashed</i> one is speculated and can be wrong. <b>Click any sentence on the left</b> to read it the same way. The criteria themselves — what counts as universal, infinite, disjunctive, apodictic — are set out in <b>judgment-forms.md</b>, beside this file. The German is the transcription's, the English is machine translation.</div>
   </aside>
 </main>
 
@@ -342,14 +342,16 @@ function tidy(text, s, e) {
   return e > s ? { s, e } : null;
 }
 
-/* A span can hold a whole syllogism ("Alle Menschen sind sterblich, Caius ist ein Mensch, also …").
-   Split it into its judgments at a comma before a new capitalised subject + verb, or before a conclusion
-   word, and record which parts the text itself draws as a conclusion. */
+/* A span can hold a whole syllogism ("Alle Menschen sind sterblich, Caius ist ein Mensch, also …"), and
+   just as often a judgment followed by a remark about it ("die Seele ist unsterblich, dieser Satz ist
+   materialiter wahr"). Split it into its judgments at a comma, semicolon or colon before a new subject
+   with its own verb — a capitalised one, a demonstrative taking up what was just said, or a conclusion
+   word — and record which parts the text itself draws as a conclusion. */
 const CONCL = new RegExp('^(?:also|folglich|mithin|demnach|ergo|igitur)(?![\\p{L}])', 'iu');
 function splitJudgments(text, s, e) {
   const seg = text.slice(s, e);
   const cut = [0];
-  const re = /[,;]\s+(?=(?:\p{Lu}\p{L}+\s+(?:ist|sind|hat|haben|kann|muß|est|sunt)(?![\p{L}]))|(?:also|folglich|mithin|demnach|ergo|igitur)(?![\p{L}]))/gu;
+  const re = /[,;:]\s+(?=(?:\p{Lu}\p{L}+\s+(?:ist|sind|hat|haben|kann|muß|est|sunt)(?![\p{L}]))|(?:dieser|diese|dieses|dies|dieß|solches|welches)(?:\s+\p{L}+)?\s+(?:ist|sind|war|waren|hat|haben|kann|muß|est|sunt)(?![\p{L}])|(?:also|folglich|mithin|demnach|ergo|igitur)(?![\p{L}]))/giu;
   let m;
   while ((m = re.exec(seg))) cut.push(m.index + m[0].length);
   cut.push(seg.length);
@@ -509,6 +511,9 @@ function isSimple(t, labels) {
   const compound = labels.includes('hypothetical') || labels.includes('disjunctive');
   if (/^(wenn|wann|falls|si)(?![\p{L}])/iu.test(t) && !labels.includes('hypothetical')) return false;   // a wenn-clause with no consequence
   if (!/^(?:\p{Lu}|alle|aller|allen|alles|jeder|jede|jedes|jeden|kein|keine|keiner|keines|einige|etliche|manche|wenn|wann|falls|si|entweder|also|folglich|mithin|demnach|ergo|der|die|das|den|ein|eine|einer|ein\s)/u.test(t)) return false;   // begins mid-clause
+  /* German puts the finite verb second in a judgment; verb-first is a question or a
+     condition, neither of which is one. */
+  if (VERB.test(t.split(/\s+/)[0].replace(/[^\p{L}]/gu, ''))) return false;
   if (/^(wie|als|wo|nicht|von|vom|zwischen|mit|durch|für|in|auf|an|zu|bey|bei|aus|nach|über|unter|ohne|um)\s/iu.test(t)) return false;   // starts mid-sentence
   if (!compound && VERB.test(t.split(/\s+/).pop().replace(/[.!,]+$/, ''))) return false;   // verb-final: a subordinate clause, not a simple sentence
   const words = t.split(/\s+/).length;
@@ -526,45 +531,136 @@ function isSimple(t, labels) {
   return true;
 }
 
-/* The wording that makes an unmarked sentence read as a demonstration of a form: a quantifier or an
-   individual's name opening the sentence, a wenn…so, an entweder…oder, a negated predicate. */
-const IMPLICIT_START = new RegExp('^(?:' + [
-  '(?:Alle|Aller|Jeder|Jede|Jedes|Jeden|Ein jeder|Omnis|Omne|Omnes|Omnia|Kein|Keine|Keiner|Keines|Nullus|Nulla|Nullum)\\s+\\p{L}+',
-  '(?:Einige|Etliche|Manche|Mancher|Manches|Quidam|Quaedam|Quoddam|Aliqui|Aliquis|Aliquod|Nonnulli)\\s+\\p{L}+',
-  '(?:Caius|Cajus|Socrates|Sokrates|Titius|Petrus|Sempronius)\\s+(?:ist|sind|war|hat|est)',
-  '(?:Wenn|Wann|Falls|Si)\\s'
-].join('|') + ')', 'iu');
-function isImplicitExample(t, labels) {
-  return IMPLICIT_START.test(t) || labels.includes('disjunctive') || labels.includes('infinite');
+/* ── reading a judgment's structure ───────────────────────────────────────────
+   The four heads are assigned from what a cue scopes over, not from a word being
+   present somewhere, so a judgment is first cut into its subject phrase, its finite
+   verb, and what follows. judgment-forms.md §2.2. */
+const COPULA = new RegExp('^(?:ist|sind|war|waren|sey|seyn|sei|bin|bist|est|sunt|erat|bleibt|bleiben|heißt|heißen|wird|werden)$', 'iu');
+const PLURAL_VERB = /^(?:sind|waren|seyn|sunt|bleiben|heißen|werden|haben|hatten|können|müßen|müssen|sollen|mögen|dürfen|habent|possunt)$/i;
+const MODAL = new RegExp(B + '(muß|müßen|müssen|muss|kann|kan|können|könnte|mag|möchte|soll|sollen|darf|dürfen|potest|possunt|debet)(?![\\p{L}])', 'iu');
+const PASSIVE = new RegExp(B + '(?:(?:ge|ver|be|er|ent|zer|emp|miß|miss)[^\\W\\d_]+(?:t|en)|[^\\W\\d_]+(?:iert|iret|irt))\\s+(?:werden|wird)(?![\\p{L}])', 'iu');
+const CONSEQUENT = new RegExp('(?:^|[\\s,;:])(?:so|dann|ita|tum)(?![\\p{L}])', 'iu');
+
+function readJudgment(t) {
+  VERB.lastIndex = 0;
+  const m = VERB.exec(t);
+  if (!m) return { head: t, verb: '', tail: '', plural: false, copula: false };
+  const verb = (m[1] || m[0]).trim();
+  return { head: t.slice(0, m.index).trim(), verb,
+           tail: t.slice(m.index + m[0].length).trim(),
+           plural: PLURAL_VERB.test(verb), copula: COPULA.test(verb) };
 }
 
+/* The main clause. In a hypothetical the consequence is what is asserted, so quality is
+   read off the consequent and a negation in the condition does not make the whole
+   judgment negative. judgment-forms.md §4.5, §5.2. */
+function mainClause(t, hyp) {
+  if (!hyp) return t;
+  const m = CONSEQUENT.exec(t);
+  return m ? t.slice(m.index + m[0].length) : t;
+}
+
+/* Every word the loaded works use, so that §4.7 can ask whether a privative predicate's
+   positive stem is a predicate this text itself has. Built once, from whatever is loaded,
+   which is what lets the rule travel to a text these transcripts know nothing about. */
+let WORK_VOCAB = null;
+function workVocab() {
+  if (WORK_VOCAB) return WORK_VOCAB;
+  WORK_VOCAB = new Set();
+  JF_WORKS.forEach(w => w.data.sections.forEach(sec => sec.blocks.forEach(b => {
+    if (!b.text) return;
+    (b.text.toLowerCase().match(/[^\W\d_]{3,}/gu) || []).forEach(x => WORK_VOCAB.add(x));
+  })));
+  return WORK_VOCAB;
+}
+
+/* ── the word tables, §2.2: a new text extends these, not the logic ──────────── */
+const Q_UNIVERSAL  = new RegExp('^(?:alle[rnsm]?|jede[rnsm]?|ein\\s+jede[rs]?|omnis|omne|omnes|omnia|sämtliche)(?![\\p{L}])', 'iu');
+const Q_NONE       = new RegExp('^(?:kein|keine|keiner|keines|keinen|keinem|nullus|nulla|nullum)(?![\\p{L}])', 'iu');
+const Q_PARTICULAR = new RegExp('^(?:einige[rn]?|etliche|manche[rsn]?|quidam|quaedam|quoddam|aliqui|aliquis|aliquod|nonnulli|ein\\s+theil)(?![\\p{L}])', 'iu');
+const Q_DEMONSTR   = new RegExp('^(?:diese[rnsm]?|jene[rnsm]?|dies|hic|haec|hoc)(?![\\p{L}])', 'iu');
+const Q_DEFINITE   = new RegExp('^(?:der|die|das|den|dem|des|ein|eine|einer|eines|einem|einen)(?![\\p{L}])', 'iu');
+/* Proper names: recognising one needs a list, since German capitalises every noun. */
+const Q_NAME = new RegExp(B + '(?:gott|caius|cajus|socrates|sokrates|caesar|cäsar|titius|sempronius|petrus|alexander|plato|platon|aristoteles|herodot|epicur|wolff|baumgarten|locke|newton|leibniz|cartesius|descartes)(?![\\p{L}])', 'iu');
+/* Privatives that name a perfection, not a privation, and so stay affirmative. §4.8 */
+const POSITIVE_PRIVATIVE = new RegExp('^(?:unendlich|unveränderlich|unermeßlich|unermesslich|unbegreiflich|unwandelbar|unerschaffen|unabhängig|unsichtbar|unaussprechlich)', 'iu');
+const NEGATION = new RegExp(B + '(?:nicht|kein[^\\W\\d_]*|nullus|nulla|nullum|non|nie|niemals|nichts|niemand|nimmermehr|haud|nequaquam)(?![\\p{L}-])', 'iu');
+const PRIVATIVE = new RegExp('^(?:(nicht-|non-|nicht)([^\\W\\d_]{4,})|un([^\\W\\d_]{4,}))', 'iu');
+const MOD_NECESSARY = new RegExp(B + '(?:nothwendig[^\\W\\d_]*|notwendig[^\\W\\d_]*|schlechterdings|unumgänglich|necesse|necessario|apodictisch|apodiktisch)(?![\\p{L}])', 'iu');
+const MOD_POSSIBLE  = new RegExp(B + '(?:vielleicht|wahrscheinlich|vermuthlich|möglicherweise|etwa|ohn\\s?gefähr|forsitan|problematisch)(?![\\p{L}])', 'iu');
+const MOD_FRAME = new RegExp('^(?:es\\s+(?:ist|wäre)\\s+(möglich|nothwendig|notwendig|unmöglich|gewiß|ungewiß))(?![\\p{L}])', 'iu');
+
 /* ── labelling a judgment with its forms ──────────────────────────────────────
-   Inferred from wording alone, on Kant's four heads. Returns form ids. */
+   judgment-forms.md §§2–6. Every judgment gets one label from each head (§2.1). */
 function classify(t) {
-  const labels = [];
+  const j = readJudgment(t);
   const hyp = /(?:^|[\s,;:])(?:wenn|wann|falls|si)(?![\p{L}])[^]*?(?:^|[\s,;:])(?:so|dann|ita|tum|ergo)(?![\p{L}])/iu.test(t);
-  /* A divided sphere, however it is written: "entweder … oder", or a bare disjunct — "A ist b oder c",
-     "A ist b oder nicht-b" — which the lectures set down without "entweder" as often as with it. */
-  const disj = /(?<![\p{L}])(?:oder|vel|aut|sive|seu)(?![\p{L}])/iu.test(t);
-  // quantity
-  let quant = null;
-  if (/(?<![\p{L}])(alle|aller|allen|alles|jeder|jede|jedes|jeden|jedem|omnis|omne|omnes|omnia|kein|keine|keiner|keines|keinen|keinem|nullus|nulla|nullum)(?![\p{L}])/iu.test(t)) quant = 'universal';
-  else if (/(?<![\p{L}])(einige|einiger|etliche|manche|mancher|manches|quidam|quaedam|quoddam|aliqui|aliquis|aliquod|nonnulli|ein\s+theil)(?![\p{L}])/iu.test(t)) quant = 'particular';
-  else if (/(?<![\p{L}])(caius|cajus|socrates|sokrates|titius|petrus|sempronius|hic|haec|hoc)(?![\p{L}])|^(dieser|diese|dieses|dies)(?![\p{L}])/iu.test(t)) quant = 'singular';
-  if (quant) labels.push(quant);
-  // quality
-  const infinite = /(?<![\p{L}])(ist|sind|sey|seyn|est|sunt)\s+(nicht-?(?!s(?![\p{L}]))\p{L}{4,}|un(?!ser|ter|mittel|d(?![\p{L}]))\p{L}{4,}|non-\p{L}+)/iu.test(t);
-  const neg = /(?<![\p{L}])(nicht|kein\p{L}*|nullus|nulla|nullum|non|nie|niemals|nichts|niemand|nimmermehr)(?![\p{L}-])/iu.test(t);
-  if (infinite && !neg) labels.push('infinite');
-  else if (neg) labels.push('negative');
-  else labels.push('affirmative');
-  // relation
-  labels.push(hyp ? 'hypothetical' : disj ? 'disjunctive' : 'categorical');
-  // modality
-  if (/(?<![\p{L}])(muß|müßen|müssen|muss|nothwendig\p{L}*|notwendig\p{L}*|unmöglich\p{L}*|schlechterdings|necesse|necessario|apodic\p{L}*)(?![\p{L}])/iu.test(t)) labels.push('apodictic');
-  else if (/(?<![\p{L}])(kann|kan|können|könnte|mag|möchte|möglich\p{L}*|vielleicht|potest|possunt|problematisch\p{L}*)(?![\p{L}])/iu.test(t)) labels.push('problematic');
-  else labels.push('assertoric');
-  return labels;
+  const disj = isDivision(t, j);
+  let main = mainClause(t, hyp);
+  if (disj) main = main.split(new RegExp(B + '(?:oder|vel|aut|sive|seu)(?![\\p{L}])', 'iu'))[0];
+  const mj = hyp || disj ? readJudgment(main) : j;
+  return [quantityOf(j), qualityOf(main, mj), hyp ? 'hypothetical' : disj ? 'disjunctive' : 'categorical',
+          modalityOf(t, main, mj, hyp, disj)];
+}
+
+/* §3. How much of the subject's sphere the predicate is said of — read off the subject
+   phrase, never off a quantifier standing anywhere in the sentence. */
+const PREFIELD = /^(?:und|aber|allein|denn|also|folglich|mithin|demnach|nun|doch|auch|so|ja|zwar|hier|da|daher|darum|deswegen|dadurch|dabey|dabei|ferner|endlich|jedoch|dennoch|gleichwohl|übrigens|wenigstens|vielleicht|wirklich|gewiß|eben|nemlich|nehmlich|freylich|oft|öfters|immer|niemals)(?![^\W\d_])\s*/iu;
+function quantityOf(j) {
+  let head = j.head.trim();
+  while (PREFIELD.test(head)) head = head.replace(PREFIELD, '').trim();
+  if (!head) head = j.tail.trim();      // inverted: the subject follows the verb
+  if (Q_UNIVERSAL.test(head) || Q_NONE.test(head)) return 'universal';   // kein is a universal negative
+  if (Q_PARTICULAR.test(head)) return 'particular';
+  if (Q_DEMONSTR.test(head) || Q_NAME.test(head)) return 'singular';     // §3.3, §3.6
+  if (Q_DEFINITE.test(head)) return 'universal';                         // §3.5
+  return 'universal';                                                    // §3.4 bare plural, and the default
+}
+
+/* §4. What the copula does. The criterion is where the negation sits — Wiener Logik,
+   AA 24:930 — so a negation in the condition of a hypothetical is not counted. */
+function qualityOf(main, mj) {
+  const neg = NEGATION.test(main);
+  const pred = (mj.tail || '').replace(/^(?:ein|eine|einer|eines|einem|einen|der|die|das|zu|gar|ganz|gantz|noch|auch|immer|wohl|doch|nur|sehr|also|entweder)\s+/i, '');
+  const p = PRIVATIVE.exec(pred);
+  if (p && mj.copula) {
+    const stem = (p[2] || p[3] || '').toLowerCase().replace(/(?:es|er|en|e|s)$/, '');
+    const explicit = !!p[1];                                             // §4.6 nicht-B, non-B
+    const positive = POSITIVE_PRIVATIVE.test(pred);                      // §4.8 a perfection
+    const formed = stem.length > 3 && workVocab().has(stem);             // §4.7 stem in use
+    if (!positive && (explicit || formed)) {
+      /* The copula must be clean: a negation that is not the predicate's own makes it negative. */
+      const rest = main.replace(pred.slice(0, p[0].length), ' ');
+      return NEGATION.test(rest) ? 'negative' : 'infinite';
+    }
+  }
+  return neg ? 'negative' : 'affirmative';
+}
+
+/* §5.3–5.4. A division, not an apposition: the disjuncts must be co-predicates of one
+   subject, or co-subjects marked as a division by entweder. */
+function isDivision(t, j) {
+  const OR = new RegExp(B + '(?:oder|vel|aut|sive|seu)(?![\\p{L}])', 'iu');
+  if (!OR.test(t)) return false;
+  if (/(?:^|[\s,;:])(?:entweder|aut)(?![\p{L}])/iu.test(t)) return true;
+  return !!j.tail && OR.test(j.tail);        // in the predicate: a division; in the subject alone: apposition
+}
+
+/* §6. The attitude to the whole assertion. A modal word inside the predicate does not by
+   itself set it: what matters is whether the modal governs the copula or a lexical verb. */
+function modalityOf(t, main, mj, hyp, disj) {
+  if (MOD_NECESSARY.test(main) || MOD_FRAME.test(t) && /nothwendig|notwendig|unmöglich/i.test(t)) return 'apodictic';
+  if (MOD_POSSIBLE.test(main) || MOD_FRAME.test(t) && /möglich|ungewiß/i.test(t)) return 'problematic';
+  /* §6.6: the compound as a whole asserts its consequence or its division. */
+  if (hyp || disj) return 'assertoric';
+  const m = MODAL.exec(main);
+  if (!m) return 'assertoric';
+  const after = main.slice(m.index + m[0].length);
+  const governsCopula = /(?:^|\s)(?:seyn|sein|sey|bleiben|heißen|werden|esse)(?![\p{L}])/iu.test(after) && !PASSIVE.test(after);
+  if (!governsCopula) return 'assertoric';                               // §6.3 a capacity or a duty
+  if (/^(?:soll|sollen)$/i.test(m[1] || m[0])) return 'assertoric';      // §6.5
+  if (/^(?:muß|müßen|müssen|muss|debet)$/i.test(m[1] || m[0])) return 'apodictic';
+  return 'problematic';                                                  // §6.2 kann, mag, könnte + seyn
 }
 
 /* Every example in the three works. A sentence is an example when it works as one (above) and is simple;
