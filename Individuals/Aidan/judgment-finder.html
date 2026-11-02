@@ -342,14 +342,16 @@ function tidy(text, s, e) {
   return e > s ? { s, e } : null;
 }
 
-/* A span can hold a whole syllogism ("Alle Menschen sind sterblich, Caius ist ein Mensch, also …").
-   Split it into its judgments at a comma before a new capitalised subject + verb, or before a conclusion
-   word, and record which parts the text itself draws as a conclusion. */
+/* A span can hold a whole syllogism ("Alle Menschen sind sterblich, Caius ist ein Mensch, also …"), and
+   just as often a judgment followed by a remark about it ("die Seele ist unsterblich, dieser Satz ist
+   materialiter wahr"). Split it into its judgments at a comma, semicolon or colon before a new subject
+   with its own verb — a capitalised one, a demonstrative taking up what was just said, or a conclusion
+   word — and record which parts the text itself draws as a conclusion. */
 const CONCL = new RegExp('^(?:also|folglich|mithin|demnach|ergo|igitur)(?![\\p{L}])', 'iu');
 function splitJudgments(text, s, e) {
   const seg = text.slice(s, e);
   const cut = [0];
-  const re = /[,;]\s+(?=(?:\p{Lu}\p{L}+\s+(?:ist|sind|hat|haben|kann|muß|est|sunt)(?![\p{L}]))|(?:also|folglich|mithin|demnach|ergo|igitur)(?![\p{L}]))/gu;
+  const re = /[,;:]\s+(?=(?:\p{Lu}\p{L}+\s+(?:ist|sind|hat|haben|kann|muß|est|sunt)(?![\p{L}]))|(?:dieser|diese|dieses|dies|dieß|solches|welches)(?:\s+\p{L}+)?\s+(?:ist|sind|war|waren|hat|haben|kann|muß|est|sunt)(?![\p{L}])|(?:also|folglich|mithin|demnach|ergo|igitur)(?![\p{L}]))/giu;
   let m;
   while ((m = re.exec(seg))) cut.push(m.index + m[0].length);
   cut.push(seg.length);
@@ -509,6 +511,9 @@ function isSimple(t, labels) {
   const compound = labels.includes('hypothetical') || labels.includes('disjunctive');
   if (/^(wenn|wann|falls|si)(?![\p{L}])/iu.test(t) && !labels.includes('hypothetical')) return false;   // a wenn-clause with no consequence
   if (!/^(?:\p{Lu}|alle|aller|allen|alles|jeder|jede|jedes|jeden|kein|keine|keiner|keines|einige|etliche|manche|wenn|wann|falls|si|entweder|also|folglich|mithin|demnach|ergo|der|die|das|den|ein|eine|einer|ein\s)/u.test(t)) return false;   // begins mid-clause
+  /* German puts the finite verb second in a judgment; verb-first is a question or a
+     condition, neither of which is one. */
+  if (VERB.test(t.split(/\s+/)[0].replace(/[^\p{L}]/gu, ''))) return false;
   if (/^(wie|als|wo|nicht|von|vom|zwischen|mit|durch|für|in|auf|an|zu|bey|bei|aus|nach|über|unter|ohne|um)\s/iu.test(t)) return false;   // starts mid-sentence
   if (!compound && VERB.test(t.split(/\s+/).pop().replace(/[.!,]+$/, ''))) return false;   // verb-final: a subordinate clause, not a simple sentence
   const words = t.split(/\s+/).length;

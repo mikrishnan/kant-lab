@@ -35,9 +35,18 @@ clause, at most fourteen words. Only a hypothetical or a disjunctive may have tw
 clauses, for the ground–consequence and the division respectively; thirty words and two
 finite verbs are then allowed.
 
-1.2 A span the text draws as an inference is split into its judgments at a comma before a
-new capitalised subject with its own verb, or before *also*, *folglich*, *mithin*,
-*demnach*, *ergo*, *igitur*. Each resulting judgment is labelled on its own.
+1.2 A span is split into its judgments at a comma, semicolon or colon before a new
+subject with its own verb — a capitalised one, a demonstrative taking up what was just
+said (*dieser Satz ist*, *dieses ist*), or a conclusion word (*also*, *folglich*,
+*mithin*, *demnach*, *ergo*, *igitur*). Each resulting judgment is labelled on its own.
+Two things make this necessary. A span can hold a whole syllogism; and the transcription
+habitually packs a judgment and a remark on its truth into one sentence — *die Seele ist
+unsterblich, dieser Satz ist materialiter wahr* (AA 24:97), *Die Seele ist unsterblich:
+dieses ist völlig gewiß* (AA 24:204) — so that without the split Kant's own standing
+example of the infinite judgment is never reached.
+
+1.2.1 A part whose first word is a finite verb is not a judgment. German puts the verb
+second in one; verb-first is a question or a condition.
 
 1.3 A sentence is an **example** when its content carries no weight in the lecture — it
 shows a form rather than making a point. A sentence whose subject is the lecture's own
