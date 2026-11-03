@@ -4595,6 +4595,7 @@ function writeHash() {
   if (S.d) { u.set('d', S.d); if (S.d === 'judgement' && S.jtab === 'nik') u.set('jt', 'nik'); }
   else if (S.q) {
     u.set('q', S.q);
+    if (S.enFrom) u.set('ef', S.enFrom);
     u.set('w', S.w);
     if (S.cm && S.co) { u.set('cm', S.cm); u.set('co', S.co); }
     if (!S.merge) u.set('merge', '0');
@@ -4621,6 +4622,7 @@ function readHash() {
   S.preset = null;
   S.miss = null;
   S.q = u.get('q') || '';
+  S.enFrom = u.get('ef') || null;   // the English question the German and Latin were asked for
   S.w = u.has('w') ? +u.get('w') : 5;
   S.cm = u.get('cm') || '';
   S.co = u.get('co') || '';
