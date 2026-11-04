@@ -55,12 +55,6 @@
     margin-bottom: 1rem;
   }
 
-  h2 + p.note {
-    color: var(--faded);
-    font-style: italic;
-    margin: -0.6rem 0 1rem;
-  }
-
   ul.apps { list-style: none; }
 
   ul.apps + h2 { margin-top: 2.5rem; }
@@ -142,18 +136,15 @@
     font-style: italic;
   }
 
-  /* Works in progress: dashed, the suite's mark for what is not yet settled */
-  ul.apps.wip li { border-style: dashed; }
-
-  ul.apps.wip li.empty { color: var(--faded); font-style: italic; }
-
-  ul.apps.wip li.empty a {
-    font-family: inherit;
-    font-weight: normal;
-    font-size: inherit;
-    letter-spacing: normal;
-    text-decoration: underline;
+  /* What was retired, under the tools: one quiet line */
+  p.note.retired {
+    color: var(--faded);
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-top: 2.5rem;
   }
+
+  p.note.retired a { color: var(--accent); }
 
   footer {
     margin-top: 2.5rem;
@@ -172,9 +163,9 @@
   <h2>For the seminar</h2>
   <ul class="apps">
     <li>
-      <a href="Individuals/mikrishnan/portal/index.html">The Logic Portal</a>
+      <a href="logic-portal/index.html">The Logic Portal</a>
       <p>Ask the whole logic corpus a question at once: Meier, Baumgarten, the Reflexionen, the Blomberg, Wiener and Busolt lectures, and Jäsche, in every spelling. Any passage leads to the Meier § it is on, Kant's dated notes there and the other lectures on it. Built from the seminar's own tools.</p>
-      <form class="lookup" id="refl-lookup" action="Individuals/mikrishnan/portal/index.html">
+      <form class="lookup" id="refl-lookup" action="logic-portal/index.html">
         <label for="refl-no">Look up a Reflexion</label>
         <input id="refl-no" type="search" autocomplete="off" spellcheck="false" placeholder="4086, or a page: 16:236" aria-describedby="refl-hint">
         <button type="submit">Open</button>
@@ -183,34 +174,7 @@
     </li>
   </ul>
 
-  <h2>Tools</h2>
-  <ul class="apps">
-    <li>
-      <a href="baumgarten-reader/baumgartenreading-guide.html">Baumgarten Reader</a>
-      <p>Latin reading guide for Baumgarten's <em>Metaphysica</em>, with inline German glosses.</p>
-    </li>
-    <li>
-      <a href="meier-reader/meier-reading-guide.html">Meier Reader</a>
-      <p>German reading guide for Meier's <em>Auszug aus der Vernunftlehre</em>, with a side panel of parallel passages from the tradition.</p>
-    </li>
-    <li>
-      <a href="porphyrian-tree/porphyrian-tree.html">Porphyrian Tree</a>
-      <p>A configurator for building genus&ndash;species trees under user-chosen division rules.</p>
-    </li>
-  </ul>
-
-  <h2>Works in progress</h2>
-  <p class="note">Tools the working groups are building. Expect rough edges.</p>
-  <ul class="apps wip">
-    <li>
-      <a href="groups/kant-quest/">Kant Quest</a>
-      <p>Work in progress by the Kant Quest group.</p>
-    </li>
-    <li>
-      <a href="groups/logiccorpus/">Logic Corpus</a>
-      <p>Work in progress by the Logic Corpus group.</p>
-    </li>
-  </ul>
+  <p class="note retired">Retired on 4 November 2026: the Baumgarten and Meier Readers, whose textbooks are now read in the Logic Portal with Kant’s notes beside them (their old addresses redirect there), and the <a href="porphyrian-tree/porphyrian-tree.html">Porphyrian Tree</a>, one of the seminar’s early experiments.</p>
 
   <footer>Source on <a href="https://github.com/mikrishnan/kant-lab">GitHub</a> &middot; <a href="https://github.com/mikrishnan/kant-lab#how-work-happens">How to contribute</a>.</footer>
 </main>

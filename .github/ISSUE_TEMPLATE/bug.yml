@@ -8,10 +8,8 @@ body:
     attributes:
       label: Which tool?
       options:
-        - Baumgarten reader
-        - Meier reader
-        - Porphyrian tree
-        - A working group's tool
+        - The Logic Portal
+        - A participant's tool, in Individuals/
         - A new tool
         - Shared data
     validations:

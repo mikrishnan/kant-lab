@@ -1,19 +1,19 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    Parallel passages from the tradition, keyed to the §§ of G. F. Meier,
-   Auszug aus der Vernunftlehre (AA XVI). Read by the Meier reader's Tradition
-   tab.
+   Auszug aus der Vernunftlehre (AA XVI). Read by the Logic Portal's Tradition
+   tab, as it was by the Meier reader's until that reader was retired.
 
    HAND-CURATED, not generated: edit this file directly. Only 10 of Meier's 563
    §§ are annotated so far; every other § shows a "no entries yet" placeholder.
    Adding entries is the intended way for this layer to grow, and needs no
-   change to the reader.
+   change to the portal.
 
    Shape
      TRADITION = { <§ number>: [ entry, entry, … ], … }
 
    Entry fields
      strata    wolff | scholastic | aristotle — picks the colour band, and must
-               match one of the reader's three filter buttons
+               match one of the Tradition tab's three filter buttons
      author    "Christian Wolff"
      source    the work and its place, "Philosophia Rationalis, §§ 1–3"
      relation  source | parallel | contrast — how the passage stands to Meier's

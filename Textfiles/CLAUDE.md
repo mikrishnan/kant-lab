@@ -1,6 +1,6 @@
 # Textfiles
 
-Upstream RTF transcriptions the readers' embedded data was extracted from.
+Upstream RTF transcriptions the shared texts were extracted from.
 
 | File | Source |
 | --- | --- |
@@ -40,7 +40,7 @@ textutil -convert txt -stdout Baumgarten.rtfd
 | `Vol16reflexionenMeier.rtfd` | `scripts/parse_refl.py L` → `scripts/emit.py` | `data/reflexionen-16-meier.js` |
 | `Vol17erlauterungenBaum.rtf`, `Vol17reflexionenBaum.rtfd`, `vol18reflexionenBaum.rtfd` | `scripts/parse_refl.py M` → `scripts/emit_baum_refl.py` | `data/reflexionen-17-18-baumgarten.js` |
 | `vol14Adickes.rtf` | none — read by hand | `data/phases-adickes.js` |
-| `Meier.rtf` | none in the repo | the `MEIER` blob inside the Meier reader |
+| `Meier.rtf` | none in the repo | the `MEIER` blob inside the retired Meier reader, which `Individuals/Jesus-La-Paz/meier-auszug-data.js` copies for the Logic Portal |
 | `Vol9Logic.rtfd` | none yet | nothing |
 
 The exact commands, with the `textutil` invocations and the flags each script wants, are
@@ -53,7 +53,7 @@ transcribed verbatim into the `.js` by hand.
 
 ## Extraction notes
 
-The two readers' primary texts reached their data by different routes, and it shows.
+The two textbooks reached their data by different routes, and it shows.
 
 - The **Baumgarten** data is machine-extracted, by `parse_baum.py` from
   `Baumgarten.rtfd`. `MET_PARAGRAPHS` has all 804 §§ AA XVII prints; `MET_SYNOPSIS`
@@ -71,7 +71,10 @@ The two readers' primary texts reached their data by different routes, and it sh
   entries), the `HIERARCHY` outline, `CITATIONS` (563), and the hand-curated `TRADITION`.
   **No extractor for it survives in the repo**, so it cannot be regenerated from
   `Meier.rtf`: edit the blob programmatically or with a targeted replacement, and do not
-  pretty-print it.
+  pretty-print it. The blob was the Meier reader's; since that reader was retired on
+  4 November 2026, the text the Logic Portal shows is Jesus's copy of it,
+  `Individuals/Jesus-La-Paz/meier-auszug-data.js`, so a correction to Meier's text goes
+  there.
 
 `Vol9Logic.rtfd` is the newest arrival and nothing consumes it yet. It is the obvious
 next thing to build on, the *Logik* being Kant's lectures on the very *Auszug* the Meier
