@@ -55,7 +55,9 @@ It outlives the session that started it: later sessions add to it.
 - **Afterwards: Organize and save.** This opens the session page over the portal, as the
   Handouts page does. Tick items and press **+ New investigation from the ticked**, or **Add
   the ticked** to an investigation already there. *Or add to one begun earlier* continues an
-  investigation from an earlier session. Each investigation has a line saying what the question
+  investigation from an earlier session. Each passage opens with ▸ to its whole text (and its
+  English, when the English is on), or all at once with *open all*; its citation, as in the panel,
+  opens it in the portal. Each investigation has a line saying what the question
   is, and can have its own Canvas discussion; ✎ gives a passage a note. **Save for the class**
   opens GitHub with the session as a file in [sessions/](sessions/), and you press *Commit
   changes*.
