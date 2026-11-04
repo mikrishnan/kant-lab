@@ -21,284 +21,340 @@
   --failed: #a3361b;
   --pending: #6f604f;
   --ai: #7748c0;
+  --auto: #00788c;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 body { font-family: 'EB Garamond', Georgia, serif; font-size: 17px; line-height: 1.5; background: var(--parchment); color: var(--ink); }
 button, select, input, textarea { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
 
-header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; padding: 12px 22px; background: var(--accent); color: var(--parchment); }
+/* ---------- header ---------- */
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; padding: 10px 22px; background: var(--accent); color: var(--parchment); }
 header h1 { font-family: 'Cinzel', serif; font-weight: 400; font-size: 18px; letter-spacing: .08em; margin: 0; }
-header p { margin: 0; font-size: 15px; opacity: .9; }
+nav { display: flex; gap: 4px; }
+nav button { background: transparent; color: var(--parchment); border: 1px solid var(--accent-soft); padding: 2px 14px; cursor: pointer; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: .07em; }
+nav button.on { background: var(--parchment); color: var(--accent); }
 header .stored { margin-left: auto; font-size: 13.5px; opacity: .85; }
+h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 15px; letter-spacing: .07em; color: var(--accent); margin: 0 0 8px; }
+h3 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 13px; letter-spacing: .07em; color: var(--accent); margin: 18px 0 6px; }
 
-.wrap { display: grid; grid-template-columns: minmax(340px, 420px) 1fr; gap: 0; align-items: start; }
-h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 15px; letter-spacing: .07em; color: var(--accent); margin: 0 0 10px; }
-
-/* ---------- the form ---------- */
-#formPane { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 16px 20px 30px; background: var(--parchment-dark); border-right: 1px solid var(--rule); }
-.field { margin-bottom: 11px; }
+/* ---------- shared controls ---------- */
+.btn { background: var(--accent); color: var(--parchment); border: 1px solid var(--accent); padding: 3px 14px; cursor: pointer; border-radius: 2px; font-size: 15.5px; }
+.btn.light { background: var(--parchment); color: var(--accent); border-color: var(--accent-soft); }
+.btn.light:hover { border-color: var(--accent); }
+.btn.small { padding: 1px 9px; font-size: 14px; }
+.btn.danger { background: var(--parchment); color: var(--failed); border-color: var(--failed); }
+.btn:disabled { opacity: .4; cursor: default; }
+.chip { display: inline-block; font-family: 'Cinzel', serif; font-size: 10.5px; letter-spacing: .05em; padding: 1px 8px; border-radius: 10px; color: #fff; white-space: nowrap; vertical-align: 1px; }
+.chip.worked { background: var(--worked); } .chip.partly { background: var(--partly); } .chip.failed { background: var(--failed); }
+.chip.pending { background: transparent; color: var(--pending); border: 1px dashed var(--pending); }
+.chip.ai { background: transparent; color: var(--ai); border: 1px solid var(--ai); }
+.chip.auto { background: transparent; color: var(--auto); border: 1px solid var(--auto); }
+.chip.kind { background: transparent; color: var(--accent); border: 1px solid var(--accent-soft); }
+.chip.thread { background: var(--parchment-dark); color: var(--accent); border: 1px solid var(--accent-soft); cursor: pointer; }
+.field { margin-bottom: 10px; }
 .field label, .field .lbl { display: block; font-family: 'Cinzel', serif; font-size: 11.5px; letter-spacing: .06em; color: var(--accent); margin-bottom: 2px; }
 .field .hint { font-size: 13.5px; color: var(--muted); margin: 0 0 3px; line-height: 1.35; }
 .field input[type=text], .field input[type=url], .field input[type=date], .field textarea, .field select {
   width: 100%; padding: 4px 7px; border: 1px solid var(--accent-soft); background: var(--parchment); border-radius: 2px; font-size: 16px;
 }
-.field textarea { resize: vertical; min-height: 54px; }
+.field textarea { resize: vertical; min-height: 48px; }
 .field input:focus, .field textarea:focus, .field select:focus { outline: 2px solid var(--accent-soft); outline-offset: 0; }
-.row2 { display: flex; gap: 8px; }
-.row2 > * { flex: 1; }
+.row2 { display: flex; gap: 10px; flex-wrap: wrap; }
+.row2 > * { flex: 1 1 180px; }
 .choices { display: flex; flex-wrap: wrap; gap: 4px; }
-.choices label { font-family: 'EB Garamond', serif; font-size: 15.5px; letter-spacing: 0; color: var(--ink); display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--accent-soft); background: var(--parchment); padding: 2px 10px; border-radius: 14px; cursor: pointer; margin: 0; }
+.choices label { font-family: 'EB Garamond', serif; font-size: 15.5px; letter-spacing: 0; color: var(--ink); display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--accent-soft); background: var(--parchment); padding: 1px 10px; border-radius: 14px; cursor: pointer; margin: 0; }
 .choices input { margin: 0; }
 .choices label:has(input:checked) { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
 .choices.verdict label:has(input[value=worked]:checked) { background: var(--worked); border-color: var(--worked); }
 .choices.verdict label:has(input[value=partly]:checked) { background: var(--partly); border-color: var(--partly); }
 .choices.verdict label:has(input[value=failed]:checked) { background: var(--failed); border-color: var(--failed); }
 .choices.verdict label:has(input[value=""]:checked) { background: var(--pending); border-color: var(--pending); }
-#versionInfo { font-size: 13.5px; margin-top: 3px; min-height: 1.2em; }
-#versionInfo.ok { color: var(--worked); }
-#versionInfo.warn { color: var(--failed); }
+.vinfo { font-size: 13.5px; margin-top: 3px; min-height: 1.2em; }
+.vinfo.ok { color: var(--worked); } .vinfo.warn { color: var(--failed); }
 .req { color: var(--failed); }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
-.btn { background: var(--accent); color: var(--parchment); border: 1px solid var(--accent); padding: 4px 16px; cursor: pointer; border-radius: 2px; font-size: 15.5px; }
-.btn.light { background: var(--parchment); color: var(--accent); border-color: var(--accent-soft); }
-.btn.light:hover { border-color: var(--accent); }
-.btn.small { padding: 1px 10px; font-size: 14px; }
-.btn.danger { background: var(--parchment); color: var(--failed); border-color: var(--failed); }
-#formMsg { font-size: 14.5px; color: var(--muted); }
-#formMsg.err { color: var(--failed); }
-.editing-banner { display: none; background: #fff4c7; border: 1px solid var(--accent-soft); padding: 4px 8px; font-size: 14.5px; margin-bottom: 10px; }
-.editing .editing-banner { display: block; }
-
-/* ---------- the log ---------- */
-#logPane { padding: 16px 22px 60px; min-width: 0; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
 .toolbar input[type=search], .toolbar select { padding: 3px 7px; border: 1px solid var(--accent-soft); background: var(--parchment); font-size: 15px; }
-.toolbar input[type=search] { width: 210px; }
+.toolbar input[type=search] { width: 200px; }
 .toolbar .sp { flex: 1; }
-.summary { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14.5px; color: var(--muted); margin: 0 0 12px; padding: 6px 10px; background: var(--parchment-dark); border: 1px solid var(--rule); }
+.summary { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 14.5px; color: var(--muted); margin: 0 0 12px; padding: 5px 10px; background: var(--parchment-dark); border: 1px solid var(--rule); }
 .summary b { color: var(--ink); font-weight: 500; }
-.chip { display: inline-block; font-family: 'Cinzel', serif; font-size: 10.5px; letter-spacing: .05em; padding: 1px 8px; border-radius: 10px; color: #fff; white-space: nowrap; vertical-align: 1px; }
-.chip.worked { background: var(--worked); } .chip.partly { background: var(--partly); } .chip.failed { background: var(--failed); } .chip.pending { background: transparent; color: var(--pending); border: 1px dashed var(--pending); }
-.chip.ai { background: transparent; color: var(--ai); border: 1px solid var(--ai); }
-.chip.kind { background: transparent; color: var(--accent); border: 1px solid var(--accent-soft); }
-
-.entry { background: #fffaf0; border: 1px solid var(--rule); border-left: 5px solid var(--pending); border-radius: 3px; margin-bottom: 10px; padding: 8px 12px 9px; }
-.entry.v-worked { border-left-color: var(--worked); } .entry.v-partly { border-left-color: var(--partly); } .entry.v-failed { border-left-color: var(--failed); }
-.entry.ai { background: #f7f2fb; }
-.entry .top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
-.entry .date { font-family: 'Cinzel', serif; font-size: 12px; color: var(--muted); letter-spacing: .04em; }
-.entry .q { flex-basis: 100%; font-size: 18px; font-weight: 500; margin: 2px 0 4px; }
-.entry .who { font-size: 14px; color: var(--muted); }
-.entry .ops { margin-left: auto; display: flex; gap: 6px; }
-.entry dl { display: grid; grid-template-columns: 118px 1fr; gap: 2px 12px; margin: 0; font-size: 15.5px; }
-.entry dt { font-family: 'Cinzel', serif; font-size: 10.5px; letter-spacing: .05em; color: var(--accent); padding-top: 4px; }
-.entry dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
-.entry dd a { color: var(--accent); }
-.entry dd .nocommit { color: var(--failed); font-size: 13.5px; }
-.empty { color: var(--muted); font-style: italic; padding: 20px 0; }
-
+.empty { color: var(--muted); font-style: italic; padding: 12px 0; }
 details.box { background: var(--parchment-dark); border: 1px solid var(--rule); margin: 0 0 12px; padding: 6px 12px; border-radius: 3px; }
-details.box summary { cursor: pointer; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: .06em; color: var(--accent); }
+details.box > summary { cursor: pointer; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: .06em; color: var(--accent); }
 details.box p, details.box li { font-size: 15px; }
-details.box textarea { width: 100%; min-height: 110px; padding: 5px 7px; border: 1px solid var(--accent-soft); background: var(--parchment); font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
-details.box pre { white-space: pre-wrap; background: var(--parchment); border: 1px solid var(--rule); padding: 8px; font-size: 13.5px; font-family: ui-monospace, Menlo, monospace; max-height: 260px; overflow-y: auto; }
+textarea.mono, details.box textarea { width: 100%; min-height: 110px; padding: 5px 7px; border: 1px solid var(--accent-soft); background: var(--parchment); font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+.msg { font-size: 14.5px; color: var(--muted); }
+.msg.err { color: var(--failed); }
 
-#toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--parchment); padding: 6px 14px; border-radius: 3px; font-size: 15px; display: none; z-index: 10; }
+/* ---------- sessions view ---------- */
+.sessions { display: grid; grid-template-columns: 300px 1fr; align-items: start; min-height: calc(100vh - 100px); }
+#sessList { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 14px 14px 30px; background: var(--parchment-dark); border-right: 1px solid var(--rule); }
+.sitem { display: block; width: 100%; text-align: left; background: var(--parchment); border: 1px solid var(--rule); border-left: 4px solid var(--accent-soft); padding: 5px 9px; margin-bottom: 6px; cursor: pointer; border-radius: 2px; }
+.sitem:hover { border-color: var(--accent-soft); }
+.sitem.on { border-color: var(--accent); border-left-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.sitem .d { font-family: 'Cinzel', serif; font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+.sitem .t { display: block; font-weight: 500; line-height: 1.3; margin: 1px 0 3px; }
+.sitem .c { font-size: 13px; color: var(--muted); }
+.vbar { display: flex; height: 5px; margin-top: 4px; gap: 2px; }
+.vbar span { border-radius: 2px; }
+#sessDetail { padding: 14px 24px 60px; min-width: 0; }
+.shead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 10px; }
+.shead .ttl { flex: 1 1 300px; font-size: 22px; font-weight: 500; padding: 2px 6px; border: 1px solid transparent; background: transparent; border-radius: 2px; }
+.shead .ttl:hover, .shead .ttl:focus { border-color: var(--accent-soft); background: var(--parchment); outline: 0; }
+.saved { font-size: 13px; color: var(--muted); }
+.sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+.sgrid .wide { grid-column: 1 / -1; }
+
+/* ---------- ideas ---------- */
+.idea { background: #fffaf0; border: 1px solid var(--rule); border-left: 5px solid var(--pending); border-radius: 3px; margin-bottom: 9px; padding: 7px 12px 8px; }
+.idea.v-worked { border-left-color: var(--worked); } .idea.v-partly { border-left-color: var(--partly); } .idea.v-failed { border-left-color: var(--failed); }
+.idea.ai { background: #f7f2fb; } .idea.auto { background: #eef7f8; }
+.idea .top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 9px; }
+.idea .num { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 14px; min-width: 18px; }
+.idea .ctx { font-family: 'Cinzel', serif; font-size: 11px; color: var(--muted); letter-spacing: .03em; }
+.idea .ctx a { color: var(--accent); }
+.idea .q { flex-basis: 100%; font-size: 17.5px; font-weight: 500; margin: 2px 0 3px; }
+.idea .who { font-size: 14px; color: var(--muted); }
+.idea .ops { margin-left: auto; display: flex; gap: 4px; }
+.idea dl { display: grid; grid-template-columns: 118px 1fr; gap: 1px 12px; margin: 0; font-size: 15.5px; }
+.idea dt { font-family: 'Cinzel', serif; font-size: 10.5px; letter-spacing: .05em; color: var(--accent); padding-top: 4px; }
+.idea dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.idea dd a { color: var(--accent); }
+.nocommit { color: var(--failed); font-size: 13.5px; }
+
+/* ---------- the sorter ---------- */
+.sorter { border: 1px solid var(--accent-soft); background: #fbf6ea; padding: 8px 12px 10px; border-radius: 3px; margin: 6px 0 14px; }
+.sorter p { margin: 2px 0 6px; font-size: 15px; }
+.proposal { border-top: 1px solid var(--rule); margin-top: 10px; padding-top: 8px; }
+.prop { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; border-bottom: 1px dotted var(--rule); font-size: 15.5px; }
+.prop input { margin-top: 5px; }
+.prop .pt { font-weight: 500; }
+.prop .pb { color: var(--muted); font-size: 14.5px; white-space: pre-wrap; }
+.warnbox { background: #fff4c7; border: 1px solid var(--accent-soft); padding: 5px 9px; font-size: 15px; margin: 6px 0; }
+
+/* ---------- threads ---------- */
+.thread { margin-bottom: 18px; }
+.thread h3 { display: flex; gap: 10px; align-items: baseline; }
+.thread h3 small { font-family: 'EB Garamond', serif; font-weight: 400; letter-spacing: 0; color: var(--muted); font-size: 14px; }
+.tlist { border-left: 2px solid var(--accent-soft); margin-left: 6px; padding-left: 14px; }
+
+/* ---------- dialog ---------- */
+dialog { border: 1px solid var(--accent); background: var(--parchment); padding: 0; width: min(720px, 96vw); max-height: 92vh; border-radius: 3px; box-shadow: 0 10px 40px #0005; }
+dialog::backdrop { background: #2a211866; }
+dialog form { padding: 14px 20px 16px; overflow-y: auto; max-height: 92vh; }
+dialog h2 { display: flex; align-items: center; }
+dialog h2 .x { margin-left: auto; }
+
+#toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--parchment); padding: 6px 14px; border-radius: 3px; font-size: 15px; display: none; z-index: 30; }
+.view { padding: 16px 24px 60px; }
 footer { font-size: 13.5px; color: var(--muted); padding: 10px 22px 20px; border-top: 1px solid var(--rule); }
-@media (max-width: 860px) {
-  .wrap { grid-template-columns: 1fr; }
-  #formPane { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--rule); }
-  .entry dl { grid-template-columns: 1fr; }
-  .entry dt { padding-top: 6px; }
+@media (max-width: 880px) {
+  .sessions { grid-template-columns: 1fr; }
+  #sessList { position: static; max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--rule); }
+  .sgrid { grid-template-columns: 1fr; }
+  .idea dl { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 <header>
   <h1>Kant Lab Method Log</h1>
-  <p>One row per attempt: what we asked, what we tried, and whether it worked.</p>
+  <nav aria-label="Views">
+    <button data-view="sessions" class="on">Sessions</button>
+    <button data-view="ideas">All ideas</button>
+    <button data-view="threads">Threads</button>
+    <button data-view="data">Import &amp; export</button>
+  </nav>
   <span class="stored" id="stored"></span>
 </header>
 
-<div class="wrap">
-  <!-- ======================= the form ======================= -->
-  <section id="formPane" aria-labelledby="formTitle">
-    <h2 id="formTitle">New entry</h2>
-    <div class="editing-banner">Editing an entry. <button class="btn light small" type="button" id="cancelEdit">Cancel</button></div>
-    <form id="form" autocomplete="off" novalidate>
-      <div class="row2">
-        <div class="field"><label for="f-date">Date <span class="req">*</span></label><input type="date" id="f-date" required></div>
-        <div class="field"><span class="lbl">Who started it <span class="req">*</span></span>
-          <select id="f-who" aria-label="Who started it">
-            <option value="">choose…</option>
-            <option value="professor">Professor</option>
-            <option value="student">Student</option>
-            <option value="AI suggestion">AI suggestion</option>
-          </select></div>
-      </div>
-      <div class="field"><label for="f-question">Question asked <span class="req">*</span></label>
-        <p class="hint">The research question this attempt was for, in a sentence.</p>
-        <textarea id="f-question" rows="2" placeholder="Where does the logic treat the nihil negativum without the term?"></textarea></div>
-      <div class="field"><span class="lbl">What we tried <span class="req">*</span></span>
-        <div class="choices" id="f-kind" role="radiogroup" aria-label="Kind of attempt">
-          <label><input type="radio" name="kind" value="search"> search</label>
-          <label><input type="radio" name="kind" value="feature"> feature</label>
-          <label><input type="radio" name="kind" value="prompt"> prompt</label>
-          <label><input type="radio" name="kind" value="other"> other</label>
-        </div>
-        <textarea id="f-tried" rows="2" style="margin-top:5px" placeholder='Portal search "contradictio in adjecto", all 19 texts'></textarea></div>
-      <div class="field"><label for="f-version">Tool version</label>
-        <p class="hint">A preview link with the commit ID, so this row can be re-checked against the exact version used.</p>
-        <input type="url" id="f-version" placeholder="https://raw.githack.com/mikrishnan/kant-lab/<commit>/logic-portal/index.html#q=…">
-        <div id="versionInfo"></div></div>
-      <div class="field"><label for="f-result">Result <span class="req">*</span></label>
-        <p class="hint">What the texts or the tool returned: counts, passages, what was missing. Facts, not judgement.</p>
-        <textarea id="f-result" rows="3"></textarea></div>
-      <div class="field"><span class="lbl">Verdict</span>
-        <div class="choices verdict" role="radiogroup" aria-label="Verdict">
-          <label><input type="radio" name="verdict" value="worked"> worked</label>
-          <label><input type="radio" name="verdict" value="partly"> partly</label>
-          <label><input type="radio" name="verdict" value="failed"> failed</label>
-          <label><input type="radio" name="verdict" value="" checked> not judged yet</label>
-        </div></div>
-      <div class="field"><label for="f-why">Why</label>
-        <p class="hint">Why it worked or did not, as you judge it.</p>
-        <textarea id="f-why" rows="2"></textarea></div>
-      <div class="field"><label for="f-changed">What we changed</label>
-        <p class="hint">In the tool, the question, or how we work, because of this. "Nothing yet" is a fine answer.</p>
-        <textarea id="f-changed" rows="2"></textarea></div>
-      <div class="field"><span class="lbl">Written by</span>
-        <div class="choices" role="radiogroup" aria-label="Written by">
-          <label><input type="radio" name="drafted" value="me" checked> me</label>
-          <label><input type="radio" name="drafted" value="AI-drafted"> AI-drafted</label>
-        </div></div>
-      <div class="actions">
-        <button class="btn" type="submit" id="saveBtn">Add to the log</button>
-        <button class="btn light" type="button" id="clearBtn">Clear</button>
-        <span id="formMsg"></span>
-      </div>
-    </form>
-  </section>
+<!-- ======================= sessions ======================= -->
+<main id="v-sessions" class="sessions">
+  <aside id="sessList" aria-label="Sessions">
+    <div class="actions" style="margin:0 0 10px"><button class="btn" id="newSess">+ New session</button></div>
+    <div id="sessItems"></div>
+  </aside>
+  <section id="sessDetail"></section>
+</main>
 
-  <!-- ======================= the log ======================= -->
-  <section id="logPane" aria-labelledby="logTitle">
-    <div class="toolbar">
-      <h2 id="logTitle" style="margin:0 8px 0 0">The log</h2>
-      <input type="search" id="q" placeholder="Search the log…" aria-label="Search the log">
-      <select id="fVerdict" aria-label="Filter by verdict">
-        <option value="">every verdict</option><option value="worked">worked</option><option value="partly">partly</option><option value="failed">failed</option><option value="pending">not judged yet</option>
-      </select>
-      <select id="fWho" aria-label="Filter by who started it">
-        <option value="">anyone</option><option value="professor">professor</option><option value="student">student</option><option value="AI suggestion">AI suggestion</option>
-      </select>
-      <select id="fKind" aria-label="Filter by kind">
-        <option value="">any kind</option><option value="search">search</option><option value="feature">feature</option><option value="prompt">prompt</option><option value="other">other</option>
-      </select>
-      <select id="sort" aria-label="Order">
-        <option value="new">newest first</option><option value="old">oldest first</option>
-      </select>
-      <span class="sp"></span>
-      <button class="btn light small" id="copyTsv" title="Copies every row shown, with a header row, for pasting into Google Sheets">Copy for Google Sheets</button>
-      <button class="btn light small" id="dlCsv">Download CSV</button>
-      <button class="btn light small" id="dlJson" title="A backup of the whole log, which Import reads back">Back up</button>
+<!-- ======================= all ideas ======================= -->
+<main id="v-ideas" class="view" hidden>
+  <div class="toolbar">
+    <h2 style="margin:0 8px 0 0">Every idea, across sessions</h2>
+    <input type="search" id="q" placeholder="Search…" aria-label="Search the ideas">
+    <select id="fVerdict" aria-label="Filter by verdict"><option value="">every verdict</option><option value="worked">worked</option><option value="partly">partly</option><option value="failed">failed</option><option value="pending">not judged yet</option></select>
+    <select id="fWho" aria-label="Filter by who raised it"><option value="">anyone</option><option value="professor">professor</option><option value="student">student</option><option value="AI suggestion">AI suggestion</option></select>
+    <select id="fKind" aria-label="Filter by kind"><option value="">any kind</option></select>
+    <select id="fThread" aria-label="Filter by thread"><option value="">any thread</option></select>
+    <select id="fBy" aria-label="Filter by who wrote it"><option value="">written by anyone</option><option value="me">written by me</option><option value="AI-drafted">AI-drafted</option><option value="auto-sorted">auto-sorted</option></select>
+    <select id="sort" aria-label="Order"><option value="new">newest first</option><option value="old">oldest first</option></select>
+  </div>
+  <div class="summary" id="ideasSummary"></div>
+  <div id="ideasList"></div>
+</main>
+
+<!-- ======================= threads ======================= -->
+<main id="v-threads" class="view" hidden>
+  <h2>Threads: one idea followed from session to session</h2>
+  <p class="msg">A thread is a tag you give ideas (in ✎, "Threads"), such as <i>nihil negativum</i> or <i>concept search</i>. Here each thread is listed with every idea that carries it, in the order of the sessions, so you can see how a question, or a way of working on it, developed.</p>
+  <div id="threadList"></div>
+</main>
+
+<!-- ======================= import & export ======================= -->
+<main id="v-data" class="view" hidden>
+  <h2>Import and export</h2>
+  <h3>To Google Sheets</h3>
+  <p class="msg">Two sheets: one row per <b>session</b>, and one row per <b>idea</b> (with its session's date and title). Click a cell in the sheet and paste.</p>
+  <div class="actions">
+    <button class="btn light" id="copySessions">Copy the sessions sheet</button>
+    <button class="btn light" id="copyIdeas">Copy the ideas sheet</button>
+    <button class="btn light" id="dlIdeas">Download the ideas sheet as CSV</button>
+  </div>
+  <h3>Back up</h3>
+  <p class="msg">The whole log as one file, which Import reads back here or in another browser. Do this regularly: the log lives only in this browser.</p>
+  <div class="actions"><button class="btn light" id="dlJson">Download a backup</button></div>
+  <h3>Import</h3>
+  <p class="msg">A backup file (this version or the earlier one), or the ideas sheet pasted from Google Sheets with its header row. Ideas are put in the session with the same date and title, which is made if it does not exist; nothing already in the log is changed, and an idea already there is not added twice.</p>
+  <textarea class="mono" id="importText" aria-label="Rows to import" placeholder="Paste the ideas sheet here, header row included"></textarea>
+  <div class="actions">
+    <button class="btn small" id="importBtn">Import pasted rows</button>
+    <label class="btn light small" style="cursor:pointer">Open a backup or CSV file…<input type="file" id="importFile" accept=".json,.csv,.tsv,.txt" hidden></label>
+    <span class="msg" id="importMsg"></span>
+  </div>
+  <h3>Example</h3>
+  <div class="actions"><button class="btn light" id="examples">Add the example session (nihil negativum, 4 Nov 2026)</button><span class="msg" id="exMsg"></span></div>
+</main>
+
+<footer>Kept in this browser only (its local storage) and never sent anywhere. Another browser starts empty, and clearing the browser's data clears the log, so back it up or copy it to the Google Sheets regularly. Transcripts can hold classmates' names and words: keep them here or in a private document, and do not commit them to the repository, which is public.</footer>
+
+<!-- the idea editor -->
+<dialog id="ideaDlg" aria-labelledby="ideaTitle">
+  <form id="ideaForm" method="dialog" autocomplete="off" novalidate>
+    <h2 id="ideaTitle">Idea <button type="button" class="btn light small x" id="ideaCancel">Close</button></h2>
+    <div class="field"><label for="i-idea">Main idea, or the question asked <span class="req">*</span></label>
+      <textarea id="i-idea" rows="2" placeholder="Where does the logic treat the nihil negativum without the term?"></textarea></div>
+    <div class="field"><span class="lbl">What we tried</span>
+      <div class="choices" id="i-kinds"></div>
+      <textarea id="i-tried" rows="2" style="margin-top:5px" placeholder='Portal search "contradictio in adjecto", all 19 texts'></textarea></div>
+    <div class="field"><label for="i-version">Tool version</label>
+      <p class="hint">A preview link with the commit ID, so this can be re-checked against the version used.</p>
+      <input type="url" id="i-version" placeholder="https://raw.githack.com/mikrishnan/kant-lab/<commit>/logic-portal/index.html#q=…">
+      <div class="vinfo" id="i-vinfo"></div></div>
+    <div class="field"><label for="i-result">Result, or what came of it</label>
+      <p class="hint">What the texts or the tool returned, or what the discussion arrived at. Facts, not judgement.</p>
+      <textarea id="i-result" rows="3"></textarea></div>
+    <div class="field"><span class="lbl">Verdict</span>
+      <div class="choices verdict" role="radiogroup" aria-label="Verdict">
+        <label><input type="radio" name="verdict" value="worked"> worked</label>
+        <label><input type="radio" name="verdict" value="partly"> partly</label>
+        <label><input type="radio" name="verdict" value="failed"> failed</label>
+        <label><input type="radio" name="verdict" value="" checked> not judged yet</label>
+      </div></div>
+    <div class="field"><label for="i-why">Why</label><textarea id="i-why" rows="2"></textarea></div>
+    <div class="field"><label for="i-changed">What we changed</label><textarea id="i-changed" rows="2"></textarea></div>
+    <div class="row2">
+      <div class="field"><label for="i-who">Who raised it</label>
+        <select id="i-who"><option value="">—</option><option value="professor">Professor</option><option value="student">Student</option><option value="AI suggestion">AI suggestion</option></select></div>
+      <div class="field"><label for="i-threads">Threads</label>
+        <input type="text" id="i-threads" list="threadNames" placeholder="nihil negativum, concept search">
+        <datalist id="threadNames"></datalist></div>
     </div>
-    <div class="summary" id="summary"></div>
-
-    <details class="box" id="importBox">
-      <summary>Import rows: from Google Sheets, a backup, or a draft by Claude</summary>
-      <p>Paste rows copied from the Google Sheet (with its header row), or the rows Claude drafted, or open a backup file. Rows are added to the log; nothing already in it is changed. Rows whose "Written by" is empty come in as written by you, unless you tick the box.</p>
-      <textarea id="importText" aria-label="Rows to import" placeholder="Date	Question asked	What we tried	Kind	Tool version	Result	Verdict	Why	What we changed	Who started it	Written by"></textarea>
-      <div class="actions">
-        <label style="font-size:15px"><input type="checkbox" id="importAi"> mark them AI-drafted</label>
-        <button class="btn small" id="importBtn">Import pasted rows</button>
-        <label class="btn light small" style="cursor:pointer">Open a backup or CSV file…<input type="file" id="importFile" accept=".json,.csv,.tsv,.txt" hidden></label>
-        <span id="importMsg"></span>
+    <div class="field"><span class="lbl">Written by</span>
+      <div class="choices" role="radiogroup" aria-label="Written by">
+        <label><input type="radio" name="drafted" value="me" checked> me</label>
+        <label><input type="radio" name="drafted" value="AI-drafted"> AI-drafted</label>
+        <label><input type="radio" name="drafted" value="auto-sorted"> auto-sorted</label>
       </div>
-    </details>
-
-    <details class="box">
-      <summary>Have Claude draft the rows at the end of a session</summary>
-      <p>Copy this into the Claude session you worked in. It knows what was tried, so it can write the rows; the verdicts and the "why" stay yours. Paste its answer into <b>Import</b> above with "mark them AI-drafted" ticked, then judge each row with ✎.</p>
-      <pre id="prompt"></pre>
-      <button class="btn light small" id="copyPrompt">Copy the prompt</button>
-    </details>
-
-    <div id="list"></div>
-  </section>
-</div>
-
-<footer>
-  Kept in this browser only (its local storage), and never sent anywhere. Another browser or computer starts empty, and clearing the browser's data clears the log, so copy it to the Google Sheet or press <b>Back up</b> regularly. The Sheet is the record the class shares; this page is for writing rows quickly and well.
-  <span id="exampleWrap"> · <button class="btn light small" id="examples">Add the example rows (nihil negativum, 4 Nov 2026)</button></span>
-</footer>
+      <p class="hint">Once you have checked and corrected an AI-drafted or auto-sorted idea, you can set this to "me".</p></div>
+    <div class="actions">
+      <button class="btn" type="submit" id="ideaSave">Save</button>
+      <span class="msg" id="ideaMsg"></span>
+    </div>
+  </form>
+</dialog>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* ---------- data ---------- */
-// The columns, in the order of the Sheet. `key` is the field in a stored row.
-const COLUMNS = [
-  { key: 'date',     head: 'Date' },
-  { key: 'question', head: 'Question asked' },
-  { key: 'tried',    head: 'What we tried' },
-  { key: 'kind',     head: 'Kind' },
-  { key: 'version',  head: 'Tool version' },
-  { key: 'result',   head: 'Result' },
-  { key: 'verdict',  head: 'Verdict' },
-  { key: 'why',      head: 'Why' },
-  { key: 'changed',  head: 'What we changed' },
-  { key: 'who',      head: 'Who started it' },
-  { key: 'drafted',  head: 'Written by' },
-];
-const STORE = 'kantlab-method-log-v1';
+const STORE = 'kantlab-method-log-v2';
+const STORE_V1 = 'kantlab-method-log-v1';    // the earlier, one-row-per-attempt log
+const SESSION_TYPES = ['class meeting', 'lab meeting', 'work session', 'office hours', 'other'];
+const KINDS = ['search', 'feature', 'prompt', 'discussion', 'other'];
 const VERDICTS = ['worked', 'partly', 'failed'];
 const WHO = ['professor', 'student', 'AI suggestion'];
-const KINDS = ['search', 'feature', 'prompt', 'other'];
-
-// Worked examples from the nihil negativum case study, drafted by Claude on 4 November 2026
-// from its own searches in the portal. Their verdicts are left for the student to give.
-const PORTAL_AT = 'https://raw.githack.com/mikrishnan/kant-lab/d3ba40d12994e28b66caf8840b63805363539085/logic-portal/index.html';
-const EXAMPLES = [
-  { date: '2026-11-04', who: 'professor', kind: 'search',
-    question: 'Where does Kant, or the tradition he lectured from, use the term "nihil negativum"?',
-    tried: 'Portal search for the phrase "nihil negativum", all 19 texts.',
-    version: PORTAL_AT + '#q=%22nihil%20negativum%22',
-    result: '24 occurrences in 18 passages, in 7 of 19 texts: Baumgarten § 7, the Reflexionen on Baumgarten, Negative Größen (AA II), KrV A and B, Metaphysik Mrongovius and K3. "none" in every logic text: Meier, the Reflexionen on logic, the seven lecture transcripts, and Jäsche.' },
-  { date: '2026-11-04', who: 'AI suggestion', kind: 'feature',
-    question: 'Does the lexicon\'s "Find it in the texts, in its Latin and German forms" reach the logic lectures?',
-    tried: 'Opened the lexicon entry for nihil negativum from the search above and pressed "Find it in the texts, in its Latin and German forms".',
-    version: PORTAL_AT + '#q=%22nihil+negativum%22+OR+Unm%C3%B6gliche&w=5',
-    result: 'It searched "nihil negativum" OR Unmögliche: 38 occurrences in 28 passages, still 7 of 19 texts, and still none in any logic text. It adds one German word, in its exact form; not "unmöglich", "Unding", or "widerspricht sich".' },
-  { date: '2026-11-04', who: 'AI suggestion', kind: 'search',
-    question: 'Do the logic lectures discuss the self-contradictory concept in their own words?',
-    tried: 'Portal searches for "contradictio in adjecto", and for "sich selbst widerspricht" OR "sich widerspricht" OR "sich selbst widersprechen".',
-    version: PORTAL_AT + '#q=%22contradictio%20in%20adjecto%22',
-    result: '"contradictio in adjecto": Blomberg 2, Wiener 1, Pölitz 2, Dohna 1, Jäsche 2. "sich (selbst) widerspricht": Reflexionen on logic 2, Wiener 1, Busolt 1, Philippi 2, Pölitz 3, Jäsche 2. The passages have not been read yet, so whether they are about the same thing is open.' },
-  { date: '2026-11-04', who: 'AI suggestion', kind: 'feature',
-    question: 'Does the portal need a way to show that a term is absent from a text?',
-    tried: 'Claude proposed it as a new feature in conversation, then checked the portal before building anything.',
-    version: PORTAL_AT + '#q=%22nihil%20negativum%22',
-    result: 'The portal already has it: "Where it occurs" lists every text, with "none" where the term is absent, and rates per 10,000 words.' },
+// The ideas sheet, in column order: the same as the earlier log's, with the session in front.
+const IDEA_COLS = [
+  { key: 'sdate', head: 'Session date' }, { key: 'stitle', head: 'Session' }, { key: 'n', head: '#' },
+  { key: 'idea', head: 'Main idea / question asked' }, { key: 'tried', head: 'What we tried' }, { key: 'kind', head: 'Kind' },
+  { key: 'version', head: 'Tool version' }, { key: 'result', head: 'Result' }, { key: 'verdict', head: 'Verdict' },
+  { key: 'why', head: 'Why' }, { key: 'changed', head: 'What we changed' }, { key: 'who', head: 'Who raised it' },
+  { key: 'threads', head: 'Threads' }, { key: 'drafted', head: 'Written by' },
 ];
+const SESSION_COLS = [
+  { key: 'date', head: 'Date' }, { key: 'title', head: 'Session' }, { key: 'type', head: 'Type' }, { key: 'goal', head: 'Goal' },
+  { key: 'summary', head: 'Summary' }, { key: 'ideas', head: 'Ideas' }, { key: 'worked', head: 'Worked' }, { key: 'partly', head: 'Partly' },
+  { key: 'failed', head: 'Failed' }, { key: 'pending', head: 'Not judged' }, { key: 'changed', head: 'What we changed' }, { key: 'next', head: 'Next steps' },
+];
+// Headings that the sorter takes as the session's own parts rather than ideas
+const NEXT_HEAD = /^(?:next(?:\s+steps?)?|to\s*-?\s*do|action\s+items?|follow[-\s]?ups?|homework|for next (?:time|week|session))\b/i;
+const CHANGED_HEAD = /^(?:decisions?|decided|changes?|what we changed|changed)\b/i;
+const GOAL_HEAD = /^(?:goals?|agenda|aims?|purpose)\b/i;
+
+// The example: the nihil negativum searches of 4 November 2026, drafted by Claude from its own
+// searches in the portal, verdicts left for the student.
+const PORTAL_AT = 'https://raw.githack.com/mikrishnan/kant-lab/d3ba40d12994e28b66caf8840b63805363539085/logic-portal/index.html';
+const EXAMPLE = {
+  date: '2026-11-04', title: 'Nihil negativum: first searches in the portal', type: 'work session', example: true,
+  goal: 'Use the nihil negativum as a case study: what can the Logic Portal tell us, and where does it fall short?',
+  summary: 'Searched the portal for the term, tried the lexicon\'s expansion, then searched the logic lectures for their own wording about self-contradictory concepts. Checked whether a proposed feature already existed.',
+  changed: '', next: 'Read the "contradictio in adjecto" passages in Blomberg, Wiener, Pölitz, Dohna and Jäsche beside Baumgarten § 7 and KrV A 291.',
+  ideas: [
+    { who: 'professor', kind: 'search', threads: ['nihil negativum'],
+      idea: 'Where does Kant, or the tradition he lectured from, use the term "nihil negativum"?',
+      tried: 'Portal search for the phrase "nihil negativum", all 19 texts.', version: PORTAL_AT + '#q=%22nihil%20negativum%22',
+      result: '24 occurrences in 18 passages, in 7 of 19 texts: Baumgarten § 7, the Reflexionen on Baumgarten, Negative Größen (AA II), KrV A and B, Metaphysik Mrongovius and K3. "none" in every logic text: Meier, the Reflexionen on logic, the seven lecture transcripts, and Jäsche.' },
+    { who: 'AI suggestion', kind: 'feature', threads: ['nihil negativum', 'concept search'],
+      idea: 'Does the lexicon\'s "Find it in the texts, in its Latin and German forms" reach the logic lectures?',
+      tried: 'Opened the lexicon entry for nihil negativum and pressed "Find it in the texts, in its Latin and German forms".', version: PORTAL_AT + '#q=%22nihil+negativum%22+OR+Unm%C3%B6gliche&w=5',
+      result: 'It searched "nihil negativum" OR Unmögliche: 38 occurrences in 28 passages, still none in any logic text. It adds one German word in its exact form; not "unmöglich", "Unding", or "widerspricht sich".' },
+    { who: 'AI suggestion', kind: 'search', threads: ['nihil negativum'],
+      idea: 'Do the logic lectures discuss the self-contradictory concept in their own words?',
+      tried: 'Portal searches for "contradictio in adjecto", and for "sich selbst widerspricht" OR "sich widerspricht" OR "sich selbst widersprechen".', version: PORTAL_AT + '#q=%22contradictio%20in%20adjecto%22',
+      result: '"contradictio in adjecto": Blomberg 2, Wiener 1, Pölitz 2, Dohna 1, Jäsche 2. "sich (selbst) widerspricht": Reflexionen on logic 2, Wiener 1, Busolt 1, Philippi 2, Pölitz 3, Jäsche 2. Not yet read, so whether they are about the same thing is open.' },
+    { who: 'AI suggestion', kind: 'feature', threads: ['AI use'],
+      idea: 'Does the portal need a way to show that a term is absent from a text?',
+      tried: 'Claude proposed it as a new feature in conversation, then checked the portal before building anything.', version: PORTAL_AT + '#q=%22nihil%20negativum%22',
+      result: 'The portal already has it: "Where it occurs" lists every text, with "none" where the term is absent, and rates per 10,000 words.' },
+  ],
+};
 
 /* ---------- state ---------- */
-let rows = [];          // the log, as stored
-let editing = null;     // id of the row in the form, when editing
+let sessions = [];
+let view = 'sessions';
+let current = null;     // id of the open session
+let editIdea = null;    // { sid, iid } while the idea editor is open
+let proposal = null;    // what the sorter proposes, before it is accepted
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
 function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-function toast(msg) { const t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(toast.tm); toast.tm = setTimeout(() => { t.style.display = 'none'; }, 2600); }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(toast.tm); toast.tm = setTimeout(() => { t.style.display = 'none'; }, 2800); }
 function fmtDate(d) {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || '');
   if (!m) return d || '';
   return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
+function byDate(a, b) { return (a.date || '').localeCompare(b.date || '') || (a.created || '').localeCompare(b.created || ''); }
+function sess(id) { return sessions.find(s => s.id === id); }
+function threadsOf(x) { return Array.isArray(x) ? x : String(x || '').split(/[,;]/).map(t => t.trim()).filter(Boolean); }
 
 /* The commit a tool-version link names, and the page it points to. A link without one
-   shows whatever the tool is now, not what it was when the row was written. */
+   shows whatever the tool is now, not what it was when the idea was logged. */
 function parseVersion(url) {
   if (!url) return null;
   let m = /raw\.githack\.com\/[^/]+\/[^/]+\/([0-9a-f]{7,40})\/([^#?]*)/i.exec(url);
@@ -309,208 +365,490 @@ function parseVersion(url) {
   if (m && /\d/.test(m[1]) && /[a-f]/i.test(m[1])) return { commit: m[1], path: '' };
   return { commit: null };
 }
+function verdictCounts(list) {
+  const c = { worked: 0, partly: 0, failed: 0, pending: 0 };
+  list.forEach(i => { c[i.verdict || 'pending']++; });
+  return c;
+}
 
 /* ---------- storage ---------- */
+function blankSession(o) {
+  return Object.assign({ id: uid(), created: new Date().toISOString(), date: today(), title: '', type: 'class meeting',
+    goal: '', summary: '', transcript: '', changed: '', next: '', ideas: [] }, o || {});
+}
+function blankIdea(o) {
+  return Object.assign({ id: uid(), idea: '', tried: '', kind: '', version: '', result: '', verdict: '', why: '', changed: '', who: '', threads: [], drafted: 'me' }, o || {});
+}
 function load() {
-  try { rows = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch (e) { rows = []; }
-  if (!Array.isArray(rows)) rows = [];
+  try { sessions = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch (e) { sessions = []; }
+  if (!Array.isArray(sessions)) sessions = [];
+  // Rows from the earlier log come over once, grouped into a session per date.
+  try {
+    const old = JSON.parse(localStorage.getItem(STORE_V1) || 'null');
+    if (Array.isArray(old) && old.length && !localStorage.getItem(STORE + '-migrated')) {
+      sessionsFromV1(old).forEach(addOrMerge);
+      localStorage.setItem(STORE + '-migrated', new Date().toISOString());
+      save();
+      setTimeout(() => toast(old.length + ' entries from the earlier log were moved into sessions by date.'), 400);
+    }
+  } catch (e) { /* the earlier log is left as it was */ }
 }
 function save() {
-  try { localStorage.setItem(STORE, JSON.stringify(rows)); }
-  catch (e) { toast('Could not save in this browser: back up the log now.'); }
+  try { localStorage.setItem(STORE, JSON.stringify(sessions)); $('saved') && ($('saved').textContent = 'saved'); }
+  catch (e) { toast('Could not save in this browser: download a backup now.'); }
 }
-
-/* ---------- the form ---------- */
-function radio(name) { const r = document.querySelector('input[name="' + name + '"]:checked'); return r ? r.value : ''; }
-function setRadio(name, v) { document.querySelectorAll('input[name="' + name + '"]').forEach(r => { r.checked = r.value === (v || ''); }); }
-
-function readForm() {
-  return {
-    date: $('f-date').value, who: $('f-who').value, question: $('f-question').value.trim(),
-    kind: radio('kind'), tried: $('f-tried').value.trim(), version: $('f-version').value.trim(),
-    result: $('f-result').value.trim(), verdict: radio('verdict'), why: $('f-why').value.trim(),
-    changed: $('f-changed').value.trim(), drafted: radio('drafted') || 'me',
-  };
-}
-function fillForm(r) {
-  $('f-date').value = r.date || today(); $('f-who').value = r.who || '';
-  $('f-question').value = r.question || ''; setRadio('kind', r.kind); $('f-tried').value = r.tried || '';
-  $('f-version').value = r.version || ''; $('f-result').value = r.result || ''; setRadio('verdict', r.verdict);
-  $('f-why').value = r.why || ''; $('f-changed').value = r.changed || ''; setRadio('drafted', r.drafted || 'me');
-  showVersion();
-}
-function clearForm() {
-  editing = null;
-  document.body.classList.remove('editing');
-  $('formTitle').textContent = 'New entry';
-  $('saveBtn').textContent = 'Add to the log';
-  // keep the date and who started it: the next row is usually the same session
-  const keep = { date: $('f-date').value || today(), who: $('f-who').value };
-  fillForm(keep);
-  $('formMsg').textContent = '';
-  $('formMsg').className = '';
-}
-function showVersion() {
-  const v = $('f-version').value.trim(), info = $('versionInfo'), p = parseVersion(v);
-  if (!v) { info.textContent = ''; info.className = ''; return; }
-  if (p && p.commit) { info.textContent = '✓ commit ' + p.commit.slice(0, 7) + (p.path ? ' · ' + p.path : ''); info.className = 'ok'; }
-  else { info.textContent = '⚠ No commit ID: this link shows the tool as it is now, not the version you used.'; info.className = 'warn'; }
-}
-
-$('form').onsubmit = e => {
-  e.preventDefault();
-  const r = readForm(), missing = [];
-  if (!r.date) missing.push('date');
-  if (!r.who) missing.push('who started it');
-  if (!r.question) missing.push('question asked');
-  if (!r.kind) missing.push('kind of attempt');
-  if (!r.tried) missing.push('what we tried');
-  if (!r.result) missing.push('result');
-  if (missing.length) { $('formMsg').textContent = 'Still needed: ' + missing.join(', ') + '.'; $('formMsg').className = 'err'; return; }
-  if (editing) {
-    const i = rows.findIndex(x => x.id === editing);
-    if (i >= 0) rows[i] = Object.assign({}, rows[i], r, { updated: new Date().toISOString() });
-    toast('Entry updated.');
-  } else {
-    rows.push(Object.assign({ id: uid(), created: new Date().toISOString() }, r));
-    toast('Added to the log.');
-  }
-  save();
-  clearForm();
-  render();
-};
-$('clearBtn').onclick = clearForm;
-$('cancelEdit').onclick = clearForm;
-$('f-version').addEventListener('input', showVersion);
-
-function editRow(id) {
-  const r = rows.find(x => x.id === id);
-  if (!r) return;
-  editing = id;
-  fillForm(r);
-  document.body.classList.add('editing');
-  $('formTitle').textContent = 'Edit entry';
-  $('saveBtn').textContent = 'Save changes';
-  $('formPane').scrollTop = 0;
-  if (innerWidth <= 860) $('formPane').scrollIntoView({ behavior: 'smooth' });
-  // an AI-drafted row is opened to be judged: start at the verdict
-  if (r.drafted === 'AI-drafted' && !r.verdict) setTimeout(() => document.querySelector('input[name=verdict]').focus(), 50);
-  else $('f-question').focus();
-}
-function deleteRow(id) {
-  const r = rows.find(x => x.id === id);
-  if (!r || !confirm('Delete this entry?\n\n' + r.question)) return;
-  rows = rows.filter(x => x.id !== id);
-  if (editing === id) clearForm();
-  save();
-  render();
-  toast('Entry deleted.');
-}
-
-/* ---------- the list ---------- */
-function shown() {
-  const q = $('q').value.trim().toLowerCase(), fv = $('fVerdict').value, fw = $('fWho').value, fk = $('fKind').value;
-  let out = rows.filter(r => {
-    if (fv === 'pending' ? r.verdict : fv && r.verdict !== fv) return false;
-    if (fw && r.who !== fw) return false;
-    if (fk && r.kind !== fk) return false;
-    if (q && !COLUMNS.some(c => String(r[c.key] || '').toLowerCase().includes(q))) return false;
-    return true;
+function sessionsFromV1(rows) {
+  const groups = new Map();
+  rows.forEach(r => {
+    const d = r.date || today();
+    if (!groups.has(d)) groups.set(d, blankSession({ date: d, title: 'Entries from the earlier log', type: 'other' }));
+    groups.get(d).ideas.push(blankIdea({ idea: r.question || '', tried: r.tried || '', kind: r.kind || '', version: r.version || '',
+      result: r.result || '', verdict: r.verdict || '', why: r.why || '', changed: r.changed || '', who: r.who || '',
+      drafted: r.drafted === 'AI-drafted' ? 'AI-drafted' : 'me', threads: [] }));
   });
-  out.sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.created || '').localeCompare(b.created || ''));
-  if ($('sort').value === 'new') out.reverse();
+  return [...groups.values()];
+}
+// Add a session, or merge its ideas into the one with the same date and title; an idea
+// already there (same text, tried and result) is not added twice.
+function addOrMerge(s) {
+  const sig = i => [i.idea, i.tried, i.result].join('\u0001');
+  const same = sessions.find(x => x.date === s.date && (x.title || '') === (s.title || ''));
+  if (!same) { sessions.push(s); return s.ideas.length; }
+  const have = new Set(same.ideas.map(sig));
+  let n = 0;
+  s.ideas.forEach(i => { if (!have.has(sig(i))) { same.ideas.push(i); have.add(sig(i)); n++; } });
+  ['goal', 'summary', 'transcript', 'changed', 'next'].forEach(k => { if (!same[k] && s[k]) same[k] = s[k]; });
+  return n;
+}
+
+/* ---------- views ---------- */
+function showView(v) {
+  view = v;
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+  ['sessions', 'ideas', 'threads', 'data'].forEach(k => { $('v-' + k).hidden = k !== v; });
+  history.replaceState(null, '', '#' + (v === 'sessions' && current ? 's=' + current : 'view=' + v));
+  render();
+}
+function render() {
+  const nIdeas = sessions.reduce((n, s) => n + s.ideas.length, 0);
+  $('stored').textContent = sessions.length + (sessions.length === 1 ? ' session' : ' sessions') + ', ' + nIdeas + (nIdeas === 1 ? ' idea' : ' ideas') + ' in this browser';
+  $('threadNames').innerHTML = allThreads().map(t => '<option value="' + esc(t) + '">').join('');
+  if (view === 'sessions') { renderSessList(); renderSession(); }
+  if (view === 'ideas') renderIdeas();
+  if (view === 'threads') renderThreads();
+  if (view === 'data') $('exMsg').textContent = sessions.some(s => s.example) ? 'Already added.' : '';
+}
+
+/* ---------- the list of sessions ---------- */
+function renderSessList() {
+  const list = sessions.slice().sort(byDate).reverse();
+  $('sessItems').innerHTML = list.length ? list.map(s => {
+    const c = verdictCounts(s.ideas), n = s.ideas.length;
+    const bar = n ? '<div class="vbar">' + ['worked', 'partly', 'failed', 'pending'].map(k => c[k] ? '<span style="flex:' + c[k] + ';background:var(--' + k + ')' + (k === 'pending' ? ';opacity:.35' : '') + '"></span>' : '').join('') + '</div>' : '';
+    return '<button class="sitem' + (s.id === current ? ' on' : '') + '" data-sid="' + s.id + '"><span class="d">' + esc(fmtDate(s.date)) + ' · ' + esc(s.type) + '</span>' +
+      '<span class="t">' + esc(s.title || 'Untitled session') + '</span><span class="c">' + n + (n === 1 ? ' idea' : ' ideas') +
+      (n ? ' · ' + c.worked + ' worked, ' + c.partly + ' partly, ' + c.failed + ' failed' + (c.pending ? ', ' + c.pending + ' not judged' : '') : '') + '</span>' + bar + '</button>';
+  }).join('') : '<p class="empty">No sessions yet.</p>';
+}
+$('sessItems').addEventListener('click', e => { const b = e.target.closest('[data-sid]'); if (b) openSession(b.dataset.sid); });
+$('newSess').onclick = () => {
+  const s = blankSession();
+  sessions.push(s); save();
+  openSession(s.id);
+  setTimeout(() => { const t = document.querySelector('#sessDetail .ttl'); if (t) t.focus(); }, 30);
+};
+function openSession(id) {
+  current = id; proposal = null;
+  if (view !== 'sessions') showView('sessions'); else { history.replaceState(null, '', '#s=' + id); render(); }
+  $('sessDetail').scrollTop = 0; window.scrollTo(0, 0);
+}
+
+/* ---------- one session ---------- */
+function renderSession() {
+  const box = $('sessDetail'), s = sess(current);
+  if (!s) {
+    box.innerHTML = '<h2>A session at a time</h2><p>Each class meeting, lab meeting or work session is one entry. Inside it go the main ideas discussed, in the order they came up, each with what was tried, what came of it, and your verdict.</p>' +
+      '<p>Press <b>+ New session</b>, or open one on the left. To start from notes, a summary or a transcript, make the session and paste it into its <b>Summary</b> or <b>Transcript</b>, then sort it into ideas.</p>' +
+      (sessions.length ? '' : '<p class="msg">To see how it looks filled in, add the example session under <a href="#view=data" data-go="data">Import &amp; export</a>.</p>');
+    return;
+  }
+  const c = verdictCounts(s.ideas);
+  box.innerHTML =
+    '<div class="shead"><input class="ttl" data-f="title" value="' + esc(s.title) + '" placeholder="Title of the session" aria-label="Title of the session">' +
+    '<span class="saved" id="saved"></span>' +
+    '<button class="btn light small" id="copyDoc" title="Copies the session as formatted text, for a Google Doc">Copy for Google Docs</button>' +
+    '<button class="btn danger small" id="delSess">Delete session</button></div>' +
+    '<div class="sgrid">' +
+    '<div class="row2"><div class="field"><label>Date</label><input type="date" data-f="date" value="' + esc(s.date) + '"></div>' +
+    '<div class="field"><label>Type</label><select data-f="type">' + SESSION_TYPES.map(t => '<option' + (t === s.type ? ' selected' : '') + '>' + t + '</option>').join('') + '</select></div></div>' +
+    '<div class="field"><label>Goal</label><input type="text" data-f="goal" value="' + esc(s.goal) + '" placeholder="What the session set out to do"></div>' +
+    '<div class="field wide"><label>Summary</label><p class="hint">Your notes or summary of the meeting. Headings, bullets or paragraphs, one per idea, sort best.</p><textarea data-f="summary" rows="5">' + esc(s.summary) + '</textarea></div>' +
+    '<details class="box wide"' + (s.transcript ? ' open' : '') + '><summary>Transcript (optional)' + (s.transcript ? ': ' + s.transcript.split(/\s+/).length + ' words' : '') + '</summary>' +
+    '<p class="hint">A transcript of the meeting, if you have one. It stays in this browser; it is copied to Claude only if you press <b>Sort with Claude</b>.</p><textarea data-f="transcript" rows="8" class="mono">' + esc(s.transcript) + '</textarea></details>' +
+    '<div class="field wide sorter"><span class="lbl">Sort the summary or transcript into ideas</span>' +
+    '<p><b>Sort automatically</b> splits the summary by its headings, bullets or paragraphs, at once, in this page. <b>Sort with Claude</b> is for a transcript or loose notes: it copies a prompt with the text; paste it into Claude, then paste Claude\'s answer back here. Either way you see the ideas first and keep the ones you tick. Verdicts are never guessed: they stay yours.</p>' +
+    '<div class="actions" style="margin-top:4px"><button class="btn small" id="autoSort">Sort automatically</button><button class="btn light small" id="claudeSort">Sort with Claude…</button></div>' +
+    '<div id="sortArea"></div></div>' +
+    '<div class="field"><label>What we changed</label><p class="hint">In the tools, the questions, or how we work, because of this session.</p><textarea data-f="changed" rows="2">' + esc(s.changed) + '</textarea></div>' +
+    '<div class="field"><label>Next steps</label><p class="hint">What to do before or at the next session.</p><textarea data-f="next" rows="2">' + esc(s.next) + '</textarea></div>' +
+    '</div>' +
+    '<h3>Ideas discussed, in order <span class="msg" style="font-family:\'EB Garamond\';letter-spacing:0;font-weight:400">· ' + s.ideas.length + (s.ideas.length ? ' · ' + c.worked + ' worked, ' + c.partly + ' partly, ' + c.failed + ' failed, ' + c.pending + ' not judged' : '') + '</span></h3>' +
+    '<div id="sessIdeas">' + (s.ideas.length ? s.ideas.map((i, k) => ideaHtml(i, s, k, false)).join('') : '<p class="empty">No ideas yet: add one, or sort the summary.</p>') + '</div>' +
+    '<div class="actions"><button class="btn" id="addIdea">+ Add an idea</button></div>';
+  renderSortArea();
+}
+// Session fields save as you type.
+$('sessDetail').addEventListener('input', e => {
+  const f = e.target.dataset.f, s = sess(current);
+  if (!f || !s) return;
+  s[f] = e.target.value;
+  if (f === 'title' || f === 'date' || f === 'type') renderSessList();
+  $('saved').textContent = 'saving…';
+  clearTimeout(save.tm); save.tm = setTimeout(save, 300);
+});
+$('sessDetail').addEventListener('click', e => {
+  const t = e.target, s = sess(current);
+  if (t.dataset.go) { e.preventDefault(); showView(t.dataset.go); return; }
+  if (!s) return;
+  if (t.id === 'addIdea') openIdea(s.id, null);
+  if (t.id === 'delSess' && confirm('Delete this session and its ' + s.ideas.length + ' ideas?\n\n' + (s.title || 'Untitled session'))) {
+    sessions = sessions.filter(x => x.id !== s.id); current = null; save(); render(); toast('Session deleted.');
+  }
+  if (t.id === 'copyDoc') copyDoc(s);
+  if (t.id === 'autoSort') { proposal = autoSort(s); renderSortArea(); }
+  if (t.id === 'claudeSort') { proposal = { claude: true }; renderSortArea(); }
+  if (t.id === 'copyClaude') copyText(claudePrompt(s), 'Prompt and text copied: paste them into Claude.');
+  if (t.id === 'readClaude') {
+    try { proposal = fromClaude($('claudeAnswer').value); renderSortArea(); }
+    catch (err) { $('claudeMsg').textContent = 'Could not read that answer: ' + err.message; $('claudeMsg').className = 'msg err'; }
+  }
+  if (t.id === 'acceptSort') acceptProposal(s);
+  if (t.id === 'dropSort') { proposal = null; renderSortArea(); }
+  const op = t.closest('[data-op]');
+  if (op) ideaOp(op.dataset.op, op.dataset.sid, op.dataset.iid);
+  const th = t.closest('[data-thread]');
+  if (th) { $('fThread').value = th.dataset.thread; showView('ideas'); }
+});
+
+/* ---------- an idea, wherever it is shown ---------- */
+function ideaHtml(i, s, k, withSession) {
+  const v = i.verdict || 'pending', p = parseVersion(i.version);
+  const ver = i.version ? '<a href="' + esc(i.version) + '" target="_blank" rel="noopener">' + esc(p && p.commit ? 'commit ' + p.commit.slice(0, 7) + (p.path ? ' · ' + p.path : '') : i.version) + '</a>' + (p && p.commit ? '' : ' <span class="nocommit">no commit ID</span>') : '';
+  const dd = (label, val) => val ? '<dt>' + label + '</dt><dd>' + val + '</dd>' : '';
+  const prov = i.drafted === 'AI-drafted' ? '<span class="chip ai">AI-drafted</span>' : i.drafted === 'auto-sorted' ? '<span class="chip auto">auto-sorted</span>' : '';
+  const ops = '<span class="ops">' + (withSession ? '' :
+      '<button class="btn light small" data-op="up" data-sid="' + s.id + '" data-iid="' + i.id + '" title="Earlier in the session"' + (k === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button class="btn light small" data-op="down" data-sid="' + s.id + '" data-iid="' + i.id + '" title="Later in the session"' + (k === s.ideas.length - 1 ? ' disabled' : '') + '>↓</button>') +
+    '<button class="btn light small" data-op="edit" data-sid="' + s.id + '" data-iid="' + i.id + '">✎ ' + (i.verdict ? 'Edit' : 'Judge') + '</button>' +
+    '<button class="btn danger small" data-op="del" data-sid="' + s.id + '" data-iid="' + i.id + '" aria-label="Delete">✕</button></span>';
+  return '<article class="idea v-' + v + (i.drafted === 'AI-drafted' ? ' ai' : i.drafted === 'auto-sorted' ? ' auto' : '') + '"><div class="top">' +
+    '<span class="num">' + (k + 1) + '</span>' +
+    (withSession ? '<span class="ctx"><a href="#s=' + s.id + '" data-open="' + s.id + '">' + esc(fmtDate(s.date)) + ' · ' + esc(s.title || 'Untitled session') + '</a></span>' : '') +
+    '<span class="chip ' + v + '">' + (i.verdict || 'not judged yet') + '</span>' +
+    (i.kind ? '<span class="chip kind">' + esc(i.kind) + '</span>' : '') + prov +
+    threadsOf(i.threads).map(t => '<span class="chip thread" data-thread="' + esc(t) + '" title="Every idea in this thread">' + esc(t) + '</span>').join('') +
+    (i.who ? '<span class="who">raised by ' + esc(i.who) + '</span>' : '') + ops +
+    '<div class="q">' + esc(i.idea) + '</div></div>' +
+    '<dl>' + dd('What we tried', esc(i.tried)) + dd('Tool version', ver) + dd('Result', esc(i.result)) + dd('Why', esc(i.why)) + dd('What we changed', esc(i.changed)) + '</dl></article>';
+}
+function ideaOp(op, sid, iid) {
+  const s = sess(sid);
+  if (!s) return;
+  const k = s.ideas.findIndex(i => i.id === iid);
+  if (k < 0) return;
+  if (op === 'edit') return openIdea(sid, iid);
+  if (op === 'del') {
+    if (!confirm('Delete this idea?\n\n' + s.ideas[k].idea)) return;
+    s.ideas.splice(k, 1); toast('Idea deleted.');
+  }
+  if (op === 'up' && k > 0) s.ideas.splice(k - 1, 0, s.ideas.splice(k, 1)[0]);
+  if (op === 'down' && k < s.ideas.length - 1) s.ideas.splice(k + 1, 0, s.ideas.splice(k, 1)[0]);
+  save(); render();
+}
+['ideasList', 'threadList'].forEach(id => $(id).addEventListener('click', e => {
+  const o = e.target.closest('[data-open]'); if (o) { e.preventDefault(); openSession(o.dataset.open); return; }
+  const op = e.target.closest('[data-op]'); if (op) ideaOp(op.dataset.op, op.dataset.sid, op.dataset.iid);
+  const th = e.target.closest('[data-thread]'); if (th) { $('fThread').value = th.dataset.thread; showView('ideas'); }
+}));
+
+/* ---------- the idea editor ---------- */
+$('i-kinds').innerHTML = KINDS.map(k => '<label><input type="radio" name="kind" value="' + k + '"> ' + k + '</label>').join('');
+function radio(name) { const r = document.querySelector('#ideaForm input[name="' + name + '"]:checked'); return r ? r.value : ''; }
+function setRadio(name, v) { document.querySelectorAll('#ideaForm input[name="' + name + '"]').forEach(r => { r.checked = r.value === (v || ''); }); }
+function openIdea(sid, iid) {
+  const s = sess(sid), i = iid ? s.ideas.find(x => x.id === iid) : blankIdea();
+  editIdea = { sid, iid };
+  $('ideaTitle').firstChild.textContent = (iid ? 'Idea ' + (s.ideas.indexOf(i) + 1) : 'New idea') + ' · ' + (s.title || fmtDate(s.date)) + ' ';
+  $('i-idea').value = i.idea; setRadio('kind', i.kind); $('i-tried').value = i.tried; $('i-version').value = i.version;
+  $('i-result').value = i.result; setRadio('verdict', i.verdict); $('i-why').value = i.why; $('i-changed').value = i.changed;
+  $('i-who').value = i.who; $('i-threads').value = threadsOf(i.threads).join(', '); setRadio('drafted', i.drafted || 'me');
+  $('ideaMsg').textContent = ''; showV();
+  $('ideaDlg').showModal();
+  setTimeout(() => (iid && !i.verdict && i.drafted !== 'me' ? document.querySelector('#ideaForm input[name=verdict]') : $('i-idea')).focus(), 30);
+}
+function showV() {
+  const v = $('i-version').value.trim(), info = $('i-vinfo'), p = parseVersion(v);
+  if (!v) { info.textContent = ''; info.className = 'vinfo'; return; }
+  if (p && p.commit) { info.textContent = '✓ commit ' + p.commit.slice(0, 7) + (p.path ? ' · ' + p.path : ''); info.className = 'vinfo ok'; }
+  else { info.textContent = '⚠ No commit ID: this link shows the tool as it is now, not the version you used.'; info.className = 'vinfo warn'; }
+}
+$('i-version').addEventListener('input', showV);
+$('ideaCancel').onclick = () => $('ideaDlg').close();
+$('ideaForm').onsubmit = e => {
+  e.preventDefault();
+  const s = sess(editIdea.sid);
+  const o = { idea: $('i-idea').value.trim(), kind: radio('kind'), tried: $('i-tried').value.trim(), version: $('i-version').value.trim(),
+    result: $('i-result').value.trim(), verdict: radio('verdict'), why: $('i-why').value.trim(), changed: $('i-changed').value.trim(),
+    who: $('i-who').value, threads: threadsOf($('i-threads').value), drafted: radio('drafted') || 'me' };
+  if (!o.idea) { $('ideaMsg').textContent = 'Give the idea or question in a sentence.'; $('ideaMsg').className = 'msg err'; return; }
+  if (editIdea.iid) Object.assign(s.ideas.find(x => x.id === editIdea.iid), o, { updated: new Date().toISOString() });
+  else s.ideas.push(blankIdea(o));
+  save(); $('ideaDlg').close(); render();
+  toast(editIdea.iid ? 'Idea saved.' : 'Idea added.');
+};
+
+/* ---------- sorting a summary into ideas, in the page ---------- */
+/* Splits the summary by its own structure: headings first (a line starting with #, a short
+   line ending in a colon, or "Topic 2"), else top-level bullets or numbered points, else
+   paragraphs. Each part becomes a proposed idea, its first line the idea and the rest what
+   came of it. Parts headed "Next steps", "Decisions" or "Goal" go to the session's own fields.
+   It does not try a transcript, which has no such structure. */
+function autoSort(s) {
+  const text = (s.summary || '').replace(/\r/g, '');
+  if (!text.trim()) return { warn: s.transcript ? 'The summary is empty. A transcript needs Sort with Claude: the built-in sorter works on written summaries.' : 'Write or paste a summary first.' };
+  const lines = text.split('\n');
+  const speaker = lines.filter(l => /^\s*(?:\[?\d{1,2}:\d{2}(?::\d{2})?\]?\s*)?[A-ZÄÖÜ][\w .'’-]{0,28}:\s+\S/.test(l)).length;
+  const transcriptLike = speaker >= 4 && speaker / lines.filter(l => l.trim()).length > 0.4;
+  const isHead = l => /^\s*#{1,6}\s+\S/.test(l) || /^\s*(?:topic|idea|item|part|point)\s+\d+\b/i.test(l) ||
+    (/^\s*[^\s*•-].{0,70}:\s*$/.test(l)) || /^\s*\*\*[^*]{2,80}\*\*\s*:?\s*$/.test(l);
+  const bullet = /^(\s*)(?:[-*•–]|\d{1,2}[.)]|[a-z][.)])\s+/;
+  const clean = l => l.replace(/^\s*#{1,6}\s+/, '').replace(/^\s*\*\*(.*?)\*\*\s*:?\s*$/, '$1').replace(bullet, '').replace(/:\s*$/, '').trim();
+  let parts = [];
+  if (lines.some(isHead)) {
+    let cur = null;
+    lines.forEach(l => {
+      if (isHead(l)) { cur = { head: clean(l), body: [] }; parts.push(cur); }
+      else if (l.trim()) { if (!cur) { cur = { head: '', body: [] }; parts.push(cur); } cur.body.push(l); }
+    });
+  } else if (lines.filter(l => bullet.test(l)).length >= 2) {
+    const indent = Math.min(...lines.filter(l => bullet.test(l)).map(l => bullet.exec(l)[1].length));
+    let cur = null;
+    lines.forEach(l => {
+      const m = bullet.exec(l);
+      if (m && m[1].length === indent) { cur = { head: clean(l), body: [] }; parts.push(cur); }
+      else if (l.trim()) { if (!cur) { cur = { head: '', body: [] }; parts.push(cur); } cur.body.push(l); }
+    });
+  } else {
+    parts = text.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean).map(p => {
+      const m = /^(.{10,160}?[.?!])\s+([\s\S]*)$/.exec(p.replace(/\n/g, ' '));
+      return m ? { head: m[1], body: [m[2]] } : { head: p.replace(/\n/g, ' '), body: [] };
+    });
+  }
+  const out = { ideas: [], next: [], changed: [], goal: [], warn: transcriptLike ? 'This looks like a transcript (most lines start with a speaker). The built-in sorter is made for summaries, so these ideas are likely to be poor: Sort with Claude will do better.' : '' };
+  parts.forEach(p => {
+    const body = p.body.map(clean).filter(Boolean).join('\n');
+    if (NEXT_HEAD.test(p.head)) { out.next.push(body || p.head); return; }
+    if (CHANGED_HEAD.test(p.head)) { out.changed.push(body || p.head); return; }
+    if (GOAL_HEAD.test(p.head)) { out.goal.push(body || p.head); return; }
+    let head = p.head, rest = body;
+    if (!head) { const m = /^(.{10,160}?[.?!])\s+([\s\S]*)$/.exec(body.replace(/\n/g, ' ')); head = m ? m[1] : body; rest = m ? m[2] : ''; }
+    if (!head) return;
+    const all = head + ' ' + rest;
+    const url = (all.match(/https?:\/\/\S+/g) || []).find(u => parseVersion(u).commit) || '';
+    out.ideas.push(blankIdea({ idea: head, result: rest, version: url.replace(/[).,;]+$/, ''), kind: guessKind(all), drafted: 'auto-sorted', keep: true }));
+  });
+  if (!out.ideas.length && !out.next.length) out.warn = out.warn || 'Found nothing to sort: try putting each idea on its own line, as a bullet or under a heading.';
   return out;
 }
-
-function render() {
-  const list = $('list'), show = shown();
-  $('stored').textContent = rows.length + (rows.length === 1 ? ' entry' : ' entries') + ' in this browser';
-  $('exampleWrap').style.display = rows.some(r => r.example) ? 'none' : '';
-  // summary of what is shown
-  const n = k => show.filter(r => (k === 'pending' ? !r.verdict : r.verdict === k)).length;
-  const by = k => show.filter(r => r.who === k).length;
-  const months = {};
-  show.forEach(r => { const m = (r.date || '').slice(0, 7); if (m) months[m] = (months[m] || 0) + 1; });
-  $('summary').innerHTML = rows.length ? '<span><b>' + show.length + '</b> shown</span>' +
-    '<span>' + VERDICTS.map(v => '<span class="chip ' + v + '">' + v + '</span> ' + n(v)).join(' &nbsp;') + ' &nbsp;<span class="chip pending">not judged</span> ' + n('pending') + '</span>' +
-    '<span>started by: ' + WHO.map(w => w + ' <b>' + by(w) + '</b>').join(', ') + '</span>' +
-    '<span>AI-drafted <b>' + show.filter(r => r.drafted === 'AI-drafted').length + '</b></span>' +
-    (Object.keys(months).length > 1 ? '<span>by month: ' + Object.keys(months).sort().map(m => fmtDate(m + '-01').replace(/^\d+ /, '') + ' <b>' + months[m] + '</b>').join(', ') + '</span>' : '')
-    : '<span>No entries yet. Fill in the form, or add the example rows at the bottom of the page.</span>';
-  if (!show.length) { list.innerHTML = rows.length ? '<p class="empty">No entry matches the search and filters.</p>' : ''; return; }
-  list.innerHTML = show.map(r => {
-    const v = r.verdict || 'pending', p = parseVersion(r.version);
-    const ver = r.version ? '<a href="' + esc(r.version) + '" target="_blank" rel="noopener">' + esc(p && p.commit ? 'commit ' + p.commit.slice(0, 7) + (p.path ? ' · ' + p.path : '') : r.version) + '</a>' +
-      (p && p.commit ? '' : ' <span class="nocommit">no commit ID</span>') : '';
-    const dd = (label, val) => val ? '<dt>' + label + '</dt><dd>' + val + '</dd>' : '';
-    return '<article class="entry v-' + v + (r.drafted === 'AI-drafted' ? ' ai' : '') + '">' +
-      '<div class="top"><span class="date">' + esc(fmtDate(r.date)) + '</span>' +
-      '<span class="chip ' + v + '">' + (r.verdict || 'not judged yet') + '</span>' +
-      (r.kind ? '<span class="chip kind">' + esc(r.kind) + '</span>' : '') +
-      (r.drafted === 'AI-drafted' ? '<span class="chip ai">AI-drafted</span>' : '') +
-      '<span class="who">started by ' + esc(r.who || '—') + '</span>' +
-      '<span class="ops"><button class="btn light small" data-edit="' + r.id + '" title="Edit, or give the verdict">✎ ' + (r.verdict ? 'Edit' : 'Judge') + '</button><button class="btn danger small" data-del="' + r.id + '" aria-label="Delete">✕</button></span>' +
-      '<div class="q">' + esc(r.question) + '</div></div>' +
-      '<dl>' + dd('What we tried', esc(r.tried)) + dd('Tool version', ver) + dd('Result', esc(r.result)) +
-      dd('Why', esc(r.why)) + dd('What we changed', esc(r.changed)) + '</dl></article>';
-  }).join('');
+// The kind is a guess from the wording, shown as a proposal like everything else here.
+function guessKind(t) {
+  if (/\b(?:search(?:ed|es|ing)?|quer(?:y|ied)|looked up|suchte|gesucht)\b/i.test(t)) return 'search';
+  if (/\b(?:prompt(?:ed)?|asked (?:claude|the ai|chatgpt)|claude|chatgpt|llm)\b/i.test(t)) return 'prompt';
+  if (/\b(?:feature|built|build|added|button|panel|view|tool|reader|app)\b/i.test(t)) return 'feature';
+  return 'discussion';
 }
-$('list').addEventListener('click', e => {
-  const ed = e.target.closest('[data-edit]'), de = e.target.closest('[data-del]');
-  if (ed) editRow(ed.dataset.edit);
-  if (de) deleteRow(de.dataset.del);
+
+/* ---------- sorting with Claude ---------- */
+function claudePrompt(s) {
+  const src = [s.summary && 'SUMMARY:\n' + s.summary, s.transcript && 'TRANSCRIPT:\n' + s.transcript].filter(Boolean).join('\n\n');
+  return `This is a summary and/or transcript of a Kant Lab session (${fmtDate(s.date)}${s.title ? ', "' + s.title + '"' : ''}). Sort it into the main ideas discussed, in the order they came up, for our method log.
+
+Answer with one JSON object only, no other text:
+{
+  "summary": "the session in 2–4 sentences",
+  "changed": "what the session decided to change, in the tools, the questions or how we work, or empty",
+  "next": "next steps, or empty",
+  "ideas": [
+    {
+      "idea": "the main idea or research question, in one sentence",
+      "tried": "what was searched, used, built, asked or argued, exactly",
+      "kind": "search | feature | prompt | discussion | other",
+      "version": "a preview link with its full commit ID if one is mentioned, else empty",
+      "result": "what the texts or the tool returned, or what the discussion arrived at, as facts",
+      "who": "professor | student | AI suggestion | empty if unclear",
+      "threads": ["short tags for ideas that recur across sessions, e.g. nihil negativum"]
+    }
+  ]
+}
+
+Rules: do not judge whether anything worked; leave verdicts out entirely, they are ours to give. Use no one's name: say "professor" or "a student". Keep each idea separate even if it was short. Do not invent anything the text does not say.
+
+${src || '(no summary or transcript yet)'}`;
+}
+function fromClaude(text) {
+  let t = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '');
+  const a = t.indexOf('{'), z = t.lastIndexOf('}');
+  if (a < 0 || z < a) throw new Error('no JSON object in it');
+  const j = JSON.parse(t.slice(a, z + 1));
+  const ideas = (j.ideas || []).map(i => blankIdea({
+    idea: String(i.idea || '').trim(), tried: String(i.tried || '').trim(), kind: KINDS.includes(i.kind) ? i.kind : (i.kind ? 'other' : ''),
+    version: String(i.version || '').trim(), result: String(i.result || '').trim(),
+    who: WHO.includes(i.who) ? i.who : '', threads: threadsOf(i.threads), drafted: 'AI-drafted', keep: true,
+  })).filter(i => i.idea);
+  return { ideas, summary: j.summary ? [String(j.summary)] : [], next: j.next ? [String(j.next)] : [], changed: j.changed ? [String(j.changed)] : [], goal: [], fromClaude: true };
+}
+function renderSortArea() {
+  const box = $('sortArea'), s = sess(current);
+  if (!box || !s) return;
+  if (!proposal) { box.innerHTML = ''; return; }
+  if (proposal.claude) {
+    box.innerHTML = '<div class="proposal"><p><b>1.</b> <button class="btn light small" id="copyClaude">Copy the prompt with the summary and transcript</button> and paste it into a Claude conversation.' +
+      (s.transcript ? '' : ' <i>(There is no transcript; the summary alone is sent.)</i>') + '</p>' +
+      '<p><b>2.</b> Paste Claude\'s whole answer here:</p><textarea class="mono" id="claudeAnswer" placeholder="{ &quot;summary&quot;: …, &quot;ideas&quot;: [ … ] }"></textarea>' +
+      '<div class="actions"><button class="btn small" id="readClaude">Read the answer</button><button class="btn light small" id="dropSort">Cancel</button><span class="msg" id="claudeMsg"></span></div></div>';
+    return;
+  }
+  const p = proposal, src = p.fromClaude ? 'AI-drafted' : 'auto-sorted';
+  const extra = [['summary', 'Summary'], ['goal', 'Goal'], ['changed', 'What we changed'], ['next', 'Next steps']].filter(([k]) => p[k] && p[k].length);
+  box.innerHTML = '<div class="proposal">' + (p.warn ? '<div class="warnbox">' + esc(p.warn) + '</div>' : '') +
+    (p.ideas && p.ideas.length ? '<p><b>' + p.ideas.length + ' ideas</b> proposed, marked <span class="chip ' + (p.fromClaude ? 'ai' : 'auto') + '">' + src + '</span>. Untick any you do not want; you can correct each one afterwards with ✎.</p>' +
+      p.ideas.map((i, k) => '<label class="prop"><input type="checkbox" data-keep="' + k + '"' + (i.keep ? ' checked' : '') + '><span><span class="pt">' + esc(i.idea) + '</span>' +
+        (i.kind ? ' <span class="chip kind">' + esc(i.kind) + '</span>' : '') + (i.who ? ' <span class="msg">· ' + esc(i.who) + '</span>' : '') +
+        threadsOf(i.threads).map(t => ' <span class="chip thread">' + esc(t) + '</span>').join('') +
+        ((i.tried || i.result) ? '<br><span class="pb">' + esc([i.tried, i.result].filter(Boolean).join(' — ').slice(0, 400)) + '</span>' : '') + '</span></label>').join('') : '') +
+    (extra.length ? '<p style="margin-top:8px">Also for the session itself:</p>' + extra.map(([k, l]) => '<label class="prop"><input type="checkbox" data-extra="' + k + '" checked><span><span class="pt">' + l + '</span><br><span class="pb">' + esc(p[k].join('\n')) + '</span></span></label>').join('') +
+      '<p class="msg">These are added after anything already in the field, never in place of it.</p>' : '') +
+    '<div class="actions">' + ((p.ideas && p.ideas.length) || extra.length ? '<button class="btn small" id="acceptSort">Add the ticked</button>' : '') + '<button class="btn light small" id="dropSort">' + ((p.ideas && p.ideas.length) || extra.length ? 'Discard' : 'Close') + '</button></div></div>';
+}
+$('sessDetail').addEventListener('change', e => {
+  if (!proposal || proposal.claude) return;
+  if (e.target.dataset.keep != null) proposal.ideas[+e.target.dataset.keep].keep = e.target.checked;
 });
-['q', 'fVerdict', 'fWho', 'fKind', 'sort'].forEach(id => $(id).addEventListener('input', render));
+function acceptProposal(s) {
+  const p = proposal;
+  const kept = (p.ideas || []).filter(i => i.keep).map(i => { const o = Object.assign({}, i); delete o.keep; return o; });
+  s.ideas.push(...kept);
+  document.querySelectorAll('#sortArea [data-extra]').forEach(cb => {
+    if (!cb.checked) return;
+    const k = cb.dataset.extra, add = p[k].join('\n');
+    s[k] = s[k] ? s[k].replace(/\s+$/, '') + '\n\n' + add : add;
+  });
+  proposal = null; save(); render();
+  toast(kept.length + (kept.length === 1 ? ' idea' : ' ideas') + ' added. Judge each with ✎.');
+}
+
+/* ---------- all ideas ---------- */
+function allIdeas() { return sessions.flatMap(s => s.ideas.map((i, k) => ({ i, s, k }))); }
+function allThreads() { return [...new Set(allIdeas().flatMap(x => threadsOf(x.i.threads)))].sort((a, b) => a.localeCompare(b)); }
+function renderIdeas() {
+  const fk = $('fKind'), ft = $('fThread'), keepK = fk.value, keepT = ft.value;
+  fk.innerHTML = '<option value="">any kind</option>' + KINDS.map(k => '<option>' + k + '</option>').join(''); fk.value = keepK;
+  ft.innerHTML = '<option value="">any thread</option>' + allThreads().map(t => '<option>' + esc(t) + '</option>').join(''); ft.value = keepT;
+  const q = $('q').value.trim().toLowerCase(), fv = $('fVerdict').value, fw = $('fWho').value, fb = $('fBy').value;
+  let list = allIdeas().filter(({ i, s }) => {
+    if (fv === 'pending' ? i.verdict : fv && i.verdict !== fv) return false;
+    if (fw && i.who !== fw) return false;
+    if (keepK && i.kind !== keepK) return false;
+    if (keepT && !threadsOf(i.threads).includes(keepT)) return false;
+    if (fb && (i.drafted || 'me') !== fb) return false;
+    if (q && ![i.idea, i.tried, i.result, i.why, i.changed, i.version, threadsOf(i.threads).join(' '), s.title].some(x => String(x || '').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  list.sort((a, b) => byDate(a.s, b.s) || a.k - b.k);
+  if ($('sort').value === 'new') list.reverse();
+  const c = verdictCounts(list.map(x => x.i)), months = {};
+  list.forEach(({ s }) => { const m = (s.date || '').slice(0, 7); if (m) months[m] = (months[m] || 0) + 1; });
+  $('ideasSummary').innerHTML = '<span><b>' + list.length + '</b> ideas in <b>' + new Set(list.map(x => x.s.id)).size + '</b> sessions</span>' +
+    '<span>' + VERDICTS.map(v => '<span class="chip ' + v + '">' + v + '</span> ' + c[v]).join(' &nbsp;') + ' &nbsp;<span class="chip pending">not judged</span> ' + c.pending + '</span>' +
+    '<span>raised by: ' + WHO.map(w => w + ' <b>' + list.filter(x => x.i.who === w).length + '</b>').join(', ') + '</span>' +
+    '<span>AI-drafted <b>' + list.filter(x => x.i.drafted === 'AI-drafted').length + '</b>, auto-sorted <b>' + list.filter(x => x.i.drafted === 'auto-sorted').length + '</b></span>' +
+    (Object.keys(months).length > 1 ? '<span>by month: ' + Object.keys(months).sort().map(m => fmtDate(m + '-01').replace(/^\d+ /, '') + ' <b>' + months[m] + '</b>').join(', ') + '</span>' : '');
+  $('ideasList').innerHTML = list.length ? list.map(({ i, s, k }) => ideaHtml(i, s, k, true)).join('') : '<p class="empty">' + (sessions.length ? 'No idea matches the search and filters.' : 'No ideas yet.') + '</p>';
+}
+['q', 'fVerdict', 'fWho', 'fKind', 'fThread', 'fBy', 'sort'].forEach(id => $(id).addEventListener('input', renderIdeas));
+
+/* ---------- threads ---------- */
+function renderThreads() {
+  const names = allThreads(), all = allIdeas();
+  $('threadList').innerHTML = names.length ? names.map(t => {
+    const items = all.filter(x => threadsOf(x.i.threads).includes(t)).sort((a, b) => byDate(a.s, b.s) || a.k - b.k);
+    const c = verdictCounts(items.map(x => x.i)), ns = new Set(items.map(x => x.s.id)).size;
+    const span = items.length ? fmtDate(items[0].s.date) + (items.length > 1 && items[items.length - 1].s.date !== items[0].s.date ? ' – ' + fmtDate(items[items.length - 1].s.date) : '') : '';
+    return '<section class="thread"><h3><span>' + esc(t) + '</span><small>' + items.length + ' ideas in ' + ns + (ns === 1 ? ' session' : ' sessions') + ' · ' + span + ' · ' + c.worked + ' worked, ' + c.partly + ' partly, ' + c.failed + ' failed, ' + c.pending + ' not judged</small></h3>' +
+      '<div class="tlist">' + items.map(({ i, s, k }) => ideaHtml(i, s, k, true)).join('') + '</div></section>';
+  }).join('') : '<p class="empty">No threads yet. Give an idea one or more threads in ✎ (for example <i>nihil negativum</i>), and it appears here with every other idea in the same thread.</p>';
+}
 
 /* ---------- export ---------- */
 function cell(v, sep) {
   const s = String(v == null ? '' : v);
   return (s.includes(sep) || /["\n\r]/.test(s)) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
-function table(list, sep) {
-  return [COLUMNS.map(c => c.head).join(sep)].concat(list.map(r => COLUMNS.map(c => cell(r[c.key], sep)).join(sep))).join('\r\n');
+function table(cols, rows, sep) { return [cols.map(c => c.head).join(sep)].concat(rows.map(r => cols.map(c => cell(r[c.key], sep)).join(sep))).join('\r\n'); }
+function ideaRows() {
+  return sessions.slice().sort(byDate).flatMap(s => s.ideas.map((i, k) => Object.assign({}, i, { sdate: s.date, stitle: s.title, n: k + 1, threads: threadsOf(i.threads).join(', ') })));
+}
+function sessionRows() {
+  return sessions.slice().sort(byDate).map(s => Object.assign({}, s, verdictCounts(s.ideas), { ideas: s.ideas.length }));
 }
 function download(name, text, type) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([text], { type }));
-  a.download = name;
+  a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
-async function copyText(text, msg) {
-  try { await navigator.clipboard.writeText(text); toast(msg); }
-  catch (e) {
+async function copyText(text, msg, html) {
+  try {
+    if (html && window.ClipboardItem) await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([text], { type: 'text/plain' }) })]);
+    else await navigator.clipboard.writeText(text);
+    toast(msg);
+  } catch (e) {
     const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
     const ok = document.execCommand('copy'); ta.remove();
-    toast(ok ? msg : 'Copying was blocked by the browser; use Download CSV instead.');
+    toast(ok ? msg : 'Copying was blocked by the browser; use the download instead.');
   }
 }
-$('copyTsv').onclick = () => {
-  const list = shown().slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-  if (!list.length) return toast('Nothing to copy.');
-  copyText(table(list, '\t'), list.length + ' rows copied. In Google Sheets, click a cell and paste.');
-};
-$('dlCsv').onclick = () => {
-  const list = shown().slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-  download('kant-lab-method-log-' + today() + '.csv', '﻿' + table(list, ','), 'text/csv;charset=utf-8');
-};
-$('dlJson').onclick = () => download('kant-lab-method-log-backup-' + today() + '.json',
-  JSON.stringify({ kind: 'kantlab-method-log', v: 1, saved: new Date().toISOString(), rows }, null, 1), 'application/json');
+$('copySessions').onclick = () => sessions.length ? copyText(table(SESSION_COLS, sessionRows(), '\t'), sessions.length + ' sessions copied. In Google Sheets, click a cell and paste.') : toast('No sessions yet.');
+$('copyIdeas').onclick = () => { const r = ideaRows(); r.length ? copyText(table(IDEA_COLS, r, '\t'), r.length + ' ideas copied. In Google Sheets, click a cell and paste.') : toast('No ideas yet.'); };
+$('dlIdeas').onclick = () => download('kant-lab-method-log-ideas-' + today() + '.csv', '﻿' + table(IDEA_COLS, ideaRows(), ','), 'text/csv;charset=utf-8');
+$('dlJson').onclick = () => download('kant-lab-method-log-backup-' + today() + '.json', JSON.stringify({ kind: 'kantlab-method-log', v: 2, saved: new Date().toISOString(), sessions }, null, 1), 'application/json');
+
+/* A session as a document: headings, the session's parts, and each idea with its fields. */
+function copyDoc(s) {
+  const c = verdictCounts(s.ideas);
+  const part = (label, v) => v ? { label, v } : null;
+  const head = [part('Type', s.type), part('Goal', s.goal), part('Summary', s.summary), part('What we changed', s.changed), part('Next steps', s.next)].filter(Boolean);
+  const ideaParts = i => [part('What we tried', [i.kind && '(' + i.kind + ')', i.tried].filter(Boolean).join(' ')), part('Tool version', i.version), part('Result', i.result),
+    part('Verdict', (i.verdict || 'not judged yet') + (i.drafted && i.drafted !== 'me' ? ' · ' + i.drafted : '')), part('Why', i.why), part('What we changed', i.changed),
+    part('Raised by', i.who), part('Threads', threadsOf(i.threads).join(', '))].filter(Boolean);
+  const title = fmtDate(s.date) + ' — ' + (s.title || 'Untitled session');
+  const txt = [title, ''].concat(head.map(p => p.label + ': ' + p.v), ['', 'Ideas discussed (' + s.ideas.length + ': ' + c.worked + ' worked, ' + c.partly + ' partly, ' + c.failed + ' failed, ' + c.pending + ' not judged)', ''],
+    s.ideas.flatMap((i, k) => [(k + 1) + '. ' + i.idea].concat(ideaParts(i).map(p => '   ' + p.label + ': ' + p.v), ['']))).join('\n');
+  const br = v => esc(v).replace(/\n/g, '<br>');
+  const html = '<h2>' + esc(title) + '</h2>' + head.map(p => '<p><b>' + p.label + ':</b> ' + br(p.v) + '</p>').join('') +
+    '<h3>Ideas discussed</h3><ol>' + s.ideas.map(i => '<li><p><b>' + esc(i.idea) + '</b></p><ul>' + ideaParts(i).map(p => '<li><b>' + p.label + ':</b> ' + (p.label === 'Tool version' ? '<a href="' + esc(p.v) + '">' + esc(p.v) + '</a>' : br(p.v)) + '</li>').join('') + '</ul></li>').join('') + '</ol>';
+  copyText(txt, 'Session copied. Paste it into a Google Doc.', html);
+}
 
 /* ---------- import ---------- */
-// Read tab- or comma-separated text with quoted cells, as Google Sheets copies and CSV files write it.
 function parseDelimited(text) {
   text = text.replace(/^﻿/, '');
-  const first = text.split(/\r?\n/)[0] || '';
-  const sep = first.includes('\t') ? '\t' : ',';
+  const sep = (text.split(/\r?\n/)[0] || '').includes('\t') ? '\t' : ',';
   const out = []; let row = [], f = '', q = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
-    if (q) {
-      if (c === '"' && text[i + 1] === '"') { f += '"'; i++; }
-      else if (c === '"') q = false;
-      else f += c;
-    } else if (c === '"' && f === '') q = true;
+    if (q) { if (c === '"' && text[i + 1] === '"') { f += '"'; i++; } else if (c === '"') q = false; else f += c; }
+    else if (c === '"' && f === '') q = true;
     else if (c === sep) { row.push(f); f = ''; }
     else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(f); out.push(row); row = []; f = ''; }
     else f += c;
@@ -518,103 +856,85 @@ function parseDelimited(text) {
   if (f !== '' || row.length) { row.push(f); out.push(row); }
   return out.filter(r => r.some(x => x.trim()));
 }
-function norm(s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); }
-function rowsFromText(text) {
+const norm = s => String(s || '').toLowerCase().replace(/[^a-z#]/g, '');
+function normDate(d) {
+  const m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(d || ''), u = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(d || '');
+  if (m) return m[1] + '-' + m[2].padStart(2, '0') + '-' + m[3].padStart(2, '0');
+  if (u) return u[3] + '-' + u[1].padStart(2, '0') + '-' + u[2].padStart(2, '0');    // Sheets' US form, month first
+  return d || today();
+}
+function cleanIdea(r) {
+  const w = String(r.who || '').toLowerCase(), k = String(r.kind || '').toLowerCase(), v = String(r.verdict || '').toLowerCase(), by = String(r.drafted || '').toLowerCase();
+  return blankIdea({ idea: String(r.idea || r.question || '').trim(), tried: String(r.tried || '').trim(), version: String(r.version || '').trim(),
+    result: String(r.result || '').trim(), why: String(r.why || '').trim(), changed: String(r.changed || '').trim(), threads: threadsOf(r.threads),
+    kind: KINDS.includes(k) ? k : (k ? 'other' : ''), verdict: VERDICTS.includes(v) ? v : '',
+    who: w.startsWith('prof') ? 'professor' : w.startsWith('stud') ? 'student' : w.startsWith('ai') ? 'AI suggestion' : '',
+    drafted: by.startsWith('ai') ? 'AI-drafted' : by.startsWith('auto') ? 'auto-sorted' : 'me' });
+}
+function importText(text) {
   const t = text.trim();
-  if (!t) return [];
+  if (!t) return 0;
   if (t[0] === '{' || t[0] === '[') {
     const j = JSON.parse(t);
-    return (Array.isArray(j) ? j : j.rows || []).map(r => Object.assign({}, r));
+    if (Array.isArray(j) || j.rows) return sessionsFromV1(Array.isArray(j) ? j : j.rows).reduce((n, s) => n + addOrMerge(s), 0);   // the earlier log
+    return (j.sessions || []).reduce((n, s) => n + addOrMerge(blankSession(Object.assign({}, s, { id: uid(), ideas: (s.ideas || []).map(i => blankIdea(Object.assign({}, i, { id: uid() }))) }))), 0);
   }
-  const grid = parseDelimited(t);
-  const head = grid[0].map(norm);
-  const idx = COLUMNS.map(c => head.indexOf(norm(c.head)));
-  const hasHead = idx.filter(i => i >= 0).length >= 3;
-  const body = hasHead ? grid.slice(1) : grid;
-  return body.map(cells => {
-    const r = {};
-    COLUMNS.forEach((c, k) => { const i = hasHead ? idx[k] : k; r[c.key] = i >= 0 && cells[i] != null ? cells[i].trim() : ''; });
-    return r;
+  const grid = parseDelimited(t), head = grid[0].map(norm);
+  const col = k => { const c = IDEA_COLS.find(x => x.key === k); return head.indexOf(norm(c.head)); };
+  const iq = head.indexOf(norm('Question asked'));      // the earlier log's sheet
+  const map = { sdate: col('sdate') >= 0 ? col('sdate') : head.indexOf('date'), stitle: col('stitle'), idea: col('idea') >= 0 ? col('idea') : iq };
+  IDEA_COLS.forEach(c => { if (map[c.key] == null) map[c.key] = col(c.key); });
+  map.who = map.who >= 0 ? map.who : head.indexOf(norm('Who started it'));
+  if (map.idea < 0) throw new Error('no "Main idea / question asked" column in the header row');
+  const groups = new Map();
+  grid.slice(1).forEach(cells => {
+    const g = k => map[k] >= 0 && cells[map[k]] != null ? cells[map[k]].trim() : '';
+    const d = normDate(g('sdate')), ti = g('stitle') || (iq >= 0 ? 'Entries from the earlier log' : '');
+    const key = d + '\u0001' + ti;
+    if (!groups.has(key)) groups.set(key, blankSession({ date: d, title: ti, type: 'other' }));
+    const i = cleanIdea({ idea: g('idea'), tried: g('tried'), kind: g('kind'), version: g('version'), result: g('result'), verdict: g('verdict'), why: g('why'), changed: g('changed'), who: g('who'), threads: g('threads'), drafted: g('drafted') });
+    if (i.idea) groups.get(key).ideas.push(i);
   });
+  return [...groups.values()].reduce((n, s) => n + addOrMerge(s), 0);
 }
-function cleanRow(r, ai) {
-  const o = { id: uid(), created: new Date().toISOString() };
-  COLUMNS.forEach(c => { o[c.key] = String(r[c.key] == null ? '' : r[c.key]).trim(); });
-  o.verdict = VERDICTS.includes(o.verdict.toLowerCase()) ? o.verdict.toLowerCase() : '';
-  const w = o.who.toLowerCase();
-  o.who = w.startsWith('prof') ? 'professor' : w.startsWith('stud') ? 'student' : w.startsWith('ai') ? 'AI suggestion' : '';
-  o.kind = KINDS.includes(o.kind.toLowerCase()) ? o.kind.toLowerCase() : (o.kind ? 'other' : '');
-  const dm = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(o.date), dd = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(o.date);
-  if (dm) o.date = dm[1] + '-' + dm[2].padStart(2, '0') + '-' + dm[3].padStart(2, '0');
-  else if (dd) o.date = dd[3] + '-' + dd[1].padStart(2, '0') + '-' + dd[2].padStart(2, '0');   // Sheets' US form, month first
-  o.drafted = ai || /ai/i.test(o.drafted) ? 'AI-drafted' : 'me';
-  if (r.example) o.example = true;
-  return o;
-}
-function importRows(list, ai) {
-  const add = list.map(r => cleanRow(r, ai)).filter(r => r.question || r.tried || r.result);
-  // leave out exact repeats of rows already in the log (the same row pasted twice)
-  const sig = r => [r.date, r.question, r.tried, r.result].join('\u0001');
-  const have = new Set(rows.map(sig));
-  const fresh = add.filter(r => !have.has(sig(r)) && have.add(sig(r)));
-  rows = rows.concat(fresh);
-  save();
-  render();
-  return { added: fresh.length, skipped: add.length - fresh.length };
-}
-function reportImport(res) {
-  const msg = res.added + (res.added === 1 ? ' row' : ' rows') + ' added' + (res.skipped ? ', ' + res.skipped + ' already in the log left out' : '') + '.';
-  $('importMsg').textContent = msg;
-  toast(msg);
-}
-$('importBtn').onclick = () => {
+function doImport(text) {
   try {
-    const res = importRows(rowsFromText($('importText').value), $('importAi').checked);
-    reportImport(res);
-    if (res.added) $('importText').value = '';
-  } catch (e) { $('importMsg').textContent = 'Could not read those rows: ' + e.message; }
-};
+    const before = sessions.length, n = importText(text);
+    save(); render();
+    const msg = n + (n === 1 ? ' idea' : ' ideas') + ' added' + (sessions.length > before ? ', in ' + (sessions.length - before) + ' new sessions' : '') + '.';
+    $('importMsg').textContent = msg; $('importMsg').className = 'msg'; toast(msg);
+    return n;
+  } catch (e) { $('importMsg').textContent = 'Could not read that: ' + e.message; $('importMsg').className = 'msg err'; return 0; }
+}
+$('importBtn').onclick = () => { if (doImport($('importText').value)) $('importText').value = ''; };
 $('importFile').onchange = e => {
-  const f = e.target.files[0];
-  if (!f) return;
+  const f = e.target.files[0]; if (!f) return;
   const rd = new FileReader();
-  rd.onload = () => {
-    try { reportImport(importRows(rowsFromText(rd.result), $('importAi').checked)); }
-    catch (err) { $('importMsg').textContent = 'Could not read that file: ' + err.message; }
-    e.target.value = '';
-  };
+  rd.onload = () => { doImport(rd.result); e.target.value = ''; };
   rd.readAsText(f);
 };
 $('examples').onclick = () => {
-  const res = importRows(EXAMPLES.map(r => Object.assign({ drafted: 'AI-drafted', example: true }, r)), true);
-  toast(res.added + ' example rows added, marked AI-drafted and not judged yet.');
+  if (sessions.some(s => s.example)) return toast('The example session is already in the log.');
+  const s = blankSession(Object.assign({}, EXAMPLE, { ideas: EXAMPLE.ideas.map(i => blankIdea(Object.assign({ drafted: 'AI-drafted' }, i))) }));
+  sessions.push(s); save();
+  openSession(s.id);
+  toast('Example session added: its ideas are AI-drafted and not judged yet.');
 };
 
-/* ---------- the prompt for Claude ---------- */
-const PROMPT = `Draft rows for our Kant Lab method log from this session: one row for each separate attempt we made to answer a research question (a search, a feature we used or built, or a prompt).
-
-Answer with tab-separated rows only, with this header row first:
-${COLUMNS.map(c => c.head).join('\t')}
-
-- Date: YYYY-MM-DD.
-- Question asked: the research question, in one sentence.
-- What we tried: exactly what was searched, used, built or asked.
-- Kind: search, feature, prompt, or other.
-- Tool version: a preview link with the full commit ID (https://raw.githack.com/mikrishnan/kant-lab/<commit>/<path>), if there is one.
-- Result: what the texts or the tool returned (counts, passages, what was missing), as facts.
-- Verdict, Why: leave empty. I will judge these myself.
-- What we changed: only what we actually changed, or leave empty.
-- Who started it: professor, student, or AI suggestion.
-- Written by: AI-drafted.
-Do not put a tab or a line break inside a cell.`;
-$('prompt').textContent = PROMPT;
-$('copyPrompt').onclick = () => copyText(PROMPT, 'Prompt copied.');
+/* ---------- wiring ---------- */
+document.querySelectorAll('nav button').forEach(b => { b.onclick = () => showView(b.dataset.view); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && proposal && !$('ideaDlg').open) { proposal = null; renderSortArea(); } });
 
 /* ---------- init ---------- */
 load();
-clearForm();
-$('f-date').value = today();
-render();
+(function init() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get('s') && sess(h.get('s'))) { current = h.get('s'); showView('sessions'); return; }
+  if (['ideas', 'threads', 'data'].includes(h.get('view'))) { showView(h.get('view')); return; }
+  const latest = sessions.slice().sort(byDate).pop();
+  current = latest ? latest.id : null;
+  showView('sessions');
+})();
 </script>
 </body>
 </html>
