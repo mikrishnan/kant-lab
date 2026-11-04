@@ -2579,7 +2579,7 @@ function englishNotes(tr, p) {
 /* ── English mode: one switch in the header puts the English under every passage that has
    one, in the full texts, beside Kant's notes, and under search hits. The German and Latin
    never go. The English is Jesus's machine translation, one of his two styles. ── */
-const EN_DEFAULT = 'guyer';      // English mode starts on, in this style; `en=0` in a link turns it off
+const EN_DEFAULT = 'guyer';      // the style English opens in; English starts off unless a link names a style (`en=guyer`)
 const MARIA_DEMO = 'https://raw.githack.com/mikrishnan/kant-lab/eb15ef290b772a4e1ab1e2f4d799ca42623b8ac5/Individuals/maria/busolt-reader.html';
 function enLine(p, a, b) {
   if (!S.en && !S.enOpen.has(p.i)) return '';
@@ -4646,8 +4646,7 @@ function writeHash() {
   if (S.off.size) u.set('off', [...S.off].join(','));
   if (S.loc) u.set('loc', S.loc);
   if (S.sel != null && P[S.sel]) { u.set('p', TEXTS[P[S.sel].t].key + ':' + P[S.sel].id); if (S.quote) u.set('quote', S.quote); }
-  if (!S.en) u.set('en', '0');                     // English is on unless a link says otherwise
-  else if (S.en !== EN_DEFAULT) u.set('en', S.en);
+  if (S.en) u.set('en', S.en);                     // English is off unless a link says otherwise
   if (enAsked() && S.q && !S.d) u.set('ql', 'en');
   if (S.q && !S.d && S.tab === 'passages') u.set('tab', 'passages');
   if (S.view === 'read' && S.readKey) { u.set('read', S.readKey); if (S.readAt != null && P[S.readAt]) u.set('at', P[S.readAt].id); }
@@ -4677,7 +4676,7 @@ function readHash() {
   S.off = new Set((u.get('off') || '').split(',').filter(Boolean));
   S.loc = u.get('loc') || null;
   S.quote = u.get('quote') || null;
-  S.en = u.get('en') === '0' ? '' : PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : EN_DEFAULT;
+  S.en = PORTAL_TR_STYLES.some(st => st.key === u.get('en')) ? u.get('en') : '';   // an old link's `en=0` reads as off too
   S.ql = u.get('ql') === 'en' ? 'en' : 'de';
   enSync();
   S.tab = u.get('tab') === 'passages' ? 'passages' : 'overview';
@@ -5040,7 +5039,7 @@ function wire() {
     e.stopPropagation(); e.preventDefault();
     enToggle(b);
   }, true);
-  $('entog').addEventListener('click', () => { S.en = S.en ? '' : 'guyer'; enApply(); writeHash(); });
+  $('entog').addEventListener('click', () => { S.en = S.en ? '' : EN_DEFAULT; enApply(); writeHash(); });
   // a seminar tool opens inside the portal; a modified click still gets its own tab
   document.addEventListener('click', e => {
     if (e.target.closest('header [data-view], header [data-home], #toolback')) closeTool();
