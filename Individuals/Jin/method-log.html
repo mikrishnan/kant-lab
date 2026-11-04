@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kant Lab Method Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --parchment: #f6efe0;
+  --parchment-dark: #ebe1cb;
+  --ink: #2a2118;
+  --muted: #6f604f;
+  --accent: #5c3d1e;
+  --accent-soft: #c9ac84;
+  --rule: #d8c9aa;
+  /* verdicts: each also carries its word, so colour is never the only cue */
+  --worked: #2f6b3a;
+  --partly: #9a6a12;
+  --failed: #a3361b;
+  --pending: #6f604f;
+  --ai: #7748c0;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: 'EB Garamond', Georgia, serif; font-size: 17px; line-height: 1.5; background: var(--parchment); color: var(--ink); }
+button, select, input, textarea { font: inherit; color: inherit; }
+
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; padding: 12px 22px; background: var(--accent); color: var(--parchment); }
+header h1 { font-family: 'Cinzel', serif; font-weight: 400; font-size: 18px; letter-spacing: .08em; margin: 0; }
+header p { margin: 0; font-size: 15px; opacity: .9; }
+header .stored { margin-left: auto; font-size: 13.5px; opacity: .85; }
+
+.wrap { display: grid; grid-template-columns: minmax(340px, 420px) 1fr; gap: 0; align-items: start; }
+h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 15px; letter-spacing: .07em; color: var(--accent); margin: 0 0 10px; }
+
+/* ---------- the form ---------- */
+#formPane { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 16px 20px 30px; background: var(--parchment-dark); border-right: 1px solid var(--rule); }
+.field { margin-bottom: 11px; }
+.field label, .field .lbl { display: block; font-family: 'Cinzel', serif; font-size: 11.5px; letter-spacing: .06em; color: var(--accent); margin-bottom: 2px; }
+.field .hint { font-size: 13.5px; color: var(--muted); margin: 0 0 3px; line-height: 1.35; }
+.field input[type=text], .field input[type=url], .field input[type=date], .field textarea, .field select {
+  width: 100%; padding: 4px 7px; border: 1px solid var(--accent-soft); background: var(--parchment); border-radius: 2px; font-size: 16px;
+}
+.field textarea { resize: vertical; min-height: 54px; }
+.field input:focus, .field textarea:focus, .field select:focus { outline: 2px solid var(--accent-soft); outline-offset: 0; }
+.row2 { display: flex; gap: 8px; }
+.row2 > * { flex: 1; }
+.choices { display: flex; flex-wrap: wrap; gap: 4px; }
+.choices label { font-family: 'EB Garamond', serif; font-size: 15.5px; letter-spacing: 0; color: var(--ink); display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--accent-soft); background: var(--parchment); padding: 2px 10px; border-radius: 14px; cursor: pointer; margin: 0; }
+.choices input { margin: 0; }
+.choices label:has(input:checked) { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+.choices.verdict label:has(input[value=worked]:checked) { background: var(--worked); border-color: var(--worked); }
+.choices.verdict label:has(input[value=partly]:checked) { background: var(--partly); border-color: var(--partly); }
+.choices.verdict label:has(input[value=failed]:checked) { background: var(--failed); border-color: var(--failed); }
+.choices.verdict label:has(input[value=""]:checked) { background: var(--pending); border-color: var(--pending); }
+#versionInfo { font-size: 13.5px; margin-top: 3px; min-height: 1.2em; }
+#versionInfo.ok { color: var(--worked); }
+#versionInfo.warn { color: var(--failed); }
+.req { color: var(--failed); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; align-items: center; }
+.btn { background: var(--accent); color: var(--parchment); border: 1px solid var(--accent); padding: 4px 16px; cursor: pointer; border-radius: 2px; font-size: 15.5px; }
+.btn.light { background: var(--parchment); color: var(--accent); border-color: var(--accent-soft); }
+.btn.light:hover { border-color: var(--accent); }
+.btn.small { padding: 1px 10px; font-size: 14px; }
+.btn.danger { background: var(--parchment); color: var(--failed); border-color: var(--failed); }
+#formMsg { font-size: 14.5px; color: var(--muted); }
+#formMsg.err { color: var(--failed); }
+.editing-banner { display: none; background: #fff4c7; border: 1px solid var(--accent-soft); padding: 4px 8px; font-size: 14.5px; margin-bottom: 10px; }
+.editing .editing-banner { display: block; }
+
+/* ---------- the log ---------- */
+#logPane { padding: 16px 22px 60px; min-width: 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.toolbar input[type=search], .toolbar select { padding: 3px 7px; border: 1px solid var(--accent-soft); background: var(--parchment); font-size: 15px; }
+.toolbar input[type=search] { width: 210px; }
+.toolbar .sp { flex: 1; }
+.summary { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14.5px; color: var(--muted); margin: 0 0 12px; padding: 6px 10px; background: var(--parchment-dark); border: 1px solid var(--rule); }
+.summary b { color: var(--ink); font-weight: 500; }
+.chip { display: inline-block; font-family: 'Cinzel', serif; font-size: 10.5px; letter-spacing: .05em; padding: 1px 8px; border-radius: 10px; color: #fff; white-space: nowrap; vertical-align: 1px; }
+.chip.worked { background: var(--worked); } .chip.partly { background: var(--partly); } .chip.failed { background: var(--failed); } .chip.pending { background: transparent; color: var(--pending); border: 1px dashed var(--pending); }
+.chip.ai { background: transparent; color: var(--ai); border: 1px solid var(--ai); }
+.chip.kind { background: transparent; color: var(--accent); border: 1px solid var(--accent-soft); }
+
+.entry { background: #fffaf0; border: 1px solid var(--rule); border-left: 5px solid var(--pending); border-radius: 3px; margin-bottom: 10px; padding: 8px 12px 9px; }
+.entry.v-worked { border-left-color: var(--worked); } .entry.v-partly { border-left-color: var(--partly); } .entry.v-failed { border-left-color: var(--failed); }
+.entry.ai { background: #f7f2fb; }
+.entry .top { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.entry .date { font-family: 'Cinzel', serif; font-size: 12px; color: var(--muted); letter-spacing: .04em; }
+.entry .q { flex-basis: 100%; font-size: 18px; font-weight: 500; margin: 2px 0 4px; }
+.entry .who { font-size: 14px; color: var(--muted); }
+.entry .ops { margin-left: auto; display: flex; gap: 6px; }
+.entry dl { display: grid; grid-template-columns: 118px 1fr; gap: 2px 12px; margin: 0; font-size: 15.5px; }
+.entry dt { font-family: 'Cinzel', serif; font-size: 10.5px; letter-spacing: .05em; color: var(--accent); padding-top: 4px; }
+.entry dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.entry dd a { color: var(--accent); }
+.entry dd .nocommit { color: var(--failed); font-size: 13.5px; }
+.empty { color: var(--muted); font-style: italic; padding: 20px 0; }
+
+details.box { background: var(--parchment-dark); border: 1px solid var(--rule); margin: 0 0 12px; padding: 6px 12px; border-radius: 3px; }
+details.box summary { cursor: pointer; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: .06em; color: var(--accent); }
+details.box p, details.box li { font-size: 15px; }
+details.box textarea { width: 100%; min-height: 110px; padding: 5px 7px; border: 1px solid var(--accent-soft); background: var(--parchment); font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+details.box pre { white-space: pre-wrap; background: var(--parchment); border: 1px solid var(--rule); padding: 8px; font-size: 13.5px; font-family: ui-monospace, Menlo, monospace; max-height: 260px; overflow-y: auto; }
+
+#toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--parchment); padding: 6px 14px; border-radius: 3px; font-size: 15px; display: none; z-index: 10; }
+footer { font-size: 13.5px; color: var(--muted); padding: 10px 22px 20px; border-top: 1px solid var(--rule); }
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: 1fr; }
+  #formPane { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--rule); }
+  .entry dl { grid-template-columns: 1fr; }
+  .entry dt { padding-top: 6px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Kant Lab Method Log</h1>
+  <p>One row per attempt: what we asked, what we tried, and whether it worked.</p>
+  <span class="stored" id="stored"></span>
+</header>
+
+<div class="wrap">
+  <!-- ======================= the form ======================= -->
+  <section id="formPane" aria-labelledby="formTitle">
+    <h2 id="formTitle">New entry</h2>
+    <div class="editing-banner">Editing an entry. <button class="btn light small" type="button" id="cancelEdit">Cancel</button></div>
+    <form id="form" autocomplete="off" novalidate>
+      <div class="row2">
+        <div class="field"><label for="f-date">Date <span class="req">*</span></label><input type="date" id="f-date" required></div>
+        <div class="field"><span class="lbl">Who started it <span class="req">*</span></span>
+          <select id="f-who" aria-label="Who started it">
+            <option value="">choose…</option>
+            <option value="professor">Professor</option>
+            <option value="student">Student</option>
+            <option value="AI suggestion">AI suggestion</option>
+          </select></div>
+      </div>
+      <div class="field"><label for="f-question">Question asked <span class="req">*</span></label>
+        <p class="hint">The research question this attempt was for, in a sentence.</p>
+        <textarea id="f-question" rows="2" placeholder="Where does the logic treat the nihil negativum without the term?"></textarea></div>
+      <div class="field"><span class="lbl">What we tried <span class="req">*</span></span>
+        <div class="choices" id="f-kind" role="radiogroup" aria-label="Kind of attempt">
+          <label><input type="radio" name="kind" value="search"> search</label>
+          <label><input type="radio" name="kind" value="feature"> feature</label>
+          <label><input type="radio" name="kind" value="prompt"> prompt</label>
+          <label><input type="radio" name="kind" value="other"> other</label>
+        </div>
+        <textarea id="f-tried" rows="2" style="margin-top:5px" placeholder='Portal search "contradictio in adjecto", all 19 texts'></textarea></div>
+      <div class="field"><label for="f-version">Tool version</label>
+        <p class="hint">A preview link with the commit ID, so this row can be re-checked against the exact version used.</p>
+        <input type="url" id="f-version" placeholder="https://raw.githack.com/mikrishnan/kant-lab/<commit>/logic-portal/index.html#q=…">
+        <div id="versionInfo"></div></div>
+      <div class="field"><label for="f-result">Result <span class="req">*</span></label>
+        <p class="hint">What the texts or the tool returned: counts, passages, what was missing. Facts, not judgement.</p>
+        <textarea id="f-result" rows="3"></textarea></div>
+      <div class="field"><span class="lbl">Verdict</span>
+        <div class="choices verdict" role="radiogroup" aria-label="Verdict">
+          <label><input type="radio" name="verdict" value="worked"> worked</label>
+          <label><input type="radio" name="verdict" value="partly"> partly</label>
+          <label><input type="radio" name="verdict" value="failed"> failed</label>
+          <label><input type="radio" name="verdict" value="" checked> not judged yet</label>
+        </div></div>
+      <div class="field"><label for="f-why">Why</label>
+        <p class="hint">Why it worked or did not, as you judge it.</p>
+        <textarea id="f-why" rows="2"></textarea></div>
+      <div class="field"><label for="f-changed">What we changed</label>
+        <p class="hint">In the tool, the question, or how we work, because of this. "Nothing yet" is a fine answer.</p>
+        <textarea id="f-changed" rows="2"></textarea></div>
+      <div class="field"><span class="lbl">Written by</span>
+        <div class="choices" role="radiogroup" aria-label="Written by">
+          <label><input type="radio" name="drafted" value="me" checked> me</label>
+          <label><input type="radio" name="drafted" value="AI-drafted"> AI-drafted</label>
+        </div></div>
+      <div class="actions">
+        <button class="btn" type="submit" id="saveBtn">Add to the log</button>
+        <button class="btn light" type="button" id="clearBtn">Clear</button>
+        <span id="formMsg"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- ======================= the log ======================= -->
+  <section id="logPane" aria-labelledby="logTitle">
+    <div class="toolbar">
+      <h2 id="logTitle" style="margin:0 8px 0 0">The log</h2>
+      <input type="search" id="q" placeholder="Search the log…" aria-label="Search the log">
+      <select id="fVerdict" aria-label="Filter by verdict">
+        <option value="">every verdict</option><option value="worked">worked</option><option value="partly">partly</option><option value="failed">failed</option><option value="pending">not judged yet</option>
+      </select>
+      <select id="fWho" aria-label="Filter by who started it">
+        <option value="">anyone</option><option value="professor">professor</option><option value="student">student</option><option value="AI suggestion">AI suggestion</option>
+      </select>
+      <select id="fKind" aria-label="Filter by kind">
+        <option value="">any kind</option><option value="search">search</option><option value="feature">feature</option><option value="prompt">prompt</option><option value="other">other</option>
+      </select>
+      <select id="sort" aria-label="Order">
+        <option value="new">newest first</option><option value="old">oldest first</option>
+      </select>
+      <span class="sp"></span>
+      <button class="btn light small" id="copyTsv" title="Copies every row shown, with a header row, for pasting into Google Sheets">Copy for Google Sheets</button>
+      <button class="btn light small" id="dlCsv">Download CSV</button>
+      <button class="btn light small" id="dlJson" title="A backup of the whole log, which Import reads back">Back up</button>
+    </div>
+    <div class="summary" id="summary"></div>
+
+    <details class="box" id="importBox">
+      <summary>Import rows: from Google Sheets, a backup, or a draft by Claude</summary>
+      <p>Paste rows copied from the Google Sheet (with its header row), or the rows Claude drafted, or open a backup file. Rows are added to the log; nothing already in it is changed. Rows whose "Written by" is empty come in as written by you, unless you tick the box.</p>
+      <textarea id="importText" aria-label="Rows to import" placeholder="Date	Question asked	What we tried	Kind	Tool version	Result	Verdict	Why	What we changed	Who started it	Written by"></textarea>
+      <div class="actions">
+        <label style="font-size:15px"><input type="checkbox" id="importAi"> mark them AI-drafted</label>
+        <button class="btn small" id="importBtn">Import pasted rows</button>
+        <label class="btn light small" style="cursor:pointer">Open a backup or CSV file…<input type="file" id="importFile" accept=".json,.csv,.tsv,.txt" hidden></label>
+        <span id="importMsg"></span>
+      </div>
+    </details>
+
+    <details class="box">
+      <summary>Have Claude draft the rows at the end of a session</summary>
+      <p>Copy this into the Claude session you worked in. It knows what was tried, so it can write the rows; the verdicts and the "why" stay yours. Paste its answer into <b>Import</b> above with "mark them AI-drafted" ticked, then judge each row with ✎.</p>
+      <pre id="prompt"></pre>
+      <button class="btn light small" id="copyPrompt">Copy the prompt</button>
+    </details>
+
+    <div id="list"></div>
+  </section>
+</div>
+
+<footer>
+  Kept in this browser only (its local storage), and never sent anywhere. Another browser or computer starts empty, and clearing the browser's data clears the log, so copy it to the Google Sheet or press <b>Back up</b> regularly. The Sheet is the record the class shares; this page is for writing rows quickly and well.
+  <span id="exampleWrap"> · <button class="btn light small" id="examples">Add the example rows (nihil negativum, 4 Nov 2026)</button></span>
+</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------- data ---------- */
+// The columns, in the order of the Sheet. `key` is the field in a stored row.
+const COLUMNS = [
+  { key: 'date',     head: 'Date' },
+  { key: 'question', head: 'Question asked' },
+  { key: 'tried',    head: 'What we tried' },
+  { key: 'kind',     head: 'Kind' },
+  { key: 'version',  head: 'Tool version' },
+  { key: 'result',   head: 'Result' },
+  { key: 'verdict',  head: 'Verdict' },
+  { key: 'why',      head: 'Why' },
+  { key: 'changed',  head: 'What we changed' },
+  { key: 'who',      head: 'Who started it' },
+  { key: 'drafted',  head: 'Written by' },
+];
+const STORE = 'kantlab-method-log-v1';
+const VERDICTS = ['worked', 'partly', 'failed'];
+const WHO = ['professor', 'student', 'AI suggestion'];
+const KINDS = ['search', 'feature', 'prompt', 'other'];
+
+// Worked examples from the nihil negativum case study, drafted by Claude on 4 November 2026
+// from its own searches in the portal. Their verdicts are left for the student to give.
+const PORTAL_AT = 'https://raw.githack.com/mikrishnan/kant-lab/d3ba40d12994e28b66caf8840b63805363539085/logic-portal/index.html';
+const EXAMPLES = [
+  { date: '2026-11-04', who: 'professor', kind: 'search',
+    question: 'Where does Kant, or the tradition he lectured from, use the term "nihil negativum"?',
+    tried: 'Portal search for the phrase "nihil negativum", all 19 texts.',
+    version: PORTAL_AT + '#q=%22nihil%20negativum%22',
+    result: '24 occurrences in 18 passages, in 7 of 19 texts: Baumgarten § 7, the Reflexionen on Baumgarten, Negative Größen (AA II), KrV A and B, Metaphysik Mrongovius and K3. "none" in every logic text: Meier, the Reflexionen on logic, the seven lecture transcripts, and Jäsche.' },
+  { date: '2026-11-04', who: 'AI suggestion', kind: 'feature',
+    question: 'Does the lexicon\'s "Find it in the texts, in its Latin and German forms" reach the logic lectures?',
+    tried: 'Opened the lexicon entry for nihil negativum from the search above and pressed "Find it in the texts, in its Latin and German forms".',
+    version: PORTAL_AT + '#q=%22nihil+negativum%22+OR+Unm%C3%B6gliche&w=5',
+    result: 'It searched "nihil negativum" OR Unmögliche: 38 occurrences in 28 passages, still 7 of 19 texts, and still none in any logic text. It adds one German word, in its exact form; not "unmöglich", "Unding", or "widerspricht sich".' },
+  { date: '2026-11-04', who: 'AI suggestion', kind: 'search',
+    question: 'Do the logic lectures discuss the self-contradictory concept in their own words?',
+    tried: 'Portal searches for "contradictio in adjecto", and for "sich selbst widerspricht" OR "sich widerspricht" OR "sich selbst widersprechen".',
+    version: PORTAL_AT + '#q=%22contradictio%20in%20adjecto%22',
+    result: '"contradictio in adjecto": Blomberg 2, Wiener 1, Pölitz 2, Dohna 1, Jäsche 2. "sich (selbst) widerspricht": Reflexionen on logic 2, Wiener 1, Busolt 1, Philippi 2, Pölitz 3, Jäsche 2. The passages have not been read yet, so whether they are about the same thing is open.' },
+  { date: '2026-11-04', who: 'AI suggestion', kind: 'feature',
+    question: 'Does the portal need a way to show that a term is absent from a text?',
+    tried: 'Claude proposed it as a new feature in conversation, then checked the portal before building anything.',
+    version: PORTAL_AT + '#q=%22nihil%20negativum%22',
+    result: 'The portal already has it: "Where it occurs" lists every text, with "none" where the term is absent, and rates per 10,000 words.' },
+];
+
+/* ---------- state ---------- */
+let rows = [];          // the log, as stored
+let editing = null;     // id of the row in the form, when editing
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(toast.tm); toast.tm = setTimeout(() => { t.style.display = 'none'; }, 2600); }
+function fmtDate(d) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || '');
+  if (!m) return d || '';
+  return new Date(+m[1], +m[2] - 1, +m[3]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/* The commit a tool-version link names, and the page it points to. A link without one
+   shows whatever the tool is now, not what it was when the row was written. */
+function parseVersion(url) {
+  if (!url) return null;
+  let m = /raw\.githack\.com\/[^/]+\/[^/]+\/([0-9a-f]{7,40})\/([^#?]*)/i.exec(url);
+  if (m) return { commit: m[1], path: decodeURIComponent(m[2]) };
+  m = /github\.com\/[^/]+\/[^/]+\/(?:blob|tree|commit)\/([0-9a-f]{7,40})(?:\/([^#?]*))?/i.exec(url);
+  if (m) return { commit: m[1], path: m[2] ? decodeURIComponent(m[2]) : '' };
+  m = /(?:^|[^0-9a-f])([0-9a-f]{7,40})(?:[^0-9a-f]|$)/i.exec(url);
+  if (m && /\d/.test(m[1]) && /[a-f]/i.test(m[1])) return { commit: m[1], path: '' };
+  return { commit: null };
+}
+
+/* ---------- storage ---------- */
+function load() {
+  try { rows = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch (e) { rows = []; }
+  if (!Array.isArray(rows)) rows = [];
+}
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify(rows)); }
+  catch (e) { toast('Could not save in this browser: back up the log now.'); }
+}
+
+/* ---------- the form ---------- */
+function radio(name) { const r = document.querySelector('input[name="' + name + '"]:checked'); return r ? r.value : ''; }
+function setRadio(name, v) { document.querySelectorAll('input[name="' + name + '"]').forEach(r => { r.checked = r.value === (v || ''); }); }
+
+function readForm() {
+  return {
+    date: $('f-date').value, who: $('f-who').value, question: $('f-question').value.trim(),
+    kind: radio('kind'), tried: $('f-tried').value.trim(), version: $('f-version').value.trim(),
+    result: $('f-result').value.trim(), verdict: radio('verdict'), why: $('f-why').value.trim(),
+    changed: $('f-changed').value.trim(), drafted: radio('drafted') || 'me',
+  };
+}
+function fillForm(r) {
+  $('f-date').value = r.date || today(); $('f-who').value = r.who || '';
+  $('f-question').value = r.question || ''; setRadio('kind', r.kind); $('f-tried').value = r.tried || '';
+  $('f-version').value = r.version || ''; $('f-result').value = r.result || ''; setRadio('verdict', r.verdict);
+  $('f-why').value = r.why || ''; $('f-changed').value = r.changed || ''; setRadio('drafted', r.drafted || 'me');
+  showVersion();
+}
+function clearForm() {
+  editing = null;
+  document.body.classList.remove('editing');
+  $('formTitle').textContent = 'New entry';
+  $('saveBtn').textContent = 'Add to the log';
+  // keep the date and who started it: the next row is usually the same session
+  const keep = { date: $('f-date').value || today(), who: $('f-who').value };
+  fillForm(keep);
+  $('formMsg').textContent = '';
+  $('formMsg').className = '';
+}
+function showVersion() {
+  const v = $('f-version').value.trim(), info = $('versionInfo'), p = parseVersion(v);
+  if (!v) { info.textContent = ''; info.className = ''; return; }
+  if (p && p.commit) { info.textContent = '✓ commit ' + p.commit.slice(0, 7) + (p.path ? ' · ' + p.path : ''); info.className = 'ok'; }
+  else { info.textContent = '⚠ No commit ID: this link shows the tool as it is now, not the version you used.'; info.className = 'warn'; }
+}
+
+$('form').onsubmit = e => {
+  e.preventDefault();
+  const r = readForm(), missing = [];
+  if (!r.date) missing.push('date');
+  if (!r.who) missing.push('who started it');
+  if (!r.question) missing.push('question asked');
+  if (!r.kind) missing.push('kind of attempt');
+  if (!r.tried) missing.push('what we tried');
+  if (!r.result) missing.push('result');
+  if (missing.length) { $('formMsg').textContent = 'Still needed: ' + missing.join(', ') + '.'; $('formMsg').className = 'err'; return; }
+  if (editing) {
+    const i = rows.findIndex(x => x.id === editing);
+    if (i >= 0) rows[i] = Object.assign({}, rows[i], r, { updated: new Date().toISOString() });
+    toast('Entry updated.');
+  } else {
+    rows.push(Object.assign({ id: uid(), created: new Date().toISOString() }, r));
+    toast('Added to the log.');
+  }
+  save();
+  clearForm();
+  render();
+};
+$('clearBtn').onclick = clearForm;
+$('cancelEdit').onclick = clearForm;
+$('f-version').addEventListener('input', showVersion);
+
+function editRow(id) {
+  const r = rows.find(x => x.id === id);
+  if (!r) return;
+  editing = id;
+  fillForm(r);
+  document.body.classList.add('editing');
+  $('formTitle').textContent = 'Edit entry';
+  $('saveBtn').textContent = 'Save changes';
+  $('formPane').scrollTop = 0;
+  if (innerWidth <= 860) $('formPane').scrollIntoView({ behavior: 'smooth' });
+  // an AI-drafted row is opened to be judged: start at the verdict
+  if (r.drafted === 'AI-drafted' && !r.verdict) setTimeout(() => document.querySelector('input[name=verdict]').focus(), 50);
+  else $('f-question').focus();
+}
+function deleteRow(id) {
+  const r = rows.find(x => x.id === id);
+  if (!r || !confirm('Delete this entry?\n\n' + r.question)) return;
+  rows = rows.filter(x => x.id !== id);
+  if (editing === id) clearForm();
+  save();
+  render();
+  toast('Entry deleted.');
+}
+
+/* ---------- the list ---------- */
+function shown() {
+  const q = $('q').value.trim().toLowerCase(), fv = $('fVerdict').value, fw = $('fWho').value, fk = $('fKind').value;
+  let out = rows.filter(r => {
+    if (fv === 'pending' ? r.verdict : fv && r.verdict !== fv) return false;
+    if (fw && r.who !== fw) return false;
+    if (fk && r.kind !== fk) return false;
+    if (q && !COLUMNS.some(c => String(r[c.key] || '').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  out.sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.created || '').localeCompare(b.created || ''));
+  if ($('sort').value === 'new') out.reverse();
+  return out;
+}
+
+function render() {
+  const list = $('list'), show = shown();
+  $('stored').textContent = rows.length + (rows.length === 1 ? ' entry' : ' entries') + ' in this browser';
+  $('exampleWrap').style.display = rows.some(r => r.example) ? 'none' : '';
+  // summary of what is shown
+  const n = k => show.filter(r => (k === 'pending' ? !r.verdict : r.verdict === k)).length;
+  const by = k => show.filter(r => r.who === k).length;
+  const months = {};
+  show.forEach(r => { const m = (r.date || '').slice(0, 7); if (m) months[m] = (months[m] || 0) + 1; });
+  $('summary').innerHTML = rows.length ? '<span><b>' + show.length + '</b> shown</span>' +
+    '<span>' + VERDICTS.map(v => '<span class="chip ' + v + '">' + v + '</span> ' + n(v)).join(' &nbsp;') + ' &nbsp;<span class="chip pending">not judged</span> ' + n('pending') + '</span>' +
+    '<span>started by: ' + WHO.map(w => w + ' <b>' + by(w) + '</b>').join(', ') + '</span>' +
+    '<span>AI-drafted <b>' + show.filter(r => r.drafted === 'AI-drafted').length + '</b></span>' +
+    (Object.keys(months).length > 1 ? '<span>by month: ' + Object.keys(months).sort().map(m => fmtDate(m + '-01').replace(/^\d+ /, '') + ' <b>' + months[m] + '</b>').join(', ') + '</span>' : '')
+    : '<span>No entries yet. Fill in the form, or add the example rows at the bottom of the page.</span>';
+  if (!show.length) { list.innerHTML = rows.length ? '<p class="empty">No entry matches the search and filters.</p>' : ''; return; }
+  list.innerHTML = show.map(r => {
+    const v = r.verdict || 'pending', p = parseVersion(r.version);
+    const ver = r.version ? '<a href="' + esc(r.version) + '" target="_blank" rel="noopener">' + esc(p && p.commit ? 'commit ' + p.commit.slice(0, 7) + (p.path ? ' · ' + p.path : '') : r.version) + '</a>' +
+      (p && p.commit ? '' : ' <span class="nocommit">no commit ID</span>') : '';
+    const dd = (label, val) => val ? '<dt>' + label + '</dt><dd>' + val + '</dd>' : '';
+    return '<article class="entry v-' + v + (r.drafted === 'AI-drafted' ? ' ai' : '') + '">' +
+      '<div class="top"><span class="date">' + esc(fmtDate(r.date)) + '</span>' +
+      '<span class="chip ' + v + '">' + (r.verdict || 'not judged yet') + '</span>' +
+      (r.kind ? '<span class="chip kind">' + esc(r.kind) + '</span>' : '') +
+      (r.drafted === 'AI-drafted' ? '<span class="chip ai">AI-drafted</span>' : '') +
+      '<span class="who">started by ' + esc(r.who || '—') + '</span>' +
+      '<span class="ops"><button class="btn light small" data-edit="' + r.id + '" title="Edit, or give the verdict">✎ ' + (r.verdict ? 'Edit' : 'Judge') + '</button><button class="btn danger small" data-del="' + r.id + '" aria-label="Delete">✕</button></span>' +
+      '<div class="q">' + esc(r.question) + '</div></div>' +
+      '<dl>' + dd('What we tried', esc(r.tried)) + dd('Tool version', ver) + dd('Result', esc(r.result)) +
+      dd('Why', esc(r.why)) + dd('What we changed', esc(r.changed)) + '</dl></article>';
+  }).join('');
+}
+$('list').addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]'), de = e.target.closest('[data-del]');
+  if (ed) editRow(ed.dataset.edit);
+  if (de) deleteRow(de.dataset.del);
+});
+['q', 'fVerdict', 'fWho', 'fKind', 'sort'].forEach(id => $(id).addEventListener('input', render));
+
+/* ---------- export ---------- */
+function cell(v, sep) {
+  const s = String(v == null ? '' : v);
+  return (s.includes(sep) || /["\n\r]/.test(s)) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function table(list, sep) {
+  return [COLUMNS.map(c => c.head).join(sep)].concat(list.map(r => COLUMNS.map(c => cell(r[c.key], sep)).join(sep))).join('\r\n');
+}
+function download(name, text, type) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+async function copyText(text, msg) {
+  try { await navigator.clipboard.writeText(text); toast(msg); }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy'); ta.remove();
+    toast(ok ? msg : 'Copying was blocked by the browser; use Download CSV instead.');
+  }
+}
+$('copyTsv').onclick = () => {
+  const list = shown().slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  if (!list.length) return toast('Nothing to copy.');
+  copyText(table(list, '\t'), list.length + ' rows copied. In Google Sheets, click a cell and paste.');
+};
+$('dlCsv').onclick = () => {
+  const list = shown().slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  download('kant-lab-method-log-' + today() + '.csv', '﻿' + table(list, ','), 'text/csv;charset=utf-8');
+};
+$('dlJson').onclick = () => download('kant-lab-method-log-backup-' + today() + '.json',
+  JSON.stringify({ kind: 'kantlab-method-log', v: 1, saved: new Date().toISOString(), rows }, null, 1), 'application/json');
+
+/* ---------- import ---------- */
+// Read tab- or comma-separated text with quoted cells, as Google Sheets copies and CSV files write it.
+function parseDelimited(text) {
+  text = text.replace(/^﻿/, '');
+  const first = text.split(/\r?\n/)[0] || '';
+  const sep = first.includes('\t') ? '\t' : ',';
+  const out = []; let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"' && text[i + 1] === '"') { f += '"'; i++; }
+      else if (c === '"') q = false;
+      else f += c;
+    } else if (c === '"' && f === '') q = true;
+    else if (c === sep) { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(f); out.push(row); row = []; f = ''; }
+    else f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); out.push(row); }
+  return out.filter(r => r.some(x => x.trim()));
+}
+function norm(s) { return String(s || '').toLowerCase().replace(/[^a-z]/g, ''); }
+function rowsFromText(text) {
+  const t = text.trim();
+  if (!t) return [];
+  if (t[0] === '{' || t[0] === '[') {
+    const j = JSON.parse(t);
+    return (Array.isArray(j) ? j : j.rows || []).map(r => Object.assign({}, r));
+  }
+  const grid = parseDelimited(t);
+  const head = grid[0].map(norm);
+  const idx = COLUMNS.map(c => head.indexOf(norm(c.head)));
+  const hasHead = idx.filter(i => i >= 0).length >= 3;
+  const body = hasHead ? grid.slice(1) : grid;
+  return body.map(cells => {
+    const r = {};
+    COLUMNS.forEach((c, k) => { const i = hasHead ? idx[k] : k; r[c.key] = i >= 0 && cells[i] != null ? cells[i].trim() : ''; });
+    return r;
+  });
+}
+function cleanRow(r, ai) {
+  const o = { id: uid(), created: new Date().toISOString() };
+  COLUMNS.forEach(c => { o[c.key] = String(r[c.key] == null ? '' : r[c.key]).trim(); });
+  o.verdict = VERDICTS.includes(o.verdict.toLowerCase()) ? o.verdict.toLowerCase() : '';
+  const w = o.who.toLowerCase();
+  o.who = w.startsWith('prof') ? 'professor' : w.startsWith('stud') ? 'student' : w.startsWith('ai') ? 'AI suggestion' : '';
+  o.kind = KINDS.includes(o.kind.toLowerCase()) ? o.kind.toLowerCase() : (o.kind ? 'other' : '');
+  const dm = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(o.date), dd = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(o.date);
+  if (dm) o.date = dm[1] + '-' + dm[2].padStart(2, '0') + '-' + dm[3].padStart(2, '0');
+  else if (dd) o.date = dd[3] + '-' + dd[1].padStart(2, '0') + '-' + dd[2].padStart(2, '0');   // Sheets' US form, month first
+  o.drafted = ai || /ai/i.test(o.drafted) ? 'AI-drafted' : 'me';
+  if (r.example) o.example = true;
+  return o;
+}
+function importRows(list, ai) {
+  const add = list.map(r => cleanRow(r, ai)).filter(r => r.question || r.tried || r.result);
+  // leave out exact repeats of rows already in the log (the same row pasted twice)
+  const sig = r => [r.date, r.question, r.tried, r.result].join('\u0001');
+  const have = new Set(rows.map(sig));
+  const fresh = add.filter(r => !have.has(sig(r)) && have.add(sig(r)));
+  rows = rows.concat(fresh);
+  save();
+  render();
+  return { added: fresh.length, skipped: add.length - fresh.length };
+}
+function reportImport(res) {
+  const msg = res.added + (res.added === 1 ? ' row' : ' rows') + ' added' + (res.skipped ? ', ' + res.skipped + ' already in the log left out' : '') + '.';
+  $('importMsg').textContent = msg;
+  toast(msg);
+}
+$('importBtn').onclick = () => {
+  try {
+    const res = importRows(rowsFromText($('importText').value), $('importAi').checked);
+    reportImport(res);
+    if (res.added) $('importText').value = '';
+  } catch (e) { $('importMsg').textContent = 'Could not read those rows: ' + e.message; }
+};
+$('importFile').onchange = e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try { reportImport(importRows(rowsFromText(rd.result), $('importAi').checked)); }
+    catch (err) { $('importMsg').textContent = 'Could not read that file: ' + err.message; }
+    e.target.value = '';
+  };
+  rd.readAsText(f);
+};
+$('examples').onclick = () => {
+  const res = importRows(EXAMPLES.map(r => Object.assign({ drafted: 'AI-drafted', example: true }, r)), true);
+  toast(res.added + ' example rows added, marked AI-drafted and not judged yet.');
+};
+
+/* ---------- the prompt for Claude ---------- */
+const PROMPT = `Draft rows for our Kant Lab method log from this session: one row for each separate attempt we made to answer a research question (a search, a feature we used or built, or a prompt).
+
+Answer with tab-separated rows only, with this header row first:
+${COLUMNS.map(c => c.head).join('\t')}
+
+- Date: YYYY-MM-DD.
+- Question asked: the research question, in one sentence.
+- What we tried: exactly what was searched, used, built or asked.
+- Kind: search, feature, prompt, or other.
+- Tool version: a preview link with the full commit ID (https://raw.githack.com/mikrishnan/kant-lab/<commit>/<path>), if there is one.
+- Result: what the texts or the tool returned (counts, passages, what was missing), as facts.
+- Verdict, Why: leave empty. I will judge these myself.
+- What we changed: only what we actually changed, or leave empty.
+- Who started it: professor, student, or AI suggestion.
+- Written by: AI-drafted.
+Do not put a tab or a line break inside a cell.`;
+$('prompt').textContent = PROMPT;
+$('copyPrompt').onclick = () => copyText(PROMPT, 'Prompt copied.');
+
+/* ---------- init ---------- */
+load();
+clearForm();
+$('f-date').value = today();
+render();
+</script>
+</body>
+</html>
