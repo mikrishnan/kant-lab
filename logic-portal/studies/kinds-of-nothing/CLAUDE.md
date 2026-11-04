@@ -16,8 +16,11 @@ changing it. [README.md](README.md) describes it for a human.
 
 ## How the page draws on the portal
 
-- **The portal's code cannot be called from here.** Its script is one closed function,
-  so nothing in it is a global. Do not copy its code in either; it changes every week.
+- **The portal's code cannot be called from here,** with one exception. Its script is one
+  closed function, so nothing in it is a global except `window.PORTAL`, which it exposes for
+  `class-sessions.js`. The queue reads the portal's search through that, in the portal
+  shown on its right (see *The queue* below). Do not copy the portal's code in either; it
+  changes every week.
 - **Link to it by address.** Every passage opens in the portal, in the pane on the right
   or in a tab of its own. The addresses, all relative to this folder:
   - a textbook §: `../../index.html#read=baumgarten&at=p7` (or `meier`);
@@ -54,6 +57,29 @@ changing it. [README.md](README.md) describes it for a human.
   texts are OCR, so say so wherever they are quoted.
 - **The repository is public.** Use GitHub usernames, not names, and put no readings or
   PDFs here.
+
+## The queue
+
+`queue.html` is the queue, `queue-config.js` where it keeps its flags. The README's
+*The queue* describes both for a human.
+
+- **The flags live in `kant-lab-seminar/queues`, a private repository, never here.** Do not
+  copy flags, notes or readers' names into this repository: it is public.
+- **The page writes only its own reader's file** (`flags/<login>.json`), and adds to
+  `queue.json` only by appending. Numbers never move, so nothing takes a passage out.
+- **The token goes only to `https://api.github.com`.** Never add a way to point the page at
+  another address, by a parameter or otherwise: a link could then collect tokens.
+- **It reads the portal through `window.PORTAL`** in the frame on its right: `S.q` and
+  `S.loc` for the search, `runQuery()` for what it finds, `P` and `TEXTS` for the passages,
+  and `TEXTS[…].entries` and `.groups` for a Reflexion's phase and filing. It changes
+  nothing there. If the portal renames any of these, "Add passages" says so; the repair is
+  here, not in the portal.
+- **Attested vs. inferred** holds here too. "Readers differ" is the page's own finding and
+  is drawn dashed. A note filed only by the AA's block heading, or by its handbook page, has
+  that filing drawn dashed, since its own locus note does not say so.
+- **Testing it** needs the real repository and a token. Use a queue folder of its own,
+  `queues/test-<something>/`, by changing `queue` in a scratch copy of the config, and
+  delete that folder afterwards. Never test against `queues/nihil-negativum/`.
 
 ## House style and checks
 
