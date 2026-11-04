@@ -7,6 +7,36 @@ corrects it in their own words.
 Each entry: the date, who asked (GitHub username), what was asked for, what it showed,
 whether it helped, and what it got wrong or could not do.
 
+## 4 November 2026: the queue
+
+*A draft, to be corrected by nikolasland in their own words.*
+
+- **Asked for (nikolasland):** the working paper's second tool, the queue, changed so that
+  each passage is flagged against the four kinds of nothing in the Critique's table (any of
+  them, several, or none). The flags are saved on GitHub, so that several of us can work on
+  it at once and see each other's flags live. Its passages come from the Logic Portal's
+  search.
+- **What there is:**
+  - `queue.html`, linked from the study's page, with the portal on the right;
+  - a box that adds what the portal's search finds, Kant's notes filed on a §, or the
+    starting points;
+  - the four kinds and *None* on every passage, a line of note, the others' ticks shown once
+    you have given yours, a list for seminar, filters, and a bar;
+  - the flags kept in a private repository, `kant-lab-seminar/queues`, one file per reader.
+- **What it showed:** nothing yet, since nobody has flagged. Building it confirmed the
+  paper's counts through the portal itself. Its search for *nichts OR nihil* finds 302 of
+  Kant's notes on Baumgarten. 69 notes are filed on § 7: 26 by their own locus note, 43 only
+  by the AA's block heading. Across the whole corpus the same search finds 2,090 passages.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do:**
+  - "live" means within about half a minute;
+  - only members with a token see the queue;
+  - a passage cannot be taken out again;
+  - "Add passages" depends on what the portal exposes as `window.PORTAL`, and stops, saying
+    so, if that changes.
+- **Unsure:** whether hiding others' ticks until you have given yours is right; and whether
+  *None* and *not yet read* are kept apart clearly enough.
+
 ## 4 November 2026: the study is set up
 
 - **Asked for:** a sandbox for this question, beside the Logic Portal and drawing on it,
