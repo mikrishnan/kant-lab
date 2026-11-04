@@ -1,69 +1,15 @@
-# Meier reader
+# Meier Reader (retired)
 
-An interactive reading guide to **G. F. Meier, *Auszug aus der Vernunftlehre*** (Halle
-1752) — the logic textbook Kant used in his lecture courses for thirty years, and the
-book whose interleaved pages carry the *Reflexionen zur Logik* of Academy Edition
-vol. XVI.
+Retired on 4 November 2026. Everything it did — the *Auszug* with Kant’s Reflexionen beside it, the AA’s blocks of notes, the Tradition tab, the outline and the go-to box — is now in the
+[Logic Portal](../logic-portal/index.html#read=meier), which reads the same data from
+[`../data/`](../data/). Open Meier’s *Auszug* there under **Read**.
 
-**Owners:** Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), who also own
-the Baumgarten reader and the shared data in [`../data/`](../data/). Text errors, bugs and
-proposals go to them, through the issue forms described in the
-[root README](../README.md).
+The address still works. [meier-reading-guide.html](meier-reading-guide.html) redirects into the portal, and a link to a
+§ (`#go=92`), a page of the Academy edition (`#go=16:236`) or a paragraph (`#para-92`)
+opens the same place there.
 
-**Spec:** [SPEC.md](SPEC.md) — what the tool did on 10 October 2026, item by item, and
-the questions it left open. It is a record, no longer kept up to date.
-
-## Running it
-
-Open [meier-reading-guide.html](meier-reading-guide.html) in any modern browser —
-double-click it, or:
-
-```sh
-open meier-reading-guide.html
-```
-
-No install, no server, no build. The whole app is that one file. An internet
-connection is used only to fetch the display fonts; it works offline with fallbacks.
-
-## What you get
-
-- **The complete German text**, all 563 §§, laid out by *Haupttheil* and *Abschnitt*.
-- **A collapsible outline** in the left sidebar, showing each *Abschnitt* with its
-  § range. Clicking jumps you there; the current section stays highlighted.
-- **Clickable cross-references.** Meier's internal citations — including his compound
-  forms like `§.116-121.` — are links that scroll to the passage cited.
-- **Academy Edition citations.** Each paragraph carries its `AA 16:…` reference, so you
-  can move between this text and the *Reflexionen* keyed to it.
-- **A tradition panel** on the right. Click any paragraph and the panel shows where
-  that passage comes from and what it argues against, in three colour-coded strata:
-  - **Wolff · Leibniz** — Meier's immediate sources;
-  - **Scholastic** — Aquinas, Porphyry, Baumgarten;
-  - **Aristotle** — the ultimate ancestry of the doctrine.
-
-  Each entry is tagged *Source*, *Parallel*, or *Contrast*. The three buttons at the
-  top of the panel filter by stratum, and the divider between the two columns can be
-  dragged to rebalance them.
-- **A § or page box** in the header: type a § (`92`) or a page of the Academy edition
-  (`16:236`, `AA XVI 236`) and press Enter. A page that holds only Kant's notes opens
-  them beside the § they are filed under. A page of another volume, such as a logic
-  lecture in AA 24 or Baumgarten in AA 17–18, says which text it is in, with a link to
-  where you can read it. A link ending `meier-reading-guide.html#go=16:236` opens the
-  reader at that § or page.
-- **Two searches.** The box above the text searches the work you are reading and
-  highlights every match in place; the counter shows which hit you are on, and `‹ ›`
-  or Enter / Shift-Enter step through them. The box under the panel tabs searches the
-  annotation layers instead — the tradition entries and Kant's Reflexionen together —
-  and lists what it finds, with the § each hit belongs to; click a result to go there.
-  Both are case-sensitive about umlauts, so *über* and *uber* are different words.
-
-## Coverage
-
-The primary text is complete. The tradition annotations are not — ten pivotal
-paragraphs are annotated so far (§§ 1, 10, 14, 15, 115, 155, 292, 353, 362, 414);
-other paragraphs show a placeholder in the right-hand panel. Annotation is ongoing.
-The entries live in [../data/tradition-meier.js](../data/tradition-meier.js), whose
-header explains how to add one; propose additions by pull request, as the
-[root README](../README.md) describes.
-
-Baumgarten's *Metaphysica* has its own reader in
-[../baumgarten-reader/](../baumgarten-reader/).
+Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel) looked after it, and still look
+after the data it was built from. The reader as it last stood, with its spec and its
+notes for Claude, is at commit
+[`9d47366`](https://github.com/mikrishnan/kant-lab/tree/9d473662a1a2a947232aed780ffbd180e9f233c0/meier-reader);
+[open it as it was](https://raw.githack.com/mikrishnan/kant-lab/9d473662a1a2a947232aed780ffbd180e9f233c0/meier-reader/meier-reading-guide.html).

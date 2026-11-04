@@ -3,9 +3,9 @@
 Work by individual Kant Lab participants, as distinct from the shared tools at the
 root of this repository.
 
-Everything above this directory — the three readers, `data/`, `scripts/`,
-`Textfiles/` — is team work: one Baumgarten reader, one Meier reader, one Porphyrian
-tree, maintained in common. This directory is the other kind. A participant's own
+Everything above this directory — the Logic Portal, `data/`, `scripts/`, `Textfiles/` —
+is the seminar's common work, kept by its one team, the Kant Lab. This directory is the
+other kind. A participant's own
 project lives in a folder of its own here, under their name, and belongs to them.
 
 ```
@@ -14,9 +14,11 @@ Individuals/
     ...whatever your project needs
 ```
 
-Most of what is here so far is Porphyrian tree attempts, alongside some seminar
-readings and demo files. Nothing in this directory is loaded by the three shared
-apps, and nothing here is expected to look like them.
+Here are participants' own readers, finders and explorers, alongside some demo files.
+The Logic Portal reads several of them, and its `catalogue.js` lists which; nothing else
+here is expected to look like the portal. The Porphyrian-tree pages were early
+experiments, retired on 4 November 2026: each now says so, and links to the page as it
+last stood.
 
 ## How changes arrive now
 
@@ -25,11 +27,7 @@ When you upload or edit a file on github.com, the only option offered is **Creat
 branch for this commit and start a pull request**. Take it, and on the pull request's
 page press **Squash and merge** — nobody else needs to approve a change that touches
 only your own folder. The root [README](../README.md) explains why, and how the shared
-tools and the working groups are run.
-
-One folder here is the seminar's rather than its owner's: the Logic Portal,
-`mikrishnan/portal/`. Anyone may change it, and someone other than the author approves
-the change. The root README's *Fixing the Logic Portal in seminar* says how.
+tools and the shared data are run.
 
 The site publishes this folder along with everything else, so **published readings,
 books and other PDFs do not belong here.** Course readings belong on the course site.
@@ -51,7 +49,7 @@ one, that is your call to make, and the link you have already shared will stop w
 when you do.
 
 **Building on the shared data.** If your project uses the generated files in
-[../data/](../data/), read them with a relative `<script src>` the way the readers in
-[../baumgarten-reader/](../baumgarten-reader/) and [../meier-reader/](../meier-reader/)
-do, rather than copying the file. Those are machine-extracted and a copy goes stale the
+[../data/](../data/), read them with a relative `<script src>` — from your folder,
+`../../data/metaphysica-17.js` — the way the [Logic Portal](../logic-portal/) does, rather
+than copying the file. Those are machine-extracted and a copy goes stale the
 next time its extractor runs.
