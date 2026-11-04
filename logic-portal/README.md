@@ -97,7 +97,8 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
 [studies/](studies/) holds research sandboxes beside the portal: a page for one question
 that reads the same texts and opens each passage here, by its address, without changing
 the portal. Features built for one question stay in its study. The first is
-[The kinds of nothing](studies/kinds-of-nothing/index.html).
+[The kinds of nothing](studies/kinds-of-nothing/index.html). The **Studies** tab, beside Explore,
+lists them all, from `studies/studies.js`; a link to `index.html#studies` opens it.
 
 ## What it does
 
