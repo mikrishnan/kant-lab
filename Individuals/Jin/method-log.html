@@ -277,6 +277,8 @@ footer { font-size: 13.5px; color: var(--muted); padding: 10px 22px 20px; border
 </dialog>
 <div id="toast" role="status" aria-live="polite"></div>
 
+<!-- Jin's sessions kept in the repository: METHOD_LOG_SESSIONS. Plain <script src> so the page also works from file:// -->
+<script src="method-log-sessions.js"></script>
 <script>
 /* ---------- data ---------- */
 const STORE = 'kantlab-method-log-v2';
@@ -392,6 +394,21 @@ function load() {
       setTimeout(() => toast(old.length + ' entries from the earlier log were moved into sessions by date.'), 400);
     }
   } catch (e) { /* the earlier log is left as it was */ }
+  // Sessions committed to the repository come in once each; one deleted here stays deleted.
+  if (typeof METHOD_LOG_SESSIONS !== 'undefined' && Array.isArray(METHOD_LOG_SESSIONS)) {
+    let seen = [];
+    try { seen = JSON.parse(localStorage.getItem(STORE + '-repo-seen') || '[]'); } catch (e) { seen = []; }
+    let n = 0;
+    METHOD_LOG_SESSIONS.forEach(r => {
+      if (!r || !r.id || seen.includes(r.id)) return;
+      seen.push(r.id);
+      if (sessions.some(x => x.repoId === r.id || (x.date === r.date && (x.title || '') === (r.title || '')))) return;
+      sessions.push(blankSession(Object.assign({}, r, { id: uid(), repoId: r.id, ideas: (r.ideas || []).map(i => blankIdea(Object.assign({}, i, { id: uid(), threads: threadsOf(i.threads) }))) })));
+      n++;
+    });
+    localStorage.setItem(STORE + '-repo-seen', JSON.stringify(seen));
+    if (n) { save(); setTimeout(() => toast(n + (n === 1 ? ' session' : ' sessions') + ' from the repository added to this browser\'s log.'), 600); }
+  }
 }
 function save() {
   try { localStorage.setItem(STORE, JSON.stringify(sessions)); $('saved') && ($('saved').textContent = 'saved'); }
@@ -445,7 +462,7 @@ function renderSessList() {
   $('sessItems').innerHTML = list.length ? list.map(s => {
     const c = verdictCounts(s.ideas), n = s.ideas.length;
     const bar = n ? '<div class="vbar">' + ['worked', 'partly', 'failed', 'pending'].map(k => c[k] ? '<span style="flex:' + c[k] + ';background:var(--' + k + ')' + (k === 'pending' ? ';opacity:.35' : '') + '"></span>' : '').join('') + '</div>' : '';
-    return '<button class="sitem' + (s.id === current ? ' on' : '') + '" data-sid="' + s.id + '"><span class="d">' + esc(fmtDate(s.date)) + ' · ' + esc(s.type) + '</span>' +
+    return '<button class="sitem' + (s.id === current ? ' on' : '') + '" data-sid="' + s.id + '"><span class="d">' + esc(fmtDate(s.date)) + ' · ' + esc(s.type) + (s.repoId ? ' · in the repository' : '') + '</span>' +
       '<span class="t">' + esc(s.title || 'Untitled session') + '</span><span class="c">' + n + (n === 1 ? ' idea' : ' ideas') +
       (n ? ' · ' + c.worked + ' worked, ' + c.partly + ' partly, ' + c.failed + ' failed' + (c.pending ? ', ' + c.pending + ' not judged' : '') : '') + '</span>' + bar + '</button>';
   }).join('') : '<p class="empty">No sessions yet.</p>';
@@ -478,6 +495,7 @@ function renderSession() {
     '<span class="saved" id="saved"></span>' +
     '<button class="btn light small" id="copyDoc" title="Copies the session as formatted text, for a Google Doc">Copy for Google Docs</button>' +
     '<button class="btn danger small" id="delSess">Delete session</button></div>' +
+    (s.repoId ? '<p class="msg" style="margin:-4px 0 10px">A copy of this session is saved in the repository, in <code>Individuals/Jin/method-log-sessions.js</code>. What you change here stays in this browser until it is sent there to be committed.</p>' : '') +
     '<div class="sgrid">' +
     '<div class="row2"><div class="field"><label>Date</label><input type="date" data-f="date" value="' + esc(s.date) + '"></div>' +
     '<div class="field"><label>Type</label><select data-f="type">' + SESSION_TYPES.map(t => '<option' + (t === s.type ? ' selected' : '') + '>' + t + '</option>').join('') + '</select></div></div>' +
