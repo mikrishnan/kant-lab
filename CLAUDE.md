@@ -363,6 +363,14 @@ participant's tool loads shared data from `../../data/` and never copies it. A s
 `logic-portal/studies/<topic>/`, is a sandbox for tools built around one research question:
 it reads the same texts and opens every passage in the portal by its address, and a change
 to the portal never touches a study, nor a study's to the portal.
+
+**Puzzles.** A study can keep a `puzzles.md`: a running list of hunches that are not yet
+requests, which anyone in the seminar adds to. The first is
+[logic-portal/studies/kinds-of-nothing/puzzles.md](logic-portal/studies/kinds-of-nothing/puzzles.md).
+When someone in a session says "puzzle", thinks aloud and says it is for the puzzles, or adds
+to a puzzle already there, record it in that file by the rules at its top: in their words,
+dated, under their GitHub username, added to the end of the puzzle it develops, and with
+nothing suggested unless they ask. Do not turn a hunch into code, a feature or a reading.
 [docs/maintaining.md](docs/maintaining.md) describes bringing a tool into the portal,
 promoting one to the top level, and retiring one.
 

@@ -181,7 +181,9 @@ folder is gone. Work happens in three places:
   question by whoever is working on it. A study sits beside the portal and draws on it —
   every passage opens in the portal — without changing it, so features for one question
   stay out of the tool everyone uses. [logic-portal/studies/](logic-portal/studies/) lists
-  them; the first is *The kinds of nothing*.
+  them; the first is *The kinds of nothing*. A study can also keep a `puzzles.md`, a running
+  list of hunches that aren't requests yet. Anyone adds to it by telling Claude "Puzzle: …"
+  or "On puzzle 1: …", or by editing it on github.com.
 
 **Building data rather than an app.** A dataset starts in your folder. Once the portal or
 other tools depend on it, it moves to `data/`, and changes to it go through the owners of
