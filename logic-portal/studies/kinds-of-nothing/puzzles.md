@@ -84,3 +84,22 @@ A new puzzle, at the end of the file:
 **Developments**
 
 - *None yet.*
+
+### 2. The examples: shadow, light, two-sided figure, cold
+
+**Status:** ready to ask · raised 4 November 2026 by mikrishnan
+
+> Kant has a set of examples, like shadow, light, two-sided figure, that are just standard
+> examples of different kinds of nothing. It's the kind of thing that at some point it would
+> be easy to do a compilation of, both ways. What are the examples Kant uses over time: for
+> any given example, like shadow or cold, which kind of nothing is it associated with? But
+> then also from the other direction: what does each kind of nothing get as its example?
+> That would be something I think pretty clear cut to assemble, but it's information that
+> we don't want right now. We'll store this as a thing we know we can build, but we're just
+> going to have to wait until we want it.
+
+**Prompted by:** a conversation in the seminar, 4 November 2026. No passages yet.
+
+**Developments**
+
+- *None yet.*
