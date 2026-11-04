@@ -92,6 +92,13 @@ text, and a button offers to search for them everywhere.
 A search's results have two tabs: **Overview**, with the phrasings and where they occur, and
 **Passages**. The search options fold away under **Options**.
 
+## Studies
+
+[studies/](studies/) holds research sandboxes beside the portal: a page for one question
+that reads the same texts and opens each passage here, by its address, without changing
+the portal. Features built for one question stay in its study. The first is
+[The kinds of nothing](studies/kinds-of-nothing/index.html).
+
 ## What it does
 
 - **Ask.** Type a word or phrase (`form* fals*`, `"satz des widerspruchs"`). The search

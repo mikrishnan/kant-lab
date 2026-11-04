@@ -12,7 +12,7 @@ team, the Kant Lab; there are no working groups.
 | --- | --- |
 | [README.md](README.md) | The contributor workflow — issue → pull request → review → merge — written for participants |
 | [index.html](index.html) | GitHub Pages landing page: the Logic Portal, and one line on what has been retired |
-| [logic-portal/](logic-portal/) | The Logic Portal: search and reading across the whole logic corpus, the whole seminar's tool. It loads the shared data, its own OCR of four AA XXIV lectures (`aa24-ocr/`) and of AA XXIX's 1983 part, *Metaphysik Mrongovius*, K3 and *Logik Mrongovius* (`aa29-ocr/`), Kant's published works (`published/`: AA I, AA II and the Critique in A and B), and some participants' work from `Individuals/`, all listed in its `catalogue.js`; `pinned/` holds frozen copies made by `build-pins.py`, and `sessions/` the class sessions. Its [README.md](logic-portal/README.md) describes it |
+| [logic-portal/](logic-portal/) | The Logic Portal: search and reading across the whole logic corpus, the whole seminar's tool. It loads the shared data, its own OCR of four AA XXIV lectures (`aa24-ocr/`) and of AA XXIX's 1983 part, *Metaphysik Mrongovius*, K3 and *Logik Mrongovius* (`aa29-ocr/`), Kant's published works (`published/`: AA I, AA II and the Critique in A and B), and some participants' work from `Individuals/`, all listed in its `catalogue.js`; `pinned/` holds frozen copies made by `build-pins.py`, `sessions/` the class sessions, and `studies/` the research sandboxes beside the portal, each with its own `CLAUDE.md`. Its [README.md](logic-portal/README.md) describes it |
 | [baumgarten-reader/](baumgarten-reader/), [meier-reader/](meier-reader/) | **Retired** on 4 November 2026, when the portal had taken in all they did. Each page now redirects to the same § or page in the portal; each folder's `README.md` names the commit where the reader last stood |
 | [porphyrian-tree/](porphyrian-tree/) | **Retired** on 4 November 2026, with the participants' Porphyrian-tree pages: an early experiment. The page is a notice linking to the last version |
 | [data/](data/) | Shared `.js` data files the tools read — the *Metaphysica*, the Reflexionen, Adickes' phase chronology, the Meier tradition passages. [data/README.md](data/README.md) lists their globals and who reads them |
@@ -359,7 +359,10 @@ AA XIV, and the Jäsche *Logik* is AA IX.
 **One team.** The seminar works as one team, the Kant Lab; the working groups and their
 `groups/` folder were retired in November 2026. Participants' own work lives in
 `Individuals/<name>/`, and what the whole seminar uses goes into the Logic Portal. A
-participant's tool loads shared data from `../../data/` and never copies it.
+participant's tool loads shared data from `../../data/` and never copies it. A study,
+`logic-portal/studies/<topic>/`, is a sandbox for tools built around one research question:
+it reads the same texts and opens every passage in the portal by its address, and a change
+to the portal never touches a study, nor a study's to the portal.
 [docs/maintaining.md](docs/maintaining.md) describes bringing a tool into the portal,
 promoting one to the top level, and retiring one.
 
