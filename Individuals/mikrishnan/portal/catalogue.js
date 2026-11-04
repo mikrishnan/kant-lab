@@ -130,6 +130,30 @@ const PORTAL_TEXTS = [
     accuracy: { ocr: true, words: 98, how: 'Measured on Logik Busolt, run through the same OCR and compared with the InteLex transcription the portal also has: about 98% of words right with case and punctuation set aside, 96.5% exactly as printed. Not corrected.' },
     credit: 'mikrishnan (OCR import)' },
 
+  // The 1983 part of AA XXIX, read off the printed volume by OCR and not corrected: about 99% of
+  // words right, proofread on three pages. Its 1980 part is not here: see PORTAL_GAPS below and
+  // ../aa29-ocr/README.md.
+  { key: 'metaphysik-mrongovius', title: 'Metaphysik Mrongovius (uncorrected OCR)', short: 'Mrongovius (OCR)', layer: 'lecture',
+    date: '1782/83', year: 1782, vol: 29, shape: 'logik', on: 'baumgarten',
+    file: '../aa29-ocr/metaphysik-mrongovius-29-ocr.js', global: 'METAPHYSIK_MRONGOVIUS',
+    source: 'AA 29:747–940, a student transcript of the metaphysics lectures (its title page: “1783 d. 4. Febr:”); uncorrected OCR of the Internet Archive’s scan of AA XXIX’s 1983 part, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    accuracy: { ocr: true, words: 99, how: 'Proofread word by word against the scans on three pages of AA XXIX’s 1983 part (AA 29:769, 1012, 1046; 1,083 words): 9 words misread, so about 99% right with case set aside, and 98% exactly as printed, because this scan’s OCR capitalises nouns the print has in lower case (substanz → Substanz). No clean transcription of these pages exists to measure the whole text against. Not corrected.' },
+    credit: 'mikrishnan (OCR import)' },
+
+  { key: 'metaphysik-k3', title: 'Metaphysik K3 (uncorrected OCR)', short: 'K3 (OCR)', layer: 'lecture',
+    date: '1794/95', year: 1794, vol: 29, shape: 'logik', on: 'baumgarten',
+    file: '../aa29-ocr/metaphysik-k3-29-ocr.js', global: 'METAPHYSIK_K3',
+    source: 'AA 29:945–1040, which the AA calls Metaphysik Arnoldt (K3): a student transcript of the metaphysics lectures, breaking off (its title page: “pro 1794/95”); uncorrected OCR of the Internet Archive’s scan of AA XXIX’s 1983 part, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    accuracy: { ocr: true, words: 99, how: 'Proofread word by word against the scans on three pages of AA XXIX’s 1983 part (AA 29:769, 1012, 1046; 1,083 words): 9 words misread, so about 99% right with case set aside, and 98% exactly as printed, because this scan’s OCR capitalises nouns the print has in lower case (substanz → Substanz). No clean transcription of these pages exists to measure the whole text against. Not corrected.' },
+    credit: 'mikrishnan (OCR import)' },
+
+  { key: 'logik-mrongovius', title: 'Logik Mrongovius (uncorrected OCR)', short: 'Logik Mrongovius (OCR)', layer: 'lecture',
+    date: '1784', year: 1784, vol: 29, shape: 'logik', on: 'meier',
+    file: '../aa29-ocr/logik-mrongovius-29-ocr.js', global: 'LOGIK_MRONGOVIUS',
+    source: 'AA 29:1045–1047, the surviving opening of a student transcript of the logic lectures (its title page: “den 25 May 1784”); uncorrected OCR of the Internet Archive’s scan of AA XXIX’s 1983 part, by aa24-ocr/parse_aa24_ocr.py. Check quotations against the page image',
+    accuracy: { ocr: true, words: 99, how: 'Proofread word by word against the scans on three pages of AA XXIX’s 1983 part (AA 29:769, 1012, 1046; 1,083 words): 9 words misread, so about 99% right with case set aside, and 98% exactly as printed, because this scan’s OCR capitalises nouns the print has in lower case (substanz → Substanz). No clean transcription of these pages exists to measure the whole text against. Not corrected.' },
+    credit: 'mikrishnan (OCR import)' },
+
   { key: 'jaesche', title: 'Jäsche Logik', short: 'Jäsche', layer: 'compilation',
     date: '1800', year: 1800, vol: 9, shape: 'logik', on: 'meier',
     file: '../../Alex%20Li/logik-jasche-9.js', global: 'LOGIK_JASCHE',
@@ -166,6 +190,15 @@ const PORTAL_TEXTS = [
     source: 'The 1787 text as AA III (1904/1911) prints it, OCR of the Internet Archive’s scan, spelling repaired by rule: about 98% of words agree with the Bonner Kant-Korpus. B pages from AA III’s margin, a query where uncertain. Check quotations against the page image',
     accuracy: { ocr: true, words: 98, how: 'Measured on every page against the Bonner Kant-Korpus’s text of AA III, with spelling differences set aside. The OCR’s commonest misreadings were repaired by rule; each repaired word keeps the OCR’s reading in the data. B pages shown with a query are uncertain.' },
     credit: 'mikrishnan (OCR import)' },
+];
+
+/* What the portal does not have, and why: shown in small type under the texts on the home page
+   and under the lectures in Read, so that the seminar remembers. Hand-written: edit it directly.
+     short  the line shown
+     more   the rest, shown on hover */
+const PORTAL_GAPS = [
+  { short: 'AA XXIX’s 1980 part (the Philosophische Enzyklopädie, Herder’s notes on mathematics and physics, the Berliner and Danziger Physik, Moral Mrongovius II): online only at HathiTrust, and nothing has been taken from there',
+    more: 'The portal has only AA XXIX’s 1983 part (Metaphysik Mrongovius, Metaphysik K3, Logik Mrongovius), from the Internet Archive. The 1980 part (AA 29:1–742) is not on the Internet Archive, and HathiTrust asks that a whole volume come through its own download, with a UChicago login, not be copied by a script. So none of it is here, and none of it has been taken. To add it: download the volume’s PDF from HathiTrust that way, then OCR it. See Individuals/mikrishnan/aa29-ocr/README.md.' },
 ];
 
 /* The seminar's annotation layers: connections and classifications the portal shows beside

@@ -93,6 +93,10 @@ how many manuscript breaks were numbered by reading, by sequence, or not at all,
 and every heading it found. **Read it.** Its docstring says what it knows about the
 layout.
 
+The same extractor also reads AA XXIX's 1983 part (`parse_aa24_ocr.py aa29`), into
+[../aa29-ocr/](../aa29-ocr/README.md). What it does for that scan's OCR is switched on for
+that scan only, and leaves the four files here unchanged (checked byte for byte).
+
 To measure the OCR against a clean transcription of the same pages:
 
 ```sh

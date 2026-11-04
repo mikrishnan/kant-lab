@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
-"""Extract the AA XXIV logic transcripts the repository has no InteLex copy of,
-from the Internet Archive's OCR of the printed volume, into the `logik` shape.
+"""Extract Academy Edition lecture transcripts the repository has no InteLex copy
+of, from the Internet Archive's OCR of the printed volumes, into the `logik`
+shape: four logic lectures of AA XXIV, and the 1983 part of AA XXIX (two
+metaphysics lectures and a logic fragment).
 
     python3 parse_aa24_ocr.py philippi CACHE OUT.js
-    python3 parse_aa24_ocr.py all CACHE OUTDIR
+    python3 parse_aa24_ocr.py all  CACHE OUTDIR      the four AA XXIV texts
+    python3 parse_aa24_ocr.py aa29 CACHE OUTDIR      the three AA XXIX texts
 
-CACHE is a folder holding the two volumes' word-position OCR as the Internet
+CACHE is a folder holding the volumes' word-position OCR as the Internet
 Archive serves it (see README.md for the curl lines):
 
     kantsgesammeltes241imma_djvu.xml   AA XXIV, erste Hälfte  (pp. 1–496)
     kantsgesammeltes242imma_djvu.xml   AA XXIV, zweite Hälfte (pp. 497–1103)
+    kantsgesammeltes0029kant_djvu.xml  AA XXIX, erste Hälfte, zweiter Teil
+                                       (1983; pp. 743–1188)
 
-The scans are of the Duquesne University (Gumberg Library) copy, digitized by
-the Internet Archive in 2010.
+The AA XXIV scans are of the Duquesne University (Gumberg Library) copy,
+digitized by the Internet Archive in 2010; the AA XXIX scan is of Trent
+University's (Bata Library) copy, digitized in 2019. The 1980 part of AA XXIX
+(pp. 1–742) is not on the Internet Archive, and is not here: see
+../aa29-ocr/README.md.
 
 THIS IS UNCORRECTED OCR. Nothing here is guessed, filled in or smoothed over:
 every word is the OCR engine's reading of the printed page, and the misreadings
@@ -74,8 +82,10 @@ import sys
 import xml.etree.ElementTree as ET
 
 VOLS = {
-    1: {"item": "kantsgesammeltes241imma", "offset": 8},     # leaf = page + 8
-    2: {"item": "kantsgesammeltes242imma", "offset": -486},  # leaf = page - 486
+    1: {"item": "kantsgesammeltes241imma", "offset": 8, "aa": 24, "roman": "XXIV"},       # leaf = page + 8
+    2: {"item": "kantsgesammeltes242imma", "offset": -486, "aa": 24, "roman": "XXIV"},    # leaf = page - 486
+    3: {"item": "kantsgesammeltes0029kant", "offset": -734, "aa": 29, "roman": "XXIX",    # leaf = page - 734
+        "split_lines": True},
 }
 SCAN_URL = "https://archive.org/details/{item}/page/n{n}/mode/1up"
 
@@ -109,6 +119,24 @@ WORKS = {
         "edition": "AA XXIV reprints this transcript from Kowalewski's edition (1924), not from the manuscript",
         "ms": True,
     },
+    # AA XXIX, erste Hälfte, zweiter Teil (1983), "Ergänzungen II", from its Inhaltsverzeichnis
+    # (AA 29:1187–88). Left out: the Magath variants (29:1049–77), variant readings against
+    # Pölitz's text of the Religionslehre rather than a text, and Lehmann's Anhang (29:1079ff.).
+    "metaphysik-mrongovius": {
+        "const": "METAPHYSIK_MRONGOVIUS", "work": "Metaphysik Mrongovius", "label": "Metaphysik Mrongovius",
+        "vol": 3, "aa": [743, 940], "front": [743, 745], "contents": [], "text": [747, 940],
+        "date": "1782/83", "ms": True, "group": "aa29", "file": "metaphysik-mrongovius-29-ocr.js",
+    },
+    "metaphysik-k3": {
+        "const": "METAPHYSIK_K3", "work": "Metaphysik K3 (Arnoldt)", "label": "Metaphysik Arnoldt (K3)",
+        "vol": 3, "aa": [941, 1040], "front": [941, 943], "contents": [], "text": [945, 1040],
+        "date": "1794/95", "ms": True, "group": "aa29", "file": "metaphysik-k3-29-ocr.js",
+    },
+    "logik-mrongovius": {
+        "const": "LOGIK_MRONGOVIUS", "work": "Logik Mrongovius", "label": "Logik Mrongovius",
+        "vol": 3, "aa": [1041, 1047], "front": [1041, 1043], "contents": [], "text": [1045, 1047],
+        "date": "1784", "ms": True, "group": "aa29", "file": "logik-mrongovius-29-ocr.js",
+    },
 }
 
 # Not emitted: the repository has Busolt from InteLex. Kept so the OCR can be
@@ -133,14 +161,31 @@ def load_leaves(path):
             continue
         lines = []
         for line in el.iter("LINE"):
-            words = []
+            boxes = []
             for wd in line.iter("WORD"):
                 t = re.sub(r"\s+", " ", (wd.text or "")).strip()
                 if not t:
                     continue
-                c = [int(x) for x in wd.get("coords").split(",")[:4]]
+                c = [int(x) for x in wd.get("coords").split(",")[:4]]   # left, bottom, right, top
                 conf = wd.get("x-confidence")
-                conf = int(conf) if conf and conf.isdigit() else None
+                boxes.append((t, c, int(conf) if conf and conf.isdigit() else None))
+            if not boxes:
+                continue
+            # The AA XXIX scan's OCR leaves the top and left of some boxes at 0, as if
+            # the word reached the page's top-left corner (61 words, mostly enumerators
+            # like `1. )`); their bottom and right edges are right. Rebuild such a box
+            # from those, the height of the line's other words, and a width by its
+            # letters, before anything reads it. (AA XXIV's OCR has none.)
+            good = [(c[1] - c[3], (c[2] - c[0]) / len(t)) for t, c, _conf in boxes if c[3] > 0 and c[0] > 0]
+            h = sorted(g[0] for g in good)[len(good) // 2] if good else 45
+            cw = sorted(g[1] for g in good)[len(good) // 2] if good else 20   # width of a letter on this line
+            for t, c, _conf in boxes:
+                if c[3] == 0 and c[1] > 0:
+                    c[3] = c[1] - h
+                    if c[0] == 0:
+                        c[0] = max(0, round(c[2] - cw * len(t.replace(" ", ""))))
+            words = []
+            for t, c, conf in boxes:
                 # The OCR sometimes boxes two words as one (`30 Hirngespinste`,
                 # a margin number and the first word). Split them, sharing the
                 # box out by characters, so a margin number can be told apart.
@@ -149,10 +194,9 @@ def load_leaves(path):
                 for k, part in enumerate(parts):
                     w = span * (len(part) + (1 if k < len(parts) - 1 else 0)) / len(t)
                     words.append({"t": part, "x0": round(x), "y1": c[1], "x1": round(x + span * len(part) / len(t)),
-                                  "y0": c[3], "c": conf, "split": len(parts) > 1})
+                                  "y0": c[3], "c": conf, "split": len(parts) > 1, "part": k})
                     x += w
-            if words:
-                lines.append(words)
+            lines.append(words)
         leaves.append({"w": int(el.get("width")), "h": int(el.get("height")), "lines": lines})
         el.clear()
     return leaves
@@ -195,7 +239,7 @@ def is_head(ws, page):
     t = line_text(ws)
     if ly(ws) > 450:
         return False
-    return bool(re.search(r"Vorlesungen|Logik|Anhang|^\W*[\dGOo(]{3,4}\W*$", t)) or str(page) in t
+    return bool(re.search(r"Vorlesungen|Logik|Anhang|Ergänzungen|Metaphysik|^\W*[\dGOo(]{3,4}\W*$", t)) or str(page) in t
 
 
 def is_signature(ws, leaf_h):
@@ -216,13 +260,22 @@ class Page:
     pass
 
 
-def read_page(leaf, page, edges_by_parity, report):
-    """Return a Page with .lines: each {text, words, indent, centred, ms: [raw], conf}."""
+def read_page(leaf, page, edges_by_parity, report, split_lines=False):
+    """Return a Page with .lines: each {text, words, indent, centred, ms: [raw], conf}.
+
+    split_lines: the scan's OCR splits a printed line into several OCR lines on one
+    baseline (the AA XXIX scan does; the AA XXIV scans do not), so the running head,
+    margin numbers and enumerators have to be put back together first."""
     P = Page()
     P.page = page
     lines = [ws for ws in leaf["lines"]]
     P.head = None
-    if lines and is_head(lines[0], page):
+    first = lines[0] if lines else None
+    if split_lines and lines and ly(lines[0]) <= 450:
+        # judge the head on everything on its baseline: `Prolegomena Logices` + `1047`,
+        # or `S24` (824 misread) + `Ergänzungen II`
+        first = [w for ws in lines if abs(ly(ws) - ly(lines[0])) < 25 for w in ws]
+    if lines and is_head(first, page):
         P.head = line_text(lines[0])
         y_head = ly(lines[0])
         lines = lines[1:]
@@ -251,6 +304,44 @@ def read_page(leaf, page, edges_by_parity, report):
         for ws in lines:
             P.lines.append({"text": line_text(ws), "indent": False, "centred": False, "ms": [], "words": ws})
         return P
+
+    # The AA XXIX scan's OCR often gives a margin number (`5`, `10`, `238`) as a line
+    # of its own, listed apart from the text line it stands beside but on the same
+    # baseline. Put each back into the text line on its baseline, where the margin
+    # tests below find it, rather than let it pass for a table cell. (Off for AA
+    # XXIV, whose OCR keeps margin numbers in their lines.)
+    if split_lines and L is not None:
+        def margin_only(ws):
+            y = ly(ws)
+            return all(len(w["t"]) <= 5 and (w["x0"] < L(y) - 15 or w["x0"] > R(y) + 4) for w in ws)
+        mo = {i for i, ws in enumerate(lines) if margin_only(ws)}
+        keep = [i for i in range(len(lines)) if i not in mo]
+        merged = {i: list(lines[i]) for i in keep}
+        for i in sorted(mo):
+            y = ly(lines[i])
+            best = min(keep, key=lambda j: abs(ly(lines[j]) - y), default=None)
+            if best is not None and abs(ly(lines[best]) - y) < 30:
+                merged[best] = sorted(merged[best] + lines[i], key=lambda w: w["x0"])
+                report["marginRejoined"] += 1
+            else:
+                merged[i] = list(lines[i])
+        lines = [merged[i] for i in sorted(merged)]
+        # An enumerator split off its line (`a. )`, `1. )` + the text) is one printed
+        # line, not a table row: a row with a segment spanning much of the column is text.
+        colw0 = R(1500) - L(1500)
+        out, used = [], set()
+        for i, ws in enumerate(lines):
+            if i in used:
+                continue
+            grp = [j for j in range(i, len(lines)) if j not in used and abs(ly(lines[j]) - ly(ws)) < 20]
+            if len(grp) > 1 and any(max(w["x1"] for w in lines[j]) - min(w["x0"] for w in lines[j]) > 0.4 * colw0 for j in grp):
+                out.append(sorted([w for j in grp for w in lines[j]], key=lambda w: w["x0"]))
+                used.update(grp)
+                report["linesRejoined"] += len(grp) - 1
+            else:
+                out.append(ws)
+                used.add(i)
+        lines = out
 
     # A table's cells come out of the OCR as separate lines on one baseline.
     # Prose never puts two lines at one height, so rows of cells mark a table;
@@ -307,7 +398,9 @@ def read_page(leaf, page, edges_by_parity, report):
         P.lines.append({
             "text": line_text(ws),
             "indent": x0 > le + 28,
-            "x0ok": not ws[0].get("split"),     # a split box's start is only estimated
+            # a split box's start is only estimated -- except its first piece's, which is
+            # the box's own (AA XXIV keeps the stricter rule its data was built with)
+            "x0ok": (ws[0].get("part", 0) == 0) if split_lines else not ws[0].get("split"),
             "short": x1 < re_ - 60,
             "centred": centred,
             "ms": [ms_raw] if ms_raw else [],
@@ -325,6 +418,7 @@ class Builder:
         self.blocks = None
         self.cur = None           # the paragraph being assembled
         self.all_ms = []          # every manuscript break, in order
+        self.join_hanging = VOLS[cfg["vol"]].get("split_lines", False)
         self.new_section(None, [], "none")
 
     def new_section(self, title, headings, src):
@@ -398,6 +492,17 @@ class Builder:
     def add_line(self, line, page, first_on_page, after_hyphen, prev_short):
         text, mss = self.take_ms(line)
         starts = line["indent"] and not after_hyphen and (line.get("x0ok", True) or prev_short)
+        # A hanging indent (a list item's second line) looks like a new paragraph. Where
+        # the line before broke off mid-sentence, and this one opens in lower case and is
+        # not itself an item (`a.)`, `2.)`), it runs on: joined on this extractor's
+        # judgement and marked so. (AA XXIX only: AA XXIV's paragraphs stay as they were.)
+        inferred = False
+        if starts and self.cur is not None and self.join_hanging:
+            prevt = self.cur["text"].rstrip()
+            if (prevt and not re.search(r"[.:;!?)\]»“\"—–-]$", prevt) and re.match(r"[a-zäöüß]", text)
+                    and not re.match(r"[a-z0-9IVX]{1,4}\s?\.?\s?\)", text)):
+                starts, inferred = False, True
+                self.report["joinedHanging"] += 1
         c = self.cur
         if c is None or starts:
             self.flush()
@@ -407,6 +512,8 @@ class Builder:
         else:
             if first_on_page:
                 c["joined"].add("layout")
+            if inferred:
+                c["joined"].add("inferred")
             t = c["text"]
             t = re.sub(r"[‐‑¬]$", "-", t)
             if re.search(r"[A-Za-zÄÖÜäöüß]-$", t) and text[:1].islower():
@@ -521,14 +628,14 @@ def build(key, leaves_by_vol, report):
 
     def page_obj(p):
         leaf = leaves[p + vol["offset"] - 1]
-        return read_page(leaf, p, edges, report)
+        return read_page(leaf, p, edges, report, split_lines=vol.get("split_lines", False))
 
     def raw_lines(p):
         leaf = leaves[p + vol["offset"] - 1]
         out = [line_text(ws) for ws in leaf["lines"]]
         if out and leaf["lines"] and is_head(leaf["lines"][0], p) and p not in cfg["front"]:
             out = out[1:]
-        return [t for t in out if not re.fullmatch(r"[\dOoIil]{1,3}\s*\*", t)]
+        return [t for t in out if not re.fullmatch(r"[\dOoIil]{1,3}\s*\*|\d{5,}", t)]
 
     front = [t for p in cfg["front"] for t in raw_lines(p)]
     editorial = [t for p in cfg.get("editorial", []) for t in raw_lines(p)]
@@ -601,14 +708,14 @@ def build(key, leaves_by_vol, report):
     words = sum(len(b["text"].split()) for b in blocks)
     confs = [b["ocrConf"] for b in blocks if "ocrConf" in b]
     meta = {
-        "work": cfg["work"], "label": cfg["label"], "volume": 24, "date": cfg["date"],
+        "work": cfg["work"], "label": cfg["label"], "volume": vol["aa"], "date": cfg["date"],
         "provenance": cfg["provenance"],
-        "source": "OCR of the printed AA XXIV (Internet Archive item %s), by Individuals/mikrishnan/aa24-ocr/parse_aa24_ocr.py" % vol["item"],
+        "source": "OCR of the printed AA %s (Internet Archive item %s), by Individuals/mikrishnan/aa24-ocr/parse_aa24_ocr.py" % (vol["roman"], vol["item"]),
         "ocr": True,
         "quality": "uncorrected machine reading of the printed page: expect misread letters, never added or reworded text. Check any quotation against the page image (meta.scan).",
         "aa": cfg["aa"],
         "scan": {"item": vol["item"], "url": SCAN_URL, "n": "AA page + %d" % (vol["offset"] - 1),
-                 "note": "page image of AA 24:P is SCAN_URL with n = P + (%d)" % (vol["offset"] - 1)},
+                 "note": "page image of AA %d:P is SCAN_URL with n = P + (%d)" % (vol["aa"], vol["offset"] - 1)},
         "counts": {"sections": len(sections), "blocks": len(blocks), "pages": hi - lo + 1, "words": words,
                    "joinedLayout": sum(1 for b in blocks if "layout" in b.get("joined", [])),
                    "dehyphenated": sum(b.get("dehyphenated", 0) for b in blocks),
@@ -624,14 +731,14 @@ def build(key, leaves_by_vol, report):
 
 
 HEADER = """/* ─────────────────────────────────────────────────────────────────────────────
-   {work}, Academy Edition XXIV ({date}) — AA 24:{a}–{b}
+   {work}, Academy Edition {roman} ({date}) — AA {aa}:{a}–{b}
    UNCORRECTED OCR. Machine-extracted from the Internet Archive's OCR of the
    printed volume (item {item}) by
    Individuals/mikrishnan/aa24-ocr/parse_aa24_ocr.py — do not hand-edit.
 
    Every word here is the OCR engine's reading of the AA's printed page. Letters
    are misread in places (`Tbat`, `rnüße`); nothing has been added, reworded or
-   filled in. Before quoting, check the passage against the page image: AA 24:P
+   filled in. Before quoting, check the passage against the page image: AA {aa}:P
    is https://archive.org/details/{item}/page/n<P{off:+d}>/mode/1up
 
    Same shape as data/logik-busolt-24.js (read the field list there), plus:
@@ -645,7 +752,12 @@ HEADER = """/* ─────────────────────�
                      low values mark passages to check first
    block.dehyphenated how many printer's line-end hyphens were removed
    block.joined      "layout": the paragraph runs on across a page, read off the
-                     AA's typesetting (the next page's first line not indented)
+                     AA's typesetting (the next page's first line not indented);
+                     "inferred" (AA XXIX): a line indented like a paragraph's
+                     first was joined to the one before, because that broke off
+                     mid-sentence and this opens in lower case — the hanging
+                     indent of a list item's second line. The extractor's
+                     judgement, not the layout's
    block.kind        text | heading | table. A `heading` is the section's
                      heading again, kept in the text so that nothing the page
                      prints drops out of it. A `table` has empty `text` and the
@@ -667,21 +779,21 @@ def write(key, data, out):
     vol = VOLS[cfg["vol"]]
     with open(out, "w", encoding="utf-8") as f:
         f.write(HEADER.format(work=cfg["work"], date=cfg["date"], a=cfg["aa"][0], b=cfg["aa"][1],
-                              item=vol["item"], off=vol["offset"] - 1))
+                              item=vol["item"], off=vol["offset"] - 1, aa=vol["aa"], roman=vol["roman"]))
         f.write("const %s = " % cfg["const"])
         f.write(json.dumps(data, ensure_ascii=False, indent=1))
         f.write(";\n")
 
 
 def new_report():
-    return {"headMismatch": [], "noHead": [], "borrowedEdges": [], "splitMerged": 0, "marginOnlyLines": 0,
+    return {"headMismatch": [], "noHead": [], "borrowedEdges": [], "splitMerged": 0, "marginOnlyLines": 0, "marginRejoined": 0, "linesRejoined": 0, "joinedHanging": 0,
             "lineNumbers": 0, "lineNumbersOdd": 0, "ms": 0, "msAttested": 0, "msInferred": 0, "msUnresolved": 0,
             "msSlashOnly": 0, "msApprox": 0, "msExtraSlash": 0, "centredKept": 0, "tables": 0, "tableLines": 0, "headings": []}
 
 
 def print_report(key, data, r):
     m = data["meta"]
-    print("── %s ── AA 24:%d–%d" % (m["work"], *m["aa"]))
+    print("── %s ── AA %d:%d–%d" % (m["work"], m["volume"], *m["aa"]))
     print("  sections %(sections)d  blocks %(blocks)d  pages %(pages)d  words %(words)d  "
           "joined across a page %(joinedLayout)d  dehyphenated %(dehyphenated)d  mean OCR confidence %(meanOcrConf)s" % m["counts"])
     print("  front: %d lines   contents: %d entries   editorial: %d lines" %
@@ -694,7 +806,10 @@ def print_report(key, data, r):
           (r["msSlashOnly"], r["msApprox"], r["msExtraSlash"]))
     print("  centred lines kept as text (not a heading by the layout): %d" % r["centredKept"])
     print("  tables kept as OCR lines, not prose: %d (%d lines)" % (r["tables"], r["tableLines"]))
-    print("  merged margin digits split off: %d   lines that were all margin: %d" % (r["splitMerged"], r["marginOnlyLines"]))
+    print("  merged margin digits split off: %d   lines that were all margin: %d   margin numbers put back into their line: %d   split lines rejoined: %d" %
+          (r["splitMerged"], r["marginOnlyLines"], r["marginRejoined"], r["linesRejoined"]))
+    if r["joinedHanging"]:
+        print("  hanging-indent lines joined to the line before (joined: inferred): %d" % r["joinedHanging"])
     if r["headMismatch"]:
         print("  running head disagrees with leaf arithmetic:", r["headMismatch"][:12])
     if r["borrowedEdges"]:
@@ -706,17 +821,18 @@ def print_report(key, data, r):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("work", help="one of %s, or all" % ", ".join(WORKS))
+    ap.add_argument("work", help="one of %s; or all (the AA XXIV texts), or aa29" % ", ".join(WORKS))
     ap.add_argument("cache")
     ap.add_argument("out")
     a = ap.parse_args()
-    keys = list(WORKS) if a.work == "all" else [a.work]
+    group = {"all": "aa24", "aa29": "aa29"}.get(a.work)
+    keys = [k for k in WORKS if WORKS[k].get("group", "aa24") == group] if group else [a.work]
     need = sorted({(WORKS.get(k) or VALIDATION[k])["vol"] for k in keys})
     leaves = {v: load_leaves(os.path.join(a.cache, VOLS[v]["item"] + "_djvu.xml")) for v in need}
     for k in keys:
         r = new_report()
         data = build(k, leaves, r)
-        out = os.path.join(a.out, "logik-%s-24-ocr.js" % k) if a.work == "all" else a.out
+        out = os.path.join(a.out, WORKS[k].get("file", "logik-%s-24-ocr.js" % k)) if group else a.out
         write(k, data, out)
         print_report(k, data, r)
         print("  wrote", out)
