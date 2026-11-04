@@ -131,6 +131,9 @@ waiting for the organisation's approval.
   and those not yet read by you or by anyone. The order can be by number, by date (the
   page's own placing, by Adickes' phases), or by § of Baumgarten. *Numbers from … to …*
   deals the queue out: "I'll take 1–60".
+- **A passage you are working on stays in view.** Under any filter, a passage you tick or
+  write a note on stays in the list, marked as no longer matching, so that you can tick a
+  second kind. It leaves when you change the filter, the order or the numbers.
 - **The bar** counts passages read by one reader and by two or more.
 
 ### Adding passages

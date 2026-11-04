@@ -151,6 +151,7 @@
   .chip.st.differ { border: 1px dashed var(--warn); color: var(--warn); background: var(--warn-bg); }
   .ocr { font-style: italic; }
   .placed { border-bottom: 1px dashed var(--faded); }
+  .leaving { font-style: italic; border-bottom: 1px dashed var(--faded); }
 </style>
 </head>
 <body>
@@ -264,6 +265,7 @@ let saving = false, saveTimer = null, saveErr = '', netErr = '';
 let headSha = null, headEtag = null, lastCheck = 0, checking = false;
 const blobs = new Map();            // blob sha → parsed file: a blob never changes
 let view = { filter: 'all', order: 'num', from: null, to: null };
+const kept = new Set();             // passages ticked or noted under the current filter: they stay in view until it changes
 let current = null;                 // the ref open in the portal pane
 let portalSeen = null, searchState = null;  // the portal's address when last read, and what reading it gave
 
@@ -782,7 +784,7 @@ function excerptHtml(it) {
   return esc(s.slice(0, a)) + '<mark>' + esc(s.slice(a, b)) + '</mark>' + esc(s.slice(b));
 }
 
-function itemHtml(it, num) {
+function itemHtml(it, num, leaving) {
   const st = stateOf(it.ref), my = mine[it.ref];
   const k = keyOf(it.ref), pl = placeOf(it);
   let when = '';
@@ -825,6 +827,8 @@ function itemHtml(it, num) {
   else chip = '<span class="chip st">not yet read</span>';
   const placed = pl.how === 'phase' && view.order === 'date'
     ? '<span class="placed" title="This page’s placing, not Adickes’ date">placed at ' + pl.year + ', by ' + esc(pl.sym) + '</span>' : '';
+  const label = (filterDefs().find(([f]) => f === view.filter) || [, ''])[1];
+  const stays = leaving ? '<span class="leaving" title="Kept in view while you work on it">no longer “' + esc(label) + '”: stays here until you change the filter</span>' : '';
   return '<div class="item' + (it.ref === current ? ' on' : '') + '" data-ref="' + esc(it.ref) + '">' +
     '<div class="top"><span class="num">' + num + '</span><span class="chip lane">' + esc(it.lane || k) + '</span><span class="cite">' + esc(it.cite) + '</span>' +
       '<span class="work' + (it.ocr ? ' ocr' : '') + '">' + esc(it.work) + '</span>' + when + '</div>' +
@@ -833,7 +837,7 @@ function itemHtml(it, num) {
     (it.excerpt ? '<div class="excerpt"' + (k === 'baumgarten' ? '' : ' lang="de"') + '>' + excerptHtml(it) + '</div>' : '') +
     '<div class="flags">' + boxes + '<input class="qnote" data-note="1" maxlength="600" placeholder="a line of note" value="' + esc(my && my.note) + '" aria-label="Your note on passage ' + num + '"></div>' +
     rd +
-    '<div class="foot">' + chip + placed + (it.ocr ? '<span class="ocr">OCR: check against the page image</span>' : '') +
+    '<div class="foot">' + chip + stays + placed + (it.ocr ? '<span class="ocr">OCR: check against the page image</span>' : '') +
       '<a href="' + esc(portalHref(it.ref)) + '" target="_blank" rel="noopener" data-out="1">open in the portal ↗</a></div>' +
   '</div>';
 }
@@ -853,15 +857,18 @@ function renderList() {
     return;
   }
   const num = new Map(queue.items.map((x, n) => [x.ref, n + 1]));
+  const leaving = new Set();
   let list = queue.items.filter(it => {
     const n = num.get(it.ref);
     if (view.from && n < view.from) return false;
     if (view.to && n > view.to) return false;
-    return passes(it, view.filter, stateOf(it.ref));
+    if (passes(it, view.filter, stateOf(it.ref))) return true;
+    if (kept.has(it.ref)) { leaving.add(it.ref); return true; }
+    return false;
   });
   if (view.order === 'date') list = list.map(it => ({ it, y: placeOf(it).year })).sort((a, b) => (a.y == null) - (b.y == null) || (a.y || 0) - (b.y || 0) || num.get(a.it.ref) - num.get(b.it.ref)).map(x => x.it);
   if (view.order === 'para') list = list.map(it => ({ it, p: paraOf(it) })).sort((a, b) => (a.p == null) - (b.p == null) || (a.p || 0) - (b.p || 0) || num.get(a.it.ref) - num.get(b.it.ref)).map(x => x.it);
-  $('list').innerHTML = list.length ? list.map(it => itemHtml(it, num.get(it.ref))).join('') : '<div class="empty">No passage in the queue matches.</div>';
+  $('list').innerHTML = list.length ? list.map(it => itemHtml(it, num.get(it.ref), leaving.has(it.ref))).join('') : '<div class="empty">No passage in the queue matches.</div>';
 
   if (anchor) { const el = $('list').querySelector('[data-ref="' + CSS.escape(anchor) + '"]'); if (el) box.scrollTop += el.getBoundingClientRect().top - top - offset; }
   if (typing) {
@@ -988,10 +995,10 @@ $('study').addEventListener('click', e => {
   const open = t.closest('[data-open]');
   if (open) { e.preventDefault(); openInPane(open.dataset.open); return; }
   const kb = t.closest('[data-kind]');
-  if (kb) { const ref = kb.closest('.item').dataset.ref; toggleKind(ref, kb.dataset.kind); render(); return; }
+  if (kb) { const ref = kb.closest('.item').dataset.ref; kept.add(ref); toggleKind(ref, kb.dataset.kind); render(); return; }
   if (t.closest('[data-note]') || t.closest('[data-out]')) return;
   const f = t.closest('[data-filter]');
-  if (f) { view.filter = f.dataset.filter; render(); return; }
+  if (f) { view.filter = f.dataset.filter; kept.clear(); render(); return; }
   const q = t.closest('[data-q]');
   if (q) { $('portal').src = PORTAL + '#q=' + encodeURIComponent(q.dataset.q); return; }
   if (t.id === 'add-search' || t.id === 'add-para' || t.id === 'add-start') { addFrom(t.id); return; }
@@ -1002,13 +1009,14 @@ $('study').addEventListener('click', e => {
 $('study').addEventListener('input', e => {
   if (e.target.dataset && e.target.dataset.note) {
     const ref = e.target.closest('.item').dataset.ref, v = e.target.value;
+    kept.add(ref);
     setFlag(ref, x => { x.note = v; });
   }
 });
 $('study').addEventListener('focusout', e => { if (e.target.dataset && e.target.dataset.note) setTimeout(render, 0); });
-$('order').addEventListener('change', e => { view.order = e.target.value; renderList(); });
-$('from').addEventListener('input', e => { view.from = +e.target.value || null; renderList(); });
-$('to').addEventListener('input', e => { view.to = +e.target.value || null; renderList(); });
+$('order').addEventListener('change', e => { view.order = e.target.value; kept.clear(); renderList(); });
+$('from').addEventListener('input', e => { view.from = +e.target.value || null; kept.clear(); renderList(); });
+$('to').addEventListener('input', e => { view.to = +e.target.value || null; kept.clear(); renderList(); });
 $('para').addEventListener('change', renderFromPara);
 $('add').addEventListener('toggle', () => { if ($('add').open) { renderFromSearch(); renderFromPara(); renderFromStart(); } });
 
