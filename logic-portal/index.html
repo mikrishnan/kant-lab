@@ -377,6 +377,16 @@
   .home-foot { text-align: center; color: var(--faded); font-size: 0.85rem; margin-top: 3rem; }
   .explore section { margin: 0 0 2.2rem; }
   .explore .intro { color: var(--faded); font-style: italic; margin: 0.2rem 0 1.8rem; }
+  /* Studies: one card per study, from studies/studies.js */
+  .studies { display: grid; gap: 0.9rem; max-width: 52rem; }
+  .study-card { cursor: default; padding: 0.9rem 1.1rem; }
+  .study-card .st-title { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.1rem; color: var(--accent); text-decoration: none; letter-spacing: 0.02em; }
+  .study-card .st-title:hover { text-decoration: underline; }
+  .study-card .who { font-size: 0.95rem; }
+  .study-card ul { margin: 0.6rem 0 0; padding-left: 1.1rem; font-size: 0.95rem; }
+  .study-card li { margin: 0.15rem 0; }
+  .study-card a { color: var(--accent); }
+  .study-card .st-docs, .study-card .st-meta { margin-top: 0.5rem; font-size: 0.86rem; color: var(--faded); }
 
   /* ── Results ────────────────────────────────────────────────────────── */
   .res-head { margin: 0.2rem 0 0.4rem; }
@@ -726,7 +736,7 @@
   @media (max-width: 760px) {
     header { flex-wrap: wrap; gap: 0.3rem 1rem; padding: 0.45rem 0.8rem; }
     header .spacer { display: none; }
-    nav { gap: 0.9rem; order: 3; flex-basis: 100%; }
+    nav { gap: 0.4rem 0.9rem; order: 3; flex-basis: 100%; flex-wrap: wrap; }
     #app, #app.en:not(.no-rail), #app:not(.no-rail) { grid-template-columns: minmax(0, 1fr) !important; position: relative; }
     #rail { position: absolute; inset: 0; z-index: 6; border-left: none; }
     #divider { display: none; }
@@ -758,6 +768,7 @@
     <button type="button" data-view="ask" class="on">Search</button>
     <button type="button" data-view="read">Read</button>
     <button type="button" data-view="explore">Explore</button>
+    <button type="button" data-view="studies">Studies</button>
     <button type="button" data-view="people">Contributors</button>
   </nav>
   <span class="spacer"></span>
@@ -844,6 +855,7 @@
 
     <div id="view-read" hidden></div>
     <div id="view-explore" hidden></div>
+    <div id="view-studies" hidden></div>
     <div id="view-people" hidden></div>
   </section>
 
@@ -853,6 +865,7 @@
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
 <script src="catalogue.js?v=2026-11-04a"></script>
+<script src="studies/studies.js?v=2026-11-04a"></script>
 <script>
 (() => {
 'use strict';
@@ -1838,6 +1851,30 @@ function rangeLabel(T) {
   }
   const own = lo == null ? '' : T.cite + ' ' + String(lo).replace(/\?$/, '') + '–' + String(hi).replace(/\?$/, '');
   return own + (aaRange(T).label ? (own ? ' · ' : '') + aaRange(T).label : '');
+}
+
+/* Studies: the research sandboxes beside the portal, one card each, from studies/studies.js.
+   A study's pages open in this tab, since each has the portal beside it already; its Markdown
+   files open on GitHub. */
+function renderStudies() {
+  const list = typeof PORTAL_STUDIES !== 'undefined' && Array.isArray(PORTAL_STUDIES) ? PORTAL_STUDIES : [];
+  const gh = 'https://github.com/mikrishnan/kant-lab/blob/main/logic-portal/studies/';
+  const when = d => { const t = new Date(d + 'T12:00:00'); return isNaN(t) ? d : t.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
+  let h = '<div class="explore"><h2>Studies</h2><p class="intro">A study is a sandbox for building research tools around one question. ' +
+    'It sits beside the portal and draws on it: it reads the same texts, and opens every passage here, without changing the portal. What is built for one question stays in its study.</p>';
+  h += list.length ? '<div class="studies">' + list.map(st => {
+    const parts = st.parts || [], first = parts[0];
+    return '<section class="qcard static study-card">' +
+      (first ? '<a class="st-title" href="studies/' + esc(first.href) + '">' + esc(st.title) + '</a>' : '<span class="st-title">' + esc(st.title) + '</span>') +
+      '<span class="who">' + esc(st.question) + '</span>' +
+      (parts.length ? '<ul>' + parts.map(x => '<li><a href="studies/' + esc(x.href) + '">' + esc(x.label) + '</a>' + (x.what ? ': ' + esc(x.what) : '') + '</li>').join('') + '</ul>' : '') +
+      ((st.docs || []).length ? '<div class="st-docs">' + st.docs.map(x => '<a href="' + esc(gh + x.href) + '" target="_blank" rel="noopener">' + esc(x.label) + ' ↗</a>').join(' · ') + '</div>' : '') +
+      (st.begun ? '<div class="st-meta">Begun ' + esc(when(st.begun)) + '</div>' : '') +
+      '</section>';
+  }).join('') + '</div>' : '<p class="note">No studies yet.</p>';
+  h += '<p class="note" style="margin-top:1.6rem">To start another, ask Claude to set one up like the kinds of nothing, with its question. ' +
+    '<a href="' + esc(gh + 'README.md') + '" target="_blank" rel="noopener">How studies work ↗</a></p>';
+  $('view-studies').innerHTML = h + '</div>';
 }
 
 /* Explore: every starting point the seminar has built, in one place. */
@@ -4453,11 +4490,12 @@ function renderPeople() {
 
 function showView(v) {
   S.view = v;
-  ['ask', 'read', 'explore', 'people'].forEach(k => { $('view-' + k).hidden = k !== v; });
+  ['ask', 'read', 'explore', 'studies', 'people'].forEach(k => { $('view-' + k).hidden = k !== v; });
   document.querySelectorAll('nav [data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === v));
   $('left').scrollTop = 0;
   if (v === 'read') renderRead();
   if (v === 'people') renderPeople();
+  if (v === 'studies') renderStudies();
   if (v === 'explore') syncForm();
 }
 
@@ -4619,6 +4657,7 @@ function writeHash() {
     if (S.cmp.bit) u.set('cb', S.cmp.bit.join('-'));
   }
   if (S.bookOpen) u.set('tb', '1');
+  if (S.view === 'studies') u.set('studies', '');
   history.replaceState(null, '', '#' + u.toString());
 }
 function readHash() {
@@ -4676,7 +4715,7 @@ function readHash() {
     if (q) { S.sel = q.i; if (!u.get('rt')) S.rtab = 'text'; S.cmp = cmpFresh(q.i); }
   }
   syncForm();
-  showView(S.readKey ? 'read' : 'ask');
+  showView(S.readKey ? 'read' : u.has('studies') ? 'studies' : 'ask');
   renderResults();
   renderRail();
   if (S.q || S.d || S.sel != null || S.readKey) pushTrail();
@@ -4860,7 +4899,7 @@ function wire() {
     if (d.closeRail) { S.sel = null; S.quote = null; S.noteFocus = null; $('app').style.gridTemplateColumns = ''; renderRail(); document.querySelectorAll('.hit.sel').forEach(x => x.classList.remove('sel')); if (studyOn()) renderRead(); writeHash(); return; }
     // Read, pressed again while reading a text, goes back to the list of texts
     if (d.view === 'read' && S.view === 'read' && S.readKey && el.closest('nav')) { openRead(null, null); return; }
-    if (d.view) { showView(d.view); if (d.view === 'read') writeHash(); return; }
+    if (d.view) { const was = S.view; showView(d.view); if (d.view === 'read' || d.view === 'studies' || was === 'studies') writeHash(); return; }
     if (d.trail != null) { $('tip').hidden = true; goStep(+d.trail); return; }
     if (d.expandRail) { S.expand.add(d.expandRail); renderRail(); return; }
     if (d.expand) { S.expand.add(d.expand); renderResults(); return; }
