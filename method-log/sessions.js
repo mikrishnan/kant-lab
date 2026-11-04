@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    Kant Lab method log: the sessions kept in the repository
-   Jin's own record, read by method-log.html beside it. Each session the app does not
+   The lab's record, read by index.html beside it. Each session the app does not
    already hold is added to the browser's log when the page opens, once: a session
    deleted in the browser stays deleted there. Edits made in the browser stay in the
    browser until they are sent here to be committed.
