@@ -169,7 +169,7 @@ that was ever merged, so nothing is lost, and nobody but the professor can overw
 
 The seminar is one team, the Kant Lab. Until November 2026 it also had working groups,
 each with a folder in `groups/`; they were folded back into the one team then, and the
-folder is gone. Work happens in two places:
+folder is gone. Work happens in three places:
 
 - **Your own folder,** `Individuals/<your-name>/`, for anything you want to try. To build
   something with others, keep it in one person's folder and say whose in the issue.
@@ -177,6 +177,11 @@ folder is gone. Work happens in two places:
   someone's folder joins the portal: the portal reads its files through `catalogue.js`, as
   it already reads several participants' work, or takes the feature in, as it took in the
   Baumgarten and Meier readers.
+- **A study,** `logic-portal/studies/<topic>/`, for tools built around one research
+  question by whoever is working on it. A study sits beside the portal and draws on it —
+  every passage opens in the portal — without changing it, so features for one question
+  stay out of the tool everyone uses. [logic-portal/studies/](logic-portal/studies/) lists
+  them; the first is *The kinds of nothing*.
 
 **Building data rather than an app.** A dataset starts in your folder. Once the portal or
 other tools depend on it, it moves to `data/`, and changes to it go through the owners of

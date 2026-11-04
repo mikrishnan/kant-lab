@@ -106,6 +106,13 @@ itself in someone's folder in `Individuals/` joins the portal in one of two ways
 - **The portal takes the feature in,** as it took in the Baumgarten and Meier readers. The
   original then stays in its owner's folder, or is retired (below).
 
+A tool built for one research question belongs in a **study**,
+`logic-portal/studies/<topic>/`, rather than in the portal: a page beside the portal that
+reads the same texts and opens every passage in it by address, so that features for one
+question do not reach the tool everyone uses. A study's `CLAUDE.md` keeps its sessions
+inside its folder, and its `journal.md` records what each feature showed. A feature that
+proves itself there comes into the portal by either route above.
+
 A tool that should stand on its own beside the portal is promoted to the top level when:
 
 - it does what its author set out to do, when you click through it;
