@@ -534,6 +534,7 @@
   .rwork { flex: 1; font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.76rem; letter-spacing: 0.06em; }
   .rclose { background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--faded); cursor: pointer; padding: 0 0.15rem; }
   .rclose:hover { color: var(--accent); }
+  .rfold { display: none; }
   /* Going through the search results one by one, from the reading pane. */
   .rstep { display: flex; align-items: center; gap: 0.15rem; font-size: 0.84rem; color: var(--faded); white-space: nowrap; }
   .rstep button { background: none; border: 1px solid var(--line); border-radius: 4px; color: var(--accent); cursor: pointer; font-size: 0.95rem; line-height: 1; padding: 0.08rem 0.42rem; }
@@ -751,6 +752,12 @@
     /* the textbook stays in view above, Kant's notes below it */
     #app.studyrail:not(.no-rail) #rail { top: auto; height: 46%; border-top: 2px solid var(--line); box-shadow: 0 -4px 14px rgba(26, 18, 8, 0.12); }
     #app.studyrail:not(.no-rail) #left { padding-bottom: 50vh; }
+    /* folded, as they start: a bar naming the § and its notes, so the textbook has the page */
+    #app.studyrail.foldnotes:not(.no-rail) #rail { height: auto; }
+    #app.studyrail.foldnotes #railbody, #app.studyrail.foldnotes #railhead .rtabs, #app.studyrail.foldnotes #railhead .pmeta { display: none; }
+    #app.studyrail.foldnotes #railhead { padding-bottom: 0.6rem; border-bottom: none; }
+    #app.studyrail.foldnotes:not(.no-rail) #left { padding-bottom: 5rem; }
+    #app.studyrail .rfold { display: inline-block; margin-left: auto; flex: none; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 0.1rem 0.7rem; font-size: 0.85rem; color: var(--accent); cursor: pointer; }
     .study { grid-template-columns: minmax(0, 1fr); }
     .study .outline { position: static; max-height: 12rem; }
     .readbar { top: -1rem; }
@@ -2839,6 +2846,7 @@ function renderRail(headOnly) {
     placeRestore(L, m, S.view === 'read' ? readOffset() : 0);
   }
 }
+let notesFolded = true;   // on a narrow screen, Kant's notes beside the textbook start folded to a bar
 function drawRail(headOnly) {
   const rail = $('rail');
   if (S.sel == null || !P[S.sel]) {
@@ -2854,6 +2862,7 @@ function drawRail(headOnly) {
   const readingHere = S.view === 'read' && S.readKey === T.key;
   if (S.railW) $('app').style.gridTemplateColumns = 'minmax(0, 1fr) ' + S.railW + 'px';
   $('app').classList.toggle('studyrail', readingHere && isStudyText(T));
+  $('app').classList.toggle('foldnotes', notesFolded);
   if (readingHere && isStudyText(T)) return renderStudyRail(p, T, headOnly);
   if (!['text', 'cmp', 'conn'].includes(S.rtab)) S.rtab = 'text';
   $('railhead').innerHTML = '<div class="rhead"><div class="rwork"><span class="layer">' + esc(LAYER_LABEL[T.layer] || T.layer) + '</span>' + esc(T.title) + '</div>' +
@@ -2910,6 +2919,7 @@ function renderStudyRail(p, T, headOnly) {
   const notes = notesOf(T);
   const n = notes && notes.byPara && notes.byPara[p.para] ? notes.byPara[p.para].length : 0;
   $('railhead').innerHTML = '<div class="rhead"><div class="rwork"><span class="layer">KANT’S NOTES</span>on ' + esc(T.short) + ' § ' + p.para + '</div>' +
+    '<button type="button" class="rfold" data-foldnotes="1" aria-expanded="' + !notesFolded + '">' + (notesFolded ? n + ' note' + (n === 1 ? '' : 's') + ' ▴' : 'Fold ▾') + '</button>' +
     '<button type="button" class="rclose" data-close-rail="1" title="Hide the notes">×</button></div>' +
     '<div class="pmeta">' + esc(p.sec || '') + '</div>' +
     '<div class="rtabs"><button type="button" data-rtab="notes"' + (S.rtab === 'notes' ? ' class="on"' : '') + '>Kant’s notes<span class="muted small"> ' + n + '</span></button>' +
@@ -4830,7 +4840,7 @@ function wire() {
 
   document.addEventListener('click', e => {
     if (e.target.closest('#modal') && (e.target.id === 'modal' || e.target.closest('[data-close-modal]'))) { closeModal(); return; }
-    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq],[data-lookcmp],[data-fx],[data-lx]');
+    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-foldnotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq],[data-lookcmp],[data-fx],[data-lx]');
     if (!el) return;
     const d = el.dataset;
     if (d.fx != null) { const fx = new Set(S.fx); fx.has(d.fx) ? fx.delete(d.fx) : fx.add(d.fx); S.fx = fx; S.loc = null; renderResults(); pushTrail(); return; }
@@ -4860,7 +4870,8 @@ function wire() {
     if (d.synopsis) { showSynopsis(); return; }
     if (d.syngo) { closeModal(); studyGo(textByKey('baumgarten'), +d.syngo, {}); return; }
     if (d.findstep) { stepFind(+d.findstep); return; }
-    if (d.shownotes) { const T = textByKey(S.readKey); const k = S.readAt != null ? S.readAt : T.first; studyGo(T, P[k].para, { tab: 'notes' }); renderRead(); return; }
+    if (d.foldnotes) { notesFolded = !notesFolded; drawRail(true); return; }
+    if (d.shownotes) { notesFolded = false; const T = textByKey(S.readKey); const k = S.readAt != null ? S.readAt : T.first; studyGo(T, P[k].para, { tab: 'notes' }); renderRead(); return; }
     if (d.note != null && !e.target.closest('[data-open]')) { const q = P[+d.note]; const e2 = TEXTS[q.t].entries[q.entry]; if (e2 && e2.loc && e2.loc.lemma) tintFor(+d.note); return; }
     if (d.fp != null) { if (String(window.getSelection())) return; focusFromText(+d.fp, el.closest('.fulltext')); return; }
     if (d.read != null) { openRead(d.read || null, null); return; }
