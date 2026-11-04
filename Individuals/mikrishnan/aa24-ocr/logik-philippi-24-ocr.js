@@ -20,7 +20,12 @@
                      low values mark passages to check first
    block.dehyphenated how many printer's line-end hyphens were removed
    block.joined      "layout": the paragraph runs on across a page, read off the
-                     AA's typesetting (the next page's first line not indented)
+                     AA's typesetting (the next page's first line not indented);
+                     "inferred" (AA XXIX): a line indented like a paragraph's
+                     first was joined to the one before, because that broke off
+                     mid-sentence and this opens in lower case — the hanging
+                     indent of a list item's second line. The extractor's
+                     judgement, not the layout's
    block.kind        text | heading | table. A `heading` is the section's
                      heading again, kept in the text so that nothing the page
                      prints drops out of it. A `table` has empty `text` and the

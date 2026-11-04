@@ -372,6 +372,8 @@
   .qcard select { width: 100%; margin-top: 0.55rem; padding: 0.2rem 0.4rem; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); }
   .starts .qcards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .more-starts { color: var(--faded); font-size: 0.95rem; margin: 1rem 0 0; }
+  .gaps { color: var(--faded); font-size: 0.86rem; line-height: 1.45; margin: 0.8rem 0 0; }   /* what the portal does not have (PORTAL_GAPS) */
+  .gaps b { font-weight: 600; }
   .home-foot { text-align: center; color: var(--faded); font-size: 0.85rem; margin-top: 3rem; }
   .explore section { margin: 0 0 2.2rem; }
   .explore .intro { color: var(--faded); font-style: italic; margin: 0.2rem 0 1.8rem; }
@@ -850,7 +852,7 @@
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
-<script src="catalogue.js?v=2026-11-01b"></script>
+<script src="catalogue.js?v=2026-11-04a"></script>
 <script>
 (() => {
 'use strict';
@@ -1811,8 +1813,13 @@ function statusText() {
 }
 
 /* Arriving: one question box (in the page), and the seminar's questions to start from. */
+/* What the portal does not have, and why (the catalogue's PORTAL_GAPS), in small type. */
+function gapsHtml() {
+  const gs = typeof PORTAL_GAPS === 'undefined' ? [] : PORTAL_GAPS;
+  return gs.length ? '<p class="gaps"><b>Not in the portal:</b> ' + gs.map(g => '<span title="' + esc(g.more || '') + '">' + esc(g.short) + '.</span>').join(' ') + '</p>' : '';
+}
 function renderHome(box) {
-  box.innerHTML = '<div class="starts"><div class="ph">OR READ A TEXT IN FULL</div><div class="qcards tcards">' + TEXTS.map(textCard).join('') + '</div>' +
+  box.innerHTML = '<div class="starts"><div class="ph">OR READ A TEXT IN FULL</div><div class="qcards tcards">' + TEXTS.map(textCard).join('') + '</div>' + gapsHtml() +
     '<p class="more-starts">Or start from the seminar’s work in <span class="lnk" data-view="explore">Explore</span>: the kinds of inference and judgment, the logical principles, the lectures’ concepts, parallel passages.</p></div>' +
     '<div class="home-foot">' + esc(statusText()) + '</div>';
 }
@@ -4174,7 +4181,7 @@ function readIndexHtml() {
   let h = '<div class="explore"><h2>Read</h2><p class="intro">Every text in the corpus, in full. Meier and Baumgarten, and Kant’s notes on either, open as the textbook with the notes beside it, following along: the Meier and Baumgarten Readers, inside the portal. Click any paragraph to see what hangs on it; select words to search for them everywhere.</p>';
   groups.forEach(([layer, label]) => {
     const ts = TEXTS.filter(t => t.layer === layer);
-    if (ts.length) h += '<section><div class="ph">' + label.toUpperCase() + '</div><div class="qcards">' + ts.map(textCard).join('') + '</div></section>';
+    if (ts.length) h += '<section><div class="ph">' + label.toUpperCase() + '</div><div class="qcards">' + ts.map(textCard).join('') + '</div>' + (layer === 'lecture' ? gapsHtml() : '') + '</section>';
   });
   return h + '<details class="bytext"><summary>About these transcriptions, and adding a text</summary>' + aboutTextsHtml() + '</details></div>';
 }
