@@ -1844,8 +1844,21 @@ function renderHome(box) {
     '<p class="more-starts">Or start from the seminar’s work in <span class="lnk" data-view="explore">Explore</span>: the kinds of inference and judgment, the logical principles, the lectures’ concepts, parallel passages.</p></div>' +
     '<div class="home-foot">' + esc(statusText()) + '</div>';
 }
-const textCard = t => '<button type="button" class="qcard" data-read="' + t.key + '">' + esc(t.title) +
-  '<span class="who">' + esc(t.date) + (rangeLabel(t) ? ' · ' + esc(rangeLabel(t)) : '') + ' · ' + t.words.toLocaleString('en') + ' words' + (trFor(t) ? ' · English' : '') + (accShort(t) ? ' · ' + esc(accShort(t)) : '') + '</span></button>';
+/* A text's box on the start page and under Read. The title's closing parenthesis ("(uncorrected OCR)",
+   "(4th ed., 1757)", "(on Meier)") moves down into the line beneath, so the title reads cleanly; nothing
+   it said is lost. The line gives the year only once, and where the parenthesis already says OCR, the
+   accuracy follows it as a figure rather than repeating "OCR". The full title stays everywhere else. */
+function textCard(t) {
+  const m = /^(.*?)\s*\(([^()]*)\)$/.exec(t.title), main = m ? m[1] : t.title, range = rangeLabel(t) || '';
+  // what the parenthesis said, less what the line gives anyway: the year, and an edition's letter
+  // when its pages already begin with it (A i–856)
+  const note = (m ? m[2].split(/\s*[,;]\s*/) : [])
+    .filter(s => s && s !== t.date && !(/^[AB]$/.test(s) && range.startsWith(s + ' '))).join(', ');
+  const a = t.accuracy, acc = a && a.ocr && /OCR/.test(note) ? 'about ' + a.words + '% of words right' : accShort(t);
+  const bits = [note, t.date && main.includes(t.date) ? '' : t.date, range, t.words.toLocaleString('en') + ' words', trFor(t) ? 'English' : '', acc].filter(Boolean);
+  return '<button type="button" class="qcard" data-read="' + t.key + '">' + esc(main) +
+    '<span class="who">' + esc(bits.join(' · ')) + '</span></button>';
+}
 /* Where a text is printed: its AA pages, or for the Critique its own edition's (B i–884, AA 3:1–552). */
 function rangeLabel(T) {
   if (!T.cite) return aaRange(T).label;
