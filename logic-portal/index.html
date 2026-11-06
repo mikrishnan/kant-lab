@@ -2632,7 +2632,7 @@ function enSync() {
   bar.innerHTML = '<span class="lab">ENGLISH</span>' +
     '<span class="sty">' + PORTAL_TR_STYLES.map(st => '<button type="button" data-en="' + st.key + '"' + (S.en === st.key ? ' class="on"' : '') + ' title="' + esc(st.tag) + '">' + esc(st.label.replace(' principles', '')) + '</button>').join('') + '</span>' +
     '<span class="muted" title="The German and Latin always stay. Baumgarten and the Reflexionen on him are translated whole.">Machine translation, for orientation: check it against the German</span>' +
-    '<span class="soon"><a href="' + MARIA_DEMO + '" target="_blank" rel="noopener" title="Coming soon: Maria’s sentence-by-sentence translation, across the whole portal">Maria’s translation, a preview ↗</a></span>';
+    '<span class="soon" title="Maria’s sentence-by-sentence translation: choose German only, Interlinear or With English beside the English switch">Maria’s translation: the reading modes beside the English switch</span>';
 }
 function enApply() { enSync(); enRefresh(); }
 /* German | English beside the search box: shown only with English on; German unless the reader picks English. */
@@ -5117,11 +5117,13 @@ function focusFromText(k, box) {
 
 /* Exposed for checking the page from the console. */
 window.PORTAL = { S, P, TEXTS, LAYERS, DOCS, CONC_REV, ANNOT, FT, runQuery: () => runQuery(), parseQuery, normWord, placeOf, parallelsFor, findInText,
-  BYID, SITE_PORTAL, trFor, trState, trEntry };   // the last five for class-sessions.js
+  BYID, SITE_PORTAL, trFor, trState, trEntry,      // the last five for class-sessions.js
+  loadScript, getGlobal, esc, openModal, closeModal, ask, enRefresh };   // these for reading.js
 
 boot();
 })();
 </script>
 <script src="class-sessions.js?v=2026-11-02f"></script>
+<script src="reading.js?v=2026-11-06a"></script>
 </body>
 </html>
