@@ -3,7 +3,9 @@
 
    A layer over the passages the portal draws, so that nothing in the portal's own drawing changes:
    once a passage is on the page, its words are matched back to the passage's text and wrapped in
-   spans that carry what Maria's reader knows about them. Three reading modes, chosen in the header:
+   spans that carry what Maria's reader knows about them. All of it is behind one switch in the header,
+   German learning mode, off unless the reader turns it on (or the address has ?learn=1); with it off the
+   portal is untouched. In learning mode, three ways to read:
 
      German only   the German alone; hovering an underlined glossary term shows the glossary's English
                    and its modern spelling, and clicking it opens the glossary entry
@@ -41,7 +43,9 @@ const RD_DEPTH = ['main clause', 'subordinate clause', 'clause within a subordin
 const RD_PAUSE = 4000;
 const RD_SKIP = '.pbm, .gloss, .misnote, .fen, .enb, .rd-il, sup';   // drawn by the portal, but not words of the passage
 
-let RD = { mode: 'de', gram: false, glossary: 'idle', units: 'idle', pin: null, hov: null, hovPh: null, hovTerm: null, timer: 0 };
+// Off unless the reader switches German learning mode on (or the address asks for it, ?learn=1): with it off the
+// portal is exactly the portal, with nothing of this layer drawn.
+let RD = { on: new URLSearchParams(location.search).get('learn') === '1', mode: 'de', gram: false, glossary: 'idle', units: 'idle', pin: null, hov: null, hovPh: null, hovTerm: null, timer: 0 };
 
 /* ── loading, on first need ── */
 function rdLoad(which) {
@@ -235,7 +239,7 @@ function rdInterlinear(el, p, units) {
 
 /* ── finding and treating every passage the portal draws ── */
 function rdTreat(el) {
-  if (el.dataset.rd === rdToken()) return;
+  if (!RD.on || el.dataset.rd === rdToken()) return;
   const host = el.closest('[data-fp]');
   if (!host || host.classList.contains('frow')) return;
   const p = P[+host.dataset.fp];
@@ -261,6 +265,10 @@ new MutationObserver(muts => {
 }).observe(document.body, { childList: true, subtree: true });
 // After a change of mode, the portal draws its passages again (as for the English switch), and they are treated afresh.
 function rdRedraw() {
+  document.body.classList.toggle('rd-on', RD.on);
+  const lb = document.getElementById('rdlearn');
+  if (lb) { lb.classList.toggle('on', RD.on); lb.setAttribute('aria-pressed', RD.on ? 'true' : 'false'); lb.textContent = RD.on ? 'German learning mode ✓' : 'German learning mode'; }
+  if (!RD.on) { RD.pin = null; RD.hov = RD.hovPh = RD.hovTerm = null; rdPop().hidden = true; }
   document.body.classList.toggle('rdm-de', RD.mode === 'de');
   document.body.classList.toggle('rdm-il', RD.mode === 'il');
   document.body.classList.toggle('rdm-en', RD.mode === 'en');
@@ -412,6 +420,9 @@ document.addEventListener('scroll', () => { if (RD.hov || RD.pin || RD.hovTerm) 
 function rdControls() {
   const header = document.querySelector('header'), en = document.getElementById('entog');
   if (!header || !en || document.getElementById('rdmode')) return;
+  const bar = document.createElement('div');
+  bar.id = 'rdbar';
+  bar.innerHTML = '<span class="lab">GERMAN LEARNING MODE</span>';
   const box = document.createElement('span');
   box.id = 'rdmode';
   box.title = 'Maria’s sentence-by-sentence translation (Busolt, Blomberg, Meier) and her glossary (every German text)';
@@ -419,7 +430,19 @@ function rdControls() {
     '<button type="button" data-rdm="il" title="Each phrase over its short English gloss; click a sentence for its English (Busolt, Blomberg, Meier).">Interlinear</button>' +
     '<button type="button" data-rdm="en" title="Try the German first: hover a phrase for its gloss; click, or rest on, a sentence for its English (Busolt, Blomberg, Meier).">With English</button>' +
     '<label title="Colour each phrase by its role and arc the verb brackets (Busolt, Blomberg, Meier): a model’s analysis, unreviewed"><input type="checkbox" id="rdgram"> grammar</label>';
-  header.insertBefore(box, en);
+  const learn = document.createElement('button');
+  learn.type = 'button'; learn.id = 'rdlearn'; learn.className = 'btn entog';
+  learn.title = 'Maria’s German learning mode: her sentence-by-sentence translation, phrase glosses and grammar (Busolt, Blomberg, Meier), and her glossary (every German text)';
+  learn.textContent = 'German learning mode';
+  header.insertBefore(learn, en);
+  bar.appendChild(box);
+  bar.insertAdjacentHTML('beforeend', '<span class="muted">Maria’s sentence translation, phrase glosses and grammar in Busolt, Blomberg and Meier; her glossary underlined in every German text. Machine-made, unreviewed: check it against the German.</span>');
+  header.insertAdjacentElement('afterend', bar);
+  learn.addEventListener('click', () => {
+    RD.on = !RD.on;
+    if (RD.on) { rdLoad('glossary'); if (RD.mode !== 'de' || RD.gram) rdLoad('units'); }
+    rdRedraw();
+  });
   box.addEventListener('click', e => {
     const b = e.target.closest('[data-rdm]');
     if (!b || b.dataset.rdm === RD.mode) return;
@@ -433,8 +456,13 @@ function rdControls() {
 /* ── styles, kept in the portal's palette ── */
 (function rdStyle() {
   const css = `
-  #rdmode { display: inline-flex; align-items: center; gap: 0; margin-right: 0.6rem; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; font-size: 0.82rem; }
-  #rdmode button { font: inherit; border: 0; background: transparent; color: var(--faded); padding: 0.25rem 0.7rem; cursor: pointer; }
+  #rdbar { display: none; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.9rem; padding: 0.35rem 1.2rem; background: var(--paper); border-bottom: 1px solid var(--line-soft); font-size: 0.86rem; color: var(--faded); }
+  body.rd-on #rdbar { display: flex; }
+  #rdbar .lab { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--accent); }
+  #rdmode { display: inline-flex; align-items: center; gap: 0; margin-right: 0.4rem; flex: none; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; font-size: 0.82rem; }
+  #rdmode button { font: inherit; border: 0; background: transparent; color: var(--faded); padding: 0.22rem 0.55rem; cursor: pointer; white-space: nowrap; }
+  #rdlearn { white-space: nowrap; margin-right: 0.4rem; }
+  #rdmode label { white-space: nowrap; }
   #rdmode button + button { border-left: 1px solid var(--line); }
   #rdmode button.on { background: var(--accent); color: var(--parchment); }
   #rdmode label { padding: 0 0.6rem; color: var(--faded); border-left: 1px solid var(--line); display: inline-flex; gap: 0.25rem; align-items: center; cursor: pointer; }
@@ -474,4 +502,4 @@ function rdControls() {
 /* ── start: the glossary at once (it is small), Maria's sentences when a mode or the grammar first needs them ── */
 rdControls();
 document.body.classList.add('rdm-de');
-rdLoad('glossary');
+if (RD.on) { rdLoad('glossary'); rdRedraw(); }

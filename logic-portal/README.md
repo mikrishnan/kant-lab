@@ -200,7 +200,8 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   and classified passages, where a long passage shows roughly the stretch of English that
   matches the German shown. The German and Latin never go. A bar under the header says what the
   English is, switches between the two styles, and notes that Baumgarten and Kant's notes on
-  Baumgarten have no English yet. It also points to Maria's reading modes, beside the switch.
+  Baumgarten have no English yet. It also announces Maria's sentence-by-sentence translation,
+  which is coming to the whole portal, and links to a preview of it from Maria's branch.
   Every passage that has English also has a small **English** button of its own, which opens
   that passage's English under it and nothing else.
 
@@ -219,10 +220,12 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   Maria's translation across the whole portal, which works differently: sentence by sentence,
   with a shared glossary, and with modes that let a reader try the German first. When that
   happens, remove the header switch, the bar, the per-passage buttons and `enLine`, rather than
-  running both side by side. Maria's translation has reached three texts so far (below), so for
-  now the two run side by side: hers where it has reached, this English everywhere.
-- **Maria's reading modes, and her glossary.** Beside the **English** switch, a choice of three
-  ways to read, from [reading.js](reading.js):
+  running both side by side.
+- **German learning mode** (on Maria's branch, not yet in the portal as published). A switch in
+  the header, beside **English**, turns on Maria's translation and glossary from
+  [reading.js](reading.js). It is off unless the reader turns it on, or the address asks for it
+  with `?learn=1` (`index.html?learn=1#read=busolt`). With it off, the portal is the portal and
+  nothing of the mode is drawn. In learning mode there are three ways to read:
   - **German only**, the default: the German alone.
   - **Interlinear**: each phrase stands over its own short English gloss, in German word
     order, and a click on a sentence shows its English.
@@ -236,8 +239,8 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   clause's end.
 
   The sentence translations, the phrase glosses and the grammar cover **Busolt, Blomberg and
-  Meier**, the texts Maria's translation has reached. In every German text, in any mode, the
-  terms of Maria's shared glossary are underlined. Hovering one gives the glossary's English and
+  Meier**, the texts Maria's translation has reached. In learning mode the terms of Maria's
+  shared glossary are underlined in every German text. Hovering one gives the glossary's English and
   the modern spelling of the word as printed. Clicking it opens the entry: its senses, its Latin,
   the spellings the texts use, and an example sentence with its English, linked to the passage.
 
@@ -246,7 +249,7 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   and lexicon keep working. Interlinear is the exception: it draws its passages afresh, without
   them. The glossary is matched in the browser by the rules of Maria's `glossary.py`. The data
   is all in `Individuals/maria/` (`translations/` and `glossary/`, whose READMEs say how it was
-  made), and the sentence data loads only when a mode or the grammar first needs it. All of it is
+  made), and nothing of it loads until learning mode is turned on. All of it is
   machine work, unreviewed, and the pop-ups say so.
 - **Parallel passages.** Every passage lists the passages of other texts nearest it in wording:
   the words they share, weighted by how rare each is, leaving out Jessie's stopwords, as Jessie's
