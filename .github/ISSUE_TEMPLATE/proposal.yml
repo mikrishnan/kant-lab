@@ -6,16 +6,14 @@ body:
   - type: markdown
     attributes:
       value: |
-        Say what you want and why. A proposal is where a spec begins, so the more concrete the better.
+        Say what you want and why. The more concrete the better.
   - type: dropdown
     id: tool
     attributes:
       label: Which tool?
       options:
-        - Baumgarten reader
-        - Meier reader
-        - Porphyrian tree
-        - A working group's tool
+        - The Logic Portal
+        - A participant's tool, in Individuals/
         - A new tool
         - Shared data
     validations:
@@ -33,7 +31,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: spec
+    id: steps
     attributes:
-      label: Draft spec items
-      description: Optional. Numbered, each one checkable by clicking — e.g. "1. Clicking a § number scrolls the text to that §."
+      label: Steps
+      description: Optional. For something bigger, the steps to ask for one at a time, each one checkable by clicking — e.g. "1. Clicking a § number scrolls the text to that §."

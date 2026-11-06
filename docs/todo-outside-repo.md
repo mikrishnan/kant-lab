@@ -1,4 +1,8 @@
-# Outside-the-repo tasks for the working-group rollout
+# Outside-the-repo tasks
+
+Written for the working-group rollout of October 2026. The working groups were folded
+back into one team, the Kant Lab, on 4 November 2026, and the tasks about them are
+struck through below.
 
 The settings, decisions and conversations that a pull request cannot do. The in-repo
 half of the rollout is done, except for R9 in [todo-in-repo.md](todo-in-repo.md),
@@ -16,8 +20,7 @@ which waits on O12 below. Unless noted otherwise, each task needs the repository
   GitHub may go on showing cached views until GitHub Support clears them.
 - [ ] **O3. Names in public.** Every participant's name and work is on a public site.
   Make sure the students know that, and check the university's guidance if unsure.
-  Anyone who prefers can use a pseudonymous folder name for their own folder and their
-  group's.
+  Anyone who prefers can use a pseudonymous folder name for their own folder.
 
 ## Claude access
 
@@ -64,9 +67,6 @@ from Code Owners" has nothing to enforce.
   account, then close them:
   - [ ] a pull request touching only `Individuals/<name>/` can be merged by its author
     at once;
-  - [ ] a pull request touching `groups/<test>/` is blocked until a member listed on
-    that group's `CODEOWNERS` line approves it. To test this, add a temporary group line
-    first;
   - [ ] a pull request touching `data/` or `index.html` is blocked until a maintainer
     approves it;
   - [ ] a direct push to `main` from a non-admin is rejected.
@@ -111,29 +111,17 @@ from Code Owners" has nothing to enforce.
 - [ ] **O13. Connect accounts.** Each student signs in at claude.ai/code, connects
   GitHub, and opens a session on mikrishnan/kant-lab. Fifteen minutes, with the O6 dry
   run's notes on hand.
-- [ ] **O14. A zero-risk first exercise: check the Baumgarten reader.**
-  - Before class, open and pin one issue, *"Check the Baumgarten reader"*, holding the
-    checklist from `works.md` § 1b:
-    - the lemma chips at §§ 11–12 — § 12's `»Posito — quod«` is the hard case;
-    - a phase chip;
-    - the panel's resizer, `×` and *Reflexionen* button;
-    - the "belong to no §" view;
-    - the undiagnosed scroll problem — *which* scroll misbehaves, and how;
-    - the console.
-  - Students work through it and file what they find with the **Bug** and
-    **Text error** forms. This teaches issues and clears a real backlog.
-- [ ] **O15. Form groups.** Students file **New working group** issues. Set each group up
-  as in "Setting up a working group" in [maintaining.md](maintaining.md). The likely
-  first candidates:
-  - the 11 or more independent Porphyrian trees in `Individuals/`, consolidated into
-    one spec;
-  - the Jäsche *Logik* as a dataset;
-  - annotating the Meier reader's `TRADITION` map, which is now in
-    `data/tradition-meier.js`, so passages can be added without touching the reader.
-- [ ] **O16. Each group's first pull request is its `SPEC.md`,** reviewed within the
+- [x] ~~**O14. A zero-risk first exercise: check the Baumgarten reader.**~~ Dropped on
+  4 November 2026: the Baumgarten reader was retired, and the portal now shows its text.
+- [x] ~~**O15. Form groups.**~~ Dropped on 4 November 2026: the seminar is one team, and
+  the Porphyrian trees that were the likely first group's work were retired.
+- [x] ~~**O16. Each group's first pull request is its `SPEC.md`,** reviewed within the
   group before anyone asks Claude for code. A group starting from a prototype in
   `Individuals/` instead brings it in and drafts the spec from it in that first pull
-  request.
+  request.~~ Dropped on 1 November 2026: groups no longer write specs.
+- [ ] **O17. After the one-team change.** On GitHub, delete the `new-group` label (no
+  `group:` labels were ever made). The **New working group** issue form is gone from the
+  repository already.
 
 ## After that
 

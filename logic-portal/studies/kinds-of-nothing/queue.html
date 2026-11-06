@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The queue · the kinds of nothing · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  /* The Logic Portal's palette and fonts, as on the study's own page. */
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --panel: #faf7f0;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #b8a88a;
+    --found-bg: #fff8e8;
+    --found-bd: #c8a055;
+    --found-ink: #7a4a00;
+    --era-1750: #7a6a4a;
+    --era-1760: #5c6e3a;
+    --era-1770: #8b5e3c;
+    --era-1780: #3b5068;
+    --era-1790: #6b4f7a;
+    --era-none: #9a9a9a;
+    --ok: #4a6b2e;
+    --warn: #8a2b1c;
+    --warn-bg: #f8e9e4;
+    /* the four kinds of nothing, from the same palette */
+    --k1: var(--era-1790);
+    --k2: var(--era-1780);
+    --k3: var(--era-1760);
+    --k4: var(--accent);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: 'EB Garamond', Georgia, serif; font-size: 16px; line-height: 1.45; color: var(--ink);
+         background: var(--parchment); display: flex; flex-direction: column; }
+  button, input, select { font: inherit; color: inherit; }
+
+  header { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.55rem 1rem; border-bottom: 1px solid var(--line);
+           background: var(--parchment-dark); font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 0.05em; flex: none; }
+  header a { color: var(--accent); text-decoration: none; }
+  header a:hover { text-decoration: underline; }
+  header .slash { color: var(--line); }
+  header b { color: var(--accent); font-weight: 600; }
+
+  main { flex: 1; display: flex; min-height: 0; }
+  #study { width: 54%; min-width: 24rem; overflow-y: auto; padding: 1.1rem 1.4rem 3rem; }
+  #pane { flex: 1; display: flex; flex-direction: column; border-left: 1px solid var(--line); background: var(--panel); min-width: 0; }
+  #pane .bar { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.35rem 0.8rem;
+               font-size: 0.85rem; color: var(--faded); border-bottom: 1px solid var(--parchment-dark); }
+  #pane .bar a { color: var(--accent); }
+  #pane iframe { flex: 1; width: 100%; border: 0; background: var(--parchment); }
+
+  h1 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.45rem; color: var(--accent); margin: 0 0 0.2rem; letter-spacing: 0.02em; }
+  h2 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1rem; color: var(--accent); letter-spacing: 0.06em;
+       margin: 1.3rem 0 0.4rem; border-bottom: 1px solid var(--line); padding-bottom: 0.2rem; }
+  h2 .count { font-family: 'EB Garamond', serif; font-weight: 400; color: var(--faded); letter-spacing: 0; font-size: 0.95rem; }
+  p { margin: 0.3rem 0; }
+  .note { color: var(--faded); font-size: 0.92rem; }
+  .note a, .links a, #study a { color: var(--accent); }
+  .small { font-size: 0.88rem; }
+  .warn { color: var(--warn); }
+
+  /* the four kinds, as the Critique's table names them */
+  .kinds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4rem; margin: 0.6rem 0 0.2rem; }
+  .kind { border: 1px solid var(--line); border-top: 3px solid var(--k); border-radius: 3px; background: var(--panel); padding: 0.25rem 0.45rem; font-size: 0.86rem; line-height: 1.25; }
+  .kind b { font-style: italic; font-weight: 600; }
+  .kind span { color: var(--faded); display: block; }
+  .kind .n { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--k); }
+  .k1 { --k: var(--k1); } .k2 { --k: var(--k2); } .k3 { --k: var(--k3); } .k4 { --k: var(--k4); } .k0 { --k: var(--faded); }
+
+  /* joining, and the line that says where things stand */
+  .card { border: 1px solid var(--line); border-radius: 4px; background: var(--panel); padding: 0.65rem 0.8rem; margin: 0.7rem 0; }
+  .card.join { border-left: 4px solid var(--accent); }
+  .joinrow { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-top: 0.45rem; }
+  .joinrow input[type=password] { flex: 1; min-width: 14rem; padding: 0.3rem 0.5rem; border: 1px solid var(--line); border-radius: 3px; background: #fff; font-family: Menlo, monospace; font-size: 0.85rem; }
+  .btn { border: 1px solid var(--accent); background: var(--accent); color: #fff; border-radius: 3px; padding: 0.2rem 0.75rem; cursor: pointer; }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn.quiet { background: transparent; color: var(--accent); }
+  .linkbtn { border: 0; background: none; color: var(--accent); text-decoration: underline; cursor: pointer; padding: 0; }
+  #status { display: flex; flex-wrap: wrap; gap: 0.2rem 0.8rem; align-items: baseline; font-size: 0.9rem; color: var(--faded); }
+  #status .dot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--ok); margin-right: 0.3rem; }
+  #status .dot.busy { background: var(--found-bd); }
+  #status .dot.bad { background: var(--warn); }
+  #status .err { color: var(--warn); flex-basis: 100%; }
+
+  /* adding passages */
+  details.add { border: 1px solid var(--line); border-radius: 4px; background: var(--panel); margin: 0.7rem 0; }
+  details.add > summary { cursor: pointer; padding: 0.4rem 0.8rem; font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 0.05em; color: var(--accent); }
+  details.add .body { padding: 0 0.8rem 0.7rem; }
+  details.add h3 { font-size: 0.95rem; margin: 0.7rem 0 0.2rem; color: var(--accent); }
+  .texts { margin: 0.3rem 0; padding: 0; list-style: none; font-size: 0.92rem; }
+  .texts li { margin: 0.1rem 0; }
+  .sources { margin: 0.2rem 0 0; padding-left: 1.2rem; font-size: 0.9rem; }
+  .inline { display: inline-flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+  .inline input[type=number] { width: 4.5rem; padding: 0.1rem 0.3rem; border: 1px solid var(--line); border-radius: 3px; background: #fff; }
+
+  /* the queue's controls */
+  .tools { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; align-items: center; font-size: 0.9rem; margin: 0.4rem 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+  .fchip { border: 1px solid var(--line); background: #fff; border-radius: 0.8rem; padding: 0 0.5rem; font-size: 0.82rem; cursor: pointer; color: var(--faded); }
+  .fchip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .fchip i { font-style: normal; opacity: 0.75; }
+  .tools select, .tools input[type=number] { border: 1px solid var(--line); border-radius: 3px; background: #fff; padding: 0 0.25rem; font-size: 0.88rem; }
+  .tools input[type=number] { width: 4rem; }
+  .progress { height: 0.5rem; border-radius: 0.3rem; background: var(--parchment-dark); overflow: hidden; display: flex; margin: 0.5rem 0 0.15rem; }
+  .progress span { background: var(--accent); }
+  .progress span.one { background: var(--found-bd); }
+  .progline { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.2rem 1rem; font-size: 0.86rem; color: var(--faded); }
+
+  /* a passage in the queue */
+  .empty { border: 1px dashed var(--line); border-radius: 4px; padding: 0.6rem 0.8rem; color: var(--faded); font-style: italic; font-size: 0.95rem; }
+  .item { border: 1px solid var(--line); border-radius: 4px; background: var(--panel); padding: 0.45rem 0.7rem 0.5rem; margin: 0.5rem 0; cursor: pointer; }
+  .item:hover { border-color: var(--accent-light); }
+  .item.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+  .item .top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.5rem; }
+  .item .num { font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--faded); min-width: 1.6rem; }
+  .item .cite { font-weight: 600; color: var(--accent); }
+  .item .work { color: var(--ink); }
+  .item .filed { font-size: 0.88rem; color: var(--faded); }
+  .item .filed .weak { border-bottom: 1px dashed var(--faded); }
+  .item .excerpt { font-size: 0.95rem; margin-top: 0.2rem; }
+  .item .excerpt mark { background: #f1dfc0; color: inherit; padding: 0 1px; }
+  .flags { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; margin-top: 0.4rem; cursor: default; }
+  .kb { display: inline-flex; align-items: center; gap: 0.25rem; border: 1px solid var(--k); color: var(--k); background: #fff;
+        border-radius: 3px; padding: 0 0.45rem; font-size: 0.86rem; line-height: 1.55; cursor: pointer; }
+  .kb .n { font-family: 'Cinzel', serif; font-size: 0.72rem; }
+  .kb .lt { font-style: italic; }
+  .kb.on { background: var(--k); color: #fff; }
+  .kb .others { font-size: 0.72rem; border-radius: 0.6rem; padding: 0 0.3rem; background: var(--parchment-dark); color: var(--ink); font-style: normal; }
+  .kb.on .others { background: rgba(255,255,255,0.85); }
+  .qnote { flex: 1; min-width: 10rem; border: 1px solid var(--line); border-radius: 3px; background: #fff; padding: 0.05rem 0.4rem; font-size: 0.9rem; }
+  .readers { font-size: 0.88rem; margin-top: 0.3rem; color: var(--ink); }
+  .readers .who { color: var(--accent); }
+  .readers .hid { color: var(--faded); font-style: italic; }
+  .item .foot { display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem; margin-top: 0.3rem; font-size: 0.85rem; color: var(--faded); align-items: baseline; }
+
+  .chip { display: inline-block; font-size: 0.8rem; line-height: 1.35; padding: 0 0.4rem; border-radius: 0.7rem; border: 1px solid; white-space: nowrap; }
+  .chip.lane { border-color: var(--line); color: var(--faded); font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.06em; }
+  .chip.phase { color: #fff; border-color: transparent; }
+  .chip.phase.none { background: #fff; color: var(--faded); border: 1px dashed var(--era-none); }
+  .chip.st { border-color: var(--line); color: var(--faded); background: #fff; }
+  .chip.st.agree { border-color: var(--ok); color: var(--ok); }
+  .chip.st.read { border-color: var(--accent-light); color: var(--accent); }
+  .chip.st.differ { border: 1px dashed var(--warn); color: var(--warn); background: var(--warn-bg); }
+  .ocr { font-style: italic; }
+  .placed { border-bottom: 1px dashed var(--faded); }
+  .leaving { font-style: italic; border-bottom: 1px dashed var(--faded); }
+</style>
+</head>
+<body>
+<header>
+  <a href="../../../index.html">KANT LAB</a><span class="slash">/</span>
+  <a href="../../index.html">The Logic Portal</a><span class="slash">/</span>
+  <a href="../../index.html#studies">Studies</a><span class="slash">/</span>
+  <a href="index.html">The kinds of nothing</a><span class="slash">/</span>
+  <b>The queue</b>
+</header>
+<main>
+  <section id="study">
+    <h1>The queue</h1>
+    <p class="note">Passages from the portal’s search, numbered, for the seminar to flag against Kant’s table of nothing. Tick every kind a passage bears on, or <i>None</i>. Ticks are saved to GitHub as you make them, signed with your GitHub name. Everyone working on the queue sees them within about half a minute. The page never ticks anything itself.</p>
+    <div class="kinds" id="kinds"></div>
+    <p class="note small" id="kinds-cite"></p>
+
+    <div id="conn"></div>
+    <div id="work" hidden>
+      <details class="add" id="add">
+        <summary>Add passages to the queue</summary>
+        <div class="body">
+          <h3>From the portal’s search</h3>
+          <p class="note small">Search in the portal on the right, in its search box, as you would anywhere in it. This box then shows what the search finds, and adds it. Passages already in the queue keep their numbers; new ones go at the end. For the paper’s two searches:
+            <button type="button" class="linkbtn" data-q="nichts OR nihil">nichts OR nihil</button> ·
+            <button type="button" class="linkbtn" data-q="&quot;nihil negativum&quot;">“nihil negativum”</button>.</p>
+          <div id="from-search"></div>
+          <h3>Kant’s notes filed on a § of Baumgarten</h3>
+          <p class="note small">Every Reflexion the Academy edition files on that §, as the portal has them, whether by the note’s own locus note or only by the AA’s block heading. Each says which.</p>
+          <div class="inline"><span>§</span><input type="number" id="para" min="1" max="1000" value="7"><button type="button" class="btn quiet" id="para-read">Look</button></div>
+          <div id="from-para"></div>
+          <h3>The study’s starting points</h3>
+          <div id="from-start"></div>
+          <h3>How the queue was made</h3>
+          <ol class="sources" id="sources"></ol>
+        </div>
+      </details>
+
+      <h2>The queue <span class="count" id="qcount"></span></h2>
+      <div class="progress" id="bar"></div>
+      <div class="progline" id="progline"></div>
+      <div class="tools">
+        <div class="chips" id="filters"></div>
+      </div>
+      <div class="tools">
+        <label>Order <select id="order">
+          <option value="num">by number</option>
+          <option value="date">by date (this page’s placing)</option>
+          <option value="para">by § of Baumgarten</option>
+        </select></label>
+        <span class="inline">Numbers <input type="number" id="from" min="1" placeholder="from"> to <input type="number" id="to" min="1" placeholder="to"></span>
+      </div>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <section id="pane">
+    <div class="bar"><span>The Logic Portal, beside the queue. Its search fills the queue</span><a id="full" href="../../index.html" target="_blank" rel="noopener">open it full size ↗</a></div>
+    <iframe id="portal" title="The Logic Portal" src="../../index.html"></iframe>
+  </section>
+</main>
+
+<!-- Adickes' chronology, for placing a note in time; the study's starting points; and where the flags are kept. -->
+<script src="../../../data/phases-adickes.js"></script>
+<script src="starting-points.js"></script>
+<script src="queue-config.js"></script>
+<script>
+'use strict';
+
+/* ── Data: the table of nothing, and what this page knows ──────────────────── */
+
+const CFG = STUDY_QUEUE_CONFIG;
+const PORTAL = '../../index.html';
+const API = 'https://api.github.com';                 // the only place the token is ever sent
+const REPO = '/repos/' + CFG.owner + '/' + CFG.repo;
+const DIR = 'queues/' + CFG.queue;
+const QUEUE_PATH = DIR + '/queue.json';
+const FLAG_FILE = new RegExp('^' + DIR.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '/flags/([A-Za-z0-9-]+)\\.json$');
+const README = 'https://github.com/mikrishnan/kant-lab/blob/main/logic-portal/studies/kinds-of-nothing/README.md#the-queue';
+const TOKEN_KEY = 'kantlab-queue-token';
+
+/* The Critique's table of nothing, A 291–292 / B 348, in its own words and order. */
+const KINDS = [
+  { key: 'ens-rationis',     n: 1, la: 'ens rationis',     de: 'Leerer Begriff ohne Gegenstand' },
+  { key: 'nihil-privativum', n: 2, la: 'nihil privativum', de: 'Leerer Gegenstand eines Begriffs' },
+  { key: 'ens-imaginarium',  n: 3, la: 'ens imaginarium',  de: 'Leere Anschauung ohne Gegenstand' },
+  { key: 'nihil-negativum',  n: 4, la: 'nihil negativum',  de: 'Leerer Gegenstand ohne Begriff' },
+];
+const KIND_KEYS = KINDS.map(k => k.key);
+const KIND = Object.fromEntries(KINDS.map(k => [k.key, k]));
+const TABLE = { ref: 'krv-a:krv-a-0491', cite: 'KrV A 291–292', b: { ref: 'krv-b:krv-b-0901', cite: 'B 348' } };
+
+const LANE_OF_KEY = { baumgarten: 'Baumgarten', meier: 'Meier', 'refl-meta': 'Kant’s notes', 'refl-logik': 'Kant’s notes' };
+const LANE_OF_LAYER = { textbook: 'Textbook', notes: 'Kant’s notes', lecture: 'Lecture', published: 'Published' };
+const LANE_OF_START = { 'metaphysik-mrongovius': 'Lecture', 'metaphysik-k3': 'Lecture', aa02: 'Published', 'krv-a': 'Published', 'krv-b': 'Published' };
+// Adickes' own decade bands (AA 14:XXXV), as the portal colours a phase chip
+const ERAS = [[1750, 1759, '--era-1750'], [1760, 1769, '--era-1760'], [1770, 1779, '--era-1770'],
+              [1780, 1789, '--era-1780'], [1790, 9999, '--era-1790']];
+
+/* ── State ──────────────────────────────────────────────────────────────────── */
+
+let token = null, me = null;        // the reader's token, and their GitHub login
+let queue = null, queueSha = null;  // queue.json as on GitHub, and its blob
+const readers = new Map();          // login → { sha, flags }: every reader's file as last read
+let mine = {};                      // this reader's flags, ref → { kinds: null | [keys], note, at }
+let mineSha = null;                 // the blob of this reader's file on GitHub; null if none yet
+let cleared = {};                   // ref → when this reader took back every tick, until saved
+let version = 0, savedVersion = 0;  // edits made, and edits GitHub has
+const changed = new Set();          // refs changed since the last save, for the commit message
+let saving = false, saveTimer = null, saveErr = '', netErr = '';
+let headSha = null, headEtag = null, lastCheck = 0, checking = false;
+const blobs = new Map();            // blob sha → parsed file: a blob never changes
+let view = { filter: 'all', order: 'num', from: null, to: null };
+const kept = new Set();             // passages ticked or noted under the current filter: they stay in view until it changes
+let current = null;                 // the ref open in the portal pane
+let portalSeen = null, searchState = null;  // the portal's address when last read, and what reading it gave
+
+/* ── Small builders ─────────────────────────────────────────────────────────── */
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const keyOf = ref => ref.slice(0, ref.indexOf(':'));
+const idOf = ref => ref.slice(ref.indexOf(':') + 1);
+const today = () => new Date().toISOString().slice(0, 10);
+const plural = (n, w, ws) => n + ' ' + (n === 1 ? w : (ws || w + 's'));
+const kindsLabel = ks => ks.length ? ks.map(k => KIND[k].la).join(', ') : 'none of the four';
+const sameKinds = (a, b) => a.length === b.length && a.every(k => b.includes(k));
+
+/* Where a passage opens in the portal, as on the study's page. */
+function portalHref(ref) {
+  const k = keyOf(ref), id = idOf(ref);
+  if (k === 'baumgarten' || k === 'meier') return PORTAL + '#read=' + k + '&at=' + encodeURIComponent(id);
+  if (k === 'refl-meta' || k === 'refl-logik') return PORTAL + '#refl=' + id.replace(/^r/, '');
+  return PORTAL + '#read=' + encodeURIComponent(k) + '&at=' + encodeURIComponent(id);
+}
+
+/* When a passage stands in time, by the study page's rule: a date the text has is stated; a
+   Reflexion is placed by the earliest dated phase in Adickes' expression, outside its
+   parentheses if any is dated there. That placing is this page's, and is shown as such. */
+function placeOf(it) {
+  const y = String(it.date || '').match(/1[6-9]\d\d/);
+  if (y) return { year: +y[0], how: 'stated' };
+  if (!it.phRaw || typeof phaseInfo !== 'function') return { year: null, how: 'none' };
+  const outer = it.phRaw.replace(/\([^)]*\)/g, ' '), inner = (it.phRaw.match(/\(([^)]*)\)/g) || []).join(' ');
+  const earliest = s => {
+    let best = null;
+    for (const tok of s.split(/[\s−–-]+/)) {
+      const sym = tok.replace(/[?()]/g, '').trim();
+      if (!sym) continue;
+      const info = phaseInfo(sym);
+      if (info && info.from != null && (!best || info.from < best.year)) best = { year: info.from, sym: info.sym || sym };
+    }
+    return best;
+  };
+  const b = earliest(outer) || earliest(inner);
+  return b ? { year: b.year, how: 'phase', sym: b.sym } : { year: null, how: 'none' };
+}
+const eraVar = year => { const e = ERAS.find(([lo, hi]) => year >= lo && year <= hi); return e ? e[2] : '--era-none'; };
+function paraOf(it) {
+  if (it.paras && it.paras.length) return it.paras[0];
+  const m = keyOf(it.ref) === 'baumgarten' && /^p(\d+)$/.exec(idOf(it.ref));
+  return m ? +m[1] : null;
+}
+
+/* UTF-8 in and out of GitHub's base64. */
+function b64encode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function b64decode(b64) {
+  const bin = atob(String(b64).replace(/\s/g, ''));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+/* The files, one passage or one flag to a line, so that GitHub's history shows each change. */
+function queueText(q) {
+  const head = { kind: 'kantlab-queue', v: 1, id: CFG.queue, title: q.title || CFG.title, kinds: KIND_KEYS };
+  return JSON.stringify(head).replace(/\}$/, ',') + '\n "sources": [\n' + q.sources.map(s => '  ' + JSON.stringify(s)).join(',\n') +
+    '\n ],\n "items": [\n' + q.items.map(x => '  ' + JSON.stringify(x)).join(',\n') + '\n ]\n}\n';
+}
+function flagsText(flags) {
+  const order = queue ? new Map(queue.items.map((x, n) => [x.ref, n])) : new Map();
+  const refs = Object.keys(flags).sort((a, b) => (order.has(a) ? order.get(a) : 1e9) - (order.has(b) ? order.get(b) : 1e9) || a.localeCompare(b));
+  const head = { kind: 'kantlab-queue-flags', v: 1, queue: CFG.queue, reader: me };
+  return JSON.stringify(head).replace(/\}$/, ',') + '\n "flags": {\n' + refs.map(r => '  ' + JSON.stringify(r) + ': ' + JSON.stringify(flags[r])).join(',\n') + '\n }\n}\n';
+}
+
+/* What comes back from GitHub is data: keep only the shapes this page writes. */
+function cleanQueue(d) {
+  if (!d || !Array.isArray(d.items)) return null;
+  const seen = new Set();
+  const items = d.items.filter(x => x && typeof x.ref === 'string' && /^[\w-]+:\S+$/.test(x.ref) && !seen.has(x.ref) && seen.add(x.ref));
+  return { title: String(d.title || CFG.title), sources: Array.isArray(d.sources) ? d.sources.filter(s => s && typeof s === 'object') : [], items };
+}
+function cleanEntry(e) {
+  if (!e || typeof e !== 'object') return null;
+  const kinds = Array.isArray(e.kinds) ? KIND_KEYS.filter(k => e.kinds.includes(k)) : null;
+  const note = typeof e.note === 'string' ? e.note.slice(0, 600) : '';
+  if (kinds === null && !note) return null;
+  return { kinds, note, at: typeof e.at === 'string' ? e.at : '' };
+}
+function cleanFlags(f) {
+  const out = {};
+  if (f && typeof f === 'object') for (const [ref, e] of Object.entries(f)) { const c = cleanEntry(e); if (c) out[ref] = c; }
+  return out;
+}
+/* Two copies of this reader's own file, from two tabs or two computers: per passage, the later wins. */
+function mergeMine(server, local, gone) {
+  const out = {};
+  for (const ref of new Set([...Object.keys(server), ...Object.keys(local), ...Object.keys(gone)])) {
+    const cands = [server[ref] && { e: server[ref], at: server[ref].at }, local[ref] && { e: local[ref], at: local[ref].at }, gone[ref] && { e: null, at: gone[ref] }].filter(Boolean);
+    cands.sort((a, b) => String(b.at).localeCompare(String(a.at)));
+    if (cands[0] && cands[0].e) out[ref] = cands[0].e;
+  }
+  return out;
+}
+
+/* ── GitHub ─────────────────────────────────────────────────────────────────── */
+
+async function gh(method, path, opts) {
+  const o = opts || {};
+  const headers = { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + token };
+  if (o.body) headers['Content-Type'] = 'application/json';
+  if (o.etag) headers['If-None-Match'] = o.etag;
+  let r;
+  try { r = await fetch(API + path, { method, headers, body: o.body ? JSON.stringify(o.body) : undefined, cache: 'no-store' }); }
+  catch (e) { const err = new Error('offline'); err.status = 0; throw err; }
+  let data = null;
+  if (r.status !== 304) { try { data = await r.json(); } catch (e) { data = null; } }
+  return { status: r.status, ok: r.ok, data, etag: r.headers.get('ETag'), left: r.headers.get('x-ratelimit-remaining'), reset: r.headers.get('x-ratelimit-reset') };
+}
+function apiError(r) {
+  const e = new Error('GitHub ' + r.status);
+  e.status = r.status; e.gh = r.data && r.data.message; e.left = r.left; e.reset = r.reset;
+  return e;
+}
+function messageFor(e) {
+  if (!e || e.status === 0) return 'GitHub can’t be reached. Your ticks are kept in this browser, and are saved when the connection returns.';
+  if (e.status === 401) return 'GitHub didn’t accept the token. It may have expired or been revoked. Make a new one and join again.';
+  if (e.status === 403 && e.left === '0') {
+    const t = e.reset ? new Date(+e.reset * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'later';
+    return 'GitHub’s limit on requests is used up until ' + t + '. Your ticks are kept, and are saved then.';
+  }
+  if (e.status === 403) return 'The token can read the queue but not save to it. It needs “Contents: Read and write”. If the organisation approves tokens, it may still be waiting for approval.';
+  if (e.status === 404) return 'The token can’t see ' + CFG.owner + '/' + CFG.repo + '. Check that you accepted the invitation to ' + CFG.owner + ', that the token’s resource owner is ' + CFG.owner + ' with the repository ' + CFG.repo + ' selected, and, if the organisation approves tokens, that yours has been approved.';
+  if (e.message === 'conflict') return 'Someone else saved the same file at the same moment several times over. Try again.';
+  return 'GitHub answered ' + e.status + (e.gh ? ': “' + e.gh + '”' : '') + '.';
+}
+async function readBlob(sha) {
+  if (blobs.has(sha)) return blobs.get(sha);
+  const r = await gh('GET', REPO + '/git/blobs/' + sha);
+  if (!r.ok) throw apiError(r);
+  let v = null;
+  try { v = JSON.parse(b64decode(r.data.content)); } catch (e) { v = null; }
+  blobs.set(sha, v);
+  return v;
+}
+async function readFile(path) {
+  const r = await gh('GET', REPO + '/contents/' + path + '?ref=' + encodeURIComponent(CFG.branch));
+  if (r.status === 404) return null;
+  if (!r.ok) throw apiError(r);
+  let v = null;
+  try { v = JSON.parse(b64decode(r.data.content)); } catch (e) { v = null; }
+  return { sha: r.data.sha, data: v };
+}
+async function writeFile(path, text, sha, message) {
+  const body = { message, content: b64encode(text), branch: CFG.branch };
+  if (sha) body.sha = sha;
+  return gh('PUT', REPO + '/contents/' + path, { body });
+}
+const myPath = () => DIR + '/flags/' + me + '.json';
+
+/* ── Keeping up with the others ─────────────────────────────────────────────
+   One small question to GitHub every pollSeconds while the page is in view: has the branch
+   moved? Only when it has does the page read the file list, and then only the files that
+   changed. */
+async function refresh(force) {
+  if (!token || !me || checking) return;
+  checking = true;
+  try {
+    const r = await gh('GET', REPO + '/git/ref/heads/' + encodeURIComponent(CFG.branch), { etag: force ? null : headEtag });
+    lastCheck = Date.now(); netErr = '';
+    let sha = headSha;
+    if (r.status === 200) { sha = r.data.object.sha; headEtag = r.etag; }
+    else if (r.status === 404 || r.status === 409) sha = null;      // no branch yet: an empty repository
+    else if (r.status !== 304) throw apiError(r);
+    if (sha === headSha && !force) return;
+    const files = new Map();
+    if (sha) {
+      const t = await gh('GET', REPO + '/git/trees/' + sha + '?recursive=1');
+      if (!t.ok) throw apiError(t);
+      (t.data.tree || []).forEach(x => { if (x.type === 'blob' && x.path.indexOf(DIR + '/') === 0) files.set(x.path, x.sha); });
+    }
+    const qsha = files.get(QUEUE_PATH) || null;
+    if (qsha !== queueSha) { queue = qsha ? cleanQueue(await readBlob(qsha)) : null; queueSha = qsha; }
+    const present = new Set();
+    for (const [path, bsha] of files) {
+      const m = FLAG_FILE.exec(path);
+      if (!m) continue;
+      const login = m[1];
+      present.add(login);
+      if (readers.has(login) && readers.get(login).sha === bsha) continue;
+      const d = await readBlob(bsha);
+      readers.set(login, { sha: bsha, flags: cleanFlags(d && d.flags) });
+    }
+    [...readers.keys()].forEach(l => { if (!present.has(l)) readers.delete(l); });
+    const own = readers.get(me);
+    const ownSha = own ? own.sha : null;
+    if (ownSha !== mineSha) {                        // saved from another tab or computer
+      mineSha = ownSha;
+      mine = version === savedVersion ? Object.assign({}, own ? own.flags : {}) : mergeMine(own ? own.flags : {}, mine, cleared);
+    }
+    headSha = sha;
+    render();
+  } catch (e) {
+    netErr = messageFor(e);
+  } finally {
+    checking = false;
+    renderStatus();
+  }
+}
+
+/* ── Saving this reader's ticks ─────────────────────────────────────────────
+   A few seconds after the last tick, one save of the reader's whole file. Saves go one at a
+   time. If the file changed on GitHub meanwhile (another tab of the same reader), the page reads
+   it, keeps the later of each pair, and saves again. Until GitHub has them, the ticks are also
+   kept in this browser, so that closing the tab or losing the connection loses nothing. */
+const pendKey = () => 'kantlab-queue-pending:' + CFG.owner + '/' + CFG.repo + ':' + CFG.queue + ':' + me;
+function keepPending() {
+  try {
+    if (version === savedVersion) localStorage.removeItem(pendKey());
+    else localStorage.setItem(pendKey(), JSON.stringify({ mine, cleared, changed: [...changed] }));
+  } catch (e) { /* a full or blocked localStorage only loses the offline copy */ }
+}
+function scheduleSave(ms) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flush, ms != null ? ms : CFG.saveSeconds * 1000);
+  renderStatus();
+}
+function commitMessage(refs) {
+  const num = queue ? new Map(queue.items.map((x, n) => [x.ref, n + 1])) : new Map();
+  const nums = refs.map(r => num.has(r) ? 'no. ' + num.get(r) : r).slice(0, 8);
+  return me + ': flags on ' + nums.join(', ') + (refs.length > 8 ? ' and ' + (refs.length - 8) + ' more' : '') + ' in ' + CFG.queue;
+}
+async function flush() {
+  if (!token || !me || saving || version === savedVersion) return;
+  saving = true; saveErr = ''; renderStatus();
+  try {
+    for (let attempt = 0; ; attempt++) {
+      const v = version, refs = [...changed], text = flagsText(mine);
+      const r = await writeFile(myPath(), text, mineSha, commitMessage(refs));
+      if (r.ok) {
+        mineSha = r.data.content.sha;
+        readers.set(me, { sha: mineSha, flags: cleanFlags(JSON.parse(text).flags) });
+        savedVersion = v;
+        if (version === v) { changed.clear(); cleared = {}; }
+        break;
+      }
+      if ((r.status === 409 || r.status === 422) && attempt < 4) {
+        const f = await readFile(myPath());
+        mineSha = f ? f.sha : null;
+        mine = mergeMine(f ? cleanFlags(f.data && f.data.flags) : {}, mine, cleared);
+        await new Promise(res => setTimeout(res, 300 * (attempt + 1)));
+        continue;
+      }
+      throw attempt >= 4 ? Object.assign(new Error('conflict'), { status: r.status }) : apiError(r);
+    }
+  } catch (e) {
+    saveErr = messageFor(e);
+  } finally {
+    saving = false;
+    keepPending();
+    renderStatus();
+    renderSummary();
+  }
+  if (version !== savedVersion && !saveErr) scheduleSave();
+}
+
+/* A tick, an untick, or a note. Ticking None takes back the four; ticking one of the four takes
+   back None. Taking back every tick returns the passage to "not yet read". */
+function setFlag(ref, fn) {
+  const e = mine[ref] ? { kinds: mine[ref].kinds ? mine[ref].kinds.slice() : null, note: mine[ref].note || '' } : { kinds: null, note: '' };
+  fn(e);
+  e.at = new Date().toISOString();
+  if (e.kinds === null && !e.note) { delete mine[ref]; cleared[ref] = e.at; }
+  else { mine[ref] = e; delete cleared[ref]; }
+  version++; changed.add(ref);
+  keepPending();
+  scheduleSave();
+}
+function toggleKind(ref, k) {
+  setFlag(ref, e => {
+    if (k === 'none') { e.kinds = e.kinds && !e.kinds.length ? null : []; return; }
+    const ks = e.kinds || [];
+    e.kinds = ks.includes(k) ? ks.filter(x => x !== k) : KIND_KEYS.filter(x => x === k || ks.includes(x));
+    if (!e.kinds.length) e.kinds = null;
+  });
+}
+
+/* ── Adding to the queue ────────────────────────────────────────────────────
+   Read queue.json fresh, append only what is not in it yet, and save. If two people add at the
+   same moment, the second reads the first's version and appends to that. Numbers never move. */
+async function addToQueue(items, source) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const f = await readFile(QUEUE_PATH);
+    const q = (f && cleanQueue(f.data)) || { title: CFG.title, sources: [], items: [] };
+    const have = new Set(q.items.map(x => x.ref));
+    const add = items.filter(x => !have.has(x.ref));
+    if (!add.length) return { added: 0 };
+    const n = q.sources.length + 1;
+    q.sources.push(Object.assign({ n }, source, { by: me, added: today(), found: items.length, new: add.length }));
+    add.forEach(x => q.items.push(Object.assign({}, x, { source: n })));
+    const r = await writeFile(QUEUE_PATH, queueText(q), f ? f.sha : null,
+      me + ': adds ' + plural(add.length, 'passage') + ' to ' + CFG.queue + ' (' + source.how + ')');
+    if (r.ok) { queue = q; queueSha = r.data.content.sha; render(); return { added: add.length, from: have.size + 1 }; }
+    if (r.status !== 409 && r.status !== 422) throw apiError(r);
+    await new Promise(res => setTimeout(res, 400 * (attempt + 1)));
+  }
+  throw new Error('conflict');
+}
+
+/* ── Reading the portal beside the page ─────────────────────────────────────
+   The portal on the right is the portal itself, on the same site, so this page can ask it what
+   its search has found: window.PORTAL, the interface class-sessions.js uses. Nothing in the
+   portal is changed. If the portal stops offering it, the box says so instead of guessing. */
+function portalWin() {
+  try {
+    const w = $('portal').contentWindow;
+    return w && w.PORTAL && Array.isArray(w.PORTAL.P) && w.PORTAL.P.length ? w : null;
+  } catch (e) { return null; }
+}
+function howFiled(e, groups) {
+  if (e.src === 'locus' && e.loc && e.loc.raw) return { filed: e.loc.raw, filedHow: 'locus' };
+  if (e.src === 'block') {
+    const g = groups && groups[e.grp];
+    const raw = g && g.raw ? String(g.raw).replace(/―\s*\d+\s*―/g, '').replace(/\s+/g, ' ').trim() : '';
+    return { filed: raw ? 'AA block “' + raw + '”' : 'AA block heading', filedHow: 'block' };
+  }
+  if (e.src === 'page') return { filed: 'by the handbook page, ' + (e.sig || ''), filedHow: 'page' };
+  return { filed: 'no § stated', filedHow: 'none' };
+}
+function excerptAround(text, a, b) {
+  const t = String(text || '');
+  const from = Math.max(0, a - 110), to = Math.min(t.length, Math.max(b, a) + 140);
+  const tidy = s => s.replace(/[|¬]/g, '').replace(/\s+/g, ' ');
+  const pre = tidy(t.slice(from, a)).replace(/^\s+/, ''), mid = tidy(t.slice(a, b)), post = tidy(t.slice(b, to)).replace(/\s+$/, '');
+  const lead = from > 0 ? '… ' : '';
+  return { excerpt: lead + pre + mid + post + (to < t.length ? ' …' : ''), hit: mid ? [lead.length + pre.length, lead.length + pre.length + mid.length] : undefined };
+}
+function itemFromPortal(PT, i, ms) {
+  const p = PT.P[i], T = PT.TEXTS[p.t];
+  const it = { ref: T.key + ':' + p.id, cite: p.cite || '', work: T.short || T.title || T.key, lane: LANE_OF_KEY[T.key] || LANE_OF_LAYER[T.layer] || '' };
+  if (/OCR/.test(T.title || '')) it.ocr = true;
+  if (T.shape === 'refl') {
+    const e = T.entries && T.entries[p.entry];
+    if (e) { it.phRaw = e.phRaw || ''; Object.assign(it, howFiled(e, T.groups)); if (e.paras && e.paras.length) it.paras = e.paras.slice(0, 12); }
+  } else {
+    it.date = T.date || '';
+    if (p.para) it.paras = [p.para];
+  }
+  const m = (ms || []).find(x => !x.en && p.ts && p.ts[x.a] != null);
+  Object.assign(it, m ? excerptAround(p.text, p.ts[m.a], p.te[m.b]) : excerptAround(p.text, 0, 0));
+  if (it.hit === undefined) delete it.hit;
+  return it;
+}
+function readPortalSearch() {
+  const w = portalWin();
+  if (!w) return { state: 'loading' };
+  const PT = w.PORTAL, S = PT.S;
+  if (!S || typeof PT.runQuery !== 'function' || !PT.TEXTS) return { state: 'changed' };
+  const q = String(S.q || '').trim();
+  if (!q) return { state: 'empty' };
+  let R;
+  try { R = PT.runQuery(); } catch (e) { return { state: 'error', q, msg: String(e && e.message || e) }; }
+  if (!R || !R.byPass || !R.byPass.size) return { state: 'none', q };
+  // in the order the portal's Passages list shows them: text by text, then as each text runs
+  const byText = [];
+  PT.TEXTS.forEach(T => {
+    let ps = [...R.byPass.keys()].filter(i => PT.P[i].t === T.idx);
+    if (S.loc) ps = ps.filter(i => R.byPass.get(i).some(m => m.loc === S.loc));
+    if (ps.length) byText.push({ key: T.key, name: T.short || T.title, ps: ps.sort((a, b) => a - b) });
+  });
+  const loc = S.loc ? ((R.locs || []).find(L => L.key === S.loc) || {}).label || S.loc : null;
+  return { state: 'ok', q, loc, en: !!R.en, byText, PT, R };
+}
+function notesOnPara(n) {
+  const w = portalWin();
+  if (!w) return { state: 'loading' };
+  const PT = w.PORTAL, T = (PT.TEXTS || []).find(x => x.key === 'refl-meta');
+  if (!T || !T.entries) return { state: 'changed' };
+  const ps = PT.P.filter(p => p.t === T.idx && (p.paras || []).includes(n)).map(p => p.i);
+  const items = ps.map(i => itemFromPortal(PT, i, null));
+  const by = h => items.filter(x => x.filedHow === h).length;
+  return { state: 'ok', items, locus: by('locus'), block: by('block'), page: by('page') };
+}
+function startingItems() {
+  return (typeof STUDY_STARTING_POINTS !== 'undefined' ? STUDY_STARTING_POINTS : []).map(s => {
+    const it = { ref: s.ref, cite: s.cite, work: s.work, lane: LANE_OF_KEY[keyOf(s.ref)] || LANE_OF_START[keyOf(s.ref)] || '', excerpt: s.excerpt || '' };
+    if (s.date) it.date = s.date;
+    if (s.phRaw) it.phRaw = s.phRaw;
+    if (/OCR/.test(s.work || '')) it.ocr = true;
+    if (s.how) { it.filed = s.how; it.filedHow = 'found'; }
+    return it;
+  });
+}
+
+/* ── Who has read what ──────────────────────────────────────────────────── */
+
+function decided(e) { return e && Array.isArray(e.kinds); }
+function readingsOf(ref) {
+  const out = [];
+  readers.forEach((r, login) => {
+    const e = login === me ? mine[ref] : r.flags[ref];
+    if (e) out.push({ login, e });
+  });
+  if (me && !readers.has(me) && mine[ref]) out.push({ login: me, e: mine[ref] });
+  return out;
+}
+function stateOf(ref) {
+  const all = readingsOf(ref);
+  const dec = all.filter(x => decided(x.e));
+  const iDecided = decided(mine[ref]);
+  const others = all.filter(x => x.login !== me);
+  const hidden = CFG.blind && !iDecided && others.some(x => decided(x.e));
+  const visible = hidden ? all.filter(x => x.login === me) : all;
+  const differ = dec.length >= 2 && dec.some(x => !sameKinds(x.e.kinds, dec[0].e.kinds));
+  return { all, dec, visible, hidden, differ, iDecided };
+}
+
+/* ── Rendering ──────────────────────────────────────────────────────────── */
+
+function renderKinds() {
+  $('kinds').innerHTML = KINDS.map(k => '<div class="kind k' + k.n + '"><span class="n">' + k.n + '</span><b>' + esc(k.la) + '</b><span>' + esc(k.de) + '</span></div>').join('');
+  $('kinds-cite').innerHTML = '“Nichts als …”: the table of nothing, <a href="' + esc(portalHref(TABLE.ref)) + '" data-open="' + esc(TABLE.ref) + '">' + esc(TABLE.cite) + '</a> / <a href="' + esc(portalHref(TABLE.b.ref)) + '" data-open="' + esc(TABLE.b.ref) + '" class="ocr">' + esc(TABLE.b.cite) + '</a> (B is OCR).';
+}
+
+function renderConn() {
+  if (token && me) {
+    $('conn').innerHTML = '<div id="status"></div>';
+    $('work').hidden = false;
+    renderStatus();
+    return;
+  }
+  $('work').hidden = true;
+  $('conn').innerHTML =
+    '<div class="card join">' +
+      '<p><b>Join the queue.</b> The queue and everyone’s ticks are kept on GitHub, in the seminar’s private repository <code>' + esc(CFG.owner + '/' + CFG.repo) + '</code>. To see them and to tick, paste your GitHub token. It is a key that can open that one repository and nothing else. <a href="' + esc(README) + '" target="_blank" rel="noopener">How to make one</a>.</p>' +
+      '<form class="joinrow" id="joinform"><input type="password" id="tok" autocomplete="off" spellcheck="false" placeholder="github_pat_…" aria-label="Your GitHub token">' +
+        '<label class="small"><input type="checkbox" id="remember"> remember on this computer</label>' +
+        '<button class="btn" id="joinbtn">Join</button></form>' +
+      '<p class="note small">Without <i>remember</i>, the token is forgotten when this tab closes. It is sent only to GitHub (api.github.com).</p>' +
+      '<p class="warn small" id="joinerr"></p>' +
+    '</div>';
+}
+
+function ago(t) {
+  const s = Math.round((Date.now() - t) / 1000);
+  return s < 5 ? 'just now' : s < 90 ? s + ' s ago' : Math.round(s / 60) + ' min ago';
+}
+function renderStatus() {
+  const el = $('status');
+  if (!el) return;
+  const waiting = version - savedVersion > 0;
+  const n = [...changed].length;
+  const dot = saveErr || netErr ? 'bad' : saving || waiting ? 'busy' : '';
+  const saved = saving ? 'saving…' : waiting ? (saveErr ? plural(n, 'change') + ' not yet saved' : 'saving in a moment…') : 'all your ticks saved';
+  const others = [...readers.keys()].filter(l => l !== me).length;
+  el.innerHTML = '<span><span class="dot ' + dot + '"></span>Joined as <b>@' + esc(me) + '</b> · ' + saved + '</span>' +
+    '<span>' + (lastCheck ? 'others checked ' + ago(lastCheck) : 'reading the queue…') + ' · ' + plural(others, 'other reader') + '</span>' +
+    '<span><button type="button" class="linkbtn" id="check">check now</button> · <button type="button" class="linkbtn" id="leave">leave</button></span>' +
+    (saveErr ? '<span class="err">' + esc(saveErr) + ' <button type="button" class="linkbtn" id="retry">try again</button></span>' : '') +
+    (netErr && netErr !== saveErr ? '<span class="err">' + esc(netErr) + '</span>' : '');
+}
+
+function filterDefs() {
+  return [['all', 'all'], ...KINDS.map(k => [k.key, k.n + ' ' + k.la]), ['none', 'none'], ['seminar', 'for seminar'],
+          ['unread-me', 'not yet read by me'], ['unread', 'not yet read by anyone']];
+}
+function passes(it, f, st) {
+  if (f === 'all') return true;
+  if (f === 'seminar') return st.differ;
+  if (f === 'unread-me') return !st.iDecided;
+  if (f === 'unread') return !st.dec.length;
+  if (f === 'none') return st.visible.some(x => decided(x.e) && !x.e.kinds.length);
+  return st.visible.some(x => decided(x.e) && x.e.kinds.includes(f));
+}
+
+function renderSummary() {
+  if (!$('work') || $('work').hidden) return;
+  const items = queue ? queue.items : [];
+  const N = items.length;
+  $('qcount').textContent = N ? '· ' + N : '';
+  let one = 0, two = 0, sem = 0, minecount = 0;
+  const per = new Map();
+  items.forEach(it => {
+    const st = stateOf(it.ref);
+    if (st.dec.length >= 2) two++; else if (st.dec.length === 1) one++;
+    if (st.differ) sem++;
+    if (st.iDecided) minecount++;
+    st.dec.forEach(x => per.set(x.login, (per.get(x.login) || 0) + 1));
+  });
+  $('bar').innerHTML = N ? '<span style="width:' + (100 * two / N) + '%" title="read by two or more"></span><span class="one" style="width:' + (100 * one / N) + '%" title="read by one"></span>' : '';
+  $('progline').innerHTML = N
+    ? '<span>' + (one + two) + ' of ' + N + ' read · ' + two + ' by two or more readers · ' + sem + ' for seminar · you: ' + minecount + '</span>' +
+      '<span>' + [...per.entries()].sort((a, b) => b[1] - a[1]).map(([l, c]) => '@' + esc(l) + ' ' + c).join(' · ') + '</span>'
+    : '';
+  $('filters').innerHTML = filterDefs().map(([f, label]) => {
+    const c = items.filter(it => passes(it, f, stateOf(it.ref))).length;
+    const k = KIND[f];
+    return '<button type="button" class="fchip' + (view.filter === f ? ' on' : '') + '" data-filter="' + f + '"' + (k ? ' style="' + (view.filter === f ? 'background:var(--k' + k.n + ');border-color:var(--k' + k.n + ')' : 'color:var(--k' + k.n + ')') + '"' : '') + '>' + esc(label) + ' <i>' + c + '</i></button>';
+  }).join('');
+  renderSources();
+}
+
+function renderSources() {
+  const s = queue ? queue.sources : [];
+  $('sources').innerHTML = s.length ? s.map(x => '<li>' + esc(x.how) + (x.query ? ': <b>' + esc(x.query) + '</b>' : '') + ' — ' +
+    plural(+x.found || 0, 'passage') + ' found, ' + (+x.new || 0) + ' new · @' + esc(x.by) + ', ' + esc(x.added) + '</li>').join('')
+    : '<li class="note">Nothing yet.</li>';
+}
+
+function excerptHtml(it) {
+  const s = String(it.excerpt || '');
+  if (!Array.isArray(it.hit) || it.hit.length !== 2) return esc(s);
+  const [a, b] = it.hit;
+  return esc(s.slice(0, a)) + '<mark>' + esc(s.slice(a, b)) + '</mark>' + esc(s.slice(b));
+}
+
+function itemHtml(it, num, leaving) {
+  const st = stateOf(it.ref), my = mine[it.ref];
+  const k = keyOf(it.ref), pl = placeOf(it);
+  let when = '';
+  if (it.phRaw) {
+    when = pl.how === 'phase'
+      ? '<span class="chip phase" style="background:var(' + eraVar(pl.year) + ')" title="Adickes’ phase, as the AA prints it">' + esc(it.phRaw) + '</span>'
+      : '<span class="chip phase none" title="Adickes gives this phase no years">' + esc(it.phRaw) + ' · no years</span>';
+  } else if (it.date) when = '<span>' + esc(it.date) + '</span>';
+  const filed = it.filed
+    ? '<div class="filed">' + (it.filedHow === 'found' ? 'starting point: ' + esc(it.filed)
+      : it.filedHow === 'locus' ? 'filed by its locus note: “' + esc(it.filed) + '”'
+      : '<span class="weak" title="' + (it.filedHow === 'block' ? 'Filed only by the AA’s block heading, not by a locus note of its own' : it.filedHow === 'page' ? 'Filed by the page of Kant’s handbook it stands on, which names every § on that page' : 'Nothing in the AA locates this note') + '">' + esc(it.filed) + '</span>') + '</div>'
+    : '';
+  // the boxes: this reader's own ticks, and how many others ticked each, where they may be seen
+  const others = st.visible.filter(x => x.login !== me && decided(x.e));
+  const count = key => others.filter(x => key === 'none' ? !x.e.kinds.length : x.e.kinds.includes(key)).length;
+  const on = key => decided(my) && (key === 'none' ? !my.kinds.length : my.kinds.includes(key));
+  const box = (key, cls, inner, title) => {
+    const c = count(key);
+    return '<button type="button" class="kb ' + cls + (on(key) ? ' on' : '') + '" data-kind="' + key + '" aria-pressed="' + on(key) + '" title="' + esc(title) + '">' + inner +
+      (c ? '<span class="others" title="' + c + ' other reader' + (c === 1 ? '' : 's') + '">' + c + '</span>' : '') + '</button>';
+  };
+  const boxes = KINDS.map(K => box(K.key, 'k' + K.n, '<span class="n">' + K.n + '</span><span class="lt">' + esc(K.la) + '</span>', K.de)).join('') +
+    box('none', 'k0', 'None', 'None of the four: read, and bears on none of them');
+  // the others' readings, signed
+  let rd = '';
+  if (st.hidden) {
+    const n = st.all.filter(x => x.login !== me && decided(x.e)).length;
+    rd = '<div class="readers"><span class="hid">Read by ' + plural(n, 'other') + '. Tick yours, or None, to see theirs.</span></div>';
+  } else {
+    const os = st.visible.filter(x => x.login !== me);
+    if (os.length) rd = '<div class="readers">' + os.map(x => '<span class="who">@' + esc(x.login) + '</span> ' +
+      (decided(x.e) ? esc(kindsLabel(x.e.kinds)) : '<i>no ticks yet</i>') + (x.e.note ? ' — “' + esc(x.e.note) + '”' : '')).join(' · ') + '</div>';
+  }
+  let chip;
+  if (st.differ) chip = '<span class="chip st differ" title="Worked out by this page: two readers’ ticks are not the same">readers differ: for seminar</span>';
+  else if (st.hidden) chip = '<span class="chip st read">read by ' + st.dec.length + '</span>';
+  else if (st.dec.length >= 2) chip = '<span class="chip st agree">' + st.dec.length + ' readers agree</span>';
+  else if (st.dec.length === 1) chip = '<span class="chip st read">read by ' + (st.dec[0].login === me ? 'you' : '@' + esc(st.dec[0].login)) + '</span>';
+  else chip = '<span class="chip st">not yet read</span>';
+  const placed = pl.how === 'phase' && view.order === 'date'
+    ? '<span class="placed" title="This page’s placing, not Adickes’ date">placed at ' + pl.year + ', by ' + esc(pl.sym) + '</span>' : '';
+  const label = (filterDefs().find(([f]) => f === view.filter) || [, ''])[1];
+  const stays = leaving ? '<span class="leaving" title="Kept in view while you work on it">no longer “' + esc(label) + '”: stays here until you change the filter</span>' : '';
+  return '<div class="item' + (it.ref === current ? ' on' : '') + '" data-ref="' + esc(it.ref) + '">' +
+    '<div class="top"><span class="num">' + num + '</span><span class="chip lane">' + esc(it.lane || k) + '</span><span class="cite">' + esc(it.cite) + '</span>' +
+      '<span class="work' + (it.ocr ? ' ocr' : '') + '">' + esc(it.work) + '</span>' + when + '</div>' +
+    filed +
+    // No lang="la" on Latin: for Latin, EB Garamond sets u as v, and the page must show the letters the edition prints.
+    (it.excerpt ? '<div class="excerpt"' + (k === 'baumgarten' ? '' : ' lang="de"') + '>' + excerptHtml(it) + '</div>' : '') +
+    '<div class="flags">' + boxes + '<input class="qnote" data-note="1" maxlength="600" placeholder="a line of note" value="' + esc(my && my.note) + '" aria-label="Your note on passage ' + num + '"></div>' +
+    rd +
+    '<div class="foot">' + chip + stays + placed + (it.ocr ? '<span class="ocr">OCR: check against the page image</span>' : '') +
+      '<a href="' + esc(portalHref(it.ref)) + '" target="_blank" rel="noopener" data-out="1">open in the portal ↗</a></div>' +
+  '</div>';
+}
+
+function renderList() {
+  if ($('work').hidden) return;
+  const box = $('study');
+  // keep the reader where they were: the passage at the top of the view, and a note being typed
+  const act = document.activeElement, typing = act && act.dataset && act.dataset.note ? act.closest('.item').dataset.ref : null;
+  const caret = typing ? [act.selectionStart, act.selectionEnd] : null;
+  let anchor = null, offset = 0;
+  const top = box.getBoundingClientRect().top;
+  for (const el of $('list').children) { const r = el.getBoundingClientRect(); if (r.bottom > top) { anchor = el.dataset.ref; offset = r.top - top; break; } }
+
+  if (!queue || !queue.items.length) {
+    $('list').innerHTML = '<div class="empty">The queue is empty. Open “Add passages to the queue” above: search in the portal on the right, then add what its search finds.</div>';
+    return;
+  }
+  const num = new Map(queue.items.map((x, n) => [x.ref, n + 1]));
+  const leaving = new Set();
+  let list = queue.items.filter(it => {
+    const n = num.get(it.ref);
+    if (view.from && n < view.from) return false;
+    if (view.to && n > view.to) return false;
+    if (passes(it, view.filter, stateOf(it.ref))) return true;
+    if (kept.has(it.ref)) { leaving.add(it.ref); return true; }
+    return false;
+  });
+  if (view.order === 'date') list = list.map(it => ({ it, y: placeOf(it).year })).sort((a, b) => (a.y == null) - (b.y == null) || (a.y || 0) - (b.y || 0) || num.get(a.it.ref) - num.get(b.it.ref)).map(x => x.it);
+  if (view.order === 'para') list = list.map(it => ({ it, p: paraOf(it) })).sort((a, b) => (a.p == null) - (b.p == null) || (a.p || 0) - (b.p || 0) || num.get(a.it.ref) - num.get(b.it.ref)).map(x => x.it);
+  $('list').innerHTML = list.length ? list.map(it => itemHtml(it, num.get(it.ref), leaving.has(it.ref))).join('') : '<div class="empty">No passage in the queue matches.</div>';
+
+  if (anchor) { const el = $('list').querySelector('[data-ref="' + CSS.escape(anchor) + '"]'); if (el) box.scrollTop += el.getBoundingClientRect().top - top - offset; }
+  if (typing) {
+    const inp = $('list').querySelector('[data-ref="' + CSS.escape(typing) + '"] [data-note]');
+    if (inp) { inp.focus(); try { inp.setSelectionRange(caret[0], caret[1]); } catch (e) { /* not a text input */ } }
+  }
+}
+
+function render() { renderSummary(); renderList(); }
+
+/* The "Add passages" box: what the portal's search has found, and what it would add. */
+function renderFromSearch() {
+  const el = $('from-search');
+  const s = readPortalSearch();
+  searchState = s.state;
+  if (s.state === 'loading') { el.innerHTML = '<p class="note small">The portal is still loading on the right.</p>'; return; }
+  if (s.state === 'changed') { el.innerHTML = '<p class="warn small">The portal no longer tells this page what its search found (its window.PORTAL has changed), so passages can’t be added from it. The study’s CLAUDE.md says where to look.</p>'; return; }
+  if (s.state === 'empty') { el.innerHTML = '<p class="note small">No search in the portal yet.</p>'; return; }
+  if (s.state === 'error') { el.innerHTML = '<p class="warn small">The portal’s search “' + esc(s.q) + '” failed: ' + esc(s.msg) + '</p>'; return; }
+  if (s.state === 'none') { el.innerHTML = '<p class="note small">The portal’s search <b>' + esc(s.q) + '</b> finds nothing.</p>'; return; }
+  const inQ = queue ? new Set(queue.items.map(x => x.ref)) : new Set();
+  const prev = new Set([...el.querySelectorAll('input[data-text]')].filter(x => !x.checked).map(x => x.dataset.text));
+  const total = s.byText.reduce((a, t) => a + t.ps.length, 0);
+  el.innerHTML = '<p class="small">The portal’s search <b>' + esc(s.q) + '</b>' + (s.loc ? ', the phrasing <b>' + esc(s.loc) + '</b> only' : '') + (s.en ? ', asked in English' : '') +
+    ', finds ' + plural(total, 'passage') + ':</p>' +
+    '<ul class="texts">' + s.byText.map(t => {
+      const fresh = t.ps.filter(i => !inQ.has(s.PT.TEXTS[s.PT.P[i].t].key + ':' + s.PT.P[i].id)).length;
+      return '<li><label><input type="checkbox" data-text="' + esc(t.key) + '"' + (prev.has(t.key) ? '' : ' checked') + '> ' + esc(t.name) + ': ' + t.ps.length + (fresh < t.ps.length ? ' <span class="note">(' + (t.ps.length - fresh) + ' already in the queue)</span>' : '') + '</label></li>';
+    }).join('') + '</ul>' +
+    '<button type="button" class="btn" id="add-search">Add these to the queue</button> <span class="note small" id="add-search-msg"></span>';
+}
+function renderFromPara() {
+  const n = +$('para').value;
+  const el = $('from-para');
+  if (!n) { el.innerHTML = ''; return; }
+  const s = notesOnPara(n);
+  if (s.state === 'loading') { el.innerHTML = '<p class="note small">The portal is still loading on the right.</p>'; return; }
+  if (s.state === 'changed') { el.innerHTML = '<p class="warn small">The portal no longer offers its Reflexionen to this page.</p>'; return; }
+  el.innerHTML = '<p class="small">' + plural(s.items.length, 'note') + ' filed on § ' + n + ': ' + s.locus + ' by their own locus note, ' + s.block + ' only by the AA’s block heading' + (s.page ? ', ' + s.page + ' by the handbook page' : '') + '.</p>' +
+    (s.items.length ? '<button type="button" class="btn" id="add-para" data-para="' + n + '">Add these to the queue</button> <span class="note small" id="add-para-msg"></span>' : '');
+}
+function renderFromStart() {
+  const items = startingItems();
+  $('from-start').innerHTML = '<p class="small">The ' + items.length + ' passages in <code>starting-points.js</code> that name the <i>nihil negativum</i>, and the two §§ that § 7 points to.</p>' +
+    '<button type="button" class="btn quiet" id="add-start">Add them to the queue</button> <span class="note small" id="add-start-msg"></span>';
+}
+
+function openInPane(ref) {
+  current = ref;
+  const fr = $('portal');
+  let href = portalHref(ref);
+  // with a search open in the portal, keep it on the left and open the passage on the right
+  try {
+    const u = new URLSearchParams(fr.contentWindow.location.hash.slice(1));
+    // ("Refl. 3722" is what the portal writes in its box when it opens a Reflexion by number: not a search)
+    const q = u.get('q') || '';
+    if (q && !u.get('refl') && !/^Refl\.\s*\d+$/.test(q.trim())) { u.set('p', ref); u.delete('quote'); href = PORTAL + '#' + u.toString(); }
+  } catch (e) { /* not loaded yet */ }
+  fr.src = href;
+  $('full').href = href;
+  document.querySelectorAll('.item').forEach(el => el.classList.toggle('on', el.dataset.ref === ref));
+}
+
+/* ── Joining and leaving ────────────────────────────────────────────────── */
+
+async function join(tok, remember, quiet) {
+  token = tok;
+  try {
+    const u = await gh('GET', '/user');
+    if (!u.ok) throw apiError(u);
+    const r = await gh('GET', REPO);
+    if (!r.ok) throw apiError(r);
+    me = u.data.login;
+  } catch (e) {
+    token = null; me = null;
+    if (!quiet) { const el = $('joinerr'); if (el) el.textContent = messageFor(e); }
+    else { renderConn(); const el = $('joinerr'); if (el) el.textContent = messageFor(e); }
+    return false;
+  }
+  try {
+    if (remember) { localStorage.setItem(TOKEN_KEY, tok); sessionStorage.removeItem(TOKEN_KEY); }
+    else { sessionStorage.setItem(TOKEN_KEY, tok); localStorage.removeItem(TOKEN_KEY); }
+  } catch (e) { /* storage blocked: the token lasts as long as the page */ }
+  // ticks made before, and not yet on GitHub
+  let pend = null;
+  try { pend = JSON.parse(localStorage.getItem(pendKey()) || 'null'); } catch (e) { pend = null; }
+  renderConn();
+  await refresh(true);
+  if (pend && pend.mine) {
+    mine = mergeMine(mine, cleanFlags(pend.mine), pend.cleared || {});
+    (pend.changed || []).forEach(r => changed.add(r));
+    version++;
+    scheduleSave(0);
+  }
+  render();
+  return true;
+}
+function leave() {
+  try { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); } catch (e) { /* nothing kept */ }
+  token = null; me = null; queue = null; queueSha = null; readers.clear(); mine = {}; mineSha = null; cleared = {};
+  version = savedVersion = 0; changed.clear(); headSha = null; headEtag = null; lastCheck = 0; saveErr = netErr = '';
+  clearTimeout(saveTimer);
+  renderConn();
+}
+
+/* ── Wiring ─────────────────────────────────────────────────────────────── */
+
+$('conn').addEventListener('submit', e => {
+  e.preventDefault();
+  const tok = $('tok').value.trim();
+  if (!tok) return;
+  $('joinbtn').disabled = true;
+  $('joinerr').textContent = '';
+  join(tok, $('remember').checked).then(ok => { const b = $('joinbtn'); if (b) b.disabled = false; if (ok) $('tok') && ($('tok').value = ''); });
+});
+$('conn').addEventListener('click', e => {
+  if (e.target.id === 'leave') { if (version === savedVersion || confirm('Some ticks are not saved yet. Leave anyway? They stay in this browser and are saved the next time you join.')) leave(); }
+  if (e.target.id === 'check') refresh(true);
+  if (e.target.id === 'retry') { saveErr = ''; flush(); }
+});
+
+$('study').addEventListener('click', e => {
+  const t = e.target;
+  const open = t.closest('[data-open]');
+  if (open) { e.preventDefault(); openInPane(open.dataset.open); return; }
+  const kb = t.closest('[data-kind]');
+  if (kb) { const ref = kb.closest('.item').dataset.ref; kept.add(ref); toggleKind(ref, kb.dataset.kind); render(); return; }
+  if (t.closest('[data-note]') || t.closest('[data-out]')) return;
+  const f = t.closest('[data-filter]');
+  if (f) { view.filter = f.dataset.filter; kept.clear(); render(); return; }
+  const q = t.closest('[data-q]');
+  if (q) { $('portal').src = PORTAL + '#q=' + encodeURIComponent(q.dataset.q); return; }
+  if (t.id === 'add-search' || t.id === 'add-para' || t.id === 'add-start') { addFrom(t.id); return; }
+  if (t.id === 'para-read') { renderFromPara(); return; }
+  const item = t.closest('.item');
+  if (item && !t.closest('.flags')) openInPane(item.dataset.ref);
+});
+$('study').addEventListener('input', e => {
+  if (e.target.dataset && e.target.dataset.note) {
+    const ref = e.target.closest('.item').dataset.ref, v = e.target.value;
+    kept.add(ref);
+    setFlag(ref, x => { x.note = v; });
+  }
+});
+$('study').addEventListener('focusout', e => { if (e.target.dataset && e.target.dataset.note) setTimeout(render, 0); });
+$('order').addEventListener('change', e => { view.order = e.target.value; kept.clear(); renderList(); });
+$('from').addEventListener('input', e => { view.from = +e.target.value || null; kept.clear(); renderList(); });
+$('to').addEventListener('input', e => { view.to = +e.target.value || null; kept.clear(); renderList(); });
+$('para').addEventListener('change', renderFromPara);
+$('add').addEventListener('toggle', () => { if ($('add').open) { renderFromSearch(); renderFromPara(); renderFromStart(); } });
+
+async function addFrom(id) {
+  const btn = $(id), msg = $(id + '-msg');
+  let items = [], source = null;
+  if (id === 'add-search') {
+    const s = readPortalSearch();
+    if (s.state !== 'ok') { renderFromSearch(); return; }
+    const off = new Set([...$('from-search').querySelectorAll('input[data-text]')].filter(x => !x.checked).map(x => x.dataset.text));
+    s.byText.filter(t => !off.has(t.key)).forEach(t => t.ps.forEach(i => items.push(itemFromPortal(s.PT, i, s.R.byPass.get(i)))));
+    const texts = s.byText.filter(t => !off.has(t.key)).map(t => t.name);
+    source = { how: 'the portal’s search', query: s.q, loc: s.loc || undefined, texts };
+  } else if (id === 'add-para') {
+    const n = +btn.dataset.para, s = notesOnPara(n);
+    if (s.state !== 'ok') return;
+    items = s.items;
+    source = { how: 'Kant’s notes filed on Baumgarten § ' + n, para: n };
+  } else {
+    items = startingItems();
+    source = { how: 'the study’s starting points', file: 'starting-points.js' };
+  }
+  if (!items.length) return;
+  const inQ = queue ? new Set(queue.items.map(x => x.ref)) : new Set();
+  const fresh = items.filter(x => !inQ.has(x.ref)).length;
+  if (fresh > 300 && !confirm('Add ' + fresh + ' passages to the queue? Once a passage has its number it stays in the queue, so untick any text you don’t want first.')) return;
+  btn.disabled = true; if (msg) msg.textContent = 'adding…';
+  try {
+    const r = await addToQueue(items, source);
+    if (msg) msg.textContent = r.added ? plural(r.added, 'passage') + ' added, as nos. ' + r.from + '–' + (r.from + r.added - 1) + '.' : 'All of them are in the queue already.';
+  } catch (e) {
+    if (msg) msg.textContent = messageFor(e);
+  } finally {
+    btn.disabled = false;
+    if ($('add').open) { renderFromSearch(); }
+  }
+}
+
+/* The portal's search, while the box is open: re-read it whenever the portal's address changes. */
+setInterval(() => {
+  if (!$('add').open || $('work').hidden) return;
+  let h = null;
+  try { h = $('portal').contentWindow.location.hash; } catch (e) { h = null; }
+  if (h !== portalSeen || searchState === 'loading') { portalSeen = h; renderFromSearch(); }
+}, 1000);
+$('portal').addEventListener('load', () => { portalSeen = null; });
+
+setInterval(() => { if (token && !document.hidden) refresh(); }, CFG.pollSeconds * 1000);
+setInterval(renderStatus, 5000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+window.addEventListener('online', () => { netErr = ''; refresh(); flush(); });
+window.addEventListener('beforeunload', e => { if (token && version !== savedVersion) { flush(); e.preventDefault(); e.returnValue = ''; } });
+
+/* ── Init ───────────────────────────────────────────────────────────────── */
+
+renderKinds();
+renderConn();
+(function () {
+  let tok = null, remembered = false;
+  try { tok = sessionStorage.getItem(TOKEN_KEY); if (!tok) { tok = localStorage.getItem(TOKEN_KEY); remembered = !!tok; } } catch (e) { tok = null; }
+  if (tok) join(tok, remembered, true);
+})();
+</script>
+</body>
+</html>

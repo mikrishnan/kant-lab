@@ -420,9 +420,9 @@ GitHub account, and an idea. Every tool on the site travels the same road:</p>
     <li>Find at least one partner, so that you can review each other's work.</li>
     <li>File a <a href="https://github.com/mikrishnan/kant-lab/issues/new?template=new-group.yml"
       target="_blank" rel="noopener">New working group</a> issue. The professor creates your folder.</li>
-    <li>Together, write <code>SPEC.md</code>: what question the tool answers, and a numbered
-      list of things it does that anyone can check by clicking.</li>
-    <li>One person asks Claude to build one spec item at a time, and opens a pull request.</li>
+    <li>Agree on what the tool should do. For anything big, write a short brief in an issue,
+      broken into steps that anyone can check by clicking.</li>
+    <li>One person asks Claude for one change at a time, in plain words, and opens a pull request.</li>
     <li>Another member checks it with the preview link and approves it
       <span class="who">another group member approves</span>.</li>
   </ol>
@@ -431,7 +431,7 @@ GitHub account, and an idea. Every tool on the site travels the same road:</p>
     <summary>Requests for your group</summary>
     <label for="g-name">Group name (lowercase, with hyphens)</label>
     <input type="text" id="g-name" placeholder="e.g. phase-timeline" autocomplete="off">
-    <label>Building one spec item:</label>
+    <label>Asking for one change:</label>
     <div class="prompt" id="g-prompt-item"></div>
     <label>Reviewing a teammate's pull request, if you'd like help:</label>
     <div class="prompt" id="g-prompt-review"></div>
@@ -441,31 +441,27 @@ GitHub account, and an idea. Every tool on the site travels the same road:</p>
     <summary>Aside: starting from something in your own folder</summary>
     <p>If you already built a version in <code>Individuals/</code>, put its path in the
     issue's <strong>Starting from</strong> field. Once the group's folder exists, its first
-    pull request copies your page in and drafts the spec from what the page does:</p>
+    pull request copies your page in:</p>
     <label for="g-proto">Path to your page</label>
     <input type="text" id="g-proto" placeholder="e.g. Individuals/jane-doe/phase-timeline.html" autocomplete="off">
     <div class="prompt" id="g-prompt-proto"></div>
     <p>Your original stays where it was, yours to keep. Whoever reviews this pull request
-    checks each drafted spec item against the page, so it is the spec's first review too.</p>
+    checks that the page works as it did in your folder.</p>
   </details>
 
   <details>
-    <summary>What a spec looks like</summary>
-    <p><strong>Question</strong> · the scholarly question the tool helps with.<br>
-    <strong>Sources</strong> · which texts, and which files in <code>data/</code>.<br>
-    <strong>Attested vs. inferred</strong> · what the tool works out for itself, and how it shows that.<br>
-    <strong>Behaviour</strong> · numbered statements, each true or false of the page, e.g.
-    <em>“4. Clicking a § number scrolls the text to that §.”</em><br>
-    <strong>Out of scope</strong> · what it deliberately doesn't do.</p>
-    <p>The spec is the part you own and argue about. Claude writes the code; the spec is
-    how you tell it what to build, and how your teammates check that it did.</p>
+    <summary>What makes a good request</summary>
+    <p>Say what the tool does now, what it should do instead, and what that would help you
+    read or see. Anything a reader can check by clicking makes a good request, e.g.
+    <em>“Clicking a § number on a card should scroll the text to that §.”</em> Keep each
+    request to one change, so that its pull request is small enough to review.</p>
   </details>
 </section>
 
 <!-- ───────────────────────────── Step 3 ───────────────────────────── -->
 <section class="panel" id="panel-tool">
   <h2>Step 3 · Make it a tool</h2>
-  <p>When your group thinks the tool is polished and does everything its spec says, file
+  <p>When your group thinks the tool is polished and does what you set out to do, file
   a <a href="https://github.com/mikrishnan/kant-lab/issues/new?template=proposal.yml"
   target="_blank" rel="noopener">Proposal</a> issue asking for it to be promoted.
   With the professor's approval it moves to the top of the site, beside the Baumgarten
@@ -498,14 +494,14 @@ GitHub account, and an idea. Every tool on the site travels the same road:</p>
     <li>
       <strong>Join the conversation</strong>
       <p>Comment on other people's <a href="https://github.com/mikrishnan/kant-lab/issues"
-      target="_blank" rel="noopener">issues</a>, and help a group argue out its spec.
+      target="_blank" rel="noopener">issues</a>, and help a group argue out what its tool should do.
       Ideas get better when someone else pushes on them.</p>
     </li>
     <li>
       <strong>Review a pull request</strong>
       <p>You review by using, not by reading code: open the pull request's preview link,
-      check each spec item it claims, and look at the browser console (Ctrl+Shift+J, or
-      ⌥⌘J on a Mac) for red errors. Then approve, or comment saying which item failed.</p>
+      try what it says it changes, and look at the browser console (Ctrl+Shift+J, or
+      ⌥⌘J on a Mac) for red errors. Then approve, or comment saying what failed.</p>
     </li>
     <li>
       <strong>Provide translations</strong>
@@ -566,7 +562,6 @@ GitHub account, and an idea. Every tool on the site travels the same road:</p>
       <dt>Pull request</dt><dd>A request to bring a branch's changes into the live site, with a place to discuss and approve them.</dd>
       <dt>Preview link</dt><dd>A raw.githack.com address showing a page as it stands on a branch, before it's merged.</dd>
       <dt>Squash and merge</dt><dd>The button that accepts a pull request. The site updates a few minutes later.</dd>
-      <dt>Spec</dt><dd>A group's <code>SPEC.md</code>: what its tool is for, and what it does, item by item.</dd>
     </dl>
   </details>
 
@@ -658,11 +653,11 @@ function renderGroupPrompts() {
   const proto = document.getElementById('g-proto').value.trim() || 'Individuals/your-name/your-page.html';
 
   setPrompt('g-prompt-item',
-    `Read groups/${group}/SPEC.md and groups/${group}/CLAUDE.md. Implement Behaviour item NUMBER. Only change files in groups/${group}/. When you are done, push your branch and open a pull request that says which Behaviour items it implements.`);
+    `In groups/${group}/, DESCRIBE THE CHANGE IN PLAIN WORDS. Only change files in groups/${group}/. When you are done, push your branch and give me the preview link.`);
   setPrompt('g-prompt-review',
-    `Read pull request NUMBER and groups/${group}/SPEC.md. Give me a checklist of what to click in the preview to check each Behaviour item the pull request claims, and point out any changed files outside groups/${group}/.`);
+    `Read pull request NUMBER. Give me a checklist of what to click in the preview to check what it says it changes, and point out any changed files outside groups/${group}/.`);
   setPrompt('g-prompt-proto',
-    `Read groups/${group}/CLAUDE.md. Bring in ${proto} as groups/${group}/index.html, and draft SPEC.md from what the page does now. Only change files in groups/${group}/.`);
+    `Read groups/${group}/CLAUDE.md. Bring in ${proto} as groups/${group}/index.html. Only change files in groups/${group}/.`);
 }
 
 function setPrompt(id, text) {

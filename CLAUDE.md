@@ -2,47 +2,49 @@
 
 A small research repository of digital-humanities tools for reading the pre-Kantian
 German school philosophy that Kant lectured from — Baumgarten's *Metaphysica*,
-Meier's *Auszug aus der Vernunftlehre* — plus an interactive model of the
-Aristotelian–Scholastic genus/species tree those texts presuppose.
+Meier's *Auszug aus der Vernunftlehre* — and Kant's notes and lectures on them. Its
+shared tool is the Logic Portal, which the whole seminar keeps. The seminar works as one
+team, the Kant Lab; there are no working groups.
 
 ## Layout
 
 | Path | What it is |
 | --- | --- |
-| [README.md](README.md) | The contributor workflow — issue → spec → pull request → review → merge — written for participants |
-| [index.html](index.html) | GitHub Pages landing page: the approved tools, then the working groups' works in progress |
-| [baumgarten-reader/](baumgarten-reader/) | Single-file SPA: Latin reading guide for Baumgarten's *Metaphysica* with inline German glosses |
-| [meier-reader/](meier-reader/) | Single-file SPA: German reading guide for Meier's *Auszug*, with a side panel of parallel passages from the tradition |
-| [porphyrian-tree/](porphyrian-tree/) | Single-file SPA: a configurator for building genus–species trees under user-chosen division rules |
+| [README.md](README.md) | The contributor workflow — issue → pull request → review → merge — written for participants |
+| [index.html](index.html) | GitHub Pages landing page: the Logic Portal, and one line on what has been retired |
+| [logic-portal/](logic-portal/) | The Logic Portal: search and reading across the whole logic corpus, the whole seminar's tool. It loads the shared data, its own OCR of four AA XXIV lectures (`aa24-ocr/`) and of AA XXIX's 1983 part, *Metaphysik Mrongovius*, K3 and *Logik Mrongovius* (`aa29-ocr/`), Kant's published works (`published/`: AA I, AA II and the Critique in A and B), and some participants' work from `Individuals/`, all listed in its `catalogue.js`; `pinned/` holds frozen copies made by `build-pins.py`, `sessions/` the class sessions, and `studies/` the research sandboxes beside the portal, each with its own `CLAUDE.md`. Its [README.md](logic-portal/README.md) describes it |
+| [method-log/](method-log/) | The Method Log: one entry per class or lab session, with the ideas it discussed, what was tried, what came of it and whether it worked, for studying how the lab's method changes. It keeps what is typed in the browser's local storage, the one page here that does; [method-log/sessions.js](method-log/sessions.js) holds the sessions committed to the repository. Its [README.md](method-log/README.md) describes it |
+| [baumgarten-reader/](baumgarten-reader/), [meier-reader/](meier-reader/) | **Retired** on 4 November 2026, when the portal had taken in all they did. Each page now redirects to the same § or page in the portal; each folder's `README.md` names the commit where the reader last stood |
+| [porphyrian-tree/](porphyrian-tree/) | **Retired** on 4 November 2026, with the participants' Porphyrian-tree pages: an early experiment. The page is a notice linking to the last version |
 | [data/](data/) | Shared `.js` data files the tools read — the *Metaphysica*, the Reflexionen, Adickes' phase chronology, the Meier tradition passages. [data/README.md](data/README.md) lists their globals and who reads them |
 | [scripts/](scripts/) | One-off Python extractors that produce `data/` from `Textfiles/` |
-| [Textfiles/](Textfiles/) | RTF source transcriptions the SPAs' embedded data was extracted from |
-| [groups/](groups/) | Working groups' playgrounds, one folder per group, each with a `SPEC.md` as its source of truth. Team work, at the works-in-progress tier; the rules for a group folder are in [groups/_template/CLAUDE.md](groups/_template/CLAUDE.md) |
-| [Individuals/](Individuals/) | Participants' own projects, one folder each and belonging to its owner. Nothing in `Individuals/` is loaded by the shared tools. The exception to ownership is the Logic Portal, `Individuals/mikrishnan/portal/`, which the whole seminar keeps |
+| [Textfiles/](Textfiles/) | RTF source transcriptions the data in `data/` was extracted from |
+| [Individuals/](Individuals/) | Participants' own projects, one folder each and belonging to its owner. The Logic Portal reads some participants' files, which its `catalogue.js` lists |
 | [docs/](docs/) | Notes for maintainers: [docs/maintaining.md](docs/maintaining.md) |
 | [.github/](.github/) | `CODEOWNERS` (who approves what), the issue forms, the pull request template |
 | [.claude/launch.json](.claude/launch.json) | The preview server for the Claude desktop app's Browser pane: `python3 -m http.server` at the repository root |
 
-Each SPA directory has its own `CLAUDE.md` with the data shapes and function map for
-that app, and a `README.md` aimed at a human opening it for the first time. The two
-readers also have a `SPEC.md`, which is the source of truth for what each does, as a
-group's spec is for its tool. Each spec numbers the tool's behaviours, marks those that
-fail at present, and keeps a list of open questions.
+The portal's [README.md](logic-portal/README.md) is aimed at a human opening it for the
+first time, and its `catalogue.js` documents the shape of every text it loads. Specs are
+no longer written or kept up to date: implement what the request asks, and neither check
+it against a `SPEC.md` nor update one. The two retired readers' specs and notes, kept at
+the commit their READMEs name, can still be worth reading for what they knew about the
+data.
 
-## Architecture: one HTML file per app, plus shared generated data
+## Architecture: plain HTML and scripts, plus shared generated data
 
-Each app is **one `.html` file** — markup, a `<style>` block, and a `<script>` block
-with its own text data hard-coded as top-level `const`s. There is:
+Each app is **an `.html` file** — markup, a `<style>` block, and a `<script>` block —
+with its texts in `.js` files beside it or in `data/`. There is:
 
 - **no build step** — no `package.json`, bundler, transpiler, or lockfile;
 - **no framework** — plain DOM (`document.createElement`, `addEventListener`);
 - **no runtime dependencies** except Google Fonts loaded from a CDN;
 - **no server, no persistence** — all state lives in module-scope `let`s and is lost on reload.
 
-The one exception to self-containment is [data/](data/). Kant's *Reflexionen* are far
-too large to inline (a megabyte per volume), so they live in generated `.js` files that
-the readers pull in with plain `<script src>` tags. So does anything more than one tool
-might read, or that participants should be able to extend without touching app code:
+The texts live in [data/](data/). Kant's *Reflexionen* are far too large to inline (a
+megabyte per volume), so they live in generated `.js` files that the portal pulls in with
+plain `<script src>` tags. So does anything more than one tool might read, or that
+participants should be able to extend without touching app code:
 
 | File | Contents |
 | --- | --- |
@@ -53,18 +55,18 @@ might read, or that participants should be able to extend without touching app c
 | [data/logik-blomberg-24.js](data/logik-blomberg-24.js) | *Logik Blomberg*, Kant's logic lecture of ca. 1771 (AA 24:7–301), keyed to Meier's §§. **Generated** — see below. |
 | [data/logik-busolt-24.js](data/logik-busolt-24.js) | *Logik Busolt*, ca. 1789/90 (AA 24:603–686). **Generated** — see below. |
 | [data/logik-wiener-24.js](data/logik-wiener-24.js) | The *Wiener Logik*, 1780ff. (AA 24:785–940). **Generated** — see below. |
-| [data/tradition-meier.js](data/tradition-meier.js) | `TRADITION`, the Meier reader's parallel passages from Wolff, the Scholastics and Aristotle, keyed to Meier's §§. **Hand-curated** — edit it directly; its header says how. |
+| [data/tradition-meier.js](data/tradition-meier.js) | `TRADITION`, the parallel passages from Wolff, the Scholastics and Aristotle behind Meier's §§, shown in the portal's Tradition tab. **Hand-curated** — edit it directly; its header says how. |
 
 They are `<script src>` includes rather than `fetch()` on purpose: a classic script tag
 works from a `file://` URL, so the apps still open by double-clicking. Top-level `const`s
-in a classic script are visible to later scripts on the page, which is why the readers can
+in a classic script are visible to later scripts on the page, which is why the portal can
 see `REFL_ENTRIES`, `MET_PARAGRAPHS` and `phaseInfo` without any module wiring.
 
 To run an app, open the file in a browser — double-click it, or:
 
 ```sh
-open meier-reader/meier-reading-guide.html       # macOS
-xdg-open meier-reader/meier-reading-guide.html   # Linux
+open logic-portal/index.html       # macOS
+xdg-open logic-portal/index.html   # Linux
 ```
 
 There are no tests and no linter. Verification is visual: open the file, click through
@@ -105,7 +107,7 @@ Everything in `data/` except `phases-adickes.js` and `tradition-meier.js` is
 machine-extracted and **must not be hand-edited**; corrections belong in the extractor so
 they survive the next run.
 
-These pipelines belong to the readers' owners, along with `data/`, `scripts/` and
+These pipelines belong to the data's owners, along with `data/`, `scripts/` and
 `Textfiles/` (see "Git" below). This section stays here, so that every session sees it.
 A pull request that changes a pipeline's commands or what an extractor knows updates
 this section in the same pull request. Since this file is outside the owners' folders,
@@ -165,8 +167,8 @@ decade datings are written four ways.
 `emit_baum_refl.py` does the anchoring and records `src` on every entry —
 `locus`, `block`, `page`, or `none`. **Not everything in these volumes is on
 Baumgarten**: 104 entries are in Kant's copy of Eberhard's *Vorbereitung zur
-natürlichen Theologie*, 91 are loose sheets (where `L Bl.` is *loses Blatt*, **not**
-Meier's siglum L), and 459 are on the Roman-numbered front matter. None of those gets
+natürlichen Theologie*, 118 are loose sheets (where `L Bl.` is *loses Blatt*, **not**
+Meier's siglum L), and 460 are on the Roman-numbered front matter. None of those gets
 a §, and they must not be given one.
 
 ### Baumgarten's Metaphysica
@@ -198,14 +200,14 @@ What that extractor knows about this transcription, which is easy to break:
   over a page, three §§ continue into `a) b) c)`, and eight are simply mislabelled.
   Markers pair with footnotes **by position**; the printed label is kept in `marks`.
 - The **Synopsis** (AA 17:19–23) is extracted too, into `MET_SYNOPSIS`, and shown
-  behind a button in the reader. Its printed indentation is in neither the RTF nor the
+  behind a button in the portal's Baumgarten. Its printed indentation is in neither the RTF nor the
   text conversion and is **not** reconstructed — see `parse_synopsis()` for why the
   markers cannot supply it. The transcription also drops two of its pages, so §§ 280–518
   are missing from it; the extractor reports the break and the panel prints it.
 - Two readings look like misprints — § 10 `praepositio` for `propositio`, § 92
   `methaphysice`. They are **not** corrected in the text. `SUSPECTED_MISPRINTS` in
-  the extractor records the conjecture, the reader underlines the printed word and
-  states the conjecture beneath the §, and the run aborts if a table entry no longer
+  the extractor records the conjecture, the portal states it beneath the §, and the run
+  aborts if a table entry no longer
   matches its §.
 - A lettered marker's `)` closes nothing, which is what distinguishes `felicitasa)`
   from `(ectypon, copia)`. Letter runs must start at `a` — § 728's lone `l)` is an OCR
@@ -225,13 +227,35 @@ Things the extractor knows about the AA's conventions, which are easy to break:
   which is in the `α-ω` range. A naive `[α-ω]` class silently drops 133 entries.
 - The phase expression and the sigla often share one terminating period
   (`γ? η? κ? λ? ν−ξ?? L 3'.`), so the sigla has to be peeled back off.
+- The phase expression does not always end at its first period. A period inside
+  parentheses belongs to it — a query's own, `(κ3?.)`, and those of Adickes' prose
+  datings of the late phases, `θ4 (nach dem 13. Oct. 1788)`; so does one followed by
+  another phase symbol or by the dating, `θ. ψ−χ?? M 16.`, `ω4. (Sommer 1797.)`. Such
+  periods stay in `phRaw` as printed. A note with no sigla, on a student's essay or on
+  a letter, can end its header on the phase expression with no period at all:
+  `ε2? ι2? κ3? (µ? ρ2? ψ?)`.
+- The sigla do not always open on a letter and a number: a loose sheet is `L Bl. D 18.`,
+  a library can come first, `Berliner Staatsbibliothek. L Bl. 29.`, and the siglum can
+  carry a period of its own, `M. 60.`. Where the AA describes what Kant wrote on instead
+  — `Bemerkungen Kants auf seiner Elfenbein-Schreibtafel.`, `In Kants Handexemplar von
+  J.N. Tetens: …` — that is prose, and goes whole to the text.
+- Until October 2026 each of these ran part of the header into the text or the dating
+  into the sigla, in 125 entries (8 in AA XVI). The worst cost was the loose sheets: 27
+  had their `L Bl.` caught in `phRaw`, so they counted as written in a handbook. `L Bl.
+  M 22.` was filed under §§ 76–80 as page 22 of the *Metaphysica*, and `L Bl. K 10.`
+  as a "Kants Handexemplar".
 - A capital `Α` (U+0391) in the transcription is an OCR artefact of Latin `A` ("Αus"),
   not a phase.
 - The sigla can go on past a page with no letter of its own: `L 95. 95'.` (the note runs
   from p. 95 onto the interleaf), `M 147'. E II 797. 771.` (two Erdmann numbers),
   `M. 277'.`. When the header line ends in bare numbers like these, they belong to the
   sigla. Until October 2026 they were taken as the first line of the text, which opened
-  249 Reflexionen (50 in AA XVI, 199 in XVII–XVIII) with a stray `95'.`.
+  249 Reflexionen (50 in AA XVI, 199 in XVII–XVIII) with a stray `95'.`. So do an
+  Erdmann number after the second page, `M 5'. 5. E II 1369.`, a loose sheet's sides
+  and Reicke's page, `L Bl. D. 7. S. I, II. R I 200-202.`, and a siglum closed by a
+  colon or a comma, or by nothing, `L 51:`, `L 6,`. The period or comma between the
+  phase expression and the sigla is kept as printed, `M XXV, XXVI.`; until then it was
+  always given back as a period.
 
 ### The Logik transcripts of AA XXIV
 
@@ -300,7 +324,7 @@ What the extractor knows about these transcriptions, which is easy to break:
 - Blomberg alone keys its lecture to Meier's §§, in headings that stand alone on their
   line: `§ 249`, `§: 92: et §: 93:`, `§ 66- 91`, `§phus 250`. The heading is kept
   verbatim with the numbers parsed out beside it, so a tool can line the lecture up
-  against the Meier reader. A § inside a sentence is a cross-reference and stays in the
+  against Meier's §§. A § inside a sentence is a cross-reference and stays in the
   text.
 - The InteLex navigation and copyright lines wrapping the transcription are not the AA,
   and are dropped.
@@ -312,38 +336,44 @@ without terminal punctuation and the next began in lower case — carries
 
 ## Shared conventions
 
-**Design language.** The apps share one typography: `EB Garamond` for body copy and
-`Cinzel` for small-caps display headings and labels. The Baumgarten reader and the
-Porphyrian tree also share one palette: a parchment background (`--parchment`, warm
-off-white), dark ink text, and a sienna/brown accent (`--accent`, `#5c3d1e` family). The
-Meier reader is the exception, with a dark navy header and sidebar and a Prussian-blue
-accent; whether it should follow the others is Open question 7 in
-[meier-reader/SPEC.md](meier-reader/SPEC.md). Colour and font choices live in a `:root`
-custom-property block at the top of each `<style>`. Keep new UI inside its app's
-vocabulary rather than introducing new hues.
+**Design language.** The portal and the landing page share one typography, `EB Garamond`
+for body copy and `Cinzel` for small-caps display headings and labels, and one palette: a
+parchment background (`--parchment`, warm off-white), dark ink text, and a sienna/brown
+accent (`--accent`, `#5c3d1e` family). Colour and font choices live in a `:root`
+custom-property block at the top of each `<style>`. Keep new UI inside that vocabulary
+rather than introducing new hues.
 
 **Data-first script layout.** Each `<script>` opens with the content data as `const`s,
 then state `let`s, then builder/render functions, then event wiring, then an init call
 at the very bottom. When adding a feature, follow that order.
 
-**Paragraph anchors.** Both readers key everything off the work's section number.
-Paragraph elements get `id="para-N"`, cross-references in the text (`§.14`) are
-linkified at render time into click handlers that scroll to `#para-N`, and the sidebar
-tracks the active paragraph. If you touch rendering, preserve the `para-N` id scheme.
+**Section anchors.** The portal keys each textbook off its section numbers. A § is
+`pN` in the portal's addresses (`#read=meier&at=p92`), and its element in the study view
+has `id="tb-meier-92"`. The retired readers' links (`#go=92`, `#go=16:236`, `#para-92`)
+redirect to these, so if you touch either scheme, keep those links landing where they did.
 
 **Citations.** Academy Edition references are given in the `AA <volume>:<page>` form
 (e.g. `AA 16:76`). Baumgarten's *Metaphysica* is AA XVII, Meier's *Auszug* is AA XVI,
 the Reflexionen on each are in those same volumes, Adickes' chronology of Kant's hand is
 AA XIV, and the Jäsche *Logik* is AA IX.
 
-**Working groups.** Work in progress lives in `groups/<group>/`, one folder per group:
-a `SPEC.md` that is the source of truth for what the tool does, a `CLAUDE.md` of rules
-for sessions in that folder, and the tool itself as a single `index.html`. A group's
-tool loads shared data from `../../data/` and never copies it, and changes nothing
-outside its own folder. The full rules are in
-[groups/_template/CLAUDE.md](groups/_template/CLAUDE.md), which every group's
-`CLAUDE.md` starts from. A finished tool is promoted to the top level, beside the three
-existing ones — [docs/maintaining.md](docs/maintaining.md) describes how.
+**One team.** The seminar works as one team, the Kant Lab; the working groups and their
+`groups/` folder were retired in November 2026. Participants' own work lives in
+`Individuals/<name>/`, and what the whole seminar uses goes into the Logic Portal. A
+participant's tool loads shared data from `../../data/` and never copies it. A study,
+`logic-portal/studies/<topic>/`, is a sandbox for tools built around one research question:
+it reads the same texts and opens every passage in the portal by its address, and a change
+to the portal never touches a study, nor a study's to the portal.
+
+**Puzzles.** A study can keep a `puzzles.md`: a running list of hunches that are not yet
+requests, which anyone in the seminar adds to. The first is
+[logic-portal/studies/kinds-of-nothing/puzzles.md](logic-portal/studies/kinds-of-nothing/puzzles.md).
+When someone in a session says "puzzle", thinks aloud and says it is for the puzzles, or adds
+to a puzzle already there, record it in that file by the rules at its top: in their words,
+dated, under their GitHub username, added to the end of the puzzle it develops, and with
+nothing suggested unless they ask. Do not turn a hunch into code, a feature or a reading.
+[docs/maintaining.md](docs/maintaining.md) describes bringing a tool into the portal,
+promoting one to the top level, and retiring one.
 
 **Attested vs. inferred.** This is a hard rule, not a preference. Anything the tool
 worked out for itself must be visibly marked as such, and anything the Academy Edition
@@ -364,44 +394,36 @@ and correct errors in the embedded data.
 
 Editing guidance:
 
-- Text corrections go in the data `const`s at the top of the `<script>`, not in the
-  render functions.
-- **Do not reformat the long single-line JSON literals** in the Meier reader
-  (`MEIER`, `HIERARCHY`, `CITATIONS` — one of them is ~288 KB on a single line). They
-  are machine-generated dumps; pretty-printing them produces an unreadable diff that
-  buries any real change. Edit them programmatically or with a targeted string
-  replacement.
-- Both readers pass paragraph text through `innerHTML` (Baumgarten) or a tokenising
-  parser (Meier) in order to render glosses and cross-reference links. This is safe
-  only because the text is trusted local data. Do not wire either renderer up to
-  user-supplied or fetched input without escaping first.
+- Text corrections go in the data, not in the render functions: in the extractor for
+  generated data, or directly in a hand-curated file.
+- **Do not reformat the long single-line JSON literals** in the data files — `data/`,
+  the portal's `published/` and `aa24-ocr/`, and participants' files such as
+  `Individuals/Jesus-La-Paz/meier-auszug-data.js`, which holds the Meier text. They are
+  machine-generated dumps; pretty-printing them produces an unreadable diff that buries
+  any real change. Edit them programmatically or with a targeted string replacement.
+- The portal escapes every text before it renders it (`esc()`). Keep it that way, and do
+  not pass user-supplied or fetched input to `innerHTML` unescaped.
 
 ## Known gaps
 
-- The **Baumgarten reader** now carries every § that AA XVII prints — 804 of them,
+- The **Metaphysica** in `data/` carries every § that AA XVII prints — 804 of them,
   §§ 1–503 and §§ 700–1000. The remaining §§ 504–699 (Psychologia empirica, Sectiones
-  I–XVIII) are **not a gap in the tool**: AA XVII does not reprint them, putting them
-  in Bd. XV instead, and the reader shows the Academy Edition's own note saying so.
-  Filling them in would mean transcribing AA XV, which is not in `Textfiles/`.
-  Baumgarten's three prefaces are also not shown, the reader being keyed to § numbers.
-- The Reflexionen on Baumgarten now have a side panel in the **Baumgarten reader**
-  itself, tracking the § in view. 708 of the 2967 belong to no numbered § — 459 the
-  Roman-numbered front matter, 91 loose sheets, 107 another handbook (104 of those
-  Kant's copy of Eberhard), and 51 that fall into none of the three and are tagged
-  only "no § stated" — and are reachable only through
-  that panel's "belong to no §" view, not by clicking a §. The AA also files notes
-  against §§ 655–662, which AA XVII does not print; every one of those is filed
-  against a printed § as well, so none is stranded.
-- **Each reader is one work's.** The Meier reader had a "Baumgarten · Metaphysica"
-  tab for a while; it was removed. `TRADITION` is keyed to Meier's §§ and the AA XVI
-  Reflexionen are on the *Auszug*, so neither side panel said anything about
-  Baumgarten's §§, and the *Metaphysica* now has the better home of its own. Do not
-  reintroduce a second work into either app.
-- The Meier reader's `TRADITION` map (parallel passages from Wolff, the Scholastics,
-  and Aristotle) is annotated for 10 paragraphs out of 563; the rest show a
-  "no entries yet" placeholder. This is by design — annotation is ongoing work. It
-  lives in [data/tradition-meier.js](data/tradition-meier.js), so that participants
-  can add passages by pull request without touching the reader's code.
+  I–XVIII) are **not a gap in the data**: AA XVII does not reprint them, putting them in
+  Bd. XV instead, and the data keeps the Academy Edition's own note saying so. Filling
+  them in would mean transcribing AA XV, which is not in `Textfiles/`. Baumgarten's three
+  prefaces are also not in it, the data being keyed to § numbers.
+- In the portal's study view the Reflexionen on Baumgarten follow the § in view. 700 of
+  the 2967 belong to no numbered § — 460 the Roman-numbered front matter, 118 loose
+  sheets, 104 Kant's copy of Eberhard, and 18 that fall into none of the three and are
+  tagged only "no § stated" — and are reachable only through the portal's list of notes
+  that belong to no §, not by clicking a §. The AA also files notes against §§ 655–662,
+  which AA XVII does not print; every one of those is filed against a printed § as well,
+  so none is stranded.
+- The `TRADITION` map (parallel passages from Wolff, the Scholastics, and Aristotle,
+  shown in the portal's Tradition tab) is annotated for 10 paragraphs out of 563; the
+  rest show a "no entries yet" placeholder. This is by design — annotation is ongoing
+  work. It lives in [data/tradition-meier.js](data/tradition-meier.js), so that
+  participants can add passages by pull request without touching the portal's code.
 
 ## Deployment
 
@@ -416,8 +438,8 @@ Because there's no build step, deploying a change is nothing more than merging i
 Pages runs **Jekyll** over the branch, since there is no `.nojekyll` file. That has two
 consequences worth knowing:
 
-- Jekyll does not publish directories whose names begin with `_`. That is why the group
-  template is `groups/_template/`: it is in the repository but not on the site.
+- Jekyll does not publish directories whose names begin with `_`, so a folder named that
+  way is in the repository but not on the site.
 - Jekyll renders `.md` files through Liquid. **No Markdown file may contain a double
   opening curly brace, or an opening curly brace followed by a percent sign**, even
   inside backticks: an unterminated Liquid tag fails the Pages build, and the site
@@ -425,21 +447,22 @@ consequences worth knowing:
 
 ## Git
 
-`main` is protected: every change arrives by pull request, and `.github/CODEOWNERS`
-decides who must approve it. In short:
+`main` is protected by a ruleset: every change arrives by pull request, nobody can
+force-push to `main` or delete it, and `.github/CODEOWNERS` decides who must approve.
+Only the professor, as repository admin, is on the ruleset's bypass list. In short:
 
-- the Baumgarten and Meier readers, and `data/`, `scripts/` and `Textfiles/`, belong to
-  their student owners, Sophia Wyatt (@sophia-wyatt) and Maria (@mari637-pixel), either
-  of whom approves the other's changes;
-- another member of the group approves changes to a group's folder;
-- anyone in the seminar other than the author approves changes to the Logic Portal,
-  `Individuals/mikrishnan/portal/`, which is the whole seminar's although it sits in the
-  professor's folder. The README's "Fixing the Logic Portal in seminar" is the workflow;
+- `data/`, `scripts/` and `Textfiles/` belong to their student owners, Sophia Wyatt
+  (@sophia-wyatt) and Maria (@mari637-pixel), either of whom approves the other's changes;
+- changes to the Logic Portal, `logic-portal/`, need no approval: it is the whole
+  seminar's, and whoever makes a change merges it. The README's "Fixing the Logic Portal
+  in seminar" is the workflow;
 - `Individuals/` changes need no approval;
 - the professor approves everything else, and so can any one of the default reviewers
   beside them on the `*` line: Laura Benzenberg (@Benzenberg), Jeremy Weirich
-  (@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip) and
-  @zelleznick.
+  (@jweirich-globus), Jesus La Paz (@yizu6201), Qianxun Feng (@qianxun-blip), Alex Li
+  (@Alexynli), Aidan Chong (@AidanC973), Sophia Wyatt (@sophia-wyatt) and @zelleznick;
+- only the professor approves a change to `.github/CODEOWNERS` itself, since it decides
+  all of the above.
 
 A pull request that touches folders with different owners needs an approval from each,
 so keep each one within a single owner's folders where you can.

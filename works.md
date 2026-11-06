@@ -1,14 +1,42 @@
 # Work in progress
 
-Handoff notes, written 3 October 2026 and updated 10 October 2026. Read this alongside
+Handoff notes, written 3 October 2026 and last updated 4 November 2026. Read this alongside
 the root [CLAUDE.md](CLAUDE.md), which is the standing description of the repository —
 this file is only the state of play.
 
-How the repository is now run — working groups, specs, pull requests, review — is in
+How the repository is now run — one team, pull requests, review — is in
 [README.md](README.md); keeping it in order is in
 [docs/maintaining.md](docs/maintaining.md). What is left of that rollout is in
 [docs/todo-in-repo.md](docs/todo-in-repo.md) and
 [docs/todo-outside-repo.md](docs/todo-outside-repo.md).
+
+## 4 November 2026: one team, the portal moved, the readers and trees retired
+
+- **One team.** The working groups (Kant Quest, Logic Corpus) were folded back into one
+  team, the Kant Lab. `groups/`, its template, the **New working group** issue form and
+  the groups' `CODEOWNERS` lines are gone. Work happens in participants' own folders and
+  in the Logic Portal.
+- **The Logic Portal moved** from `Individuals/mikrishnan/portal/` to `logic-portal/`,
+  bringing `aa24-ocr/`, `aa29-ocr/` and `published/` with it, and needs nobody's approval. The old
+  address redirects. `.github/CODEOWNERS` itself now needs the professor.
+- **The Baumgarten and Meier readers were retired.** The portal had taken in everything
+  they did. Their pages redirect to the same § or page in the portal; their specs and
+  notes for Claude are gone from the tree. The last versions are at commit `9d47366`,
+  which each folder's `README.md` links.
+- **The Porphyrian trees were retired,** the top-level configurator and the ten
+  participants' pages alike: each page is now a notice linking to its last version at
+  `9d47366`.
+
+Files that the sections below name may since have been retired or moved; at `9d47366`
+they all still stand.
+
+## 1 November 2026: no more specs
+
+Nobody writes a `SPEC.md` any more. You ask Claude for a change in plain words, and the
+pull request's description records what changed. The README, the root `CLAUDE.md`, the
+readers' and groups' `CLAUDE.md` files, the pull request and proposal templates,
+[docs/maintaining.md](docs/maintaining.md) and the how-to-contribute page now say so.
+The specs that exist stay as a record, and the group template no longer has one.
 
 ## 9–10 October 2026: student owners for the readers, and their specs
 
