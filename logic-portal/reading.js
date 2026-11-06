@@ -8,7 +8,8 @@
    portal is untouched. In learning mode, three ways to read:
 
      German only   the German alone; hovering an underlined glossary term shows the glossary's English
-                   and its modern spelling, and clicking it opens the glossary entry
+                   and its modern spelling, and clicking it opens the glossary entry. A Glossary button in
+                   the mode's bar opens the whole glossary to browse and search, in any of the three
      Interlinear   each phrase over its own short English gloss; a click on a sentence shows its English
      With English  try the German first: hovering a phrase gives that phrase's gloss, and the whole
                    sentence's English comes on a click, or when the pointer rests on the sentence
@@ -371,6 +372,32 @@ function rdArcs() {
   });
 }
 
+/* ── the whole glossary, to browse in the portal's own pop-up window: every term, most frequent first,
+   filtered as one types (German, English, Latin, or a spelling the texts use); a term opens its entry ── */
+let RD_GQ = '';
+const rdFold = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss');
+function rdGlossaryBrowse() {
+  const G = getGlobal('KANT_GLOSSARY') || [], SP = getGlobal('KANT_GLOSSARY_SPELLINGS') || {};
+  const total = id => (SP[id] || []).reduce((a, x) => a + x[1], 0);
+  openModal('<div class="mh"><h2>Maria’s glossary</h2><span class="muted">' + G.length + ' Kantian terms, one English rendering each</span><button type="button" class="btn" data-close-modal="1">close</button></div>' +
+    '<div class="rd-gb"><input type="search" id="rdgq" placeholder="Search German, English, Latin or a period spelling…" value="' + esc(RD_GQ) + '" autocomplete="off" spellcheck="false">' +
+    '<div class="rd-gl" id="rdglist"></div>' +
+    '<div class="acts"><a href="' + RD_GLOSSARY_PAGE + '" target="_blank" rel="noopener">The glossary as a page of its own ↗</a></div></div>' +
+    '<div class="from">Maria’s shared glossary of Kantian terms, version ' + esc((getGlobal('KANT_GLOSSARY_META') || {}).version || '') + ', proposed. The underlined words in the texts are these terms.</div>');
+  const draw = () => {
+    const q = rdFold(RD_GQ.trim());
+    const list = G.filter(e => !q || rdFold([e.de, e.en, ...(e.la || []), ...(e.senses || []).map(x => x.en), ...(SP[e.id] || []).map(x => x[0])].join(' | ')).includes(q))
+      .sort((a, b) => total(b.id) - total(a.id));
+    document.getElementById('rdglist').innerHTML = list.length ? list.map(e => '<button type="button" class="rd-gr" data-rdg="' + esc(e.id) + '"><b>' + esc(e.de) + '</b><span class="en">' + esc(e.en) + '</span>' +
+      '<i>' + (e.la && e.la.length ? esc(e.la[0]) : '') + '</i><span class="n">' + (total(e.id) ? total(e.id).toLocaleString('en') : '—') + '</span></button>').join('')
+      : '<div class="muted">No term matches.</div>';
+  };
+  const inp = document.getElementById('rdgq');
+  inp.addEventListener('input', () => { RD_GQ = inp.value; draw(); });
+  draw();
+  inp.focus();
+}
+
 /* ── the glossary entry, in the portal's own pop-up window ── */
 function rdGlossaryCard(id, printed) {
   const e = RD_ENTRY.get(id);
@@ -390,7 +417,7 @@ function rdGlossaryCard(id, printed) {
     (e.note ? '<div class="nt">' + esc(e.note) + '</div>' : '') +
     (sp.some(x => x[0] !== e.de) ? '<div class="sp">Spellings in the texts: ' + sp.map(x => '<span class="' + (x[0] === e.de ? 'mod' : 'old') + '">' + esc(x[0]) + '</span> ' + x[1].toLocaleString('en')).join(' · ') + '</div>' : '') +
     (ex ? '<div class="ex"><div class="lab">EXAMPLE</div><a href="' + exLink(ex) + '" data-close-modal="1">' + esc(ex.cite) + ' →</a><div class="xd">' + bold(ex.de, ex.d) + '</div><div class="xe">' + bold(ex.en, ex.e) + '</div></div>' : '') +
-    '<div class="acts"><a href="' + RD_GLOSSARY_PAGE + '#' + esc(id) + '" target="_blank" rel="noopener">Open in Maria’s glossary ↗</a>' +
+    '<div class="acts"><button type="button" class="btn" data-rdgl="1">← All terms</button><a href="' + RD_GLOSSARY_PAGE + '#' + esc(id) + '" target="_blank" rel="noopener">Open in Maria’s glossary ↗</a>' +
     '<button type="button" class="btn" data-rdask="' + esc(printed || e.de) + '">Search the texts for “' + esc(printed || e.de) + '”</button></div></div>' +
     '<div class="from">Maria’s shared glossary of Kantian terms, version ' + esc((getGlobal('KANT_GLOSSARY_META') || {}).version || '') + ', proposed</div>');
 }
@@ -407,6 +434,10 @@ document.addEventListener('mouseover', e => {
 document.addEventListener('click', e => {
   const ask2 = e.target.closest('[data-rdask]');
   if (ask2) { closeModal(); ask({ q: ask2.dataset.rdask, w: 5, cm: '', co: '', preset: null }); return; }
+  const gb = e.target.closest('[data-rdgl]');
+  if (gb) { e.stopPropagation(); if (RD.glossary === 'ready') rdGlossaryBrowse(); return; }
+  const gr = e.target.closest('[data-rdg]');
+  if (gr) { e.stopPropagation(); rdGlossaryCard(gr.dataset.rdg); return; }
   const t = e.target.closest('.rd-t');
   if (t && !String(getSelection())) { e.stopPropagation(); e.preventDefault(); rdGlossaryCard(t.dataset.g, t.dataset.pr); return; }
   const s = e.target.closest('.rd-s');
@@ -436,6 +467,7 @@ function rdControls() {
   learn.textContent = 'German learning mode';
   header.insertBefore(learn, en);
   bar.appendChild(box);
+  bar.insertAdjacentHTML('beforeend', '<button type="button" class="btn rd-glb" data-rdgl="1" title="Browse Maria’s glossary: every term, its English, Latin, spellings and an example">Glossary</button>');
   bar.insertAdjacentHTML('beforeend', '<span class="muted">Maria’s sentence translation, phrase glosses and grammar in Busolt, Blomberg and Meier; her glossary underlined in every German text. Machine-made, unreviewed: check it against the German.</span>');
   header.insertAdjacentElement('afterend', bar);
   learn.addEventListener('click', () => {
@@ -490,6 +522,12 @@ function rdControls() {
   .rd-b.lit { outline: 1.5px solid #a12a1a; outline-offset: 1px; border-radius: 2px; } .rd-b.lit.k { outline-color: #b0600a; }
   #rdarcs { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 55; overflow: visible; }
   #rdarcs path { fill: none; stroke: #a12a1a; stroke-width: 1.6; opacity: 0.8; } #rdarcs path.k { stroke: #b0600a; } #rdarcs path.cont { stroke-dasharray: 4 3; }
+  #rdbar .rd-glb { padding: 0.1rem 0.7rem; font-size: 0.82rem; }
+  .rd-gb input { width: 100%; font: inherit; padding: 0.35rem 0.6rem; border: 1px solid var(--line); border-radius: 4px; background: var(--parchment); margin-bottom: 0.5rem; }
+  .rd-gl { max-height: 55vh; overflow-y: auto; border-top: 1px solid var(--line-soft); }
+  .rd-gr { display: grid; grid-template-columns: 11rem 1fr 7rem 3.5rem; gap: 0.6rem; width: 100%; text-align: left; font: inherit; background: none; border: 0; border-bottom: 1px solid var(--line-soft); padding: 0.3rem 0.3rem; cursor: pointer; }
+  .rd-gr:hover { background: rgba(139, 94, 60, 0.08); }
+  .rd-gr .en { color: #2b3a52; } .rd-gr i { color: var(--accent-light); } .rd-gr .n { color: var(--faded); font-size: 0.8rem; text-align: right; }
   .rd-card .en { font-size: 1.2rem; font-weight: 600; color: #2b3a52; margin-bottom: 0.3rem; }
   .rd-card .sn { color: #2b3a52; } .rd-card .av { color: #a0522d; } .rd-card .la { font-style: italic; color: var(--accent-light); }
   .rd-card .nt, .rd-card .sp { margin-top: 0.4rem; } .rd-card .sp .old { font-weight: 600; } .rd-card .sp .mod { color: #3a5a3a; }

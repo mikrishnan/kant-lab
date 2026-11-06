@@ -243,6 +243,10 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   shared glossary are underlined in every German text. Hovering one gives the glossary's English and
   the modern spelling of the word as printed. Clicking it opens the entry: its senses, its Latin,
   the spellings the texts use, and an example sentence with its English, linked to the passage.
+  A **Glossary** button in the mode's bar opens the whole glossary inside the portal: all its
+  terms, most frequent first, each with its English, its Latin and how often the texts use it,
+  filtered as one types in German, English, Latin or a period spelling (*Urtheil* finds
+  *Urteil*). A term opens its entry, and "← All terms" goes back to the list.
 
   `reading.js` is a layer over the portal's own drawing. Once a passage is on the page, its words
   are lined up with the passage's text and wrapped, so the portal's page markers, search marks
