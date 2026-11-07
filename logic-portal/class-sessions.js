@@ -71,7 +71,7 @@ let rec = localStorage.getItem(KEY + '-rec') === 'on';
 let open = false, pageOpen = false, picked = new Set(), newInv = false;
 const unfolded = new Set();   // passages shown whole on the session page (the view only, not saved)
 function save() { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { toast('This browser would not keep the session. Use Save to file.'); } }
-function setRec(on) { rec = on; try { if (on) localStorage.setItem(KEY + '-rec', 'on'); else localStorage.removeItem(KEY + '-rec'); } catch (e) { /* this visit only */ } document.body.classList.toggle('csrec', on); redraw(); }
+function setRec(on) { rec = on; try { if (on) localStorage.setItem(KEY + '-rec', 'on'); else localStorage.removeItem(KEY + '-rec'); } catch (e) { /* this visit only */ } document.body.classList.toggle('csrec', on); redraw(); railLabel(); }
 const has = i => D.items.some(x => x.ref === refOf(P[i]));
 const itemById = id => D.items.find(x => x.id === id);
 const numOf = id => D.items.findIndex(x => x.id === id) + 1;
@@ -399,7 +399,7 @@ document.addEventListener('scroll', () => { if (hovEl && hovEl.isConnected) plac
 hov.addEventListener('click', e => { e.stopPropagation(); if (hovI != null && !has(hovI)) add(hovI); else if (hovI != null) { open = true; redraw(); } });
 
 function railLabel() {
-  const b = document.querySelector('#railbody .csrail');
+  const b = document.querySelector('#rail .csrail');
   if (!b) return;
   const i = S.sel;
   b.hidden = !rec || i == null || !P[i];
@@ -409,20 +409,20 @@ function railLabel() {
   b.classList.toggle('on', inn);
 }
 function railButton() {
-  const pa = document.querySelector('#railbody .pactions');
+  // the Connections tab has a row of actions for it; the other tabs, the passage's date line above
+  const pa = document.querySelector('#railbody .pactions') || document.querySelector('#railhead .pmeta');
   if (!pa) return;
   let b = pa.querySelector('.csrail');
   if (!b) {
     b = el('button', null, 'btn csrail');
     b.type = 'button';
     b.title = 'Add this passage to the class session';
-    pa.insertBefore(b, pa.querySelector('a'));
+    if (pa.classList.contains('pmeta')) pa.appendChild(b); else pa.insertBefore(b, pa.querySelector('a'));
     b.addEventListener('click', () => { if (S.sel != null && !has(S.sel)) add(S.sel); else { open = true; redraw(); } });
   }
   railLabel();
 }
-const railbody = $('railbody');
-if (railbody) new MutationObserver(railButton).observe(railbody, { childList: true, subtree: true });
+['railbody', 'railhead'].forEach(id => { const x = $(id); if (x) new MutationObserver(railButton).observe(x, { childList: true, subtree: true }); });
 
 /* ── Copy for Canvas ────────────────────────────────────────────────────────
    Rich text, which Canvas's editor keeps, with plain text beside it: each passage cited, with
@@ -742,7 +742,7 @@ css.textContent = `
   #csbtn.on { border-color: #9a3b1e; color: #9a3b1e; }
   #csbtn.on .csn { background: #9a3b1e; color: var(--parchment); }
   #cspanel { position: fixed; z-index: 44; right: 1rem; bottom: 1rem; width: 21rem; max-width: calc(100vw - 2rem); background: var(--card); border: 1px solid var(--accent-light); border-radius: 10px; box-shadow: 0 6px 22px rgba(40, 25, 10, 0.22); padding: 0.55rem 0.8rem 0.65rem; font-size: 0.94rem; }
-  #cspanel[hidden], #cspage[hidden], #csview[hidden], #cstoast[hidden], #csback[hidden], .csfloat[hidden], .pactions .csrail[hidden] { display: none; }
+  #cspanel[hidden], #cspage[hidden], #csview[hidden], #cstoast[hidden], #csback[hidden], .csfloat[hidden], .pactions .csrail[hidden], .pmeta .csrail[hidden] { display: none; }
   #cspanel .csbar { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.3rem; min-width: 0; }
   #cspanel .csbar .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   #cspanel .cz, #cspage .cz { color: var(--accent); }
@@ -811,6 +811,8 @@ css.textContent = `
   .csfloat.in { border-color: var(--line); color: var(--faded); }
   .pactions .csrail { border-color: #9a3b1e; color: #9a3b1e; }
   .pactions .csrail.on { border-color: var(--line); color: var(--faded); }
+  .pmeta .csrail { margin-left: 0.6rem; padding: 0 0.55rem; font-size: 0.8rem; border-color: #9a3b1e; color: #9a3b1e; }
+  .pmeta .csrail.on { border-color: var(--line); color: var(--faded); }
   #cstoast { position: fixed; z-index: 60; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: #3b2a17; color: var(--parchment); border-radius: 6px; padding: 0.5rem 0.9rem; font-size: 0.92rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25); display: flex; gap: 0.9rem; align-items: baseline; max-width: 90vw; }
   #cstoast button { background: none; border: none; color: #f1d98c; cursor: pointer; padding: 0; font: inherit; text-decoration: underline; }
   #csview { position: fixed; inset: 0; z-index: 30; background: var(--parchment); display: flex; flex-direction: column; }

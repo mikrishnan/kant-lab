@@ -4690,7 +4690,8 @@ function readHash() {
   S.preset = null;
   S.miss = null;
   S.q = u.get('q') || '';
-  S.enFrom = u.get('ef') || null;   // the English question the German and Latin were asked for
+  // the English question the German and Latin were asked for; a link whose question is that same word has not been redone yet
+  S.enFrom = u.get('ef') && u.get('ef') !== S.q ? u.get('ef') : null;
   S.w = u.has('w') ? +u.get('w') : 5;
   S.cm = u.get('cm') || '';
   S.co = u.get('co') || '';
@@ -4802,13 +4803,14 @@ function wire() {
   $('ask').addEventListener('submit', e => {
     e.preventDefault();
     // An Academy page goes to that page. Without "AA" in front, a volume the portal has none of
-    // ("1.5") is taken for words to search, as it was before.
+    // ("1.5") is taken for words to search, as it was before; but with no letters in it there are
+    // no words to search, so it is taken for the page, and the portal says what it has instead.
     const ab = parseAB($('q').value);
     if (ab && goAB(ab)) return;
     const c = parseAA($('q').value);
     if (c) {
       if (goAA(c)) return;
-      if (c.prefixed || TEXTS.some(T => aaRange(T).byVol[c.vol])) { showAAMiss(c); return; }
+      if (c.prefixed || TEXTS.some(T => aaRange(T).byVol[c.vol]) || !/\p{L}/u.test($('q').value)) { showAAMiss(c); return; }
     }
     // A textbook's §, "Meier § 125", "Baumgarten § 55", "Jäsche § 3" or "§ 125" (Meier), opens it to read
     const pm = parseParaRef($('q').value);
@@ -5138,6 +5140,6 @@ window.PORTAL = { S, P, TEXTS, LAYERS, DOCS, CONC_REV, ANNOT, FT, runQuery: () =
 boot();
 })();
 </script>
-<script src="class-sessions.js?v=2026-11-02f"></script>
+<script src="class-sessions.js?v=2026-11-07a"></script>
 </body>
 </html>
