@@ -2017,7 +2017,8 @@ function renderResults() {
   const enHint = S.preset || R.en ? '' : (S.enFrom ? englishNote(S.enFrom) : englishHint(S.q, true));
   h += enHint + (S.preset || S.enFrom || R.en ? '' : lexHint(S.q)) + '</div>';
   if (R.forms) h += R.forms.map(formsStrip).join('');
-  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">' + (R.en ? 'No passage’s English has it. To search the German, choose German beside the box.' : 'No passage has it.') + ' Try a * to widen a word, or allow more words between.</div>' + (enHint || S.preset || R.en ? '' : englishHint(S.q)); return; }
+  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">' + (R.en ? 'No passage’s English has it. To search the German, choose German beside the box.' : 'No passage has it.') + ' Try a * to widen a word, or allow more words between.' +
+    (S.preset || R.en || S.enFrom || !/^[a-z][a-z' -]*$/i.test(S.q.trim()) ? '' : '<div style="margin-top:0.4rem">If it is English: ' + enSearchLink(S.q.trim()) + '.</div>') + '</div>' + (enHint || S.preset || R.en ? '' : englishHint(S.q)); return; }
 
   const tab = S.tab === 'passages' ? 'passages' : 'overview';
   h += '<div class="tabs"><button type="button" data-tab="overview"' + (tab === 'overview' ? ' class="on"' : '') + '>Overview</button>' +
@@ -2128,7 +2129,9 @@ function englishExpansion(q) {
   let e = lxEnEntry(words);
   if (!e) { const ws = words.split(/\s+/).filter(w => !LX_SMALL.has(w)); if (ws.length === 1) e = lxEnEntry(ws[0]); }
   if (!e) return null;
-  const main = [...e.lex].map(i => LX[i]);
+  // a phrase the lexicon gives only as a pointer to other terms ("real ground" → ratio fiendi, Realgrund) is looked for in those terms
+  const loose = !e.lex.size && !e.forms.size;
+  const main = [...(loose ? e.rel : e.lex)].map(i => LX[i]);
   const forms = new Set();
   main.forEach(L => { [L.la].concat(L.forms || []).forEach(f => forms.add(f)); (L.de || []).forEach(d => { d = d.replace(/^(der|die|das) /i, ''); if (!/[,;(]/.test(d) && d.split(' ').length <= 2) forms.add(d); }); });
   e.forms.forEach(f => forms.add(f));
@@ -2139,7 +2142,7 @@ function englishExpansion(q) {
   [...e.rel].forEach(i => (LX[i].related || []).slice(0, 8).forEach(r => { const j = lexForms().get(r.toLowerCase()); if (j != null) relSet.add(j); }));
   main.forEach(L => relSet.delete(LX.indexOf(L)));
   const rel = [...relSet].map(i => LX[i]).slice(0, 40);
-  return { query: [...forms].slice(0, 30).map(q1).join(' OR '), main, rel, forms: [...forms] };
+  return { query: [...forms].slice(0, 30).map(q1).join(' OR '), main, rel, forms: [...forms], loose };
 }
 function lexCardHTML(L) {
   return '<div class="lexcard"><div><span class="la">' + esc(L.la) + '</span> <span class="muted small">' + esc(L.field || '') + '</span></div>' +
@@ -2157,10 +2160,15 @@ function lexQuery(L) {
 const LEX_NOTE = '<div class="from">Latin–German–English terms: Jesus’s lexicon, made by machine (Claude) from the texts’ Latin; check what matters</div>';
 function englishNote(en) {
   const ex = englishExpansion(en); if (!ex) return '';
-  return '<div class="ennote"><b>' + esc(en) + '</b> is English, and the texts are German and Latin, so the search looked for the words they use for it: ' +
+  return '<div class="ennote"><b>' + esc(en) + '</b> is English, and the texts are German and Latin, so the search looked for ' + (ex.loose ? 'the terms the lexicon gives for it' : 'the words they use for it') + ': ' +
     ex.forms.slice(0, 30).map(f => '<span class="lnk" data-askq="' + esc(q1(f)) + '">' + (lexForms().has(f.toLowerCase()) ? '<i>' + esc(f) + '</i>' : esc(f)) + '</span>').join(', ') + '.' +
     (ex.rel.length ? '<div style="margin-top:0.3rem">Related terms: ' + ex.rel.map(L => '<span class="lnk" data-askq="' + esc(lexQuery(L)) + '" title="' + esc((L.en || []).join('; ')) + '"><i>' + esc(L.la) + '</i></span>').join(', ') + '</div>' : '') +
-    '</div>' + ex.main.slice(0, 3).map(lexCardHTML).join('') + ex.rel.slice(0, 2).map(lexCardHTML).join('') + LEX_NOTE;
+    '<div style="margin-top:0.3rem">' + enSearchLink(en) + '</div></div>' + ex.main.slice(0, 3).map(lexCardHTML).join('') + ex.rel.slice(0, 2).map(lexCardHTML).join('') + LEX_NOTE;
+}
+/* A link that asks the same English question of the English translations (every text has one) */
+function enSearchLink(en) {
+  if (typeof PORTAL_TRANSLATIONS === 'undefined' || !PORTAL_TRANSLATIONS.length) return '';
+  return '<a href="#q=' + encodeURIComponent(en) + '&en=' + (S.en || EN_DEFAULT) + '&ql=en' + (S.off.size ? '&off=' + [...S.off].join(',') : '') + '">Look for “' + esc(en) + '” in the English translations</a>';
 }
 /* A Latin term asked for: its English, German and definition above the results */
 function lexHint(q) {
