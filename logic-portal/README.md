@@ -199,8 +199,9 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   every passage of the full texts, under each of Kant's notes beside Meier, and under search hits
   and classified passages, where a long passage shows roughly the stretch of English that
   matches the German shown. The German and Latin never go. A bar under the header says what the
-  English is, switches between the two styles, and notes that Baumgarten and Kant's notes on
-  Baumgarten have no English yet. It also announces Maria's sentence-by-sentence translation,
+  English is and switches between the two styles. Every text has English. The published works'
+  (AA I, AA II and the two editions of the Critique, some 6 MB a style) loads only when one of
+  their passages is shown or the English is searched; the rest loads when English is switched on. It also announces Maria's sentence-by-sentence translation,
   which is coming to the whole portal, and links to a preview of it from Maria's branch.
   Every passage that has English also has a small **English** button of its own, which opens
   that passage's English under it and nothing else.
@@ -220,8 +221,9 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   Maria's translation across the whole portal, which works differently: sentence by sentence,
   with a shared glossary, and with modes that let a reader try the German first. When that
   happens, remove the header switch, the bar, the per-passage buttons and `enLine`, rather than
-  running both side by side. Until then, Baumgarten's *Metaphysica* and Kant's notes on it have
-  no English at all.
+  running both side by side. The texts read by OCR (the lectures of Philippi, Pölitz,
+  Dohna and Herder, the two Mrongovius and K3, and AA II and KrV B) were translated from the
+  uncorrected OCR, so their English silently mends obvious misreadings and says in a note where a reading was too garbled to be sure of.
 - **Parallel passages.** Every passage lists the passages of other texts nearest it in wording:
   the words they share, weighted by how rare each is, leaving out Jessie's stopwords, as Jessie's
   parallel-passage tool compares the lectures.

@@ -871,7 +871,7 @@
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
-<script src="catalogue.js?v=2026-11-04a"></script>
+<script src="catalogue.js?v=2026-11-06a"></script>
 <script src="studies/studies.js?v=2026-11-04a"></script>
 <script>
 (() => {
@@ -2640,11 +2640,14 @@ function enSync() {
   document.body.classList.toggle('trmode', on);
   if (on) S.enStyle = S.en;
   if (!on) return;
-  (typeof PORTAL_TRANSLATIONS === 'undefined' ? [] : PORTAL_TRANSLATIONS).forEach(tr => trState(tr, S.en));
+  // the published works' English is large (some 6 MB a style): it loads when one of their passages is shown,
+  // or when the English is searched (enIndex), not as soon as English is switched on
+  (typeof PORTAL_TRANSLATIONS === 'undefined' ? [] : PORTAL_TRANSLATIONS)
+    .filter(tr => { const T = textByKey(tr.text); return !T || T.layer !== 'published'; }).forEach(tr => trState(tr, S.en));
   // one quiet line: the two styles, what the English is, and Maria's preview; the rest on hover
   bar.innerHTML = '<span class="lab">ENGLISH</span>' +
     '<span class="sty">' + PORTAL_TR_STYLES.map(st => '<button type="button" data-en="' + st.key + '"' + (S.en === st.key ? ' class="on"' : '') + ' title="' + esc(st.tag) + '">' + esc(st.label.replace(' principles', '')) + '</button>').join('') + '</span>' +
-    '<span class="muted" title="The German and Latin always stay. Baumgarten and the Reflexionen on him are translated whole.">Machine translation, for orientation: check it against the German</span>' +
+    '<span class="muted" title="The German and Latin always stay. Every text has English; that of Kant’s published works loads when one of their passages is shown.">Machine translation, for orientation: check it against the German</span>' +
     '<span class="soon"><a href="' + MARIA_DEMO + '" target="_blank" rel="noopener" title="Coming soon: Maria’s sentence-by-sentence translation, across the whole portal">Maria’s translation, a preview ↗</a></span>';
 }
 function enApply() { enSync(); enRefresh(); }
