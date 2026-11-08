@@ -40,7 +40,7 @@
   body.idle { cursor: none; }
 
   main { flex: 1; display: flex; min-height: 0; }
-  #stage { flex: 1; overflow-y: auto; min-width: 0; }
+  #stage { flex: 1; overflow-y: auto; min-width: 0; overflow-anchor: none; }   /* the screen keeps its own place, below */
   #col { max-width: 36em; margin: 0 auto; padding: 1.6em 1.4em 100vh; font-size: var(--fs); line-height: 1.5; }   /* room below, so the last item can come to the top */
   .head h1 { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; font-size: 1.1em; margin: 0; line-height: 1.3; }
   .head .date { color: var(--faded); font-style: italic; font-size: 0.62em; margin: 0.2em 0 0.8em; }
@@ -61,11 +61,15 @@
   .it .en .lab { display: block; font-family: 'Cinzel', serif; font-size: 0.6em; letter-spacing: 0.06em; color: var(--faded); margin-bottom: 0.15em; white-space: normal; }
   .it .en.wait { font-style: italic; color: var(--faded); font-size: 0.6em; }
   .it .pn { margin-top: 0.5em; font-size: 0.68em; color: #4b3a26; border-left: 2px solid #d9bf83; padding-left: 0.6em; font-style: italic; white-space: pre-wrap; }
-  .it .later { font-size: 0.58em; color: #8a6417; font-style: italic; margin-bottom: 0.3em; }
   .it .gone { color: var(--faded); font-style: italic; }
-  .it.note .q { font-style: italic; color: var(--accent); font-size: 1.05em; white-space: pre-wrap; }
-  .it.clh .clt { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; font-size: 0.95em; letter-spacing: 0.02em; }
-  .it.clh .cls { color: var(--faded); font-style: italic; font-size: 0.62em; }
+  .it .hlabel { font-family: 'Cinzel', serif; font-size: 0.62em; letter-spacing: 0.05em; color: #7a4a14; margin-bottom: 0.2em; }
+  .it .de mark, .it .en mark { background: var(--hl); color: inherit; padding: 0 0.05em; border-radius: 2px; }
+  .it .de u, .it .en u { text-decoration-color: var(--accent-light); text-decoration-thickness: 0.08em; text-underline-offset: 0.15em; }
+  .it .part { font-family: 'Cinzel', serif; font-size: 0.6em; color: var(--accent-light); letter-spacing: 0.03em; }
+  .it.note .q { font-style: italic; color: var(--accent); font-size: 1.05em; }
+  .it.note .q p { margin: 0 0 0.4em; }
+  .it.hd { border-top: none; padding-bottom: 0.2em; }
+  .it.hd .hdt { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; font-size: 0.9em; letter-spacing: 0.04em; margin: 0.4em 0 0; padding-bottom: 0.25em; border-bottom: 1px solid var(--line); }
   .it.sub { margin-left: 1.4em; border-top-style: dashed; }
   body.nonotes .it .pn { display: none; }
 
@@ -82,7 +86,7 @@
 <div id="bar">
   <a href="../../index.html" title="The Logic Portal">← The Logic Portal</a>
   <b class="cz">Class screen</b>
-  <select id="src" aria-label="Which session to show"></select>
+  <select id="src" aria-label="Which handout to show"></select>
   <input type="file" id="file" accept=".json,application/json" hidden>
   <span class="spacer"></span>
   <select id="pos" aria-label="Go to an item" title="Go to an item"></select>
@@ -100,101 +104,80 @@
 <div id="keys">↓ or Space: on · ↑: back · E English · C in context · F full screen</div>
 
 <script>
-/* The class screen: a class session shown on the room's screen, its passages large and one after
-   another. It reads
-     the session   one of this browser's, by default the one open in the portal's Session panel
-                   (and following it there), drafts included; one published for the class
-                   (../../sessions/<name>.json, or ?session=<name>); or a file saved with
-                   "Save to file";
-     its clusters  this browser's, else those published (../../clusters/<id>.json);
+/* The class screen: a class handout shown on the room's screen, its passages large and one
+   after another. It reads
+     the handout   one of this browser's, by default the one open on the portal's Handouts page
+                   (and following it there), published or not; one published for the class
+                   (../../handouts/<name>.json, or ?handout=<name>); or a file saved with the
+                   Handouts page's "Save to file";
      the texts     the portal itself, loaded in the frame on the right, hidden unless "In context"
                    is on, through window.PORTAL: P, TEXTS, BYID and the English.
+   A handout's headings stand as its sections, its notes as the points to make with their
+   passages under them (3.1, 3.2), and each passage with its label, its note, and the highlights
+   and underlines its maker gave it. Margin notes are the maker's own and are not shown.
    It writes nothing but its own settings. When the portal, in another window of this browser,
-   adds to the session or a cluster, the screen follows, keeping its place. */
+   changes the handout, the screen follows, keeping its place. */
 (function () {
 'use strict';
-const STORE_KEY = 'kantlab-sessions-v3', OLD_KEY = 'kantlab-session-draft-v2', CL_KEY = 'kantlab-clusters-v1', PREF = 'kantlab-class-screen-v1';
-const REPO = 'mikrishnan/kant-lab', DIR = 'logic-portal/sessions';
+const KEY = 'kantlab-handouts-v1', PREF = 'kantlab-class-screen-v1';
+const REPO = 'mikrishnan/kant-lab', DIR = 'logic-portal/handouts';
 const PORTAL = '../../index.html';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const flat = s => String(s || '').replace(/\s+/g, ' ').trim();
+const paras = s => String(s || '').trim().split(/\n\s*\n/).map(flat).filter(Boolean);
 const clip = (s, n) => s.length > n ? s.slice(0, n).replace(/\s+\S*$/, '') + ' …' : s;
 const rich = s => esc(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/\*([^*\n]+)\*/g, '<i>$1</i>');
-const longDate = iso => { const d = new Date(iso + 'T12:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
+const longDate = iso => { const d = new Date(String(iso).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
 const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
 const readLS = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
 
 let PT = null;                 // the portal's window.PORTAL, once its texts are in
 let STYLES = [];               // the English's styles, from the portal's catalogue
-let SRC = 'current';           // 'current' (the session open in the portal), 'local:<sid>', 'saved:<name>' or 'file'
-let RAW = null;                // the saved session or file being shown, as read
-let FILE = null;               // a session read from a file
-let SAVED = [];                // the sessions published for the class: { slug, title, date }
-let SESSION = null;            // what is shown: { title, date, items, saved, empty }
+let SRC = 'current';           // 'current' (the handout open in the portal), 'local:<id>', 'pub:<name>', 'file' or 'file:<id>'
+let FILE = null;               // a file opened here: a whole "Save to file", or one published handout
+let PUBLISHED = [];            // the handouts published for the class: { slug, title, published }
+let SHOW = null;               // what is shown: { title, sub, items, empty, id }
 let stops = [], cur = 0, waiting = false;
 const pref = { size: 1.6, en: '', notes: true, ctx: false };
 try { Object.assign(pref, readLS(PREF) || {}); } catch (e) { /* the defaults */ }
 const savePref = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) { /* this visit only */ } };
 const frame = $('portal');
 
-/* ── The session, in one shape whatever it comes from ── */
-const files = {};              // clusters published for the class: id → cluster, or null
-async function clusterFile(id) {
-  if (id in files) return files[id];
-  files[id] = null;
-  try { const r = await fetch('../../clusters/' + id + '.json', { cache: 'no-cache' }); if (r.ok) { const c = await r.json(); if (c && Array.isArray(c.items)) files[id] = c; } } catch (e) { /* none */ }
-  return files[id];
-}
-async function loadSaved(slug) {
-  try { const r = await fetch('../../sessions/' + slug + '.json', { cache: 'no-cache' }); if (r.ok) { const d = await r.json(); if (d && Array.isArray(d.items)) return d; } } catch (e) { /* none */ }
+/* ── The handout, in one shape whatever it comes from ──
+   { kind: 'heading', text } | { kind: 'note', text, items: [passage] }
+   | { kind: 'passage' | 'excerpt', ref, refs, cites, author, work, cite, label, text, from, en, marks, note }
+   as a published handout has them; `refs` and `cites` for a passage joined from several. */
+async function loadPublished(slug) {
+  try { const r = await fetch('../../handouts/' + slug + '.json', { cache: 'no-cache' }); if (r.ok) { const d = await r.json(); if (d && Array.isArray(d.items)) return d; } } catch (e) { /* none */ }
   return null;
 }
-async function savedList() {
+async function publishedList() {
   try {
     const r = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + DIR + '?ref=main');
     if (!r.ok) return [];
     const fs = (await r.json()).filter(f => f.type === 'file' && /^[a-z0-9-]+\.json$/.test(f.name));
-    const out = await Promise.all(fs.map(async f => { const slug = f.name.replace(/\.json$/, ''), d = await loadSaved(slug); return d ? { slug, title: d.title, date: d.date } : null; }));
-    return out.filter(Boolean).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+    const out = await Promise.all(fs.map(async f => { const slug = f.name.replace(/\.json$/, ''), d = await loadPublished(slug); return d ? { slug, title: d.title || slug, published: d.published || '' } : null; }));
+    return out.filter(Boolean).sort((a, b) => (b.published || '').localeCompare(a.published || ''));
   } catch (e) { return []; }
 }
-// A cluster as it is now: this browser's, else the one published
-async function clusterNow(id) { const cl = readLS(CL_KEY) || {}; return cl[id] || await clusterFile(id); }
-// The sessions in this browser, as the portal keeps them (or the one it kept before it kept several)
-function store() {
-  const x = readLS(STORE_KEY);
-  if (x && Array.isArray(x.list) && x.list.length) return x;
-  const d = readLS(OLD_KEY);
-  return d && Array.isArray(d.items) ? { current: 'old', list: [Object.assign({ sid: 'old' }, d)] } : { current: null, list: [] };
+// The handouts in this browser, as the Handouts page keeps them
+function store() { const d = readLS(KEY); return d && Array.isArray(d.handouts) ? d : { current: null, handouts: [] }; }
+const countIn = items => items.reduce((n, x) => n + (x.kind === 'note' ? (x.items || []).length : x.kind === 'heading' ? 0 : 1), 0);
+// A passage kept in this browser, as a published handout has it
+const passOf = it => ({ id: it.id, kind: it.kind, ref: it.ref, refs: it.parts ? it.parts.map(q => q.ref) : null, cites: it.parts ? it.parts.map(q => q.cite) : null,
+  author: it.author, work: it.work, cite: it.cite, label: flat(it.label), text: it.text, from: it.from,
+  en: it.kind === 'excerpt' && it.enSnippet ? it.en : null, enApprox: !!it.enApprox,
+  marks: (it.marks || []).filter(m => m.k !== 'mn'), note: flat(it.note) ? it.note.trim() : '' });
+function fromLocal(h) {
+  const n = countIn(h.items);
+  return { id: h.id, title: h.name || 'A handout', items: h.items.map(it => it.kind === 'heading' ? { id: it.id, kind: 'heading', text: it.text || '' }
+      : it.kind === 'note' ? { id: it.id, kind: 'note', text: it.text || '', items: (it.items || []).map(passOf) } : passOf(it)),
+    sub: plural(n, 'passage') + ' · ' + (h.published ? 'published ' + longDate(h.published.at) + ', and as it is now in this browser' : 'not published, in this browser') };
 }
-const stateOf = s => !s.saved ? 'draft' : s.changed && s.changed > s.saved.at ? 'changed' : 'published';
-const STATE_WORDS = { draft: 'a draft, in this browser', changed: 'in this browser, changed since it was published', published: 'published' };
-// One of this browser's sessions: its clusters as they are now, no "added after"
-async function fromDraft(src) {
-  const st = store(), sid = src === 'current' ? st.current : src.slice(6), d = st.list.find(x => x.sid === sid) || (src === 'current' ? st.list[0] : null);
-  if (!d || !Array.isArray(d.items)) return { title: st.list.length ? 'That session is no longer in this browser' : 'No class session in this browser yet', date: '', items: [], empty: true };
-  const items = [];
-  for (const x of d.items) {
-    if (x.kind === 'note') items.push({ kind: 'note', id: x.id, text: x.text || '' });
-    else if (x.kind === 'cluster') { const c = await clusterNow(x.cluster); items.push({ kind: 'cluster', id: x.id, cluster: x.cluster, title: c ? c.title : x.cluster, items: c ? c.items : [], missing: !c }); }
-    else items.push(Object.assign({}, x));
-  }
-  return { title: d.title || 'A class session', date: d.date || '', items, saved: false, state: stateOf(d), sid: d.sid };
-}
-// A saved session, or a file: its clusters as they are now, with what came after the class marked
-async function fromSaved(d) {
-  const items = [];
-  for (const [k, x] of d.items.entries()) {
-    const id = 'i' + (k + 1);
-    if (x.kind === 'note') items.push({ kind: 'note', id, text: x.text || '' });
-    else if (x.kind === 'cluster') {
-      const c = await clusterNow(x.cluster), was = x.items || [], now = c ? c.items : was;
-      items.push({ kind: 'cluster', id, cluster: x.cluster, title: (c && c.title) || x.title || x.cluster, items: now, gone: c ? was.filter(y => !now.some(z => z.ref === y.ref)).length : 0 });
-    } else items.push(Object.assign({ id }, x));
-  }
-  return { title: d.title || 'A class session', date: d.date || '', items, saved: true };
+function fromPublished(d) {
+  return { title: d.title || 'A class handout', items: d.items, sub: plural(countIn(d.items), 'passage') + (d.published ? ' · published ' + longDate(d.published) : '') };
 }
 
 /* ── Drawing ── */
@@ -207,46 +190,86 @@ function english(p, T) {
   return st === 'ready' ? PT.trEntry(tr, pref.en, p) : null;
 }
 const styleLabel = () => (STYLES.find(s => s.key === pref.en) || {}).label || pref.en;
-function passageHtml(x, n, key, later) {
-  const q = PT.BYID.get(x.ref), p = q != null ? PT.P[q] : null, T = p ? PT.TEXTS[p.t] : null;
-  const a = T && T.accuracy;
-  const cite = '<b>' + esc(x.author) + '</b>, <span class="w">' + esc(x.work) + '</span>, ' + esc(x.cite) +
+const pOf = r => { const q = r && PT.BYID.get(r); return q != null ? PT.P[q] : null; };
+// A highlight or underline's words in a text: the handout tray's own rule, the words in order
+// with any spacing between them, and where they stand more than once, the place whose
+// neighbouring words agree best with those kept beside the mark
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function common(a, b, fromEnd) {
+  const x = a.replace(/\s+/g, ' '), y = b.replace(/\s+/g, ' ');
+  let n = 0;
+  while (n < x.length && n < y.length && (fromEnd ? x[x.length - 1 - n] === y[y.length - 1 - n] : x[n] === y[n])) n++;
+  return n;
+}
+function findMark(s, m) {
+  const words = String(m.q || '').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return null;
+  const re = new RegExp(words.map(reEsc).join('\\s+'), 'g');
+  let best = null, score = -1, x;
+  while ((x = re.exec(s))) {
+    const e = x.index + x[0].length;
+    const sc = common(s.slice(Math.max(0, x.index - 40), x.index), m.pre || '', true) + common(s.slice(e, e + 40), m.post || '', false);
+    if (sc > score) { score = sc; best = [x.index, e]; }
+  }
+  return best;
+}
+function painted(str, marks, field, asRich) {
+  const f = t => asRich ? rich(t) : esc(t);
+  const rs = (marks || []).filter(m => (m.f || 'text') === field && (m.k === 'hl' || m.k === 'ul'))
+    .map(m => { const r = findMark(str, m); return r ? r.concat(m.k) : null; }).filter(Boolean).sort((a, b) => a[0] - b[0]);
+  let h = '', at = 0;
+  rs.forEach(([a, b, k]) => { if (a < at) return; h += f(str.slice(at, a)) + (k === 'hl' ? '<mark>' : '<u>') + f(str.slice(a, b)) + (k === 'hl' ? '</mark>' : '</u>'); at = b; });
+  return h + f(str.slice(at));
+}
+const langOf = T => T && T.shape === 'metaphysica' ? 'la' : 'de';
+function passageHtml(x, n, key) {
+  const p = pOf(x.ref), T = p ? PT.TEXTS[p.t] : null, a = T && T.accuracy, joined = x.refs && x.refs.length > 1;
+  const cite = '<b>' + esc(x.author) + '</b>, <span class="w">' + esc(x.work) + '</span>, ' + esc(joined ? (x.cites || []).join('; ') : x.cite) +
     (p ? ' <span class="d">· ' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + '</span>' : '') +
     (a && a.ocr ? '<span class="tag" title="' + esc(a.how) + '">OCR · about ' + esc(a.words) + '% of words right</span>' : '') +
     (p ? '<a href="' + PORTAL + '#p=' + encodeURIComponent(x.ref) + '&amp;rt=conn" target="kantlab-portal" data-ctx title="This passage in the portal, in its full text">in the portal ↗</a>' : '');
-  const e = p ? english(p, T) : null;
-  return '<section class="it' + (key.includes('|') ? ' sub' : '') + '" data-key="' + esc(key) + '" data-ref="' + esc(x.ref) + '" data-label="' + esc(n + ' · ' + clip((T ? T.short : x.work) + ', ' + x.cite, 60)) + '">' +
-    '<div class="num">' + esc(n) + '</div><div class="body">' + (later || '') + '<div class="cite">' + cite + '</div>' +
-    (p ? '<div class="de" lang="' + (T.shape === 'metaphysica' ? 'la' : 'de') + '">' + esc(p.text) + '</div>' : '<div class="gone">(This passage is no longer in the portal.)</div>') +
-    (e === 'loading' ? '<div class="en wait">English loading…</div>'
-      : e ? '<div class="en" lang="en"><span class="lab">English · a machine translation on ' + esc(styleLabel()) + (e.part ? ' · made for a longer stretch than this passage' : '') + '</span>' + rich(e.text) + '</div>' : '') +
-    (flat(x.note) ? '<div class="pn">' + esc(x.note.trim()) + '</div>' : '') + '</div></section>';
-}
-function itemHtml(x, n, S) {
-  if (x.kind === 'note') return '<section class="it note" data-key="' + esc(x.id) + '" data-label="' + esc(n + ' · ' + clip(flat(x.text) || 'A note', 60)) + '"><div class="num">' + esc(n) + '</div><div class="body"><div class="q">' + esc(x.text || '') + '</div></div></section>';
-  if (x.kind !== 'cluster') return passageHtml(x, n, x.id, '');
-  const its = x.items || [];
-  return '<section class="it clh" data-key="' + esc(x.id) + '" data-label="' + esc(n + ' · ❖ ' + clip(x.title, 50)) + '"><div class="num">' + esc(n) + '</div><div class="body">' +
-      '<div class="clt">❖ ' + esc(x.title) + '</div><div class="cls">a cluster of ' + plural(its.length, 'passage') +
-      (x.missing ? ' · neither in this browser nor published' : '') +
-      (x.gone ? ' · ' + (x.gone === 1 ? 'one passage that was in it at this class has' : x.gone + ' passages that were in it at this class have') + ' since been taken out' : '') + '</div></div></section>' +
-    its.map((y, j) => passageHtml(y, n + '.' + (j + 1), x.id + '|' + y.ref,
-      S.saved && S.date && y.added && y.added > S.date ? '<div class="later">Added to the cluster after this class, on ' + esc(longDate(y.added)) + '.</div>' : '')).join('');
+  let text, en = null;
+  if (x.kind === 'excerpt') {   // its own words, as selected; from the English, they are English
+    text = x.from === 'english' ? '<div class="de" lang="en">' + painted(x.text || '', x.marks, 'text', true) + '</div>' : '<div class="de" lang="' + langOf(T) + '">' + painted(x.text || '', x.marks, 'text') + '</div>';
+    if (pref.en && x.en && x.from !== 'english') en = { text: x.en, approx: x.enApprox };
+  } else if (joined) {         // its parts, each with its citation
+    const ps = x.refs.map(r => pOf(r));
+    text = '<div class="de" lang="' + langOf(T) + '">' + ps.map((q, k) => '<span class="part">' + esc((x.cites || [])[k] || '') + '</span> ' + (q ? esc(q.text) : '(no longer in the portal)')).join('\n\n') + '</div>';
+    if (pref.en) { const es = ps.map(q => q ? english(q, PT.TEXTS[q.t]) : null); en = es.includes('loading') ? 'loading' : es.every(e => e && e.text) ? { text: es.map(e => e.text).join('\n\n') } : null; }
+  } else {
+    text = p ? '<div class="de" lang="' + langOf(T) + '">' + painted(p.text, x.marks, 'text') + '</div>' : x.text ? '<div class="de">' + esc(x.text) + '</div>' : '<div class="gone">(This passage is no longer in the portal.)</div>';
+    if (p) { const e = english(p, T); en = e === 'loading' ? 'loading' : e ? { text: e.text, part: e.part } : null; }
+  }
+  return '<section class="it' + (key.includes('.') ? ' sub' : '') + '" data-key="' + esc(key) + '"' + (p ? ' data-ref="' + esc(x.ref) + '"' : '') + ' data-label="' + esc(n + ' · ' + clip((x.label ? x.label + ': ' : '') + (T ? T.short : x.work || '') + ', ' + (x.cite || ''), 60)) + '">' +
+    '<div class="num">' + esc(n) + '</div><div class="body">' + (x.label ? '<div class="hlabel">' + esc(x.label) + '</div>' : '') + '<div class="cite">' + cite + '</div>' + text +
+    (en === 'loading' ? '<div class="en wait">English loading…</div>'
+      : en ? '<div class="en" lang="en"><span class="lab">English · a machine translation' + (pref.en && x.kind !== 'excerpt' ? ' on ' + esc(styleLabel()) : '') + (en.part ? ' · made for a longer stretch than this passage' : '') + (en.approx ? ' · approximate' : '') + '</span>' + painted(en.text, x.marks, 'en', true) + '</div>' : '') +
+    (x.note ? '<div class="pn">' + esc(x.note) + '</div>' : '') + '</div></section>';
 }
 const curKey = () => stops[cur] ? stops[cur].dataset.key : null;
 function render(keep) {
-  if (!PT || !SESSION) return;
-  const S = SESSION, st = $('stage'), was = keep && stops.find(s => s.dataset.key === keep), off = was ? was.getBoundingClientRect().top : 0;
-  const np = S.items.reduce((a, x) => a + (x.kind === 'note' ? 0 : x.kind === 'cluster' ? (x.items || []).length : 1), 0), nn = S.items.filter(x => x.kind === 'note').length;
+  if (!PT || !SHOW) return;
+  const S = SHOW, st = $('stage'), was = keep && stops.find(s => s.dataset.key === keep), off = was ? was.getBoundingClientRect().top : 0;
   waiting = false;
-  $('col').innerHTML = '<div class="head"><h1>' + esc(S.title) + '</h1><div class="date">' + (S.date ? esc(longDate(S.date)) + ' · ' : '') + plural(np, 'passage') + (nn ? ', ' + plural(nn, 'note') : '') +
-      (S.state ? ' · ' + STATE_WORDS[S.state] : '') + '</div></div>' +
-    (S.items.length ? S.items.map((x, k) => itemHtml(x, String(k + 1), S)).join('')
-      : '<p class="msg">' + (S.empty ? 'This browser has no class session yet. In the portal, press <b>Session</b>, turn on <b>Recording</b>, and press <b>+ Session</b> on passages: they appear here as you add them.' : 'Nothing in this session yet. Passages added to it in the portal appear here as you add them.') + '</p>');
+  let k = 0, h = '';
+  S.items.forEach((x, i) => {
+    const key = x.id || 'a' + i;
+    if (x.kind === 'heading') { if (flat(x.text)) h += '<section class="it hd" data-key="' + esc(key) + '" data-label="' + esc('§ ' + clip(flat(x.text), 56)) + '"><div class="num"></div><div class="body"><h2 class="hdt">' + esc(x.text) + '</h2></div></section>'; return; }
+    const n = String(++k);
+    if (x.kind === 'note') {
+      h += '<section class="it note" data-key="' + esc(key) + '" data-label="' + esc(n + ' · ' + clip(flat(x.text) || 'A note', 60)) + '"><div class="num">' + n + '</div><div class="body"><div class="q">' +
+        (paras(x.text).map(t => '<p>' + esc(t) + '</p>').join('') || '<p>…</p>') + '</div></div></section>' +
+        (x.items || []).map((y, j) => passageHtml(y, n + '.' + (j + 1), key + '.' + (y.id || j))).join('');
+      return;
+    }
+    h += passageHtml(x, n, key);
+  });
+  $('col').innerHTML = '<div class="head"><h1>' + esc(S.title) + '</h1><div class="date">' + esc(S.sub || '') + '</div></div>' +
+    (h || '<p class="msg">' + (S.empty ? 'This browser has no handouts yet. In the portal, press <b>Handouts</b>, then <b>+ Add to handout</b> beside a passage: they appear here as you add them.' : 'Nothing in this handout yet. Passages added to it in the portal appear here as you add them.') + '</p>');
   stops = [...$('col').querySelectorAll('.it')];
-  const k = keep ? stops.findIndex(s => s.dataset.key === keep) : -1;
-  cur = k >= 0 ? k : Math.min(cur, Math.max(0, stops.length - 1));
-  if (k >= 0 && was) st.scrollTop += stops[k].getBoundingClientRect().top - off;   // keep the passage in view where it was
+  const k2 = keep ? stops.findIndex(s => s.dataset.key === keep) : -1;
+  cur = k2 >= 0 ? k2 : Math.min(cur, Math.max(0, stops.length - 1));
+  if (k2 >= 0 && was) st.scrollTop += stops[k2].getBoundingClientRect().top - off;   // keep the passage in view where it was
   $('pos').innerHTML = stops.map((s, i) => '<option value="' + i + '">' + esc(s.dataset.label) + '</option>').join('') || '<option>—</option>';
   mark();
   if (waiting) setTimeout(() => render(curKey()), 700);
@@ -306,41 +329,45 @@ function context() {
   try { if (frame.contentWindow.location.hash.slice(1) !== h) frame.contentWindow.location.hash = h; } catch (e) { /* not reachable */ }
 }
 
-/* ── Which session ── */
+/* ── Which handout ── */
 function drawSrc() {
-  const st = store(), open = st.list.find(x => x.sid === st.current) || st.list[0], slug = SRC.startsWith('saved:') ? SRC.slice(6) : '';
-  const known = SAVED.some(s => s.slug === slug), word = { draft: 'draft', changed: 'changed since published', published: 'published' };
-  const mine = st.list.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  $('src').innerHTML = '<option value="current">The session open in the portal' + (open ? ': ' + esc(clip(open.title || '', 36)) : '') + '</option>' +
-    (mine.length ? '<optgroup label="In this browser">' + mine.map(s => '<option value="local:' + esc(s.sid) + '">' + esc(clip(s.title || 'A session', 40)) + ' · ' + word[stateOf(s)] + '</option>').join('') + '</optgroup>' : '') +
-    (SAVED.length || (slug && !known) ? '<optgroup label="Published for the class">' + SAVED.map(s => '<option value="saved:' + esc(s.slug) + '">' + esc(clip(s.title || s.slug, 44)) + ' · ' + esc(longDate(s.date)) + '</option>').join('') +
-      (slug && !known ? '<option value="saved:' + esc(slug) + '">' + esc(RAW && RAW.title ? clip(RAW.title, 44) : slug) + '</option>' : '') + '</optgroup>' : '') +
-    (FILE ? '<option value="file">From a file: ' + esc(clip(FILE.title || 'a session', 40)) + '</option>' : '') +
-    '<option value="open">Open a session file…</option>';
+  const st = store(), open = st.handouts.find(x => x.id === st.current) || st.handouts[0], slug = SRC.startsWith('pub:') ? SRC.slice(4) : '';
+  const known = PUBLISHED.some(s => s.slug === slug);
+  $('src').innerHTML = '<option value="current">The handout open in the portal' + (open ? ': ' + esc(clip(open.name || '', 36)) : '') + '</option>' +
+    (st.handouts.length ? '<optgroup label="In this browser">' + st.handouts.map(h => '<option value="local:' + esc(h.id) + '">' + esc(clip(h.name || 'A handout', 40)) + ' · ' + (h.published ? 'published' : 'not published') + '</option>').join('') + '</optgroup>' : '') +
+    (PUBLISHED.length || (slug && !known) ? '<optgroup label="Published for the class">' + PUBLISHED.map(s => '<option value="pub:' + esc(s.slug) + '">' + esc(clip(s.title, 44)) + (s.published ? ' · ' + esc(longDate(s.published)) : '') + '</option>').join('') +
+      (slug && !known ? '<option value="pub:' + esc(slug) + '">' + esc(SHOW && SHOW.title ? clip(SHOW.title, 44) : slug) + '</option>' : '') + '</optgroup>' : '') +
+    (FILE && Array.isArray(FILE.handouts) ? '<optgroup label="From the file">' + FILE.handouts.map(h => '<option value="file:' + esc(h.id) + '">' + esc(clip(h.name || 'A handout', 44)) + '</option>').join('') + '</optgroup>'
+      : FILE ? '<option value="file">From a file: ' + esc(clip(FILE.title || 'a handout', 40)) + '</option>' : '') +
+    '<option value="open">Open a file…</option>';
   $('src').value = SRC;
 }
 async function show(src, keep) {
-  const was = SESSION && (SESSION.sid || SRC);
+  const was = SHOW && (SHOW.id || SRC);
   SRC = src;
-  if (src === 'current' || src.startsWith('local:')) { RAW = null; SESSION = await fromDraft(src); }
-  else if (src === 'file') { RAW = FILE; SESSION = await fromSaved(FILE); }
+  if (src === 'current' || src.startsWith('local:')) {
+    const st = store(), h = src === 'current' ? st.handouts.find(x => x.id === st.current) || st.handouts[0] : st.handouts.find(x => x.id === src.slice(6));
+    SHOW = h ? fromLocal(h) : { title: st.handouts.length ? 'That handout is no longer in this browser' : 'No handouts in this browser yet', sub: '', items: [], empty: true };
+  } else if (src.startsWith('file:')) {
+    const h = FILE && FILE.handouts.find(x => x.id === src.slice(5));
+    SHOW = h ? fromLocal(h) : { title: 'That handout is not in the file', sub: '', items: [] };
+    SHOW.sub = SHOW.sub.replace(/, and as it is now in this browser|, in this browser/, ', from the file');
+  } else if (src === 'file') SHOW = fromPublished(FILE);
   else {
-    const slug = src.slice(6);
-    RAW = await loadSaved(slug);
-    SESSION = RAW ? await fromSaved(RAW) : { title: 'There is no published session called “' + slug + '”', date: '', items: [], saved: true };
+    const slug = src.slice(4), d = await loadPublished(slug);
+    SHOW = d ? fromPublished(d) : { title: 'There is no published handout called “' + slug + '”', sub: '', items: [] };
   }
-  history.replaceState(null, '', src.startsWith('saved:') ? '?session=' + encodeURIComponent(src.slice(6)) : location.pathname);
-  document.title = (SESSION.empty ? 'Class screen' : SESSION.title + ' · Class screen') + ' · Kant Lab';
+  history.replaceState(null, '', src.startsWith('pub:') ? '?handout=' + encodeURIComponent(src.slice(4)) : location.pathname);
+  document.title = (SHOW.empty ? 'Class screen' : SHOW.title + ' · Class screen') + ' · Kant Lab';
   drawSrc();
-  if (keep && (SESSION.sid || SRC) !== was) keep = null;   // another session opened in the portal: from its top
+  if (keep && (SHOW.id || SRC) !== was) keep = null;   // another handout opened in the portal: from its top
   if (!keep) { cur = 0; $('stage').scrollTop = 0; }
   render(keep);
 }
-// The portal, in another window of this browser, changed the session or a cluster: follow, keeping the place
+// The portal, in another window of this browser, changed the handouts: follow, keeping the place
 window.addEventListener('storage', e => {
-  if (!PT || (e.key !== STORE_KEY && e.key !== CL_KEY && e.key !== null)) return;
+  if (!PT || (e.key !== KEY && e.key !== null)) return;
   if (SRC === 'current' || SRC.startsWith('local:')) show(SRC, curKey());
-  else if (e.key !== STORE_KEY) (async () => { SESSION = await fromSaved(RAW || FILE); render(curKey()); })();
   else drawSrc();
 });
 $('src').addEventListener('change', e => {
@@ -355,9 +382,10 @@ $('file').addEventListener('change', async e => {
   if (!f) return;
   try {
     const d = JSON.parse(await f.text());
-    if (!d || !Array.isArray(d.items)) throw new Error('not a session');
-    FILE = d; show('file');
-  } catch (err) { alert('That file is not a class session saved from the portal.'); }
+    if (d && Array.isArray(d.handouts) && d.handouts.length) { FILE = d; show('file:' + ((d.handouts.find(h => h.id === d.current) || d.handouts[0]).id)); }
+    else if (d && Array.isArray(d.items)) { FILE = d; show('file'); }
+    else throw new Error('not a handout');
+  } catch (err) { alert('That file is not a handout, nor handouts saved from the portal.'); }
 });
 $('pos').addEventListener('change', e => { go(+e.target.value, true); e.target.blur(); });
 
@@ -373,7 +401,10 @@ function setEn(v) { pref.en = v; savePref(); apply(); render(curKey()); }
 function size(d) { pref.size = Math.max(1, Math.min(3.2, Math.round((pref.size + d) * 10) / 10)); savePref(); const k = curKey(); apply(); render(k); }
 $('en').addEventListener('change', e => { setEn(e.target.value); e.target.blur(); });
 $('notes').addEventListener('click', e => { pref.notes = !pref.notes; savePref(); apply(); e.currentTarget.blur(); });
-$('ctx').addEventListener('click', e => { pref.ctx = !pref.ctx; savePref(); apply(); e.currentTarget.blur(); });
+// the portal beside it narrows the text, which then runs longer: the item in hand stays at the top
+const repin = () => { const s = stops[cur]; if (s) s.scrollIntoView({ block: 'start', behavior: 'auto' }); };
+$('ctx').addEventListener('click', e => { pref.ctx = !pref.ctx; savePref(); apply(); repin(); e.currentTarget.blur(); });
+window.addEventListener('resize', () => { clearTimeout(window.__rp); window.__rp = setTimeout(repin, 150); });
 $('smaller').addEventListener('click', e => { size(-0.1); e.currentTarget.blur(); });
 $('bigger').addEventListener('click', e => { size(0.1); e.currentTarget.blur(); });
 function full() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }
@@ -427,9 +458,9 @@ function boot() {
   if (pref.en && !STYLES.some(s => s.key === pref.en)) pref.en = '';
   $('en').innerHTML = '<option value="">No English</option>' + STYLES.map(s => '<option value="' + esc(s.key) + '">English: ' + esc(s.label) + '</option>').join('');
   apply();
-  const wanted = new URLSearchParams(location.search).get('session');
-  show(wanted && /^[a-z0-9-]+$/.test(wanted) ? 'saved:' + wanted : 'current');
-  savedList().then(l => { SAVED = l; drawSrc(); });
+  const wanted = new URLSearchParams(location.search).get('handout');
+  show(wanted && /^[a-z0-9-]+$/.test(wanted) ? 'pub:' + wanted : 'current');
+  publishedList().then(l => { PUBLISHED = l; drawSrc(); });
 }
 boot();
 })();

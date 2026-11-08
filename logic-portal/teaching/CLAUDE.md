@@ -7,7 +7,7 @@ This folder holds small tools for teaching with the Logic Portal, one folder eac
 
 - **Change only the tool's own folder**, plus its entry in `teaching.js` and its row in
   `README.md`. Never edit the portal (`../index.html`, `../catalogue.js`,
-  `../class-sessions.js`), `data/`, a study, or another tool. If a tool cannot be built
+  `../handout-tray.js`), `data/`, a study, or another tool. If a tool cannot be built
   without a change to the portal, stop and say so: that change is a pull request of its
   own, and the people who use the portal for everything else review it.
 - A tool is for teaching. Do not generalise one into the portal on your own initiative.
@@ -22,16 +22,14 @@ This folder holds small tools for teaching with the Logic Portal, one folder eac
   portal's code; it changes every week.
 - **Link to the portal by address:** `../../index.html#p=<ref>&rt=conn` for a passage,
   `#read=<textKey>&at=<id>` for a place in a text, `#q=<words>` for a search.
-- **The class sessions, read only.** `class-sessions.js` keeps every session in this
-  browser, drafts and published ones, in `localStorage['kantlab-sessions-v3']` as
-  `{ current, list }` (`current` the `sid` of the one open), and the clusters in
-  `localStorage['kantlab-clusters-v1']`, the shapes its comments give. A browser that has
-  not opened the portal since November 2026 may still have one session alone in
-  `kantlab-session-draft-v2`. Published sessions are `logic-portal/sessions/<name>.json`
-  (`../../sessions/` from a tool's folder; see `../sessions/README.md`), published
-  clusters `logic-portal/clusters/<id>.json` (see `../clusters/README.md`). A tool reads
-  these and never writes them. The `storage` event tells a tool when the portal, in another
-  window, has changed them.
+- **The handouts, read only.** `handout-tray.js` keeps every handout in this browser in
+  `localStorage['kantlab-handouts-v1']`, as `{ v, current, collect, handouts }`
+  (`current` the `id` of the one open), each `{ id, name, made, items, trash, published }`,
+  the shapes its comments give. Published handouts are `logic-portal/handouts/<name>.json`
+  (`../../handouts/` from a tool's folder; see `../handouts/README.md`). A tool reads these
+  and never writes them. The `storage` event tells a tool when the portal, in another
+  window, has changed them. Margin notes (`marks` with `k: 'mn'`) are their maker's own:
+  never show them.
 - Pages under `logic-portal/` share one origin with the portal, so all of this works
   on GitHub Pages and on a local server, but not from a `file://` address.
 
