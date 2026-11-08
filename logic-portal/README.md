@@ -11,7 +11,9 @@ and then answers at once.
 ## Finding your way
 
 Four places, along the top (pressing **Read** again while reading goes back to the list of texts):
-- **Search** opens on one question box, with every text there to open and read in full.
+- **Search** opens on one question box, with every text there to open and read in full,
+  grouped by kind and in date order: the textbooks, Kant's notes, the logic lecture notes, the
+  metaphysics lecture notes, and the published works. **Read** groups them the same way.
 - **Read** lists the corpus. Open any text to read it through: its contents, a box to go
   to a §, an AA page or a Reflexion, and **Find in this text**, which marks every place a word
   or words stand in that text, with ‹ › (or Enter and Shift-Enter) to go from one to the next.
