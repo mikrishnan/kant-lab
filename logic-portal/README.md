@@ -73,8 +73,22 @@ It outlives the session that started it: later sessions add to it.
 - **Export to Word**, on the session page (and **Word** in the panel), downloads the session as
   a .docx: every passage whole, with its citation, its note, and its English when the English
   is on, then the investigations with their items. It needs no saving for the class.
+- **Clusters.** A *cluster* is a named group of passages on one topic, say the passages on
+  error, kept to use again. A session holds a cluster as one item, by its name and not as a
+  copy, so a passage added to the cluster later is in every session that has it. On the session
+  page, tick passages and press **Make a cluster of the ticked**. **+ A cluster…**, beside
+  **+ Note or question**, puts one made earlier into this session. The **Clusters** list on the
+  right has every cluster, with **Add passages to it**. That sets the panel's **Add passages to**
+  to the cluster, so that + Session adds to the cluster, until you set it back to the session.
+  In the session a cluster folds open to its passages, each with ▸, ↑ ↓, ✎ and ✕. A change there
+  is a change to the cluster everywhere. Each cluster is saved for the class on its own, as a file
+  in [clusters/](clusters/). In a saved session, students see a cluster as it is now, with a note
+  on any passage added after that class, or taken out since.
+- **The class screen.** **Screen ↗** in the panel, and **Class screen ↗** on the session page,
+  open the session in large type in a window of its own, for the room's screen. It follows the
+  session as you add to it. See [teaching/class-screen/](teaching/class-screen/).
 
-Until it is saved, a session is kept in your own browser. The code is
+Until it is saved, a session is kept in your own browser, and so are its clusters. The code is
 [class-sessions.js](class-sessions.js).
 
 Wherever you are, clicking an example (a search hit, a classified passage, a parallel) opens
@@ -99,6 +113,14 @@ that reads the same texts and opens each passage here, by its address, without c
 the portal. Features built for one question stay in its study. The first is
 [The kinds of nothing](studies/kinds-of-nothing/index.html). The **Studies** tab, beside Explore,
 lists them all, from `studies/studies.js`; a link to `index.html#studies` opens it.
+
+## Teaching tools
+
+[teaching/](teaching/) holds small tools for teaching with the portal, a new one most weeks.
+Like a study, each reads the same texts and the class sessions without changing the portal.
+They are listed at [teaching/index.html](teaching/index.html), from `teaching/teaching.js`, and
+the session page links to that list. The first is the
+[class screen](teaching/class-screen/index.html).
 
 ## What it does
 

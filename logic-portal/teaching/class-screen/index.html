@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class screen · The Logic Portal · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  /* The Logic Portal's palette and fonts, so the screen reads as part of it. */
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --paper: #faf6ec;
+    --card: #fbf8f1;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #d9ccb0;
+    --line-soft: #e8dec9;
+    --hl: #f1d98c;
+    --fs: 1.6rem;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: 'EB Garamond', Georgia, serif; color: var(--ink); background: var(--parchment); display: flex; flex-direction: column; overflow: hidden; }
+
+  #bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.7rem; padding: 0.4rem 1rem; border-bottom: 1px solid var(--line);
+         background: var(--parchment-dark); font-size: 0.92rem; flex: none; transition: opacity 0.4s; }
+  #bar .cz { font-family: 'Cinzel', serif; color: var(--accent); letter-spacing: 0.05em; font-weight: 600; }
+  #bar a { color: var(--accent); text-decoration: none; }
+  #bar a:hover { text-decoration: underline; }
+  #bar select { font: inherit; font-size: 0.88rem; max-width: 22rem; padding: 0.1rem 0.3rem; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+  #bar .spacer { flex: 1; }
+  .btn { font: inherit; font-size: 0.88rem; border: 1px solid var(--line); background: var(--card); color: var(--accent); border-radius: 999px; padding: 0.05rem 0.7rem; cursor: pointer; }
+  .btn:hover { border-color: var(--accent-light); }
+  .btn.on { background: var(--accent); border-color: var(--accent); color: var(--parchment); }
+  body.idle #bar { opacity: 0; }
+  body.idle { cursor: none; }
+
+  main { flex: 1; display: flex; min-height: 0; }
+  #stage { flex: 1; overflow-y: auto; min-width: 0; }
+  #col { max-width: 36em; margin: 0 auto; padding: 1.6em 1.4em 100vh; font-size: var(--fs); line-height: 1.5; }   /* room below, so the last item can come to the top */
+  .head h1 { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; font-size: 1.1em; margin: 0; line-height: 1.3; }
+  .head .date { color: var(--faded); font-style: italic; font-size: 0.62em; margin: 0.2em 0 0.8em; }
+  .msg { color: var(--faded); font-style: italic; font-size: 0.7em; }
+  .msg b { color: var(--accent); font-style: normal; }
+
+  .it { display: grid; grid-template-columns: 2.6em minmax(0, 1fr); gap: 0 0.7em; padding: 0.9em 0 1em; border-top: 1px solid var(--line-soft); scroll-margin-top: 0.4em; }
+  .it .num { font-family: 'Cinzel', serif; color: var(--line); text-align: right; font-size: 0.72em; line-height: 2; transition: color 0.2s; }
+  .it.cur .num { color: var(--accent); font-weight: 600; }
+  .it .cite { font-size: 0.6em; color: var(--accent); margin-bottom: 0.4em; line-height: 1.4; }
+  .it .cite .w { font-style: italic; }
+  .it .cite .d { color: var(--faded); }
+  .it .cite .tag { display: inline-block; margin-left: 0.4em; padding: 0 0.45em; border: 1px dashed #c9a46b; border-radius: 3px; color: #7a4a14; font-size: 0.9em; }
+  .it .cite a { color: var(--faded); margin-left: 0.6em; white-space: nowrap; }
+  .it .cite a:hover { color: var(--accent); }
+  .it .de { white-space: pre-wrap; }
+  .it .en { margin-top: 0.55em; padding-left: 0.8em; border-left: 3px solid var(--line); color: #3f3529; font-size: 0.86em; white-space: pre-wrap; }
+  .it .en .lab { display: block; font-family: 'Cinzel', serif; font-size: 0.6em; letter-spacing: 0.06em; color: var(--faded); margin-bottom: 0.15em; white-space: normal; }
+  .it .en.wait { font-style: italic; color: var(--faded); font-size: 0.6em; }
+  .it .pn { margin-top: 0.5em; font-size: 0.68em; color: #4b3a26; border-left: 2px solid #d9bf83; padding-left: 0.6em; font-style: italic; white-space: pre-wrap; }
+  .it .later { font-size: 0.58em; color: #8a6417; font-style: italic; margin-bottom: 0.3em; }
+  .it .gone { color: var(--faded); font-style: italic; }
+  .it.note .q { font-style: italic; color: var(--accent); font-size: 1.05em; white-space: pre-wrap; }
+  .it.clh .clt { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; font-size: 0.95em; letter-spacing: 0.02em; }
+  .it.clh .cls { color: var(--faded); font-style: italic; font-size: 0.62em; }
+  .it.sub { margin-left: 1.4em; border-top-style: dashed; }
+  body.nonotes .it .pn { display: none; }
+
+  #side { width: 44%; min-width: 24rem; border-left: 1px solid var(--line); display: flex; }
+  #side iframe { flex: 1; width: 100%; height: 100%; border: 0; background: var(--parchment); }
+  /* hidden, but laid out, so that the portal inside boots as it would in a window */
+  #side.off { position: fixed; left: -12000px; top: 0; width: 1280px; height: 800px; visibility: hidden; }
+
+  #keys { position: fixed; right: 0.8rem; bottom: 0.5rem; font-size: 0.78rem; color: var(--faded); background: rgba(245, 239, 224, 0.9); padding: 0.1rem 0.5rem; border-radius: 4px; }
+  body.full #keys { display: none; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <a href="../../index.html" title="The Logic Portal">← The Logic Portal</a>
+  <b class="cz">Class screen</b>
+  <select id="src" aria-label="Which session to show"></select>
+  <input type="file" id="file" accept=".json,application/json" hidden>
+  <span class="spacer"></span>
+  <select id="pos" aria-label="Go to an item" title="Go to an item"></select>
+  <select id="en" aria-label="English" title="English beneath the German (E)"></select>
+  <button type="button" class="btn" id="notes" title="Your notes on passages (N)">Notes</button>
+  <button type="button" class="btn" id="ctx" title="The passage in context, in the portal beside it (C)">In context</button>
+  <button type="button" class="btn" id="smaller" title="Smaller (−)">A−</button>
+  <button type="button" class="btn" id="bigger" title="Larger (+)">A+</button>
+  <button type="button" class="btn" id="full" title="Full screen (F)">Full screen</button>
+</div>
+<main>
+  <div id="stage"><div id="col"><p class="msg" id="wait">Loading the texts…</p></div></div>
+  <aside id="side" class="off"><iframe id="portal" title="The Logic Portal" src="../../index.html"></iframe></aside>
+</main>
+<div id="keys">↓ or Space: on · ↑: back · E English · C in context · F full screen</div>
+
+<script>
+/* The class screen: a class session shown on the room's screen, its passages large and one after
+   another. It reads
+     the session   this browser's (the one being prepared in the portal's Session panel), one
+                   saved for the class (../../sessions/<name>.json, or ?session=<name>), or a
+                   file saved with "Save to file";
+     its clusters  this browser's, else those saved for the class (../../clusters/<id>.json);
+     the texts     the portal itself, loaded in the frame on the right, hidden unless "In context"
+                   is on, through window.PORTAL: P, TEXTS, BYID and the English.
+   It writes nothing but its own settings. When the portal, in another window of this browser,
+   adds to the session or a cluster, the screen follows, keeping its place. */
+(function () {
+'use strict';
+const KEY = 'kantlab-session-draft-v2', CL_KEY = 'kantlab-clusters-v1', PREF = 'kantlab-class-screen-v1';
+const REPO = 'mikrishnan/kant-lab', DIR = 'logic-portal/sessions';
+const PORTAL = '../../index.html';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const flat = s => String(s || '').replace(/\s+/g, ' ').trim();
+const clip = (s, n) => s.length > n ? s.slice(0, n).replace(/\s+\S*$/, '') + ' …' : s;
+const rich = s => esc(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/\*([^*\n]+)\*/g, '<i>$1</i>');
+const longDate = iso => { const d = new Date(iso + 'T12:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
+const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+const readLS = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+
+let PT = null;                 // the portal's window.PORTAL, once its texts are in
+let STYLES = [];               // the English's styles, from the portal's catalogue
+let SRC = 'draft';             // 'draft', 'saved:<name>' or 'file'
+let RAW = null;                // the saved session or file being shown, as read
+let FILE = null;               // a session read from a file
+let SAVED = [];                // the sessions saved for the class: { slug, title, date }
+let SESSION = null;            // what is shown: { title, date, items, saved, empty }
+let stops = [], cur = 0, waiting = false;
+const pref = { size: 1.6, en: '', notes: true, ctx: false };
+try { Object.assign(pref, readLS(PREF) || {}); } catch (e) { /* the defaults */ }
+const savePref = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) { /* this visit only */ } };
+const frame = $('portal');
+
+/* ── The session, in one shape whatever it comes from ── */
+const files = {};              // clusters saved for the class: id → cluster, or null
+async function clusterFile(id) {
+  if (id in files) return files[id];
+  files[id] = null;
+  try { const r = await fetch('../../clusters/' + id + '.json', { cache: 'no-cache' }); if (r.ok) { const c = await r.json(); if (c && Array.isArray(c.items)) files[id] = c; } } catch (e) { /* none */ }
+  return files[id];
+}
+async function loadSaved(slug) {
+  try { const r = await fetch('../../sessions/' + slug + '.json', { cache: 'no-cache' }); if (r.ok) { const d = await r.json(); if (d && Array.isArray(d.items)) return d; } } catch (e) { /* none */ }
+  return null;
+}
+async function savedList() {
+  try {
+    const r = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + DIR + '?ref=main');
+    if (!r.ok) return [];
+    const fs = (await r.json()).filter(f => f.type === 'file' && /^[a-z0-9-]+\.json$/.test(f.name));
+    const out = await Promise.all(fs.map(async f => { const slug = f.name.replace(/\.json$/, ''), d = await loadSaved(slug); return d ? { slug, title: d.title, date: d.date } : null; }));
+    return out.filter(Boolean).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  } catch (e) { return []; }
+}
+// A cluster as it is now: this browser's, else the one saved for the class
+async function clusterNow(id) { const cl = readLS(CL_KEY) || {}; return cl[id] || await clusterFile(id); }
+// The session being prepared in this browser: its clusters as they are now, no "added after"
+async function fromDraft() {
+  const d = readLS(KEY);
+  if (!d || !Array.isArray(d.items)) return { title: 'No class session in this browser yet', date: '', items: [], empty: true };
+  const items = [];
+  for (const x of d.items) {
+    if (x.kind === 'note') items.push({ kind: 'note', id: x.id, text: x.text || '' });
+    else if (x.kind === 'cluster') { const c = await clusterNow(x.cluster); items.push({ kind: 'cluster', id: x.id, cluster: x.cluster, title: c ? c.title : x.cluster, items: c ? c.items : [], missing: !c }); }
+    else items.push(Object.assign({}, x));
+  }
+  return { title: d.title || 'A class session', date: d.date || '', items, saved: false };
+}
+// A saved session, or a file: its clusters as they are now, with what came after the class marked
+async function fromSaved(d) {
+  const items = [];
+  for (const [k, x] of d.items.entries()) {
+    const id = 'i' + (k + 1);
+    if (x.kind === 'note') items.push({ kind: 'note', id, text: x.text || '' });
+    else if (x.kind === 'cluster') {
+      const c = await clusterNow(x.cluster), was = x.items || [], now = c ? c.items : was;
+      items.push({ kind: 'cluster', id, cluster: x.cluster, title: (c && c.title) || x.title || x.cluster, items: now, gone: c ? was.filter(y => !now.some(z => z.ref === y.ref)).length : 0 });
+    } else items.push(Object.assign({ id }, x));
+  }
+  return { title: d.title || 'A class session', date: d.date || '', items, saved: true };
+}
+
+/* ── Drawing ── */
+function english(p, T) {
+  if (!pref.en || !PT.trFor) return null;
+  const tr = PT.trFor(T);
+  if (!tr) return null;
+  const st = PT.trState(tr, pref.en);
+  if (st === 'loading') { waiting = true; return 'loading'; }
+  return st === 'ready' ? PT.trEntry(tr, pref.en, p) : null;
+}
+const styleLabel = () => (STYLES.find(s => s.key === pref.en) || {}).label || pref.en;
+function passageHtml(x, n, key, later) {
+  const q = PT.BYID.get(x.ref), p = q != null ? PT.P[q] : null, T = p ? PT.TEXTS[p.t] : null;
+  const a = T && T.accuracy;
+  const cite = '<b>' + esc(x.author) + '</b>, <span class="w">' + esc(x.work) + '</span>, ' + esc(x.cite) +
+    (p ? ' <span class="d">· ' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + '</span>' : '') +
+    (a && a.ocr ? '<span class="tag" title="' + esc(a.how) + '">OCR · about ' + esc(a.words) + '% of words right</span>' : '') +
+    (p ? '<a href="' + PORTAL + '#p=' + encodeURIComponent(x.ref) + '&amp;rt=conn" target="kantlab-portal" data-ctx title="This passage in the portal, in its full text">in the portal ↗</a>' : '');
+  const e = p ? english(p, T) : null;
+  return '<section class="it' + (key.includes('|') ? ' sub' : '') + '" data-key="' + esc(key) + '" data-ref="' + esc(x.ref) + '" data-label="' + esc(n + ' · ' + clip((T ? T.short : x.work) + ', ' + x.cite, 60)) + '">' +
+    '<div class="num">' + esc(n) + '</div><div class="body">' + (later || '') + '<div class="cite">' + cite + '</div>' +
+    (p ? '<div class="de" lang="' + (T.shape === 'metaphysica' ? 'la' : 'de') + '">' + esc(p.text) + '</div>' : '<div class="gone">(This passage is no longer in the portal.)</div>') +
+    (e === 'loading' ? '<div class="en wait">English loading…</div>'
+      : e ? '<div class="en" lang="en"><span class="lab">English · a machine translation on ' + esc(styleLabel()) + (e.part ? ' · made for a longer stretch than this passage' : '') + '</span>' + rich(e.text) + '</div>' : '') +
+    (flat(x.note) ? '<div class="pn">' + esc(x.note.trim()) + '</div>' : '') + '</div></section>';
+}
+function itemHtml(x, n, S) {
+  if (x.kind === 'note') return '<section class="it note" data-key="' + esc(x.id) + '" data-label="' + esc(n + ' · ' + clip(flat(x.text) || 'A note', 60)) + '"><div class="num">' + esc(n) + '</div><div class="body"><div class="q">' + esc(x.text || '') + '</div></div></section>';
+  if (x.kind !== 'cluster') return passageHtml(x, n, x.id, '');
+  const its = x.items || [];
+  return '<section class="it clh" data-key="' + esc(x.id) + '" data-label="' + esc(n + ' · ❖ ' + clip(x.title, 50)) + '"><div class="num">' + esc(n) + '</div><div class="body">' +
+      '<div class="clt">❖ ' + esc(x.title) + '</div><div class="cls">a cluster of ' + plural(its.length, 'passage') +
+      (x.missing ? ' · neither in this browser nor saved for the class' : '') +
+      (x.gone ? ' · ' + (x.gone === 1 ? 'one passage that was in it at this class has' : x.gone + ' passages that were in it at this class have') + ' since been taken out' : '') + '</div></div></section>' +
+    its.map((y, j) => passageHtml(y, n + '.' + (j + 1), x.id + '|' + y.ref,
+      S.saved && S.date && y.added && y.added > S.date ? '<div class="later">Added to the cluster after this class, on ' + esc(longDate(y.added)) + '.</div>' : '')).join('');
+}
+const curKey = () => stops[cur] ? stops[cur].dataset.key : null;
+function render(keep) {
+  if (!PT || !SESSION) return;
+  const S = SESSION, st = $('stage'), was = keep && stops.find(s => s.dataset.key === keep), off = was ? was.getBoundingClientRect().top : 0;
+  const np = S.items.reduce((a, x) => a + (x.kind === 'note' ? 0 : x.kind === 'cluster' ? (x.items || []).length : 1), 0), nn = S.items.filter(x => x.kind === 'note').length;
+  waiting = false;
+  $('col').innerHTML = '<div class="head"><h1>' + esc(S.title) + '</h1><div class="date">' + (S.date ? esc(longDate(S.date)) + ' · ' : '') + plural(np, 'passage') + (nn ? ', ' + plural(nn, 'note') : '') +
+      (S.saved ? '' : ' · as it is being prepared in this browser') + '</div></div>' +
+    (S.items.length ? S.items.map((x, k) => itemHtml(x, String(k + 1), S)).join('')
+      : '<p class="msg">' + (S.empty ? 'This browser has no class session yet. In the portal, press <b>Session</b>, turn on <b>Recording</b>, and press <b>+ Session</b> on passages: they appear here as you add them.' : 'Nothing in this session yet. Passages added to it in the portal appear here as you add them.') + '</p>');
+  stops = [...$('col').querySelectorAll('.it')];
+  const k = keep ? stops.findIndex(s => s.dataset.key === keep) : -1;
+  cur = k >= 0 ? k : Math.min(cur, Math.max(0, stops.length - 1));
+  if (k >= 0 && was) st.scrollTop += stops[k].getBoundingClientRect().top - off;   // keep the passage in view where it was
+  $('pos').innerHTML = stops.map((s, i) => '<option value="' + i + '">' + esc(s.dataset.label) + '</option>').join('') || '<option>—</option>';
+  mark();
+  if (waiting) setTimeout(() => render(curKey()), 700);
+}
+let ctxT = 0;
+function mark() {
+  stops.forEach((s, i) => s.classList.toggle('cur', i === cur));
+  if (stops.length) $('pos').value = String(cur);
+  clearTimeout(ctxT);
+  if (pref.ctx) ctxT = setTimeout(context, 300);   // once the scrolling has settled
+}
+function go(i, scroll) {
+  if (!stops.length) return;
+  cur = Math.max(0, Math.min(stops.length - 1, i));
+  mark();
+  if (scroll) stops[cur].scrollIntoView({ block: 'start', behavior: 'auto' });
+}
+// On: through a long passage a screen at a time, then to the next item. Back: the same, upward.
+// Moves jump rather than glide: on the room's screen a page turned reads better than a slide,
+// and a redraw (the English arriving) cannot leave a glide half done.
+function next() {
+  const st = $('stage'), s = stops[cur];
+  if (!s) return;
+  const r = s.getBoundingClientRect(), box = st.getBoundingClientRect();
+  if (r.bottom > box.bottom + 4 && r.top < box.bottom - 40) { st.scrollBy({ top: Math.min(st.clientHeight * 0.8, r.bottom - box.bottom + 24), behavior: 'auto' }); return; }
+  go(cur + 1, true);
+}
+function prev() {
+  const st = $('stage'), s = stops[cur];
+  if (!s) return;
+  const r = s.getBoundingClientRect(), box = st.getBoundingClientRect();
+  if (r.top < box.top - 4) { st.scrollBy({ top: -Math.min(st.clientHeight * 0.8, box.top - r.top + 8), behavior: 'auto' }); return; }
+  go(cur - 1, true);
+}
+// Scrolled by hand: the item in hand is the last one whose top has reached the top of the screen
+// (an item brought there stands just below the edge, by its scroll margin), or else the first
+let ticking = false;
+$('stage').addEventListener('scroll', () => {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    ticking = false;
+    const top = $('stage').getBoundingClientRect().top + 20;
+    let k = 0;
+    stops.forEach((s, i) => { if (s.getBoundingClientRect().top <= top) k = i; });
+    if (stops.length && k !== cur) { cur = k; mark(); }
+  });
+}, { passive: true });
+
+/* ── In context: the passage in the portal, beside it ── */
+function context() {
+  $('side').classList.toggle('off', !pref.ctx);
+  $('ctx').classList.toggle('on', pref.ctx);
+  const s = stops[cur], ref = s && s.dataset.ref;
+  if (!pref.ctx || !ref) return;
+  const h = 'p=' + encodeURIComponent(ref) + '&rt=conn';
+  try { if (frame.contentWindow.location.hash.slice(1) !== h) frame.contentWindow.location.hash = h; } catch (e) { /* not reachable */ }
+}
+
+/* ── Which session ── */
+function drawSrc() {
+  const d = readLS(KEY), slug = SRC.startsWith('saved:') ? SRC.slice(6) : '';
+  const known = SAVED.some(s => s.slug === slug);
+  $('src').innerHTML = '<option value="draft">This browser’s session' + (d && Array.isArray(d.items) ? ': ' + esc(clip(d.title || '', 40)) + ' (' + d.items.length + ')' : '') + '</option>' +
+    (SAVED.length || (slug && !known) ? '<optgroup label="Saved for the class">' + SAVED.map(s => '<option value="saved:' + esc(s.slug) + '">' + esc(clip(s.title || s.slug, 44)) + ' · ' + esc(longDate(s.date)) + '</option>').join('') +
+      (slug && !known ? '<option value="saved:' + esc(slug) + '">' + esc(RAW && RAW.title ? clip(RAW.title, 44) : slug) + '</option>' : '') + '</optgroup>' : '') +
+    (FILE ? '<option value="file">From a file: ' + esc(clip(FILE.title || 'a session', 40)) + '</option>' : '') +
+    '<option value="open">Open a session file…</option>';
+  $('src').value = SRC;
+}
+async function show(src, keep) {
+  SRC = src;
+  if (src === 'draft') { RAW = null; SESSION = await fromDraft(); }
+  else if (src === 'file') { RAW = FILE; SESSION = await fromSaved(FILE); }
+  else {
+    const slug = src.slice(6);
+    RAW = await loadSaved(slug);
+    SESSION = RAW ? await fromSaved(RAW) : { title: 'There is no saved session called “' + slug + '”', date: '', items: [], saved: true };
+  }
+  history.replaceState(null, '', src.startsWith('saved:') ? '?session=' + encodeURIComponent(src.slice(6)) : location.pathname);
+  document.title = (SESSION.empty ? 'Class screen' : SESSION.title + ' · Class screen') + ' · Kant Lab';
+  drawSrc();
+  if (!keep) { cur = 0; $('stage').scrollTop = 0; }
+  render(keep);
+}
+// The portal, in another window of this browser, changed the session or a cluster: follow, keeping the place
+window.addEventListener('storage', e => {
+  if (!PT || (e.key !== KEY && e.key !== CL_KEY && e.key !== null)) return;
+  if (SRC === 'draft') show('draft', curKey());
+  else if (e.key !== KEY) (async () => { SESSION = await fromSaved(RAW || FILE); render(curKey()); })();
+  else drawSrc();
+});
+$('src').addEventListener('change', e => {
+  const v = e.target.value;
+  if (v === 'open') { e.target.value = SRC; $('file').click(); return; }
+  show(v);
+  e.target.blur();
+});
+$('file').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  try {
+    const d = JSON.parse(await f.text());
+    if (!d || !Array.isArray(d.items)) throw new Error('not a session');
+    FILE = d; show('file');
+  } catch (err) { alert('That file is not a class session saved from the portal.'); }
+});
+$('pos').addEventListener('change', e => { go(+e.target.value, true); e.target.blur(); });
+
+/* ── The controls ── */
+function apply() {
+  document.documentElement.style.setProperty('--fs', pref.size + 'rem');
+  document.body.classList.toggle('nonotes', !pref.notes);
+  $('notes').classList.toggle('on', pref.notes);
+  $('en').value = pref.en;
+  context();
+}
+function setEn(v) { pref.en = v; savePref(); apply(); render(curKey()); }
+function size(d) { pref.size = Math.max(1, Math.min(3.2, Math.round((pref.size + d) * 10) / 10)); savePref(); const k = curKey(); apply(); render(k); }
+$('en').addEventListener('change', e => { setEn(e.target.value); e.target.blur(); });
+$('notes').addEventListener('click', e => { pref.notes = !pref.notes; savePref(); apply(); e.currentTarget.blur(); });
+$('ctx').addEventListener('click', e => { pref.ctx = !pref.ctx; savePref(); apply(); e.currentTarget.blur(); });
+$('smaller').addEventListener('click', e => { size(-0.1); e.currentTarget.blur(); });
+$('bigger').addEventListener('click', e => { size(0.1); e.currentTarget.blur(); });
+function full() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }
+$('full').addEventListener('click', e => { full(); e.currentTarget.blur(); });
+let idleT = 0;
+function awake() {
+  document.body.classList.remove('idle');
+  clearTimeout(idleT);
+  if (document.fullscreenElement) idleT = setTimeout(() => document.body.classList.add('idle'), 2500);
+}
+document.addEventListener('fullscreenchange', () => { const on = !!document.fullscreenElement; document.body.classList.toggle('full', on); $('full').classList.toggle('on', on); awake(); });
+document.addEventListener('mousemove', awake);
+$('col').addEventListener('click', e => {
+  const s = e.target.closest('.it');
+  if (!s) return;
+  const i = stops.indexOf(s);
+  if (e.target.closest('a[data-ctx]') && pref.ctx) { e.preventDefault(); go(i, false); return; }
+  if (!e.target.closest('a') && !String(window.getSelection && window.getSelection())) go(i, false);
+});
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey || (e.target.closest && e.target.closest('select, input, textarea'))) return;
+  if (e.target.closest && e.target.closest('button') && (e.key === ' ' || e.key === 'Enter')) return;
+  const k = e.key;
+  if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { e.preventDefault(); next(); }
+  else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp' || (k === ' ' && e.shiftKey)) { e.preventDefault(); prev(); }
+  else if (k === 'Home') { e.preventDefault(); go(0, true); }
+  else if (k === 'End') { e.preventDefault(); go(stops.length - 1, true); }
+  else if (k === 'e' || k === 'E') { const ks = [''].concat(STYLES.map(s => s.key)); setEn(ks[(ks.indexOf(pref.en) + 1) % ks.length]); }
+  else if (k === 'n' || k === 'N') $('notes').click();
+  else if (k === 'c' || k === 'C') $('ctx').click();
+  else if (k === 'f' || k === 'F') full();
+  else if (k === '+' || k === '=') size(0.1);
+  else if (k === '-' || k === '_') size(-0.1);
+  else return;
+  awake();
+});
+
+/* ── Start: wait for the portal in the frame to have its texts in ── */
+function boot() {
+  let pt = null, doc = null;
+  try { pt = frame.contentWindow.PORTAL; doc = frame.contentDocument; }
+  catch (e) { $('wait').innerHTML = 'The class screen reads the portal’s texts, so it has to be opened from the same site as the portal: from the portal’s Session panel, or at <b>…/logic-portal/teaching/class-screen/</b>. It does not work opened as a file.'; return; }
+  const ld = doc && doc.getElementById('loading'), lm = doc && doc.getElementById('loadmsg');
+  if (!(pt && pt.P && pt.P.length && pt.BYID && ld && ld.hidden)) {
+    if (lm && lm.textContent) $('wait').textContent = 'Loading the texts… ' + lm.textContent;
+    setTimeout(boot, 300);
+    return;
+  }
+  PT = pt;
+  try { STYLES = frame.contentWindow.Function('return typeof PORTAL_TR_STYLES === "undefined" ? [] : PORTAL_TR_STYLES')(); } catch (e) { STYLES = []; }
+  if (pref.en && !STYLES.some(s => s.key === pref.en)) pref.en = '';
+  $('en').innerHTML = '<option value="">No English</option>' + STYLES.map(s => '<option value="' + esc(s.key) + '">English: ' + esc(s.label) + '</option>').join('');
+  apply();
+  const wanted = new URLSearchParams(location.search).get('session');
+  show(wanted && /^[a-z0-9-]+$/.test(wanted) ? 'saved:' + wanted : 'draft');
+  savedList().then(l => { SAVED = l; drawSrc(); });
+}
+boot();
+})();
+</script>
+</body>
+</html>

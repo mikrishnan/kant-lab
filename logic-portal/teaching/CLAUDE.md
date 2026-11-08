@@ -1,0 +1,45 @@
+# Teaching tools
+
+This folder holds small tools for teaching with the Logic Portal, one folder each.
+[README.md](README.md) describes them for a human.
+
+## Scope
+
+- **Change only the tool's own folder**, plus its entry in `teaching.js` and its row in
+  `README.md`. Never edit the portal (`../index.html`, `../catalogue.js`,
+  `../class-sessions.js`), `data/`, a study, or another tool. If a tool cannot be built
+  without a change to the portal, stop and say so: that change is a pull request of its
+  own, and the people who use the portal for everything else review it.
+- A tool is for teaching. Do not generalise one into the portal on your own initiative.
+
+## How a tool draws on the portal
+
+- **Through the portal in a frame,** as the studies do. The portal's script is one closed
+  function; the only global is `window.PORTAL`: `P` and `TEXTS` for the passages, `BYID`
+  for a passage by its `ref` (`textKey:id`), and `trFor`, `trState` and `trEntry` for the
+  English. The class screen's `index.html` loads `../../index.html` in a frame, waits for
+  `#loading` to be hidden, and reads `frame.contentWindow.PORTAL`. Do not copy the
+  portal's code; it changes every week.
+- **Link to the portal by address:** `../../index.html#p=<ref>&rt=conn` for a passage,
+  `#read=<textKey>&at=<id>` for a place in a text, `#q=<words>` for a search.
+- **The class sessions, read only.** `class-sessions.js` keeps the session being prepared
+  in `localStorage['kantlab-session-draft-v2']` and the clusters in
+  `localStorage['kantlab-clusters-v1']`, the shapes its comments give. Saved sessions
+  are `logic-portal/sessions/<name>.json` (`../../sessions/` from a tool's folder; see
+  `../sessions/README.md`), saved clusters `logic-portal/clusters/<id>.json` (see
+  `../clusters/README.md`). A tool reads these and never writes them. The `storage` event tells a tool when the portal, in another window,
+  has changed them.
+- Pages under `logic-portal/` share one origin with the portal, so all of this works
+  on GitHub Pages and on a local server, but not from a `file://` address.
+
+## Attested vs. inferred
+
+As in the root `CLAUDE.md`. The English is a machine translation: say so wherever it is
+shown, and name the translator whose method it follows, as the portal does. A text that is
+OCR says so, with the share of words right that its `accuracy` gives. A Reflexion's dating
+is Adickes' phase with the portal's years beside it, labelled as his.
+
+## The repository is public
+
+No student's name, and nothing from Canvas. Markdown here is published through Jekyll: no
+double opening curly brace, and no opening curly brace followed by a percent sign.

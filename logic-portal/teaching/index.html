@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teaching tools · The Logic Portal · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  /* The Logic Portal's palette and fonts, so the page reads as part of it. */
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --card: #fbf8f1;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #d9ccb0;
+    --line-soft: #e8dec9;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'EB Garamond', Georgia, serif; font-size: 17px; line-height: 1.45; color: var(--ink); background: var(--parchment); }
+  header { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.55rem 1rem; border-bottom: 1px solid var(--line);
+           background: var(--parchment-dark); font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 0.05em; }
+  header a { color: var(--accent); text-decoration: none; }
+  header a:hover { text-decoration: underline; }
+  header .slash { color: var(--line); }
+  header b { color: var(--accent); font-weight: 600; }
+  main { max-width: 46rem; margin: 0 auto; padding: 1.6rem 1.4rem 4rem; }
+  h1 { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; font-size: 1.5rem; margin: 0 0 0.4rem; }
+  .intro { color: #4b4034; margin: 0 0 1.4rem; }
+  .tools { display: grid; gap: 0.8rem; }
+  .tool { display: block; background: var(--card); border: 1px solid var(--line-soft); border-left: 3px solid var(--accent-light);
+          border-radius: 8px; padding: 0.75rem 1rem; text-decoration: none; color: var(--ink); }
+  .tool:hover { border-color: var(--accent-light); }
+  .tool b { display: block; font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; letter-spacing: 0.03em; }
+  .tool span { display: block; margin-top: 0.2rem; }
+  .tool small { display: block; margin-top: 0.3rem; color: var(--faded); font-style: italic; font-size: 0.85rem; }
+  .none { color: var(--faded); font-style: italic; }
+</style>
+</head>
+<body>
+<header><a href="../../index.html">Kant Lab</a><span class="slash">/</span><a href="../index.html">The Logic Portal</a><span class="slash">/</span><b>Teaching tools</b></header>
+<main>
+  <h1>Teaching tools</h1>
+  <p class="intro">Small tools made for teaching with the Logic Portal, a new one most weeks. Each draws on the
+    portal’s texts and its class sessions without changing the portal.</p>
+  <div class="tools" id="tools"></div>
+</main>
+<script src="teaching.js"></script>
+<script>
+(function () {
+  'use strict';
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const longDate = iso => { const d = new Date(iso + 'T12:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
+  const list = typeof PORTAL_TEACHING !== 'undefined' && Array.isArray(PORTAL_TEACHING) ? PORTAL_TEACHING : [];
+  document.getElementById('tools').innerHTML = list.length
+    ? list.map(t => '<a class="tool" href="' + esc(t.href) + '"><b>' + esc(t.title) + '</b><span>' + esc(t.what) + '</span><small>Made ' + esc(longDate(t.begun)) + '</small></a>').join('')
+    : '<p class="none">No teaching tools yet.</p>';
+})();
+</script>
+</body>
+</html>
