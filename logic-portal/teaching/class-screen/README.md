@@ -5,6 +5,9 @@ another, with the English beneath them when you want it. Open it with **Class sc
 portal's Handouts page. It opens in a window of its own, which you can drag onto the room's screen
 and make full screen, while the portal stays on your laptop.
 
+**The class password.** The screen shows nothing until it is given, as the Handouts page does;
+with **Remember on this computer** it is not asked again in that browser.
+
 **What it shows.** By default, the handout open on the Handouts page in this browser, published or
 not. It follows that handout as you work. A passage or note you add in the portal appears on the
 screen, and the screen keeps its place. If you open another handout there, the screen shows that

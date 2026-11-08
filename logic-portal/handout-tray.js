@@ -25,6 +25,10 @@
    remembered in this browser. The Handouts page's Class screen button shows the handout on
    the room's screen (teaching/class-screen/).
 
+   The handouts are the class's: nothing of them opens without the class password, which
+   handouts/lock.js checks (KANTLAB_LOCK), and a published handout is encrypted with it.
+   Handout mode stays off until the password is given; Lock, on the Handouts page, forgets it.
+
    The portal is a closed IIFE. This file reads it only through window.PORTAL, and it
    draws nothing inside the portal's own markup except one button beside the passage open
    on the right, the header's buttons, and the Class handouts in Read.
@@ -37,7 +41,12 @@ const { S, P, TEXTS } = PT;
 
 const KEY = 'kantlab-handouts-v1';
 const MODE_KEY = 'kantlab-handouts-mode';      // 'on', or absent for off
-let mode = localStorage.getItem(MODE_KEY) === 'on';
+const modeWas = localStorage.getItem(MODE_KEY) === 'on';   // on when last left, so on again once the password is given
+let mode = false;
+const LOCK = window.KANTLAB_LOCK || null;                  // handouts/lock.js: the class password
+// Before anything of the handouts opens: the class password, unless given already on this page
+// or remembered on this computer. Without lock.js nothing opens.
+const gate = (text) => !LOCK ? Promise.resolve(false) : LOCK.key() ? Promise.resolve(true) : LOCK.ask(text ? { text } : undefined);
 const REPO = 'mikrishnan/kant-lab';
 const DIR = 'logic-portal/handouts';   // where published handouts live
 const SITE = PT.SITE_PORTAL || 'https://mikrishnan.github.io/kant-lab/logic-portal/index.html';
@@ -626,8 +635,11 @@ if (anchor && anchor.parentNode) { anchor.parentNode.insertBefore(hc, anchor); a
 else document.body.append(hb, hc);
 hb.addEventListener('click', () => {
   if (!page.hidden && docked) { closePage(); return; }
-  if (!mode && !$('moremenu')) setMode(true);
-  openPage();
+  gate().then(ok => {
+    if (!ok) { if (!LOCK) toast('The handouts’ lock did not load. Reload the page and try again.'); return; }
+    if (!mode && !$('moremenu')) setMode(true);
+    openPage();
+  });
 });
 hc.addEventListener('click', () => { DB.collect = null; save(); if (!page.hidden) render(); toast('Passages you add now go to the end of the handout, under no note.'); });
 
@@ -682,7 +694,7 @@ function menuDraw() {
       : 'Collect passages for a handout as you read, then arrange and export them.') + '</p>' +
     (mode || n ? '<button type="button" class="linkish hopen">Open my handouts' + (n ? ' (' + plural(n, 'passage') + ')' : '') + '</button>' : '') + '</div>';
 }
-function setMode(on) {
+function setMode(on, quiet) {
   mode = on;
   try { if (on) localStorage.setItem(MODE_KEY, 'on'); else localStorage.removeItem(MODE_KEY); } catch (e) { /* the switch still works for this visit */ }
   document.body.classList.toggle('hmode', on);
@@ -690,15 +702,20 @@ function setMode(on) {
   if (mi) mi.checked = on;
   if (!on) { hideHover(); sb.hidden = true; }
   marks();
-  toast(on ? 'Handout mode is on. Point at a passage and press + Handout.' : 'Handout mode is off. Your handouts are kept.');
+  if (!quiet) toast(on ? 'Handout mode is on. Point at a passage and press + Handout.' : 'Handout mode is off. Your handouts are kept.');
 }
-msec.addEventListener('change', e => { if (e.target.classList.contains('hmode')) setMode(e.target.checked); });
+msec.addEventListener('change', e => {
+  if (!e.target.classList.contains('hmode')) return;
+  const t = e.target;
+  if (!t.checked) { setMode(false); return; }
+  gate().then(ok => { if (ok) setMode(true); else t.checked = false; });
+});
 msec.addEventListener('click', e => {
   if (!e.target.closest('.hopen')) return;
   moremenu.hidden = true;
   const mb = $('morebtn');
   if (mb) { mb.setAttribute('aria-expanded', 'false'); mb.classList.remove('on'); }
-  openPage();
+  gate().then(ok => { if (ok) openPage(); });
 });
 
 /* A passage under the pointer, in the search results or in a full text, gets "+ Handout"
@@ -826,6 +843,7 @@ page.innerHTML = '<div class="hdockgrip" title="Drag to make the handout wider o
   '<button type="button" class="btn" data-h="txt" title="Plain text in the Handout tool’s markup, ready to make into a handout in your house style">Handout tool text</button></span>' +
   '<button type="button" class="btn solid" data-h="publish" title="Put this handout in the portal, for students to read with every passage live">Publish for students</button>' +
   '<button type="button" class="btn" data-h="screen" title="Show this handout on the room’s screen, in a window of its own">Class screen ↗</button>' +
+  '<button type="button" class="linkish" data-h="lock" title="Forget the class password on this computer: it is asked for again before the handouts open">Lock</button>' +
   ($('moremenu') ? '' : '<label class="hmodesw" title="Off, the portal shows nothing of the handouts but the Handouts button; your handouts are kept"><input type="checkbox" class="hmodein"' + (mode ? ' checked' : '') + '> + Handout on passages</label>') +
   '<span class="hfile"><button type="button" class="linkish" data-h="save" title="Every handout, in one file, to keep or to move to another browser">Save to file</button>' +
   '<button type="button" class="linkish" data-h="open" title="Adds the handouts in a saved file to these">Open file</button></span>' +
@@ -1168,6 +1186,7 @@ page.addEventListener('click', e => {
     case 'close': return closePage();
     case 'dock': return setDock(!docked);
     case 'screen': { const w = window.open(SCREEN, 'kantlab-class-screen', 'popup,width=1280,height=800'); if (w) w.focus(); return; }
+    case 'lock': { if (LOCK) LOCK.forget().then(() => { setMode(false, true); closePage(); toast('Locked. The class password will be asked for before the handouts open again.'); }); return; }
     case 'new': { const x = blank('Untitled handout'); DB.handouts.push(x); DB.current = x.id; pubOpen = false; save(); render(); const i = page.querySelector('.hname'); i.focus(); i.select(); return; }
     case 'delete': {
       const n = countOf(h);
@@ -1244,7 +1263,7 @@ page.addEventListener('click', e => {
     case 'publish': pubOpen = !pubOpen; render(); if (pubOpen) page.querySelector('main').scrollTop = 0; return;
     case 'pubclose': pubOpen = false; render(); return;
     case 'pubgo': markPublished(h); return;   // the link itself opens GitHub
-    case 'pubfile': { const P2 = publication(h); download(new Blob([P2.json], { type: 'application/json' }), P2.slug + '.json'); markPublished(h); return; }
+    case 'pubfile': { const P2 = publication(h); if (!P2.ready) return; download(new Blob([P2.json], { type: 'application/json' }), P2.slug + '.json'); markPublished(h); return; }
     case 'publink': { const link = publication(h).link; if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => toast('Link copied: ' + link), () => prompt('Copy this link:', link)); else prompt('Copy this link:', link); return; }
   }
 });
@@ -1640,11 +1659,24 @@ function publishable(h) {
       : it.kind === 'note' ? { kind: 'note', text: it.text || '', items: kids(it).map(pass) } : pass(it)),
   };
 }
+/* What publishing puts in the repository: the handout sealed with the class key (handouts/lock.js),
+   so that its file reads as nothing without the class password. Sealing takes a moment, so the
+   panel is drawn again once the handout, as it stands, is sealed. */
+let SEALED = { id: null, plain: null, json: null, pending: null };
+function sealed(h) {
+  const plain = JSON.stringify(publishable(h));
+  if (SEALED.id === h.id && SEALED.plain === plain) return SEALED.json;
+  if (LOCK && LOCK.key() && SEALED.pending !== plain) {
+    SEALED.pending = plain;
+    LOCK.seal(plain).then(json => { SEALED = { id: h.id, plain, json, pending: null }; if (pubOpen && !page.hidden) render(); }, () => { SEALED.pending = null; });
+  }
+  return null;
+}
 function publication(h) {
   const slug = (h.published && h.published.slug) || slugOf(h.name);
-  const json = JSON.stringify(publishable(h), null, 1) + '\n';
-  const newUrl = 'https://github.com/' + REPO + '/new/main/' + DIR + '?filename=' + encodeURIComponent(slug + '.json') + '&value=' + encodeURIComponent(json);
-  return { slug, json, newUrl, link: SITE_DIR + '?handout=' + slug, again: !!h.published, viaNew: !h.published && newUrl.length < 7500 };
+  const json = sealed(h);
+  const newUrl = json ? 'https://github.com/' + REPO + '/new/main/' + DIR + '?filename=' + encodeURIComponent(slug + '.json') + '&value=' + encodeURIComponent(json) : '';
+  return { slug, json, newUrl, link: SITE_DIR + '?handout=' + slug, again: !!h.published, viaNew: !!json && !h.published && newUrl.length < 7500, ready: !!json };
 }
 function markPublished(h) {
   h.published = { slug: publication(h).slug, at: new Date().toISOString() };
@@ -1655,9 +1687,9 @@ function publishPanel(h) {
   if (!pubOpen) return '';
   const p = publication(h);
   return '<div class="hpub"><b>Publish “' + esc(h.name) + '” for students</b>' +
-    '<p>Publishing makes this handout public: anyone can read it, your notes and labels included, because the Kant Lab repository is public. ' +
-    'Students see every passage live in the portal, with a link to read it in context.</p>' +
-    (p.viaNew
+    '<p>Publishing puts this handout in the Kant Lab repository, which is public, but locked with the class password: without it the file reads as nothing, your notes and labels included. ' +
+    'Students open it with the class password, and see every passage live in the portal, with a link to read it in context.</p>' +
+    (!p.ready ? '<p class="muted">Locking the handout with the class password…</p>' : p.viaNew
       ? '<p>1. <a class="btn solid" href="' + esc(p.newUrl) + '" target="_blank" rel="noopener" data-h="pubgo">Open GitHub to publish</a> &nbsp; 2. On GitHub, press <b>Commit changes</b>.</p>'
       : '<p>1. <button type="button" class="btn solid" data-h="pubfile">Download the file</button> &nbsp; 2. <a class="btn" href="https://github.com/' + REPO + '/upload/main/' + DIR + '" target="_blank" rel="noopener">Open GitHub’s upload page</a> &nbsp; 3. Drag <code>' + esc(p.slug) + '.json</code> from your Downloads folder onto it, and press <b>Commit changes</b>.' +
         (p.again ? ' It replaces the version you published before.' : '') + '</p>') +
@@ -1683,7 +1715,17 @@ async function showPublished(slug) {
   const box = view.querySelector('.hwrap');
   let d = null;
   try { const r = await fetch('handouts/' + slug + '.json', { cache: 'no-cache' }); if (r.ok) d = await r.json(); } catch (e) { /* d stays null */ }
-  if (!d || !Array.isArray(d.items)) { box.innerHTML = '<p>There is no class handout called “' + esc(slug) + '” here. If it was published a minute ago, try again shortly.</p>'; return; }
+  if (!d || !(Array.isArray(d.items) || (LOCK && LOCK.isLocked(d)))) { box.innerHTML = '<p>There is no class handout called “' + esc(slug) + '” here. If it was published a minute ago, try again shortly.</p>'; return; }
+  // the class password, before anything of it shows
+  const ok = (LOCK && await LOCK.remembered()) || await gate('This handout is for the class. Enter the class password to read it.');
+  if (!ok) {
+    box.innerHTML = '<p>This handout is for the class, and opens with the class password.</p><p><button type="button" class="btn solid" id="hunlock">Enter the class password</button></p>';
+    $('hunlock').addEventListener('click', () => { view.remove(); showPublished(slug); });
+    return;
+  }
+  if (LOCK.isLocked(d)) {
+    try { d = await LOCK.open(d); } catch (e) { box.innerHTML = '<p>This handout was locked with a password other than the class’s present one. Ask for it to be published again.</p>'; return; }
+  }
   document.title = d.title + ' · The Logic Portal';
   await ready();
   drawPublished(d, 0);
@@ -1740,6 +1782,8 @@ back.addEventListener('click', () => { if (view) { view.hidden = false; back.hid
 /* Read lists the class handouts that have been published, by asking GitHub what is in
    handouts/ (once a visit), above the texts. */
 let CLASS = null;
+// a locked handout's name, from its file's: its title is inside the lock
+const nameOf = slug => (slug.charAt(0).toUpperCase() + slug.slice(1)).replace(/-/g, ' ');
 async function classHandouts() {
   if (CLASS) return CLASS;
   try { const c = sessionStorage.getItem('kantlab-class-handouts'); if (c) return (CLASS = JSON.parse(c)); } catch (e) { /* ask GitHub */ }
@@ -1748,7 +1792,7 @@ async function classHandouts() {
     const files = r.ok ? (await r.json()).filter(f => f.type === 'file' && /^[a-z0-9-]+\.json$/.test(f.name)) : [];
     CLASS = await Promise.all(files.map(async f => {
       const slug = f.name.replace(/\.json$/, '');
-      try { const d = await (await fetch('handouts/' + f.name)).json(); return { slug, title: d.title || slug, published: d.published || '' }; }
+      try { const d = await (await fetch('handouts/' + f.name)).json(); return LOCK && LOCK.isLocked(d) ? { slug, title: nameOf(slug), published: '', locked: true } : { slug, title: d.title || slug, published: d.published || '' }; }
       catch (e) { return { slug, title: slug, published: '' }; }
     }));
     CLASS.sort((a, b) => (b.published || '').localeCompare(a.published || ''));
@@ -1764,7 +1808,7 @@ async function classList() {
   if (!list.length || box.querySelector('.hclass') || !box.isConnected) return;
   const sec = el('section', null, 'hclass');
   sec.innerHTML = '<div class="ph">CLASS HANDOUTS</div><div class="hclist">' + list.map(x =>
-    '<a class="hcl" href="?handout=' + esc(x.slug) + '"><b>' + esc(x.title) + '</b>' + (x.published ? '<span>Published ' + esc(x.published) + '</span>' : '') + '</a>').join('') + '</div>';
+    '<a class="hcl" href="?handout=' + esc(x.slug) + '"><b>' + esc(x.title) + '</b>' + (x.locked ? '<span>For the class: opens with the class password</span>' : x.published ? '<span>Published ' + esc(x.published) + '</span>' : '') + '</a>').join('') + '</div>';
   const intro = box.querySelector('.intro');
   if (intro) intro.after(sec); else box.prepend(sec);
 }
@@ -1965,6 +2009,7 @@ function zip(files, type) {
 window.HANDOUTS = { get db() { return DB; }, toText: () => toText(cur()), docx: () => docxBlob(cur()), publishable: () => publishable(cur()), open: openPage };
 
 document.body.classList.toggle('hmode', mode);
-document.body.classList.toggle('hnomenu', !$('moremenu'));   // no Modes menu: the Handouts button is the switch
+document.body.classList.toggle('hnomenu', !$('moremenu'));
+if (LOCK) LOCK.remembered().then(k => { if (k && modeWas) setMode(true, true); });   // no Modes menu: the Handouts button is the switch
 marks();
 })();
