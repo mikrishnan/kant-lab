@@ -271,6 +271,12 @@
   .nloc, .naa { font-size: 0.82rem; color: var(--faded); font-style: italic; }
   .ntext { white-space: pre-wrap; margin-top: 0.2rem; line-height: 1.45; }
   .nfoot { font-size: 0.78rem; color: var(--faded); margin-top: 0.25rem; display: flex; flex-wrap: wrap; gap: 0.2rem 0.6rem; }
+  /* A passage unfolded in its full text inside its card: a fold that scrolls on its own */
+  .ftxbox { margin: 0.45rem -0.2rem 0.1rem -0.25rem; border: 1px solid var(--line-soft); border-radius: 6px; background: var(--parchment); }
+  .ftxbar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.8rem; font-size: 0.78rem; color: var(--faded); padding: 0.3rem 0.6rem; border-bottom: 1px solid var(--line-soft); }
+  .ftxbar .spacer { flex: 1; }
+  .ftxs { max-height: 24rem; overflow-y: auto; overscroll-behavior: contain; padding: 0.2rem 0.4rem 0.5rem 0; container-type: inline-size; }
+  .ftxs .fulltext { font-size: 0.95rem; }
   .itag { border: 1px dashed #c9a46b; color: #7a4a14; border-radius: 3px; padding: 0 0.3rem; }
   .nmore { display: block; width: 100%; text-align: center; margin: 0.3rem 0 0.7rem; }
   .nmore.end { color: var(--faded); font-style: italic; border: none; cursor: default; }
@@ -2924,6 +2930,7 @@ function cmpShowB() {
 function cmpBody(body, p, T) {
   const keep = CMP.shown === p.i ? body.scrollTop : 0;
   body.innerHTML = renderCompare(p, T);
+  ftxMount(body);
   body.scrollTop = keep;
   CMP.shown = p.i;
 }
@@ -2949,6 +2956,7 @@ function renderStudyRail(p, T, headOnly) {
   if (S.rtab === 'cmp') return cmpBody(body, p, T);
   CMP.shown = null;
   body.innerHTML = S.rtab === 'trad' ? traditionPanel(T, p.para) : S.rtab === 'conn' ? renderConnections(p, T) : notesPanel(T, p.para);
+  ftxMount(body);
   body.scrollTop = 0;
   if (S.rtab === 'notes') {
     const target = (S.noteFocus != null && $('note-' + S.noteFocus)) || $('nsub-' + p.para);
@@ -3433,9 +3441,9 @@ function renderCompare(p, T) {
     const c0 = whole || !k0 ? 0 : b.s[k0], c1 = whole || k1 >= nb ? b.str.length : b.e[k1 - 1];
     h += '<div class="cmp-b"><div class="cmp-h"><span class="layer">' + esc(LAYER_LABEL[TB.layer] || TB.layer) + '</span><b>' + esc(TB.shape === 'refl' ? B.cite : cmpCite(B)) + '</b>' +
       (cmpMeta(B) ? '<span class="cd">' + esc(cmpMeta(B)) + '</span>' : '') + tieChip(r) + '<span class="spacer"></span>' +
-      '<span class="lnk" data-open="' + B.i + '" title="Open it in this pane, in its full text. The route bar’s back arrow returns here.">open it ›</span></div>' +
+      ftxLink(B.i, 'open it in its full text') + '</div>' +
       '<div class="cmp-text" lang="de">' + (c0 > 0 ? '… ' : '') + cmpHtml(b, c0, c1, mkB) + (c1 < b.str.length ? ' …' : '') + '</div>' +
-      (windowed ? '<div class="cmp-foot"><span class="lnk" data-cwhole="' + (st.whole ? '0' : '1') + '">' + (st.whole ? 'only the stretch that shares its wording' : 'the whole passage, ' + nb.toLocaleString('en') + ' words') + '</span></div>' : '') + '</div>';
+      (windowed ? '<div class="cmp-foot"><span class="lnk" data-cwhole="' + (st.whole ? '0' : '1') + '">' + (st.whole ? 'only the stretch that shares its wording' : 'the whole passage, ' + nb.toLocaleString('en') + ' words') + '</span></div>' : '') + ftxBox(B.i) + '</div>';
     const runs = r.runs.slice(0, 8);
     if (runs.length) h += '<div class="cmp-runs"><div class="cgh">Word for word in both</div>' + runs.map(x => {
       const ph = a.str.slice(a.s[x[0]], a.e[x[0] + x[2] - 1]).replace(/\s+/g, ' ');
@@ -3817,7 +3825,7 @@ function noteCard(q, n, T) {
     (loc.raw ? '<div class="nloc">' + esc(loc.raw) + '</div>' : '') +
     '<div class="ntext" lang="de">' + (e.vacat ? '[Vacat — the Academy Edition records this number with no text]' : esc(e.text || '')) + '</div>' + (e.vacat ? '' : enLine(q)) +
     '<div class="nfoot">' + (e.sig ? '<span>' + esc(e.sig) + '</span>' : '') + '<span>§ from ' + esc(PLACE_HOW[e.src] || e.src || '') + '</span>' +
-    (q.interp ? '<span class="itag">interpolated §</span>' : '') + '<span class="lnk" data-open="' + q.i + '">open in its full text</span>' + (e.vacat ? '' : enButton(q)) + '</div></div>';
+    (q.interp ? '<span class="itag">interpolated §</span>' : '') + ftxLink(q.i, 'open in its full text') + (e.vacat ? '' : enButton(q)) + '</div>' + ftxBox(q.i) + '</div>';
 }
 
 /* ── The notes panel for § n of a textbook ── */
@@ -4151,6 +4159,41 @@ function ftSetFocus(st, k) {
   const f = st.el.querySelector('[data-fp="' + k + '"]');
   if (f) f.classList.add('focus');
   st.focus = k;
+}
+
+/* ── A passage unfolded in its full text inside the card that shows it: a fold that opens and
+   closes where it is, so that the list around it keeps its place. It is the pane's full text in
+   small, drawn a stretch at a time and extended as the fold scrolls. "Read on in the pane" still
+   opens the passage there, with its Compare and Connections. ── */
+const FTX = new Set();                 // passages whose fold is open
+const ftxLink = (i, label) => '<span class="lnk" data-ftx="' + i + '" data-label="' + esc(label) + '" aria-expanded="' + FTX.has(i) + '">' +
+  (FTX.has(i) ? 'close its full text ▴' : esc(label) + ' ▾') + '</span>';
+function ftxBox(i) {
+  if (!FTX.has(i)) return '';
+  const T = TEXTS[P[i].t];
+  return '<div class="ftxbox" data-ftxbox="' + i + '"><div class="ftxbar"><span>' +
+    (T.shape === 'refl' ? 'Among the notes around it, in the Academy edition’s order' : esc(T.short) + ', where it stands') + '</span><span class="spacer"></span>' +
+    '<span class="lnk" data-open="' + i + '" title="Open it in the pane, with its Compare and Connections. The route bar’s back arrow returns here.">read on in the pane ›</span></div>' +
+    '<div class="ftxs"><div class="fulltext" id="ftx-' + i + '"></div></div></div>';
+}
+function ftxMount(root) {
+  Object.keys(FT).forEach(id => { if (id.startsWith('ftx-') && !FT[id].el.isConnected) delete FT[id]; });
+  root.querySelectorAll('.ftxs > .fulltext').forEach(el => {
+    if (el.childElementCount) return;
+    const i = +el.id.slice(4), sc = el.parentElement;
+    // a third of the way down, so that the notes before it show above and it reads as one of a run
+    ftOpen(el, sc, i, i, Math.round((parseFloat(getComputedStyle(sc).maxHeight) || 360) / 3));
+    sc.addEventListener('scroll', () => { $('selbtn').hidden = true; ftScroll(FT[el.id]); }, { passive: true });
+  });
+}
+function ftxToggle(link) {
+  const i = +link.dataset.ftx, card = link.closest('.ncard, .cmp-b');
+  if (FTX.has(i)) { FTX.delete(i); delete FT['ftx-' + i]; } else FTX.add(i);
+  link.outerHTML = ftxLink(i, link.dataset.label);
+  if (!card) return;
+  const old = card.querySelector('[data-ftxbox="' + i + '"]');
+  if (old) old.remove();
+  if (FTX.has(i)) { card.insertAdjacentHTML('beforeend', ftxBox(i)); ftxMount(card); }
 }
 
 const clip = (s, n) => s.length > n ? s.slice(0, n).replace(/\s+\S*$/, '') + ' …' : s;
@@ -4858,9 +4901,10 @@ function wire() {
 
   document.addEventListener('click', e => {
     if (e.target.closest('#modal') && (e.target.id === 'modal' || e.target.closest('[data-close-modal]'))) { closeModal(); return; }
-    const el = e.target.closest('[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-foldnotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq],[data-lookcmp],[data-fx],[data-lx]');
+    const el = e.target.closest('[data-ftx],[data-open],[data-loc],[data-doc],[data-view],[data-trail],[data-step],[data-map],[data-expand],[data-expand-rail],[data-para],[data-text],[data-en],[data-home],[data-tab],[data-close-rail],[data-read],[data-readat],[data-rtab],[data-jtab],[data-principle],[data-xref],[data-phase],[data-lemma],[data-satz],[data-era],[data-strata],[data-goto],[data-blocks],[data-nofix],[data-olpart],[data-outline],[data-synopsis],[data-syngo],[data-findstep],[data-shownotes],[data-foldnotes],[data-note],[data-fp],[data-rstep],[data-bookopen],[data-bookat],[data-aago],[data-cmpwith],[data-cbit],[data-ctag],[data-cwhole],[data-cmore],[data-askq],[data-lookcmp],[data-fx],[data-lx]');
     if (!el) return;
     const d = el.dataset;
+    if (d.ftx != null) { ftxToggle(el); return; }
     if (d.fx != null) { const fx = new Set(S.fx); fx.has(d.fx) ? fx.delete(d.fx) : fx.add(d.fx); S.fx = fx; S.loc = null; renderResults(); pushTrail(); return; }
     if (d.jtab) { S.jtab = d.jtab; S.loc = null; renderResults(); writeHash(); return; }
     if (d.principle) { askPrinciple(LAYERS.principles.find(x => x.id === d.principle)); return; }
@@ -5125,6 +5169,7 @@ function openRead(key, at) {
 /* A paragraph clicked in a full text: on the left, its connections open on the right; on the
    right, it becomes the passage in view. */
 function focusFromText(k, box) {
+  if (box && box.id.startsWith('ftx-')) { ftSetFocus(FT[box.id], k); return; }
   if (box && box.id === 'readtext' && studyOn()) { S.noteFocus = null; studyGo(TEXTS[P[k].t], P[k].para, {}); return; }
   S.sel = k;
   S.quote = null;
