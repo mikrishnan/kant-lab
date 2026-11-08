@@ -103,6 +103,7 @@
 </main>
 <div id="keys">↓ or Space: on · ↑: back · E English · C in context · F full screen</div>
 
+<script src="../../handouts/lock.js?v=2026-11-08a"></script>
 <script>
 /* The class screen: a class handout shown on the room's screen, its passages large and one
    after another. It reads
@@ -116,7 +117,9 @@
    passages under them (3.1, 3.2), and each passage with its label, its note, and the highlights
    and underlines its maker gave it. Margin notes are the maker's own and are not shown.
    It writes nothing but its own settings. When the portal, in another window of this browser,
-   changes the handout, the screen follows, keeping its place. */
+   changes the handout, the screen follows, keeping its place.
+   The handouts are the class's: the screen shows nothing until the class password is given
+   (../../handouts/lock.js), and a published handout, sealed with it, is opened with it. */
 (function () {
 'use strict';
 const KEY = 'kantlab-handouts-v1', PREF = 'kantlab-class-screen-v1';
@@ -149,8 +152,11 @@ const frame = $('portal');
    { kind: 'heading', text } | { kind: 'note', text, items: [passage] }
    | { kind: 'passage' | 'excerpt', ref, refs, cites, author, work, cite, label, text, from, en, marks, note }
    as a published handout has them; `refs` and `cites` for a passage joined from several. */
+const LOCK = window.KANTLAB_LOCK || null;
+// A published handout, opened with the class key where it is sealed with it
+async function unseal(d) { return LOCK && LOCK.isLocked(d) ? LOCK.open(d) : d; }
 async function loadPublished(slug) {
-  try { const r = await fetch('../../handouts/' + slug + '.json', { cache: 'no-cache' }); if (r.ok) { const d = await r.json(); if (d && Array.isArray(d.items)) return d; } } catch (e) { /* none */ }
+  try { const r = await fetch('../../handouts/' + slug + '.json', { cache: 'no-cache' }); if (r.ok) { const d = await unseal(await r.json()); if (d && Array.isArray(d.items)) return d; } } catch (e) { /* none, or sealed with another password */ }
   return null;
 }
 async function publishedList() {
@@ -366,7 +372,7 @@ async function show(src, keep) {
 }
 // The portal, in another window of this browser, changed the handouts: follow, keeping the place
 window.addEventListener('storage', e => {
-  if (!PT || (e.key !== KEY && e.key !== null)) return;
+  if (!PT || !LOCK || !LOCK.key() || (e.key !== KEY && e.key !== null)) return;
   if (SRC === 'current' || SRC.startsWith('local:')) show(SRC, curKey());
   else drawSrc();
 });
@@ -381,7 +387,7 @@ $('file').addEventListener('change', async e => {
   e.target.value = '';
   if (!f) return;
   try {
-    const d = JSON.parse(await f.text());
+    const d = await unseal(JSON.parse(await f.text()));
     if (d && Array.isArray(d.handouts) && d.handouts.length) { FILE = d; show('file:' + ((d.handouts.find(h => h.id === d.current) || d.handouts[0]).id)); }
     else if (d && Array.isArray(d.items)) { FILE = d; show('file'); }
     else throw new Error('not a handout');
@@ -458,6 +464,17 @@ function boot() {
   if (pref.en && !STYLES.some(s => s.key === pref.en)) pref.en = '';
   $('en').innerHTML = '<option value="">No English</option>' + STYLES.map(s => '<option value="' + esc(s.key) + '">English: ' + esc(s.label) + '</option>').join('');
   apply();
+  start();
+}
+// The class password first, then the handout
+async function start() {
+  const ok = LOCK && ((await LOCK.remembered()) || (await LOCK.ask({ text: 'The class screen shows the class’s handouts. Enter the class password to go on.', cancel: 'Cancel' })));
+  if (!ok) {
+    $('col').innerHTML = LOCK ? '<p class="msg">The class screen shows the class’s handouts, and opens with the class password. <button type="button" class="btn" id="unlock">Enter the class password</button></p>'
+      : '<p class="msg">The handouts’ lock did not load. Reload the page.</p>';
+    if ($('unlock')) $('unlock').addEventListener('click', start);
+    return;
+  }
   const wanted = new URLSearchParams(location.search).get('handout');
   show(wanted && /^[a-z0-9-]+$/.test(wanted) ? 'pub:' + wanted : 'current');
   publishedList().then(l => { PUBLISHED = l; drawSrc(); });

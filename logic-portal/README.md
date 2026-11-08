@@ -63,7 +63,11 @@ A search's results have two tabs: **Overview**, with the phrasings and where the
 ## Handouts
 
 While you read, you can collect passages instead of copying them into a document. Press
-**Handouts** in the header: it turns on *handout mode* and opens the Handouts page. Handout
+**Handouts** in the header and give the class password: it turns on *handout mode* and opens
+the Handouts page. The handouts are the class's, so nothing of them opens without the
+password; **Remember on this computer** spares asking again there, and **Lock**, on the
+Handouts page, forgets it. [handouts/README.md](handouts/README.md) says how the password is
+kept and what it can and cannot protect. Handout
 mode starts off, so nobody meets buttons they did not ask for, and the browser remembers the
 choice. The page's **+ Handout on passages** switch turns it off again; your handouts are kept.
 
@@ -133,11 +137,13 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   large type, one passage after another, in a window of its own: see
   [teaching/class-screen/](teaching/class-screen/). It follows the handout as you add to it.
 - **Publish it for students.** **Publish for students** opens GitHub with the handout as a
-  file in [handouts/](handouts/), and you press *Commit changes*. Students then open it at
+  file in [handouts/](handouts/), encrypted with the class password, and you press *Commit
+  changes*. Students then open it at
   `…/logic-portal/?handout=<name>`, or from **Read**, where class handouts are listed. They see
   your notes and labels, and every passage drawn live from the portal, with **Read it in
-  context ›**. A published handout is public, notes included, like everything in the
-  repository. To change it, publish again. To take it down, delete its file.
+  context ›**, once they give the class password. The file is in the public repository, but
+  without the password it reads as nothing. To change it, publish again. To take it down,
+  delete its file.
 
 Until you publish, your handouts are kept in your own browser on your own computer, and
 nowhere else. The repository and the site never see them. **Save to file** writes them all to one `.json`
