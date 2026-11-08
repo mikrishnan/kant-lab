@@ -45,63 +45,6 @@ Four places, along the top (pressing **Read** again while reading goes back to t
   passage, the parallel passages, and the three lexicons.
 - **Contributors** lists who built what.
 
-**Class sessions and investigations.** A *session* is the record of one class: the passages the
-class looked at, in order, with the notes and questions it came up with. An *investigation* is
-a question the class wants to look into, bundled with the passages and notes that bear on it.
-It outlives the session that started it: later sessions add to it.
-
-- **In class.** The header's **Session** button opens a small panel at the bottom right. Turn on
-  **Recording**, then press **+ Session** on each passage the class examines: on a search hit,
-  on a paragraph of a full text, or beside the passage open on the right. Type a note or
-  question into the panel and press Enter.
-- **Afterwards: Organize and publish.** This opens the session page over the portal, as the
-  Handouts page does. Tick items and press **+ New investigation from the ticked**, or **Add
-  the ticked** to an investigation already there. *Or add to one begun earlier* continues an
-  investigation from an earlier session. Each passage opens with ▸ to its whole text (and its
-  English, when the English is on), or all at once with *open all*; its citation, as in the panel,
-  opens it in the portal. Each investigation has a line saying what the question
-  is, and can have its own Canvas discussion; ✎ gives a passage a note.
-- **Build it up, then publish.** A session is a draft, only in your browser, for as long as you
-  like: the page says *Draft · only in this browser*. Its date is the day of the class, and you
-  can set it ahead. **New session** begins another and keeps this one; the menu beside *Class
-  session* opens any of them, and **+ Session** adds to the one open. When it is ready, press
-  **Publish…**. It lists what is not yet published: the session, and any of its clusters changed
-  since they were published, each a step of its own. A step for a new file opens GitHub with the
-  file filled in, and you press *Commit changes*. A step for a file published before downloads it,
-  for you to drop into GitHub's upload page. The session then says *Published*. If you change it
-  afterwards it says *Published · changed since*, and **Publish the changes…** publishes it again
-  the same way. The session goes into [sessions/](sessions/). **Remove this session from this
-  browser**, below its items, takes it out of the menu; what was published stays.
-- **For students, inside the portal**, every passage is drawn live, with **Read it in
-  context**. `…/portal/?session=<name>` is a session, numbered, with its investigations and the
-  link to its Canvas discussion. `…/portal/?investigation=<name>` is an investigation, with what
-  each session added to it. `…/portal/?investigate` lists every investigation, newest first.
-  Under **Read** are the sessions and investigations.
-- **For Canvas.** Every page, and the session page, has **Copy for Canvas**. It copies rich text
-  for the forum: each passage cited, with its opening words, its note, and a link back to it in
-  the portal. The portal keeps no comments, and cannot post to Canvas itself, since that would
-  need a Canvas login and the site is public: paste the copy into the discussion.
-- **Export to Word**, on the session page (and **Word** in the panel), downloads the session as
-  a .docx: every passage whole, with its citation, its note, and its English when the English
-  is on, then the investigations with their items. It needs no saving for the class.
-- **Clusters.** A *cluster* is a named group of passages on one topic, say the passages on
-  error, kept to use again. A session holds a cluster as one item, by its name and not as a
-  copy, so a passage added to the cluster later is in every session that has it. On the session
-  page, tick passages and press **Make a cluster of the ticked**. **+ A cluster…**, beside
-  **+ Note or question**, puts one made earlier into this session. The **Clusters** list on the
-  right has every cluster, with **Add passages to it**. That sets the panel's **Add passages to**
-  to the cluster, so that + Session adds to the cluster, until you set it back to the session.
-  In the session a cluster folds open to its passages, each with ▸, ↑ ↓, ✎ and ✕. A change there
-  is a change to the cluster everywhere. A cluster is published as a file of its own in
-  [clusters/](clusters/), along with the first session that has it, or from the Clusters list. In a saved session, students see a cluster as it is now, with a note
-  on any passage added after that class, or taken out since.
-- **The class screen.** **Screen ↗** in the panel, and **Class screen ↗** on the session page,
-  open the session in large type in a window of its own, for the room's screen. It follows the
-  session as you add to it. See [teaching/class-screen/](teaching/class-screen/).
-
-Until it is published, a session is kept only in your own browser, and so are its clusters. The code is
-[class-sessions.js](class-sessions.js).
-
 Wherever you are, clicking an example (a search hit, a classified passage, a parallel) opens
 it **in its full text** on the right, scrolled to the passage and highlighted, so you can look
 through example after example in context. Its **Connections** tab beside the full text gives:
@@ -117,6 +60,96 @@ text, and a button offers to search for them everywhere.
 A search's results have two tabs: **Overview**, with the phrasings and where they occur, and
 **Passages**. The search options fold away under **Options**.
 
+## Handouts
+
+While you read, you can collect passages instead of copying them into a document. Press
+**Handouts** in the header: it turns on *handout mode* and opens the Handouts page. Handout
+mode starts off, so nobody meets buttons they did not ask for, and the browser remembers the
+choice. The page's **+ Handout on passages** switch turns it off again; your handouts are kept.
+
+- **Add a passage.** Point at a passage in the search results or in a full text and press
+  **+ Handout**, or press **+ Add to handout** beside the passage open on the right. If the
+  English is on, the passage's English comes along with it.
+- **Add an excerpt.** Select some of a passage's words, in the original or in its English,
+  and press **+ Add these words to handout**. A few sentences come with the same sentences of the
+  English (matched sentence by sentence; where the sentences cannot be matched, roughly the
+  same stretch, and marked so), shown from the start for students; words picked in the English
+  bring the matching German. In Kant's published works the citation narrows to the pages the
+  words are on.
+- **Side by side.** **⇆ Side by side** on the Handouts page puts your handout in a column on the
+  right while you read and add on the left; drag its edge to make it wider, and **⤢ Full page**
+  to go back. The browser remembers which you chose.
+- **Arrange it.** **Handout** in the header opens your handouts. Keep as many as you like,
+  one per class, say. The one on screen is the one you add to. Drag any card by its ⠿ or its
+  top line, as in the Finder: drop it between two cards (a line shows where), drop a passage
+  onto a note to put it under that note, or drag it out of a note to anywhere else; notes and
+  passages move between sections the same way. ↑ and ↓ (⤒ and ⤓ for the top and the bottom)
+  also move a card. A card's buttons stay faint, and an empty label or note field blank, until
+  you point at the card. You can add section headings. For an excerpt you can choose to show the
+  English of the whole passage.
+- **Fold sections and notes away.** ▾ on a section heading folds the section up to its heading
+  and what it holds (*3 passages, 1 note*); ▾ on a note folds it to its first line and its
+  number of passages; ▸ opens either again. **Fold all sections** shows just the outline, **Fold
+  all notes** just the notes' first lines, and **Open all** opens everything. A folded section
+  moves as a whole, by its ⠿ or with ↑ ↓ ⤒ ⤓, and a card dropped onto a folded section or note
+  goes in and stays folded away (with **Undo**). Folding only changes what is on screen, never
+  the handout or its exports; anything added to something folded in any other way (from the
+  portal, by ↑ ↓, from the trash) opens it, so nothing goes out of sight unasked.
+- **Join passages the portal divides.** Where a passage of the handout is followed by the next
+  one of the same text (or a later one), **Join with the next passage** makes them one passage
+  of the handout, cited across both (*AA 1:392–394*, *A 50–52 / B 74–76*); the portal's own texts
+  are not changed. Each part keeps its citation as a small marker in the text, which opens that
+  part in the portal; **Open it in the portal** goes to the first. **Split** gives the passages
+  back as they were. Students see a joined passage as one, with the same markers.
+- **Say what you want to say.** **+ Note** adds a note: your setup, a claim, how some
+  passages bear on each other, a question for students. **+ Note in this section**, on a
+  section heading, adds one at the end of that section, and a note shows the section it is in.
+  **Add passages here**, on a section heading, sends every passage you add in the portal to
+  the end of that section, in the order you add them, until you press it again or the
+  **Into: …** button in the header.
+  A note can stand on its own. To put
+  passages under it, press its **Collect here** button. Every passage you add in the portal
+  then goes under that note, until you press it again or the **Under: …** button in the
+  header. You can also move a passage with its **Under** list. Each passage has a
+  **Label** of your own, such as *Against X*, and a note of its own.
+- **Mark up the passages.** Select words of a passage, or of its English, and choose
+  **Highlight**, **Underline** or **✎ Margin note** (the selection takes whole words). A margin
+  note sits in the right margin, level with its words, which get a dotted line and a number;
+  on a narrow card it goes under the text. Click a highlight or underline to remove it, or
+  select words and press **Remove marks**; ✕ removes a margin note (with **Undo**), and one
+  left empty goes by itself. Highlights and underlines appear in the Word file, the PDF and the
+  students' view, and underlines as `__…__` in the Handout tool text; margin notes are yours
+  and stay on the Handouts page. A mark keeps its words, not their position, so it stays on
+  them however the passage is drawn.
+- **Change your mind.** ✕ moves a passage to the handout's **Trash**, which folds open on the
+  left. Click anything there to put it back where it was. **Empty the trash** clears it for
+  good.
+- **Export it** as **Word** (Pages opens it too), as a **PDF** (the browser's Print
+  window: choose *Save as PDF*), or as **Handout tool text**. The last is plain text in the
+  markup of Maya's Handout tool, which turns it into a handout in her house style. Notes,
+  labels and the passages under each note come along. Every export marks the English as
+  machine translation.
+- **Show it on the room's screen.** **Class screen ↗** on the Handouts page opens the handout in
+  large type, one passage after another, in a window of its own: see
+  [teaching/class-screen/](teaching/class-screen/). It follows the handout as you add to it.
+- **Publish it for students.** **Publish for students** opens GitHub with the handout as a
+  file in [handouts/](handouts/), and you press *Commit changes*. Students then open it at
+  `…/logic-portal/?handout=<name>`, or from **Read**, where class handouts are listed. They see
+  your notes and labels, and every passage drawn live from the portal, with **Read it in
+  context ›**. A published handout is public, notes included, like everything in the
+  repository. To change it, publish again. To take it down, delete its file.
+
+Until you publish, your handouts are kept in your own browser on your own computer, and
+nowhere else. The repository and the site never see them. **Save to file** writes them all to one `.json`
+file, to keep or to open in another browser with **Open file**. Clearing the browser's
+site data deletes them.
+
+Each passage keeps its address in the portal (`textKey:id`, the same as in a `#p=` link)
+beside its words. So a later handout builder can bring passages in by reference rather than
+by copied text, and **Open it in the portal** goes back to the passage in context. The code
+is [handout-tray.js](handout-tray.js). It reads the portal only through `window.PORTAL`, and
+keeps everything under one `localStorage` key, `kantlab-handouts-v1`.
+
 ## Studies
 
 [studies/](studies/) holds research sandboxes beside the portal: a page for one question
@@ -128,10 +161,9 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
 ## Teaching tools
 
 [teaching/](teaching/) holds small tools for teaching with the portal, a new one most weeks.
-Like a study, each reads the same texts and the class sessions without changing the portal.
-They are listed at [teaching/index.html](teaching/index.html), from `teaching/teaching.js`, and
-the session page links to that list. The first is the
-[class screen](teaching/class-screen/index.html).
+Like a study, each reads the same texts and the handouts without changing the portal.
+They are listed at [teaching/index.html](teaching/index.html), from `teaching/teaching.js`. The
+first is the [class screen](teaching/class-screen/index.html), which the Handouts page opens.
 
 ## What it does
 

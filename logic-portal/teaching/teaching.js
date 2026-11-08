@@ -18,7 +18,7 @@ const PORTAL_TEACHING = [
   {
     key: 'class-screen',
     title: 'Class screen',
-    what: 'A class session on the room’s screen: its passages large, one after another, with the English beneath them when you want it, and each passage in context one key away. It follows the session as passages are added to it in the portal.',
+    what: 'A handout on the room’s screen: its sections, notes and passages large, one after another, with the English beneath them when you want it, and each passage in context one key away. It follows the handout as passages are added to it in the portal.',
     begun: '2026-11-08',
     href: 'class-screen/index.html',
   },
