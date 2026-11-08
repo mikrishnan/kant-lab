@@ -102,17 +102,18 @@
 <script>
 /* The class screen: a class session shown on the room's screen, its passages large and one after
    another. It reads
-     the session   this browser's (the one being prepared in the portal's Session panel), one
-                   saved for the class (../../sessions/<name>.json, or ?session=<name>), or a
-                   file saved with "Save to file";
-     its clusters  this browser's, else those saved for the class (../../clusters/<id>.json);
+     the session   one of this browser's, by default the one open in the portal's Session panel
+                   (and following it there), drafts included; one published for the class
+                   (../../sessions/<name>.json, or ?session=<name>); or a file saved with
+                   "Save to file";
+     its clusters  this browser's, else those published (../../clusters/<id>.json);
      the texts     the portal itself, loaded in the frame on the right, hidden unless "In context"
                    is on, through window.PORTAL: P, TEXTS, BYID and the English.
    It writes nothing but its own settings. When the portal, in another window of this browser,
    adds to the session or a cluster, the screen follows, keeping its place. */
 (function () {
 'use strict';
-const KEY = 'kantlab-session-draft-v2', CL_KEY = 'kantlab-clusters-v1', PREF = 'kantlab-class-screen-v1';
+const STORE_KEY = 'kantlab-sessions-v3', OLD_KEY = 'kantlab-session-draft-v2', CL_KEY = 'kantlab-clusters-v1', PREF = 'kantlab-class-screen-v1';
 const REPO = 'mikrishnan/kant-lab', DIR = 'logic-portal/sessions';
 const PORTAL = '../../index.html';
 
@@ -127,10 +128,10 @@ const readLS = k => { try { return JSON.parse(localStorage.getItem(k) || 'null')
 
 let PT = null;                 // the portal's window.PORTAL, once its texts are in
 let STYLES = [];               // the English's styles, from the portal's catalogue
-let SRC = 'draft';             // 'draft', 'saved:<name>' or 'file'
+let SRC = 'current';           // 'current' (the session open in the portal), 'local:<sid>', 'saved:<name>' or 'file'
 let RAW = null;                // the saved session or file being shown, as read
 let FILE = null;               // a session read from a file
-let SAVED = [];                // the sessions saved for the class: { slug, title, date }
+let SAVED = [];                // the sessions published for the class: { slug, title, date }
 let SESSION = null;            // what is shown: { title, date, items, saved, empty }
 let stops = [], cur = 0, waiting = false;
 const pref = { size: 1.6, en: '', notes: true, ctx: false };
@@ -139,7 +140,7 @@ const savePref = () => { try { localStorage.setItem(PREF, JSON.stringify(pref));
 const frame = $('portal');
 
 /* ── The session, in one shape whatever it comes from ── */
-const files = {};              // clusters saved for the class: id → cluster, or null
+const files = {};              // clusters published for the class: id → cluster, or null
 async function clusterFile(id) {
   if (id in files) return files[id];
   files[id] = null;
@@ -159,19 +160,28 @@ async function savedList() {
     return out.filter(Boolean).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   } catch (e) { return []; }
 }
-// A cluster as it is now: this browser's, else the one saved for the class
+// A cluster as it is now: this browser's, else the one published
 async function clusterNow(id) { const cl = readLS(CL_KEY) || {}; return cl[id] || await clusterFile(id); }
-// The session being prepared in this browser: its clusters as they are now, no "added after"
-async function fromDraft() {
-  const d = readLS(KEY);
-  if (!d || !Array.isArray(d.items)) return { title: 'No class session in this browser yet', date: '', items: [], empty: true };
+// The sessions in this browser, as the portal keeps them (or the one it kept before it kept several)
+function store() {
+  const x = readLS(STORE_KEY);
+  if (x && Array.isArray(x.list) && x.list.length) return x;
+  const d = readLS(OLD_KEY);
+  return d && Array.isArray(d.items) ? { current: 'old', list: [Object.assign({ sid: 'old' }, d)] } : { current: null, list: [] };
+}
+const stateOf = s => !s.saved ? 'draft' : s.changed && s.changed > s.saved.at ? 'changed' : 'published';
+const STATE_WORDS = { draft: 'a draft, in this browser', changed: 'in this browser, changed since it was published', published: 'published' };
+// One of this browser's sessions: its clusters as they are now, no "added after"
+async function fromDraft(src) {
+  const st = store(), sid = src === 'current' ? st.current : src.slice(6), d = st.list.find(x => x.sid === sid) || (src === 'current' ? st.list[0] : null);
+  if (!d || !Array.isArray(d.items)) return { title: st.list.length ? 'That session is no longer in this browser' : 'No class session in this browser yet', date: '', items: [], empty: true };
   const items = [];
   for (const x of d.items) {
     if (x.kind === 'note') items.push({ kind: 'note', id: x.id, text: x.text || '' });
     else if (x.kind === 'cluster') { const c = await clusterNow(x.cluster); items.push({ kind: 'cluster', id: x.id, cluster: x.cluster, title: c ? c.title : x.cluster, items: c ? c.items : [], missing: !c }); }
     else items.push(Object.assign({}, x));
   }
-  return { title: d.title || 'A class session', date: d.date || '', items, saved: false };
+  return { title: d.title || 'A class session', date: d.date || '', items, saved: false, state: stateOf(d), sid: d.sid };
 }
 // A saved session, or a file: its clusters as they are now, with what came after the class marked
 async function fromSaved(d) {
@@ -218,7 +228,7 @@ function itemHtml(x, n, S) {
   const its = x.items || [];
   return '<section class="it clh" data-key="' + esc(x.id) + '" data-label="' + esc(n + ' · ❖ ' + clip(x.title, 50)) + '"><div class="num">' + esc(n) + '</div><div class="body">' +
       '<div class="clt">❖ ' + esc(x.title) + '</div><div class="cls">a cluster of ' + plural(its.length, 'passage') +
-      (x.missing ? ' · neither in this browser nor saved for the class' : '') +
+      (x.missing ? ' · neither in this browser nor published' : '') +
       (x.gone ? ' · ' + (x.gone === 1 ? 'one passage that was in it at this class has' : x.gone + ' passages that were in it at this class have') + ' since been taken out' : '') + '</div></div></section>' +
     its.map((y, j) => passageHtml(y, n + '.' + (j + 1), x.id + '|' + y.ref,
       S.saved && S.date && y.added && y.added > S.date ? '<div class="later">Added to the cluster after this class, on ' + esc(longDate(y.added)) + '.</div>' : '')).join('');
@@ -230,7 +240,7 @@ function render(keep) {
   const np = S.items.reduce((a, x) => a + (x.kind === 'note' ? 0 : x.kind === 'cluster' ? (x.items || []).length : 1), 0), nn = S.items.filter(x => x.kind === 'note').length;
   waiting = false;
   $('col').innerHTML = '<div class="head"><h1>' + esc(S.title) + '</h1><div class="date">' + (S.date ? esc(longDate(S.date)) + ' · ' : '') + plural(np, 'passage') + (nn ? ', ' + plural(nn, 'note') : '') +
-      (S.saved ? '' : ' · as it is being prepared in this browser') + '</div></div>' +
+      (S.state ? ' · ' + STATE_WORDS[S.state] : '') + '</div></div>' +
     (S.items.length ? S.items.map((x, k) => itemHtml(x, String(k + 1), S)).join('')
       : '<p class="msg">' + (S.empty ? 'This browser has no class session yet. In the portal, press <b>Session</b>, turn on <b>Recording</b>, and press <b>+ Session</b> on passages: they appear here as you add them.' : 'Nothing in this session yet. Passages added to it in the portal appear here as you add them.') + '</p>');
   stops = [...$('col').querySelectorAll('.it')];
@@ -298,35 +308,39 @@ function context() {
 
 /* ── Which session ── */
 function drawSrc() {
-  const d = readLS(KEY), slug = SRC.startsWith('saved:') ? SRC.slice(6) : '';
-  const known = SAVED.some(s => s.slug === slug);
-  $('src').innerHTML = '<option value="draft">This browser’s session' + (d && Array.isArray(d.items) ? ': ' + esc(clip(d.title || '', 40)) + ' (' + d.items.length + ')' : '') + '</option>' +
-    (SAVED.length || (slug && !known) ? '<optgroup label="Saved for the class">' + SAVED.map(s => '<option value="saved:' + esc(s.slug) + '">' + esc(clip(s.title || s.slug, 44)) + ' · ' + esc(longDate(s.date)) + '</option>').join('') +
+  const st = store(), open = st.list.find(x => x.sid === st.current) || st.list[0], slug = SRC.startsWith('saved:') ? SRC.slice(6) : '';
+  const known = SAVED.some(s => s.slug === slug), word = { draft: 'draft', changed: 'changed since published', published: 'published' };
+  const mine = st.list.slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  $('src').innerHTML = '<option value="current">The session open in the portal' + (open ? ': ' + esc(clip(open.title || '', 36)) : '') + '</option>' +
+    (mine.length ? '<optgroup label="In this browser">' + mine.map(s => '<option value="local:' + esc(s.sid) + '">' + esc(clip(s.title || 'A session', 40)) + ' · ' + word[stateOf(s)] + '</option>').join('') + '</optgroup>' : '') +
+    (SAVED.length || (slug && !known) ? '<optgroup label="Published for the class">' + SAVED.map(s => '<option value="saved:' + esc(s.slug) + '">' + esc(clip(s.title || s.slug, 44)) + ' · ' + esc(longDate(s.date)) + '</option>').join('') +
       (slug && !known ? '<option value="saved:' + esc(slug) + '">' + esc(RAW && RAW.title ? clip(RAW.title, 44) : slug) + '</option>' : '') + '</optgroup>' : '') +
     (FILE ? '<option value="file">From a file: ' + esc(clip(FILE.title || 'a session', 40)) + '</option>' : '') +
     '<option value="open">Open a session file…</option>';
   $('src').value = SRC;
 }
 async function show(src, keep) {
+  const was = SESSION && (SESSION.sid || SRC);
   SRC = src;
-  if (src === 'draft') { RAW = null; SESSION = await fromDraft(); }
+  if (src === 'current' || src.startsWith('local:')) { RAW = null; SESSION = await fromDraft(src); }
   else if (src === 'file') { RAW = FILE; SESSION = await fromSaved(FILE); }
   else {
     const slug = src.slice(6);
     RAW = await loadSaved(slug);
-    SESSION = RAW ? await fromSaved(RAW) : { title: 'There is no saved session called “' + slug + '”', date: '', items: [], saved: true };
+    SESSION = RAW ? await fromSaved(RAW) : { title: 'There is no published session called “' + slug + '”', date: '', items: [], saved: true };
   }
   history.replaceState(null, '', src.startsWith('saved:') ? '?session=' + encodeURIComponent(src.slice(6)) : location.pathname);
   document.title = (SESSION.empty ? 'Class screen' : SESSION.title + ' · Class screen') + ' · Kant Lab';
   drawSrc();
+  if (keep && (SESSION.sid || SRC) !== was) keep = null;   // another session opened in the portal: from its top
   if (!keep) { cur = 0; $('stage').scrollTop = 0; }
   render(keep);
 }
 // The portal, in another window of this browser, changed the session or a cluster: follow, keeping the place
 window.addEventListener('storage', e => {
-  if (!PT || (e.key !== KEY && e.key !== CL_KEY && e.key !== null)) return;
-  if (SRC === 'draft') show('draft', curKey());
-  else if (e.key !== KEY) (async () => { SESSION = await fromSaved(RAW || FILE); render(curKey()); })();
+  if (!PT || (e.key !== STORE_KEY && e.key !== CL_KEY && e.key !== null)) return;
+  if (SRC === 'current' || SRC.startsWith('local:')) show(SRC, curKey());
+  else if (e.key !== STORE_KEY) (async () => { SESSION = await fromSaved(RAW || FILE); render(curKey()); })();
   else drawSrc();
 });
 $('src').addEventListener('change', e => {
@@ -414,7 +428,7 @@ function boot() {
   $('en').innerHTML = '<option value="">No English</option>' + STYLES.map(s => '<option value="' + esc(s.key) + '">English: ' + esc(s.label) + '</option>').join('');
   apply();
   const wanted = new URLSearchParams(location.search).get('session');
-  show(wanted && /^[a-z0-9-]+$/.test(wanted) ? 'saved:' + wanted : 'draft');
+  show(wanted && /^[a-z0-9-]+$/.test(wanted) ? 'saved:' + wanted : 'current');
   savedList().then(l => { SAVED = l; drawSrc(); });
 }
 boot();

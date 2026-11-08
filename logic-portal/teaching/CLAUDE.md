@@ -22,13 +22,16 @@ This folder holds small tools for teaching with the Logic Portal, one folder eac
   portal's code; it changes every week.
 - **Link to the portal by address:** `../../index.html#p=<ref>&rt=conn` for a passage,
   `#read=<textKey>&at=<id>` for a place in a text, `#q=<words>` for a search.
-- **The class sessions, read only.** `class-sessions.js` keeps the session being prepared
-  in `localStorage['kantlab-session-draft-v2']` and the clusters in
-  `localStorage['kantlab-clusters-v1']`, the shapes its comments give. Saved sessions
-  are `logic-portal/sessions/<name>.json` (`../../sessions/` from a tool's folder; see
-  `../sessions/README.md`), saved clusters `logic-portal/clusters/<id>.json` (see
-  `../clusters/README.md`). A tool reads these and never writes them. The `storage` event tells a tool when the portal, in another window,
-  has changed them.
+- **The class sessions, read only.** `class-sessions.js` keeps every session in this
+  browser, drafts and published ones, in `localStorage['kantlab-sessions-v3']` as
+  `{ current, list }` (`current` the `sid` of the one open), and the clusters in
+  `localStorage['kantlab-clusters-v1']`, the shapes its comments give. A browser that has
+  not opened the portal since November 2026 may still have one session alone in
+  `kantlab-session-draft-v2`. Published sessions are `logic-portal/sessions/<name>.json`
+  (`../../sessions/` from a tool's folder; see `../sessions/README.md`), published
+  clusters `logic-portal/clusters/<id>.json` (see `../clusters/README.md`). A tool reads
+  these and never writes them. The `storage` event tells a tool when the portal, in another
+  window, has changed them.
 - Pages under `logic-portal/` share one origin with the portal, so all of this works
   on GitHub Pages and on a local server, but not from a `file://` address.
 

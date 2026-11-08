@@ -52,15 +52,24 @@ It outlives the session that started it: later sessions add to it.
   **Recording**, then press **+ Session** on each passage the class examines: on a search hit,
   on a paragraph of a full text, or beside the passage open on the right. Type a note or
   question into the panel and press Enter.
-- **Afterwards: Organize and save.** This opens the session page over the portal, as the
+- **Afterwards: Organize and publish.** This opens the session page over the portal, as the
   Handouts page does. Tick items and press **+ New investigation from the ticked**, or **Add
   the ticked** to an investigation already there. *Or add to one begun earlier* continues an
   investigation from an earlier session. Each passage opens with ▸ to its whole text (and its
   English, when the English is on), or all at once with *open all*; its citation, as in the panel,
   opens it in the portal. Each investigation has a line saying what the question
-  is, and can have its own Canvas discussion; ✎ gives a passage a note. **Save for the class**
-  opens GitHub with the session as a file in [sessions/](sessions/), and you press *Commit
-  changes*.
+  is, and can have its own Canvas discussion; ✎ gives a passage a note.
+- **Build it up, then publish.** A session is a draft, only in your browser, for as long as you
+  like: the page says *Draft · only in this browser*. Its date is the day of the class, and you
+  can set it ahead. **New session** begins another and keeps this one; the menu beside *Class
+  session* opens any of them, and **+ Session** adds to the one open. When it is ready, press
+  **Publish…**. It lists what is not yet published: the session, and any of its clusters changed
+  since they were published, each a step of its own. A step for a new file opens GitHub with the
+  file filled in, and you press *Commit changes*. A step for a file published before downloads it,
+  for you to drop into GitHub's upload page. The session then says *Published*. If you change it
+  afterwards it says *Published · changed since*, and **Publish the changes…** publishes it again
+  the same way. The session goes into [sessions/](sessions/). **Remove this session from this
+  browser**, below its items, takes it out of the menu; what was published stays.
 - **For students, inside the portal**, every passage is drawn live, with **Read it in
   context**. `…/portal/?session=<name>` is a session, numbered, with its investigations and the
   link to its Canvas discussion. `…/portal/?investigation=<name>` is an investigation, with what
@@ -81,14 +90,14 @@ It outlives the session that started it: later sessions add to it.
   right has every cluster, with **Add passages to it**. That sets the panel's **Add passages to**
   to the cluster, so that + Session adds to the cluster, until you set it back to the session.
   In the session a cluster folds open to its passages, each with ▸, ↑ ↓, ✎ and ✕. A change there
-  is a change to the cluster everywhere. Each cluster is saved for the class on its own, as a file
-  in [clusters/](clusters/). In a saved session, students see a cluster as it is now, with a note
+  is a change to the cluster everywhere. A cluster is published as a file of its own in
+  [clusters/](clusters/), along with the first session that has it, or from the Clusters list. In a saved session, students see a cluster as it is now, with a note
   on any passage added after that class, or taken out since.
 - **The class screen.** **Screen ↗** in the panel, and **Class screen ↗** on the session page,
   open the session in large type in a window of its own, for the room's screen. It follows the
   session as you add to it. See [teaching/class-screen/](teaching/class-screen/).
 
-Until it is saved, a session is kept in your own browser, and so are its clusters. The code is
+Until it is published, a session is kept only in your own browser, and so are its clusters. The code is
 [class-sessions.js](class-sessions.js).
 
 Wherever you are, clicking an example (a search hit, a classified passage, a parallel) opens

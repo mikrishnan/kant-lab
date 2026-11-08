@@ -8,15 +8,20 @@
 
    In class, the header's Session button opens a small capture panel at the bottom right. With
    recording on, + Session on a search hit, a paragraph of a full text, or the passage open on
-   the right adds it to the session; + Note adds a note or a question. "Organize and save" opens
+   the right adds it to the session; + Note adds a note or a question. "Organize and publish" opens
    the session page, as the Handouts page opens over the portal. There the items are ticked and
    bundled into investigations, new ones or ones begun in earlier sessions; there are notes on
    passages, links to the class's discussions in Canvas, Copy for Canvas, Export to Word (also in
-   the panel), and Save for the class. Each passage there folds open (▸) to the whole text, and its
+   the panel), and Publish. Each passage there folds open (▸) to the whole text, and its
    citation, like each passage in the panel, links to it in the portal.
 
-   Saving publishes the session as a file in sessions/, through GitHub's own new-file page, as
-   handouts are published. Students then have, inside the portal, every passage drawn live:
+   This browser keeps any number of sessions, each a draft built up bit by bit until it is
+   published; a menu on the session page opens another, and New session begins one, keeping the
+   rest. Publish lists what is not yet published, the session and any of its clusters changed
+   since, and puts each in the repository as a file, through GitHub's own new-file page (or its
+   upload page, for a file published before), as handouts are published. A published session
+   changed since says so, and is published again the same way. Students then have, inside the
+   portal, every passage drawn live:
      ?session=<name>          one session, numbered, with its investigations and its discussion
      ?investigation=<name>    one investigation, with what each session added to it
      ?investigate             every investigation, newest first
@@ -28,12 +33,12 @@
    any session as one item, and a session holds it by name, so a passage added to the cluster is in
    every session that has it. In the Session panel, "Add passages to" sends + Session to a cluster
    instead of the session; on the session page, ticked passages become a cluster, and the Clusters
-   list puts one into the session. Clusters are saved for the class as files in clusters/.
+   list puts one into the session. Clusters are published as files in clusters/.
 
    The class screen (teaching/class-screen/) shows a session on the room's screen, from this
    browser or a saved one; the panel and the session page open it in a window of its own.
 
-   Until it is saved, a session is kept in this browser (localStorage), and so are its clusters.
+   Until it is published, a session is kept only in this browser (localStorage), and so are its clusters.
    It reads the portal only through window.PORTAL. sessions/README.md gives a session file's
    shape, clusters/README.md a cluster's. */
 (function () {
@@ -68,26 +73,54 @@ const passageUrl = ref => (PT.SITE_PORTAL || SITE_DIR + 'index.html') + '#p=' + 
 const citeOf = x => x.author + ', ' + x.work + ', ' + x.cite;
 const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
 
-/* ── The session being recorded ─────────────────────────────────────────────
-   { title, date, discussion, items: [{ id, kind, ref, cite, author, work, note } | { id, kind: 'note', text }],
-     invs: [{ id, title, about, discussion, items: [item ids], cont }], saved, next }
-   `cont` marks an investigation begun in an earlier session, which this one adds to. */
-function blank() { return { title: 'Class, ' + longDate(today()), date: today(), discussion: '', items: [], invs: [], saved: null, next: 1 }; }
-let D = (() => {
-  try { const x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x && Array.isArray(x.items)) return x; } catch (e) { /* a new one */ }
-  try {   // a session begun with the first version of the tool: its items, numbered
-    const o = JSON.parse(localStorage.getItem(OLD_KEY) || 'null');
-    if (o && Array.isArray(o.items)) { const d = Object.assign(blank(), { title: o.title, date: o.date, discussion: o.discussion || '' }); o.items.forEach(x => d.items.push(Object.assign({}, x, { id: 'i' + d.next++, q: undefined }))); return d; }
-  } catch (e) { /* a new one */ }
-  return blank();
+/* ── The sessions in this browser ───────────────────────────────────────────
+   Each is built up bit by bit, as a draft, and published when it is ready:
+   { sid, title, date, discussion, items: [{ id, kind, ref, cite, author, work, note } | { id, kind: 'note', text }
+     | { id, kind: 'cluster', cluster }], invs: [{ id, title, about, discussion, items: [item ids], cont }],
+     saved: null | { slug, at }, changed, next }
+   `saved` is when it was last published (`slug` its file's name), `changed` when it was last changed,
+   so a published session changed since says so. `cont` marks an investigation begun in an earlier
+   session, which this one adds to. All of them are kept as { current: sid, list } under STORE_KEY;
+   D is the one open, the one + Session adds to. */
+const STORE_KEY = 'kantlab-sessions-v3';
+const newSid = () => 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function blank() { return { sid: newSid(), title: 'Class, ' + longDate(today()), date: today(), discussion: '', items: [], invs: [], saved: null, changed: null, next: 1 }; }
+let STORE = (() => {
+  try { const x = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); if (x && Array.isArray(x.list) && x.list.length) return x; } catch (e) { /* the first time */ }
+  const first = (() => {   // the one session the tool kept before it kept several; the old copy is left where it was
+    try { const x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x && Array.isArray(x.items)) return Object.assign({ changed: null }, x); } catch (e) { /* a new one */ }
+    try {   // a session begun with the first version of the tool: its items, numbered
+      const o = JSON.parse(localStorage.getItem(OLD_KEY) || 'null');
+      if (o && Array.isArray(o.items)) { const d = Object.assign(blank(), { title: o.title, date: o.date, discussion: o.discussion || '' }); o.items.forEach(x => d.items.push(Object.assign({}, x, { id: 'i' + d.next++, q: undefined }))); return d; }
+    } catch (e) { /* a new one */ }
+    return blank();
+  })();
+  if (!first.sid) first.sid = newSid();
+  return { current: first.sid, list: [first] };
 })();
+let D = STORE.list.find(x => x.sid === STORE.current) || STORE.list[0];
+STORE.current = D.sid;
+// A session's state: a draft never published, published as it stands, or published and changed since
+const pubState = s => !s.saved ? 'draft' : s.changed && s.changed > s.saved.at ? 'changed' : 'published';
+const STATE_LABEL = { draft: 'Draft · only in this browser', published: 'Published', changed: 'Published · changed since' };
+// Put another session in D's place: undoing a change, or opening another
+function setD(s) {
+  const k = STORE.list.findIndex(x => x.sid === s.sid);
+  if (k >= 0) STORE.list[k] = s; else STORE.list.push(s);
+  D = s; STORE.current = s.sid;
+}
 let rec = localStorage.getItem(KEY + '-rec') === 'on';
-let open = false, pageOpen = false, picked = new Set(), newInv = false, newCl = '';   // newCl: where a cluster is being named, 'panel' or 'page'
+let open = false, pageOpen = false, picked = new Set(), newInv = false, newCl = '', pubOpen = false;   // newCl: where a cluster is being named, 'panel' or 'page'
 const unfolded = new Set();   // passages shown whole, and clusters open, on the session page (the view only, not saved)
+function fresh() { picked.clear(); unfolded.clear(); newInv = false; newCl = ''; pubOpen = false; }   // what is open on the page, for another session
 // what can fold on the session page: each passage, each cluster, and each passage in a cluster (as "<item id>|<ref>")
 const foldKeys = () => [].concat(...D.items.filter(x => !isNote(x)).map(x => [x.id].concat(isCluster(x) ? cItems(x).map(y => x.id + '|' + y.ref) : [])));
 const refOfKey = k => k.includes('|') ? k.slice(k.indexOf('|') + 1) : (itemById(k) || {}).ref;
-function save() { try { localStorage.setItem(KEY, JSON.stringify(D)); } catch (e) { toast('This browser would not keep the session. Use Save to file.'); } }
+// Keep every session; `touch` (the default) marks the open one changed
+function save(touch) {
+  if (touch !== false) D.changed = new Date().toISOString();
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(STORE)); } catch (e) { toast('This browser would not keep the session. Use Save to file.'); }
+}
 function setRec(on) { rec = on; try { if (on) localStorage.setItem(KEY + '-rec', 'on'); else localStorage.removeItem(KEY + '-rec'); } catch (e) { /* this visit only */ } document.body.classList.toggle('csrec', on); redraw(); railLabel(); }
 const itemById = id => D.items.find(x => x.id === id);
 const numOf = id => D.items.findIndex(x => x.id === id) + 1;
@@ -102,7 +135,7 @@ const invsOf = id => D.invs.filter(v => v.items.includes(id));
    students can see what was added after the class. */
 let CL = (() => { try { const x = JSON.parse(localStorage.getItem(CL_KEY) || 'null'); if (x && typeof x === 'object' && !Array.isArray(x)) return x; } catch (e) { /* none yet */ } return {}; })();
 function saveCl() { try { localStorage.setItem(CL_KEY, JSON.stringify(CL)); } catch (e) { toast('This browser would not keep the cluster.'); } }
-let PUBCL = null;   // the clusters saved for the class, from clusters/ (once a visit): id → cluster
+let PUBCL = null;   // the clusters published for the class, from clusters/ (once a visit): id → cluster
 const clOf = id => CL[id] || (PUBCL && PUBCL[id]) || null;
 // A cluster's passages: in a session file, those it had (or, for students, has now); in this session, as it is now
 const cItems = x => x.items || ((clOf(x.cluster) || {}).items) || [];
@@ -171,7 +204,7 @@ function clusterOfTicked(title) {
   its.forEach(x => picked.delete(x.id)); newCl = ''; unfolded.add(y.id);
   save(); redraw(); railLabel();
   toast('The cluster “' + c.title + '”, ' + plural(its.length, 'passage') + ', is item ' + (D.items.indexOf(y) + 1) + '. Put it into any later session from the Clusters list.',
-    [['Undo', () => { D = JSON.parse(before); delete CL[c.id]; saveCl(); save(); redraw(); railLabel(); }]]);
+    [['Undo', () => { setD(JSON.parse(before)); delete CL[c.id]; saveCl(); save(); redraw(); railLabel(); }]]);
 }
 /* A cluster as it is saved, in clusters/<id>.json */
 function clData(c) {
@@ -255,7 +288,7 @@ function drawPanel() {
   if (panel.hidden) return;
   const n = D.items.length, c = target && CL[target], list = c ? c.items : D.items, last = list.slice(-4);
   const link = x => '<a href="#p=' + encodeURIComponent(x.ref) + '&amp;rt=conn" title="Open it in the portal">' + itemLine(x) + '</a>';
-  panel.innerHTML = '<div class="csbar"><b class="cz">Session</b><span class="muted small">' + esc(D.title) + '</span><span class="spacer"></span>' +
+  panel.innerHTML = '<div class="csbar"><b class="cz">Session</b><span class="muted small" title="' + esc(STATE_LABEL[pubState(D)]) + '">' + esc(D.title) + ' · ' + ({ draft: 'draft', published: 'published', changed: 'changed since published' })[pubState(D)] + '</span><span class="spacer"></span>' +
     '<button type="button" class="linkish" data-c="close" title="Hide the panel; the session is kept">Hide</button></div>' +
     '<label class="csrow"><input type="checkbox" data-c="rec"' + (rec ? ' checked' : '') + '> <b>Recording</b> <span class="muted small">' + (rec ? 'press + ' + (c ? toName() : 'Session') + ' on a passage' : 'turn on to add passages') + '</span></label>' +
     '<label class="csrow csto"><span class="muted small">Add passages to</span><select data-c="to" title="Where + Session puts a passage: the session, or a cluster kept to use again">' +
@@ -268,7 +301,7 @@ function drawPanel() {
       : c ? '<p class="muted small">Nothing in it yet. ' + (rec ? 'Press' : 'Turn on recording, then press') + ' <b>+ ' + esc(toName()) + '</b> on a passage.</p>'
       : '<p class="muted small">No passages yet. Turn on recording, then press <b>+ Session</b> on a passage: a search hit, a paragraph of a text, or the passage open on the right.</p>') +
     '<form class="csquick" data-c="quick"><input data-f="quick" placeholder="A note or question, then Enter…" spellcheck="true"><button type="submit" class="btn">+ Note</button></form>' +
-    '<p class="csopen"><button type="button" class="btn solid" data-c="page">Organize and save ›</button><span class="muted small">' + plural(n, 'item') + (D.invs.length ? ' · ' + plural(D.invs.length, 'investigation') : '') + '</span>' +
+    '<p class="csopen"><button type="button" class="btn solid" data-c="page">Organize and publish ›</button><span class="muted small">' + plural(n, 'item') + (D.invs.length ? ' · ' + plural(D.invs.length, 'investigation') : '') + '</span>' +
       '<span class="spacer"></span><button type="button" class="linkish" data-c="screen" title="Show this session on the room’s screen, in a window of its own">Screen ↗</button>' +
       (n ? '<button type="button" class="linkish" data-c="word" title="Download the session as a Word file">Word</button>' : '') + '</p>';
 }
@@ -285,7 +318,7 @@ panel.addEventListener('submit', e => {
   if (e.target.dataset.c === 'newcl') {
     const j = panel.querySelector('[data-f="clname"]'), title = flat(j && j.value);
     if (!title) { if (j) j.focus(); return; }
-    pubClusters().then(() => {   // first the names saved for the class, so that the new one takes none of them
+    pubClusters().then(() => {   // first the names already published, so that the new one takes none of them
       const c = newCluster(title, []);
       newCl = ''; setTarget(c.id);
       toast('The cluster “' + c.title + '” is made. ' + (rec ? '' : 'With recording on, ') + '+ ' + toName() + ' on a passage adds it there.');
@@ -341,7 +374,7 @@ function drawPage() {
   const clusterMain = x => {
     const c = clOf(x.cluster), its = cItems(x), on = unfolded.has(x.id);
     const head = '<div class="cshead"><button type="button" class="csfold" data-c="fold" data-i="' + esc(x.id) + '" title="' + (on ? 'Fold the cluster' : 'Show its passages') + '">' + (on ? '▾' : '▸') + '</button>' +
-      '<span class="csclt" data-c="fold" data-i="' + esc(x.id) + '">❖ ' + esc(c ? c.title : x.cluster) + '</span><span class="muted small">' + (c ? 'a cluster of ' + plural(its.length, 'passage') : 'a cluster neither in this browser nor saved for the class') + '</span></div>';
+      '<span class="csclt" data-c="fold" data-i="' + esc(x.id) + '">❖ ' + esc(c ? c.title : x.cluster) + '</span><span class="muted small">' + (c ? 'a cluster of ' + plural(its.length, 'passage') : 'a cluster neither in this browser nor published') + '</span></div>';
     if (!c) return head;
     if (!on) return head + (its.length ? '<div class="csword" data-c="fold" data-i="' + esc(x.id) + '" title="Show its passages">' +
       esc(its.slice(0, 4).map(y => { const p = pOf(y.ref); return (p ? TEXTS[p.t].short : y.work) + ', ' + y.cite; }).join(' · ') + (its.length > 4 ? ' …' : '')) + '</div>' : '');
@@ -394,30 +427,50 @@ function drawPage() {
   // a cluster in the Clusters list: every one this browser has or the class has saved
   const clCard = c => {
     const mine = !!CL[c.id], k = clInSession(c.id), pub = mine && clPublication(c);
-    const state = !mine ? 'saved for the class' : !c.saved ? 'not saved for the class yet' : unsaved(c) ? 'changed since it was saved' : 'saved for the class';
+    const state = !mine ? 'published' : !c.saved ? 'not published yet' : unsaved(c) ? 'changed since it was published' : 'published';
     return '<section class="cscl' + (c.id === target ? ' to' : '') + '">' +
       (mine ? '<input class="csvtitle" data-f="cltitle" data-cl="' + esc(c.id) + '" value="' + esc(c.title) + '" aria-label="Name of the cluster" spellcheck="true">' : '<div class="csvtitle">' + esc(c.title) + '</div>') +
       '<div class="muted small">' + plural(c.items.length, 'passage') + ' · ' +
         (k >= 0 ? 'item ' + (k + 1) + ' of this session' : '<button type="button" class="linkish" data-c="clput" data-cl="' + esc(c.id) + '">put it in this session</button>') +
-        ' · <span class="' + (state.startsWith('saved') ? '' : 'cswarn') + '">' + state + '</span></div>' +
+        ' · <span class="' + (state === 'published' ? '' : 'cswarn') + '">' + state + '</span></div>' +
       '<div class="csvacts">' + (c.id === target ? '<span class="small">+ Session adds passages to it now.</span><button type="button" class="linkish" data-c="clto" data-cl="">Add to the session instead</button>'
           : '<button type="button" class="linkish" data-c="clto" data-cl="' + esc(c.id) + '">Add passages to it ›</button>') +
-        (mine && unsaved(c) ? (pub.viaNew ? '<a class="btn solid" href="' + esc(pub.newUrl) + '" target="_blank" rel="noopener" data-c="clpubgo" data-cl="' + esc(c.id) + '">Save for the class</a>'
-          : '<button type="button" class="btn solid" data-c="clpubfile" data-cl="' + esc(c.id) + '">' + (c.saved ? 'Save again' : 'Save for the class') + '</button>') : '') +
+        (mine && unsaved(c) ? (pub.viaNew ? '<a class="btn solid" href="' + esc(pub.newUrl) + '" target="_blank" rel="noopener" data-c="clpubgo" data-cl="' + esc(c.id) + '">Publish</a>'
+          : '<button type="button" class="btn solid" data-c="clpubfile" data-cl="' + esc(c.id) + '" title="Download it, to drop into GitHub’s upload page for clusters">' + (c.saved ? 'Publish the changes' : 'Publish') + '</button>') : '') +
         (mine ? '<button type="button" class="linkish" data-c="cldrop" data-cl="' + esc(c.id) + '">Remove from this browser</button>' : '') + '</div></section>';
   };
+  // Publishing: what of this session is not yet published, a step for each, in the order to take them
+  const st = pubState(D), dirty = D.items.filter(isCluster).map(x => CL[x.cluster]).filter(c => c && unsaved(c));
+  const upload = dir => '<a href="https://github.com/' + REPO + '/upload/main/' + dir + '" target="_blank" rel="noopener">GitHub’s upload page for ' + dir.replace('logic-portal/', '') + '</a>';
+  const pubPanel = () => {
+    const steps = (st === 'published' ? [] : ['<li><b>The session' + (st === 'changed' ? ', with its changes' : '') + '.</b> ' + (pub.viaNew && !D.saved
+        ? '<a class="btn solid" href="' + esc(pub.newUrl) + '" target="_blank" rel="noopener" data-c="pubgo">Open GitHub to publish it</a> There, press <b>Commit changes</b>.'
+        : '<button type="button" class="btn solid" data-c="pubfile">Download it</button> Drop the file into ' + upload(DIR) + ' and press <b>Commit changes</b>.' + (D.saved ? ' It replaces the version published before.' : '')) + '</li>'])
+      .concat(dirty.map(c => { const cp = clPublication(c); return '<li><b>The cluster “' + esc(c.title) + '”</b>, ' + (c.saved ? 'changed since it was published' : 'not published yet') + '. ' + (cp.viaNew
+        ? '<a class="btn solid" href="' + esc(cp.newUrl) + '" target="_blank" rel="noopener" data-c="clpubgo" data-cl="' + esc(c.id) + '">Open GitHub to publish it</a> There, press <b>Commit changes</b>.'
+        : '<button type="button" class="btn solid" data-c="clpubfile" data-cl="' + esc(c.id) + '">Download it</button> Drop the file into ' + upload(CL_DIR) + ' and press <b>Commit changes</b>.' + (c.saved ? ' It changes the cluster in every session that has it.' : '')) + '</li>'; }));
+    return '<section class="cspub"><div class="cspubh"><b class="cz">Publish “' + esc(D.title) + '” for the class</b><span class="spacer"></span><button type="button" class="linkish" data-c="pubclose">Close</button></div>' +
+      '<p>Until it is published, a session is only in this browser, so build it up for as long as you like. Publishing puts it in the portal for students, with every passage live. Anyone can then read it, notes included, because the repository is public: put no student’s name in it. You can go on changing it and publish again.</p>' +
+      (steps.length ? '<ol class="cssteps">' + steps.join('') + '</ol>' + (steps.length > 1 ? '<p class="muted small">Each is a file of its own on GitHub, so each is a step of its own.</p>' : '')
+        : '<p class="csok">✓ Everything in it is published' + (D.saved ? ', as it stands' : '') + '.</p>') +
+      '<p class="muted small">A minute or two after the last step, students find it under <b>Read</b>, or at <a href="' + esc(pub.link) + '" target="_blank" rel="noopener">' + esc(pub.link.replace(/^https?:\/\//, '')) + '</a>.</p></section>';
+  };
+  const mine = STORE.list.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '') || a.title.localeCompare(b.title));
   page.innerHTML = '<div class="cspbar"><button type="button" class="btn" data-c="back">← Back to the portal</button><b class="cz">Class session</b>' +
+    '<select class="cspick" data-c="pick" title="The sessions in this browser: open one to build it up or publish it">' + mine.map(s2 => '<option value="' + esc(s2.sid) + '"' + (s2 === D ? ' selected' : '') + '>' +
+      esc(clip(s2.title || 'A session', 40)) + ' · ' + ({ draft: 'draft', published: 'published', changed: 'changed since published' })[pubState(s2)] + '</option>').join('') + '</select>' +
+    '<button type="button" class="linkish" data-c="new" title="Begin another session; this one is kept">New session</button>' +
+    '<span class="csst ' + st + '" title="' + esc(STATE_LABEL[st]) + '">' + STATE_LABEL[st] + (D.saved && st !== 'draft' ? ' ' + esc(new Date(D.saved.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })) : '') + '</span>' +
     '<label class="csrow inbar"><input type="checkbox" data-c="rec"' + (rec ? ' checked' : '') + '> Recording</label><span class="spacer"></span>' +
-    (n ? (pub.viaNew && !D.saved ? '<a class="btn solid" href="' + esc(pub.newUrl) + '" target="_blank" rel="noopener" data-c="pubgo">Save for the class</a>'
-      : '<button type="button" class="btn solid" data-c="pubfile">' + (D.saved ? 'Save again' : 'Save for the class') + '</button>') : '') +
+    (n ? '<button type="button" class="btn' + (st === 'published' && !dirty.length ? '' : ' solid') + '" data-c="publish" title="Put this session in the portal for students, when it is ready">' +
+      (st === 'draft' ? 'Publish…' : st === 'changed' || dirty.length ? 'Publish the changes…' : 'Published ✓') + '</button>' : '') +
     '<button type="button" class="linkish" data-c="copyall"' + (n ? '' : ' disabled') + '>Copy for Canvas</button>' +
     '<button type="button" class="btn" data-c="word"' + (n ? '' : ' disabled') + ' title="Download the session as a Word file, to keep or rework">Export to Word</button>' +
     '<button type="button" class="btn" data-c="screen" title="Show this session on the room’s screen, in a window of its own">Class screen ↗</button>' +
-    '<button type="button" class="linkish" data-c="file">Save to file</button><button type="button" class="linkish" data-c="new">New session</button>' +
-    '<a class="linkish" href="teaching/index.html" target="_blank" rel="noopener" title="The small tools made for teaching with the portal">Teaching tools ↗</a></div>' +
-    '<div class="cspbody"><div class="cspcol">' +
+    '<button type="button" class="linkish" data-c="file">Save to file</button></div>' +
+    '<div class="cspbody">' + (pubOpen && n ? pubPanel() : '') + '<div class="cspcol">' +
       '<input class="cstitle" data-f="title" value="' + esc(D.title) + '" aria-label="Title of the session" spellcheck="false">' +
-      '<div class="csmeta"><span class="muted">' + esc(longDate(D.date)) + '</span><input class="csdisc" data-f="discussion" type="url" value="' + esc(D.discussion) + '" placeholder="The class’s Canvas discussion, for comments: https://…" spellcheck="false"></div>' +
+      '<div class="csmeta"><input class="csdate" type="date" data-f="date" value="' + esc(D.date) + '" aria-label="The day of the class" title="The day of the class"><input class="csdisc" data-f="discussion" type="url" value="' + esc(D.discussion) + '" placeholder="The class’s Canvas discussion, for comments: https://…" spellcheck="false"></div>' +
       '<h3 class="csh">In this session <span class="muted small">' + plural(n, 'item') + (ticked ? ' · ' + ticked + ' ticked <button type="button" class="linkish" data-c="untick">untick</button>' : '') +
         (np ? ' · ' + (nOpen < np ? '<button type="button" class="linkish" data-c="openall">open all</button>' : '') + (nOpen && nOpen < np ? ' · ' : '') +
           (nOpen ? '<button type="button" class="linkish" data-c="foldall">fold all</button>' : '') : '') + '</span></h3>' +
@@ -427,6 +480,8 @@ function drawPage() {
           others.map(c => '<option value="' + esc(c.id) + '">❖ ' + esc(c.title) + ' (' + c.items.length + ')</option>').join('') + '</select>' : '') +
         (tickedP && newCl !== 'page' ? '<button type="button" class="btn" data-c="clmake" title="Make the ticked passages a cluster, kept to use again in later sessions">Make a cluster of the ticked (' + tickedP + ')</button>' : '') + '</p>' +
       (newCl === 'page' && tickedP ? '<form class="csnewform" data-c="newcl"><input data-f="clname" placeholder="Name the cluster, e.g. Error" spellcheck="true"><button type="submit" class="btn solid">Make it of the ticked (' + tickedP + ')</button><button type="button" class="linkish" data-c="nocl">Cancel</button></form>' : '') +
+      '<p class="csfoot muted small"><button type="button" class="linkish" data-c="sdrop" title="Take this session out of this browser; what is published stays">Remove this session from this browser</button> · ' +
+        '<a class="linkish" href="teaching/index.html" target="_blank" rel="noopener" title="The small tools made for teaching with the portal">Teaching tools ↗</a></p>' +
     '</div><div class="cspcol inv"><h3 class="csh">Investigations <span class="muted small">questions to look into, bundled with what bears on them</span></h3>' +
       D.invs.map(invCard).join('') +
       '<div class="csnew">' + (newInv
@@ -436,14 +491,13 @@ function drawPage() {
           choices.map(([id, t]) => '<option value="' + esc(id) + '">' + esc(t) + '</option>').join('') + '</select></label>' : '') + '</div>' +
       '<h3 class="csh cshcl">Clusters <span class="muted small">groups of passages, kept to use again; a session holds one as a single item</span></h3>' +
       (clAll().length ? clAll().map(clCard).join('') +
-        '<p class="cshelp muted small">A session holds a cluster by its name, so a passage added to the cluster, here or in a later session, is in every session that has it once the cluster is saved again. ' +
-          '<b>Save for the class</b> opens GitHub with the cluster as a file; there, press <b>Commit changes</b>. Saving it again downloads the file: drop it into <a href="https://github.com/' + REPO + '/upload/main/' + CL_DIR + '" target="_blank" rel="noopener">GitHub’s upload page for clusters</a>.</p>'
+        '<p class="cshelp muted small">A session holds a cluster by its name, so a passage added to the cluster, here or in a later session, is in every session that has it once the cluster is published again. ' +
+          'Publishing a session publishes the changes to its clusters with it.</p>'
         : '<p class="muted small">None yet. Tick passages on the left and press <b>Make a cluster of the ticked</b>, or in the Session panel set <b>Add passages to</b> to a new cluster.</p>') +
-      (n ? '<p class="cshelp muted small">' + (pub.viaNew && !D.saved
-          ? '<b>Save for the class</b> opens GitHub with the session as a file; there, press <b>Commit changes</b>.'
-          : 'Download the file, then on <a href="https://github.com/' + REPO + '/upload/main/' + DIR + '" target="_blank" rel="noopener">GitHub’s upload page</a> drop it in and press <b>Commit changes</b>' + (D.saved ? '; it replaces the version saved before.' : '.')) +
-        ' A minute or two later students find the session and its investigations under <b>Read</b>, or at <a href="' + esc(pub.link) + '" target="_blank" rel="noopener">' + esc(pub.link.replace(/^https?:\/\//, '')) + '</a>. ' +
-        'The repository is public, so put no student’s name in a title or note.</p>' : '') +
+      (n ? '<p class="cshelp muted small">' + (st === 'draft' ? 'Build the session up for as long as you like: it stays only in this browser, a draft, until you press <b>Publish…</b> at the top. '
+          : st === 'changed' || dirty.length ? 'What you have changed since publishing is only in this browser until you press <b>Publish the changes…</b> at the top. '
+          : 'It is published as it stands. Change it as you like: the changes stay in this browser until you publish them. ') +
+        '<b>New session</b> begins another and keeps this one, in the menu beside “Class session”. The repository is public, so put no student’s name in a title or note.</p>' : '') +
     '</div></div>';
   const b2 = page.querySelector('.cspbody'); if (b2 && scrolled) b2.scrollTop = scrolled;
 }
@@ -465,6 +519,15 @@ page.addEventListener('change', e => {
   const t = e.target;
   if (t.dataset.c === 'rec') { setRec(t.checked); return; }
   if (t.dataset.c === 'cladd' && t.value) { putCluster(t.value); return; }
+  if (t.dataset.c === 'pick') {   // open another session in this browser
+    const s2 = STORE.list.find(x => x.sid === t.value);
+    if (s2 && s2 !== D) { setD(s2); fresh(); save(false); redraw(); railLabel(); toast('“' + s2.title + '” is open: + Session adds to it.'); }
+    return;
+  }
+  if (t.dataset.f === 'date' && /^\d{4}-\d{2}-\d{2}$/.test(t.value)) {   // the day of the class; a title that was only the old day follows it
+    if (D.title === 'Class, ' + longDate(D.date)) D.title = 'Class, ' + longDate(t.value);
+    D.date = t.value; save(); drawPage(); drawPanel(); return;
+  }
   if (t.dataset.c === 'tick') { if (t.checked) picked.add(t.dataset.i); else picked.delete(t.dataset.i); drawPage(); return; }
   if (t.dataset.c === 'cont' && t.value) {
     const id = t.value, title = (PUBLISHED && PUBLISHED[id] && PUBLISHED[id].title) || (known()[id] || {}).title || id;
@@ -486,7 +549,7 @@ page.addEventListener('submit', e => {
 });
 page.addEventListener('click', e => {
   const b = e.target.closest('[data-c]');
-  if (!b || ['rec', 'tick', 'cont', 'newinv', 'cladd', 'newcl'].includes(b.dataset.c)) return;
+  if (!b || ['rec', 'tick', 'cont', 'newinv', 'cladd', 'newcl', 'pick'].includes(b.dataset.c)) return;
   const k = +b.dataset.k, v = b.dataset.v && D.invs.find(x => x.id === b.dataset.v);
   switch (b.dataset.c) {
     case 'back': closePage(); return;
@@ -551,10 +614,10 @@ page.addEventListener('click', e => {
     }
     case 'cldrop': {
       const id = b.dataset.cl, c = CL[id], k2 = clInSession(id);
-      if (k2 >= 0 && !(PUBCL && PUBCL[id])) { toast('It is item ' + (k2 + 1) + ' of this session and not saved for the class: take it out of the session first.'); return; }
+      if (k2 >= 0 && !(PUBCL && PUBCL[id])) { toast('It is item ' + (k2 + 1) + ' of this session and not published: take it out of the session first.'); return; }
       delete CL[id]; saveCl();
       if (target === id) setTarget(''); else redraw();
-      toast('“' + c.title + '” is removed from this browser' + (c.saved ? '; the copy saved for the class stays.' : '.'), [['Undo', () => { CL[id] = c; saveCl(); redraw(); }]]);
+      toast('“' + c.title + '” is removed from this browser' + (c.saved ? '; what was published stays.' : '.'), [['Undo', () => { CL[id] = c; saveCl(); redraw(); }]]);
       return;
     }
     case 'foldall': unfolded.clear(); drawPage(); return;
@@ -574,15 +637,28 @@ page.addEventListener('click', e => {
       else b.href = pub.newUrl;
       markSaved(); return;
     }
-    case 'new': {
-      const old = D; D = blank(); picked.clear(); save(); redraw(); railLabel();
-      toast('A new session. Its investigations can be continued from this one.', [['Undo', () => { D = old; save(); redraw(); railLabel(); }]]);
+    case 'new': {   // the one open is kept, in the menu beside "Class session"
+      const was = D, s = blank();
+      setD(s); fresh(); save(false); redraw(); railLabel();
+      toast('A new session. “' + was.title + '” is kept: choose it again from the menu at the top.', [['Undo', () => { STORE.list = STORE.list.filter(x => x !== s); setD(was); fresh(); save(false); redraw(); railLabel(); }]]);
       return;
     }
+    case 'sdrop': {
+      const s = D, k = STORE.list.indexOf(s);
+      STORE.list.splice(k, 1);
+      const filler = STORE.list.length ? null : blank();
+      if (filler) STORE.list.push(filler);
+      setD(STORE.list[Math.min(k, STORE.list.length - 1)]); fresh(); save(false); redraw(); railLabel();
+      toast('“' + s.title + '” is removed from this browser' + (s.saved ? '; what was published stays.' : '.'),
+        [['Undo', () => { if (filler && !filler.items.length) STORE.list = STORE.list.filter(x => x !== filler); STORE.list.splice(k, 0, s); setD(s); fresh(); save(false); redraw(); railLabel(); }]]);
+      return;
+    }
+    case 'publish': pubOpen = !pubOpen; drawPage(); { const b2 = page.querySelector('.cspbody'); if (b2 && pubOpen) b2.scrollTop = 0; } return;
+    case 'pubclose': pubOpen = false; drawPage(); return;
   }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && pageOpen && !e.target.closest('input, textarea, select')) closePage(); });
-function markSaved() { D.saved = { slug: publication().slug, at: new Date().toISOString() }; D.invs.forEach(remember); PUBLISHED = null; save(); setTimeout(redraw, 300); }
+function markSaved() { D.saved = { slug: publication().slug, at: new Date().toISOString() }; D.invs.forEach(remember); PUBLISHED = null; save(false); setTimeout(redraw, 300); }
 function download(text, name) {
   const a = el('a');
   a.href = URL.createObjectURL(text instanceof Blob ? text : new Blob([text], { type: 'application/json' }));
@@ -601,7 +677,15 @@ function sessionData() {
   return { kind: 'kantlab-session', v: 2, title: D.title, date: D.date, discussion: D.discussion || '', items, investigations: invs };
 }
 function publication() {
-  const slug = (D.saved && D.saved.slug) || (D.date + '-' + slugOf(D.title.replace(/^class,?\s*/i, '') === longDate(D.date) ? 'class' : D.title)).replace(/-+/g, '-');
+  // its file's name: the one it was published under, or a new one that no other session here, or saved, has
+  let slug = D.saved && D.saved.slug;
+  if (!slug) {
+    const base = (D.date + '-' + slugOf(D.title.replace(/^class,?\s*/i, '') === longDate(D.date) ? 'class' : D.title)).replace(/-+/g, '-');
+    const taken = new Set(STORE.list.filter(s => s !== D && s.saved).map(s => s.saved.slug).concat((LIST || []).map(s => s.slug)));
+    let n = 2;
+    slug = base;
+    while (taken.has(slug)) slug = base + '-' + n++;
+  }
   const json = JSON.stringify(sessionData(), null, 1) + '\n';
   const newUrl = 'https://github.com/' + REPO + '/new/main/' + DIR + '?filename=' + encodeURIComponent(slug + '.json') + '&value=' + encodeURIComponent(json);
   return { slug, json, newUrl, link: SITE_DIR + '?session=' + slug, viaNew: newUrl.length < 7500 };
@@ -890,7 +974,7 @@ function clusterHtml(it, n, id, state, extra, date) {
       date && y.added && y.added > date ? '<div class="csvlater">Added to the cluster after this class, on ' + esc(longDate(y.added)) + '.</div>' : '')).join('') +
     '</div></div>';
 }
-/* The clusters saved for the class: GitHub says what is in clusters/ (once a visit). */
+/* The clusters published for the class: GitHub says what is in clusters/ (once a visit). */
 async function loadCluster(id) {
   try { const r = await fetch('clusters/' + id + '.json', { cache: 'no-cache' }); if (r.ok) { const c = await r.json(); if (c && Array.isArray(c.items)) return Object.assign(c, { id }); } } catch (e) { /* none */ }
   return null;
@@ -1068,7 +1152,7 @@ css.textContent = `
   #cspanel .csopen { display: flex; align-items: baseline; gap: 0.6rem; margin: 0; }
   #cspanel .csopen .spacer { flex: 1; }
   #cspage { position: fixed; inset: 0; z-index: 31; background: var(--parchment); display: flex; flex-direction: column; }
-  #cspage .cspbar { display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 1.6rem; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  #cspage .cspbar { display: flex; align-items: center; gap: 0.6rem 0.65rem; padding: 0.6rem 1.6rem; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
   #cspage .cspbar .cz { font-size: 1.05rem; }
   #cspage .cspbar .spacer { flex: 1; }
   #cspage .csrow.inbar { margin: 0; font-size: 0.92rem; color: var(--faded); }
@@ -1186,6 +1270,21 @@ css.textContent = `
   #csview .csvcl .csvpass { padding: 0.6rem 0 0.4rem; border-top: 1px dashed var(--line-soft); grid-template-columns: 2.4rem minmax(0, 1fr); }
   #csview .csvcl .csvn { font-size: 0.95rem; }
   #csview .csvlater { font-size: 0.85rem; color: #8a6417; font-style: italic; margin: 0.15rem 0 0.3rem; }
+  /* the sessions in this browser, each a draft until published */
+  #cspage .cspick { font: inherit; font-size: 0.88rem; max-width: 19rem; padding: 0.12rem 0.35rem; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+  #cspage .csst { font-size: 0.8rem; border-radius: 999px; padding: 0.02rem 0.55rem; border: 1px dashed var(--line); color: var(--faded); white-space: nowrap; }
+  #cspage .csst.published { border-style: solid; color: var(--accent); }
+  #cspage .csst.changed { border-color: #c9a46b; color: #7a4a14; }
+  #cspage .csdate { font: inherit; font-size: 0.9rem; padding: 0.15rem 0.4rem; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--faded); }
+  #cspage .cspub { grid-column: 1 / -1; background: var(--card); border: 1px solid var(--accent-light); border-radius: 10px; padding: 0.7rem 1rem 0.5rem; box-shadow: 0 2px 10px rgba(60, 40, 20, 0.08); }
+  #cspage .cspubh { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 0.3rem; }
+  #cspage .cspubh .spacer { flex: 1; }
+  #cspage .cspub p { margin: 0.3rem 0; line-height: 1.45; }
+  #cspage .cssteps { margin: 0.5rem 0; padding-left: 1.4rem; }
+  #cspage .cssteps li { margin: 0.45rem 0; line-height: 1.6; }
+  #cspage .cssteps .btn { margin: 0 0.3rem; text-decoration: none; }
+  #cspage .csok { color: var(--accent); }
+  #cspage .csfoot { margin-top: 1.4rem; }
 `;
 document.head.appendChild(css);
 document.body.classList.toggle('csrec', rec);
