@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Class screen · The Logic Portal · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  /* The Logic Portal's palette and fonts, so the screen reads as part of it. */
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --paper: #faf6ec;
+    --card: #fbf8f1;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #d9ccb0;
+    --line-soft: #e8dec9;
+    --hl: #f1d98c;
+    --fs: 1.6rem;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: 'EB Garamond', Georgia, serif; color: var(--ink); background: var(--parchment); display: flex; flex-direction: column; overflow: hidden; }
+
+  #bar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.7rem; padding: 0.4rem 1rem; border-bottom: 1px solid var(--line);
+         background: var(--parchment-dark); font-size: 0.92rem; flex: none; transition: opacity 0.4s; }
+  #bar .cz { font-family: 'Cinzel', serif; color: var(--accent); letter-spacing: 0.05em; font-weight: 600; }
+  #bar a { color: var(--accent); text-decoration: none; }
+  #bar a:hover { text-decoration: underline; }
+  #bar select { font: inherit; font-size: 0.88rem; max-width: 22rem; padding: 0.1rem 0.3rem; border: 1px solid var(--line); border-radius: 6px; background: var(--paper); color: var(--ink); }
+  #bar .spacer { flex: 1; }
+  .btn { font: inherit; font-size: 0.88rem; border: 1px solid var(--line); background: var(--card); color: var(--accent); border-radius: 999px; padding: 0.05rem 0.7rem; cursor: pointer; }
+  .btn:hover { border-color: var(--accent-light); }
+  .btn.on { background: var(--accent); border-color: var(--accent); color: var(--parchment); }
+  body.idle #bar { opacity: 0; }
+  body.idle { cursor: none; }
+
+  main { flex: 1; display: flex; min-height: 0; }
+  #stage { flex: 1; overflow-y: auto; min-width: 0; overflow-anchor: none; }   /* the screen keeps its own place, below */
+  #col { max-width: 36em; margin: 0 auto; padding: 1.6em 1.4em 100vh; font-size: var(--fs); line-height: 1.5; }   /* room below, so the last item can come to the top */
+  .head h1 { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; font-size: 1.1em; margin: 0; line-height: 1.3; }
+  .head .date { color: var(--faded); font-style: italic; font-size: 0.62em; margin: 0.2em 0 0.8em; }
+  .msg { color: var(--faded); font-style: italic; font-size: 0.7em; }
+  .msg b { color: var(--accent); font-style: normal; }
+
+  .it { display: grid; grid-template-columns: 2.6em minmax(0, 1fr); gap: 0 0.7em; padding: 0.9em 0 1em; border-top: 1px solid var(--line-soft); scroll-margin-top: 0.4em; }
+  .it .num { font-family: 'Cinzel', serif; color: var(--line); text-align: right; font-size: 0.72em; line-height: 2; transition: color 0.2s; }
+  .it.cur .num { color: var(--accent); font-weight: 600; }
+  .it .cite { font-size: 0.6em; color: var(--accent); margin-bottom: 0.4em; line-height: 1.4; }
+  .it .cite .w { font-style: italic; }
+  .it .cite .d { color: var(--faded); }
+  .it .cite .tag { display: inline-block; margin-left: 0.4em; padding: 0 0.45em; border: 1px dashed #c9a46b; border-radius: 3px; color: #7a4a14; font-size: 0.9em; }
+  .it .cite a { color: var(--faded); margin-left: 0.6em; white-space: nowrap; }
+  .it .cite a:hover { color: var(--accent); }
+  .it .de { white-space: pre-wrap; }
+  #stage { container-type: inline-size; }
+  #col.wide { max-width: min(74em, 100%); }
+  #col.wide :is(.head, .it.note .q, .it .pn, .hdt) { max-width: 36em; }
+  .it .duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 1.3em; align-items: start; }
+  .it .duo .en { margin-top: 0; font-size: 0.9em; }
+  @container (max-width: 900px) { .it .duo { display: block; } .it .duo .en { margin-top: 0.55em; } }
+  .it .en { margin-top: 0.55em; padding-left: 0.8em; border-left: 3px solid var(--line); color: #3f3529; font-size: 0.86em; white-space: pre-wrap; }
+  .it .en .lab { display: block; font-family: 'Cinzel', serif; font-size: 0.6em; letter-spacing: 0.06em; color: var(--faded); margin-bottom: 0.15em; white-space: normal; }
+  .it .en.wait { font-style: italic; color: var(--faded); font-size: 0.6em; }
+  .it .pn { margin-top: 0.5em; font-size: 0.68em; color: #4b3a26; border-left: 2px solid #d9bf83; padding-left: 0.6em; font-style: italic; white-space: pre-wrap; }
+  .it .gone { color: var(--faded); font-style: italic; }
+  .it .hlabel { font-family: 'Cinzel', serif; font-size: 0.62em; letter-spacing: 0.05em; color: #7a4a14; margin-bottom: 0.2em; }
+  .it .de mark, .it .en mark { background: var(--hl); color: inherit; padding: 0 0.05em; border-radius: 2px; }
+  .it .de u, .it .en u { text-decoration-color: var(--accent-light); text-decoration-thickness: 0.08em; text-underline-offset: 0.15em; }
+  .it .part { font-family: 'Cinzel', serif; font-size: 0.6em; color: var(--accent-light); letter-spacing: 0.03em; }
+  .it.note .q { font-style: italic; color: var(--accent); font-size: 1.05em; }
+  .it.note .q p { margin: 0 0 0.4em; }
+  .it.note .ntitle { font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.78em; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 0.3em; }
+  .it details.ans { margin: 0 0 0.5em; }
+  .it details.ans > summary { display: inline-block; list-style: none; cursor: pointer; font-family: 'Cinzel', serif; font-style: normal; font-size: 0.5em; letter-spacing: 0.06em; color: var(--faded); }
+  .it details.ans > summary::-webkit-details-marker { display: none; }
+  .it details.ans > summary::after { content: ' ▸'; }
+  .it details.ans[open] > summary::after { content: ' ▾'; }
+  .it details.ans > p { margin: 0.2em 0 0.3em; padding-left: 0.6em; border-left: 3px solid var(--line); }
+  .it .pn details.ans > summary { font-size: 0.8em; }
+  .it.hd { border-top: none; padding-bottom: 0.2em; }
+  .it.hd .hdt { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; font-size: 0.9em; letter-spacing: 0.04em; margin: 0.4em 0 0; padding-bottom: 0.25em; border-bottom: 1px solid var(--line); }
+  .it.sub { margin-left: 1.4em; border-top-style: dashed; }
+  body.nonotes .it .pn { display: none; }
+
+  #side { width: 44%; min-width: 24rem; border-left: 1px solid var(--line); display: flex; }
+  #side iframe { flex: 1; width: 100%; height: 100%; border: 0; background: var(--parchment); }
+  /* hidden, but laid out, so that the portal inside boots as it would in a window */
+  #side.off { position: fixed; left: -12000px; top: 0; width: 1280px; height: 800px; visibility: hidden; }
+
+  #keys { position: fixed; right: 0.8rem; bottom: 0.5rem; font-size: 0.78rem; color: var(--faded); background: rgba(245, 239, 224, 0.9); padding: 0.1rem 0.5rem; border-radius: 4px; }
+  body.full #keys { display: none; }
+</style>
+</head>
+<body>
+<div id="bar">
+  <a href="../../index.html" title="The Logic Portal">← The Logic Portal</a>
+  <b class="cz">Class screen</b>
+  <select id="src" aria-label="Which handout to show"></select>
+  <input type="file" id="file" accept=".json,application/json" hidden>
+  <span class="spacer"></span>
+  <select id="pos" aria-label="Go to an item" title="Go to an item"></select>
+  <select id="en" aria-label="English" title="English beside the German (E)"></select>
+  <button type="button" class="btn" id="notes" title="Your notes on passages (N)">Notes</button>
+  <button type="button" class="btn" id="ctx" title="The passage in context, in the portal beside it (C)">In context</button>
+  <button type="button" class="btn" id="smaller" title="Smaller (−)">A−</button>
+  <button type="button" class="btn" id="bigger" title="Larger (+)">A+</button>
+  <button type="button" class="btn" id="full" title="Full screen (F)">Full screen</button>
+</div>
+<main>
+  <div id="stage"><div id="col"><p class="msg" id="wait">Loading the texts…</p></div></div>
+  <aside id="side" class="off"><iframe id="portal" title="The Logic Portal" src="../../index.html"></iframe></aside>
+</main>
+<div id="keys">↓ or Space: on · ↑: back · E English · C in context · F full screen</div>
+
+<script src="../../handouts/lock.js?v=2026-11-08a"></script>
+<script>
+/* The class screen: a class handout shown on the room's screen, its passages large and one
+   after another. It reads
+     the handout   one of this browser's, by default the one open on the portal's Handouts page
+                   (and following it there), published or not; one published for the class
+                   (../../handouts/<name>.json, or ?handout=<name>); or a file saved with the
+                   Handouts page's "Save to file";
+     the texts     the portal itself, loaded in the frame on the right, hidden unless "In context"
+                   is on, through window.PORTAL: P, TEXTS, BYID and the English.
+   A handout's headings stand as its sections, its notes as the points to make with their
+   passages under them (3.1, 3.2), and each passage with its label, its note, and the highlights
+   and underlines its maker gave it. Margin notes are the maker's own and are not shown.
+   It writes nothing but its own settings. When the portal, in another window of this browser,
+   changes the handout, the screen follows, keeping its place.
+   The handouts are the class's: the screen shows nothing until the class password is given
+   (../../handouts/lock.js), and a published handout, sealed with it, is opened with it. */
+(function () {
+'use strict';
+const KEY = 'kantlab-handouts-v1', PREF = 'kantlab-class-screen-v1';
+const REPO = 'mikrishnan/kant-lab', DIR = 'logic-portal/handouts';
+const PORTAL = '../../index.html';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const flat = s => String(s || '').replace(/\s+/g, ' ').trim();
+const paras = s => String(s || '').trim().split(/\n\s*\n/).map(flat).filter(Boolean);
+const clip = (s, n) => s.length > n ? s.slice(0, n).replace(/\s+\S*$/, '') + ' …' : s;
+const rich = s => esc(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/\*([^*\n]+)\*/g, '<i>$1</i>');
+const longDate = iso => { const d = new Date(String(iso).slice(0, 10) + 'T12:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); };
+const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+const readLS = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+
+let PT = null;                 // the portal's window.PORTAL, once its texts are in
+let STYLES = [];               // the English's styles, from the portal's catalogue
+let SRC = 'current';           // 'current' (the handout open in the portal), 'local:<id>', 'pub:<name>', 'file' or 'file:<id>'
+let FILE = null;               // a file opened here: a whole "Save to file", or one published handout
+let PUBLISHED = [];            // the handouts published for the class: { slug, title, published }
+let SHOW = null;               // what is shown: { title, sub, items, empty, id }
+let stops = [], cur = 0, waiting = false;
+const pref = { size: 1.6, en: '', notes: true, ctx: false };
+try { Object.assign(pref, readLS(PREF) || {}); } catch (e) { /* the defaults */ }
+const savePref = () => { try { localStorage.setItem(PREF, JSON.stringify(pref)); } catch (e) { /* this visit only */ } };
+const frame = $('portal');
+
+/* ── The handout, in one shape whatever it comes from ──
+   { kind: 'heading', text } | { kind: 'note', text, items: [passage] }
+   | { kind: 'passage' | 'excerpt', ref, refs, cites, author, work, cite, label, text, from, en, marks, note }
+   as a published handout has them; `refs` and `cites` for a passage joined from several. */
+const LOCK = window.KANTLAB_LOCK || null;
+// A published handout, opened with the class key where it is sealed with it
+async function unseal(d) { return LOCK && LOCK.isLocked(d) ? LOCK.open(d) : d; }
+async function loadPublished(slug) {
+  try { const r = await fetch('../../handouts/' + slug + '.json', { cache: 'no-cache' }); if (r.ok) { const d = await unseal(await r.json()); if (d && Array.isArray(d.items)) return d; } } catch (e) { /* none, or sealed with another password */ }
+  return null;
+}
+async function publishedList() {
+  try {
+    const r = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + DIR + '?ref=main');
+    if (!r.ok) return [];
+    const fs = (await r.json()).filter(f => f.type === 'file' && /^[a-z0-9-]+\.json$/.test(f.name));
+    const out = await Promise.all(fs.map(async f => { const slug = f.name.replace(/\.json$/, ''), d = await loadPublished(slug); return d ? { slug, title: d.title || slug, published: d.published || '' } : null; }));
+    return out.filter(Boolean).sort((a, b) => (b.published || '').localeCompare(a.published || ''));
+  } catch (e) { return []; }
+}
+// The handouts in this browser, as the Handouts page keeps them
+function store() { const d = readLS(KEY); return d && Array.isArray(d.handouts) ? d : { current: null, handouts: [] }; }
+const countIn = items => items.reduce((n, x) => n + (x.kind === 'note' ? (x.items || []).length : x.kind === 'heading' ? 0 : 1), 0);
+// A passage kept in this browser, as a published handout has it; noEn where its handout's English
+// is off, for the whole handout or for this passage
+const passOf = (it, h) => ({ id: it.id, noEn: h.english === false || !!it.enHide, kind: it.kind, ref: it.ref, refs: it.parts ? it.parts.map(q => q.ref) : null, cites: it.parts ? it.parts.map(q => q.cite) : null,
+  author: it.author, work: it.work, cite: it.cite, label: flat(it.label), text: it.text, from: it.from,
+  en: it.kind === 'excerpt' && it.enSnippet ? it.en : null, enApprox: !!it.enApprox,
+  marks: (it.marks || []).filter(m => m.k !== 'mn'), note: flat(it.note) ? it.note.trim() : '' });
+function fromLocal(h) {
+  const n = countIn(h.items);
+  return { id: h.id, title: h.name || 'A handout', items: h.items.map(it => it.kind === 'heading' ? { id: it.id, kind: 'heading', text: it.text || '' }
+      : it.kind === 'note' ? { id: it.id, kind: 'note', title: flat(it.title), text: it.text || '', items: (it.items || []).map(x => passOf(x, h)) } : passOf(it, h)),
+    sub: plural(n, 'passage') + ' · ' + (h.published ? 'published ' + longDate(h.published.at) + ', and as it is now in this browser' : 'not published, in this browser') };
+}
+function fromPublished(d) {
+  // Published since English mode, a handout says which passages show their English (english: true)
+  const noEn = x => d.english === false || (d.english === true && !x.english);
+  const items = d.items.map(x => x.kind === 'heading' ? x : x.kind === 'note' ? Object.assign({}, x, { items: (x.items || []).map(y => Object.assign({}, y, { noEn: noEn(y) })) }) : Object.assign({}, x, { noEn: noEn(x) }));
+  return { title: d.title || 'A class handout', items, sub: plural(countIn(d.items), 'passage') + (d.published ? ' · published ' + longDate(d.published) : '') };
+}
+
+/* ── Drawing ── */
+function english(p, T) {
+  if (!pref.en || !PT.trFor) return null;
+  const tr = PT.trFor(T);
+  if (!tr) return null;
+  const st = PT.trState(tr, pref.en);
+  if (st === 'loading') { waiting = true; return 'loading'; }
+  return st === 'ready' ? PT.trEntry(tr, pref.en, p) : null;
+}
+const styleLabel = () => (STYLES.find(s => s.key === pref.en) || {}).label || pref.en;
+const pOf = r => { const q = r && PT.BYID.get(r); return q != null ? PT.P[q] : null; };
+// A highlight or underline's words in a text: the handout tray's own rule, the words in order
+// with any spacing between them, and where they stand more than once, the place whose
+// neighbouring words agree best with those kept beside the mark
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function common(a, b, fromEnd) {
+  const x = a.replace(/\s+/g, ' '), y = b.replace(/\s+/g, ' ');
+  let n = 0;
+  while (n < x.length && n < y.length && (fromEnd ? x[x.length - 1 - n] === y[y.length - 1 - n] : x[n] === y[n])) n++;
+  return n;
+}
+function findMark(s, m) {
+  const words = String(m.q || '').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return null;
+  const re = new RegExp(words.map(reEsc).join('\\s+'), 'g');
+  let best = null, score = -1, x;
+  while ((x = re.exec(s))) {
+    const e = x.index + x[0].length;
+    const sc = common(s.slice(Math.max(0, x.index - 40), x.index), m.pre || '', true) + common(s.slice(e, e + 40), m.post || '', false);
+    if (sc > score) { score = sc; best = [x.index, e]; }
+  }
+  return best;
+}
+// The words the handout leaves out (its cuts) as […]: the passage as students are given it.
+function cutOut(s, ms) {
+  s = String(s || '');
+  // found in the words as they read, the English's *italic* and **bold** marks aside, and cut with them
+  let plain = '';
+  const map = [], bare = t => String(t || '').replace(/\*+/g, '');
+  for (let i = 0; i < s.length; i++) if (s[i] !== '*') { map.push(i); plain += s[i]; }
+  const rs = (ms || []).filter(m => m.k === 'cut').map(m => findMark(plain, Object.assign({}, m, { q: bare(m.q), pre: bare(m.pre), post: bare(m.post) }))).filter(Boolean)
+    .map(([a, b]) => { let x = map[a], y = map[b - 1] + 1; while (x > 0 && s[x - 1] === '*') x--; while (y < s.length && s[y] === '*') y++; return [x, y]; })
+    .sort((a, b) => a[0] - b[0]);
+  let out = '', at = 0;
+  rs.forEach(([a, b]) => { if (a < at) { at = Math.max(at, b); return; } out += s.slice(at, a) + '[…]'; at = b; });
+  return out + s.slice(at);
+}
+function painted(str, marks, field, asRich) {
+  const f = t => asRich ? rich(t) : esc(t);
+  str = cutOut(String(str), (marks || []).filter(m => (m.f || 'text') === field));
+  const rs = (marks || []).filter(m => (m.f || 'text') === field && (m.k === 'hl' || m.k === 'ul'))
+    .map(m => { const r = findMark(str, m); return r ? r.concat(m.k) : null; }).filter(Boolean).sort((a, b) => a[0] - b[0]);
+  let h = '', at = 0;
+  rs.forEach(([a, b, k]) => { if (a < at) return; h += f(str.slice(at, a)) + (k === 'hl' ? '<mark>' : '<u>') + f(str.slice(a, b)) + (k === 'hl' ? '</mark>' : '</u>'); at = b; });
+  return h + f(str.slice(at));
+}
+const langOf = T => T && T.shape === 'metaphysica' ? 'la' : 'de';
+// The passage's words and its English side by side, where it has English and the screen has room
+const duo = (de, en) => en && !en.startsWith('<div class="en wait"') ? '<div class="duo">' + de + en + '</div>' : de + en;
+function passageHtml(x, n, key) {
+  const p = pOf(x.ref), T = p ? PT.TEXTS[p.t] : null, a = T && T.accuracy, joined = x.refs && x.refs.length > 1;
+  const cite = '<b>' + esc(x.author) + '</b>, <span class="w">' + esc(x.work) + '</span>, ' + esc(joined ? (x.cites || []).join('; ') : x.cite) +
+    (p ? ' <span class="d">· ' + esc(T.shape === 'refl' ? p.dateLabel + ' (Adickes)' : T.date) + '</span>' : '') +
+    (a && a.ocr ? '<span class="tag" title="' + esc(a.how) + '">OCR · about ' + esc(a.words) + '% of words right</span>' : '') +
+    (p ? '<a href="' + PORTAL + '#p=' + encodeURIComponent(x.ref) + '&amp;rt=conn" target="kantlab-portal" data-ctx title="This passage in the portal, in its full text">in the portal ↗</a>' : '');
+  let text, en = null;
+  if (x.kind === 'excerpt') {   // its own words, as selected; from the English, they are English
+    text = x.from === 'english' ? '<div class="de" lang="en">' + painted(x.text || '', x.marks, 'text', true) + '</div>' : '<div class="de" lang="' + langOf(T) + '">' + painted(x.text || '', x.marks, 'text') + '</div>';
+    if (pref.en && !x.noEn && x.en && x.from !== 'english') en = { text: x.en, approx: x.enApprox };
+  } else if (joined) {         // its parts, each with its citation
+    const ps = x.refs.map(r => pOf(r));
+    text = '<div class="de" lang="' + langOf(T) + '">' + ps.map((q, k) => '<span class="part">' + esc((x.cites || [])[k] || '') + '</span> ' + (q ? painted(q.text, x.marks, 'text') : '(no longer in the portal)')).join('\n\n') + '</div>';
+    if (pref.en && !x.noEn) { const es = ps.map(q => q ? english(q, PT.TEXTS[q.t]) : null); en = es.includes('loading') ? 'loading' : es.every(e => e && e.text) ? { text: es.map(e => e.text).join('\n\n') } : null; }
+  } else {
+    text = p ? '<div class="de" lang="' + langOf(T) + '">' + painted(p.text, x.marks, 'text') + '</div>' : x.text ? '<div class="de">' + esc(x.text) + '</div>' : '<div class="gone">(This passage is no longer in the portal.)</div>';
+    if (p && !x.noEn) { const e = english(p, T); en = e === 'loading' ? 'loading' : e ? { text: e.text, part: e.part } : null; }
+  }
+  return '<section class="it' + (key.includes('.') ? ' sub' : '') + '" data-key="' + esc(key) + '"' + (p ? ' data-ref="' + esc(x.ref) + '"' : '') + ' data-label="' + esc(n + ' · ' + clip((x.label ? x.label + ': ' : '') + (T ? T.short : x.work || '') + ', ' + (x.cite || ''), 60)) + '">' +
+    '<div class="num">' + esc(n) + '</div><div class="body">' + (x.label ? '<div class="hlabel">' + esc(x.label) + '</div>' : '') + '<div class="cite">' + cite + '</div>' + duo(text,
+    (en === 'loading' ? '<div class="en wait">English loading…</div>'
+      : en ? '<div class="en" lang="en"><span class="lab">English · a machine translation' + (pref.en && x.kind !== 'excerpt' ? ' on ' + esc(styleLabel()) : '') + (en.part ? ' · made for a longer stretch than this passage' : '') + (en.approx ? ' · approximate' : '') + '</span>' + painted(en.text, x.marks, 'en', true) + '</div>' : '')) +
+    (x.note ? '<div class="pn">' + (hasAnswer(x.note) ? answersHtml(x.note, key) : esc(x.note)) + '</div>' : '') + '</div></section>';
+}
+/* A question with its answer kept back: in a note, a paragraph that opens "Answer:" is folded under
+   a small "Answer ▸", as in the students' view, and ↓ opens it before going on, so that the room
+   meets the question first. An answer opened stays open when the screen is drawn again. */
+const ANSWER = /^answers?\s*:\s*/i;
+const hasAnswer = t => paras(t).some(x => ANSWER.test(x));
+// A note's words without its answers, for the list of items at the top, which the room can see
+function unanswered(t) {
+  const ps = paras(t), out = [];
+  for (let i = 0; i < ps.length; i++) {
+    if (!ANSWER.test(ps[i])) { out.push(ps[i]); continue; }
+    if (!ps[i].replace(ANSWER, '') && i + 1 < ps.length && !ANSWER.test(ps[i + 1])) i++;
+  }
+  return out.join(' ');
+}
+const ansOpen = new Set();
+function answersHtml(text, key) {
+  const ps = paras(text), out = [];
+  for (let i = 0, k = 0; i < ps.length; i++) {
+    if (!ANSWER.test(ps[i])) { out.push('<p>' + esc(ps[i]) + '</p>'); continue; }
+    const run = [];
+    for (; i < ps.length && ANSWER.test(ps[i]); i++) {
+      let t = ps[i].replace(ANSWER, '');
+      if (!t && i + 1 < ps.length && !ANSWER.test(ps[i + 1])) t = ps[++i];   // "Answer:" on a line of its own
+      run.push(t);
+    }
+    i--;
+    const id = key + '.' + (k++);
+    out.push('<details class="ans" data-ans="' + esc(id) + '"' + (ansOpen.has(id) ? ' open' : '') + '><summary>' + (run.length > 1 ? run.length + ' answers' : 'Answer') + '</summary>' +
+      run.map(t => '<p>' + esc(t) + '</p>').join('') + '</details>');
+  }
+  return out.join('');
+}
+document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (d.matches && d.matches('details.ans')) { if (d.open) ansOpen.add(d.dataset.ans); else ansOpen.delete(d.dataset.ans); }
+}, true);
+const curKey = () => stops[cur] ? stops[cur].dataset.key : null;
+function render(keep) {
+  if (!PT || !SHOW) return;
+  const S = SHOW, st = $('stage'), was = keep && stops.find(s => s.dataset.key === keep), off = was ? was.getBoundingClientRect().top : 0;
+  waiting = false;
+  let k = 0, h = '';
+  S.items.forEach((x, i) => {
+    const key = x.id || 'a' + i;
+    if (x.kind === 'heading') { if (flat(x.text)) h += '<section class="it hd" data-key="' + esc(key) + '" data-label="' + esc('§ ' + clip(flat(x.text), 56)) + '"><div class="num"></div><div class="body"><h2 class="hdt">' + esc(x.text) + '</h2></div></section>'; return; }
+    const n = String(++k);
+    if (x.kind === 'note') {
+      h += '<section class="it note" data-key="' + esc(key) + '" data-label="' + esc(n + ' · ' + clip(flat(x.title) || unanswered(x.text) || 'A note', 60)) + '"><div class="num">' + n + '</div><div class="body">' +
+        (flat(x.title) ? '<div class="ntitle">' + esc(x.title) + '</div>' : '') + '<div class="q">' +
+        (answersHtml(x.text, key) || '<p>…</p>') + '</div></div></section>' +
+        (x.items || []).map((y, j) => passageHtml(y, n + '.' + (j + 1), key + '.' + (y.id || j))).join('');
+      return;
+    }
+    h += passageHtml(x, n, key);
+  });
+  $('col').innerHTML = '<div class="head"><h1>' + esc(S.title) + '</h1><div class="date">' + esc(S.sub || '') + '</div></div>' +
+    (h || '<p class="msg">' + (S.empty ? 'This browser has no handouts yet. In the portal, press <b>Handouts</b>, then <b>+ Add to handout</b> beside a passage: they appear here as you add them.' : 'Nothing in this handout yet. Passages added to it in the portal appear here as you add them.') + '</p>');
+  $('col').classList.toggle('wide', !!$('col').querySelector('.duo'));   // wider, for the two columns
+  stops = [...$('col').querySelectorAll('.it')];
+  const k2 = keep ? stops.findIndex(s => s.dataset.key === keep) : -1;
+  cur = k2 >= 0 ? k2 : Math.min(cur, Math.max(0, stops.length - 1));
+  if (k2 >= 0 && was) st.scrollTop += stops[k2].getBoundingClientRect().top - off;   // keep the passage in view where it was
+  $('pos').innerHTML = stops.map((s, i) => '<option value="' + i + '">' + esc(s.dataset.label) + '</option>').join('') || '<option>—</option>';
+  mark();
+  if (waiting) setTimeout(() => render(curKey()), 700);
+}
+let ctxT = 0;
+function mark() {
+  stops.forEach((s, i) => s.classList.toggle('cur', i === cur));
+  if (stops.length) $('pos').value = String(cur);
+  clearTimeout(ctxT);
+  if (pref.ctx) ctxT = setTimeout(context, 300);   // once the scrolling has settled
+}
+function go(i, scroll) {
+  if (!stops.length) return;
+  cur = Math.max(0, Math.min(stops.length - 1, i));
+  mark();
+  if (scroll) stops[cur].scrollIntoView({ block: 'start', behavior: 'auto' });
+}
+// On: through a long passage a screen at a time, then to the next item. Back: the same, upward.
+// Moves jump rather than glide: on the room's screen a page turned reads better than a slide,
+// and a redraw (the English arriving) cannot leave a glide half done.
+function next() {
+  const st = $('stage'), s = stops[cur];
+  if (!s) return;
+  const r = s.getBoundingClientRect(), box = st.getBoundingClientRect();
+  // an answer still folded, and in view: open it first
+  const a = [...s.querySelectorAll('details.ans:not([open])')].find(x => x.getClientRects().length && x.getBoundingClientRect().top < box.bottom - 30);
+  if (a) {
+    a.open = true; ansOpen.add(a.dataset.ans);
+    const ar = a.getBoundingClientRect();
+    if (ar.bottom > box.bottom) st.scrollBy({ top: Math.min(st.clientHeight * 0.8, ar.bottom - box.bottom + 24), behavior: 'auto' });
+    return;
+  }
+  if (r.bottom > box.bottom + 4 && r.top < box.bottom - 40) { st.scrollBy({ top: Math.min(st.clientHeight * 0.8, r.bottom - box.bottom + 24), behavior: 'auto' }); return; }
+  go(cur + 1, true);
+}
+function prev() {
+  const st = $('stage'), s = stops[cur];
+  if (!s) return;
+  const r = s.getBoundingClientRect(), box = st.getBoundingClientRect();
+  if (r.top < box.top - 4) { st.scrollBy({ top: -Math.min(st.clientHeight * 0.8, box.top - r.top + 8), behavior: 'auto' }); return; }
+  go(cur - 1, true);
+}
+// Scrolled by hand: the item in hand is the last one whose top has reached the top of the screen
+// (an item brought there stands just below the edge, by its scroll margin), or else the first
+let ticking = false;
+$('stage').addEventListener('scroll', () => {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(() => {
+    ticking = false;
+    const top = $('stage').getBoundingClientRect().top + 20;
+    let k = 0;
+    stops.forEach((s, i) => { if (s.getBoundingClientRect().top <= top) k = i; });
+    if (stops.length && k !== cur) { cur = k; mark(); }
+  });
+}, { passive: true });
+
+/* ── In context: the passage in the portal, beside it ── */
+function context() {
+  $('side').classList.toggle('off', !pref.ctx);
+  $('ctx').classList.toggle('on', pref.ctx);
+  const s = stops[cur], ref = s && s.dataset.ref;
+  if (!pref.ctx || !ref) return;
+  const h = 'p=' + encodeURIComponent(ref) + '&rt=conn';
+  try { if (frame.contentWindow.location.hash.slice(1) !== h) frame.contentWindow.location.hash = h; } catch (e) { /* not reachable */ }
+}
+
+/* ── Which handout ── */
+function drawSrc() {
+  const st = store(), open = st.handouts.find(x => x.id === st.current) || st.handouts[0], slug = SRC.startsWith('pub:') ? SRC.slice(4) : '';
+  const known = PUBLISHED.some(s => s.slug === slug);
+  $('src').innerHTML = '<option value="current">The handout open in the portal' + (open ? ': ' + esc(clip(open.name || '', 36)) : '') + '</option>' +
+    (st.handouts.length ? '<optgroup label="In this browser">' + st.handouts.map(h => '<option value="local:' + esc(h.id) + '">' + esc(clip(h.name || 'A handout', 40)) + ' · ' + (h.published ? 'published' : 'not published') + '</option>').join('') + '</optgroup>' : '') +
+    (PUBLISHED.length || (slug && !known) ? '<optgroup label="Published for the class">' + PUBLISHED.map(s => '<option value="pub:' + esc(s.slug) + '">' + esc(clip(s.title, 44)) + (s.published ? ' · ' + esc(longDate(s.published)) : '') + '</option>').join('') +
+      (slug && !known ? '<option value="pub:' + esc(slug) + '">' + esc(SHOW && SHOW.title ? clip(SHOW.title, 44) : slug) + '</option>' : '') + '</optgroup>' : '') +
+    (FILE && Array.isArray(FILE.handouts) ? '<optgroup label="From the file">' + FILE.handouts.map(h => '<option value="file:' + esc(h.id) + '">' + esc(clip(h.name || 'A handout', 44)) + '</option>').join('') + '</optgroup>'
+      : FILE ? '<option value="file">From a file: ' + esc(clip(FILE.title || 'a handout', 40)) + '</option>' : '') +
+    '<option value="open">Open a file…</option>';
+  $('src').value = SRC;
+}
+async function show(src, keep) {
+  const was = SHOW && (SHOW.id || SRC);
+  SRC = src;
+  if (src === 'current' || src.startsWith('local:')) {
+    const st = store(), h = src === 'current' ? st.handouts.find(x => x.id === st.current) || st.handouts[0] : st.handouts.find(x => x.id === src.slice(6));
+    SHOW = h ? fromLocal(h) : { title: st.handouts.length ? 'That handout is no longer in this browser' : 'No handouts in this browser yet', sub: '', items: [], empty: true };
+  } else if (src.startsWith('file:')) {
+    const h = FILE && FILE.handouts.find(x => x.id === src.slice(5));
+    SHOW = h ? fromLocal(h) : { title: 'That handout is not in the file', sub: '', items: [] };
+    SHOW.sub = SHOW.sub.replace(/, and as it is now in this browser|, in this browser/, ', from the file');
+  } else if (src === 'file') SHOW = fromPublished(FILE);
+  else {
+    const slug = src.slice(4), d = await loadPublished(slug);
+    SHOW = d ? fromPublished(d) : { title: 'There is no published handout called “' + slug + '”', sub: '', items: [] };
+  }
+  history.replaceState(null, '', src.startsWith('pub:') ? '?handout=' + encodeURIComponent(src.slice(4)) : location.pathname);
+  document.title = (SHOW.empty ? 'Class screen' : SHOW.title + ' · Class screen') + ' · Kant Lab';
+  drawSrc();
+  if (keep && (SHOW.id || SRC) !== was) keep = null;   // another handout opened in the portal: from its top
+  if (!keep) { cur = 0; $('stage').scrollTop = 0; }
+  render(keep);
+}
+// The portal, in another window of this browser, changed the handouts: follow, keeping the place
+window.addEventListener('storage', e => {
+  if (!PT || !LOCK || !LOCK.key() || (e.key !== KEY && e.key !== null)) return;
+  if (SRC === 'current' || SRC.startsWith('local:')) show(SRC, curKey());
+  else drawSrc();
+});
+$('src').addEventListener('change', e => {
+  const v = e.target.value;
+  if (v === 'open') { e.target.value = SRC; $('file').click(); return; }
+  show(v);
+  e.target.blur();
+});
+$('file').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  try {
+    const d = await unseal(JSON.parse(await f.text()));
+    if (d && Array.isArray(d.handouts) && d.handouts.length) { FILE = d; show('file:' + ((d.handouts.find(h => h.id === d.current) || d.handouts[0]).id)); }
+    else if (d && Array.isArray(d.items)) { FILE = d; show('file'); }
+    else throw new Error('not a handout');
+  } catch (err) { alert('That file is not a handout, nor handouts saved from the portal.'); }
+});
+$('pos').addEventListener('change', e => { go(+e.target.value, true); e.target.blur(); });
+
+/* ── The controls ── */
+function apply() {
+  document.documentElement.style.setProperty('--fs', pref.size + 'rem');
+  document.body.classList.toggle('nonotes', !pref.notes);
+  $('notes').classList.toggle('on', pref.notes);
+  $('en').value = pref.en;
+  context();
+}
+function setEn(v) { pref.en = v; pref.enChosen = true; savePref(); apply(); render(curKey()); }
+function size(d) { pref.size = Math.max(1, Math.min(3.2, Math.round((pref.size + d) * 10) / 10)); savePref(); const k = curKey(); apply(); render(k); }
+$('en').addEventListener('change', e => { setEn(e.target.value); e.target.blur(); });
+$('notes').addEventListener('click', e => { pref.notes = !pref.notes; savePref(); apply(); e.currentTarget.blur(); });
+// the portal beside it narrows the text, which then runs longer: the item in hand stays at the top
+const repin = () => { const s = stops[cur]; if (s) s.scrollIntoView({ block: 'start', behavior: 'auto' }); };
+$('ctx').addEventListener('click', e => { pref.ctx = !pref.ctx; savePref(); apply(); repin(); e.currentTarget.blur(); });
+window.addEventListener('resize', () => { clearTimeout(window.__rp); window.__rp = setTimeout(repin, 150); });
+$('smaller').addEventListener('click', e => { size(-0.1); e.currentTarget.blur(); });
+$('bigger').addEventListener('click', e => { size(0.1); e.currentTarget.blur(); });
+function full() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); }
+$('full').addEventListener('click', e => { full(); e.currentTarget.blur(); });
+let idleT = 0;
+function awake() {
+  document.body.classList.remove('idle');
+  clearTimeout(idleT);
+  if (document.fullscreenElement) idleT = setTimeout(() => document.body.classList.add('idle'), 2500);
+}
+document.addEventListener('fullscreenchange', () => { const on = !!document.fullscreenElement; document.body.classList.toggle('full', on); $('full').classList.toggle('on', on); awake(); });
+document.addEventListener('mousemove', awake);
+$('col').addEventListener('click', e => {
+  const s = e.target.closest('.it');
+  if (!s) return;
+  const i = stops.indexOf(s);
+  if (e.target.closest('a[data-ctx]') && pref.ctx) { e.preventDefault(); go(i, false); return; }
+  if (!e.target.closest('a') && !String(window.getSelection && window.getSelection())) go(i, false);
+});
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey || (e.target.closest && e.target.closest('select, input, textarea'))) return;
+  if (e.target.closest && e.target.closest('button') && (e.key === ' ' || e.key === 'Enter')) return;
+  const k = e.key;
+  if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !e.shiftKey)) { e.preventDefault(); next(); }
+  else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp' || (k === ' ' && e.shiftKey)) { e.preventDefault(); prev(); }
+  else if (k === 'Home') { e.preventDefault(); go(0, true); }
+  else if (k === 'End') { e.preventDefault(); go(stops.length - 1, true); }
+  else if (k === 'e' || k === 'E') { const ks = [''].concat(STYLES.map(s => s.key)); setEn(ks[(ks.indexOf(pref.en) + 1) % ks.length]); }
+  else if (k === 'n' || k === 'N') $('notes').click();
+  else if (k === 'c' || k === 'C') $('ctx').click();
+  else if (k === 'f' || k === 'F') full();
+  else if (k === '+' || k === '=') size(0.1);
+  else if (k === '-' || k === '_') size(-0.1);
+  else return;
+  awake();
+});
+
+/* ── Start: wait for the portal in the frame to have its texts in ── */
+function boot() {
+  let pt = null, doc = null;
+  try { pt = frame.contentWindow.PORTAL; doc = frame.contentDocument; }
+  catch (e) { $('wait').innerHTML = 'The class screen reads the portal’s texts, so it has to be opened from the same site as the portal: from the portal’s Session panel, or at <b>…/logic-portal/teaching/class-screen/</b>. It does not work opened as a file.'; return; }
+  const ld = doc && doc.getElementById('loading'), lm = doc && doc.getElementById('loadmsg');
+  if (!(pt && pt.P && pt.P.length && pt.BYID && ld && ld.hidden)) {
+    if (lm && lm.textContent) $('wait').textContent = 'Loading the texts… ' + lm.textContent;
+    setTimeout(boot, 300);
+    return;
+  }
+  PT = pt;
+  try { STYLES = frame.contentWindow.Function('return typeof PORTAL_TR_STYLES === "undefined" ? [] : PORTAL_TR_STYLES')(); } catch (e) { STYLES = []; }
+  if (!pref.enChosen) pref.en = (STYLES[0] || {}).key || '';   // the English shows, as the handouts have it, until the screen is told otherwise
+  if (pref.en && !STYLES.some(s => s.key === pref.en)) pref.en = '';
+  $('en').innerHTML = '<option value="">No English</option>' + STYLES.map(s => '<option value="' + esc(s.key) + '">English: ' + esc(s.label) + '</option>').join('');
+  apply();
+  start();
+}
+// The class password first, then the handout
+async function start() {
+  const ok = LOCK && ((await LOCK.remembered()) || (await LOCK.ask({ text: 'The class screen shows the class’s handouts. Enter the class password to go on.', cancel: 'Cancel' })));
+  if (!ok) {
+    $('col').innerHTML = LOCK ? '<p class="msg">The class screen shows the class’s handouts, and opens with the class password. <button type="button" class="btn" id="unlock">Enter the class password</button></p>'
+      : '<p class="msg">The handouts’ lock did not load. Reload the page.</p>';
+    if ($('unlock')) $('unlock').addEventListener('click', start);
+    return;
+  }
+  const wanted = new URLSearchParams(location.search).get('handout');
+  show(wanted && /^[a-z0-9-]+$/.test(wanted) ? 'pub:' + wanted : 'current');
+  publishedList().then(l => { PUBLISHED = l; drawSrc(); });
+}
+boot();
+})();
+</script>
+</body>
+</html>

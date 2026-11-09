@@ -173,7 +173,19 @@
   .readbar input { width: 10.5rem; }
   .readbar .jumpmsg { flex-basis: 100%; text-align: right; font-size: 0.84rem; color: #b4532a; font-style: italic; }
   #selbtn { position: fixed; z-index: 40; background: var(--accent); color: var(--parchment); border: none; border-radius: 999px; padding: 0.22rem 0.8rem; font-size: 0.88rem; cursor: pointer; box-shadow: 0 2px 8px rgba(26, 18, 8, 0.25); }
-  .starts .qcards.tcards { grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
+  .starts .qcards.tcards { grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr)); }
+  /* A text's box in three quiet tiers (textCard), and the groups they stand in */
+  .qcard.tbox { display: flex; flex-direction: column; gap: 0.18rem; }
+  .tbox .tt { font-size: 1.02rem; line-height: 1.25; }
+  .tbox .tw { font-size: 0.82rem; line-height: 1.3; color: var(--faded); }
+  .tbox .tm { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.4rem; margin-top: auto; padding-top: 0.35rem; font-size: 0.74rem; color: var(--faded); }
+  .tchip { padding: 0 0.42rem; border: 1px solid var(--line-soft); border-radius: 999px; white-space: nowrap; line-height: 1.55; }
+  .tchip.ocr { border-style: dashed; border-color: #d9a77c; color: #8a3b12; cursor: help; }
+  .tgroup { margin: 0 0 1.2rem; }
+  .tnote { font-size: 0.86rem; color: var(--faded); margin: -0.2rem 0 0.9rem; }
+  .tnote b { font-weight: 500; }
+  .tgh { font-family: 'Cinzel', serif; font-size: 0.74rem; letter-spacing: 0.06em; color: var(--accent); margin: 0.2rem 0 0.45rem; }
+  .tgh span { color: var(--faded); font-family: 'EB Garamond', serif; letter-spacing: 0; }
 
   /* ── The study view: a textbook with Kant's notes beside it (the Meier and Baumgarten Readers) ─ */
   #view-read.studymode { max-width: 72rem; }
@@ -1846,24 +1858,57 @@ function gapsHtml() {
   return gs.length ? '<p class="gaps"><b>Not in the portal:</b> ' + gs.map(g => '<span title="' + esc(g.more || '') + '">' + esc(g.short) + '.</span>').join(' ') + '</p>' : '';
 }
 function renderHome(box) {
-  box.innerHTML = '<div class="starts"><div class="ph">OR READ A TEXT IN FULL</div><div class="qcards tcards">' + TEXTS.map(textCard).join('') + '</div>' + gapsHtml() +
+  box.innerHTML = '<div class="starts"><div class="ph">OR READ A TEXT IN FULL</div>' +
+    textGroupsHtml((label, n) => '<div class="tgh">' + esc(label) + ' <span>' + n + '</span></div>') +
     '<p class="more-starts">Or start from the seminar’s work in <span class="lnk" data-view="explore">Explore</span>: the kinds of inference and judgment, the logical principles, the lectures’ concepts, parallel passages.</p></div>' +
     '<div class="home-foot">' + esc(statusText()) + '</div>';
 }
-/* A text's box on the start page and under Read. The title's closing parenthesis ("(uncorrected OCR)",
-   "(4th ed., 1757)", "(on Meier)") moves down into the line beneath, so the title reads cleanly; nothing
-   it said is lost. The line gives the year only once, and where the parenthesis already says OCR, the
-   accuracy follows it as a figure rather than repeating "OCR". The full title stays everywhere else. */
+/* A text's box, on the start page and under Read, in three quiet tiers: the title, without its closing
+   parenthesis; when and where, beginning with whatever that parenthesis added (4th ed., on Meier); then its
+   size and its accuracy as small chips, and English where not every text has it (else it is said once, above). An OCR text's chip is dashed, as everything not
+   established is, and names the OCR as the parenthesis did ("uncorrected OCR", "OCR of AA III"). Nothing
+   is lost: the year and an edition's letter are left out only where the line already gives them, and
+   the chip's tooltip says how the accuracy was measured. The full title stays everywhere else. */
 function textCard(t) {
   const m = /^(.*?)\s*\(([^()]*)\)$/.exec(t.title), main = m ? m[1] : t.title, range = rangeLabel(t) || '';
-  // what the parenthesis said, less what the line gives anyway: the year, and an edition's letter
-  // when its pages already begin with it (A i–856)
-  const note = (m ? m[2].split(/\s*[,;]\s*/) : [])
-    .filter(s => s && s !== t.date && !(/^[AB]$/.test(s) && range.startsWith(s + ' '))).join(', ');
-  const a = t.accuracy, acc = a && a.ocr && /OCR/.test(note) ? 'about ' + a.words + '% of words right' : accShort(t);
-  const bits = [note, t.date && main.includes(t.date) ? '' : t.date, range, t.words.toLocaleString('en') + ' words', trFor(t) ? 'English' : '', acc].filter(Boolean);
-  return '<button type="button" class="qcard" data-read="' + t.key + '">' + esc(main) +
-    '<span class="who">' + esc(bits.join(' · ')) + '</span></button>';
+  const said = (m ? m[2].split(/\s*[,;]\s*/) : [])
+    .filter(s => s && s !== t.date && !(/^[AB]$/.test(s) && range.startsWith(s + ' ')));
+  const ocrSaid = said.filter(s => /OCR/.test(s)).join(', '), otherSaid = said.filter(s => !/OCR/.test(s)).join(', ');
+  const when = [otherSaid, t.date && main.includes(t.date) ? '' : t.date, range].filter(Boolean).join(' · ');
+  const a = t.accuracy;
+  const acc = !a ? '' : a.ocr ? (ocrSaid || 'OCR') + ' · ' + a.words + '%' : 'clean text';
+  const accTip = !a ? '' : (a.ocr ? 'About ' + a.words + '% of words right. ' : (a.label ? a.label + '. ' : '')) + (a.how || '');
+  return '<button type="button" class="qcard tbox" data-read="' + t.key + '"><span class="tt">' + esc(main) + '</span>' +
+    (when ? '<span class="tw">' + esc(when) + '</span>' : '') +
+    '<span class="tm"><span>' + t.words.toLocaleString('en') + ' words</span>' +
+      (acc ? '<span class="tchip' + (a.ocr ? ' ocr' : '') + '" title="' + esc(accTip) + '">' + esc(acc) + '</span>' : '') +
+      (trFor(t) && !TEXTS.every(trFor) ? '<span class="tchip">English</span>' : '') + '</span></button>';
+}
+/* The texts in groups, each in date order. The start page and Read share them. A text of a kind not
+   named here still shows, under "Other texts". */
+const TEXT_GROUPS = [
+  ['The textbooks', t => t.layer === 'textbook'],
+  ['Kant’s notes', t => t.layer === 'notes'],
+  ['Logic lecture notes', t => t.layer === 'lecture' && t.on !== 'baumgarten'],
+  ['Metaphysics lecture notes', t => t.layer === 'lecture' && t.on === 'baumgarten'],
+  ['Published works', t => t.layer === 'published' || t.layer === 'compilation'],
+];
+function textGroups() {
+  const placed = new Set();
+  const out = TEXT_GROUPS.map(([label, keep]) => {
+    const ts = TEXTS.filter(t => !placed.has(t) && keep(t)).sort((x, y) => (x.year || 0) - (y.year || 0));
+    ts.forEach(t => placed.add(t));
+    return [label, ts];
+  });
+  const rest = TEXTS.filter(t => !placed.has(t));
+  if (rest.length) out.push(['Other texts', rest]);
+  return out.filter(([, ts]) => ts.length);
+}
+/* The groups as sections. What the portal lacks (PORTAL_GAPS) follows the last group of lectures. */
+function textGroupsHtml(head) {
+  const gs = textGroups(), lastLectures = gs.map(([l]) => l).filter(l => /lecture/i.test(l)).pop();
+  return (TEXTS.every(trFor) ? '<p class="tnote">Every text can be read with English beside it: press <b>English</b> at the top.</p>' : '') + gs.map(([label, ts]) => '<section class="tgroup">' + head(label, ts.length) + '<div class="qcards tcards">' + ts.map(textCard).join('') + '</div>' +
+    (label === lastLectures ? gapsHtml() : '') + '</section>').join('');
 }
 /* Where a text is printed: its AA pages, or for the Critique its own edition's (B i–884, AA 3:1–552). */
 function rangeLabel(T) {
@@ -2023,7 +2068,8 @@ function renderResults() {
   const enHint = S.preset || R.en ? '' : (S.enFrom ? englishNote(S.enFrom) : englishHint(S.q, true));
   h += enHint + (S.preset || S.enFrom || R.en ? '' : lexHint(S.q)) + '</div>';
   if (R.forms) h += R.forms.map(formsStrip).join('');
-  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">' + (R.en ? 'No passage’s English has it. To search the German, choose German beside the box.' : 'No passage has it.') + ' Try a * to widen a word, or allow more words between.</div>' + (enHint || S.preset || R.en ? '' : englishHint(S.q)); return; }
+  if (!R.matches.length) { box.innerHTML = h + '<div class="empty">' + (R.en ? 'No passage’s English has it. To search the German, choose German beside the box.' : 'No passage has it.') + ' Try a * to widen a word, or allow more words between.' +
+    (S.preset || R.en || S.enFrom || !/^[a-z][a-z' -]*$/i.test(S.q.trim()) ? '' : '<div style="margin-top:0.4rem">If it is English: ' + enSearchLink(S.q.trim()) + '.</div>') + '</div>' + (enHint || S.preset || R.en ? '' : englishHint(S.q)); return; }
 
   const tab = S.tab === 'passages' ? 'passages' : 'overview';
   h += '<div class="tabs"><button type="button" data-tab="overview"' + (tab === 'overview' ? ' class="on"' : '') + '>Overview</button>' +
@@ -2134,7 +2180,9 @@ function englishExpansion(q) {
   let e = lxEnEntry(words);
   if (!e) { const ws = words.split(/\s+/).filter(w => !LX_SMALL.has(w)); if (ws.length === 1) e = lxEnEntry(ws[0]); }
   if (!e) return null;
-  const main = [...e.lex].map(i => LX[i]);
+  // a phrase the lexicon gives only as a pointer to other terms ("real ground" → ratio fiendi, Realgrund) is looked for in those terms
+  const loose = !e.lex.size && !e.forms.size;
+  const main = [...(loose ? e.rel : e.lex)].map(i => LX[i]);
   const forms = new Set();
   main.forEach(L => { [L.la].concat(L.forms || []).forEach(f => forms.add(f)); (L.de || []).forEach(d => { d = d.replace(/^(der|die|das) /i, ''); if (!/[,;(]/.test(d) && d.split(' ').length <= 2) forms.add(d); }); });
   e.forms.forEach(f => forms.add(f));
@@ -2145,7 +2193,7 @@ function englishExpansion(q) {
   [...e.rel].forEach(i => (LX[i].related || []).slice(0, 8).forEach(r => { const j = lexForms().get(r.toLowerCase()); if (j != null) relSet.add(j); }));
   main.forEach(L => relSet.delete(LX.indexOf(L)));
   const rel = [...relSet].map(i => LX[i]).slice(0, 40);
-  return { query: [...forms].slice(0, 30).map(q1).join(' OR '), main, rel, forms: [...forms] };
+  return { query: [...forms].slice(0, 30).map(q1).join(' OR '), main, rel, forms: [...forms], loose };
 }
 function lexCardHTML(L) {
   return '<div class="lexcard"><div><span class="la">' + esc(L.la) + '</span> <span class="muted small">' + esc(L.field || '') + '</span></div>' +
@@ -2163,10 +2211,15 @@ function lexQuery(L) {
 const LEX_NOTE = '<div class="from">Latin–German–English terms: Jesus’s lexicon, made by machine (Claude) from the texts’ Latin; check what matters</div>';
 function englishNote(en) {
   const ex = englishExpansion(en); if (!ex) return '';
-  return '<div class="ennote"><b>' + esc(en) + '</b> is English, and the texts are German and Latin, so the search looked for the words they use for it: ' +
+  return '<div class="ennote"><b>' + esc(en) + '</b> is English, and the texts are German and Latin, so the search looked for ' + (ex.loose ? 'the terms the lexicon gives for it' : 'the words they use for it') + ': ' +
     ex.forms.slice(0, 30).map(f => '<span class="lnk" data-askq="' + esc(q1(f)) + '">' + (lexForms().has(f.toLowerCase()) ? '<i>' + esc(f) + '</i>' : esc(f)) + '</span>').join(', ') + '.' +
     (ex.rel.length ? '<div style="margin-top:0.3rem">Related terms: ' + ex.rel.map(L => '<span class="lnk" data-askq="' + esc(lexQuery(L)) + '" title="' + esc((L.en || []).join('; ')) + '"><i>' + esc(L.la) + '</i></span>').join(', ') + '</div>' : '') +
-    '</div>' + ex.main.slice(0, 3).map(lexCardHTML).join('') + ex.rel.slice(0, 2).map(lexCardHTML).join('') + LEX_NOTE;
+    '<div style="margin-top:0.3rem">' + enSearchLink(en) + '</div></div>' + ex.main.slice(0, 3).map(lexCardHTML).join('') + ex.rel.slice(0, 2).map(lexCardHTML).join('') + LEX_NOTE;
+}
+/* A link that asks the same English question of the English translations (every text has one) */
+function enSearchLink(en) {
+  if (typeof PORTAL_TRANSLATIONS === 'undefined' || !PORTAL_TRANSLATIONS.length) return '';
+  return '<a href="#q=' + encodeURIComponent(en) + '&en=' + (S.en || EN_DEFAULT) + '&ql=en' + (S.off.size ? '&off=' + [...S.off].join(',') : '') + '">Look for “' + esc(en) + '” in the English translations</a>';
 }
 /* A Latin term asked for: its English, German and definition above the results */
 function lexHint(q) {
@@ -4280,12 +4333,8 @@ function aboutTextsHtml() {
 }
 
 function readIndexHtml() {
-  const groups = [['textbook', 'The textbooks'], ['notes', 'Kant’s notes'], ['lecture', 'The lectures'], ['compilation', 'Jäsche'], ['published', 'Published works']];
   let h = '<div class="explore"><h2>Read</h2><p class="intro">Every text in the corpus, in full. Meier and Baumgarten, and Kant’s notes on either, open as the textbook with the notes beside it, following along: the Meier and Baumgarten Readers, inside the portal. Click any paragraph to see what hangs on it; select words to search for them everywhere.</p>';
-  groups.forEach(([layer, label]) => {
-    const ts = TEXTS.filter(t => t.layer === layer);
-    if (ts.length) h += '<section><div class="ph">' + label.toUpperCase() + '</div><div class="qcards">' + ts.map(textCard).join('') + '</div>' + (layer === 'lecture' ? gapsHtml() : '') + '</section>';
-  });
+  h += textGroupsHtml(label => '<div class="ph">' + esc(label.toUpperCase()) + '</div>');
   return h + '<details class="bytext"><summary>About these transcriptions, and adding a text</summary>' + aboutTextsHtml() + '</details></div>';
 }
 
@@ -5180,11 +5229,12 @@ function focusFromText(k, box) {
 
 /* Exposed for checking the page from the console. */
 window.PORTAL = { S, P, TEXTS, LAYERS, DOCS, CONC_REV, ANNOT, FT, runQuery: () => runQuery(), parseQuery, normWord, placeOf, parallelsFor, findInText,
-  BYID, SITE_PORTAL, trFor, trState, trEntry };   // the last five for class-sessions.js
+  BYID, SITE_PORTAL, trFor, trState, trEntry };   // the last five for handout-tray.js
 
 boot();
 })();
 </script>
-<script src="class-sessions.js?v=2026-11-07a"></script>
+<script src="handouts/lock.js?v=2026-11-08a"></script>
+<script src="handout-tray.js?v=2026-11-09f"></script>
 </body>
 </html>
