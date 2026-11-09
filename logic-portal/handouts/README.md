@@ -15,7 +15,12 @@ from that password, so here, in the public repository, it reads as nothing:
 
 Inside, once opened with the class password, is the handout's title, its headings and notes
 as written, and each passage by its portal address (`textKey:id`), with its label and note if
-it has them. An excerpt also keeps its words. A passage joined from several also lists every
+it has them. An excerpt also keeps its words. A note keeps its `title`, if it has one. `english: true`, on the handout and on a
+passage, says that the passage's English is shown beneath it, drawn live from the portal's
+translations; an excerpt keeps the English of its own sentences, as `en`. A passage's
+`marks` are its highlights and underlines, and the words left out of it (`"k": "cut"`), each
+kept as its words and a little of what stands either side, so that they are found in the live
+text and shown as […]. A passage joined from several also lists every
 part's address and citation (`refs`, `cites`); its `ref` is the first part's. So students
 read every passage live, from the portal's own texts.
 

@@ -72,14 +72,22 @@ mode starts off, so nobody meets buttons they did not ask for, and the browser r
 choice. The page's **+ Handout on passages** switch turns it off again; your handouts are kept.
 
 - **Add a passage.** Point at a passage in the search results or in a full text and press
-  **+ Handout**, or press **+ Add to handout** beside the passage open on the right. If the
-  English is on, the passage's English comes along with it.
+  **+ Handout**, or press **+ Add to handout** beside the passage open on the right. Its
+  English comes along with it.
 - **Add an excerpt.** Select some of a passage's words, in the original or in its English,
   and press **+ Add these words to handout**. A few sentences come with the same sentences of the
   English (matched sentence by sentence; where the sentences cannot be matched, roughly the
   same stretch, and marked so), shown from the start for students; words picked in the English
   bring the matching German. In Kant's published works the citation narrows to the pages the
   words are on.
+- **English beneath every passage.** A handout shows each passage's English beneath it, for
+  students who read no German or Latin: on the Handouts page, for students, on the class screen
+  and in every export. The switch **English beneath every passage**, beside **+ Heading**, turns
+  it off for that handout, and a passage's own **English** box hides just that passage's. It is
+  on for every handout, including those made before it: a passage added while the English was
+  off gets its English from the portal's translations the next time the portal opens, and keeps
+  it. Its words, label, note and marks stay as they were. Students reading a published handout
+  have an **English** switch of their own.
 - **Side by side.** **⇆ Side by side** on the Handouts page puts your handout in a column on the
   right while you read and add on the left; drag its edge to make it wider, and **⤢ Full page**
   to go back. The browser remembers which you chose.
@@ -89,8 +97,8 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   onto a note to put it under that note, or drag it out of a note to anywhere else; notes and
   passages move between sections the same way. ↑ and ↓ (⤒ and ⤓ for the top and the bottom)
   also move a card. A card's buttons stay faint, and an empty label or note field blank, until
-  you point at the card. You can add section headings. For an excerpt you can choose to show the
-  English of the whole passage.
+  you point at the card. You can add section headings. An excerpt whose words cannot be found in
+  its passage shows the English of the whole passage.
 - **Fold sections and notes away.** ▾ on a section heading folds the section up to its heading
   and what it holds (*3 passages, 1 note*); ▾ on a note folds it to its first line and its
   number of passages; ▸ opens either again. **Fold all sections** shows just the outline, **Fold
@@ -107,7 +115,16 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   back as they were. Students see a joined passage as one, with the same markers.
 - **Say what you want to say.** **+ Note** adds a note: your setup, a claim, how some
   passages bear on each other, a question for students. **+ Note in this section**, on a
-  section heading, adds one at the end of that section, and a note shows the section it is in.
+  section heading, adds one at the top of that section, just under its heading, and a note
+  shows the section it is in. What stands under a heading is set in a little, on the Handouts page
+  and for students. **Note**, at the top of a note, is a title to type into: give the note one and
+  it stands there in place of *Note*, and above the note for students, on the class screen, and in
+  the exports (in the Handout tool text as a `###` heading).
+- **Ask a question, and keep its answer back.** In a note, or in a passage's note, start a
+  paragraph with **Answer:**. Students see the question, and beneath it only a small **Answer ▸**
+  (**2 answers ▸** for two such paragraphs in a row), which opens when they click it. On the
+  class screen it is folded the same way, and ↓ opens it before going on. On the Handouts page
+  and in the exports the note stays as you wrote it.
   **Add passages here**, on a section heading, sends every passage you add in the portal to
   the end of that section, in the order you add them, until you press it again or the
   **Into: …** button in the header.
@@ -116,6 +133,13 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   then goes under that note, until you press it again or the **Under: …** button in the
   header. You can also move a passage with its **Under** list. Each passage has a
   **Label** of your own, such as *Against X*, and a note of its own.
+- **Shorten a passage.** When a passage is more than students need, select the words to drop
+  and press **✂ Leave out**. Students see […] in their place, in the published handout, on the
+  class screen and in every export, and the passage keeps its address: **Read it in context ›**
+  still opens it whole, where it stands in the portal. On the Handouts page the words stay,
+  struck through; click them to put them back, or press **Put back all that was left out**.
+  Leaving out whole sentences takes the same sentences out of the English beneath, where the two
+  have as many sentences; otherwise, and in a joined passage, select the English words too.
 - **Mark up the passages.** Select words of a passage, or of its English, and choose
   **Highlight**, **Underline** or **✎ Margin note** (the selection takes whole words). A margin
   note sits in the right margin, level with its words, which get a dotted line and a number;
