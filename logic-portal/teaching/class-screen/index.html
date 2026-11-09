@@ -57,6 +57,12 @@
   .it .cite a { color: var(--faded); margin-left: 0.6em; white-space: nowrap; }
   .it .cite a:hover { color: var(--accent); }
   .it .de { white-space: pre-wrap; }
+  #stage { container-type: inline-size; }
+  #col.wide { max-width: min(74em, 100%); }
+  #col.wide :is(.head, .it.note .q, .it .pn, .hdt) { max-width: 36em; }
+  .it .duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 1.3em; align-items: start; }
+  .it .duo .en { margin-top: 0; font-size: 0.9em; }
+  @container (max-width: 900px) { .it .duo { display: block; } .it .duo .en { margin-top: 0.55em; } }
   .it .en { margin-top: 0.55em; padding-left: 0.8em; border-left: 3px solid var(--line); color: #3f3529; font-size: 0.86em; white-space: pre-wrap; }
   .it .en .lab { display: block; font-family: 'Cinzel', serif; font-size: 0.6em; letter-spacing: 0.06em; color: var(--faded); margin-bottom: 0.15em; white-space: normal; }
   .it .en.wait { font-style: italic; color: var(--faded); font-size: 0.6em; }
@@ -98,7 +104,7 @@
   <input type="file" id="file" accept=".json,application/json" hidden>
   <span class="spacer"></span>
   <select id="pos" aria-label="Go to an item" title="Go to an item"></select>
-  <select id="en" aria-label="English" title="English beneath the German (E)"></select>
+  <select id="en" aria-label="English" title="English beside the German (E)"></select>
   <button type="button" class="btn" id="notes" title="Your notes on passages (N)">Notes</button>
   <button type="button" class="btn" id="ctx" title="The passage in context, in the portal beside it (C)">In context</button>
   <button type="button" class="btn" id="smaller" title="Smaller (−)">A−</button>
@@ -255,6 +261,8 @@ function painted(str, marks, field, asRich) {
   return h + f(str.slice(at));
 }
 const langOf = T => T && T.shape === 'metaphysica' ? 'la' : 'de';
+// The passage's words and its English side by side, where it has English and the screen has room
+const duo = (de, en) => en && !en.startsWith('<div class="en wait"') ? '<div class="duo">' + de + en + '</div>' : de + en;
 function passageHtml(x, n, key) {
   const p = pOf(x.ref), T = p ? PT.TEXTS[p.t] : null, a = T && T.accuracy, joined = x.refs && x.refs.length > 1;
   const cite = '<b>' + esc(x.author) + '</b>, <span class="w">' + esc(x.work) + '</span>, ' + esc(joined ? (x.cites || []).join('; ') : x.cite) +
@@ -274,9 +282,9 @@ function passageHtml(x, n, key) {
     if (p && !x.noEn) { const e = english(p, T); en = e === 'loading' ? 'loading' : e ? { text: e.text, part: e.part } : null; }
   }
   return '<section class="it' + (key.includes('.') ? ' sub' : '') + '" data-key="' + esc(key) + '"' + (p ? ' data-ref="' + esc(x.ref) + '"' : '') + ' data-label="' + esc(n + ' · ' + clip((x.label ? x.label + ': ' : '') + (T ? T.short : x.work || '') + ', ' + (x.cite || ''), 60)) + '">' +
-    '<div class="num">' + esc(n) + '</div><div class="body">' + (x.label ? '<div class="hlabel">' + esc(x.label) + '</div>' : '') + '<div class="cite">' + cite + '</div>' + text +
+    '<div class="num">' + esc(n) + '</div><div class="body">' + (x.label ? '<div class="hlabel">' + esc(x.label) + '</div>' : '') + '<div class="cite">' + cite + '</div>' + duo(text,
     (en === 'loading' ? '<div class="en wait">English loading…</div>'
-      : en ? '<div class="en" lang="en"><span class="lab">English · a machine translation' + (pref.en && x.kind !== 'excerpt' ? ' on ' + esc(styleLabel()) : '') + (en.part ? ' · made for a longer stretch than this passage' : '') + (en.approx ? ' · approximate' : '') + '</span>' + painted(en.text, x.marks, 'en', true) + '</div>' : '') +
+      : en ? '<div class="en" lang="en"><span class="lab">English · a machine translation' + (pref.en && x.kind !== 'excerpt' ? ' on ' + esc(styleLabel()) : '') + (en.part ? ' · made for a longer stretch than this passage' : '') + (en.approx ? ' · approximate' : '') + '</span>' + painted(en.text, x.marks, 'en', true) + '</div>' : '')) +
     (x.note ? '<div class="pn">' + (hasAnswer(x.note) ? answersHtml(x.note, key) : esc(x.note)) + '</div>' : '') + '</div></section>';
 }
 /* A question with its answer kept back: in a note, a paragraph that opens "Answer:" is folded under
@@ -336,6 +344,7 @@ function render(keep) {
   });
   $('col').innerHTML = '<div class="head"><h1>' + esc(S.title) + '</h1><div class="date">' + esc(S.sub || '') + '</div></div>' +
     (h || '<p class="msg">' + (S.empty ? 'This browser has no handouts yet. In the portal, press <b>Handouts</b>, then <b>+ Add to handout</b> beside a passage: they appear here as you add them.' : 'Nothing in this handout yet. Passages added to it in the portal appear here as you add them.') + '</p>');
+  $('col').classList.toggle('wide', !!$('col').querySelector('.duo'));   // wider, for the two columns
   stops = [...$('col').querySelectorAll('.it')];
   const k2 = keep ? stops.findIndex(s => s.dataset.key === keep) : -1;
   cur = k2 >= 0 ? k2 : Math.min(cur, Math.max(0, stops.length - 1));
