@@ -68,6 +68,7 @@
   .it .part { font-family: 'Cinzel', serif; font-size: 0.6em; color: var(--accent-light); letter-spacing: 0.03em; }
   .it.note .q { font-style: italic; color: var(--accent); font-size: 1.05em; }
   .it.note .q p { margin: 0 0 0.4em; }
+  .it.note .ntitle { font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.78em; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 0.3em; }
   .it details.ans { margin: 0 0 0.5em; }
   .it details.ans > summary { display: inline-block; list-style: none; cursor: pointer; font-family: 'Cinzel', serif; font-style: normal; font-size: 0.5em; letter-spacing: 0.06em; color: var(--faded); }
   .it details.ans > summary::-webkit-details-marker { display: none; }
@@ -187,7 +188,7 @@ const passOf = (it, h) => ({ id: it.id, noEn: h.english === false || !!it.enHide
 function fromLocal(h) {
   const n = countIn(h.items);
   return { id: h.id, title: h.name || 'A handout', items: h.items.map(it => it.kind === 'heading' ? { id: it.id, kind: 'heading', text: it.text || '' }
-      : it.kind === 'note' ? { id: it.id, kind: 'note', text: it.text || '', items: (it.items || []).map(x => passOf(x, h)) } : passOf(it, h)),
+      : it.kind === 'note' ? { id: it.id, kind: 'note', title: flat(it.title), text: it.text || '', items: (it.items || []).map(x => passOf(x, h)) } : passOf(it, h)),
     sub: plural(n, 'passage') + ' · ' + (h.published ? 'published ' + longDate(h.published.at) + ', and as it is now in this browser' : 'not published, in this browser') };
 }
 function fromPublished(d) {
@@ -325,7 +326,8 @@ function render(keep) {
     if (x.kind === 'heading') { if (flat(x.text)) h += '<section class="it hd" data-key="' + esc(key) + '" data-label="' + esc('§ ' + clip(flat(x.text), 56)) + '"><div class="num"></div><div class="body"><h2 class="hdt">' + esc(x.text) + '</h2></div></section>'; return; }
     const n = String(++k);
     if (x.kind === 'note') {
-      h += '<section class="it note" data-key="' + esc(key) + '" data-label="' + esc(n + ' · ' + clip(unanswered(x.text) || 'A note', 60)) + '"><div class="num">' + n + '</div><div class="body"><div class="q">' +
+      h += '<section class="it note" data-key="' + esc(key) + '" data-label="' + esc(n + ' · ' + clip(flat(x.title) || unanswered(x.text) || 'A note', 60)) + '"><div class="num">' + n + '</div><div class="body">' +
+        (flat(x.title) ? '<div class="ntitle">' + esc(x.title) + '</div>' : '') + '<div class="q">' +
         (answersHtml(x.text, key) || '<p>…</p>') + '</div></div></section>' +
         (x.items || []).map((y, j) => passageHtml(y, n + '.' + (j + 1), key + '.' + (y.id || j))).join('');
       return;

@@ -17,7 +17,7 @@ file**. A published handout also opens directly at `class-screen/?handout=<name>
 the portal has an **On the class screen** link.
 
 **How a handout shows.** Its section headings stand as headings. A note, the point to make, has a
-number, and the passages under it are numbered beneath it (3.1, 3.2). Each passage keeps its label
+number and, if you gave it one, its title above it, and the passages under it are numbered beneath it (3.1, 3.2). Each passage keeps its label
 and its note, and the highlights and underlines you gave it, with […] for any words you left out; a paragraph of a note that opens **Answer:** is folded under
 **Answer ▸** until you open it, and the list of items at the top leaves it out; your margin notes are yours and are
 not shown. An excerpt shows the words you chose, and a joined passage its parts, each with its

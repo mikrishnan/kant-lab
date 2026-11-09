@@ -116,7 +116,10 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
 - **Say what you want to say.** **+ Note** adds a note: your setup, a claim, how some
   passages bear on each other, a question for students. **+ Note in this section**, on a
   section heading, adds one at the top of that section, just under its heading, and a note
-  shows the section it is in.
+  shows the section it is in. What stands under a heading is set in a little, on the Handouts page
+  and for students. **Note**, at the top of a note, is a title to type into: give the note one and
+  it stands there in place of *Note*, and above the note for students, on the class screen, and in
+  the exports (in the Handout tool text as a `###` heading).
 - **Ask a question, and keep its answer back.** In a note, or in a passage's note, start a
   paragraph with **Answer:**. Students see the question, and beneath it only a small **Answer ▸**
   (**2 answers ▸** for two such paragraphs in a row), which opens when they click it. On the

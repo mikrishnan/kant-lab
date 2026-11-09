@@ -149,7 +149,7 @@ const passagesOf = h => [].concat(...h.items.map(x => x.kind === 'note' ? kids(x
 const countOf = h => passagesOf(h).length;
 const notesOf = h => h.items.filter(x => x.kind === 'note');
 const findNote = (h, id) => h.items.find(x => x.kind === 'note' && x.id === id) || null;
-const noteName = n => clip(flat(String(n.text || '').trim().split('\n')[0]) || 'Untitled note', 48);
+const noteName = n => clip(flat(n.title) || flat(String(n.text || '').trim().split('\n')[0]) || 'Untitled note', 48);
 // A key names an item's place: '3' at the top, '3.1' the second passage under the note at 3.
 function at(h, key) {
   const [a, b] = String(key).split('.').map(Number);
@@ -494,7 +494,9 @@ css.textContent = `
   #hpage aside .trow .tl { display: block; color: var(--accent); }
   #hpage aside .trow .tx { display: block; color: var(--faded); }
   #hpage main, #hview main { flex: 1; overflow-y: auto; padding: 1.2rem 2rem 4rem; }
-  #hpage .hwrap, #hview .hwrap { max-width: 46rem; margin: 0 auto; }
+  #hpage .hwrap, #hview .hwrap { max-width: 46rem; margin: 0 0 0 1rem; }   /* to the left, a little in from the panel */
+  #hpage .hwrap > .hcard.top.insec { margin-left: 1.6rem; }   /* what stands under a heading */
+  #hview .vsec { margin-left: 1.6rem; }
   #hpage .hname { width: 100%; font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 0.2rem 0; }
   #hpage .hname:focus { outline: none; border-bottom-color: var(--accent-light); }
   #hpage .hrow { display: flex; gap: 0.6rem; align-items: center; margin: 0.6rem 0 1.1rem; flex-wrap: wrap; }
@@ -602,6 +604,9 @@ css.textContent = `
   .hcard.hnotecard { background: var(--parchment); border-color: var(--line); border-left: 3px solid var(--accent-light); }
   .hcard.hnotecard.collecting { border-color: var(--accent-light); box-shadow: 0 0 0 2px var(--hl); }
   .hcard.hnotecard .nlab { font-family: 'Cinzel', serif; letter-spacing: 0.05em; color: var(--accent); margin-right: 0.6rem; }
+  .hcard.hnotecard input.nlab { font-size: inherit; font-weight: 700; background: transparent; border: none; border-bottom: 1px dashed transparent; padding: 0; min-width: 3.2rem; max-width: 26rem; field-sizing: content; }
+  .hcard.hnotecard input.nlab::placeholder { color: var(--accent); opacity: 1; }
+  .hcard.hnotecard input.nlab:hover, .hcard.hnotecard input.nlab:focus { border-bottom-color: var(--accent-light); outline: none; }
   .hcard.hnotecard .ncoll { font-size: 0.8rem; padding: 0 0.6rem; }
   .hcard.hnotecard .ncoll.on { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
   .hcard .hnotetext { display: block; width: 100%; margin: 0.45rem 0 0.2rem; resize: vertical; min-height: 3rem; font: inherit; background: var(--card); border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.35rem 0.55rem; }
@@ -642,6 +647,7 @@ css.textContent = `
   #hview h1 { font-family: 'Cinzel', serif; color: var(--accent); font-size: 1.5rem; font-weight: 600; margin: 0.4rem 0 0.5rem; }
   #hview h2 { font-family: 'Cinzel', serif; color: var(--accent); font-size: 1.1rem; font-weight: 600; margin: 1.6rem 0 0.6rem; }
   #hview .vnote { margin: 1.1rem 0 0.4rem; }
+  #hview .vntitle { font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; margin: 0 0 0.35rem; }
   #hview .vnote p { margin: 0 0 0.5rem; }
   #hview .vpass { margin: 0.6rem 0 1rem 1.6rem; border-left: 2px solid var(--line); padding-left: 0.9rem; }
   #hview .vpass.top { margin-left: 0; }
@@ -680,6 +686,8 @@ css.textContent = `
     #hprint .nt { margin: 0 0 1em; }
     #hprint .pn { margin: 0 26pt 1em; }
     #hprint .note p { margin: 1em 0 0.4em; }
+    #hprint .note h3 { font-size: 11.5pt; font-style: italic; font-weight: 600; margin: 1.2em 0 0; }
+    #hprint .note h3 + p { margin-top: 0.3em; }
     #hprint .item { break-inside: avoid; }
   }
 `;
@@ -991,6 +999,12 @@ function render() {
     (n ? h.items.map((it, k) => over[k] ? '' : cardFor(it, String(k), h)).join('') :
       '<div class="hempty">Nothing here yet. Press <b>+ Note</b> to write the point you want to make. ' +
       'Or, in the portal, point at a passage and press <b>+ Handout</b>, or select some of its words and press <b>+ Add excerpt to handout</b>.</div>');
+  let inSec = false;   // what stands under a heading, until the next, sits a little further in
+  h.items.forEach((x, k) => {
+    if (x.kind === 'heading') { inSec = true; return; }
+    const c = inSec && page.querySelector('.hwrap > .hcard.top[data-key="' + k + '"]');
+    if (c) c.classList.add('insec');
+  });
   page.querySelectorAll('.hnote, .hnotetext').forEach(grow);
   mkbar.hidden = true;
   paintAll();
@@ -1115,7 +1129,7 @@ function moveSection(h, k, to) {
 function noteCard(it, key, h) {
   const on = collecting() === it, ks = kids(it), sec = sectionOf(h, +key), f = noteFolded(it);
   return '<div class="hcard top hnotecard' + (on ? ' collecting' : '') + (f ? ' folded' : '') + '" data-key="' + key + '" data-id="' + esc(it.id) + '">' +
-    '<div class="hcite">' + GRIP + FOLD(f) + '<span class="w"><b class="nlab">Note</b>' + (sec ? '<span class="hsec" title="This note is in that section">in “' + esc(sectionName(sec)) + '”</span>' : '') +
+    '<div class="hcite">' + GRIP + FOLD(f) + '<span class="w"><input class="nlab" data-f="title" value="' + esc(it.title || '') + '" placeholder="Note" size="' + Math.max(4, String(it.title || '').length + 1) + '" spellcheck="false" aria-label="This note’s title" title="Give this note a title: it stands here in place of “Note”, and students see it above the note">' + (sec ? '<span class="hsec" title="This note is in that section">in “' + esc(sectionName(sec)) + '”</span>' : '') +
     (f ? '<span class="hsec">' + (ks.length ? plural(ks.length, 'passage') : 'no passages') + '</span>' : '') +
     (f && !on ? '' : '<button type="button" class="btn ncoll' + (on ? ' on' : '') + '" data-h="collect" title="' + (on ? 'Stop adding passages under this note' : 'Passages you add in the portal from now on go under this note') + '">' +
     (on ? '● Collecting here · Stop' : 'Collect here') + '</button>') +
@@ -1194,7 +1208,7 @@ let trashOpen = false;
 const trashOf = h => h.trash || (h.trash = []);
 function trashLabel(it) {
   if (it.kind === 'heading') return { head: 'Heading', text: flat(it.text) || '(empty)' };
-  if (it.kind === 'note') return { head: 'Note' + (kids(it).length ? ' · ' + plural(kids(it).length, 'passage') : ''), text: clip(flat(it.text), 90) || '(empty)' };
+  if (it.kind === 'note') return { head: (flat(it.title) || 'Note') + (kids(it).length ? ' · ' + plural(kids(it).length, 'passage') : ''), text: clip(flat(it.text), 90) || '(empty)' };
   return { head: it.author + ', ' + it.cite + (it.kind === 'excerpt' ? ' · excerpt' : ''), text: clip(flat(it.text), 90) };
 }
 function trashHtml(h) {
@@ -1350,6 +1364,7 @@ page.addEventListener('input', e => {
   if (!f || !c || f === 'enShow' || f === 'under') return;
   at(h, c.dataset.key).it[f] = e.target.value;
   if (e.target.tagName === 'TEXTAREA') grow(e.target);
+  if (e.target.classList.contains('nlab')) e.target.size = Math.max(4, e.target.value.length + 1);
   save();
 });
 page.addEventListener('change', e => {
@@ -1815,7 +1830,7 @@ function publishable(h) {
   return {
     kind: 'kantlab-handout', v: 1, title: h.name, published: new Date().toISOString().slice(0, 10), english: enMode(h),
     items: h.items.map(it => it.kind === 'heading' ? { kind: 'heading', text: it.text || '' }
-      : it.kind === 'note' ? { kind: 'note', text: it.text || '', items: kids(it).map(pass) } : pass(it)),
+      : it.kind === 'note' ? Object.assign({ kind: 'note' }, flat(it.title) ? { title: it.title.trim() } : {}, { text: it.text || '', items: kids(it).map(pass) }) : pass(it)),
   };
 }
 /* What publishing puts in the repository: the handout sealed with the class key (handouts/lock.js),
@@ -1933,9 +1948,9 @@ function drawPublished(d, tries) {
     return h.replace(/<div class="vtext"/g, '<div class="vtext" data-pi="' + pi + '" data-mf="text"').replace(/<div class="ven"/g, '<div class="ven" data-pi="' + pi + '" data-mf="en"') + '</div>';
   };
   box.innerHTML = '<h1>' + esc(d.title) + '</h1>' + (d.published ? '<div class="hpubd">Published ' + esc(d.published) + '</div>' : '') +
-    d.items.map(it => it.kind === 'heading' ? (flat(it.text) ? '<h2>' + esc(it.text) + '</h2>' : '')
-      : it.kind === 'note' ? '<div class="vnote">' + answersHtml(it.text, 'a' + (na++)) + '</div>' + (it.items || []).map(x => pass(x, false)).join('')
-      : pass(it, true)).join('');
+    sectioned(d.items.map(it => it.kind === 'heading' ? (flat(it.text) ? '<h2>' + esc(it.text) + '</h2>' : '')
+      : it.kind === 'note' ? '<div class="vnote">' + (flat(it.title) ? '<div class="vntitle">' + esc(it.title) + '</div>' : '') + answersHtml(it.text, 'a' + (na++)) + '</div>' + (it.items || []).map(x => pass(x, false)).join('')
+      : pass(it, true)), d.items);
   box.querySelectorAll('[data-pi]').forEach(x => { paintMarks(x, marksOf(its[+x.dataset.pi], x.dataset.mf)); collapseCuts(x); });
   if (waiting && tries < 40) setTimeout(() => drawPublished(d, tries + 1), 500);
 }
@@ -1945,6 +1960,15 @@ function drawPublished(d, tries) {
    and in the exports the note stands as written, Answer: and all. */
 const ANSWER = /^answers?\s*:\s*/i;
 const hasAnswer = t => paras(t).some(x => ANSWER.test(x));
+// The students' view: what stands under each heading, until the next, in a box set a little in.
+function sectioned(html, items) {
+  let out = '', open = false;
+  items.forEach((it, k) => {
+    if (it.kind === 'heading') { if (open) out += '</div>'; out += html[k] + '<div class="vsec">'; open = true; }
+    else out += html[k];
+  });
+  return out + (open ? '</div>' : '');
+}
 const ansOpen = new Set();   // the answers opened in this view
 function answersHtml(text, key) {
   const ps = paras(text), out = [];
@@ -2052,6 +2076,7 @@ function toText(h) {
   h.items.forEach(it => {
     if (it.kind === 'heading') { if (flat(it.text)) L.push('# ' + flat(it.text), ''); return; }
     if (it.kind === 'note') {
+      if (flat(it.title)) L.push('### ' + flat(it.title), '');   // the Handout tool's third-level heading: in italics, no number
       const ps = paras(it.text);
       (ps.length ? ps : ['']).forEach((t, j) => { if (j) L.push(''); L.push(t); });
       kids(it).forEach(x => pass(x, '  '));
@@ -2077,7 +2102,7 @@ function exportPdf(h) {
     (flat(it.note) ? '<p class="pn">' + esc(it.note) + '</p>' : '') + '</div>';
   box.innerHTML = '<h1>' + esc(h.name) + '</h1>' + h.items.map(it => {
     if (it.kind === 'heading') return flat(it.text) ? '<h2>' + esc(it.text) + '</h2>' : '';
-    if (it.kind === 'note') return '<div class="note">' + paras(it.text).map(t => '<p>' + esc(t) + '</p>').join('') + '</div>' + kids(it).map(pass).join('');
+    if (it.kind === 'note') return '<div class="note">' + (flat(it.title) ? '<h3>' + esc(it.title) + '</h3>' : '') + paras(it.text).map(t => '<p>' + esc(t) + '</p>').join('') + '</div>' + kids(it).map(pass).join('');
     return pass(it);
   }).join('');
   box.querySelectorAll('[data-pi]').forEach(x => { paintMarks(x, marksOf(its[+x.dataset.pi], x.dataset.mf).filter(m => m.k !== 'mn')); collapseCuts(x); });
@@ -2137,7 +2162,7 @@ function docxBlob(h) {
   };
   h.items.forEach(it => {
     if (it.kind === 'heading') { if (flat(it.text)) B.push(para('Heading1', runs(flat(it.text)))); return; }
-    if (it.kind === 'note') { paras(it.text).forEach(t => B.push(para('Note', runs(t)))); kids(it).forEach(pass); return; }
+    if (it.kind === 'note') { if (flat(it.title)) B.push(para('NoteTitle', runs(flat(it.title)))); paras(it.text).forEach(t => B.push(para('Note', runs(t)))); kids(it).forEach(pass); return; }
     pass(it);
   });
   const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
@@ -2150,6 +2175,7 @@ function docxBlob(h) {
     '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/><w:rPr>' + font + '<w:sz w:val="22"/><w:szCs w:val="22"/></w:rPr></w:style>' +
     style('Title', 'Title', '<w:jc w:val="center"/><w:spacing w:after="320"/>', '<w:b/><w:sz w:val="34"/><w:szCs w:val="34"/>') +
     style('Heading1', 'heading 1', '<w:keepNext/><w:spacing w:before="320" w:after="140"/><w:outlineLvl w:val="0"/>', '<w:b/><w:sz w:val="26"/><w:szCs w:val="26"/>') +
+    style('NoteTitle', 'Note Title', '<w:keepNext/><w:spacing w:before="240" w:after="60"/>', '<w:b/><w:i/>') +
     style('Note', 'Note', '<w:keepNext/><w:spacing w:before="200" w:after="100"/>', '') +
     style('Label', 'Passage Label', '<w:keepNext/><w:ind w:left="567" w:right="567"/><w:spacing w:before="120" w:after="40"/>', '<w:i/>') +
     style('Passage', 'Passage', '<w:keepNext/><w:ind w:left="567" w:right="567"/><w:spacing w:after="60"/>', '') +
