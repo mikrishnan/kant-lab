@@ -1,32 +1,31 @@
 # Class handouts
 
-Each `.json` file here is a handout published for students from the Logic Portal's
-handout tray (**Publish for students** on the Handouts page). The portal shows one at
-`../?handout=<file name without .json>`, and lists them all under **Read**, as class
-handouts.
+[class.json](class.json) is the class's copy of the handouts, made in the Logic Portal by
+**Share with the class** on the Handouts page and uploaded here. Anyone who opens **Handouts**
+in the portal and gives the class password finds them under *The class's handouts*, to read,
+open where each passage stands and export, but not to change: only the maker changes them, in
+their own browser, and shares again.
 
-**The handouts are the class's.** The Handouts page, a published handout and the class
-screen all ask for the class password first. A published file is encrypted with a key made
-from that password, so here, in the public repository, it reads as nothing:
+**The handouts are the class's.** The file is encrypted with a key made from the class
+password, so here, in the public repository, it reads as nothing:
 
 ```json
 { "kind": "kantlab-handout-locked", "v": 1, "iv": "…", "ct": "…" }
 ```
 
-Inside, once opened with the class password, is the handout's title, its headings and notes
-as written, and each passage by its portal address (`textKey:id`), with its label and note if
-it has them. An excerpt also keeps its words. A note keeps its `title`, if it has one. `english: true`, on the handout and on a
-passage, says that the passage's English is shown beneath it, drawn live from the portal's
-translations; an excerpt keeps the English of its own sentences, as `en`. A passage's
-`marks` are its highlights and underlines, and the words left out of it (`"k": "cut"`), each
-kept as its words and a little of what stands either side, so that they are found in the live
-text and shown as […]. A passage joined from several also lists every
-part's address and citation (`refs`, `cites`); its `ref` is the first part's. So students
-read every passage live, from the portal's own texts.
+Inside, once opened with the class password, is `{ kind: 'kantlab-class-handouts', v, shared,
+handouts }`, each handout as it stands in its maker's browser (`logic-portal/handout-tray.js`
+describes the shape), without its maker's margin notes (marks of kind `mn`) or its trash.
+Each passage keeps its words, its English if it has some, its label, note and marks, the words
+left out of it (`"k": "cut"`), and its portal address (`textKey:id`), by which it opens where it
+stands in the reader.
 
-To take a handout down, delete its file. To change one, publish it again from the tray: the
-new file replaces the old. A file's name comes from the handout's title, and is not
-encrypted.
+To update the class's copy, press **Share with the class** again and upload the new
+`class.json` over the old one. To take it down, delete the file.
+
+Before November 2026 a handout could be published on its own, for students to read at
+`?handout=<name>`. That is gone; a file published that way may still be here, and nothing in
+the portal reads it now.
 
 ## The class password
 
@@ -38,7 +37,7 @@ opens the handouts. That key stays in the browser and cannot be exported.
 
 What this cannot do: the site is public and runs in the reader's browser, so someone can
 change the page in their own browser to skip the prompt. That gets them an empty Handouts
-page of their own, and nothing of the class's, since the published handouts stay
+page of their own, and nothing of the class's, since the class's copy stays
 encrypted. The encryption is only as strong as the password: a word anyone might guess can
 be guessed, each guess costing a fraction of a second. A longer password is stronger.
 
@@ -47,5 +46,6 @@ password is not asked again there. **Lock**, on the Handouts page, forgets it.
 
 **To change the password**, run `python3 make-lock.py` here. It asks for the new password
 twice and writes a new salt and fingerprint into `lock.js`; then raise `lock.js?v=` in
-`../index.html` and `../teaching/class-screen/index.html`, publish every handout again
-(those already published stay locked with the old password), and tell the class.
+`../index.html` and `../teaching/class-screen/index.html`, press **Share with the class**
+again and upload the new `class.json` (the one here stays locked with the old password), and tell
+the class.
