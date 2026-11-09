@@ -368,11 +368,31 @@ const has = i => passagesOf(cur()).some(x => x.kind === 'passage' && refsOf(x).i
    maker reads as one, can be joined into one passage of the handout. The portal's texts are
    not touched. A joined item keeps every part's address (refs) and the parts themselves, as
    they were (parts), so that Split gives them back; its own ref is the first part's, so that
-   "Open it in the portal" goes to where it begins. Each part keeps a small marker in the text,
+   "Read it where it stands" goes to where it begins. Each part keeps a small marker in the text,
    its own citation, which opens that part in the portal. */
 const refsOf = x => x.refs || [x.ref];
 const partsOf = x => x.parts || [x];
 const idxOf = ref => PT.BYID ? PT.BYID.get(ref) : undefined;
+/* Back to where a passage stands: its text open in the reader at that paragraph, however the
+   handout's copy has been changed (words left out, an excerpt, a joined passage), since the
+   passage keeps its address. A note of Kant's opens beside the textbook § it is on, picked out
+   among the notes there. Where the portal offers no openRead, its address does what it can. */
+function goRead(ref) {
+  const k = idxOf(ref);
+  if (k == null) return false;
+  const T = TEXTS[P[k].t];
+  // a lecture or a published work opens with the passage on the right too; a textbook or a
+  // note of Kant's opens beside its § with the notes, as openRead does by itself
+  if (PT.openRead) { if (!['meier', 'metaphysica', 'refl'].includes(T.shape)) { S.sel = k; S.quote = null; } PT.openRead(T.key, k); }
+  else location.hash = readHref(ref).slice(1);
+  return true;
+}
+function readHref(ref) {
+  const k = idxOf(ref), p = k != null ? P[k] : null, T = p && TEXTS[p.t];
+  if (!p) return '#p=' + encodeURIComponent(ref) + '&rt=conn';
+  if (T.shape === 'refl' && /^r\d+$/.test(p.id)) return '#refl=' + p.id.slice(1);
+  return '#read=' + encodeURIComponent(T.key) + '&at=' + encodeURIComponent(p.id);
+}
 const textOfRef = ref => String(ref).split(':')[0];
 // Can a take b, the item just after it, into itself? Both whole passages of one text, and b later in it.
 function joinable(a, b) {
@@ -613,6 +633,8 @@ css.textContent = `
   .hcard.hnotecard.folded { padding-bottom: 0.5rem; }
   .hcard .hcite { cursor: grab; }
   .hcard .hcite button, .hcard .hcite select { cursor: pointer; }
+  .hcard .hcite .hgo { background: none; border: none; padding: 0; font: inherit; color: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 2px; }
+  .hcard .hcite .hgo:hover { color: var(--accent); text-decoration-color: currentColor; }
   .hcard.into { outline: 2px solid var(--accent-light); outline-offset: 1px; background: #f7ecc8; }
   .hcard.child.before { box-shadow: 0 -3px 0 var(--accent-light); }
   .hcard.child.after { box-shadow: 0 3px 0 var(--accent-light); }
@@ -1302,15 +1324,16 @@ function passCard(it, key, h, parent, len) {
   const under = notes.length ? '<label class="hunder">Under <select data-f="under"><option value="">no note</option>' +
     notes.map(x => '<option value="' + esc(x.id) + '"' + (parent === x ? ' selected' : '') + '>' + esc(noteName(x)) + '</option>').join('') + '</select></label>' : '';
   return '<div class="hcard ' + (parent ? 'child' : 'top') + '" data-key="' + key + '" data-id="' + esc(it.id) + '"><div class="hcite">' + GRIP +
-    '<span class="w"><b>' + esc(it.author) + '</b>, <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + tag + linked + '</span>' +
+    '<span class="w"><b>' + esc(it.author) + '</b>, <i>' + esc(it.work) + '</i>, ' +
+      (live ? '<button type="button" class="hgo" data-h="go" title="Read it where it stands, in its text">' + esc(it.cite) + '</button>' : esc(it.cite)) + tag + linked + '</span>' +
     '<span class="hbtns">' + moveBtns(i, len) + '</span></div>' +
     '<input class="hlab" data-f="label" value="' + esc(it.label || '') + '" placeholder="Label (optional), e.g. Against X" spellcheck="false">' +
     duoCard(h, it, '<div class="htext" data-mf="text"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text)
-      : it.parts ? partsHtml(it, p => '<button type="button" class="hpart" data-h="gopart" data-ref="' + esc(p.ref) + '" title="Open this part in the portal">' + esc(p.cite) + '</button> ')
+      : it.parts ? partsHtml(it, p => '<button type="button" class="hpart" data-h="gopart" data-ref="' + esc(p.ref) + '" title="Read this part where it stands">' + esc(p.cite) + '</button> ')
       : esc(it.text)) + '</div>' +
     (it.from === 'english' ? '<div class="hfoot muted">Machine translation, ' + esc(styleLabel(it.enStyle)) + '</div>' : ''), enCard(h, it, enLab)) +
     '<textarea class="hnote" data-f="note" rows="1" placeholder="A note on this passage (optional)">' + esc(it.note) + '</textarea>' +
-    '<div class="hfoot">' + (live ? '<button type="button" class="linkish" data-h="go">' + (it.parts ? 'Open it in the portal, at the first part' : 'Open it in the portal') + '</button>'
+    '<div class="hfoot">' + (live ? '<button type="button" class="linkish" data-h="go" title="Its paragraph in the reader, whatever has been changed here">' + (it.parts ? 'Read it where it stands, from the first part ›' : 'Read it where it stands ›') + '</button>'
       : '<span class="muted">This passage is no longer in the portal; its words are kept here.</span>') +
     (joinNx ? '<button type="button" class="linkish" data-h="join" title="Make this passage and the one below it one passage of the handout (the portal keeps them apart)">Join with the next passage ↓</button>' : '') +
     (it.parts ? '<button type="button" class="linkish" data-h="split" title="Back into the passages it was joined from">Split into its ' + it.parts.length + ' passages</button>' : '') +
@@ -1452,10 +1475,10 @@ page.addEventListener('click', e => {
     case 'go': {
       const it = at(h, key).it;
       if (!docked) closePage();
-      location.hash = 'p=' + encodeURIComponent(it.ref) + '&rt=conn';
+      goRead(it.ref);
       return;
     }
-    case 'gopart': if (!docked) closePage(); location.hash = 'p=' + encodeURIComponent(b.dataset.ref) + '&rt=conn'; return;
+    case 'gopart': if (!docked) closePage(); goRead(b.dataset.ref); return;
     case 'join': return joinNext(h, key);
     case 'split': return splitPassage(h, key);
     case 'unlink': {
@@ -2134,7 +2157,7 @@ function drawPublished(d, tries) {
     else if (it.refs && p) {
       // a joined passage: its parts, live, each with its citation, which opens it in context
       const ps = it.refs.map((r, k) => { const q = idxOf(r); return { ref: r, cite: (it.cites || [])[k] || '', text: q != null ? P[q].text : '(no longer in the portal)', p: q != null ? P[q] : null }; });
-      body += '<div class="vtext" lang="de">' + partsHtml({ parts: ps }, x => '<a href="#p=' + encodeURIComponent(x.ref) + '&rt=conn" class="vctx vpart" title="Read this part in context">' + esc(x.cite) + '</a> ') + '</div>';
+      body += '<div class="vtext" lang="de">' + partsHtml({ parts: ps }, x => '<a href="' + readHref(x.ref) + '" data-ref="' + esc(x.ref) + '" class="vctx vpart" title="Read this part where it stands">' + esc(x.cite) + '</a> ') + '</div>';
       if (it.english && viewEn) {
         const es = ps.map(x => x.p ? englishOf(x.p) : null);
         if (es.includes('loading')) { waiting = true; body += '<div class="ven muted" lang="en">English loading…</div>'; }
@@ -2152,7 +2175,7 @@ function drawPublished(d, tries) {
     h += /<div class="ven" lang/.test(body) ? '<div class="vduo">' + body + '</div>' : body;
     const mt = it.from === 'english' || (viewEn && (it.en || (it.english && p))) ? ' · English: machine translation' : '';
     h += '<div class="vcite">' + esc(it.author) + ', <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + mt +
-      (p ? '<a href="#p=' + encodeURIComponent(it.ref) + '&rt=conn" class="vctx">' + (it.refs ? 'Read it in context, from the start ›' : 'Read it in context ›') + '</a>' : '') + '</div>';
+      (p ? '<a href="' + readHref(it.ref) + '" data-ref="' + esc(it.ref) + '" class="vctx">' + (it.refs ? 'Read it in context, from the start ›' : 'Read it in context ›') + '</a>' : '') + '</div>';
     if (it.note) h += '<div class="vpn">' + (hasAnswer(it.note) ? answersHtml(it.note, 'a' + (na++)) : esc(it.note)) + '</div>';
     const pi = its.push(it) - 1;
     return h.replace(/<div class="vtext"/g, '<div class="vtext" data-pi="' + pi + '" data-mf="text"').replace(/<div class="ven"/g, '<div class="ven" data-pi="' + pi + '" data-mf="en"') + '</div>';
@@ -2207,7 +2230,9 @@ const back = el('button', 'hback', 'btn solid');
 back.type = 'button'; back.hidden = true; back.textContent = '← Back to the handout';
 document.body.appendChild(back);
 document.addEventListener('click', e => {
-  if (!view || !e.target.closest || !e.target.closest('#hview .vctx')) return;
+  const a = view && e.target.closest && e.target.closest('#hview .vctx');
+  if (!a) return;
+  if (a.dataset.ref && PT.openRead) { e.preventDefault(); goRead(a.dataset.ref); }
   view.hidden = true; back.hidden = false;
 });
 back.addEventListener('click', () => { if (view) { view.hidden = false; back.hidden = true; } });
