@@ -86,15 +86,14 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   bring the matching German. In Kant's published works the citation narrows to the pages the
   words are on.
 - **English with every passage.** A handout shows each passage's English beside it, for
-  students who read no German or Latin: on the Handouts page, for students, on the class screen
-  and in every export. Where there is no room for two columns (a phone, a narrow window, the
+  students who read no German or Latin: on the Handouts page, in the class's copy, on the class
+  screen and in every export. Where there is no room for two columns (a phone, a narrow window, the
   handout side by side with the portal) the English goes beneath instead, and the exports keep
   it beneath. The switch **English with every passage**, beside **+ Heading**, turns
   it off for that handout, and a passage's own **English** box hides just that passage's. It is
   on for every handout, including those made before it: a passage added while the English was
   off gets its English from the portal's translations the next time the portal opens, and keeps
-  it. Its words, label, note and marks stay as they were. Students reading a published handout
-  have an **English** switch of their own.
+  it. Its words, label, note and marks stay as they were.
 - **Side by side.** **⇆ Side by side** on the Handouts page puts your handout in a column on the
   right while you read and add on the left; drag its edge to make it wider, and **⤢ Full page**
   to go back. The browser remembers which you chose.
@@ -130,15 +129,14 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
 - **Say what you want to say.** **+ Note** adds a note: your setup, a claim, how some
   passages bear on each other, a question for students. **+ Note in this section**, on a
   section heading, adds one at the top of that section, just under its heading, and a note
-  shows the section it is in. What stands under a heading is set in a little, on the Handouts page
-  and for students. **Note**, at the top of a note, is a title to type into: give the note one and
-  it stands there in place of *Note*, and above the note for students, on the class screen, and in
-  the exports (in the Handout tool text as a `###` heading).
+  shows the section it is in. What stands under a heading is set in a little. **Note**, at the top
+  of a note, is a title to type into: give the note one and it stands there in place of *Note*,
+  in the class's copy, on the class screen and in the exports (in the Handout tool text as a `###` heading).
 - **Ask a question, and keep its answer back.** In a note, or in a passage's note, start a
-  paragraph with **Answer:**. Students see the question, and beneath it only a small **Answer ▸**
-  (**2 answers ▸** for two such paragraphs in a row), which opens when they click it. On the
-  class screen it is folded the same way, and ↓ opens it before going on. On the Handouts page
-  and in the exports the note stays as you wrote it.
+  paragraph with **Answer:**. On the class screen the question shows first, with only a small
+  **Answer ▸** beneath it (**2 answers ▸** for two such paragraphs in a row), which ↓ opens
+  before going on. On the Handouts page, in the class's copy and in the exports the note stays
+  as you wrote it.
   **Add passages here**, on a section heading, sends every passage you add in the portal to
   the end of that section, in the order you add them, until you press it again or the
   **Into: …** button in the header.
@@ -148,9 +146,9 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   header. You can also move a passage with its **Under** list. Each passage has a
   **Label** of your own, such as *Against X*, and a note of its own.
 - **Shorten a passage.** When a passage is more than students need, select the words to drop
-  and press **✂ Leave out**. Students see […] in their place, in the published handout, on the
-  class screen and in every export, and the passage keeps its address: **Read it in context ›**
-  still opens it whole, at its paragraph in the reader. On the Handouts page the words stay,
+  and press **✂ Leave out**. […] stands in their place on the class screen and in every export,
+  and … in **Class view**, and the passage keeps its address: **Read it where it stands** still
+  opens it whole, at its paragraph in the reader. On the Handouts page the words stay,
   struck through; click them to put them back, or press **Put back all that was left out**.
   Whatever you leave out of the German goes out of the English beside it too. The two are
   matched clause by clause, or sentence by sentence, as the translations keep them; a few words
@@ -163,7 +161,7 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   on a narrow card it goes under the text. Click a highlight or underline to remove it, or
   select words and press **Remove marks**; ✕ removes a margin note (with **Undo**), and one
   left empty goes by itself. Highlights and underlines appear in the Word file, the PDF and the
-  students' view, and underlines as `__…__` in the Handout tool text; margin notes are yours
+  class's copy, and underlines as `__…__` in the Handout tool text; margin notes are yours
   and stay on the Handouts page. A mark keeps its words, not their position, so it stays on
   them however the passage is drawn.
 - **Change your mind.** ✕ moves a passage to the handout's **Trash**, which folds open on the
@@ -174,20 +172,22 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   markup of Maya's Handout tool, which turns it into a handout in her house style. Notes,
   labels and the passages under each note come along. Every export marks the English as
   machine translation.
-- **Show it on the room's screen.** **Class screen ↗** on the Handouts page opens the handout in
-  large type, one passage after another, in a window of its own: see
-  [teaching/class-screen/](teaching/class-screen/). It follows the handout as you add to it.
-- **Publish it for students.** **Publish for students** opens GitHub with the handout as a
-  file in [handouts/](handouts/), encrypted with the class password, and you press *Commit
-  changes*. Students then open it at
-  `…/logic-portal/?handout=<name>`, or from **Read**, where class handouts are listed. They see
-  your notes and labels, and every passage drawn live from the portal, with **Read it in
-  context ›**, once they give the class password. The file is in the public repository, but
-  without the password it reads as nothing. To change it, publish again. To take it down,
-  delete its file.
+- **Class view.** **Class view**, in the Handouts page's top bar, shows what you have left out
+  of each passage as … rather than struck through, as the room should see it. Press it again to
+  go back. For the room's screen in large type, one passage after another, there is still the
+  [class screen](teaching/class-screen/), among the teaching tools.
+- **Share it with the class.** **Share with the class** puts every handout of yours with
+  something in it into one file, `class.json`, locked with the class password, and leaves out
+  your margin notes and your trash. It saves the file to your Downloads and opens GitHub's upload
+  page for [handouts/](handouts/): drop the file in and press *Commit changes*. Anyone who opens
+  **Handouts** and gives the class password then finds your handouts under *The class's
+  handouts*, as you see them, to read, to open each passage where it stands, to switch on Class
+  view and to export, but not to change. The left column says when you last shared and whether
+  you have changed anything since; share again to give the class the new version. The file is in
+  the public repository, but without the password it reads as nothing.
 
-Until you publish, your handouts are kept in your own browser on your own computer, and
-nowhere else. The repository and the site never see them. **Save to file** writes them all to one `.json`
+Your own handouts are kept in your own browser on your own computer, and nowhere else, until
+you share them. The repository and the site never see them. **Save to file** writes them all to one `.json`
 file, to keep or to open in another browser with **Open file**. Clearing the browser's
 site data deletes them.
 
@@ -212,7 +212,8 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
 [teaching/](teaching/) holds small tools for teaching with the portal, a new one most weeks.
 Like a study, each reads the same texts and the handouts without changing the portal.
 They are listed at [teaching/index.html](teaching/index.html), from `teaching/teaching.js`. The
-first is the [class screen](teaching/class-screen/index.html), which the Handouts page opens.
+first is the [class screen](teaching/class-screen/index.html), which shows a handout in large
+type on the room's screen.
 
 ## What it does
 

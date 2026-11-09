@@ -6,33 +6,35 @@
    off (English mode); write notes, the points to make to students, with passages under
    them, each passage with a label of its maker's own ("against X"); reorder, annotate
    and prune; export a handout as Word (which Pages opens), as a PDF by way of the
-   browser's Print, or as plain text in the Handout tool's markup; and publish a
-   finished handout for students, who read it in the portal with every passage live.
+   browser's Print, or as plain text in the Handout tool's markup; and share them with the
+   class, who read them on the same Handouts page, without being able to change them.
 
    Everything is kept in this browser's localStorage, under one key, and nothing is sent
-   anywhere until its maker publishes a handout: the repository is public, and a handout
-   is its maker's own. "Save to file" writes the lot to a .json file, and "Open file"
-   reads one back. Publishing opens GitHub with the handout as a file in handouts/, for
-   its maker to commit; the portal shows it at ?handout=<name>, and lists it in Read.
+   anywhere: the repository is public, and a handout is its maker's own. "Save to file"
+   writes the lot to a .json file, and "Open file" reads one back. "Share with the class"
+   writes every handout, locked with the class password and without its maker's margin notes
+   or trash, to one file, handouts/class.json, for its maker to upload to the repository.
+   Anyone who gives the class password then sees those handouts on the Handouts page, to read
+   and export but not to change.
 
-   Each passage keeps its portal address ('textKey:id') beside its words, so that a
-   published handout can show the passage live, and a later handout builder can bring
+   Each passage keeps its portal address ('textKey:id') beside its words, so that it opens
+   where it stands in the reader, and a later handout builder can bring
    passages in by reference, as the Handout tool's passage bank does with {{Q13}}.
 
    Handout mode is off until a reader turns it on, so that nobody meets buttons they did
    not ask for. The header's Handouts button turns it on and opens the Handouts page, and
    the page's switch turns it off (or, where the header has a Modes menu, its switch there).
    Off, the handouts are kept and nothing of the tray shows but that button; the choice is
-   remembered in this browser. The Handouts page's Class screen button shows the handout on
-   the room's screen (teaching/class-screen/).
+   remembered in this browser. The Handouts page's Class view shows the words left out of a
+   passage as … rather than struck through, as the room should see them.
 
    The handouts are the class's: nothing of them opens without the class password, which
-   handouts/lock.js checks (KANTLAB_LOCK), and a published handout is encrypted with it.
+   handouts/lock.js checks (KANTLAB_LOCK), and the class's copy is encrypted with it.
    Handout mode stays off until the password is given; Lock, on the Handouts page, forgets it.
 
    The portal is a closed IIFE. This file reads it only through window.PORTAL, and it
    draws nothing inside the portal's own markup except one button beside the passage open
-   on the right, the header's buttons, and the Class handouts in Read.
+   on the right, and the header's buttons.
    ═══════════════════════════════════════════════════════════════════════════ */
 (() => {
 'use strict';
@@ -49,10 +51,9 @@ const LOCK = window.KANTLAB_LOCK || null;                  // handouts/lock.js: 
 // or remembered on this computer. Without lock.js nothing opens.
 const gate = (text) => !LOCK ? Promise.resolve(false) : LOCK.key() ? Promise.resolve(true) : LOCK.ask(text ? { text } : undefined);
 const REPO = 'mikrishnan/kant-lab';
-const DIR = 'logic-portal/handouts';   // where published handouts live
+const CLASS_FILE = 'handouts/class.json';   // the class's copy of the handouts, locked with the class password
+const UPLOAD = 'https://github.com/' + REPO + '/upload/main/logic-portal/handouts';   // where it goes up
 const SITE = PT.SITE_PORTAL || 'https://mikrishnan.github.io/kant-lab/logic-portal/index.html';
-const SCREEN = 'teaching/class-screen/index.html';   // the class screen, which shows a handout on the room's screen
-const SITE_DIR = SITE.replace(/index\.html$/, '');
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const rich = s => esc(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/\*([^*\n]+)\*/g, '<i>$1</i>');
@@ -84,7 +85,11 @@ function load() {
 }
 let DB = load();
 let touched = null;   // the linked passage being changed, whose copies follow it when it is saved (syncLinked)
-const cur = () => DB.handouts.find(h => h.id === DB.current) || DB.handouts[0];
+// The class's handouts (from handouts/class.json), read only; `viewing` is the id of the one
+// open, or null when one of this browser's own is open.
+let CLASSH = [], CLASS_AT = '', viewing = null;
+const roNow = () => viewing != null;
+const cur = () => (viewing && CLASSH.find(h => h.id === viewing)) || DB.handouts.find(h => h.id === DB.current) || DB.handouts[0];
 function save() {
   syncLinked();
   try { localStorage.setItem(KEY, JSON.stringify(DB)); }
@@ -133,7 +138,7 @@ function backupMark() {
   if (b) b.outerHTML = backupHtml();
 }
 function backupHtml() {
-  if (!LOCAL) return '<p class="hback muted small">Kept in this browser on this computer, and nowhere else, until you publish. Save to file to keep a copy or move it.</p>';
+  if (!LOCAL) return '<p class="hback muted small">Kept in this browser on this computer, and nowhere else. Save to file to keep a copy or move it.</p>';
   if (backup.ok) return '<p class="hback small ok">✓ Backed up to a file on this computer at ' + esc(backup.at) + ', in <i>Kant Lab/Handout backups</i>.</p>';
   if (backup.ok === false) return '<p class="hback small bad">⚠ Not backed up to a file. Use <b>Save to file</b> to keep a copy.</p>';
   return '<p class="hback muted small">Backing up to a file on this computer…</p>';
@@ -457,8 +462,8 @@ function splitPassage(h, key) {
   save(); render();
   toast('Split into ' + plural(ps.length, 'passage') + '.', [['Undo', () => { const k = a.list.indexOf(ps[0]); if (k >= 0) { a.list.splice(k, ps.length, it); save(); render(); } }]]);
 }
-// A joined passage's words, part by part, each opening on its own citation (a button on the
-// Handouts page, a link in the student's view), with […] where the portal has passages between.
+// A joined passage's words, part by part, each opening on its own citation, with […] where the
+// portal has passages between.
 function partsHtml(it, partTag) {
   const ps = partsOf(it);
   return ps.map((p, k) => (k && gapBetween(ps[k - 1].ref, p.ref) ? '<span class="hgap">[…]</span>\n\n' : '') +
@@ -489,9 +494,8 @@ css.textContent = `
   body.hmode #htray, body.hnomenu #htray, body.hmode .pactions .hrail, body.hmode .pmeta .hrail { display: inline-block; }
   .pmeta .hrail { margin-left: 0.6rem; padding: 0 0.55rem; font-size: 0.8rem; }
   .pmeta .hrail.on { color: var(--faded); }
-  #hpage .hmodesw, #hview .hmodesw { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; color: var(--faded); cursor: pointer; }
-  #hpage .hmodesw input, #hview .hmodesw input { accent-color: var(--accent); margin: 0; }
-  #hview .hmodesw[hidden] { display: none; }
+  #hpage .hmodesw { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; color: var(--faded); cursor: pointer; }
+  #hpage .hmodesw input { accent-color: var(--accent); margin: 0; }
   body.hmode #hcoll.on { display: inline-block; }
   #menu-ho .linkish { margin: 0.15rem 0 0.25rem; }
   #htray .hn { display: inline-block; min-width: 1.25rem; margin-left: 0.35rem; padding: 0 0.35rem; border-radius: 999px; background: var(--parchment-dark); color: var(--accent); font-size: 0.8rem; text-align: center; }
@@ -504,7 +508,7 @@ css.textContent = `
   .pactions .hrail.on { color: var(--faded); }
   #htoast { position: fixed; z-index: 60; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: #3b2a17; color: var(--parchment); border-radius: 6px; padding: 0.5rem 0.9rem; font-size: 0.92rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25); display: flex; gap: 0.9rem; align-items: baseline; max-width: 90vw; }
   #htoast button { background: none; border: none; color: #f1d98c; cursor: pointer; padding: 0; font: inherit; text-decoration: underline; }
-  #hpage, #hview { position: fixed; inset: 0; z-index: 30; background: var(--parchment); display: flex; flex-direction: column; }
+  #hpage { position: fixed; inset: 0; z-index: 30; background: var(--parchment); display: flex; flex-direction: column; }
   #hpage .hdockgrip { display: none; }
   #hpage.docked { inset: auto; top: var(--hdock-top, 0); right: 0; bottom: 0; left: auto; width: var(--hdock-w, 42vw); border-left: 1px solid var(--line); box-shadow: -6px 0 14px rgba(60, 40, 20, 0.08); z-index: 25; }
   #hpage.docked .hdockgrip { display: block; position: absolute; left: -5px; top: 0; bottom: 0; width: 10px; cursor: col-resize; z-index: 2; }
@@ -513,8 +517,8 @@ css.textContent = `
   #hpage.docked aside { width: auto; max-height: 26vh; border-right: none; border-bottom: 1px solid var(--line); padding: 0.6rem 0.8rem; }
   body.hdock #app { margin-right: var(--hdock-w, 42vw); }
   body.hdragging, body.hdragging * { cursor: col-resize !important; user-select: none !important; }
-  #hpage .hbar, #hview .hbar { display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 1.6rem; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-  #hpage .hbar .cz, #hview .hbar .cz { color: var(--accent); font-size: 1.05rem; }
+  #hpage .hbar { display: flex; align-items: center; gap: 0.8rem; padding: 0.6rem 1.6rem; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  #hpage .hbar .cz { color: var(--accent); font-size: 1.05rem; }
   #hpage .hbar .spacer { flex: 1; }
   #hpage .hbar .lab { color: var(--faded); font-size: 0.86rem; }
   #hpage .hbody { flex: 1; display: flex; min-height: 0; }
@@ -534,10 +538,9 @@ css.textContent = `
   #hpage aside .trow:hover { background: var(--card); border-color: var(--line); }
   #hpage aside .trow .tl { display: block; color: var(--accent); }
   #hpage aside .trow .tx { display: block; color: var(--faded); }
-  #hpage main, #hview main { flex: 1; overflow-y: auto; padding: 1.2rem 2rem 4rem; }
-  #hpage .hwrap, #hview .hwrap { max-width: 46rem; margin: 0 0 0 1rem; }   /* to the left, a little in from the panel */
+  #hpage main { flex: 1; overflow-y: auto; padding: 1.2rem 2rem 4rem; }
+  #hpage .hwrap { max-width: 46rem; margin: 0 0 0 1rem; }   /* to the left, a little in from the panel */
   #hpage .hwrap > .hcard.top.insec { margin-left: 1.6rem; }   /* what stands under a heading */
-  #hview .vsec { margin-left: 1.6rem; }
   #hpage .hname { width: 100%; font-family: 'Cinzel', serif; font-size: 1.4rem; color: var(--accent); background: transparent; border: none; border-bottom: 1px dashed var(--line); padding: 0.2rem 0; }
   #hpage .hname:focus { outline: none; border-bottom-color: var(--accent-light); }
   #hpage .hrow { display: flex; gap: 0.6rem; align-items: center; margin: 0.6rem 0 1.1rem; flex-wrap: wrap; }
@@ -584,7 +587,7 @@ css.textContent = `
      the list of handouts, the trash and the backup in a line or two, not a column. */
   #hpage.docked .hbar .spacer { display: none; }
   #hpage.docked .hbar .hfile { order: 1; margin-left: auto; border-left: none; padding-left: 0; }
-  #hpage.docked .hbar .hseg, #hpage.docked .hbar [data-h="publish"] { order: 2; }
+  #hpage.docked .hbar .hseg, #hpage.docked .hbar [data-h="share"] { order: 2; }
   #hpage.docked aside { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; max-height: 30vh; padding: 0.5rem 0.8rem; }
   #hpage.docked aside .hl { width: auto; margin: 0; padding: 0.15rem 0.6rem; }
   #hpage.docked aside .hl .n { display: inline; margin-left: 0.4rem; }
@@ -593,10 +596,6 @@ css.textContent = `
   #hpage.docked aside details.htrash[open] { flex-basis: 100%; }
   #hpage.docked aside .hback { margin: 0; flex-basis: 100%; font-size: 0.78rem; }
   #hpage .hempty { border: 1px dashed var(--line); border-radius: 8px; padding: 1.4rem; color: var(--faded); text-align: center; }
-  #hpage .hpub { border: 1px solid var(--accent-light); background: var(--card); border-radius: 8px; padding: 0.8rem 1rem; margin-bottom: 1.1rem; font-size: 0.94rem; }
-  #hpage .hpub p { margin: 0.45rem 0; }
-  #hpage .hpub code { font-size: 0.82rem; }
-  #hpage .hpub a.btn { text-decoration: none; display: inline-block; }
   .hcard { background: var(--card); border: 1px solid var(--line-soft); border-radius: 8px; padding: 0.7rem 0.9rem 0.6rem; margin-bottom: 0.7rem; }
   .hcard.drag { opacity: 0.45; }
   .hcard.before { box-shadow: 0 -3px 0 var(--accent-light); }
@@ -613,9 +612,9 @@ css.textContent = `
   .hcard .hlab:focus { outline: none; border-bottom-color: var(--accent-light); }
   .hcard .hlab::placeholder { color: var(--faded); opacity: 0.8; }
   .hcard .htext { margin: 0.45rem 0 0.35rem 1.3rem; white-space: pre-wrap; }
-  .hcard .hpart, #hview .vpart { font: inherit; font-size: 0.74rem; color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 0 0.4rem; margin-right: 0.15rem; cursor: pointer; text-decoration: none; white-space: nowrap; vertical-align: 0.1em; }
-  .hcard .hpart:hover, #hview .vpart:hover { background: var(--card); }
-  .hcard .hgap, #hview .hgap { color: var(--faded); }
+  .hcard .hpart { font: inherit; font-size: 0.74rem; color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 0 0.4rem; margin-right: 0.15rem; cursor: pointer; text-decoration: none; white-space: nowrap; vertical-align: 0.1em; }
+  .hcard .hpart:hover { background: var(--card); }
+  .hcard .hgap { color: var(--faded); }
   .hcard .htext.en { color: #4b4034; border-left: 2px solid var(--line); padding-left: 0.7rem; font-size: 0.96rem; }
   .hcard .hen { display: block; margin-left: 1.3rem; font-size: 0.86rem; color: var(--accent); cursor: pointer; }
   .hcard div.hen { color: var(--faded); font-style: italic; cursor: default; }
@@ -657,8 +656,25 @@ css.textContent = `
   .mk-ul { text-decoration: underline; text-decoration-color: #9a3b1e; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
   .mk-mn { border-bottom: 1.5px dotted var(--accent); cursor: pointer; }
   #hpage .mk-cut { text-decoration: line-through; text-decoration-color: var(--accent-light); color: var(--faded); opacity: 0.6; cursor: pointer; }
+  /* Class view: what is left out shows as …, as the room should see it */
+  #hpage.hcv .mk-cut { text-decoration: none; opacity: 1; cursor: default; }
+  #hpage .hbar .hcv.on { background: var(--accent); border-color: var(--accent); color: var(--parchment); }
+  /* The class's handouts, to read: everything that would change them is put away */
+  #hpage aside .hsec { font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--accent); margin: 0.8rem 0.6rem 0.25rem; }
+  #hpage aside .hsec:first-child { margin-top: 0.1rem; }
+  #hpage .hro-note { margin: 0 0 1rem; padding: 0.45rem 0.8rem; border-left: 3px solid var(--accent-light); background: var(--card); font-size: 0.92rem; color: var(--faded); }
+  #hpage.hro .hwrap button:not([data-h="go"]):not([data-h="gopart"]):not([data-h="fold"]):not([data-h="foldall"]):not([data-h="foldnotes"]):not([data-h="unfoldall"]),
+  #hpage.hro .hwrap select, #hpage.hro .hwrap .hunder, #hpage.hro .hwrap .hcopysel, #hpage.hro .hwrap .grip, #hpage.hro .hwrap .hbtns,
+  #hpage.hro .hwrap .henmode, #hpage.hro .hwrap .hhint { display: none; }
+  #hpage.hro .hwrap :is(.hlab, .hnote, .nlab):placeholder-shown { display: none; }
+  #hpage.hro .hwrap :is(input, textarea) { border-color: transparent; background: transparent; resize: none; }
+  #hpage.hro .hcard .hcite { cursor: default; }
+  #hpage aside .hshare-st { margin: 0.8rem 0.6rem 0; font-size: 0.86rem; color: var(--faded); }
+  #hpage aside .hshare-st.changed { color: #8a3b12; }
+  #hpage aside .hshare-how { margin: 0.6rem 0.4rem 0; padding: 0.55rem 0.7rem; border: 1px solid var(--accent-light); border-radius: 8px; background: var(--card); font-size: 0.88rem; }
+  #hpage aside .hshare-how ol { margin: 0.3rem 0 0.3rem 1.1rem; padding: 0; }
+  #hpage aside .hshare-how li { margin: 0.2rem 0; }
   #hpage .mk-cut.approx { text-decoration-style: dashed; }
-  #hview .mk-cut, #hprint .mk-cut { color: var(--faded); }
   .mk-n { color: var(--accent); font-size: 0.68em; font-weight: 600; margin-left: 1px; cursor: pointer; }
   .hcard.has-mn { position: relative; }
   .hcard.has-mn.mn-wide { padding-right: 15rem; }
@@ -687,26 +703,8 @@ css.textContent = `
   .hcard.hnotecard .nadd { font-size: 0.8rem; padding: 0 0.6rem; margin-left: 0.3rem; }
   .hcard .hkids > p { margin: 0.2rem 0 0.3rem; }
   .hcard.child { background: var(--card); margin-bottom: 0.5rem; padding: 0.55rem 0.8rem 0.5rem; }
-  #hview .hpubd { color: var(--faded); font-size: 0.9rem; margin: -0.2rem 0 1.2rem; }
-  #hview h1 { font-family: 'Cinzel', serif; color: var(--accent); font-size: 1.5rem; font-weight: 600; margin: 0.4rem 0 0.5rem; }
-  #hview h2 { font-family: 'Cinzel', serif; color: var(--accent); font-size: 1.1rem; font-weight: 600; margin: 1.6rem 0 0.6rem; }
-  #hview .vnote { margin: 1.1rem 0 0.4rem; }
-  #hview .vntitle { font-family: 'Cinzel', serif; color: var(--accent); font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; margin: 0 0 0.35rem; }
-  #hview .vnote p { margin: 0 0 0.5rem; }
-  #hview .vpass { margin: 0.6rem 0 1rem 1.6rem; border-left: 2px solid var(--line); padding-left: 0.9rem; }
-  #hview .vpass.top { margin-left: 0; }
-  #hview .vlab { font-style: italic; color: var(--accent); margin-bottom: 0.15rem; }
-  #hview .vtext { white-space: pre-wrap; }
-  #hview .ven { white-space: pre-wrap; color: #4b4034; font-size: 0.95rem; margin-top: 0.35rem; }
-  #hview .vcite { font-size: 0.86rem; color: var(--faded); margin-top: 0.25rem; }
-  #hview .vcite a { margin-left: 0.6rem; }
-  #hview .vpn { font-size: 0.92rem; margin-top: 0.3rem; }
   /* The German (or Latin) and its English side by side, where there is room; notes keep their width */
-  #hpage .hwrap.duo, #hview .hwrap.duo { max-width: 74rem; }
-  #hview .vduo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 1.6rem; align-items: start; }
-  #hview .vduo .ven { margin-top: 0; padding-left: 1rem; border-left: 1px solid var(--line); }
-  #hview .hwrap.duo :is(.vnote, .vpn, h2, .vpass > .vtext) { max-width: 46rem; }
-  @media (max-width: 800px) { #hview .vduo { display: block; } #hview .vduo .ven { margin-top: 0.35rem; padding-left: 0; border-left: none; } }
+  #hpage .hwrap.duo { max-width: 74rem; }
   .hcard .hduo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 1.4rem; align-items: start; }
   .hcard .hduo .hen { margin-left: 0; }
   #hpage.docked .hcard .hduo { display: block; }
@@ -719,20 +717,7 @@ css.textContent = `
   .hcard .hcopysel select:hover, .hcard .hcopysel select:focus { border-color: var(--line); outline: none; }
   .hcard .hcopysel option, .hcard .hcopysel optgroup { color: var(--ink); }
   .hcard .htag.hlinked { border-style: solid; }
-  #hview .vpn p { margin: 0 0 0.35rem; }
-  #hview details.vans { margin: -0.2rem 0 0.6rem; }
-  #hview details.vans > summary { display: inline-block; list-style: none; cursor: pointer; color: var(--faded); font-size: 0.86rem; }
-  #hview details.vans > summary::-webkit-details-marker { display: none; }
-  #hview details.vans > summary::after { content: ' ▸'; }
-  #hview details.vans[open] > summary::after { content: ' ▾'; }
-  #hview details.vans > summary:hover { color: var(--accent); }
-  #hview details.vans > p { margin: 0.25rem 0 0.4rem; padding-left: 0.8rem; border-left: 2px solid var(--line); }
   #hback { position: fixed; z-index: 46; left: 50%; top: 0.55rem; transform: translateX(-50%); }
-  .hclass .hclist { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.2rem; }
-  .hclass .hcl { display: block; min-width: 13rem; padding: 0.55rem 0.8rem; background: var(--card); border: 1px solid var(--line-soft); border-radius: 8px; text-decoration: none; color: var(--ink); }
-  .hclass .hcl:hover { border-color: var(--accent-light); }
-  .hclass .hcl b { display: block; color: var(--accent); font-weight: 600; }
-  .hclass .hcl span { font-size: 0.82rem; color: var(--faded); }
   #hprint { display: none; }
   @media print {
     body { display: block !important; background: #fff !important; }
@@ -804,7 +789,7 @@ function marks() {
   hb.innerHTML = n || mode ? 'Handout<span class="hn">' + n + '</span>' : 'Handouts';
   hb.classList.toggle('full', n > 0);
   hb.title = n || mode ? '“' + h.name + '”: ' + plural(n, 'passage') + '. Open it to arrange and export.'
-    : 'Make handouts: collect passages as you read, arrange them, and publish them for students';
+    : 'Handouts: the class’s, to read with the class password, and your own, collected as you read';
   hc.classList.toggle('on', !!(c || sec));
   if (c) { hc.textContent = 'Under: ' + noteName(c) + ' ✕'; hc.title = 'Passages you add go under this note. Click to stop.'; }
   else if (sec) { hc.textContent = 'Into: ' + clip(sectionName(sec), 30) + ' ✕'; hc.title = 'Passages you add go to the end of this section. Click to stop.'; }
@@ -853,7 +838,7 @@ msec.addEventListener('click', e => {
    at its top right. */
 let hovEl = null, hovI = null, hideT = 0;
 const hideHover = () => { hov.hidden = true; hovEl = null; hovI = null; };
-const overlayOpen = () => (!page.hidden && !docked) || (view && !view.hidden);
+const overlayOpen = () => !page.hidden && !docked;
 document.addEventListener('mouseover', e => {
   if (!mode || overlayOpen()) return;
   if (e.target === hov) { clearTimeout(hideT); return; }
@@ -972,8 +957,8 @@ page.innerHTML = '<div class="hdockgrip" title="Drag to make the handout wider o
   '<button type="button" class="btn" data-h="docx" title="A Word file. It opens in Pages too.">Word</button>' +
   '<button type="button" class="btn" data-h="pdf" title="Opens the browser’s Print window: choose Save as PDF">PDF</button>' +
   '<button type="button" class="btn" data-h="txt" title="Plain text in the Handout tool’s markup, ready to make into a handout in your house style">Handout tool text</button></span>' +
-  '<button type="button" class="btn solid" data-h="publish" title="Put this handout in the portal, for students to read with every passage live">Publish for students</button>' +
-  '<button type="button" class="btn" data-h="screen" title="Show this handout on the room’s screen, in a window of its own">Class screen ↗</button>' +
+  '<button type="button" class="btn solid hshare" data-h="share" title="Let everyone with the class password read your handouts: makes one locked file to upload to the repository">Share with the class</button>' +
+  '<button type="button" class="btn hcv" data-h="classview" aria-pressed="false" title="Show the words left out of a passage as …, as the room should see them, rather than struck through">Class view</button>' +
   '<button type="button" class="linkish" data-h="lock" title="Forget the class password on this computer: it is asked for again before the handouts open">Lock</button>' +
   ($('moremenu') ? '' : '<label class="hmodesw" title="Off, the portal shows nothing of the handouts but the Handouts button; your handouts are kept"><input type="checkbox" class="hmodein"' + (mode ? ' checked' : '') + '> + Handout on passages</label>') +
   '<span class="hfile"><button type="button" class="linkish" data-h="save" title="Every handout, in one file, to keep or to move to another browser">Save to file</button>' +
@@ -983,7 +968,8 @@ page.innerHTML = '<div class="hdockgrip" title="Drag to make the handout wider o
 document.body.appendChild(page);
 const picker = page.querySelector('input[type=file]');
 
-let pubOpen = false;
+let classView = false;    // the words left out shown as …, not struck through
+let shareOpen = false;    // the steps for uploading the class's copy, after Share with the class
 /* Side by side: the Handouts page as a column on the right, the portal still in use on the left,
    so that passages can be added, and words selected, with the handout in view. The choice and the
    column's width are remembered in this browser. */
@@ -1021,6 +1007,7 @@ document.addEventListener('mouseup', () => {
 });
 function openPage(focusId) {
   hideHover(); sb.hidden = true; tst.hidden = true; page.hidden = false; dockPlace(); render();
+  if (LOCK && LOCK.key()) loadClass().then(got => { if (got && !page.hidden) render(); });
   if (!focusId) return;
   const c = page.querySelector('.hcard[data-id="' + focusId + '"]');
   if (!c) return;
@@ -1028,7 +1015,7 @@ function openPage(focusId) {
   const lab = c.querySelector('.hlab');
   if (lab) lab.focus();
 }
-function closePage() { page.hidden = true; pubOpen = false; dockPlace(); }
+function closePage() { page.hidden = true; shareOpen = false; dockPlace(); }
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !page.hidden && !docked && !(e.target.matches && e.target.matches('input, textarea, select'))) closePage();
 });
@@ -1038,26 +1025,37 @@ function render() {
   const db = page.querySelector('.hdockbtn'), cb = page.querySelector('[data-h="close"]');
   if (db) { db.textContent = docked ? '⤢ Full page' : '⇆ Side by side'; db.title = docked ? 'Let the handout fill the window again' : 'Work with the portal on the left and this handout on the right'; }
   if (cb) cb.textContent = docked ? '✕ Close' : '← Back to the portal';
-  page.querySelector('aside').innerHTML = DB.handouts.map(x =>
-    '<button type="button" class="hl' + (x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
-    '<span class="n">' + plural(countOf(x), 'passage') + (x.published ? ' · published' : '') + '</span></button>').join('') +
-    '<button type="button" class="btn hnew" data-h="new">+ New handout</button>' +
-    trashHtml(h) + backupHtml();
+  const ro = roNow(), cls = CLASSH.filter(x => !DB.handouts.some(y => y.id === x.id)), ownShown = !cls.length || !isEmpty();
+  page.classList.toggle('hro', ro);
+  page.classList.toggle('hcv', classView);
+  const cvb = page.querySelector('.hcv');
+  if (cvb) { cvb.classList.toggle('on', classView); cvb.setAttribute('aria-pressed', String(classView)); }
+  const shb = page.querySelector('.hshare');
+  if (shb) shb.hidden = isEmpty();
+  page.querySelector('aside').innerHTML =
+    (cls.length ? '<div class="hsec">The class’s handouts</div>' + cls.map(x =>
+      '<button type="button" class="hl' + (viewing === x.id ? ' on' : '') + '" data-cpick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
+      '<span class="n">' + plural(countOf(x), 'passage') + ' · to read</span></button>').join('') + (ownShown ? '<div class="hsec">In this browser</div>' : '') : '') +
+    (ownShown ? DB.handouts.map(x =>
+      '<button type="button" class="hl' + (!ro && x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
+      '<span class="n">' + plural(countOf(x), 'passage') + '</span></button>').join('') +
+      '<button type="button" class="btn hnew" data-h="new">+ New handout</button>' : '') +
+    (ro ? '' : trashHtml(h) + backupHtml() + shareHtml());
   const n = h.items.length, over = viewOf(h), heads = h.items.filter(x => x.kind === 'heading');
   page.querySelector('.hwrap').innerHTML =
-    '<input class="hname" value="' + esc(h.name) + '" placeholder="Untitled handout" aria-label="Name of this handout" spellcheck="false">' +
+    '<input class="hname" value="' + esc(h.name) + '" placeholder="Untitled handout" aria-label="Name of this handout" spellcheck="false"' + (ro ? ' readonly' : '') + '>' +
+    (ro ? '<p class="hro-note">The class’s handout' + (CLASS_AT ? ', as shared on ' + esc(CLASS_AT) : '') + '. You can read it, open its passages where they stand and export it; only its maker changes it.</p>' : '') +
     '<div class="hrow">' +
-    '<button type="button" class="btn" data-h="note" title="A note: what you want to say, with passages under it">+ Note</button>' +
-    '<button type="button" class="btn" data-h="heading">+ Heading</button>' +
+    (ro ? '' : '<button type="button" class="btn" data-h="note" title="A note: what you want to say, with passages under it">+ Note</button>' +
+    '<button type="button" class="btn" data-h="heading">+ Heading</button>') +
     (heads.some(x => !isFolded(x)) ? '<button type="button" class="linkish" data-h="foldall" title="Fold every section away, to see just the headings">Fold all sections</button>' : '') +
     (notesOf(h).some(x => !noteFolded(x)) ? '<button type="button" class="linkish" data-h="foldnotes" title="Fold every note to its first line">Fold all notes</button>' : '') +
     (heads.some(isFolded) || notesOf(h).some(noteFolded) ? '<button type="button" class="linkish" data-h="unfoldall" title="Open every section and note">Open all</button>' : '') +
-    '<label class="hmodesw henmode" title="The English with every passage, beside it where there is room: here, for students, on the class screen and in the exports. A passage can hide its own."><input type="checkbox" class="henin"' + (enMode(h) ? ' checked' : '') + '> English with every passage</label>' +
+    '<label class="hmodesw henmode" title="The English with every passage, beside it where there is room: here, in the class’s copy and in the exports. A passage can hide its own."><input type="checkbox" class="henin"' + (enMode(h) ? ' checked' : '') + '> English with every passage</label>' +
     '<span class="spacer"></span><button type="button" class="linkish hdel" data-h="delete">Delete this handout</button></div>' +
     '<p class="hhint muted small">' + (c ? 'Passages you add go under the note “' + esc(noteName(c)) + '”.'
       : collectingSection() ? 'Passages you add go to the end of the section “' + esc(sectionName(collectingSection())) + '”.'
       : 'Passages you add from the portal go to the end of this handout. To send them to a section, press its <b>Add passages here</b>.') + '</p>' +
-    publishPanel(h) +
     (n ? h.items.map((it, k) => over[k] ? '' : cardFor(it, String(k), h)).join('') :
       '<div class="hempty">Nothing here yet. Press <b>+ Note</b> to write the point you want to make. ' +
       'Or, in the portal, point at a passage and press <b>+ Handout</b>, or select some of its words and press <b>+ Add excerpt to handout</b>.</div>');
@@ -1068,10 +1066,12 @@ function render() {
     const c = inSec && page.querySelector('.hwrap > .hcard.top[data-key="' + k + '"]');
     if (c) c.classList.add('insec');
   });
+  if (ro) page.querySelectorAll('.hwrap input, .hwrap textarea, .hwrap select').forEach(x => { if (x.type === 'checkbox' || x.tagName === 'SELECT') x.disabled = true; else x.readOnly = true; });
   page.querySelectorAll('.hnote, .hnotetext').forEach(grow);
   mkbar.hidden = true;
   paintAll();
-  if (pairCuts(h)) { save(); render(); return; }   // German cuts whose English has not followed yet
+  if (classView) page.querySelectorAll('.hwrap [data-mf]').forEach(t => collapseCuts(t, '…'));
+  if (!ro && pairCuts(h)) { save(); render(); return; }   // German cuts whose English has not followed yet
   if (enMode(h) && passagesOf(h).some(x => enWanted(h, x) && !x.en)) fillSoon();
 }
 // A text box as tall as its text. Measured only once it has a width, or a box drawn in a
@@ -1233,7 +1233,7 @@ function noteCard(it, key, h) {
     '<span class="hbtns">' + moveBtns(+key, h.items.length) + '</span></div>' +
     // Folded: the note's first line, which opens it.
     (f ? '<button type="button" class="hnotefold" data-h="fold" title="Open this note">' + esc(clip(flat(String(it.text || '').trim().split('\n')[0]), 140) || 'Empty note') + '</button></div>' :
-    '<textarea class="hnotetext" data-f="text" rows="2" placeholder="What you want to say: your setup, how the passages bear on each other, a question for students. Start a paragraph with Answer: and students see it only when they click.">' + esc(it.text) + '</textarea>' +
+    '<textarea class="hnotetext" data-f="text" rows="2" placeholder="What you want to say: your setup, how the passages bear on each other, a question for students.">' + esc(it.text) + '</textarea>' +
     (pickFor === it.id ? pickHtml(it, h) : '') +
     '<div class="hkids">' + (ks.length ? ks.map((x, j) => passCard(x, key + '.' + j, h, it, ks.length)).join('')
       : '<p class="muted small">A note on its own: your setup or commentary. To put passages under it, drag them onto it, press <b>+ Passages from this handout</b>, or <b>Collect here</b> and add them in the portal.</p>') + '</div></div>');
@@ -1403,18 +1403,23 @@ function reparent(h, key, noteId) {
 page.addEventListener('click', e => {
   e.stopPropagation();   // the portal's handlers are not for this page
   const pick = e.target.closest('[data-pick]');
-  if (pick) { DB.current = pick.dataset.pick; pubOpen = false; save(); render(); return; }
+  if (pick) { viewing = null; DB.current = pick.dataset.pick; shareOpen = false; save(); render(); return; }
+  const cpick = e.target.closest('[data-cpick]');
+  if (cpick) { viewing = cpick.dataset.cpick; shareOpen = false; render(); page.querySelector('main').scrollTop = 0; return; }
   const tr = e.target.closest('[data-tr]');
-  if (tr) { const h = cur(); putBack(h, trashOf(h)[+tr.dataset.tr]); return; }
+  if (tr && !roNow()) { const h = cur(); putBack(h, trashOf(h)[+tr.dataset.tr]); return; }
   const b = e.target.closest('[data-h]');
   if (!b) return;
+  if (roNow() && !RO_OK.has(b.dataset.h)) return;   // the class's handout is to read
   const h = cur(), c = b.closest('[data-key]'), key = c ? c.dataset.key : null;
   switch (b.dataset.h) {
     case 'close': return closePage();
     case 'dock': return setDock(!docked);
-    case 'screen': { const w = window.open(SCREEN, 'kantlab-class-screen', 'popup,width=1280,height=800'); if (w) w.focus(); return; }
-    case 'lock': { if (LOCK) LOCK.forget().then(() => { setMode(false, true); closePage(); toast('Locked. The class password will be asked for before the handouts open again.'); }); return; }
-    case 'new': { const x = blank('Untitled handout'); DB.handouts.push(x); DB.current = x.id; pubOpen = false; save(); render(); const i = page.querySelector('.hname'); i.focus(); i.select(); return; }
+    case 'classview': classView = !classView; render(); toast(classView ? 'Class view: what is left out shows as …' : 'Class view is off: what is left out is struck through again.'); return;
+    case 'share': return share();
+    case 'sharedone': shareOpen = false; render(); return;
+    case 'lock': { if (LOCK) LOCK.forget().then(() => { CLASSH = []; viewing = null; setMode(false, true); closePage(); toast('Locked. The class password will be asked for before the handouts open again.'); }); return; }
+    case 'new': { viewing = null; const x = blank('Untitled handout'); DB.handouts.push(x); DB.current = x.id; shareOpen = false; save(); render(); const i = page.querySelector('.hname'); i.focus(); i.select(); return; }
     case 'delete': {
       const n = countOf(h);
       if (!confirm('Delete “' + h.name + '”' + (n ? ' and its ' + plural(n, 'passage') : '') + '? This cannot be undone, except from a saved file.')) return;
@@ -1499,15 +1504,11 @@ page.addEventListener('click', e => {
     case 'save': return download(new Blob([JSON.stringify({ kind: 'kantlab-handouts', v: 1, saved: new Date().toISOString(), handouts: DB.handouts }, null, 1)], { type: 'application/json' }),
       'Kant Lab handouts ' + new Date().toISOString().slice(0, 10) + '.json');
     case 'open': picker.value = ''; picker.click(); return;
-    case 'publish': pubOpen = !pubOpen; render(); if (pubOpen) page.querySelector('main').scrollTop = 0; return;
-    case 'pubclose': pubOpen = false; render(); return;
-    case 'pubgo': markPublished(h); return;   // the link itself opens GitHub
-    case 'pubfile': { const P2 = publication(h); if (!P2.ready) return; download(new Blob([P2.json], { type: 'application/json' }), P2.slug + '.json'); markPublished(h); return; }
-    case 'publink': { const link = publication(h).link; if (navigator.clipboard) navigator.clipboard.writeText(link).then(() => toast('Link copied: ' + link), () => prompt('Copy this link:', link)); else prompt('Copy this link:', link); return; }
   }
 });
 page.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('htrash')) trashOpen = e.target.open; }, true);
 page.addEventListener('input', e => {
+  if (roNow()) return;
   const h = cur();
   if (e.target.classList.contains('hname')) { h.name = e.target.value; save(); const on = page.querySelector('aside .hl.on'); if (on && on.firstChild) on.firstChild.textContent = h.name || 'Untitled handout'; return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
@@ -1523,6 +1524,7 @@ page.addEventListener('input', e => {
 });
 page.addEventListener('change', e => {
   if (e.target.classList.contains('hmodein')) { setMode(e.target.checked); return; }
+  if (roNow()) return;
   if (e.target.classList.contains('henin')) { cur().english = e.target.checked; save(); render(); return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
   if (!c) return;
@@ -1553,7 +1555,7 @@ picker.addEventListener('change', () => {
 let drag = null;   // { key, it }: the card being dragged
 page.addEventListener('mousedown', e => {
   const c = e.target.closest('.hcard');
-  if (!c) return;
+  if (!c || roNow()) return;
   if (e.target.closest('.grip') || !e.target.closest('button, input, select, textarea, a, label') &&
     (e.target.closest('.hcite') || e.target === c && c.classList.contains('hhead'))) c.draggable = true;
 });
@@ -1660,10 +1662,11 @@ function relocate(h, key, dest, shut) {
    Select words of a passage, or of its English, on the Handouts page: Highlight, Underline, or
    a Margin note beside them. A mark keeps its words and a little of what comes before and after
    them, not their positions, so it finds them wherever the passage is drawn: on this page, in
-   the PDF and the Word file, and in the students' view. Highlights and underlines go
+   the PDF and the Word file, and in the class's copy. Highlights and underlines go
    everywhere; margin notes are yours and stay on this page. Leave out takes words out of what
-   students see, which shows […] in their place, while the passage keeps its address and opens
-   in the portal where it stands, whole; on this page they stay, struck through, to be put back.
+   the class sees, which shows […] in the exports and … in Class view, while the passage keeps
+   its address and opens in the portal where it stands, whole; on this page they stay, struck
+   through, to be put back.
    it.marks holds { id, k: 'hl' | 'ul' | 'mn' | 'cut', f: 'text' | 'en', q: the words, pre, post, note }. */
 const marksOf = (it, f) => (it.marks || []).filter(m => m.f === f);
 const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1834,14 +1837,14 @@ function leaveOut(it, p, undo) {
 }
 // What students see, and the PDF: each stretch left out gives way to […], once for each run of
 // its words (a joined passage's citations, which stand between, stay).
-function collapseCuts(el) {
+function collapseCuts(el, mark) {
   const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), ns = [];
   for (let n; (n = walk.nextNode());) ns.push(n);
   let prev = null;
   ns.forEach(n => {
     const c = n.parentElement.closest('.mk-cut'), id = c ? c.dataset.mk : null;
     if (!id) { if (n.data.trim()) prev = null; return; }
-    n.data = prev === id ? '' : '[…]';
+    n.data = prev === id ? '' : (mark || '[…]');
     prev = id;
   });
 }
@@ -1955,7 +1958,7 @@ function showBar(rect, html) {
   mkbar.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - mkbar.offsetWidth - 10)) + 'px';
 }
 page.addEventListener('mouseup', e => {
-  if (e.target.closest('#hmkbar')) return;
+  if (e.target.closest('#hmkbar') || roNow()) return;
   setTimeout(() => {
     const p = picked();
     if (p) {
@@ -1969,7 +1972,7 @@ page.addEventListener('mouseup', e => {
         (over.length ? '<button type="button" data-mk="clear" title="Take the highlights, underlines and margin notes off these words, and put back what was left out of them">Remove marks</button>' : ''));
       return;
     }
-    const w = window.getSelection().isCollapsed && e.target.closest && e.target.closest('#hpage .mk-cut, #hpage .mk-hl, #hpage .mk-ul');
+    const w = window.getSelection().isCollapsed && e.target.closest && e.target.closest((classView ? '' : '#hpage .mk-cut, ') + '#hpage .mk-hl, #hpage .mk-ul');
     if (w) {
       mkFor = { id: w.closest('.hcard').dataset.id, mk: w.dataset.mk };
       showBar(w.getBoundingClientRect(), '<button type="button" data-mk="rm">' + (w.classList.contains('mk-cut') ? 'Put these words back' : 'Remove ' + (w.classList.contains('mk-hl') ? 'highlight' : 'underline')) + '</button>');
@@ -2040,237 +2043,67 @@ page.addEventListener('click', e => {
   if (w && window.getSelection().isCollapsed) { const t = w.closest('.hcard').querySelector('[data-mnt="' + w.dataset.mk + '"]'); if (t) t.focus(); }
 });
 
-/* ── Publishing for students ──────────────────────────────────────────────
-   A published handout is a small JSON file in handouts/: the notes and labels as written,
-   and each passage by its portal address (an excerpt with its words too), so that students
-   read every passage live. It reaches the repository the GitHub way: a page on github.com
-   with the file filled in, where its maker presses Commit changes. A handout published
-   before goes up again as a file to drag onto GitHub's upload page, which replaces it. */
-function publishable(h) {
-  const pass = it => {
-    const o = { kind: it.kind, ref: it.ref, author: it.author, work: it.work, cite: it.cite };
-    if (it.parts) { o.refs = it.parts.map(p => p.ref); o.cites = it.parts.map(p => p.cite); }   // a joined passage
-    if (flat(it.label)) o.label = it.label.trim();
-    if (it.kind === 'excerpt') { o.text = it.text; o.from = it.from; if (it.enSnippet && enShown(h, it)) { o.en = it.en; if (it.enApprox) o.enApprox = true; } }
-    if (enWanted(h, it)) o.english = true;   // students see its English, drawn live from the portal where the handout keeps none
-    const mk = (it.marks || []).filter(m => m.k !== 'mn');   // highlights and underlines; margin notes stay private
-    if (mk.length) o.marks = mk.map(m => ({ k: m.k, f: m.f, q: m.q, pre: m.pre, post: m.post }));
-    if (flat(it.note)) o.note = it.note.trim();
-    return o;
-  };
-  return {
-    kind: 'kantlab-handout', v: 1, title: h.name, published: new Date().toISOString().slice(0, 10), english: enMode(h),
-    items: h.items.map(it => it.kind === 'heading' ? { kind: 'heading', text: it.text || '' }
-      : it.kind === 'note' ? Object.assign({ kind: 'note' }, flat(it.title) ? { title: it.title.trim() } : {}, { text: it.text || '', items: kids(it).map(pass) }) : pass(it)),
-  };
+/* ── The class's copy ─────────────────────────────────────────────────────
+   Share with the class writes every handout with something in it to one file, locked with the
+   class password: each as it stands on the Handouts page, its words left out, English and notes
+   included, but without its maker's margin notes (marks of kind 'mn') or its trash. Its maker
+   uploads the file to logic-portal/handouts/class.json on GitHub. Anyone who gives the class
+   password then finds those handouts on the Handouts page, under "The class's handouts", to
+   read, open where they stand and export, but not to change. Nothing here writes to GitHub:
+   the site has no way to, without a token. */
+const RO_OK = new Set(['close', 'dock', 'classview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'new', 'share', 'sharedone']);
+const SHARED_KEY = 'kantlab-handouts-shared';   // { at, sig }: when this browser last made the class's copy, and of what
+function forClass(h) {
+  const x = JSON.parse(JSON.stringify(h));
+  delete x.trash; delete x.published;
+  const strip = it => { if (it.marks) it.marks = it.marks.filter(m => m.k !== 'mn'); };
+  x.items.forEach(it => { if (it.kind === 'note') kids(it).forEach(strip); else strip(it); });
+  return x;
 }
-/* What publishing puts in the repository: the handout sealed with the class key (handouts/lock.js),
-   so that its file reads as nothing without the class password. Sealing takes a moment, so the
-   panel is drawn again once the handout, as it stands, is sealed. */
-let SEALED = { id: null, plain: null, json: null, pending: null };
-function sealed(h) {
-  const plain = JSON.stringify(publishable(h));
-  if (SEALED.id === h.id && SEALED.plain === plain) return SEALED.json;
-  if (LOCK && LOCK.key() && SEALED.pending !== plain) {
-    SEALED.pending = plain;
-    LOCK.seal(plain).then(json => { SEALED = { id: h.id, plain, json, pending: null }; if (pubOpen && !page.hidden) render(); }, () => { SEALED.pending = null; });
-  }
-  return null;
+const classSet = () => DB.handouts.filter(h => h.items.length).map(forClass);
+const sigOf = s => { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return (x >>> 0).toString(36); };
+const lastShare = () => { try { return JSON.parse(localStorage.getItem(SHARED_KEY) || 'null'); } catch (e) { return null; } };
+async function share() {
+  if (!LOCK || !(LOCK.key() || await gate())) { toast('The class password is needed to lock the class’s copy.'); return; }
+  const hs = classSet();
+  if (!hs.length) { toast('There is nothing in your handouts to share yet.'); return; }
+  const body = JSON.stringify(hs);
+  const text = await LOCK.seal(JSON.stringify({ kind: 'kantlab-class-handouts', v: 1, shared: today(), handouts: hs }));
+  download(new Blob([text], { type: 'application/json' }), 'class.json');
+  try { localStorage.setItem(SHARED_KEY, JSON.stringify({ at: new Date().toISOString(), sig: sigOf(body) })); } catch (e) { /* the steps still show */ }
+  window.open(UPLOAD, '_blank', 'noopener');
+  shareOpen = true; render();
 }
-function publication(h) {
-  const slug = (h.published && h.published.slug) || slugOf(h.name);
-  const json = sealed(h);
-  const newUrl = json ? 'https://github.com/' + REPO + '/new/main/' + DIR + '?filename=' + encodeURIComponent(slug + '.json') + '&value=' + encodeURIComponent(json) : '';
-  return { slug, json, newUrl, link: SITE_DIR + '?handout=' + slug, again: !!h.published, viaNew: !!json && !h.published && newUrl.length < 7500, ready: !!json };
+function shareHtml() {
+  if (isEmpty()) return '';
+  const L = lastShare(), changed = !L || L.sig !== sigOf(JSON.stringify(classSet()));
+  const when = L ? new Date(L.at).toLocaleString('en-GB', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : '';
+  return '<p class="hshare-st' + (changed ? ' changed' : '') + '">' + (!L ? 'Not shared with the class yet.' : changed ? 'Changed since you last shared, on ' + esc(when) + '.' : 'Shared with the class on ' + esc(when) + '.') + '</p>' +
+    (shareOpen ? '<div class="hshare-how"><b>To finish sharing</b><ol>' +
+      '<li><b>class.json</b> is in your Downloads.</li>' +
+      '<li>On the GitHub page that opened (<a href="' + UPLOAD + '" target="_blank" rel="noopener">open it again</a>), drop it in and press <b>Commit changes</b>.</li>' +
+      '<li>Everyone with the class password sees it on the Handouts page within a few minutes.</li></ol>' +
+      '<p class="muted small">If your browser named the file <i>class (1).json</i>, rename it <i>class.json</i> first, or GitHub keeps both.</p>' +
+      '<button type="button" class="linkish" data-h="sharedone">Done</button></div>' : '');
 }
-function markPublished(h) {
-  h.published = { slug: publication(h).slug, at: new Date().toISOString() };
-  save();
-  setTimeout(render, 300);
-}
-function publishPanel(h) {
-  if (!pubOpen) return '';
-  const p = publication(h);
-  return '<div class="hpub"><b>Publish “' + esc(h.name) + '” for students</b>' +
-    '<p>Publishing puts this handout in the Kant Lab repository, which is public, but locked with the class password: without it the file reads as nothing, your notes and labels included. ' +
-    'Students open it with the class password, and see every passage live in the portal, with a link to read it in context.</p>' +
-    (!p.ready ? '<p class="muted">Locking the handout with the class password…</p>' : p.viaNew
-      ? '<p>1. <a class="btn solid" href="' + esc(p.newUrl) + '" target="_blank" rel="noopener" data-h="pubgo">Open GitHub to publish</a> &nbsp; 2. On GitHub, press <b>Commit changes</b>.</p>'
-      : '<p>1. <button type="button" class="btn solid" data-h="pubfile">Download the file</button> &nbsp; 2. <a class="btn" href="https://github.com/' + REPO + '/upload/main/' + DIR + '" target="_blank" rel="noopener">Open GitHub’s upload page</a> &nbsp; 3. Drag <code>' + esc(p.slug) + '.json</code> from your Downloads folder onto it, and press <b>Commit changes</b>.' +
-        (p.again ? ' It replaces the version you published before.' : '') + '</p>') +
-    '<p>A minute or two later, students can open it at <a href="' + esc(p.link) + '" target="_blank" rel="noopener">' + esc(p.link) + '</a> ' +
-    '<button type="button" class="linkish" data-h="publink">Copy the link</button>. It is also listed in the portal under <b>Read</b>, as a class handout.</p>' +
-    '<p class="muted small">The file is <code>' + esc(DIR + '/' + p.slug) + '.json</code>. To take the handout down, delete that file on GitHub. ' +
-    'Changes you make here reach students only when you publish again.</p>' +
-    '<button type="button" class="linkish" data-h="pubclose">Close</button></div>';
-}
-
-/* The student's view: ?handout=<name> opens a published handout over the portal, every
-   passage drawn from the portal's own texts, with its English if the handout asks for it. */
-let view = null;
-const VIEW_EN = 'kantlab-handout-view-en';   // 'off' where a reader turned the English off
-let viewEn = (() => { try { return localStorage.getItem(VIEW_EN) !== 'off'; } catch (e) { return true; } })();
-const ready = () => new Promise(res => { const t = () => ($('loading') && !$('loading').hidden ? setTimeout(t, 250) : res()); t(); });
-const wanted = new URLSearchParams(location.search).get('handout');
-if (wanted && /^[a-z0-9-]+$/.test(wanted)) showPublished(wanted);
-async function showPublished(slug) {
-  view = el('div', 'hview');
-  view.innerHTML = '<div class="hbar"><a class="btn" href="' + esc(location.pathname) + '" title="The portal, without the handout">← The Logic Portal</a><b class="cz">Class handout</b>' +
-    '<span class="spacer"></span><label class="hmodesw" hidden title="The English beside each passage, a machine translation"><input type="checkbox" class="venin"' + (viewEn ? ' checked' : '') + '> English</label>' +
-    '<a class="linkish" href="' + esc(SCREEN + '?handout=' + slug) + '" target="kantlab-class-screen" title="Show this handout on the room’s screen">On the class screen ↗</a></div>' +
-    '<main><div class="hwrap"><p class="muted">Opening the handout…</p></div></main>';
-  document.body.appendChild(view);
-  const box = view.querySelector('.hwrap');
-  let d = null;
-  try { const r = await fetch('handouts/' + slug + '.json', { cache: 'no-cache' }); if (r.ok) d = await r.json(); } catch (e) { /* d stays null */ }
-  if (!d || !(Array.isArray(d.items) || (LOCK && LOCK.isLocked(d)))) { box.innerHTML = '<p>There is no class handout called “' + esc(slug) + '” here. If it was published a minute ago, try again shortly.</p>'; return; }
-  // the class password, before anything of it shows
-  const ok = (LOCK && await LOCK.remembered()) || await gate('This handout is for the class. Enter the class password to read it.');
-  if (!ok) {
-    box.innerHTML = '<p>This handout is for the class, and opens with the class password.</p><p><button type="button" class="btn solid" id="hunlock">Enter the class password</button></p>';
-    $('hunlock').addEventListener('click', () => { view.remove(); showPublished(slug); });
-    return;
-  }
-  if (LOCK.isLocked(d)) {
-    try { d = await LOCK.open(d); } catch (e) { box.innerHTML = '<p>This handout was locked with a password other than the class’s present one. Ask for it to be published again.</p>'; return; }
-  }
-  document.title = d.title + ' · The Logic Portal';
-  await ready();
-  const sw = view.querySelector('.hmodesw');
-  sw.hidden = !JSON.stringify(d.items).match(/"(english|en)":/);   // only where the handout has English
-  sw.querySelector('input').addEventListener('change', e => {
-    viewEn = e.target.checked;
-    try { if (viewEn) localStorage.removeItem(VIEW_EN); else localStorage.setItem(VIEW_EN, 'off'); } catch (x) { /* this visit only */ }
-    drawPublished(d, 0);
-  });
-  drawPublished(d, 0);
-}
-function drawPublished(d, tries) {
-  const box = view.querySelector('.hwrap');
-  let waiting = false, na = 0;   // na: the notes so far, to name their answers, which stay open when this is drawn again
-  const its = [];   // each passage, for its highlights and underlines once drawn
-  const pass = (it, top) => {
-    const k = PT.BYID ? PT.BYID.get(it.ref) : undefined, p = k != null ? P[k] : null;
-    let h = '<div class="vpass' + (top ? ' top' : '') + '">' + (it.label ? '<div class="vlab">' + esc(it.label) + '</div>' : '');
-    let body = '';   // the passage's words, and its English beside them where it has some
-    if (it.kind === 'excerpt') body += '<div class="vtext"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text) : esc(it.text)) + '</div>';
-    else if (it.refs && p) {
-      // a joined passage: its parts, live, each with its citation, which opens it in context
-      const ps = it.refs.map((r, k) => { const q = idxOf(r); return { ref: r, cite: (it.cites || [])[k] || '', text: q != null ? P[q].text : '(no longer in the portal)', p: q != null ? P[q] : null }; });
-      body += '<div class="vtext" lang="de">' + partsHtml({ parts: ps }, x => '<a href="' + readHref(x.ref) + '" data-ref="' + esc(x.ref) + '" class="vctx vpart" title="Read this part where it stands">' + esc(x.cite) + '</a> ') + '</div>';
-      if (it.english && viewEn) {
-        const es = ps.map(x => x.p ? englishOf(x.p) : null);
-        if (es.includes('loading')) { waiting = true; body += '<div class="ven muted" lang="en">English loading…</div>'; }
-        else if (es.every(e => e)) body += '<div class="ven" lang="en">' + es.map(e => rich(e.text)).join('\n\n') + '</div>';   // as on the Handouts page, so that its marks find their words
-      }
-    }
-    else body += p ? '<div class="vtext" lang="de">' + esc(p.text) + '</div>' : '<div class="vtext muted">(This passage is no longer in the portal.)</div>';
-    if (!viewEn) { /* the reader turned the English off */ }
-    else if (it.en) body += '<div class="ven" lang="en">' + rich(it.en) + (it.enApprox ? ' <span class="muted small">(approximate)</span>' : '') + '</div>';
-    else if (it.english && p && !it.refs) {
-      const e = englishOf(p);
-      if (e === 'loading') { waiting = true; body += '<div class="ven muted" lang="en">English loading…</div>'; }
-      else if (e) body += '<div class="ven" lang="en">' + rich(e.text) + '</div>';
-    }
-    h += /<div class="ven" lang/.test(body) ? '<div class="vduo">' + body + '</div>' : body;
-    const mt = it.from === 'english' || (viewEn && (it.en || (it.english && p))) ? ' · English: machine translation' : '';
-    h += '<div class="vcite">' + esc(it.author) + ', <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + mt +
-      (p ? '<a href="' + readHref(it.ref) + '" data-ref="' + esc(it.ref) + '" class="vctx">' + (it.refs ? 'Read it in context, from the start ›' : 'Read it in context ›') + '</a>' : '') + '</div>';
-    if (it.note) h += '<div class="vpn">' + (hasAnswer(it.note) ? answersHtml(it.note, 'a' + (na++)) : esc(it.note)) + '</div>';
-    const pi = its.push(it) - 1;
-    return h.replace(/<div class="vtext"/g, '<div class="vtext" data-pi="' + pi + '" data-mf="text"').replace(/<div class="ven"/g, '<div class="ven" data-pi="' + pi + '" data-mf="en"') + '</div>';
-  };
-  box.innerHTML = '<h1>' + esc(d.title) + '</h1>' + (d.published ? '<div class="hpubd">Published ' + esc(d.published) + '</div>' : '') +
-    sectioned(d.items.map(it => it.kind === 'heading' ? (flat(it.text) ? '<h2>' + esc(it.text) + '</h2>' : '')
-      : it.kind === 'note' ? '<div class="vnote">' + (flat(it.title) ? '<div class="vntitle">' + esc(it.title) + '</div>' : '') + answersHtml(it.text, 'a' + (na++)) + '</div>' + (it.items || []).map(x => pass(x, false)).join('')
-      : pass(it, true)), d.items);
-  box.querySelectorAll('[data-pi]').forEach(x => { paintMarks(x, marksOf(its[+x.dataset.pi], x.dataset.mf)); collapseCuts(x); });
-  box.classList.toggle('duo', !!box.querySelector('.vduo'));   // wider, for the two columns
-  if (waiting && tries < 40) setTimeout(() => drawPublished(d, tries + 1), 500);
-}
-/* A question for students with its answer kept back. In a note, or a passage's note, a paragraph
-   that opens "Answer:" is folded under a small "Answer ▸" until it is clicked, so that students
-   meet the question first; several such paragraphs in a row fold together. On the Handouts page
-   and in the exports the note stands as written, Answer: and all. */
-const ANSWER = /^answers?\s*:\s*/i;
-const hasAnswer = t => paras(t).some(x => ANSWER.test(x));
-// The students' view: what stands under each heading, until the next, in a box set a little in.
-function sectioned(html, items) {
-  let out = '', open = false;
-  items.forEach((it, k) => {
-    if (it.kind === 'heading') { if (open) out += '</div>'; out += html[k] + '<div class="vsec">'; open = true; }
-    else out += html[k];
-  });
-  return out + (open ? '</div>' : '');
-}
-const ansOpen = new Set();   // the answers opened in this view
-function answersHtml(text, key) {
-  const ps = paras(text), out = [];
-  for (let i = 0, k = 0; i < ps.length; i++) {
-    if (!ANSWER.test(ps[i])) { out.push('<p>' + esc(ps[i]) + '</p>'); continue; }
-    const run = [];
-    for (; i < ps.length && ANSWER.test(ps[i]); i++) {
-      let t = ps[i].replace(ANSWER, '');
-      if (!t && i + 1 < ps.length && !ANSWER.test(ps[i + 1])) t = ps[++i];   // "Answer:" on a line of its own
-      run.push(t);
-    }
-    i--;
-    const id = key + '.' + (k++);
-    out.push('<details class="vans" data-ans="' + esc(id) + '"' + (ansOpen.has(id) ? ' open' : '') + '><summary>' + (run.length > 1 ? run.length + ' answers' : 'Answer') + '</summary>' +
-      run.map(t => '<p>' + esc(t) + '</p>').join('') + '</details>');
-  }
-  return out.join('');
-}
-document.addEventListener('toggle', e => {
-  const d = e.target;
-  if (d.matches && d.matches('#hview details.vans')) { if (d.open) ansOpen.add(d.dataset.ans); else ansOpen.delete(d.dataset.ans); }
-}, true);
-// "Read it in context": the handout steps aside for the passage, and a button brings it back.
-const back = el('button', 'hback', 'btn solid');
-back.type = 'button'; back.hidden = true; back.textContent = '← Back to the handout';
-document.body.appendChild(back);
-document.addEventListener('click', e => {
-  const a = view && e.target.closest && e.target.closest('#hview .vctx');
-  if (!a) return;
-  if (a.dataset.ref && PT.openRead) { e.preventDefault(); goRead(a.dataset.ref); }
-  view.hidden = true; back.hidden = false;
-});
-back.addEventListener('click', () => { if (view) { view.hidden = false; back.hidden = true; } });
-
-/* Read lists the class handouts that have been published, by asking GitHub what is in
-   handouts/ (once a visit), above the texts. */
-let CLASS = null;
-// a locked handout's name, from its file's: its title is inside the lock
-const nameOf = slug => (slug.charAt(0).toUpperCase() + slug.slice(1)).replace(/-/g, ' ');
-async function classHandouts() {
-  if (CLASS) return CLASS;
-  try { const c = sessionStorage.getItem('kantlab-class-handouts'); if (c) return (CLASS = JSON.parse(c)); } catch (e) { /* ask GitHub */ }
+// The class's copy, opened with the class password. On the first opening, someone with nothing
+// of their own is shown the class's first handout.
+async function loadClass() {
   try {
-    const r = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + DIR + '?ref=main');
-    const files = r.ok ? (await r.json()).filter(f => f.type === 'file' && /^[a-z0-9-]+\.json$/.test(f.name)) : [];
-    CLASS = await Promise.all(files.map(async f => {
-      const slug = f.name.replace(/\.json$/, '');
-      try { const d = await (await fetch('handouts/' + f.name)).json(); return LOCK && LOCK.isLocked(d) ? { slug, title: nameOf(slug), published: '', locked: true } : { slug, title: d.title || slug, published: d.published || '' }; }
-      catch (e) { return { slug, title: slug, published: '' }; }
-    }));
-    CLASS.sort((a, b) => (b.published || '').localeCompare(a.published || ''));
-  } catch (e) { CLASS = []; }
-  try { sessionStorage.setItem('kantlab-class-handouts', JSON.stringify(CLASS)); } catch (e) { /* fine */ }
-  return CLASS;
+    const r = await fetch(CLASS_FILE, { cache: 'no-cache' });
+    if (!r.ok) return false;
+    let d = await r.json();
+    if (LOCK && LOCK.isLocked(d)) d = await LOCK.open(d);
+    if (!d || !Array.isArray(d.handouts)) return false;
+    CLASSH = d.handouts.filter(x => x && Array.isArray(x.items));
+    CLASS_AT = d.shared || '';
+    if (viewing && !CLASSH.some(x => x.id === viewing)) viewing = null;
+    const cls = CLASSH.filter(x => !DB.handouts.some(y => y.id === x.id));
+    if (!viewing && isEmpty() && cls.length) viewing = cls[0].id;
+    return true;
+  } catch (e) { return false; }
 }
-const readView = $('view-read');
-async function classList() {
-  const box = readView && readView.querySelector('.explore');
-  if (!box || box.querySelector('.hclass')) return;
-  const list = await classHandouts();
-  if (!list.length || box.querySelector('.hclass') || !box.isConnected) return;
-  const sec = el('section', null, 'hclass');
-  sec.innerHTML = '<div class="ph">CLASS HANDOUTS</div><div class="hclist">' + list.map(x =>
-    '<a class="hcl" href="?handout=' + esc(x.slug) + '"><b>' + esc(x.title) + '</b>' + (x.locked ? '<span>For the class: opens with the class password</span>' : x.published ? '<span>Published ' + esc(x.published) + '</span>' : '') + '</a>').join('') + '</div>';
-  const intro = box.querySelector('.intro');
-  if (intro) intro.after(sec); else box.prepend(sec);
-}
-if (readView) new MutationObserver(classList).observe(readView, { childList: true });
+const ready = () => new Promise(res => { const t = () => ($('loading') && !$('loading').hidden ? setTimeout(t, 250) : res()); t(); });
 
 /* ── Exports ─────────────────────────────────────────────────────────────── */
 const fileName = (h, ext) => (h.name || 'Handout').replace(/[\\/:*?"<>|]+/g, '-').trim() + '.' + ext;
@@ -2466,7 +2299,7 @@ function zip(files, type) {
 }
 
 /* For checking from the console, as window.PORTAL is for the portal. */
-window.HANDOUTS = { get db() { return DB; }, toText: () => toText(cur()), docx: () => docxBlob(cur()), publishable: () => publishable(cur()), open: openPage };
+window.HANDOUTS = { get db() { return DB; }, toText: () => toText(cur()), docx: () => docxBlob(cur()), open: openPage };
 
 document.body.classList.toggle('hmode', mode);
 document.body.classList.toggle('hnomenu', !$('moremenu'));
