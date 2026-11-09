@@ -101,6 +101,10 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   also move a card. To move a note to another section without dragging, use the menu at its
   top that says which section it is in (*in “Part one”*): choose the top or the end of any
   section, or just after another note, and the note goes there with its passages, with **Undo**.
+  To have a passage in two places, under two headings say, choose where in **⧉ Show it twice…**
+  at the foot of its card. The two are linked, and both say *⧉ shown twice*: a label, note,
+  highlight, margin note or cut made in either, or its English hidden, is made in both. Moving or
+  deleting one moves or deletes that one alone, and **Make separate** unlinks it.
   A card's buttons stay faint, and an empty label or note field blank, until
   you point at the card. You can add section headings. An excerpt whose words cannot be found in
   its passage shows the English of the whole passage.
