@@ -34,6 +34,11 @@ Four places, along the top (pressing **Read** again while reading goes back to t
   - note cards with phase chips coloured by decade, each opening Adickes' note;
   - lemma and Satz chips that tint the words in the § the note is on, page-position glyphs,
     and interpolated and vacat notes;
+  - **open in its full text ▾** under each note, which unfolds the note where it stands among
+    the notes around it, in the Academy edition's order, inside its card. It scrolls on its own,
+    drawing more as you go, and closes again with **close its full text ▴**, so the list of notes
+    keeps its place. **Read on in the pane ›** in the fold opens the note on its own, with its
+    Compare and Connections, as the link used to;
   - the decade filter, and search within the notes;
   - the Tradition tab (Meier);
   - Baumgarten's German glosses, misprint notes, 1757 pages, the "Handschriftliche
@@ -276,7 +281,8 @@ first is the [class screen](teaching/class-screen/index.html), which the Handout
   and lists under it what shares its wording. Its textbook § comes first, then Kant's notes
   (whether the AA files them under the same § or not), the lectures and Jäsche, closest first.
   Pick one and it opens beneath, with the words the two share marked in both, darker where the
-  same words stand in a row. So you can see at once whether a note takes Meier's words or
+  same words stand in a row. **Open it in its full text ▾** unfolds it where it stands in its own
+  text, without leaving Compare. So you can see at once whether a note takes Meier's words or
   Baumgarten's, or has its counterpart in a lecture. Name any other passage in the box to
   compare it instead: `Refl. 4086`, `16:236` or `Meier § 125`. Click a sentence to compare it
   alone; a sentence found nearly whole elsewhere carries a small ≈ tag naming where.
