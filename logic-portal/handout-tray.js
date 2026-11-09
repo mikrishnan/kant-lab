@@ -2,7 +2,7 @@
    THE HANDOUT TRAY
 
    Collect passages, or excerpts of them, while reading in the portal; keep them in
-   named handouts, each passage with its English beneath it unless its maker turns that
+   named handouts, each passage with its English beside it unless its maker turns that
    off (English mode); write notes, the points to make to students, with passages under
    them, each passage with a label of its maker's own ("against X"); reorder, annotate
    and prune; export a handout as Word (which Pages opens), as a PDF by way of the
@@ -210,7 +210,8 @@ function itemFor(i, excerpt, fromEn) {
 }
 
 /* ── English mode ────────────────────────────────────────────────────────
-   A handout shows the English beneath every passage, for students who read no German or Latin,
+   A handout shows the English with every passage, beside it where there is room and beneath it
+   where not, for students who read no German or Latin,
    unless its maker turns that off for the handout (english: false) or for one passage (enHide).
    A handout made before English mode has it on. A passage added while the portal's English was
    off, or still loading, has no English kept with it: it is fetched from the portal's
@@ -657,6 +658,20 @@ css.textContent = `
   #hview .vcite { font-size: 0.86rem; color: var(--faded); margin-top: 0.25rem; }
   #hview .vcite a { margin-left: 0.6rem; }
   #hview .vpn { font-size: 0.92rem; margin-top: 0.3rem; }
+  /* The German (or Latin) and its English side by side, where there is room; notes keep their width */
+  #hpage .hwrap.duo, #hview .hwrap.duo { max-width: 74rem; }
+  #hview .vduo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 1.6rem; align-items: start; }
+  #hview .vduo .ven { margin-top: 0; padding-left: 1rem; border-left: 1px solid var(--line); }
+  #hview .hwrap.duo :is(.vnote, .vpn, h2, .vpass > .vtext) { max-width: 46rem; }
+  @media (max-width: 800px) { #hview .vduo { display: block; } #hview .vduo .ven { margin-top: 0.35rem; padding-left: 0; border-left: none; } }
+  .hcard .hduo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 1.4rem; align-items: start; }
+  .hcard .hduo .hen { margin-left: 0; }
+  #hpage.docked .hcard .hduo { display: block; }
+  #hpage.docked .hcard .hduo .hen { margin-left: 1.3rem; }
+  @media (max-width: 1100px) { .hcard .hduo { display: block; } .hcard .hduo .hen { margin-left: 1.3rem; } }
+  .hcard .hsecsel select { font: inherit; font-size: 0.78rem; font-style: italic; color: var(--faded); background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 0 0.15rem; margin-right: 0.6rem; max-width: 15rem; cursor: pointer; }
+  .hcard .hsecsel select:hover, .hcard .hsecsel select:focus { border-color: var(--line); color: var(--accent); outline: none; }
+  .hcard .hsecsel option, .hcard .hsecsel optgroup { font-style: normal; color: var(--ink); }
   #hview .vpn p { margin: 0 0 0.35rem; }
   #hview details.vans { margin: -0.2rem 0 0.6rem; }
   #hview details.vans > summary { display: inline-block; list-style: none; cursor: pointer; color: var(--faded); font-size: 0.86rem; }
@@ -841,7 +856,7 @@ function railButton() {
   if (!pa || pa.querySelector('.hrail')) return;
   const b = el('button', null, 'btn hrail');
   b.type = 'button';
-  b.title = 'Add this passage, with its English beneath it';
+  b.title = 'Add this passage, with its English';
   if (pa.classList.contains('pmeta')) pa.appendChild(b); else pa.insertBefore(b, pa.querySelector('a'));
   railLabel(b);
 }
@@ -990,7 +1005,7 @@ function render() {
     (heads.some(x => !isFolded(x)) ? '<button type="button" class="linkish" data-h="foldall" title="Fold every section away, to see just the headings">Fold all sections</button>' : '') +
     (notesOf(h).some(x => !noteFolded(x)) ? '<button type="button" class="linkish" data-h="foldnotes" title="Fold every note to its first line">Fold all notes</button>' : '') +
     (heads.some(isFolded) || notesOf(h).some(noteFolded) ? '<button type="button" class="linkish" data-h="unfoldall" title="Open every section and note">Open all</button>' : '') +
-    '<label class="hmodesw henmode" title="The English beneath every passage: here, for students, on the class screen and in the exports. A passage can hide its own."><input type="checkbox" class="henin"' + (enMode(h) ? ' checked' : '') + '> English beneath every passage</label>' +
+    '<label class="hmodesw henmode" title="The English with every passage, beside it where there is room: here, for students, on the class screen and in the exports. A passage can hide its own."><input type="checkbox" class="henin"' + (enMode(h) ? ' checked' : '') + '> English with every passage</label>' +
     '<span class="spacer"></span><button type="button" class="linkish hdel" data-h="delete">Delete this handout</button></div>' +
     '<p class="hhint muted small">' + (c ? 'Passages you add go under the note “' + esc(noteName(c)) + '”.'
       : collectingSection() ? 'Passages you add go to the end of the section “' + esc(sectionName(collectingSection())) + '”.'
@@ -999,6 +1014,7 @@ function render() {
     (n ? h.items.map((it, k) => over[k] ? '' : cardFor(it, String(k), h)).join('') :
       '<div class="hempty">Nothing here yet. Press <b>+ Note</b> to write the point you want to make. ' +
       'Or, in the portal, point at a passage and press <b>+ Handout</b>, or select some of its words and press <b>+ Add excerpt to handout</b>.</div>');
+  page.querySelector('.hwrap').classList.toggle('duo', enMode(h) && passagesOf(h).some(x => enShown(h, x)));   // wider, for the two columns
   let inSec = false;   // what stands under a heading, until the next, sits a little further in
   h.items.forEach((x, k) => {
     if (x.kind === 'heading') { inSec = true; return; }
@@ -1045,7 +1061,39 @@ function sectionOf(h, k) {
   return null;
 }
 const sectionName = x => flat(x.text) || 'Untitled section';
-// "+ Note in this section": a new note at the end of the section the heading at k opens.
+/* Where a note stands, as a menu: "in “Part one”", and under it every place it can go, the top or
+   the end of each section or just after another note there. Choosing one moves the note there,
+   its passages with it, without dragging. */
+function moveMenu(h, k, sec) {
+  const heads = h.items.map((x, j) => x.kind === 'heading' ? j : -1).filter(j => j >= 0);
+  if (!heads.length) return '';
+  const opt = (v, t) => '<option value="' + esc(v) + '">' + esc(t) + '</option>';
+  const after = (a, b) => h.items.slice(a, b).map((x, j) => x.kind === 'note' && a + j !== k ? opt('after:' + x.id, 'After “' + noteName(x) + '”') : '').join('');
+  let html = '<option value="" selected>' + esc(sec ? 'in “' + sectionName(sec) + '”' : 'in no section') + '</option>';
+  if (heads[0] > 0) html += '<optgroup label="Before the first heading">' + opt('top', 'At the top of the handout') + after(0, heads[0]) + '</optgroup>';
+  heads.forEach(j => {
+    const x = h.items[j];
+    html += '<optgroup label="' + esc(sectionName(x)) + '">' + opt('sec:' + x.id, 'At the top') + after(j + 1, sectionEnd(h, j)) + opt('end:' + x.id, 'At the end') + '</optgroup>';
+  });
+  return '<label class="hsecsel" title="Move this note, with its passages, to another section, or to just after another note"><select data-f="moveto" aria-label="Move this note">' + html + '</select></label>';
+}
+function moveNote(h, k, v) {
+  const it = h.items[k], was = h.items.slice(), [how, id] = String(v).split(':');
+  if (!it || !how) return;
+  h.items.splice(k, 1);
+  const ix = h.items.findIndex(x => x.id === id);
+  const to = how === 'top' ? 0 : ix < 0 ? -1 : how === 'end' ? sectionEnd(h, ix) : ix + 1;
+  if (to < 0) { h.items.splice(0, h.items.length, ...was); render(); return; }
+  h.items.splice(to, 0, it);
+  const sec = sectionOf(h, to);
+  if (sec && isFolded(sec)) fold([sec.id], false);
+  save(); render();
+  const c = page.querySelector('.hcard[data-id="' + it.id + '"]');
+  if (c) c.scrollIntoView({ block: 'nearest' });
+  toast('Moved ' + (sec ? 'to “' + sectionName(sec) + '”' : 'before the first heading') + ', its passages with it.',
+    [['Undo', () => { h.items.splice(0, h.items.length, ...was); save(); render(); }]]);
+}
+// "+ Note in this section": a new note at the top of the section the heading at k opens.
 function sectionNote(h, k) {
   const n = { id: uid(), kind: 'note', text: '', items: [] };
   h.items.splice(k + 1, 0, n);   // at the top of the section, just under its heading
@@ -1129,7 +1177,7 @@ function moveSection(h, k, to) {
 function noteCard(it, key, h) {
   const on = collecting() === it, ks = kids(it), sec = sectionOf(h, +key), f = noteFolded(it);
   return '<div class="hcard top hnotecard' + (on ? ' collecting' : '') + (f ? ' folded' : '') + '" data-key="' + key + '" data-id="' + esc(it.id) + '">' +
-    '<div class="hcite">' + GRIP + FOLD(f) + '<span class="w"><input class="nlab" data-f="title" value="' + esc(it.title || '') + '" placeholder="Note" size="' + Math.max(4, String(it.title || '').length + 1) + '" spellcheck="false" aria-label="This note’s title" title="Give this note a title: it stands here in place of “Note”, and students see it above the note">' + (sec ? '<span class="hsec" title="This note is in that section">in “' + esc(sectionName(sec)) + '”</span>' : '') +
+    '<div class="hcite">' + GRIP + FOLD(f) + '<span class="w"><input class="nlab" data-f="title" value="' + esc(it.title || '') + '" placeholder="Note" size="' + Math.max(4, String(it.title || '').length + 1) + '" spellcheck="false" aria-label="This note’s title" title="Give this note a title: it stands here in place of “Note”, and students see it above the note">' + moveMenu(h, +key, sec) +
     (f ? '<span class="hsec">' + (ks.length ? plural(ks.length, 'passage') : 'no passages') + '</span>' : '') +
     (f && !on ? '' : '<button type="button" class="btn ncoll' + (on ? ' on' : '') + '" data-h="collect" title="' + (on ? 'Stop adding passages under this note' : 'Passages you add in the portal from now on go under this note') + '">' +
     (on ? '● Collecting here · Stop' : 'Collect here') + '</button>') +
@@ -1173,6 +1221,9 @@ function enCard(h, it, lab) {
     ' <span class="muted small">machine translation, ' + esc(styleLabel(it.enStyle)) + (it.enHide ? ' · hidden for this passage' : '') + '</span></label>' +
     (it.enHide ? '' : '<div class="htext en" data-mf="en" lang="en">' + rich(it.en) + '</div>');
 }
+// A passage's words and its English, side by side where the English is shown (one above the
+// other where the page is narrow, or beside the portal).
+const duoCard = (h, it, de, en) => enShown(h, it) ? '<div class="hduo"><div class="hcol">' + de + '</div><div class="hcol">' + en + '</div></div>' : de + en;
 function passCard(it, key, h, parent, len) {
   const i = +String(key).split('.').pop();
   const live = PT.BYID ? PT.BYID.has(it.ref) : true;
@@ -1188,11 +1239,10 @@ function passCard(it, key, h, parent, len) {
     '<span class="w"><b>' + esc(it.author) + '</b>, <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + tag + '</span>' +
     '<span class="hbtns">' + moveBtns(i, len) + '</span></div>' +
     '<input class="hlab" data-f="label" value="' + esc(it.label || '') + '" placeholder="Label (optional), e.g. Against X" spellcheck="false">' +
-    '<div class="htext" data-mf="text"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text)
+    duoCard(h, it, '<div class="htext" data-mf="text"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text)
       : it.parts ? partsHtml(it, p => '<button type="button" class="hpart" data-h="gopart" data-ref="' + esc(p.ref) + '" title="Open this part in the portal">' + esc(p.cite) + '</button> ')
       : esc(it.text)) + '</div>' +
-    (it.from === 'english' ? '<div class="hfoot muted">Machine translation, ' + esc(styleLabel(it.enStyle)) + '</div>' : '') +
-    enCard(h, it, enLab) +
+    (it.from === 'english' ? '<div class="hfoot muted">Machine translation, ' + esc(styleLabel(it.enStyle)) + '</div>' : ''), enCard(h, it, enLab)) +
     '<textarea class="hnote" data-f="note" rows="1" placeholder="A note on this passage (optional)">' + esc(it.note) + '</textarea>' +
     '<div class="hfoot">' + (live ? '<button type="button" class="linkish" data-h="go">' + (it.parts ? 'Open it in the portal, at the first part' : 'Open it in the portal') + '</button>'
       : '<span class="muted">This passage is no longer in the portal; its words are kept here.</span>') +
@@ -1361,7 +1411,7 @@ page.addEventListener('input', e => {
   const h = cur();
   if (e.target.classList.contains('hname')) { h.name = e.target.value; save(); const on = page.querySelector('aside .hl.on'); if (on && on.firstChild) on.firstChild.textContent = h.name || 'Untitled handout'; return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
-  if (!f || !c || f === 'enShow' || f === 'under') return;
+  if (!f || !c || f === 'enShow' || f === 'under' || f === 'moveto') return;
   at(h, c.dataset.key).it[f] = e.target.value;
   if (e.target.tagName === 'TEXTAREA') grow(e.target);
   if (e.target.classList.contains('nlab')) e.target.size = Math.max(4, e.target.value.length + 1);
@@ -1374,6 +1424,7 @@ page.addEventListener('change', e => {
   if (!c) return;
   if (f === 'enShow') { const x = at(cur(), c.dataset.key).it; if (e.target.checked) delete x.enHide; else x.enHide = true; save(); render(); }
   if (f === 'under') reparent(cur(), c.dataset.key, e.target.value);
+  if (f === 'moveto' && e.target.value) moveNote(cur(), +c.dataset.key, e.target.value);
 });
 picker.addEventListener('change', () => {
   const f = picker.files && picker.files[0];
@@ -1885,7 +1936,7 @@ if (wanted && /^[a-z0-9-]+$/.test(wanted)) showPublished(wanted);
 async function showPublished(slug) {
   view = el('div', 'hview');
   view.innerHTML = '<div class="hbar"><a class="btn" href="' + esc(location.pathname) + '" title="The portal, without the handout">← The Logic Portal</a><b class="cz">Class handout</b>' +
-    '<span class="spacer"></span><label class="hmodesw" hidden title="The English beneath each passage, a machine translation"><input type="checkbox" class="venin"' + (viewEn ? ' checked' : '') + '> English</label>' +
+    '<span class="spacer"></span><label class="hmodesw" hidden title="The English beside each passage, a machine translation"><input type="checkbox" class="venin"' + (viewEn ? ' checked' : '') + '> English</label>' +
     '<a class="linkish" href="' + esc(SCREEN + '?handout=' + slug) + '" target="kantlab-class-screen" title="Show this handout on the room’s screen">On the class screen ↗</a></div>' +
     '<main><div class="hwrap"><p class="muted">Opening the handout…</p></div></main>';
   document.body.appendChild(view);
@@ -1921,25 +1972,27 @@ function drawPublished(d, tries) {
   const pass = (it, top) => {
     const k = PT.BYID ? PT.BYID.get(it.ref) : undefined, p = k != null ? P[k] : null;
     let h = '<div class="vpass' + (top ? ' top' : '') + '">' + (it.label ? '<div class="vlab">' + esc(it.label) + '</div>' : '');
-    if (it.kind === 'excerpt') h += '<div class="vtext"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text) : esc(it.text)) + '</div>';
+    let body = '';   // the passage's words, and its English beside them where it has some
+    if (it.kind === 'excerpt') body += '<div class="vtext"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text) : esc(it.text)) + '</div>';
     else if (it.refs && p) {
       // a joined passage: its parts, live, each with its citation, which opens it in context
       const ps = it.refs.map((r, k) => { const q = idxOf(r); return { ref: r, cite: (it.cites || [])[k] || '', text: q != null ? P[q].text : '(no longer in the portal)', p: q != null ? P[q] : null }; });
-      h += '<div class="vtext" lang="de">' + partsHtml({ parts: ps }, x => '<a href="#p=' + encodeURIComponent(x.ref) + '&rt=conn" class="vctx vpart" title="Read this part in context">' + esc(x.cite) + '</a> ') + '</div>';
+      body += '<div class="vtext" lang="de">' + partsHtml({ parts: ps }, x => '<a href="#p=' + encodeURIComponent(x.ref) + '&rt=conn" class="vctx vpart" title="Read this part in context">' + esc(x.cite) + '</a> ') + '</div>';
       if (it.english && viewEn) {
         const es = ps.map(x => x.p ? englishOf(x.p) : null);
-        if (es.includes('loading')) { waiting = true; h += '<div class="ven muted" lang="en">English loading…</div>'; }
-        else if (es.every(e => e)) h += '<div class="ven" lang="en">' + es.map(e => rich(e.text)).join('<br><br>') + '</div>';
+        if (es.includes('loading')) { waiting = true; body += '<div class="ven muted" lang="en">English loading…</div>'; }
+        else if (es.every(e => e)) body += '<div class="ven" lang="en">' + es.map(e => rich(e.text)).join('<br><br>') + '</div>';
       }
     }
-    else h += p ? '<div class="vtext" lang="de">' + esc(p.text) + '</div>' : '<div class="vtext muted">(This passage is no longer in the portal.)</div>';
+    else body += p ? '<div class="vtext" lang="de">' + esc(p.text) + '</div>' : '<div class="vtext muted">(This passage is no longer in the portal.)</div>';
     if (!viewEn) { /* the reader turned the English off */ }
-    else if (it.en) h += '<div class="ven" lang="en">' + rich(it.en) + (it.enApprox ? ' <span class="muted small">(approximate)</span>' : '') + '</div>';
+    else if (it.en) body += '<div class="ven" lang="en">' + rich(it.en) + (it.enApprox ? ' <span class="muted small">(approximate)</span>' : '') + '</div>';
     else if (it.english && p && !it.refs) {
       const e = englishOf(p);
-      if (e === 'loading') { waiting = true; h += '<div class="ven muted" lang="en">English loading…</div>'; }
-      else if (e) h += '<div class="ven" lang="en">' + rich(e.text) + '</div>';
+      if (e === 'loading') { waiting = true; body += '<div class="ven muted" lang="en">English loading…</div>'; }
+      else if (e) body += '<div class="ven" lang="en">' + rich(e.text) + '</div>';
     }
+    h += /<div class="ven" lang/.test(body) ? '<div class="vduo">' + body + '</div>' : body;
     const mt = it.from === 'english' || (viewEn && (it.en || (it.english && p))) ? ' · English: machine translation' : '';
     h += '<div class="vcite">' + esc(it.author) + ', <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + mt +
       (p ? '<a href="#p=' + encodeURIComponent(it.ref) + '&rt=conn" class="vctx">' + (it.refs ? 'Read it in context, from the start ›' : 'Read it in context ›') + '</a>' : '') + '</div>';
@@ -1952,6 +2005,7 @@ function drawPublished(d, tries) {
       : it.kind === 'note' ? '<div class="vnote">' + (flat(it.title) ? '<div class="vntitle">' + esc(it.title) + '</div>' : '') + answersHtml(it.text, 'a' + (na++)) + '</div>' + (it.items || []).map(x => pass(x, false)).join('')
       : pass(it, true)), d.items);
   box.querySelectorAll('[data-pi]').forEach(x => { paintMarks(x, marksOf(its[+x.dataset.pi], x.dataset.mf)); collapseCuts(x); });
+  box.classList.toggle('duo', !!box.querySelector('.vduo'));   // wider, for the two columns
   if (waiting && tries < 40) setTimeout(() => drawPublished(d, tries + 1), 500);
 }
 /* A question for students with its answer kept back. In a note, or a passage's note, a paragraph

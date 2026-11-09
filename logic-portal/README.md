@@ -80,9 +80,11 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   same stretch, and marked so), shown from the start for students; words picked in the English
   bring the matching German. In Kant's published works the citation narrows to the pages the
   words are on.
-- **English beneath every passage.** A handout shows each passage's English beneath it, for
+- **English with every passage.** A handout shows each passage's English beside it, for
   students who read no German or Latin: on the Handouts page, for students, on the class screen
-  and in every export. The switch **English beneath every passage**, beside **+ Heading**, turns
+  and in every export. Where there is no room for two columns (a phone, a narrow window, the
+  handout side by side with the portal) the English goes beneath instead, and the exports keep
+  it beneath. The switch **English with every passage**, beside **+ Heading**, turns
   it off for that handout, and a passage's own **English** box hides just that passage's. It is
   on for every handout, including those made before it: a passage added while the English was
   off gets its English from the portal's translations the next time the portal opens, and keeps
@@ -96,7 +98,10 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   top line, as in the Finder: drop it between two cards (a line shows where), drop a passage
   onto a note to put it under that note, or drag it out of a note to anywhere else; notes and
   passages move between sections the same way. ↑ and ↓ (⤒ and ⤓ for the top and the bottom)
-  also move a card. A card's buttons stay faint, and an empty label or note field blank, until
+  also move a card. To move a note to another section without dragging, use the menu at its
+  top that says which section it is in (*in “Part one”*): choose the top or the end of any
+  section, or just after another note, and the note goes there with its passages, with **Undo**.
+  A card's buttons stay faint, and an empty label or note field blank, until
   you point at the card. You can add section headings. An excerpt whose words cannot be found in
   its passage shows the English of the whole passage.
 - **Fold sections and notes away.** ▾ on a section heading folds the section up to its heading
@@ -138,7 +143,7 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   class screen and in every export, and the passage keeps its address: **Read it in context ›**
   still opens it whole, where it stands in the portal. On the Handouts page the words stay,
   struck through; click them to put them back, or press **Put back all that was left out**.
-  Leaving out whole sentences takes the same sentences out of the English beneath, where the two
+  Leaving out whole sentences takes the same sentences out of the English beside them, where the two
   have as many sentences; otherwise, and in a joined passage, select the English words too.
 - **Mark up the passages.** Select words of a passage, or of its English, and choose
   **Highlight**, **Underline** or **✎ Margin note** (the selection takes whole words). A margin

@@ -1,7 +1,7 @@
 # The class screen
 
 A handout on the room's screen: its sections, its notes and its passages in large type, one after
-another, with the English beneath them as the handout has it. Open it with **Class screen ↗** on the
+another, with the English beside them as the handout has it (beneath them on a narrow screen, or with the portal in context beside). Open it with **Class screen ↗** on the
 portal's Handouts page. It opens in a window of its own, which you can drag onto the room's screen
 and make full screen, while the portal stays on your laptop.
 
