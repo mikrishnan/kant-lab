@@ -120,7 +120,7 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   one of the same text (or a later one), **Join with the next passage** makes them one passage
   of the handout, cited across both (*AA 1:392–394*, *A 50–52 / B 74–76*); the portal's own texts
   are not changed. Each part keeps its citation as a small marker in the text, which opens that
-  part in the portal; **Open it in the portal** goes to the first. **Split** gives the passages
+  part where it stands in the reader; **Read it where it stands** goes to the first. **Split** gives the passages
   back as they were. Students see a joined passage as one, with the same markers.
 - **Say what you want to say.** **+ Note** adds a note: your setup, a claim, how some
   passages bear on each other, a question for students. **+ Note in this section**, on a
@@ -145,7 +145,7 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
 - **Shorten a passage.** When a passage is more than students need, select the words to drop
   and press **✂ Leave out**. Students see […] in their place, in the published handout, on the
   class screen and in every export, and the passage keeps its address: **Read it in context ›**
-  still opens it whole, where it stands in the portal. On the Handouts page the words stay,
+  still opens it whole, at its paragraph in the reader. On the Handouts page the words stay,
   struck through; click them to put them back, or press **Put back all that was left out**.
   Whatever you leave out of the German goes out of the English beside it too. The two are
   matched clause by clause, or sentence by sentence, as the translations keep them; a few words
@@ -188,7 +188,9 @@ site data deletes them.
 
 Each passage keeps its address in the portal (`textKey:id`, the same as in a `#p=` link)
 beside its words. So a later handout builder can bring passages in by reference rather than
-by copied text, and **Open it in the portal** goes back to the passage in context. The code
+by copied text. **Read it where it stands**, or a click on the passage's citation, goes back to
+its paragraph in the reader, however the handout's copy has been changed: a note of Kant's opens
+beside the textbook § it is on, picked out among the notes there. The code
 is [handout-tray.js](handout-tray.js). It reads the portal only through `window.PORTAL`, and
 keeps everything under one `localStorage` key, `kantlab-handouts-v1`.
 
