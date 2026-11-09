@@ -2,7 +2,8 @@
    THE HANDOUT TRAY
 
    Collect passages, or excerpts of them, while reading in the portal; keep them in
-   named handouts; write notes, the points to make to students, with passages under
+   named handouts, each passage with its English beneath it unless its maker turns that
+   off (English mode); write notes, the points to make to students, with passages under
    them, each passage with a label of its maker's own ("against X"); reorder, annotate
    and prune; export a handout as Word (which Pages opens), as a PDF by way of the
    browser's Print, or as plain text in the Handout tool's markup; and publish a
@@ -208,6 +209,53 @@ function itemFor(i, excerpt, fromEn) {
   return it;
 }
 
+/* ── English mode ────────────────────────────────────────────────────────
+   A handout shows the English beneath every passage, for students who read no German or Latin,
+   unless its maker turns that off for the handout (english: false) or for one passage (enHide).
+   A handout made before English mode has it on. A passage added while the portal's English was
+   off, or still loading, has no English kept with it: it is fetched from the portal's
+   translations and kept with the passage, the passage's own words, label, note and marks
+   untouched. (enOn, from before, is kept but no longer read.) */
+const enMode = h => h.english !== false;
+const enWanted = (h, it) => enMode(h) && isPass(it) && it.from !== 'english' && !it.enHide;
+const enShown = (h, it) => enWanted(h, it) && !!it.en;
+// Fetch an item's English: true once it has it, false where the portal has none, 'loading' meanwhile.
+function fillEn(it) {
+  if (it.en) return true;
+  if (it.parts) {   // a joined passage: each part's, then the lot, with […] where the portal has passages between
+    const got = it.parts.map(fillEn);
+    if (got.includes('loading')) return 'loading';
+    if (!it.parts.every(q => q.en)) return false;
+    it.en = it.parts.map((q, k) => (k && gapBetween(it.parts[k - 1].ref, q.ref) ? '[…]\n\n' : '') + q.en).join('\n\n');
+    Object.assign(it, { enStyle: it.parts[0].enStyle, enPart: it.parts.some(q => q.enPart) });
+    return true;
+  }
+  const k = idxOf(it.ref), got = k == null ? null : englishOf(P[k]);
+  if (got === 'loading') return 'loading';
+  if (!got) return false;
+  if (it.kind === 'excerpt') { const s = snippetOf(P[k], it.text, false, got); Object.assign(it, { en: s.en, enSnippet: s.enSnippet, enApprox: s.enApprox }); }
+  else it.en = got.text;
+  Object.assign(it, { enStyle: got.style, enPart: !!got.part });
+  return true;
+}
+// Whether an item's English, not kept with it yet, is on its way ('loading') or not to be had (null).
+const enState = it => it.parts ? (it.parts.some(q => !q.en && enState(q) === 'loading') ? 'loading' : null)
+  : (k => k != null && englishOf(P[k]) === 'loading' ? 'loading' : null)(idxOf(it.ref));
+// Every handout in English mode gets the English its passages lack, kept as it arrives.
+let fillT = 0;
+function fillAll(tries) {
+  fillT = 0;
+  let changed = false, waiting = false;
+  DB.handouts.filter(enMode).forEach(h => passagesOf(h).forEach(it => {
+    if (!enWanted(h, it) || it.en) return;
+    const r = fillEn(it);
+    if (r === 'loading') waiting = true; else if (r) changed = true;
+  }));
+  if (changed) { save(); if (!page.hidden) render(); }
+  if (waiting && tries < 40) fillT = setTimeout(() => fillAll(tries + 1), 600);
+}
+const fillSoon = () => { if (!fillT) fillT = setTimeout(() => fillAll(0), 0); };
+
 /* ── A few sentences of a passage, with their English ─────────────────────
    An excerpt is the words selected in a passage. Its English is the same sentences of the
    passage's English, found by counting sentences, since the translations keep sentences whole:
@@ -385,6 +433,7 @@ function add(i, excerpt, fromEn) {
   if (sec) list.splice(sectionEnd(h, h.items.indexOf(sec)), 0, it);
   else list.push(it);
   save();
+  if (!it.en) fillSoon();
   if (!page.hidden) { render(); const card = page.querySelector('.hcard[data-id="' + it.id + '"]'); if (card) card.scrollIntoView({ block: 'nearest' }); }
   toast((excerpt ? 'Excerpt added ' : 'Added ') + (n ? 'under “' + noteName(n) + '”' : sec ? 'to the end of “' + sectionName(sec) + '”' : 'to “' + h.name + '”'), [
     ['Undo', () => { const k = list.indexOf(it); if (k >= 0) { list.splice(k, 1); save(); } }],
@@ -399,8 +448,9 @@ css.textContent = `
   body.hmode #htray, body.hnomenu #htray, body.hmode .pactions .hrail, body.hmode .pmeta .hrail { display: inline-block; }
   .pmeta .hrail { margin-left: 0.6rem; padding: 0 0.55rem; font-size: 0.8rem; }
   .pmeta .hrail.on { color: var(--faded); }
-  #hpage .hmodesw { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; color: var(--faded); cursor: pointer; }
-  #hpage .hmodesw input { accent-color: var(--accent); margin: 0; }
+  #hpage .hmodesw, #hview .hmodesw { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; color: var(--faded); cursor: pointer; }
+  #hpage .hmodesw input, #hview .hmodesw input { accent-color: var(--accent); margin: 0; }
+  #hview .hmodesw[hidden] { display: none; }
   body.hmode #hcoll.on { display: inline-block; }
   #menu-ho .linkish { margin: 0.15rem 0 0.25rem; }
   #htray .hn { display: inline-block; min-width: 1.25rem; margin-left: 0.35rem; padding: 0 0.35rem; border-radius: 999px; background: var(--parchment-dark); color: var(--accent); font-size: 0.8rem; text-align: center; }
@@ -525,6 +575,7 @@ css.textContent = `
   .hcard .hgap, #hview .hgap { color: var(--faded); }
   .hcard .htext.en { color: #4b4034; border-left: 2px solid var(--line); padding-left: 0.7rem; font-size: 0.96rem; }
   .hcard .hen { display: block; margin-left: 1.3rem; font-size: 0.86rem; color: var(--accent); cursor: pointer; }
+  .hcard div.hen { color: var(--faded); font-style: italic; cursor: default; }
   .hcard .hnote { display: block; width: calc(100% - 1.3rem); margin: 0.35rem 0 0 1.3rem; resize: vertical; min-height: 1.9rem; font: inherit; font-size: 0.94rem; background: var(--parchment); border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.25rem 0.5rem; }
   .hcard .hfoot { margin: 0.3rem 0 0 1.3rem; font-size: 0.84rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: baseline; }
   .hcard .hunder { color: var(--faded); }
@@ -557,6 +608,8 @@ css.textContent = `
   .mk-hl { background: #f6e07c; color: inherit; border-radius: 2px; padding: 0 1px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .mk-ul { text-decoration: underline; text-decoration-color: #9a3b1e; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
   .mk-mn { border-bottom: 1.5px dotted var(--accent); cursor: pointer; }
+  #hpage .mk-cut { text-decoration: line-through; text-decoration-color: var(--accent-light); color: var(--faded); opacity: 0.6; cursor: pointer; }
+  #hview .mk-cut, #hprint .mk-cut { color: var(--faded); }
   .mk-n { color: var(--accent); font-size: 0.68em; font-weight: 600; margin-left: 1px; cursor: pointer; }
   .hcard.has-mn { position: relative; }
   .hcard.has-mn.mn-wide { padding-right: 15rem; }
@@ -598,6 +651,14 @@ css.textContent = `
   #hview .vcite { font-size: 0.86rem; color: var(--faded); margin-top: 0.25rem; }
   #hview .vcite a { margin-left: 0.6rem; }
   #hview .vpn { font-size: 0.92rem; margin-top: 0.3rem; }
+  #hview .vpn p { margin: 0 0 0.35rem; }
+  #hview details.vans { margin: -0.2rem 0 0.6rem; }
+  #hview details.vans > summary { display: inline-block; list-style: none; cursor: pointer; color: var(--faded); font-size: 0.86rem; }
+  #hview details.vans > summary::-webkit-details-marker { display: none; }
+  #hview details.vans > summary::after { content: ' ▸'; }
+  #hview details.vans[open] > summary::after { content: ' ▾'; }
+  #hview details.vans > summary:hover { color: var(--accent); }
+  #hview details.vans > p { margin: 0.25rem 0 0.4rem; padding-left: 0.8rem; border-left: 2px solid var(--line); }
   #hback { position: fixed; z-index: 46; left: 50%; top: 0.55rem; transform: translateX(-50%); }
   .hclass .hclist { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.2rem; }
   .hclass .hcl { display: block; min-width: 13rem; padding: 0.55rem 0.8rem; background: var(--card); border: 1px solid var(--line-soft); border-radius: 8px; text-decoration: none; color: var(--ink); }
@@ -772,7 +833,7 @@ function railButton() {
   if (!pa || pa.querySelector('.hrail')) return;
   const b = el('button', null, 'btn hrail');
   b.type = 'button';
-  b.title = 'Add this passage, with its English if the English is on';
+  b.title = 'Add this passage, with its English beneath it';
   if (pa.classList.contains('pmeta')) pa.appendChild(b); else pa.insertBefore(b, pa.querySelector('a'));
   railLabel(b);
 }
@@ -921,6 +982,7 @@ function render() {
     (heads.some(x => !isFolded(x)) ? '<button type="button" class="linkish" data-h="foldall" title="Fold every section away, to see just the headings">Fold all sections</button>' : '') +
     (notesOf(h).some(x => !noteFolded(x)) ? '<button type="button" class="linkish" data-h="foldnotes" title="Fold every note to its first line">Fold all notes</button>' : '') +
     (heads.some(isFolded) || notesOf(h).some(noteFolded) ? '<button type="button" class="linkish" data-h="unfoldall" title="Open every section and note">Open all</button>' : '') +
+    '<label class="hmodesw henmode" title="The English beneath every passage: here, for students, on the class screen and in the exports. A passage can hide its own."><input type="checkbox" class="henin"' + (enMode(h) ? ' checked' : '') + '> English beneath every passage</label>' +
     '<span class="spacer"></span><button type="button" class="linkish hdel" data-h="delete">Delete this handout</button></div>' +
     '<p class="hhint muted small">' + (c ? 'Passages you add go under the note “' + esc(noteName(c)) + '”.'
       : collectingSection() ? 'Passages you add go to the end of the section “' + esc(sectionName(collectingSection())) + '”.'
@@ -932,6 +994,7 @@ function render() {
   page.querySelectorAll('.hnote, .hnotetext').forEach(grow);
   mkbar.hidden = true;
   paintAll();
+  if (enMode(h) && passagesOf(h).some(x => enWanted(h, x) && !x.en)) fillSoon();
 }
 // A text box as tall as its text. Measured only once it has a width, or a box drawn in a
 // hidden or squeezed window would come out absurdly tall; drawn again when the window resizes.
@@ -956,7 +1019,7 @@ function cardFor(it, key, h) {
       (f ? '<button type="button" class="hfoldn" data-h="fold" title="Open this section">' + foldCount(h, +key) + '</button>' : '') +
       (f && !on ? '' : '<button type="button" class="btn hsecadd' + (on ? ' on' : '') + '" data-h="collectsec" title="' + (on ? 'Stop sending new passages to this section' : 'Passages you add in the portal from now on go to the end of this section') + '">' +
       (on ? '● Adding here · Stop' : 'Add passages here') + '</button>') +
-      (f ? '' : '<button type="button" class="btn hsecnote" data-h="secnote" title="A new note at the end of this section, before the next heading">+ Note in this section</button>') +
+      (f ? '' : '<button type="button" class="btn hsecnote" data-h="secnote" title="A new note at the top of this section, just under its heading">+ Note in this section</button>') +
       '<span class="hbtns">' + moveBtns(+key, h.items.length, f ? sectionMoves(h, +key) : null) + '</span></div>';
   }
   if (it.kind === 'note') return noteCard(it, key, h);
@@ -970,10 +1033,8 @@ function sectionOf(h, k) {
 const sectionName = x => flat(x.text) || 'Untitled section';
 // "+ Note in this section": a new note at the end of the section the heading at k opens.
 function sectionNote(h, k) {
-  let end = k + 1;
-  while (end < h.items.length && h.items[end].kind !== 'heading') end++;
   const n = { id: uid(), kind: 'note', text: '', items: [] };
-  h.items.splice(end, 0, n);
+  h.items.splice(k + 1, 0, n);   // at the top of the section, just under its heading
   save(); render();
   const c = page.querySelector('.hcard[data-id="' + n.id + '"]'), t = c && c.querySelector('.hnotetext');
   if (c) c.scrollIntoView({ block: 'center' });
@@ -1062,7 +1123,7 @@ function noteCard(it, key, h) {
     '<span class="hbtns">' + moveBtns(+key, h.items.length) + '</span></div>' +
     // Folded: the note's first line, which opens it.
     (f ? '<button type="button" class="hnotefold" data-h="fold" title="Open this note">' + esc(clip(flat(String(it.text || '').trim().split('\n')[0]), 140) || 'Empty note') + '</button></div>' :
-    '<textarea class="hnotetext" data-f="text" rows="2" placeholder="What you want to say: your setup, how the passages bear on each other, a question for students…">' + esc(it.text) + '</textarea>' +
+    '<textarea class="hnotetext" data-f="text" rows="2" placeholder="What you want to say: your setup, how the passages bear on each other, a question for students. Start a paragraph with Answer: and students see it only when they click.">' + esc(it.text) + '</textarea>' +
     (pickFor === it.id ? pickHtml(it, h) : '') +
     '<div class="hkids">' + (ks.length ? ks.map((x, j) => passCard(x, key + '.' + j, h, it, ks.length)).join('')
       : '<p class="muted small">A note on its own: your setup or commentary. To put passages under it, drag them onto it, press <b>+ Passages from this handout</b>, or <b>Collect here</b> and add them in the portal.</p>') + '</div></div>');
@@ -1090,13 +1151,22 @@ function pickMove(h, n, keys) {
   save(); render();
   toast(plural(got.length, 'passage') + ' now under “' + noteName(n) + '”');
 }
+// A passage's English on its card, in English mode: shown, or hidden for this passage alone.
+function enCard(h, it, lab) {
+  if (!enMode(h) || it.from === 'english') return '';
+  if (!it.en) return '<div class="hen muted small">' + (enState(it) === 'loading' ? 'English loading…' : 'The portal has no English for this passage.') + '</div>';
+  return '<label class="hen"><input type="checkbox" data-f="enShow"' + (it.enHide ? '' : ' checked') + '> ' + lab +
+    ' <span class="muted small">machine translation, ' + esc(styleLabel(it.enStyle)) + (it.enHide ? ' · hidden for this passage' : '') + '</span></label>' +
+    (it.enHide ? '' : '<div class="htext en" data-mf="en" lang="en">' + rich(it.en) + '</div>');
+}
 function passCard(it, key, h, parent, len) {
   const i = +String(key).split('.').pop();
   const live = PT.BYID ? PT.BYID.has(it.ref) : true;
   const list = parent ? kids(parent) : h.items, joinNx = joinable(it, list[i + 1]);
   const tag = it.kind === 'excerpt' ? '<span class="htag">excerpt' + (it.from === 'english' ? ' of the English' : '') + '</span>'
     : it.parts ? '<span class="htag" title="Joined in this handout; the portal keeps them apart">' + plural(it.parts.length, 'passage') + ' joined</span>' : '';
-  const enLab = it.kind !== 'excerpt' ? 'English' : it.enSnippet ? (it.enApprox ? 'English, roughly the matching stretch' : 'English of these sentences') : 'Add the English of the whole passage';
+  const cuts = (it.marks || []).filter(m => m.k === 'cut').length;
+  const enLab = it.kind !== 'excerpt' ? 'English' : it.enSnippet ? (it.enApprox ? 'English, roughly the matching stretch' : 'English of these sentences') : 'English of the whole passage';
   const notes = notesOf(h);
   const under = notes.length ? '<label class="hunder">Under <select data-f="under"><option value="">no note</option>' +
     notes.map(x => '<option value="' + esc(x.id) + '"' + (parent === x ? ' selected' : '') + '>' + esc(noteName(x)) + '</option>').join('') + '</select></label>' : '';
@@ -1108,14 +1178,13 @@ function passCard(it, key, h, parent, len) {
       : it.parts ? partsHtml(it, p => '<button type="button" class="hpart" data-h="gopart" data-ref="' + esc(p.ref) + '" title="Open this part in the portal">' + esc(p.cite) + '</button> ')
       : esc(it.text)) + '</div>' +
     (it.from === 'english' ? '<div class="hfoot muted">Machine translation, ' + esc(styleLabel(it.enStyle)) + '</div>' : '') +
-    (it.en ? '<label class="hen"><input type="checkbox" data-f="enOn"' + (it.enOn ? ' checked' : '') + '> ' + enLab +
-      ' <span class="muted small">machine translation, ' + esc(styleLabel(it.enStyle)) + '</span></label>' +
-      (it.enOn ? '<div class="htext en" data-mf="en" lang="en">' + rich(it.en) + '</div>' : '') : '') +
+    enCard(h, it, enLab) +
     '<textarea class="hnote" data-f="note" rows="1" placeholder="A note on this passage (optional)">' + esc(it.note) + '</textarea>' +
     '<div class="hfoot">' + (live ? '<button type="button" class="linkish" data-h="go">' + (it.parts ? 'Open it in the portal, at the first part' : 'Open it in the portal') + '</button>'
       : '<span class="muted">This passage is no longer in the portal; its words are kept here.</span>') +
     (joinNx ? '<button type="button" class="linkish" data-h="join" title="Make this passage and the one below it one passage of the handout (the portal keeps them apart)">Join with the next passage ↓</button>' : '') +
     (it.parts ? '<button type="button" class="linkish" data-h="split" title="Back into the passages it was joined from">Split into its ' + it.parts.length + ' passages</button>' : '') +
+    (cuts ? '<button type="button" class="linkish" data-h="uncut" title="Students see […] where words are left out; this gives them the passage whole again">Put back all that was left out (' + cuts + ')</button>' : '') +
     under + '</div></div>';
 }
 
@@ -1254,6 +1323,12 @@ page.addEventListener('click', e => {
     case 'gopart': if (!docked) closePage(); location.hash = 'p=' + encodeURIComponent(b.dataset.ref) + '&rt=conn'; return;
     case 'join': return joinNext(h, key);
     case 'split': return splitPassage(h, key);
+    case 'uncut': {
+      const it = at(h, key).it, before = JSON.stringify(it.marks || []);
+      it.marks = (it.marks || []).filter(m => m.k !== 'cut'); save(); render();
+      toast('The passage is whole again.', [['Undo', () => { it.marks = JSON.parse(before); save(); render(); }]]);
+      return;
+    }
     case 'docx': return exportDocx(h);
     case 'pdf': return exportPdf(h);
     case 'txt': return download(new Blob([toText(h)], { type: 'text/plain;charset=utf-8' }), fileName(h, 'txt'));
@@ -1272,16 +1347,17 @@ page.addEventListener('input', e => {
   const h = cur();
   if (e.target.classList.contains('hname')) { h.name = e.target.value; save(); const on = page.querySelector('aside .hl.on'); if (on && on.firstChild) on.firstChild.textContent = h.name || 'Untitled handout'; return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
-  if (!f || !c || f === 'enOn' || f === 'under') return;
+  if (!f || !c || f === 'enShow' || f === 'under') return;
   at(h, c.dataset.key).it[f] = e.target.value;
   if (e.target.tagName === 'TEXTAREA') grow(e.target);
   save();
 });
 page.addEventListener('change', e => {
   if (e.target.classList.contains('hmodein')) { setMode(e.target.checked); return; }
+  if (e.target.classList.contains('henin')) { cur().english = e.target.checked; save(); render(); return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
   if (!c) return;
-  if (f === 'enOn') { at(cur(), c.dataset.key).it.enOn = e.target.checked; save(); render(); }
+  if (f === 'enShow') { const x = at(cur(), c.dataset.key).it; if (e.target.checked) delete x.enHide; else x.enHide = true; save(); render(); }
   if (f === 'under') reparent(cur(), c.dataset.key, e.target.value);
 });
 picker.addEventListener('change', () => {
@@ -1414,8 +1490,10 @@ function relocate(h, key, dest, shut) {
    a Margin note beside them. A mark keeps its words and a little of what comes before and after
    them, not their positions, so it finds them wherever the passage is drawn: on this page, in
    the PDF and the Word file, and in the students' view. Highlights and underlines go
-   everywhere; margin notes are yours and stay on this page. it.marks holds
-   { id, k: 'hl' | 'ul' | 'mn', f: 'text' | 'en', q: the words, pre, post, note }. */
+   everywhere; margin notes are yours and stay on this page. Leave out takes words out of what
+   students see, which shows […] in their place, while the passage keeps its address and opens
+   in the portal where it stands, whole; on this page they stay, struck through, to be put back.
+   it.marks holds { id, k: 'hl' | 'ul' | 'mn' | 'cut', f: 'text' | 'en', q: the words, pre, post, note }. */
 const marksOf = (it, f) => (it.marks || []).filter(m => m.f === f);
 const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // How many characters a and b share at their ends (or starts), spaces aside.
@@ -1439,7 +1517,7 @@ function findMark(s, m) {
   }
   return best;
 }
-const MK = { hl: ['mark', 'mk-hl'], ul: ['u', 'mk-ul'], mn: ['span', 'mk-mn'] };
+const MK = { hl: ['mark', 'mk-hl'], ul: ['u', 'mk-ul'], mn: ['span', 'mk-mn'], cut: ['span', 'mk-cut'] };
 // Paint marks ms onto the words of el, wrapping each stretch of text they cover (a joined
 // passage's citation markers are left alone). Returns the marks whose words were not found.
 function paintMarks(el, ms) {
@@ -1462,6 +1540,79 @@ function paintMarks(el, ms) {
     });
   });
   return lost;
+}
+/* Leaving words out. A stretch selected is cut within each part of the passage it covers (a
+   joined passage's citations stand between its parts), and joined to any cut it touches. Where
+   the stretch is whole sentences, and the English beneath has as many sentences as the passage,
+   the same sentences of the English are left out too; otherwise the English is left as it is,
+   for its own words to be selected. */
+function segmentsOf(t) {   // the stretches of a card's text that are the passage's words, as plainOf counts them
+  const out = [], walk = document.createTreeWalker(t, NodeFilter.SHOW_TEXT);
+  let pos = 0, a = 0;
+  for (let n; (n = walk.nextNode());) {
+    if (n.parentElement.closest('.mk-n')) continue;
+    if (n.parentElement.closest('.hpart')) { if (pos > a) out.push([a, pos]); a = pos + n.length; }
+    pos += n.length;
+  }
+  if (pos > a) out.push([a, pos]);
+  return out;
+}
+const trimRange = (t, s, e) => { while (s < e && /\s/.test(t[s])) s++; while (e > s && /\s/.test(t[e - 1])) e--; return e > s ? [s, e] : null; };
+// The sentences [s, e] covers whole, give or take a character at either end, as [first, last]; null where it cuts into one.
+function wholeSentences(t, s, e) {
+  const S = sentences(t), all = S.map((x, k) => x[0] >= s - 2 && x[1] <= e + 2 ? k : -1).filter(k => k >= 0);
+  if (!all.length || S.some((x, k) => !all.includes(k) && x[1] > s + 2 && x[0] < e - 2)) return null;
+  return [all[0], all[all.length - 1]];
+}
+function addCut(it, f, t, s, e) {
+  const keep = [];
+  (it.marks || []).forEach(m => {
+    const r = m.k === 'cut' && m.f === f ? findMark(t, m) : null;
+    if (r && (r[0] < e && r[1] > s || !t.slice(Math.min(r[1], e), Math.max(r[0], s)).trim())) { s = Math.min(s, r[0]); e = Math.max(e, r[1]); }
+    else keep.push(m);
+  });
+  keep.push({ id: uid(), k: 'cut', f, q: t.slice(s, e), pre: t.slice(Math.max(0, s - 30), s), post: t.slice(e, e + 30) });
+  it.marks = keep;
+}
+function leaveOut(it, p, undo) {
+  const t = p.c.querySelector('[data-mf="' + p.f + '"]');
+  segmentsOf(t).map(([a, b]) => trimRange(p.plain, Math.max(a, p.s), Math.min(b, p.e))).filter(Boolean).forEach(([s, e]) => addCut(it, p.f, p.plain, s, e));
+  let said = '';
+  const en = p.f === 'text' && p.c.querySelector('[data-mf="en"]');
+  if (en) {
+    const w = !it.parts && wholeSentences(p.plain, p.s, p.e), ep = plainOf(en), SE = sentences(ep);
+    if (w && SE.length === sentences(p.plain).length) { addCut(it, 'en', ep, SE[w[0]][0], SE[w[1]][1]); said = ', with the same sentences of the English'; }
+    else said = '. The English is as it was: select the same words there and press Leave out to match';
+  }
+  save(); render();
+  toast('Left out' + said + '. Students see […] in its place.', [['Undo', undo]]);
+}
+// What students see, and the PDF: each stretch left out gives way to […], once for each run of
+// its words (a joined passage's citations, which stand between, stay).
+function collapseCuts(el) {
+  const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), ns = [];
+  for (let n; (n = walk.nextNode());) ns.push(n);
+  let prev = null;
+  ns.forEach(n => {
+    const c = n.parentElement.closest('.mk-cut'), id = c ? c.dataset.mk : null;
+    if (!id) { if (n.data.trim()) prev = null; return; }
+    n.data = prev === id ? '' : '[…]';
+    prev = id;
+  });
+}
+// A text with the stretches left out of it as […], for the Word file and the Handout tool's text.
+function cutOut(s, ms) {
+  s = String(s || '');
+  // found in the words as they read, the English's *italic* and **bold** marks aside, and cut with them
+  let plain = '';
+  const map = [], bare = t => String(t || '').replace(/\*+/g, '');
+  for (let i = 0; i < s.length; i++) if (s[i] !== '*') { map.push(i); plain += s[i]; }
+  const rs = (ms || []).filter(m => m.k === 'cut').map(m => findMark(plain, Object.assign({}, m, { q: bare(m.q), pre: bare(m.pre), post: bare(m.post) }))).filter(Boolean)
+    .map(([a, b]) => { let x = map[a], y = map[b - 1] + 1; while (x > 0 && s[x - 1] === '*') x--; while (y < s.length && s[y] === '*') y++; return [x, y]; })
+    .sort((a, b) => a[0] - b[0]);
+  let out = '', at = 0;
+  rs.forEach(([a, b]) => { if (a < at) { at = Math.max(at, b); return; } out += s.slice(at, a) + '[…]'; at = b; });
+  return out + s.slice(at);
 }
 function itemById(h, id) {
   for (const x of h.items) {
@@ -1569,13 +1720,14 @@ page.addEventListener('mouseup', e => {
         '<button type="button" data-mk="hl"><mark class="mk-hl">Highlight</mark></button>' +
         '<button type="button" data-mk="ul"><u class="mk-ul">Underline</u></button>' +
         '<button type="button" data-mk="mn">✎ Margin note</button>' +
-        (over.length ? '<button type="button" data-mk="clear" title="Take the highlights, underlines and margin notes off these words">Remove marks</button>' : ''));
+        '<button type="button" data-mk="cut" title="Leave these words out of what students see: […] stands in their place, and the passage still opens where it stands in the portal">✂ Leave out</button>' +
+        (over.length ? '<button type="button" data-mk="clear" title="Take the highlights, underlines and margin notes off these words, and put back what was left out of them">Remove marks</button>' : ''));
       return;
     }
-    const w = window.getSelection().isCollapsed && e.target.closest && e.target.closest('#hpage .mk-hl, #hpage .mk-ul');
+    const w = window.getSelection().isCollapsed && e.target.closest && e.target.closest('#hpage .mk-cut, #hpage .mk-hl, #hpage .mk-ul');
     if (w) {
       mkFor = { id: w.closest('.hcard').dataset.id, mk: w.dataset.mk };
-      showBar(w.getBoundingClientRect(), '<button type="button" data-mk="rm">Remove ' + (w.classList.contains('mk-hl') ? 'highlight' : 'underline') + '</button>');
+      showBar(w.getBoundingClientRect(), '<button type="button" data-mk="rm">' + (w.classList.contains('mk-cut') ? 'Put these words back' : 'Remove ' + (w.classList.contains('mk-hl') ? 'highlight' : 'underline')) + '</button>');
       return;
     }
     mkbar.hidden = true;
@@ -1592,7 +1744,14 @@ mkbar.addEventListener('click', e => {
   const before = JSON.stringify(it.marks || []), undo = () => { it.marks = JSON.parse(before); save(); render(); };
   const ms = it.marks || (it.marks = []), k = b.dataset.mk;
   window.getSelection().removeAllRanges();
-  if (k === 'rm') { it.marks = ms.filter(m => m.id !== p.mk); save(); render(); toast('Mark removed.', [['Undo', undo]]); return; }
+  if (k === 'rm') {
+    const gone = ms.find(m => m.id === p.mk), cut = !!gone && gone.k === 'cut';
+    it.marks = ms.filter(m => m !== gone); save(); render();
+    const other = cut && it.marks.some(m => m.k === 'cut' && m.f !== gone.f);
+    toast(!cut ? 'Mark removed.' : 'Put back.' + (other ? ' What is left out of the ' + (gone.f === 'en' ? 'German' : 'English') + ' stays out until you click it there.' : ''), [['Undo', undo]]);
+    return;
+  }
+  if (k === 'cut') { leaveOut(it, p, undo); return; }
   if (k === 'clear') {
     it.marks = ms.filter(m => { if (m.f !== p.f) return true; const r = findMark(p.plain, m); return !(r && r[0] < p.e && r[1] > p.s); });
     save(); render(); toast('Marks removed from those words.', [['Undo', undo]]);
@@ -1646,15 +1805,15 @@ function publishable(h) {
     const o = { kind: it.kind, ref: it.ref, author: it.author, work: it.work, cite: it.cite };
     if (it.parts) { o.refs = it.parts.map(p => p.ref); o.cites = it.parts.map(p => p.cite); }   // a joined passage
     if (flat(it.label)) o.label = it.label.trim();
-    if (it.kind === 'excerpt') { o.text = it.text; o.from = it.from; if (it.enSnippet && it.en && it.enOn) { o.en = it.en; if (it.enApprox) o.enApprox = true; } }
-    if (it.en && it.enOn) o.english = true;
+    if (it.kind === 'excerpt') { o.text = it.text; o.from = it.from; if (it.enSnippet && enShown(h, it)) { o.en = it.en; if (it.enApprox) o.enApprox = true; } }
+    if (enWanted(h, it)) o.english = true;   // students see its English, drawn live from the portal where the handout keeps none
     const mk = (it.marks || []).filter(m => m.k !== 'mn');   // highlights and underlines; margin notes stay private
     if (mk.length) o.marks = mk.map(m => ({ k: m.k, f: m.f, q: m.q, pre: m.pre, post: m.post }));
     if (flat(it.note)) o.note = it.note.trim();
     return o;
   };
   return {
-    kind: 'kantlab-handout', v: 1, title: h.name, published: new Date().toISOString().slice(0, 10),
+    kind: 'kantlab-handout', v: 1, title: h.name, published: new Date().toISOString().slice(0, 10), english: enMode(h),
     items: h.items.map(it => it.kind === 'heading' ? { kind: 'heading', text: it.text || '' }
       : it.kind === 'note' ? { kind: 'note', text: it.text || '', items: kids(it).map(pass) } : pass(it)),
   };
@@ -1703,13 +1862,16 @@ function publishPanel(h) {
 /* The student's view: ?handout=<name> opens a published handout over the portal, every
    passage drawn from the portal's own texts, with its English if the handout asks for it. */
 let view = null;
+const VIEW_EN = 'kantlab-handout-view-en';   // 'off' where a reader turned the English off
+let viewEn = (() => { try { return localStorage.getItem(VIEW_EN) !== 'off'; } catch (e) { return true; } })();
 const ready = () => new Promise(res => { const t = () => ($('loading') && !$('loading').hidden ? setTimeout(t, 250) : res()); t(); });
 const wanted = new URLSearchParams(location.search).get('handout');
 if (wanted && /^[a-z0-9-]+$/.test(wanted)) showPublished(wanted);
 async function showPublished(slug) {
   view = el('div', 'hview');
   view.innerHTML = '<div class="hbar"><a class="btn" href="' + esc(location.pathname) + '" title="The portal, without the handout">← The Logic Portal</a><b class="cz">Class handout</b>' +
-    '<span class="spacer"></span><a class="linkish" href="' + esc(SCREEN + '?handout=' + slug) + '" target="kantlab-class-screen" title="Show this handout on the room’s screen">On the class screen ↗</a></div>' +
+    '<span class="spacer"></span><label class="hmodesw" hidden title="The English beneath each passage, a machine translation"><input type="checkbox" class="venin"' + (viewEn ? ' checked' : '') + '> English</label>' +
+    '<a class="linkish" href="' + esc(SCREEN + '?handout=' + slug) + '" target="kantlab-class-screen" title="Show this handout on the room’s screen">On the class screen ↗</a></div>' +
     '<main><div class="hwrap"><p class="muted">Opening the handout…</p></div></main>';
   document.body.appendChild(view);
   const box = view.querySelector('.hwrap');
@@ -1728,11 +1890,18 @@ async function showPublished(slug) {
   }
   document.title = d.title + ' · The Logic Portal';
   await ready();
+  const sw = view.querySelector('.hmodesw');
+  sw.hidden = !JSON.stringify(d.items).match(/"(english|en)":/);   // only where the handout has English
+  sw.querySelector('input').addEventListener('change', e => {
+    viewEn = e.target.checked;
+    try { if (viewEn) localStorage.removeItem(VIEW_EN); else localStorage.setItem(VIEW_EN, 'off'); } catch (x) { /* this visit only */ }
+    drawPublished(d, 0);
+  });
   drawPublished(d, 0);
 }
 function drawPublished(d, tries) {
   const box = view.querySelector('.hwrap');
-  let waiting = false;
+  let waiting = false, na = 0;   // na: the notes so far, to name their answers, which stay open when this is drawn again
   const its = [];   // each passage, for its highlights and underlines once drawn
   const pass = (it, top) => {
     const k = PT.BYID ? PT.BYID.get(it.ref) : undefined, p = k != null ? P[k] : null;
@@ -1742,33 +1911,62 @@ function drawPublished(d, tries) {
       // a joined passage: its parts, live, each with its citation, which opens it in context
       const ps = it.refs.map((r, k) => { const q = idxOf(r); return { ref: r, cite: (it.cites || [])[k] || '', text: q != null ? P[q].text : '(no longer in the portal)', p: q != null ? P[q] : null }; });
       h += '<div class="vtext" lang="de">' + partsHtml({ parts: ps }, x => '<a href="#p=' + encodeURIComponent(x.ref) + '&rt=conn" class="vctx vpart" title="Read this part in context">' + esc(x.cite) + '</a> ') + '</div>';
-      if (it.english) {
+      if (it.english && viewEn) {
         const es = ps.map(x => x.p ? englishOf(x.p) : null);
         if (es.includes('loading')) { waiting = true; h += '<div class="ven muted" lang="en">English loading…</div>'; }
         else if (es.every(e => e)) h += '<div class="ven" lang="en">' + es.map(e => rich(e.text)).join('<br><br>') + '</div>';
       }
     }
     else h += p ? '<div class="vtext" lang="de">' + esc(p.text) + '</div>' : '<div class="vtext muted">(This passage is no longer in the portal.)</div>';
-    if (it.en) h += '<div class="ven" lang="en">' + rich(it.en) + (it.enApprox ? ' <span class="muted small">(approximate)</span>' : '') + '</div>';
+    if (!viewEn) { /* the reader turned the English off */ }
+    else if (it.en) h += '<div class="ven" lang="en">' + rich(it.en) + (it.enApprox ? ' <span class="muted small">(approximate)</span>' : '') + '</div>';
     else if (it.english && p && !it.refs) {
       const e = englishOf(p);
       if (e === 'loading') { waiting = true; h += '<div class="ven muted" lang="en">English loading…</div>'; }
       else if (e) h += '<div class="ven" lang="en">' + rich(e.text) + '</div>';
     }
-    const mt = it.from === 'english' || it.en || (it.english && p) ? ' · English: machine translation' : '';
+    const mt = it.from === 'english' || (viewEn && (it.en || (it.english && p))) ? ' · English: machine translation' : '';
     h += '<div class="vcite">' + esc(it.author) + ', <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + mt +
       (p ? '<a href="#p=' + encodeURIComponent(it.ref) + '&rt=conn" class="vctx">' + (it.refs ? 'Read it in context, from the start ›' : 'Read it in context ›') + '</a>' : '') + '</div>';
-    if (it.note) h += '<div class="vpn">' + esc(it.note) + '</div>';
+    if (it.note) h += '<div class="vpn">' + (hasAnswer(it.note) ? answersHtml(it.note, 'a' + (na++)) : esc(it.note)) + '</div>';
     const pi = its.push(it) - 1;
     return h.replace(/<div class="vtext"/g, '<div class="vtext" data-pi="' + pi + '" data-mf="text"').replace(/<div class="ven"/g, '<div class="ven" data-pi="' + pi + '" data-mf="en"') + '</div>';
   };
   box.innerHTML = '<h1>' + esc(d.title) + '</h1>' + (d.published ? '<div class="hpubd">Published ' + esc(d.published) + '</div>' : '') +
     d.items.map(it => it.kind === 'heading' ? (flat(it.text) ? '<h2>' + esc(it.text) + '</h2>' : '')
-      : it.kind === 'note' ? '<div class="vnote">' + paras(it.text).map(t => '<p>' + esc(t) + '</p>').join('') + '</div>' + (it.items || []).map(x => pass(x, false)).join('')
+      : it.kind === 'note' ? '<div class="vnote">' + answersHtml(it.text, 'a' + (na++)) + '</div>' + (it.items || []).map(x => pass(x, false)).join('')
       : pass(it, true)).join('');
-  box.querySelectorAll('[data-pi]').forEach(x => paintMarks(x, marksOf(its[+x.dataset.pi], x.dataset.mf)));
+  box.querySelectorAll('[data-pi]').forEach(x => { paintMarks(x, marksOf(its[+x.dataset.pi], x.dataset.mf)); collapseCuts(x); });
   if (waiting && tries < 40) setTimeout(() => drawPublished(d, tries + 1), 500);
 }
+/* A question for students with its answer kept back. In a note, or a passage's note, a paragraph
+   that opens "Answer:" is folded under a small "Answer ▸" until it is clicked, so that students
+   meet the question first; several such paragraphs in a row fold together. On the Handouts page
+   and in the exports the note stands as written, Answer: and all. */
+const ANSWER = /^answers?\s*:\s*/i;
+const hasAnswer = t => paras(t).some(x => ANSWER.test(x));
+const ansOpen = new Set();   // the answers opened in this view
+function answersHtml(text, key) {
+  const ps = paras(text), out = [];
+  for (let i = 0, k = 0; i < ps.length; i++) {
+    if (!ANSWER.test(ps[i])) { out.push('<p>' + esc(ps[i]) + '</p>'); continue; }
+    const run = [];
+    for (; i < ps.length && ANSWER.test(ps[i]); i++) {
+      let t = ps[i].replace(ANSWER, '');
+      if (!t && i + 1 < ps.length && !ANSWER.test(ps[i + 1])) t = ps[++i];   // "Answer:" on a line of its own
+      run.push(t);
+    }
+    i--;
+    const id = key + '.' + (k++);
+    out.push('<details class="vans" data-ans="' + esc(id) + '"' + (ansOpen.has(id) ? ' open' : '') + '><summary>' + (run.length > 1 ? run.length + ' answers' : 'Answer') + '</summary>' +
+      run.map(t => '<p>' + esc(t) + '</p>').join('') + '</details>');
+  }
+  return out.join('');
+}
+document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (d.matches && d.matches('#hview details.vans')) { if (d.open) ansOpen.add(d.dataset.ans); else ansOpen.delete(d.dataset.ans); }
+}, true);
 // "Read it in context": the handout steps aside for the passage, and a button brings it back.
 const back = el('button', 'hback', 'btn solid');
 back.type = 'button'; back.hidden = true; back.textContent = '← Back to the handout';
@@ -1846,8 +2044,8 @@ function toText(h) {
   const pass = (it, ind) => {
     if (L[L.length - 1] !== '') L.push('');
     if (flat(it.label)) L.push(ind + '*' + flat(it.label).replace(/\*/g, '') + '*');
-    L.push(ind + '> ' + it.author + ': "' + underlined(flat(it.text), marksOf(it, 'text')) + '" (' + citeLine(it) + ')');
-    if (it.en && it.enOn) L.push(ind + '> "' + underlined(flat(it.en), marksOf(it, 'en')) + '" (English: machine translation' + (it.kind === 'excerpt' && !it.enSnippet ? ', of the whole passage' : it.enApprox ? ', approximate' : '') + ')');
+    L.push(ind + '> ' + it.author + ': "' + underlined(flat(cutOut(it.text, marksOf(it, 'text'))), marksOf(it, 'text')) + '" (' + citeLine(it) + ')');
+    if (enShown(h, it)) L.push(ind + '> "' + underlined(flat(cutOut(it.en, marksOf(it, 'en'))), marksOf(it, 'en')) + '" (English: machine translation' + (it.kind === 'excerpt' && !it.enSnippet ? ', of the whole passage' : it.enApprox ? ', approximate' : '') + ')');
     L.push(ind + '%% ' + SITE + '#p=' + encodeURIComponent(it.ref));
     if (flat(it.note)) L.push('', ind + flat(it.note));
   };
@@ -1873,16 +2071,16 @@ function exportPdf(h) {
   const its = [];   // each passage, for its highlights and underlines once drawn
   const pass = it => '<div class="item">' + (flat(it.label) ? '<div class="lab">' + esc(it.label) + '</div>' : '') +
     '<div class="q" data-pi="' + (its.push(it) - 1) + '" data-mf="text">' + (it.from === 'english' ? rich(it.text) : esc(it.text)) + '</div>' +
-    (it.en && it.enOn ? '<div class="en" data-pi="' + (its.length - 1) + '" data-mf="en">' + rich(it.en) + '</div>' : '') +
+    (enShown(h, it) ? '<div class="en" data-pi="' + (its.length - 1) + '" data-mf="en">' + rich(it.en) + '</div>' : '') +
     '<div class="c">' + esc(it.author) + ', <i>' + esc(it.work) + '</i>, ' + esc(it.cite) +
-    (it.from === 'english' || (it.en && it.enOn) ? ' · English: machine translation' : '') + '</div>' +
+    (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : '') + '</div>' +
     (flat(it.note) ? '<p class="pn">' + esc(it.note) + '</p>' : '') + '</div>';
   box.innerHTML = '<h1>' + esc(h.name) + '</h1>' + h.items.map(it => {
     if (it.kind === 'heading') return flat(it.text) ? '<h2>' + esc(it.text) + '</h2>' : '';
     if (it.kind === 'note') return '<div class="note">' + paras(it.text).map(t => '<p>' + esc(t) + '</p>').join('') + '</div>' + kids(it).map(pass).join('');
     return pass(it);
   }).join('');
-  box.querySelectorAll('[data-pi]').forEach(x => paintMarks(x, marksOf(its[+x.dataset.pi], x.dataset.mf).filter(m => m.k !== 'mn')));
+  box.querySelectorAll('[data-pi]').forEach(x => { paintMarks(x, marksOf(its[+x.dataset.pi], x.dataset.mf).filter(m => m.k !== 'mn')); collapseCuts(x); });
   const title = document.title;
   document.title = h.name;
   const done = () => { document.title = title; box.innerHTML = ''; window.removeEventListener('afterprint', done); };
@@ -1930,11 +2128,11 @@ function docxBlob(h) {
   const B = [para('Title', runs(h.name))];
   const pass = it => {
     if (flat(it.label)) B.push(para('Label', runs(flat(it.label))));
-    if (it.parts) paras(it.text).forEach(t => B.push(para('Passage', markedRuns(t, false, marksOf(it, 'text')))));   // a joined passage, part by part
-    else B.push(para('Passage', markedRuns(it.text, it.from === 'english', marksOf(it, 'text'))));
-    if (it.en && it.enOn) B.push(para('PassageEnglish', markedRuns(it.en, true, marksOf(it, 'en'))));
+    if (it.parts) paras(cutOut(it.text, marksOf(it, 'text'))).forEach(t => B.push(para('Passage', markedRuns(t, false, marksOf(it, 'text')))));   // a joined passage, part by part
+    else B.push(para('Passage', markedRuns(cutOut(it.text, marksOf(it, 'text')), it.from === 'english', marksOf(it, 'text'))));
+    if (enShown(h, it)) B.push(para('PassageEnglish', markedRuns(cutOut(it.en, marksOf(it, 'en')), true, marksOf(it, 'en'))));
     B.push(para('Citation', runs(it.author + ', ') + runs(it.work, false, '<w:i/>') + runs(', ' + it.cite +
-      (it.from === 'english' || (it.en && it.enOn) ? ' · English: machine translation' : ''))));
+      (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : ''))));
     paras(it.note).forEach(n => B.push(para('PassageNote', runs(n))));
   };
   h.items.forEach(it => {
@@ -2011,5 +2209,8 @@ window.HANDOUTS = { get db() { return DB; }, toText: () => toText(cur()), docx: 
 document.body.classList.toggle('hmode', mode);
 document.body.classList.toggle('hnomenu', !$('moremenu'));
 if (LOCK) LOCK.remembered().then(k => { if (k && modeWas) setMode(true, true); });   // no Modes menu: the Handouts button is the switch
+// The English that handouts' passages lack, fetched once the portal's texts are in: in the portal's
+// own window, not in the copy of it the class screen reads from, so that two never write at once.
+if (window === window.top && DB.handouts.some(h => enMode(h) && passagesOf(h).some(x => enWanted(h, x) && !x.en))) ready().then(fillSoon);
 marks();
 })();

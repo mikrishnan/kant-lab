@@ -68,6 +68,13 @@
   .it .part { font-family: 'Cinzel', serif; font-size: 0.6em; color: var(--accent-light); letter-spacing: 0.03em; }
   .it.note .q { font-style: italic; color: var(--accent); font-size: 1.05em; }
   .it.note .q p { margin: 0 0 0.4em; }
+  .it details.ans { margin: 0 0 0.5em; }
+  .it details.ans > summary { display: inline-block; list-style: none; cursor: pointer; font-family: 'Cinzel', serif; font-style: normal; font-size: 0.5em; letter-spacing: 0.06em; color: var(--faded); }
+  .it details.ans > summary::-webkit-details-marker { display: none; }
+  .it details.ans > summary::after { content: ' ▸'; }
+  .it details.ans[open] > summary::after { content: ' ▾'; }
+  .it details.ans > p { margin: 0.2em 0 0.3em; padding-left: 0.6em; border-left: 3px solid var(--line); }
+  .it .pn details.ans > summary { font-size: 0.8em; }
   .it.hd { border-top: none; padding-bottom: 0.2em; }
   .it.hd .hdt { font-family: 'Cinzel', serif; color: var(--accent); font-weight: 600; font-size: 0.9em; letter-spacing: 0.04em; margin: 0.4em 0 0; padding-bottom: 0.25em; border-bottom: 1px solid var(--line); }
   .it.sub { margin-left: 1.4em; border-top-style: dashed; }
@@ -171,19 +178,23 @@ async function publishedList() {
 // The handouts in this browser, as the Handouts page keeps them
 function store() { const d = readLS(KEY); return d && Array.isArray(d.handouts) ? d : { current: null, handouts: [] }; }
 const countIn = items => items.reduce((n, x) => n + (x.kind === 'note' ? (x.items || []).length : x.kind === 'heading' ? 0 : 1), 0);
-// A passage kept in this browser, as a published handout has it
-const passOf = it => ({ id: it.id, kind: it.kind, ref: it.ref, refs: it.parts ? it.parts.map(q => q.ref) : null, cites: it.parts ? it.parts.map(q => q.cite) : null,
+// A passage kept in this browser, as a published handout has it; noEn where its handout's English
+// is off, for the whole handout or for this passage
+const passOf = (it, h) => ({ id: it.id, noEn: h.english === false || !!it.enHide, kind: it.kind, ref: it.ref, refs: it.parts ? it.parts.map(q => q.ref) : null, cites: it.parts ? it.parts.map(q => q.cite) : null,
   author: it.author, work: it.work, cite: it.cite, label: flat(it.label), text: it.text, from: it.from,
   en: it.kind === 'excerpt' && it.enSnippet ? it.en : null, enApprox: !!it.enApprox,
   marks: (it.marks || []).filter(m => m.k !== 'mn'), note: flat(it.note) ? it.note.trim() : '' });
 function fromLocal(h) {
   const n = countIn(h.items);
   return { id: h.id, title: h.name || 'A handout', items: h.items.map(it => it.kind === 'heading' ? { id: it.id, kind: 'heading', text: it.text || '' }
-      : it.kind === 'note' ? { id: it.id, kind: 'note', text: it.text || '', items: (it.items || []).map(passOf) } : passOf(it)),
+      : it.kind === 'note' ? { id: it.id, kind: 'note', text: it.text || '', items: (it.items || []).map(x => passOf(x, h)) } : passOf(it, h)),
     sub: plural(n, 'passage') + ' · ' + (h.published ? 'published ' + longDate(h.published.at) + ', and as it is now in this browser' : 'not published, in this browser') };
 }
 function fromPublished(d) {
-  return { title: d.title || 'A class handout', items: d.items, sub: plural(countIn(d.items), 'passage') + (d.published ? ' · published ' + longDate(d.published) : '') };
+  // Published since English mode, a handout says which passages show their English (english: true)
+  const noEn = x => d.english === false || (d.english === true && !x.english);
+  const items = d.items.map(x => x.kind === 'heading' ? x : x.kind === 'note' ? Object.assign({}, x, { items: (x.items || []).map(y => Object.assign({}, y, { noEn: noEn(y) })) }) : Object.assign({}, x, { noEn: noEn(x) }));
+  return { title: d.title || 'A class handout', items, sub: plural(countIn(d.items), 'passage') + (d.published ? ' · published ' + longDate(d.published) : '') };
 }
 
 /* ── Drawing ── */
@@ -219,8 +230,23 @@ function findMark(s, m) {
   }
   return best;
 }
+// The words the handout leaves out (its cuts) as […]: the passage as students are given it.
+function cutOut(s, ms) {
+  s = String(s || '');
+  // found in the words as they read, the English's *italic* and **bold** marks aside, and cut with them
+  let plain = '';
+  const map = [], bare = t => String(t || '').replace(/\*+/g, '');
+  for (let i = 0; i < s.length; i++) if (s[i] !== '*') { map.push(i); plain += s[i]; }
+  const rs = (ms || []).filter(m => m.k === 'cut').map(m => findMark(plain, Object.assign({}, m, { q: bare(m.q), pre: bare(m.pre), post: bare(m.post) }))).filter(Boolean)
+    .map(([a, b]) => { let x = map[a], y = map[b - 1] + 1; while (x > 0 && s[x - 1] === '*') x--; while (y < s.length && s[y] === '*') y++; return [x, y]; })
+    .sort((a, b) => a[0] - b[0]);
+  let out = '', at = 0;
+  rs.forEach(([a, b]) => { if (a < at) { at = Math.max(at, b); return; } out += s.slice(at, a) + '[…]'; at = b; });
+  return out + s.slice(at);
+}
 function painted(str, marks, field, asRich) {
   const f = t => asRich ? rich(t) : esc(t);
+  str = cutOut(String(str), (marks || []).filter(m => (m.f || 'text') === field));
   const rs = (marks || []).filter(m => (m.f || 'text') === field && (m.k === 'hl' || m.k === 'ul'))
     .map(m => { const r = findMark(str, m); return r ? r.concat(m.k) : null; }).filter(Boolean).sort((a, b) => a[0] - b[0]);
   let h = '', at = 0;
@@ -237,21 +263,57 @@ function passageHtml(x, n, key) {
   let text, en = null;
   if (x.kind === 'excerpt') {   // its own words, as selected; from the English, they are English
     text = x.from === 'english' ? '<div class="de" lang="en">' + painted(x.text || '', x.marks, 'text', true) + '</div>' : '<div class="de" lang="' + langOf(T) + '">' + painted(x.text || '', x.marks, 'text') + '</div>';
-    if (pref.en && x.en && x.from !== 'english') en = { text: x.en, approx: x.enApprox };
+    if (pref.en && !x.noEn && x.en && x.from !== 'english') en = { text: x.en, approx: x.enApprox };
   } else if (joined) {         // its parts, each with its citation
     const ps = x.refs.map(r => pOf(r));
-    text = '<div class="de" lang="' + langOf(T) + '">' + ps.map((q, k) => '<span class="part">' + esc((x.cites || [])[k] || '') + '</span> ' + (q ? esc(q.text) : '(no longer in the portal)')).join('\n\n') + '</div>';
-    if (pref.en) { const es = ps.map(q => q ? english(q, PT.TEXTS[q.t]) : null); en = es.includes('loading') ? 'loading' : es.every(e => e && e.text) ? { text: es.map(e => e.text).join('\n\n') } : null; }
+    text = '<div class="de" lang="' + langOf(T) + '">' + ps.map((q, k) => '<span class="part">' + esc((x.cites || [])[k] || '') + '</span> ' + (q ? painted(q.text, x.marks, 'text') : '(no longer in the portal)')).join('\n\n') + '</div>';
+    if (pref.en && !x.noEn) { const es = ps.map(q => q ? english(q, PT.TEXTS[q.t]) : null); en = es.includes('loading') ? 'loading' : es.every(e => e && e.text) ? { text: es.map(e => e.text).join('\n\n') } : null; }
   } else {
     text = p ? '<div class="de" lang="' + langOf(T) + '">' + painted(p.text, x.marks, 'text') + '</div>' : x.text ? '<div class="de">' + esc(x.text) + '</div>' : '<div class="gone">(This passage is no longer in the portal.)</div>';
-    if (p) { const e = english(p, T); en = e === 'loading' ? 'loading' : e ? { text: e.text, part: e.part } : null; }
+    if (p && !x.noEn) { const e = english(p, T); en = e === 'loading' ? 'loading' : e ? { text: e.text, part: e.part } : null; }
   }
   return '<section class="it' + (key.includes('.') ? ' sub' : '') + '" data-key="' + esc(key) + '"' + (p ? ' data-ref="' + esc(x.ref) + '"' : '') + ' data-label="' + esc(n + ' · ' + clip((x.label ? x.label + ': ' : '') + (T ? T.short : x.work || '') + ', ' + (x.cite || ''), 60)) + '">' +
     '<div class="num">' + esc(n) + '</div><div class="body">' + (x.label ? '<div class="hlabel">' + esc(x.label) + '</div>' : '') + '<div class="cite">' + cite + '</div>' + text +
     (en === 'loading' ? '<div class="en wait">English loading…</div>'
       : en ? '<div class="en" lang="en"><span class="lab">English · a machine translation' + (pref.en && x.kind !== 'excerpt' ? ' on ' + esc(styleLabel()) : '') + (en.part ? ' · made for a longer stretch than this passage' : '') + (en.approx ? ' · approximate' : '') + '</span>' + painted(en.text, x.marks, 'en', true) + '</div>' : '') +
-    (x.note ? '<div class="pn">' + esc(x.note) + '</div>' : '') + '</div></section>';
+    (x.note ? '<div class="pn">' + (hasAnswer(x.note) ? answersHtml(x.note, key) : esc(x.note)) + '</div>' : '') + '</div></section>';
 }
+/* A question with its answer kept back: in a note, a paragraph that opens "Answer:" is folded under
+   a small "Answer ▸", as in the students' view, and ↓ opens it before going on, so that the room
+   meets the question first. An answer opened stays open when the screen is drawn again. */
+const ANSWER = /^answers?\s*:\s*/i;
+const hasAnswer = t => paras(t).some(x => ANSWER.test(x));
+// A note's words without its answers, for the list of items at the top, which the room can see
+function unanswered(t) {
+  const ps = paras(t), out = [];
+  for (let i = 0; i < ps.length; i++) {
+    if (!ANSWER.test(ps[i])) { out.push(ps[i]); continue; }
+    if (!ps[i].replace(ANSWER, '') && i + 1 < ps.length && !ANSWER.test(ps[i + 1])) i++;
+  }
+  return out.join(' ');
+}
+const ansOpen = new Set();
+function answersHtml(text, key) {
+  const ps = paras(text), out = [];
+  for (let i = 0, k = 0; i < ps.length; i++) {
+    if (!ANSWER.test(ps[i])) { out.push('<p>' + esc(ps[i]) + '</p>'); continue; }
+    const run = [];
+    for (; i < ps.length && ANSWER.test(ps[i]); i++) {
+      let t = ps[i].replace(ANSWER, '');
+      if (!t && i + 1 < ps.length && !ANSWER.test(ps[i + 1])) t = ps[++i];   // "Answer:" on a line of its own
+      run.push(t);
+    }
+    i--;
+    const id = key + '.' + (k++);
+    out.push('<details class="ans" data-ans="' + esc(id) + '"' + (ansOpen.has(id) ? ' open' : '') + '><summary>' + (run.length > 1 ? run.length + ' answers' : 'Answer') + '</summary>' +
+      run.map(t => '<p>' + esc(t) + '</p>').join('') + '</details>');
+  }
+  return out.join('');
+}
+document.addEventListener('toggle', e => {
+  const d = e.target;
+  if (d.matches && d.matches('details.ans')) { if (d.open) ansOpen.add(d.dataset.ans); else ansOpen.delete(d.dataset.ans); }
+}, true);
 const curKey = () => stops[cur] ? stops[cur].dataset.key : null;
 function render(keep) {
   if (!PT || !SHOW) return;
@@ -263,8 +325,8 @@ function render(keep) {
     if (x.kind === 'heading') { if (flat(x.text)) h += '<section class="it hd" data-key="' + esc(key) + '" data-label="' + esc('§ ' + clip(flat(x.text), 56)) + '"><div class="num"></div><div class="body"><h2 class="hdt">' + esc(x.text) + '</h2></div></section>'; return; }
     const n = String(++k);
     if (x.kind === 'note') {
-      h += '<section class="it note" data-key="' + esc(key) + '" data-label="' + esc(n + ' · ' + clip(flat(x.text) || 'A note', 60)) + '"><div class="num">' + n + '</div><div class="body"><div class="q">' +
-        (paras(x.text).map(t => '<p>' + esc(t) + '</p>').join('') || '<p>…</p>') + '</div></div></section>' +
+      h += '<section class="it note" data-key="' + esc(key) + '" data-label="' + esc(n + ' · ' + clip(unanswered(x.text) || 'A note', 60)) + '"><div class="num">' + n + '</div><div class="body"><div class="q">' +
+        (answersHtml(x.text, key) || '<p>…</p>') + '</div></div></section>' +
         (x.items || []).map((y, j) => passageHtml(y, n + '.' + (j + 1), key + '.' + (y.id || j))).join('');
       return;
     }
@@ -300,6 +362,14 @@ function next() {
   const st = $('stage'), s = stops[cur];
   if (!s) return;
   const r = s.getBoundingClientRect(), box = st.getBoundingClientRect();
+  // an answer still folded, and in view: open it first
+  const a = [...s.querySelectorAll('details.ans:not([open])')].find(x => x.getClientRects().length && x.getBoundingClientRect().top < box.bottom - 30);
+  if (a) {
+    a.open = true; ansOpen.add(a.dataset.ans);
+    const ar = a.getBoundingClientRect();
+    if (ar.bottom > box.bottom) st.scrollBy({ top: Math.min(st.clientHeight * 0.8, ar.bottom - box.bottom + 24), behavior: 'auto' });
+    return;
+  }
   if (r.bottom > box.bottom + 4 && r.top < box.bottom - 40) { st.scrollBy({ top: Math.min(st.clientHeight * 0.8, r.bottom - box.bottom + 24), behavior: 'auto' }); return; }
   go(cur + 1, true);
 }
@@ -403,7 +473,7 @@ function apply() {
   $('en').value = pref.en;
   context();
 }
-function setEn(v) { pref.en = v; savePref(); apply(); render(curKey()); }
+function setEn(v) { pref.en = v; pref.enChosen = true; savePref(); apply(); render(curKey()); }
 function size(d) { pref.size = Math.max(1, Math.min(3.2, Math.round((pref.size + d) * 10) / 10)); savePref(); const k = curKey(); apply(); render(k); }
 $('en').addEventListener('change', e => { setEn(e.target.value); e.target.blur(); });
 $('notes').addEventListener('click', e => { pref.notes = !pref.notes; savePref(); apply(); e.currentTarget.blur(); });
@@ -461,6 +531,7 @@ function boot() {
   }
   PT = pt;
   try { STYLES = frame.contentWindow.Function('return typeof PORTAL_TR_STYLES === "undefined" ? [] : PORTAL_TR_STYLES')(); } catch (e) { STYLES = []; }
+  if (!pref.enChosen) pref.en = (STYLES[0] || {}).key || '';   // the English shows, as the handouts have it, until the screen is told otherwise
   if (pref.en && !STYLES.some(s => s.key === pref.en)) pref.en = '';
   $('en').innerHTML = '<option value="">No English</option>' + STYLES.map(s => '<option value="' + esc(s.key) + '">English: ' + esc(s.label) + '</option>').join('');
   apply();

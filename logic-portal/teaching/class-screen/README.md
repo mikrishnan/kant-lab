@@ -1,7 +1,7 @@
 # The class screen
 
 A handout on the room's screen: its sections, its notes and its passages in large type, one after
-another, with the English beneath them when you want it. Open it with **Class screen ↗** on the
+another, with the English beneath them as the handout has it. Open it with **Class screen ↗** on the
 portal's Handouts page. It opens in a window of its own, which you can drag onto the room's screen
 and make full screen, while the portal stays on your laptop.
 
@@ -18,7 +18,8 @@ the portal has an **On the class screen** link.
 
 **How a handout shows.** Its section headings stand as headings. A note, the point to make, has a
 number, and the passages under it are numbered beneath it (3.1, 3.2). Each passage keeps its label
-and its note, and the highlights and underlines you gave it; your margin notes are yours and are
+and its note, and the highlights and underlines you gave it, with […] for any words you left out; a paragraph of a note that opens **Answer:** is folded under
+**Answer ▸** until you open it, and the list of items at the top leaves it out; your margin notes are yours and are
 not shown. An excerpt shows the words you chose, and a joined passage its parts, each with its
 citation.
 
@@ -26,10 +27,10 @@ citation.
 
 | Key | |
 | --- | --- |
-| ↓, →, Space, Page Down | on: through a long passage a screen at a time, then to the next item |
+| ↓, →, Space, Page Down | on: through a long passage a screen at a time, then to the next item. A folded answer in view opens first |
 | ↑, ←, Shift-Space, Page Up | back |
 | Home, End | the first item, the last |
-| E | English: none, then each of the translation styles in turn |
+| E | English: each translation style in turn, then none. It is on until you choose otherwise, and a passage whose English the handout hides shows none here either |
 | N | the notes on passages, shown or hidden |
 | C | the passage in context: the portal beside it, opened at that passage |
 | F | full screen. The bar fades after a moment and comes back when the mouse moves |
