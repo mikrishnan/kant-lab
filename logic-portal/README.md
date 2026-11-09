@@ -143,8 +143,11 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   class screen and in every export, and the passage keeps its address: **Read it in context ›**
   still opens it whole, where it stands in the portal. On the Handouts page the words stay,
   struck through; click them to put them back, or press **Put back all that was left out**.
-  Leaving out whole sentences takes the same sentences out of the English beside them, where the two
-  have as many sentences; otherwise, and in a joined passage, select the English words too.
+  Whatever you leave out of the German goes out of the English beside it too. The two are
+  matched clause by clause, or sentence by sentence, as the translations keep them; a few words
+  inside a sentence take about the same stretch of the English, struck through with a dashed line
+  on the Handouts page for you to look over. Cuts made before this get their English the next
+  time the Handouts page shows them. Putting back the German puts back its English.
 - **Mark up the passages.** Select words of a passage, or of its English, and choose
   **Highlight**, **Underline** or **✎ Margin note** (the selection takes whole words). A margin
   note sits in the right margin, level with its words, which get a dotted line and a number;

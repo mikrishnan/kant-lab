@@ -615,6 +615,7 @@ css.textContent = `
   .mk-ul { text-decoration: underline; text-decoration-color: #9a3b1e; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
   .mk-mn { border-bottom: 1.5px dotted var(--accent); cursor: pointer; }
   #hpage .mk-cut { text-decoration: line-through; text-decoration-color: var(--accent-light); color: var(--faded); opacity: 0.6; cursor: pointer; }
+  #hpage .mk-cut.approx { text-decoration-style: dashed; }
   #hview .mk-cut, #hprint .mk-cut { color: var(--faded); }
   .mk-n { color: var(--accent); font-size: 0.68em; font-weight: 600; margin-left: 1px; cursor: pointer; }
   .hcard.has-mn { position: relative; }
@@ -1024,6 +1025,7 @@ function render() {
   page.querySelectorAll('.hnote, .hnotetext').forEach(grow);
   mkbar.hidden = true;
   paintAll();
+  if (pairCuts(h)) { save(); render(); return; }   // German cuts whose English has not followed yet
   if (enMode(h) && passagesOf(h).some(x => enWanted(h, x) && !x.en)) fillSoon();
 }
 // A text box as tall as its text. Measured only once it has a width, or a box drawn in a
@@ -1602,16 +1604,18 @@ function paintMarks(el, ms) {
       if (e < n.length) n.splitText(e);
       const mid = s ? n.splitText(s) : n, w = document.createElement(MK[m.k][0]);
       w.className = MK[m.k][1]; w.dataset.mk = m.id;
+      if (m.approx) { w.classList.add('approx'); w.title = 'Left out to match the German, by about the same stretch: click to put it back'; }
       mid.parentNode.insertBefore(w, mid); w.appendChild(mid);
     });
   });
   return lost;
 }
 /* Leaving words out. A stretch selected is cut within each part of the passage it covers (a
-   joined passage's citations stand between its parts), and joined to any cut it touches. Where
-   the stretch is whole sentences, and the English beneath has as many sentences as the passage,
-   the same sentences of the English are left out too; otherwise the English is left as it is,
-   for its own words to be selected. */
+   joined passage's citations stand between its parts), and joined to any cut it touches. A cut
+   in the German takes the matching stretch of the English with it (matchStretch), and is
+   marked paired; the English cut keeps the German's id (of), so that putting one back puts back
+   both, and is marked approx where its ends were placed by position. A German cut made before
+   this, or while the English was hidden or loading, is paired the next time its card is drawn. */
 function segmentsOf(t) {   // the stretches of a card's text that are the passage's words, as plainOf counts them
   const out = [], walk = document.createTreeWalker(t, NodeFilter.SHOW_TEXT);
   let pos = 0, a = 0;
@@ -1624,31 +1628,103 @@ function segmentsOf(t) {   // the stretches of a card's text that are the passag
   return out;
 }
 const trimRange = (t, s, e) => { while (s < e && /\s/.test(t[s])) s++; while (e > s && /\s/.test(t[e - 1])) e--; return e > s ? [s, e] : null; };
-// The sentences [s, e] covers whole, give or take a character at either end, as [first, last]; null where it cuts into one.
-function wholeSentences(t, s, e) {
-  const S = sentences(t), all = S.map((x, k) => x[0] >= s - 2 && x[1] <= e + 2 ? k : -1).filter(k => k >= 0);
-  if (!all.length || S.some((x, k) => !all.includes(k) && x[1] > s + 2 && x[0] < e - 2)) return null;
-  return [all[0], all[all.length - 1]];
-}
+// A cut, joined to any it touches in the same field; returns it. A cut joined from approximate ones stays approximate.
 function addCut(it, f, t, s, e) {
   const keep = [];
+  let approx = false;
   (it.marks || []).forEach(m => {
     const r = m.k === 'cut' && m.f === f ? findMark(t, m) : null;
-    if (r && (r[0] < e && r[1] > s || !t.slice(Math.min(r[1], e), Math.max(r[0], s)).trim())) { s = Math.min(s, r[0]); e = Math.max(e, r[1]); }
+    if (r && (r[0] < e && r[1] > s || !t.slice(Math.min(r[1], e), Math.max(r[0], s)).trim())) { s = Math.min(s, r[0]); e = Math.max(e, r[1]); approx = approx || !!m.approx; }
     else keep.push(m);
   });
-  keep.push({ id: uid(), k: 'cut', f, q: t.slice(s, e), pre: t.slice(Math.max(0, s - 30), s), post: t.slice(e, e + 30) });
+  const m = { id: uid(), k: 'cut', f, q: t.slice(s, e), pre: t.slice(Math.max(0, s - 30), s), post: t.slice(e, e + 30) };
+  if (approx) m.approx = true;
+  keep.push(m);
   it.marks = keep;
+  return m;
+}
+/* The stretch of the English answering to [s, e] of the German: { a, b, approx }, or null. The
+   translations keep the German's sentences and its clauses whole and in order, so both texts are
+   cut into pieces, at a clause's end (. ; : ? ! and a space) or, where those do not agree in
+   number, at a sentence's, and a cut that begins or ends at a piece's edge begins or ends at the
+   same piece's edge in the English. An end inside a piece, or a text whose pieces agree at
+   neither level, is placed by position, to the nearest whole word, and the stretch is approx. */
+const CLAUSE_END = /[.?!:;](?=\s)/g;
+function piecesOf(t, re) {
+  const out = [];
+  let s = 0, m;
+  re.lastIndex = 0;
+  while (/\s/.test(t[s] || '')) s++;
+  while ((m = re.exec(t))) { out.push([s, m.index + 1]); s = m.index + 1; while (/\s/.test(t[s] || '')) s++; }
+  if (s < t.length) out.push([s, t.length]);
+  return out;
+}
+function matchStretch(de, en, s, e) {
+  const lv = [CLAUSE_END, SENT_END].map(re => [piecesOf(de, re), piecesOf(en, re)]).find(([D, E]) => D.length > 1 && D.length === E.length)
+    || [[[0, de.length]], [[0, en.length]]];
+  const [D, E] = lv;
+  let approx = false;
+  const word = (y, lo, hi) => {   // the nearest place between two words
+    for (let d = 0; d < 60; d++) for (const z of [y - d, y + d]) if (z >= lo && z <= hi && (z === lo || z === hi || (/\s/.test(en[z - 1]) !== /\s/.test(en[z])))) return z;
+    return y;
+  };
+  const end = (x, last) => {
+    let k = D.findIndex(d => last ? d[1] >= x - 2 : d[1] > x + 2);
+    if (k < 0) k = D.length - 1;
+    const [d0, d1] = D[k], [e0, e1] = E[k];
+    if (last ? x >= d1 - 2 : x <= d0 + 2) return last ? e1 : e0;
+    approx = true;
+    return word(Math.round(e0 + (x - d0) / Math.max(1, d1 - d0) * (e1 - e0)), e0, e1);
+  };
+  const r = trimRange(en, end(s, false), end(e, true));
+  return r ? { a: r[0], b: r[1], approx } : null;
+}
+// The English as drawn, *italic* and **bold** given as their words
+const asDrawn = t => String(t || '').replace(/\*\*([^*\n]+)\*\*/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
+// Take out of the English the stretch matching German cut gm, at [s, e] of the German de. In a
+// joined passage, segs are its parts' stretches of de, and each part's German is matched with
+// that part's own English, so that the citations between do not throw the match out.
+function followCut(it, gm, de, en, s, e, segs) {
+  gm.paired = true;
+  if (it.kind === 'excerpt' && !it.enSnippet) return null;   // its English is the whole passage's
+  let D = de, E = en, off = 0, offE = 0;
+  if (it.parts && segs && segs.length === it.parts.length) {
+    let from = 0;
+    const spans = it.parts.map(q => { const t = asDrawn(q.en), i = t ? en.indexOf(t, from) : -1; if (i >= 0) from = i + t.length; return [i, t.length]; });
+    const k = segs.findIndex(([a, b]) => s >= a && s < b);
+    if (k >= 0 && spans.every(([i]) => i >= 0)) { off = segs[k][0]; D = de.slice(off, segs[k][1]); offE = spans[k][0]; E = en.substr(offE, spans[k][1]); }
+  }
+  const r = matchStretch(D, E, s - off, Math.min(e, off + D.length) - off);
+  if (!r) return null;
+  const m = addCut(it, 'en', en, r.a + offE, r.b + offE);
+  m.of = gm.id;
+  if (r.approx) m.approx = true;
+  return { approx: !!m.approx };
+}
+// The German cuts on the cards drawn whose English has not followed yet: it follows now.
+function pairCuts(h) {
+  let changed = false;
+  page.querySelectorAll('.hwrap .hcard[data-id]').forEach(c => {
+    const it = itemById(h, c.dataset.id), de = c.querySelector('[data-mf="text"]'), en = c.querySelector('[data-mf="en"]');
+    const todo = it && de && en && isPass(it) ? (it.marks || []).filter(m => m.k === 'cut' && m.f === 'text' && !m.paired) : [];
+    if (!todo.length) return;
+    const dp = plainOf(de), ep = plainOf(en), segs = segmentsOf(de);
+    todo.forEach(m => { const r = findMark(dp, m); if (r) followCut(it, m, dp, ep, r[0], r[1], segs); else m.paired = true; });
+    changed = true;
+  });
+  return changed;
 }
 function leaveOut(it, p, undo) {
   const t = p.c.querySelector('[data-mf="' + p.f + '"]');
-  segmentsOf(t).map(([a, b]) => trimRange(p.plain, Math.max(a, p.s), Math.min(b, p.e))).filter(Boolean).forEach(([s, e]) => addCut(it, p.f, p.plain, s, e));
+  const made = segmentsOf(t).map(([a, b]) => trimRange(p.plain, Math.max(a, p.s), Math.min(b, p.e))).filter(Boolean).map(([s, e]) => addCut(it, p.f, p.plain, s, e));
   let said = '';
   const en = p.f === 'text' && p.c.querySelector('[data-mf="en"]');
   if (en) {
-    const w = !it.parts && wholeSentences(p.plain, p.s, p.e), ep = plainOf(en), SE = sentences(ep);
-    if (w && SE.length === sentences(p.plain).length) { addCut(it, 'en', ep, SE[w[0]][0], SE[w[1]][1]); said = ', with the same sentences of the English'; }
-    else said = '. The English is as it was: select the same words there and press Leave out to match';
+    const ep = plainOf(en), segs = segmentsOf(t);
+    let any = false, approx = false;
+    made.forEach(m => { const r = findMark(p.plain, m), x = r && followCut(it, m, p.plain, ep, r[0], r[1], segs); if (x) { any = true; approx = approx || x.approx; } });
+    said = !any ? '. The English beside it could not be matched: select its words there and press Leave out'
+      : approx ? ', with about the same stretch of the English (struck through with a dashed line: look it over)' : ', with the same words of the English';
   }
   save(); render();
   toast('Left out' + said + '. Students see […] in its place.', [['Undo', undo]]);
@@ -1810,16 +1886,17 @@ mkbar.addEventListener('click', e => {
   const before = JSON.stringify(it.marks || []), undo = () => { it.marks = JSON.parse(before); save(); render(); };
   const ms = it.marks || (it.marks = []), k = b.dataset.mk;
   window.getSelection().removeAllRanges();
-  if (k === 'rm') {
+  if (k === 'rm') {   // a German cut takes the English that followed it back with it
     const gone = ms.find(m => m.id === p.mk), cut = !!gone && gone.k === 'cut';
-    it.marks = ms.filter(m => m !== gone); save(); render();
-    const other = cut && it.marks.some(m => m.k === 'cut' && m.f !== gone.f);
-    toast(!cut ? 'Mark removed.' : 'Put back.' + (other ? ' What is left out of the ' + (gone.f === 'en' ? 'German' : 'English') + ' stays out until you click it there.' : ''), [['Undo', undo]]);
+    const pair = cut && gone.f === 'text' ? ms.filter(m => m.k === 'cut' && m.of === gone.id) : [];
+    it.marks = ms.filter(m => m !== gone && !pair.includes(m)); save(); render();
+    toast(!cut ? 'Mark removed.' : 'Put back' + (pair.length ? ', with its English.' : '.'), [['Undo', undo]]);
     return;
   }
   if (k === 'cut') { leaveOut(it, p, undo); return; }
   if (k === 'clear') {
-    it.marks = ms.filter(m => { if (m.f !== p.f) return true; const r = findMark(p.plain, m); return !(r && r[0] < p.e && r[1] > p.s); });
+    const off = ms.filter(m => { if (m.f !== p.f) return false; const r = findMark(p.plain, m); return !!(r && r[0] < p.e && r[1] > p.s); });
+    it.marks = ms.filter(m => !off.includes(m) && !(m.of && off.some(x => x.id === m.of)));   // and the English that followed a German cut
     save(); render(); toast('Marks removed from those words.', [['Undo', undo]]);
     return;
   }
@@ -1981,7 +2058,7 @@ function drawPublished(d, tries) {
       if (it.english && viewEn) {
         const es = ps.map(x => x.p ? englishOf(x.p) : null);
         if (es.includes('loading')) { waiting = true; body += '<div class="ven muted" lang="en">English loading…</div>'; }
-        else if (es.every(e => e)) body += '<div class="ven" lang="en">' + es.map(e => rich(e.text)).join('<br><br>') + '</div>';
+        else if (es.every(e => e)) body += '<div class="ven" lang="en">' + es.map(e => rich(e.text)).join('\n\n') + '</div>';   // as on the Handouts page, so that its marks find their words
       }
     }
     else body += p ? '<div class="vtext" lang="de">' + esc(p.text) + '</div>' : '<div class="vtext muted">(This passage is no longer in the portal.)</div>';
