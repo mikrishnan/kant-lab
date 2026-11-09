@@ -83,8 +83,10 @@ function load() {
   return { v: 1, current: h.id, handouts: [h] };
 }
 let DB = load();
+let touched = null;   // the linked passage being changed, whose copies follow it when it is saved (syncLinked)
 const cur = () => DB.handouts.find(h => h.id === DB.current) || DB.handouts[0];
 function save() {
+  syncLinked();
   try { localStorage.setItem(KEY, JSON.stringify(DB)); }
   catch (e) { toast('This browser would not keep the change (its storage is full or switched off). Use Save to file.'); }
   marks();
@@ -153,9 +155,27 @@ const noteName = n => clip(flat(n.title) || flat(String(n.text || '').trim().spl
 // A key names an item's place: '3' at the top, '3.1' the second passage under the note at 3.
 function at(h, key) {
   const [a, b] = String(key).split('.').map(Number);
-  if (isNaN(b)) return { list: h.items, i: a, it: h.items[a], note: null };
-  const n = h.items[a];
-  return { list: kids(n), i: b, it: kids(n)[b], note: n };
+  const n = h.items[a], r = isNaN(b) ? { list: h.items, i: a, it: n, note: null } : { list: kids(n), i: b, it: kids(n)[b], note: n };
+  touch(r.it);
+  return r;
+}
+/* Linked copies: a passage shown in more than one place in a handout (⧉ Show it twice…). Each
+   copy is an item of its own, with a place of its own, and the copies share a link. Whatever is
+   changed in one (its label, its note, its marks, what is left out of it, its English) is copied
+   to the others as it is saved: touch() names the passage being changed, and every way of
+   changing one comes through it (at(), markAt(), the marking bar). Moving or deleting a copy
+   moves or deletes that copy alone. */
+const touch = it => { if (it && it.link) touched = it; return it; };
+const linkedOf = (h, it) => it && it.link ? passagesOf(h).filter(x => x !== it && x.link === it.link) : [];
+const OWN = ['id', 'added', 'link'];   // what each copy keeps of its own
+function copyInto(to, from) {
+  Object.keys(to).forEach(k => { if (!OWN.includes(k) && !(k in from)) delete to[k]; });
+  Object.keys(from).forEach(k => { if (!OWN.includes(k)) to[k] = JSON.parse(JSON.stringify(from[k])); });
+}
+function syncLinked() {
+  const it = touched;
+  touched = null;
+  if (it) DB.handouts.forEach(h => linkedOf(h, it).forEach(x => copyInto(x, it)));
 }
 const collecting = () => { const c = DB.collect; return c && c.h === cur().id ? findNote(cur(), c.note) : null; };
 // Or a section: "Add passages here" on a heading sends new passages to the end of its section,
@@ -673,6 +693,10 @@ css.textContent = `
   .hcard .hsecsel select { font: inherit; font-size: 0.78rem; font-style: italic; color: var(--faded); background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 0 0.15rem; margin-right: 0.6rem; max-width: 15rem; cursor: pointer; }
   .hcard .hsecsel select:hover, .hcard .hsecsel select:focus { border-color: var(--line); color: var(--accent); outline: none; }
   .hcard .hsecsel option, .hcard .hsecsel optgroup { font-style: normal; color: var(--ink); }
+  .hcard .hcopysel select { font: inherit; font-size: 0.86rem; color: var(--accent); background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 0 0.1rem; margin-right: 0.6rem; max-width: 12rem; cursor: pointer; }
+  .hcard .hcopysel select:hover, .hcard .hcopysel select:focus { border-color: var(--line); outline: none; }
+  .hcard .hcopysel option, .hcard .hcopysel optgroup { color: var(--ink); }
+  .hcard .htag.hlinked { border-style: solid; }
   #hview .vpn p { margin: 0 0 0.35rem; }
   #hview details.vans { margin: -0.2rem 0 0.6rem; }
   #hview details.vans > summary { display: inline-block; list-style: none; cursor: pointer; color: var(--faded); font-size: 0.86rem; }
@@ -1226,19 +1250,59 @@ function enCard(h, it, lab) {
 // A passage's words and its English, side by side where the English is shown (one above the
 // other where the page is narrow, or beside the portal).
 const duoCard = (h, it, de, en) => enShown(h, it) ? '<div class="hduo"><div class="hcol">' + de + '</div><div class="hcol">' + en + '</div></div>' : de + en;
+// "⧉ Show it twice…": every place a linked copy of a passage can go, the top or the end of a
+// section, or under a note, or just after the passage itself.
+function copyMenu(h) {
+  const opt = (v, t) => '<option value="' + esc(v) + '">' + esc(t) + '</option>';
+  const heads = h.items.map((x, j) => x.kind === 'heading' ? j : -1).filter(j => j >= 0);
+  const notesIn = (a, b) => h.items.slice(a, b).filter(x => x.kind === 'note').map(x => opt('under:' + x.id, 'Under “' + noteName(x) + '”')).join('');
+  let html = '<option value="">⧉ Show it twice…</option>' + opt('after', 'Just after this one');
+  if (!heads.length) html += '<optgroup label="In this handout">' + opt('top', 'At the top') + notesIn(0, h.items.length) + opt('endall', 'At the end') + '</optgroup>';
+  else {
+    if (heads[0] > 0) html += '<optgroup label="Before the first heading">' + opt('top', 'At the top of the handout') + notesIn(0, heads[0]) + '</optgroup>';
+    heads.forEach(j => { const x = h.items[j]; html += '<optgroup label="' + esc(sectionName(x)) + '">' + opt('sec:' + x.id, 'At the top') + notesIn(j + 1, sectionEnd(h, j)) + opt('end:' + x.id, 'At the end') + '</optgroup>'; });
+  }
+  return '<label class="hcopysel" title="Show this passage in a second place as well, linked: what you change in one place changes in the other"><select data-f="copyto" aria-label="Show this passage in a second place">' + html + '</select></label>';
+}
+function copyPassage(h, key, v) {
+  const a = at(h, key), it = a.it, [how, id] = String(v).split(':');
+  if (!it || !isPass(it)) return;
+  const fresh = !it.link;
+  if (fresh) it.link = uid();
+  const c = JSON.parse(JSON.stringify(it));
+  c.id = uid(); c.added = new Date().toISOString();
+  const ix = h.items.findIndex(y => y.id === id);
+  let where;
+  if (how === 'after') { a.list.splice(a.i + 1, 0, c); where = 'just after it'; }
+  else if (how === 'top') { h.items.unshift(c); where = 'at the top'; }
+  else if (how === 'endall') { h.items.push(c); where = 'at the end'; }
+  else if (how === 'under') { const n = findNote(h, id); if (!n) return; kids(n).push(c); if (noteFolded(n)) fold([n.id], false); where = 'under “' + noteName(n) + '”'; }
+  else if (ix >= 0) { h.items.splice(how === 'sec' ? ix + 1 : sectionEnd(h, ix), 0, c); if (isFolded(h.items[ix])) fold([id], false); where = (how === 'sec' ? 'at the top of “' : 'at the end of “') + sectionName(h.items[ix]) + '”'; }
+  if (!where) { if (fresh) delete it.link; return; }
+  touched = null;
+  save(); render();
+  const card = page.querySelector('.hcard[data-id="' + c.id + '"]');
+  if (card) card.scrollIntoView({ block: 'center' });
+  toast('Shown again ' + where + ', linked: what you change in one place changes in the other.', [['Undo', () => {
+    [h.items].concat(notesOf(h).map(kids)).forEach(l => { const k = l.indexOf(c); if (k >= 0) l.splice(k, 1); });
+    if (fresh) delete it.link;
+    touched = null; save(); render();
+  }]]);
+}
 function passCard(it, key, h, parent, len) {
   const i = +String(key).split('.').pop();
   const live = PT.BYID ? PT.BYID.has(it.ref) : true;
   const list = parent ? kids(parent) : h.items, joinNx = joinable(it, list[i + 1]);
   const tag = it.kind === 'excerpt' ? '<span class="htag">excerpt' + (it.from === 'english' ? ' of the English' : '') + '</span>'
     : it.parts ? '<span class="htag" title="Joined in this handout; the portal keeps them apart">' + plural(it.parts.length, 'passage') + ' joined</span>' : '';
-  const cuts = (it.marks || []).filter(m => m.k === 'cut').length;
+  const cuts = (it.marks || []).filter(m => m.k === 'cut').length, places = linkedOf(h, it).length + 1;
+  const linked = places > 1 ? '<span class="htag hlinked" title="Shown in ' + places + ' places in this handout: what you change in one changes in all">⧉ shown ' + (places === 2 ? 'twice' : places + ' times') + '</span>' : '';
   const enLab = it.kind !== 'excerpt' ? 'English' : it.enSnippet ? (it.enApprox ? 'English, roughly the matching stretch' : 'English of these sentences') : 'English of the whole passage';
   const notes = notesOf(h);
   const under = notes.length ? '<label class="hunder">Under <select data-f="under"><option value="">no note</option>' +
     notes.map(x => '<option value="' + esc(x.id) + '"' + (parent === x ? ' selected' : '') + '>' + esc(noteName(x)) + '</option>').join('') + '</select></label>' : '';
   return '<div class="hcard ' + (parent ? 'child' : 'top') + '" data-key="' + key + '" data-id="' + esc(it.id) + '"><div class="hcite">' + GRIP +
-    '<span class="w"><b>' + esc(it.author) + '</b>, <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + tag + '</span>' +
+    '<span class="w"><b>' + esc(it.author) + '</b>, <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + tag + linked + '</span>' +
     '<span class="hbtns">' + moveBtns(i, len) + '</span></div>' +
     '<input class="hlab" data-f="label" value="' + esc(it.label || '') + '" placeholder="Label (optional), e.g. Against X" spellcheck="false">' +
     duoCard(h, it, '<div class="htext" data-mf="text"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text)
@@ -1251,6 +1315,8 @@ function passCard(it, key, h, parent, len) {
     (joinNx ? '<button type="button" class="linkish" data-h="join" title="Make this passage and the one below it one passage of the handout (the portal keeps them apart)">Join with the next passage ↓</button>' : '') +
     (it.parts ? '<button type="button" class="linkish" data-h="split" title="Back into the passages it was joined from">Split into its ' + it.parts.length + ' passages</button>' : '') +
     (cuts ? '<button type="button" class="linkish" data-h="uncut" title="Students see […] where words are left out; this gives them the passage whole again">Put back all that was left out (' + cuts + ')</button>' : '') +
+    copyMenu(h) +
+    (places > 1 ? '<button type="button" class="linkish" data-h="unlink" title="Keep this one, but let what you change in it stay here, and not change its other place">Make separate</button>' : '') +
     under + '</div></div>';
 }
 
@@ -1288,6 +1354,9 @@ function putBack(h, e) {
   T.splice(j, 1);
   const n = e.under && findNote(h, e.under), list = n ? kids(n) : h.items;
   list.splice(Math.min(e.at, list.length), 0, e.it);
+  const back = e.it.kind === 'note' ? kids(e.it) : [e.it];
+  back.filter(x => x.link).forEach(x => { const o = linkedOf(h, x).find(y => !back.includes(y)); if (o) copyInto(x, o); });
+  touched = null;
   save(); render();
   toast('Put back in “' + h.name + '”' + (e.under && !n ? ' (its note is gone, so it is at the top level)' : ''));
 }
@@ -1389,10 +1458,16 @@ page.addEventListener('click', e => {
     case 'gopart': if (!docked) closePage(); location.hash = 'p=' + encodeURIComponent(b.dataset.ref) + '&rt=conn'; return;
     case 'join': return joinNext(h, key);
     case 'split': return splitPassage(h, key);
+    case 'unlink': {
+      const it = at(h, key).it, was = it.link;
+      touched = null; delete it.link; save(); render();
+      toast('This one is separate now: what you change in it stays here.', [['Undo', () => { it.link = was; touched = null; save(); render(); }]]);
+      return;
+    }
     case 'uncut': {
       const it = at(h, key).it, before = JSON.stringify(it.marks || []);
       it.marks = (it.marks || []).filter(m => m.k !== 'cut'); save(); render();
-      toast('The passage is whole again.', [['Undo', () => { it.marks = JSON.parse(before); save(); render(); }]]);
+      toast('The passage is whole again.', [['Undo', () => { it.marks = JSON.parse(before); touch(it); save(); render(); }]]);
       return;
     }
     case 'docx': return exportDocx(h);
@@ -1413,11 +1488,15 @@ page.addEventListener('input', e => {
   const h = cur();
   if (e.target.classList.contains('hname')) { h.name = e.target.value; save(); const on = page.querySelector('aside .hl.on'); if (on && on.firstChild) on.firstChild.textContent = h.name || 'Untitled handout'; return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
-  if (!f || !c || f === 'enShow' || f === 'under' || f === 'moveto') return;
+  if (!f || !c || f === 'enShow' || f === 'under' || f === 'moveto' || f === 'copyto') return;
   at(h, c.dataset.key).it[f] = e.target.value;
   if (e.target.tagName === 'TEXTAREA') grow(e.target);
   if (e.target.classList.contains('nlab')) e.target.size = Math.max(4, e.target.value.length + 1);
   save();
+  linkedOf(h, itemById(h, c.dataset.id)).forEach(x => {
+    const o = page.querySelector('.hcard[data-id="' + x.id + '"] [data-f="' + f + '"]');
+    if (o && o !== e.target) { o.value = e.target.value; if (o.tagName === 'TEXTAREA') grow(o); }
+  });
 });
 page.addEventListener('change', e => {
   if (e.target.classList.contains('hmodein')) { setMode(e.target.checked); return; }
@@ -1427,6 +1506,7 @@ page.addEventListener('change', e => {
   if (f === 'enShow') { const x = at(cur(), c.dataset.key).it; if (e.target.checked) delete x.enHide; else x.enHide = true; save(); render(); }
   if (f === 'under') reparent(cur(), c.dataset.key, e.target.value);
   if (f === 'moveto' && e.target.value) moveNote(cur(), +c.dataset.key, e.target.value);
+  if (f === 'copyto' && e.target.value) copyPassage(cur(), c.dataset.key, e.target.value);
 });
 picker.addEventListener('change', () => {
   const f = picker.files && picker.files[0];
@@ -1881,9 +1961,9 @@ mkbar.addEventListener('click', e => {
   const b = e.target.closest('[data-mk]'), p = mkFor;
   mkbar.hidden = true;
   if (!b || !p) return;
-  const h = cur(), it = itemById(h, p.id);
+  const h = cur(), it = touch(itemById(h, p.id));
   if (!it) return;
-  const before = JSON.stringify(it.marks || []), undo = () => { it.marks = JSON.parse(before); save(); render(); };
+  const before = JSON.stringify(it.marks || []), undo = () => { it.marks = JSON.parse(before); touch(it); save(); render(); };
   const ms = it.marks || (it.marks = []), k = b.dataset.mk;
   window.getSelection().removeAllRanges();
   if (k === 'rm') {   // a German cut takes the English that followed it back with it
@@ -1904,12 +1984,12 @@ mkbar.addEventListener('click', e => {
   if (k === 'mn') m.note = '';
   ms.push(m);
   save(); render();
-  if (k === 'mn') { const t = page.querySelector('[data-mnt="' + m.id + '"]'); if (t) t.focus(); }
+  if (k === 'mn') { const t = page.querySelector('.hcard[data-id="' + it.id + '"] [data-mnt="' + m.id + '"]'); if (t) t.focus(); }
 });
 document.addEventListener('mousedown', e => { if (!mkbar.hidden && !e.target.closest('#hmkbar')) mkbar.hidden = true; });
 page.querySelector('main').addEventListener('scroll', () => { mkbar.hidden = true; });
 // Margin notes: typed into, kept as typed; one left empty goes when you leave it; ✕ takes one off.
-const markAt = t => { const c = t.closest('.hcard'), it = c && itemById(cur(), c.dataset.id); return it ? { c, it, m: (it.marks || []).find(m => m.id === (t.dataset.mnt || t.dataset.mkx)) } : null; };
+const markAt = t => { const c = t.closest('.hcard'), it = c && touch(itemById(cur(), c.dataset.id)); return it ? { c, it, m: (it.marks || []).find(m => m.id === (t.dataset.mnt || t.dataset.mkx)) } : null; };
 page.addEventListener('input', e => {
   if (!e.target.dataset || !e.target.dataset.mnt) return;
   const a = markAt(e.target);
@@ -1921,7 +2001,7 @@ page.addEventListener('focusout', e => {
   if (!e.target.dataset || !e.target.dataset.mnt || e.target.value.trim()) return;
   const a = markAt(e.target);
   if (!a || !a.m) return;
-  setTimeout(() => { if (a.m.note && a.m.note.trim()) return; a.it.marks = a.it.marks.filter(m => m !== a.m); save(); render(); }, 150);
+  setTimeout(() => { if (a.m.note && a.m.note.trim()) return; a.it.marks = a.it.marks.filter(m => m !== a.m); touch(a.it); save(); render(); }, 150);
 });
 page.addEventListener('click', e => {
   const x = e.target.closest('[data-mkx]');
@@ -1930,11 +2010,11 @@ page.addEventListener('click', e => {
     if (!a || !a.m) return;
     const before = JSON.stringify(a.it.marks);
     a.it.marks = a.it.marks.filter(m => m !== a.m); save(); render();
-    toast('Margin note removed.', [['Undo', () => { a.it.marks = JSON.parse(before); save(); render(); }]]);
+    toast('Margin note removed.', [['Undo', () => { a.it.marks = JSON.parse(before); touch(a.it); save(); render(); }]]);
     return;
   }
   const w = e.target.closest('#hpage .mk-mn, #hpage .mk-n');   // its words, or its number: to the note
-  if (w && window.getSelection().isCollapsed) { const t = page.querySelector('[data-mnt="' + w.dataset.mk + '"]'); if (t) t.focus(); }
+  if (w && window.getSelection().isCollapsed) { const t = w.closest('.hcard').querySelector('[data-mnt="' + w.dataset.mk + '"]'); if (t) t.focus(); }
 });
 
 /* ── Publishing for students ──────────────────────────────────────────────
