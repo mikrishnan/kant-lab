@@ -224,6 +224,7 @@
   .xref { text-decoration: underline dotted var(--accent-light); text-underline-offset: 3px; cursor: pointer; color: var(--accent); }
   .xref:hover { color: var(--ink); }
   mark.mis { background: none; text-decoration: underline dotted #b4532a; text-underline-offset: 3px; }
+  mark.ocrq { background: none; text-decoration: underline dotted var(--accent-light); text-underline-offset: 3px; cursor: help; }
   mark.find { background: #cfe2f3; }
   mark.find.cur { background: #8fbbe0; }
   mark.tint-lemma { background: rgba(139, 94, 60, 0.24); box-shadow: 0 1px 0 var(--accent-light); }
@@ -980,7 +981,7 @@ const REFL_KIND = {
 const ERAS = [['1750', '1750s', '#d8c49a'], ['1760', '1760s', '#c8a36e'], ['1770', '1770s', '#b07d4c'], ['1780', '1780s', '#8b5e3c'], ['1790', '1790 +', '#5c3d1e'], ['none', 'undated', 'transparent']];
 const PLACE_HOW = { locus: 'its own locus note names the §', group: 'the AA’s block heading over it', block: 'the AA’s block heading over it', page: 'the handbook page it is written on', none: 'no § stated: placed from its neighbours' };
 
-const LAYER_LABEL = { textbook: 'TEXTBOOK', notes: 'KANT’S NOTES', lecture: 'LECTURE', compilation: 'JÄSCHE', published: 'PUBLISHED' };
+const LAYER_LABEL = { textbook: 'TEXTBOOK', notes: 'KANT’S NOTES', lecture: 'LECTURE', compilation: 'JÄSCHE', published: 'PUBLISHED', tradition: 'TRADITION' };
 const SRC_HOW = {
   locus: 'filed there by the Academy edition’s own locus note',
   group: 'filed there by the Academy edition’s §-range heading over it',
@@ -1274,13 +1275,16 @@ const ADAPT = {
         if (x.other != null) cite += ' / ' + oed + ' ' + span(x.other, x.otherEnd);
         pbm = (x.pb || []).map(([o, n]) => [o, ed + ' ' + q(n)]);
         aaEnd = x.aapb && x.aapb.length ? x.aapb[x.aapb.length - 1][1] : x.aa;
+      } else if (x.aa == null && x.pg != null) {
+        pbm = (x.pb || []).map(([o, n]) => [o, 'p. ' + n]);
       } else if (x.aa != null) {
         cite = 'AA ' + vol + ':' + span(x.aa, x.aaEnd);
         pbm = (x.pb || []).map(([o, n]) => [o, String(n)]);
       }
       addPassage(T, { id: x.id, cite, aa: x.aa != null ? x.aa : null, aaEnd, vol: ed ? (M.volume || null) : vol, text: x.text,
         year: x.year || T.year, sec: x.sec || '', kind: x.kind || 'p', work: x.work || null, pbm: pbm && pbm.length ? pbm : null,
-        edl: ed, edPg: x.pg, edPgEnd: x.pgMay || x.pgEnd || x.pg, other: x.other, otherEnd: x.otherEnd || x.other, fix: x.fix || null });
+        edl: ed, edPg: x.pg, edPgEnd: x.pgMay || x.pgEnd || x.pg, other: x.other, otherEnd: x.otherEnd || x.other, fix: x.fix || null,
+        para: x.par != null ? x.par : undefined, scan: x.scan != null ? x.scan : null, alt: x.alt || null });
     });
   },
 };
@@ -1888,6 +1892,7 @@ function textCard(t) {
    named here still shows, under "Other texts". */
 const TEXT_GROUPS = [
   ['The textbooks', t => t.layer === 'textbook'],
+  ['Behind the textbooks: Wolff', t => t.layer === 'tradition'],
   ['Kant’s notes', t => t.layer === 'notes'],
   ['Logic lecture notes', t => t.layer === 'lecture' && t.on !== 'baumgarten'],
   ['Metaphysics lecture notes', t => t.layer === 'lecture' && t.on === 'baumgarten'],
@@ -2798,6 +2803,7 @@ function pageAgreement(p) {
 /* The scan of the page a passage begins on: archive.org's page/n<leaf>. */
 function pageImage(p) {
   const sc = (TEXTS[p.t].meta || {}).scan;
+  if (sc && sc.item && sc.url && p.scan != null && p.aa == null) return sc.url.replace('{item}', sc.item).replace('{n}', p.scan);
   if (!sc || !sc.item || !sc.url || p.aa == null) return '';
   let n = sc.leaf ? sc.leaf[p.aa] : null;
   if (n == null && sc.n) { const m = /([+-])\s*(-?\d+)\s*$/.exec(sc.n); if (m) n = p.aa + (m[1] === '-' ? -1 : 1) * +m[2]; }
@@ -3083,7 +3089,7 @@ function parallelsSection(p) {
 const CMP_ENDS = ['ibus', 'orum', 'arum', 'ium', 'en', 'em', 'er', 'es', 'um', 'us', 'is', 'ae', 'am', 'as', 'os', 'e', 'n', 's', 'a', 'o', 'i'];
 const CMP_LIGHT = ('dies diese dieser dieses diesen diesem alle alles aller allen kann können muss muß müssen sondern denn dann weil also daher dadurch damit dazu darin daraus davon hier nun zwar ja viel viele kein keine keinen ihre seine selbst etwa etc ' +
   'et est sunt esse sit sint in non quae qui quod quam quo qua quibus ad cum vel seu aut ut sed hoc haec hic hinc ergo per ex ab de pro sub inter si nec neque atque ac tamen etiam enim autem eius ita sic omnis omne omnia id ea eo nisi tam iam nam an ipse ille').split(' ');
-const CMP_GROUP = { textbook: 'Textbook', notes: 'Kant’s notes', lecture: 'Lectures', compilation: 'Jäsche', published: 'Published works' };
+const CMP_GROUP = { textbook: 'Textbook', notes: 'Kant’s notes', lecture: 'Lectures', compilation: 'Jäsche', published: 'Published works', tradition: 'The tradition (Wolff)' };
 const CMP = { stem: null, toks: new Map(), cands: null, bits: null, shown: null };
 const cmpFresh = i => ({ for: i, with: null, bit: null, whole: false, more: false, msg: '', pick: null });
 /* The reader's choices in the Compare tab belong to the passage they were made for. */
@@ -3322,7 +3328,7 @@ function cmpCands(p, bit) {
   });
   // the whole passage leads with its own §; one sentence, with whatever matches it best
   rows.sort((x, y) => (bit ? 0 : (y.tie === 'book') - (x.tie === 'book')) || y.rank - x.rank);
-  const order = isBook ? ['notes', 'lecture', 'compilation', 'published', 'textbook'] : ['textbook', 'notes', 'lecture', 'compilation', 'published'];
+  const order = isBook ? ['notes', 'lecture', 'compilation', 'published', 'tradition', 'textbook'] : ['textbook', 'notes', 'lecture', 'compilation', 'published', 'tradition'];
   const groups = order.map(layer => ({ layer, rows: rows.filter(r => TEXTS[P[r.q].t].layer === layer) })).filter(g => g.rows.length);
   return (CMP.cands = { key, pr, lo: pr.lo, hi: pr.hi, rows, groups });
 }
@@ -3670,12 +3676,20 @@ function findSpans(k) {
 }
 /* A passage's text with its highlights, and, where a page begins inside it (Kant's published
    works), the page's number set in the line, as an edition prints it in the margin. */
+/* Where the machine readings of an OCR text disagreed and no majority decided (Wolff's logics, read
+   four times over): a dotted underline, with the other reading on hover. */
+function ocrDoubts(p) {
+  return (p.alt || []).filter(a => a[3] != null && a[3] * 2 <= a[4])
+    .map(a => [a[0], a[0] + a[1], 'ocrq', 'The machine readings disagree here (' + a[3] + ' of ' + a[4] + ' gave this). ' +
+      (a[2] ? 'Another reading: “' + a[2] + '”.' : 'The others read nothing here.') + ' Check the page image.']);
+}
 function pagedText(p, spans, found) {
   found = found || [];
   const br = chunkBreaks(p, spans.concat(found));
-  if (!p.pbm && !br.length && !found.length) return marked(p.text, 0, p.text.length, spans);
-  const label = l => p.edl ? l : 'AA ' + p.vol + ':' + l;
-  return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']).concat(found),
+  const doubt = ocrDoubts(p);
+  if (!p.pbm && !br.length && !found.length && !doubt.length) return marked(p.text, 0, p.text.length, spans);
+  const label = l => p.edl || p.vol == null ? l : 'AA ' + p.vol + ':' + l;
+  return richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']).concat(found, doubt),
     br.map(at => ({ at, html: BRK })).concat((p.pbm || []).map(([at, l]) => ({ at, html: '<span class="pbm" title="' + esc(label(l)) + ' begins here">' + esc(l) + '</span>' }))));
 }
 
@@ -3750,9 +3764,10 @@ function richText(text, spans, inserts) {
     if (i === pts.length - 1) break;
     const b = pts[i + 1];
     if (b <= a) continue;
-    const cls = [...new Set(spans.filter(z => z[0] <= a && z[1] >= b).map(z => z[2]))];
+    const on = spans.filter(z => z[0] <= a && z[1] >= b);
+    const cls = [...new Set(on.map(z => z[2]))], tip = on.map(z => z[3]).filter(Boolean);
     const seg = esc(text.slice(a, b));
-    out += cls.length ? '<mark class="' + cls.join(' ') + '">' + seg + '</mark>' : seg;
+    out += cls.length ? '<mark class="' + cls.join(' ') + '"' + (tip.length ? ' title="' + esc(tip.join(' ')) + '"' : '') + '>' + seg + '</mark>' : seg;
   }
   return out;
 }
@@ -4349,6 +4364,7 @@ function jumpHint(T) {
   if (T.shape === 'meier' || T.shape === 'metaphysica') return 'Go to §, AA page or Refl.';
   if (T.shape === 'refl') return 'Go to Refl. no. or §';
   if (T.cite) return 'Go to A or B page (A 51, B xvi)';
+  if (T.layer === 'tradition') return T.key === 'wolff-dl' ? 'Go to page, or Cap. 5 § 2' : 'Go to § or page';
   return T.key === 'jaesche' ? 'Go to § or AA page' : 'Go to AA page';
 }
 /* The jump box could not go where it was asked: say why beside it, until the next try. */
@@ -4405,6 +4421,16 @@ function findInText(T, v) {
   if (T.cite) {
     const ab = parseAB(/^\s*[AaBb]/.test(v) ? v.replace(/^\s*([ab])/, (x, l) => l.toUpperCase()) : T.cite + ' ' + v);
     return ab ? findOnEdPage(T, ab.ed, ab.page) : null;
+  }
+  if (T.layer === 'tradition') {
+    // Wolff: "Cap. 5 § 2" (the German Logik numbers its §§ within each chapter), "§ 520", or a page
+    const cm = /^\s*c(?:ap)?\.?\s*(\d+)\D+(\d+)/i.exec(v);
+    if (cm) { const want = 'Cap. ' + cm[1] + ' § ' + cm[2]; for (let k = T.first; k <= T.last; k++) if (P[k].cite.split(',')[0].replace('?', '') === want) return k; return null; }
+    const n = parseInt(String(v).replace(/[^\d]/g, ''), 10);
+    if (isNaN(n)) return null;
+    if (/§/.test(v)) { for (let k = T.first; k <= T.last; k++) if (P[k].para === n) return k; return null; }
+    for (let k = T.first; k <= T.last; k++) { const a = parseInt(P[k].edPg, 10), b = parseInt(P[k].edPgEnd, 10); if (a <= n && n <= b) return k; }
+    return null;
   }
   const isPara = /§/.test(v);
   const num = parseInt(String(v).replace(/^\s*aa\s*\d+\s*[:,.]\s*/i, '').replace(/[^\d]/g, ''), 10);
