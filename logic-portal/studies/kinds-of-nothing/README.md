@@ -93,6 +93,15 @@ note. Ticks are saved to GitHub a few seconds after you make them, signed with y
 name, and everyone else working on the queue sees them within about half a minute, without
 reloading. The page never ticks anything itself.
 
+**Anyone can read the passages, without a token.** Without one, the page shows the queue's
+passages read only, from a public copy, [queue-snapshot.js](queue-snapshot.js): every passage
+with its number, citation, excerpt and filing, opening in the portal as usual. The ticks, the
+notes and who made them are not in it, and stay private; they show once you join. The copy is
+made by [snapshot-queue.py](snapshot-queue.py) and is as fresh as its last run, which the page
+gives. After passages are added to the queue, ask Claude to "refresh the queue's public copy",
+or run `python3 logic-portal/studies/kinds-of-nothing/snapshot-queue.py` with a token that can
+see `kant-lab-seminar/queues`, and commit the file.
+
 The page is linked only from the study's page, not from the portal.
 
 ### Joining, once

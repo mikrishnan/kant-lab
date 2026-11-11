@@ -37,6 +37,10 @@
   }
 
   * { box-sizing: border-box; }
+  /* Read only: the passages from the public copy, with nothing to tick and no one's readings */
+  body.ro #add, body.ro #bar, body.ro #progline, body.ro #filters, body.ro .item .flags, body.ro .item .readers, body.ro .item .chip.st { display: none; }
+  .card.ro-note { border-style: dashed; }
+  #joinbox > summary { cursor: pointer; color: var(--accent); margin: 0.2rem 0 0.4rem; }
   html, body { margin: 0; height: 100%; }
   body { font-family: 'EB Garamond', Georgia, serif; font-size: 16px; line-height: 1.45; color: var(--ink);
          background: var(--parchment); display: flex; flex-direction: column; }
@@ -218,6 +222,8 @@
 <script src="../../../data/phases-adickes.js"></script>
 <script src="starting-points.js"></script>
 <script src="queue-config.js"></script>
+<!-- The queue's passages, a public read-only copy made by snapshot-queue.py: no flags, notes or names. -->
+<script src="queue-snapshot.js"></script>
 <script>
 'use strict';
 
@@ -254,6 +260,7 @@ const ERAS = [[1750, 1759, '--era-1750'], [1760, 1769, '--era-1760'], [1770, 177
 /* ── State ──────────────────────────────────────────────────────────────────── */
 
 let token = null, me = null;        // the reader's token, and their GitHub login
+let readOnly = false;               // no token: the passages from the public copy, to read
 let queue = null, queueSha = null;  // queue.json as on GitHub, and its blob
 const readers = new Map();          // login → { sha, flags }: every reader's file as last read
 let mine = {};                      // this reader's flags, ref → { kinds: null | [keys], note, at }
@@ -694,21 +701,37 @@ function renderKinds() {
 
 function renderConn() {
   if (token && me) {
+    readOnly = false;
+    document.body.classList.remove('ro');
     $('conn').innerHTML = '<div id="status"></div>';
     $('work').hidden = false;
     renderStatus();
     return;
   }
-  $('work').hidden = true;
-  $('conn').innerHTML =
-    '<div class="card join">' +
-      '<p><b>Join the queue.</b> The queue and everyone’s ticks are kept on GitHub, in the seminar’s private repository <code>' + esc(CFG.owner + '/' + CFG.repo) + '</code>. To see them and to tick, paste your GitHub token. It is a key that can open that one repository and nothing else. <a href="' + esc(README) + '" target="_blank" rel="noopener">How to make one</a>.</p>' +
+  const SNAP = typeof STUDY_QUEUE_SNAPSHOT !== 'undefined' && STUDY_QUEUE_SNAPSHOT && STUDY_QUEUE_SNAPSHOT.queue ? STUDY_QUEUE_SNAPSHOT : null;
+  const joinCard = '<div class="card join">' +
+      '<p><b>Join the queue.</b> The queue and everyone’s ticks are kept on GitHub, in the seminar’s private repository <code>' + esc(CFG.owner + '/' + CFG.repo) + '</code>. To tick, and to see everyone’s ticks and notes, paste your GitHub token. It is a key that can open that one repository and nothing else. <a href="' + esc(README) + '" target="_blank" rel="noopener">How to make one</a>.</p>' +
       '<form class="joinrow" id="joinform"><input type="password" id="tok" autocomplete="off" spellcheck="false" placeholder="github_pat_…" aria-label="Your GitHub token">' +
         '<label class="small"><input type="checkbox" id="remember"> remember on this computer</label>' +
         '<button class="btn" id="joinbtn">Join</button></form>' +
       '<p class="note small">Without <i>remember</i>, the token is forgotten when this tab closes. It is sent only to GitHub (api.github.com).</p>' +
       '<p class="warn small" id="joinerr"></p>' +
     '</div>';
+  if (SNAP) {
+    // Read only: anyone can see the passages, from the public copy; ticking needs a token
+    readOnly = true;
+    document.body.classList.add('ro');
+    queue = cleanQueue(SNAP.queue); queueSha = null;
+    $('work').hidden = false;
+    $('conn').innerHTML =
+      '<div class="card ro-note"><p><b>Read only.</b> The queue’s ' + plural(queue ? queue.items.length : 0, 'passage') + ', as copied from the seminar’s private repository on ' + esc(SNAP.saved) +
+      '. Anyone can read them here; the ticks, the notes and who made them stay private. To tick passages and see the others’ readings, join with your GitHub token.</p>' +
+      '<details id="joinbox"><summary>Join with your GitHub token</summary>' + joinCard + '</details></div>';
+    render();
+    return;
+  }
+  $('work').hidden = true;
+  $('conn').innerHTML = joinCard;
 }
 
 function ago(t) {
@@ -773,7 +796,7 @@ function renderSummary() {
 function renderSources() {
   const s = queue ? queue.sources : [];
   $('sources').innerHTML = s.length ? s.map(x => '<li>' + esc(x.how) + (x.query ? ': <b>' + esc(x.query) + '</b>' : '') + ' — ' +
-    plural(+x.found || 0, 'passage') + ' found, ' + (+x.new || 0) + ' new · @' + esc(x.by) + ', ' + esc(x.added) + '</li>').join('')
+    plural(+x.found || 0, 'passage') + ' found, ' + (+x.new || 0) + ' new · ' + (x.by ? '@' + esc(x.by) + ', ' : '') + esc(x.added) + '</li>').join('')
     : '<li class="note">Nothing yet.</li>';
 }
 
@@ -946,6 +969,7 @@ async function join(tok, remember, quiet) {
     token = null; me = null;
     if (!quiet) { const el = $('joinerr'); if (el) el.textContent = messageFor(e); }
     else { renderConn(); const el = $('joinerr'); if (el) el.textContent = messageFor(e); }
+    const jb = $('joinbox'); if (jb) jb.open = true;
     return false;
   }
   try {
@@ -995,7 +1019,7 @@ $('study').addEventListener('click', e => {
   const open = t.closest('[data-open]');
   if (open) { e.preventDefault(); openInPane(open.dataset.open); return; }
   const kb = t.closest('[data-kind]');
-  if (kb) { const ref = kb.closest('.item').dataset.ref; kept.add(ref); toggleKind(ref, kb.dataset.kind); render(); return; }
+  if (kb) { if (!token) return; const ref = kb.closest('.item').dataset.ref; kept.add(ref); toggleKind(ref, kb.dataset.kind); render(); return; }
   if (t.closest('[data-note]') || t.closest('[data-out]')) return;
   const f = t.closest('[data-filter]');
   if (f) { view.filter = f.dataset.filter; kept.clear(); render(); return; }
@@ -1008,6 +1032,7 @@ $('study').addEventListener('click', e => {
 });
 $('study').addEventListener('input', e => {
   if (e.target.dataset && e.target.dataset.note) {
+    if (!token) return;
     const ref = e.target.closest('.item').dataset.ref, v = e.target.value;
     kept.add(ref);
     setFlag(ref, x => { x.note = v; });

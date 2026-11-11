@@ -64,7 +64,10 @@ changing it. [README.md](README.md) describes it for a human.
 *The queue* describes both for a human.
 
 - **The flags live in `kant-lab-seminar/queues`, a private repository, never here.** Do not
-  copy flags, notes or readers' names into this repository: it is public.
+  copy flags, notes or readers' names into this repository: it is public. The one copy here is
+  `queue-snapshot.js`, the passages of `queue.json` alone, which the page shows read only to anyone
+  without a token. `snapshot-queue.py` makes it, drops `by` from the record of how the queue was
+  made, and takes no flag file. Refresh it when asked, after passages are added; never hand-edit it.
 - **The page writes only its own reader's file** (`flags/<login>.json`), and adds to
   `queue.json` only by appending. Numbers never move, so nothing takes a passage out.
 - **The token goes only to `https://api.github.com`.** Never add a way to point the page at
