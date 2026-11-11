@@ -387,6 +387,7 @@ Every connection says where it comes from; the **Contributors** page lists every
 | Kant's published works: AA I, AA II, the *Critique* in A and B | [published/](published/README.md): the BBAW's new edition of AA I, the Deutsches Textarchiv's 1781 *Critique*, and OCR of the old Academy edition's AA II and AA III |
 | Four more AA XXIV lectures (Herder, Philippi, Pölitz, Dohna-Wundlacken) | [aa24-ocr/](aa24-ocr/README.md): uncorrected OCR of the Internet Archive's scan of AA XXIV |
 | AA XXIX's 1983 part: Metaphysik Mrongovius, Metaphysik K3, Logik Mrongovius | [aa29-ocr/](aa29-ocr/README.md): uncorrected OCR of the Internet Archive's scan, by the same extractor. AA XXIX's 1980 part is not in the portal (below) |
+| Wolff's German Logic (*Vernünfftige Gedancken von den Kräfften des menschlichen Verstandes*, 1754) | [wolff/](wolff/README.md): uncorrected OCR of Munich's scan of the 1754 print, four readings of each page merged by vote; cited by chapter, § and page of that print |
 
 ## Adding a text
 
@@ -437,6 +438,10 @@ When that data moves into `data/`, the pins can go.
   edition of the *Critique* are; AA II and the B edition are OCR of the old Academy edition,
   about 96% and 98% of words right, and B's pages are uncertain where shown with a query (see
   [published/](published/README.md)). Check quotations from OCR texts against the page image.
+- **Wolff's German Logic** is OCR of the 1754 print, about 99% of the words in the text right and
+  81% in his marginal summaries; words where its four readings disagreed with no majority are
+  underlined, with the other reading on hover. His Latin *Logica* was read too and is not in the
+  portal: about 91% (see [wolff/README.md](wolff/README.md)).
 - **AA XXIX is only half here.** The portal has its 1983 part (Metaphysik Mrongovius, Metaphysik
   K3, Logik Mrongovius), not its 1980 part (the Philosophische Enzyklopädie, Herder's notes on
   mathematics and physics, the Berliner and Danziger Physik, Moral Mrongovius II). The 1980 part

@@ -190,6 +190,16 @@ const PORTAL_TEXTS = [
     source: 'The 1787 text as AA III (1904/1911) prints it, OCR of the Internet Archive’s scan, spelling repaired by rule: about 98% of words agree with the Bonner Kant-Korpus. B pages from AA III’s margin, a query where uncertain. Check quotations against the page image',
     accuracy: { ocr: true, words: 98, how: 'Measured on every page against the Bonner Kant-Korpus’s text of AA III, with spelling differences set aside. The OCR’s commonest misreadings were repaired by rule; each repaired word keeps the OCR’s reading in the data. B pages shown with a query are uncertain.' },
     credit: 'mikrishnan (OCR import)' },
+  // Christian Wolff's German Logic, the school logic Meier and Baumgarten wrote from: read off
+  // Munich's scan of the 1754 print by OCR, four readings of each page merged by vote, and not
+  // corrected. Cited by the print's own chapter, § and page. See wolff/README.md before quoting.
+  { key: 'wolff-dl', title: 'Wolff, Vernünfftige Gedancken von den Kräfften des menschlichen Verstandes (German Logic; OCR)', short: 'Wolff, Dt. Logik (OCR)', layer: 'tradition',
+    date: '1754 (1st ed. 1713)', year: 1713, shape: 'passages',
+    file: 'wolff/wolff-deutsche-logik-1754-ocr.js', global: 'WOLFF_DEUTSCHE_LOGIK',
+    source: 'Halle: Renger, 1754, from the copy in the Bayerische Staatsbibliothek (Ph.sp. 953), read by OCR off its scan (digitale-sammlungen.de) by wolff/wolff_ocr.py: the Vorrede, the Vorbericht, sixteen chapters and the two registers, with Wolff’s marginal summaries. Cited by chapter, § and page of this print. Check quotations against the page image',
+    accuracy: { ocr: true, words: 98, how: 'Proofread word by word against the scans on three pages (pp. 23, 135, 198): in the text 5 of 646 words misread, about 99% right; in Wolff’s marginal summaries 5 of 26, about 81%; 98% in all. The misreadings are chiefly the § sign read as a letter, words beside ornamental initials, and the marginal notes. Each page was read four times and merged by vote; where the readings disagreed and no majority decided (about 5% of words) the word is underlined, with the other reading on hover. Not corrected by hand.' },
+    credit: 'mikrishnan (OCR import)' },
+
 ];
 
 /* What the portal does not have, and why: shown in small type under the texts on the home page
