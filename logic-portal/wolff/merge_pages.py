@@ -24,8 +24,12 @@ UML = {"a": "ä", "o": "ö", "u": "ü", "A": "Ä", "O": "Ö", "U": "Ü"}
 def printable(t):
     """Three Fraktur forms the portal's typefaces have no glyph for, printed as the portal's 1781
     Critique prints them: the e written over a vowel as the umlaut (aͤ as ä), the Fraktur hyphen ⸗
-    as -, and ꝛc. as etc. Long s is kept: the typefaces have it."""
+    as -, and ꝛc. as etc. Long s is kept: the typefaces have it. An e-mark the reading doubled on an
+    umlaut, or set where no vowel carries it, is dropped."""
     t = re.sub(r"([aouAOU])\u0308?\u0364", lambda m: UML[m.group(1)], t)
+    # an e-mark left over is either doubled on a vowel the reading already gave an umlaut (Mäͤhrlein)
+    # or stands where no vowel carries one, a speck: neither adds a letter, and both would show as a box
+    t = t.replace("\u0364", "")
     return t.replace("\u2e17", "-").replace("ꝛc", "etc").replace("ꝛ", "r")
 
 

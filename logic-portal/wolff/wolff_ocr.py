@@ -27,7 +27,7 @@ reading, votes for the text kept, readings]]; an empty reading means the others 
 import json, os, re, statistics, sys
 from collections import Counter, defaultdict
 sys.path.insert(0, os.path.dirname(__file__))
-from merge_pages import build_lexicon, edges, load_tsv, merge, merge_n, to_lines, agreed_tokens, body_height, column, place, bare, SECT, LETTER
+from merge_pages import build_lexicon, edges, load_tsv, printable, merge, merge_n, to_lines, agreed_tokens, body_height, column, place, bare, SECT, LETTER
 
 BOOK, W, OUT = sys.argv[1:4]
 CONF = {
@@ -722,6 +722,7 @@ with open(OUT, "w", encoding="utf-8") as f:
     for i, p in enumerate(out):
         p.pop("sect", None)
         keep = {k: p[k] for k in ("id", "kind", "sec", "par", "parTo", "parInf", "cite", "pg", "pgEnd", "pb", "scan", "text", "alt") if k in p}
+        if "sec" in keep: keep["sec"] = printable(keep["sec"])   # the titles transcribed from the contents list too
         f.write("    " + json.dumps(keep, ensure_ascii=False, separators=(",", ":")) + ("," if i < len(out) - 1 else "") + "\n")
     f.write("  ],\n};\n")
 if os.environ.get("WOLFF_JSON"): json.dump(out, open(OUT + ".json", "w"), ensure_ascii=False, indent=0)
