@@ -7,6 +7,23 @@ corrects it in their own words.
 Each entry: the date, who asked (GitHub username), what was asked for, what it showed,
 whether it helped, and what it got wrong or could not do.
 
+## 11 November 2026: the queue, read without a token
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** anyone on the site to see the queue's passages, read only, without a token,
+  while those with a token still tick and add.
+- **What there is:** a public copy of the queue's passages, `queue-snapshot.js` (88 passages
+  on 11 November), made by `snapshot-queue.py`. Without a token the page shows it read only,
+  with the join form folded beneath; with one, the page is as before.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do:**
+  - the copy is as fresh as its last run, so passages added later show only once it is made
+    again;
+  - the ticks, the notes and who made them are not in it, by design: they stay in the private
+    repository.
+
 ## 4 November 2026: the queue
 
 *A draft, to be corrected by nikolasland in their own words.*
