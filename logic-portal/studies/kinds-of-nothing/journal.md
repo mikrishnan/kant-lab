@@ -7,6 +7,67 @@ corrects it in their own words.
 Each entry: the date, who asked (GitHub username), what was asked for, what it showed,
 whether it helped, and what it got wrong or could not do.
 
+## 13 November 2026: the board
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** something more visual than three panels of text. Each model should have its
+  own structure. We need arrows between the parts of different models, for example where one
+  concept in an earlier model splits into two in a later one, each with the passages that bear
+  on it. We need each model's problems, and how Kant tries to solve them later. We wanted the
+  freedom of the whiteboard, where structures are invented as we go and things are put in new
+  places, without its faults: you cannot link to texts, it fills up, you have to erase, nothing
+  is kept, and the interconnections overload it. We also wanted it to be more than flat:
+  three-dimensional, or many-dimensional.
+- **What there is:** `board.html`, and `board.js`, the study's board. The three models are
+  frames around cards. The cards are built only from Kant's labels, and each carries the
+  passages it rests on, quoted from the portal's text with a link to read each one beside the
+  board. Kant's divisions are drawn inside each frame. Anything can be dragged anywhere, and
+  you double-click to write on the board.
+  - **Arrows.** Drawn from a card's knob to another card, each typed (kept, renamed, split
+    into, merged from, dropped, new, answers?, or a type of one's own), stated in the seminar's
+    words, given its passages, and signed.
+  - **Problems.** Problem cards sit in their model's frame.
+  - **Models.** A model can be split by selecting cards and making them a model of their own,
+    and a card dropped into another frame joins that model.
+  - **The dimensions.** Layers switch the divisions, hypotheses, problems, passages, notes and
+    the computer's same-label links on and off. Views are other arrangements of the same cards.
+    Zoom gives depth: zoomed out a card is its name, zoomed in its first passage shows. Focus
+    shows only what is joined to one card. Photographs keep the board as it stood, to come back
+    to.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:**
+  - what anyone changes stays in their own browser, until it is exported and added to
+    `board.js`, so there is no shared board in class yet;
+  - passages pasted onto a card are marked *not yet checked* until they are checked against
+    the portal;
+  - the only statements on it are the problem and the claim about Refl. 3990 from this
+    session, both still to be put in mikrishnan's own words;
+  - the layers are fixed. Kinds of one's own, such as a tag for "time" or "contradiction", are
+    not there yet.
+
+## 13 November 2026: three models, as cards
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** the three models of nothing we found last session (1763, c. 1769 in Refl.
+  3990, 1781) written down in one format, so that each model's details and the changes between
+  them are easier to hold in view.
+- **What there is:** `models.html`, three cards side by side, and `models.js`, their data.
+  Each card has the same fields: how Kant divides, the kinds in Kant's words, his examples, Kant
+  comparing them, and the words for negating in the passages, each a quotation cut from the
+  portal's own text, with its citation opening the passage. Beside these, four empty fields for
+  the seminar: what is divided, by what, the model's problems, and what it does about earlier
+  ones.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:**
+  - the seminar's fields are empty, and filling them means editing `models.js`;
+  - only one or a few anchor passages stand behind each model;
+  - *Negative Größen* is OCR, and its quotations keep the OCR's slips;
+  - the table, the trees and the crosswalk drawn from the cards are not built yet.
+
 ## 11 November 2026: the queue, read without a token
 
 *A draft, to be corrected by mikrishnan in their own words.*

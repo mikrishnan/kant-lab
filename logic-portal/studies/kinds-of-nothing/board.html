@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The board · the kinds of nothing · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  /* The Logic Portal's palette and fonts, as on the study's own page. */
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --panel: #faf7f0;
+    --card: #fbf8f1;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #b8a88a;
+    --line-soft: #d9ccb0;
+    --prob: #8a3b12;      /* problems, and what may answer them */
+    --note: #fff6c9;      /* what is written on the board */
+    --machine: #9a8f7a;   /* what the computer drew */
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: 'EB Garamond', Georgia, serif; font-size: 16px; line-height: 1.35; color: var(--ink); background: var(--parchment);
+         display: flex; flex-direction: column; overflow: hidden; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  a { color: var(--accent-light); }
+
+  header { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); background: var(--parchment-dark);
+           font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 0.05em; flex: none; }
+  header a { color: var(--accent); text-decoration: none; }
+  header a:hover { text-decoration: underline; }
+  header .slash { color: var(--line); }
+  header b { color: var(--accent); font-weight: 600; }
+
+  .tools { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.5rem; padding: 0.4rem 0.8rem; border-bottom: 1px solid var(--line-soft); background: var(--panel); flex: none; }
+  .tools .grp { display: flex; align-items: center; gap: 0.3rem; padding-right: 0.6rem; margin-right: 0.1rem; border-right: 1px solid var(--line-soft); }
+  .tools .grp:last-child { border-right: 0; }
+  .tools .lbl { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); margin-right: 0.15rem; }
+  .btn { border: 1px solid var(--line); background: #fff; color: var(--accent); border-radius: 999px; padding: 0.05rem 0.7rem; cursor: pointer; font-size: 0.9rem; white-space: nowrap; }
+  .btn:hover { border-color: var(--accent-light); background: var(--card); }
+  .btn.solid { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  .btn.solid:hover { background: var(--accent-light); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .btn.k-problem { color: var(--prob); border-color: #d6b19c; }
+  .btn.k-note { background: var(--note); }
+  select.vsel { border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 0.05rem 0.3rem; max-width: 16rem; color: var(--accent); }
+  #search { border: 1px solid var(--line); border-radius: 999px; padding: 0.05rem 0.7rem; width: 11rem; background: #fff; }
+  #found { font-size: 0.82rem; color: var(--faded); min-width: 3.5rem; }
+  .linkish { background: none; border: 0; padding: 0; color: var(--faded); cursor: pointer; text-decoration: underline; font-size: 0.86rem; }
+  .linkish:hover { color: var(--accent); }
+
+  .wrap { flex: 1; display: flex; min-height: 0; }
+
+  /* ── The stage: an endless board, panned and zoomed ── */
+  #stage { flex: 1; position: relative; overflow: hidden; cursor: grab; touch-action: none; user-select: none;
+           background-color: #f7f2e4; background-image: radial-gradient(#ddd1b6 1px, transparent 1px); background-size: 24px 24px; }
+  #stage.panning { cursor: grabbing; }
+  #stage.linking, #stage.linking .card { cursor: crosshair; }
+  #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  #ink { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
+  #ink .ar { pointer-events: auto; cursor: pointer; }
+  #ink .ar path.hit { fill: none; stroke: transparent; stroke-width: 16; }
+  #ink .ar path.v { fill: none; stroke-width: 2.2; }
+  #ink .ar.division path.v { stroke-width: 1.5; }
+  #ink .ar.sel path.v { stroke-width: 4; }
+  #ink .ar .pill rect { fill: #fff; stroke-width: 1.3; }
+  #ink .ar .pill text { font-family: 'EB Garamond', serif; font-size: 13px; fill: var(--accent); }
+  #ink .ar.problem .pill text { fill: var(--prob); }
+  #ink .ar.computer .pill text { fill: var(--faded); font-style: italic; }
+  #ink .frame rect.f { stroke-width: 2; }
+  #ink .frame.sel rect.f { stroke-width: 3.5; }
+  #ink .marq { fill: rgba(139, 94, 60, 0.08); stroke: var(--accent-light); stroke-dasharray: 5 4; }
+  #ink #ghost { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
+  .dim { opacity: 0.14; }
+  #ink .ar.dim { opacity: 0.08; }
+
+  /* frame tabs: a model's name, and the handle that moves it */
+  .ftab { position: absolute; color: #fff; border-radius: 7px 7px 7px 0; padding: 0.1rem 0.6rem 0.12rem; white-space: nowrap; cursor: move; font-size: 0.9rem; }
+  .ftab b { font-family: 'Cinzel', serif; letter-spacing: 0.04em; font-weight: 600; margin-right: 0.35rem; }
+  .ftab i { opacity: 0.92; }
+  .ftab small { display: block; font-size: 0.72rem; opacity: 0.85; margin-top: -0.1rem; }
+
+  /* cards */
+  .card { position: absolute; background: #fff; border: 1.5px solid var(--line); border-left-width: 5px; border-radius: 8px; padding: 0.3rem 0.55rem 0.35rem;
+          box-shadow: 0 1px 2px rgba(60, 40, 10, 0.12); cursor: pointer; }
+  .card:hover { box-shadow: 0 2px 8px rgba(60, 40, 10, 0.2); }
+  .card.sel { outline: 3px solid var(--accent-light); outline-offset: 1px; }
+  .card.hit { outline: 3px solid #d9a441; outline-offset: 1px; }
+  .card.k-part { width: 168px; text-align: center; }
+  .card.k-part .lab { display: block; font-weight: 600; color: var(--accent); font-size: 1.02rem; line-height: 1.15; }
+  .card.k-part .lab.lat { font-style: italic; }
+  .card .sub { display: block; font-size: 0.8rem; color: var(--faded); font-style: italic; margin-top: 0.1rem; line-height: 1.15; }
+  .card .count { display: block; font-size: 0.7rem; color: var(--faded); margin-top: 0.15rem; font-family: 'Cinzel', serif; letter-spacing: 0.06em; }
+  .card .nearq { display: none; text-align: left; font-size: 0.8rem; font-style: italic; margin-top: 0.3rem; border-top: 1px dotted var(--line-soft); padding-top: 0.25rem; line-height: 1.25; }
+  .card .nearq span { font-style: normal; color: var(--faded); font-size: 0.72rem; }
+  .card.k-passage { width: 250px; background: var(--card); border-color: var(--line); font-size: 0.86rem; }
+  .card.k-passage .ttl { display: block; font-weight: 600; color: var(--accent); font-size: 0.92rem; margin-bottom: 0.1rem; }
+  .card.k-passage .pq { font-style: italic; line-height: 1.25; }
+  .card.k-passage .pc { display: block; font-size: 0.75rem; color: var(--faded); margin-top: 0.2rem; }
+  .card.k-problem { width: 260px; background: #fff7f1; border-color: #d6b19c; border-left-color: var(--prob); font-size: 0.88rem; line-height: 1.25; }
+  .card .tag { display: block; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.09em; color: var(--prob); margin-bottom: 0.15rem; }
+  .card.k-note { width: 190px; background: var(--note); border-color: #e6d58a; font-size: 0.9rem; line-height: 1.25; transform: rotate(-0.6deg); }
+  .card.k-note .tag { color: #8a7420; }
+  .card .who { display: block; font-size: 0.7rem; color: var(--faded); margin-top: 0.2rem; text-align: right; }
+  .card .chk { color: #a0661a; font-size: 0.7rem; display: block; margin-top: 0.15rem; }
+  .card .knob { position: absolute; right: -13px; top: 50%; margin-top: -11px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff;
+                font-size: 13px; line-height: 21px; text-align: center; cursor: crosshair; display: none; box-shadow: 0 0 0 2px #fff; }
+  .card:hover .knob, .card.sel .knob { display: block; }
+  #stage.readonly .knob { display: none !important; }
+  /* depth: zoomed out, a card is its name; zoomed in, its first passage shows */
+  #world.far .card .sub, #world.far .card .count, #world.far .card .who, #world.far .card .chk { display: none; }
+  #world.far .card.k-part .lab { font-size: 1.5rem; }
+  #world.far .card.k-passage .pq, #world.far .card.k-problem, #world.far .card.k-note { font-size: 1.15rem; }
+  #world.near .card .nearq { display: block; }
+
+  /* floating boxes on the stage */
+  .float { position: absolute; background: rgba(250, 247, 240, 0.96); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 2px 10px rgba(60, 40, 10, 0.12); font-size: 0.86rem; cursor: default; }
+  #layers { left: 12px; bottom: 12px; padding: 0.45rem 0.7rem 0.5rem; max-width: 260px; }
+  #layers .ttl { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); display: block; margin-bottom: 0.2rem; }
+  #layers label { display: flex; align-items: center; gap: 0.4rem; margin: 0.05rem 0; cursor: pointer; }
+  #layers label i { display: inline-block; width: 1.4rem; height: 0; border-top: 2px solid var(--accent); }
+  #layers label i.sq { height: 0.7rem; border: 1.5px solid var(--line); border-radius: 3px; }
+  #layers label span.n { color: var(--faded); margin-left: auto; padding-left: 0.6rem; }
+  #layers.closed label { display: none; }
+  #zoom { right: 12px; bottom: 12px; padding: 0.2rem 0.3rem; display: flex; align-items: center; gap: 0.2rem; }
+  #zoom button { border: 0; background: none; cursor: pointer; color: var(--accent); font-size: 1rem; padding: 0.1rem 0.45rem; border-radius: 6px; }
+  #zoom button:hover { background: var(--parchment-dark); }
+  #zoom #zk { min-width: 3.2rem; text-align: center; color: var(--faded); font-size: 0.82rem; }
+  #banner { left: 50%; top: 12px; transform: translateX(-50%); padding: 0.3rem 0.8rem; display: none; align-items: center; gap: 0.6rem; max-width: 80%; }
+  #banner.show { display: flex; }
+  #banner.photo { background: #eef2f6; border-color: #3b5068; }
+  #banner .btn { font-size: 0.82rem; }
+  #chooser { display: none; padding: 0.35rem; gap: 0.3rem; flex-wrap: wrap; width: 230px; }
+  #chooser.show { display: flex; }
+  #chooser .ttl { flex-basis: 100%; font-size: 0.78rem; color: var(--faded); padding: 0 0.2rem; }
+  #toast { left: 50%; bottom: 14px; transform: translateX(-50%); padding: 0.3rem 0.8rem; display: none; }
+  #toast.show { display: block; }
+
+  /* ── The side: what is selected, and the portal ── */
+  #side { width: 400px; flex: none; border-left: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+  #side .tabs { display: flex; border-bottom: 1px solid var(--line-soft); flex: none; }
+  #side .tabs button { flex: 1; border: 0; background: none; padding: 0.4rem; cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.08em; color: var(--faded); border-bottom: 2px solid transparent; }
+  #side .tabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
+  #details { flex: 1; overflow-y: auto; padding: 0.8rem 1rem 2rem; }
+  #reading { flex: 1; display: none; flex-direction: column; min-height: 0; }
+  #reading.on { display: flex; }
+  #reading .bar { display: flex; justify-content: space-between; padding: 0.3rem 0.8rem; font-size: 0.82rem; color: var(--faded); border-bottom: 1px solid var(--parchment-dark); }
+  #reading .bar a { color: var(--accent); }
+  #reading iframe { flex: 1; width: 100%; border: 0; background: var(--parchment); }
+  #details h2 { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--accent); margin: 0 0 0.15rem; font-weight: 600; letter-spacing: 0.02em; }
+  #details h2.lat { font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.2rem; }
+  #details .sub { color: var(--faded); font-style: italic; margin: 0 0 0.5rem; font-size: 0.92rem; }
+  #details .k { display: block; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); margin: 0.9rem 0 0.3rem; }
+  #details .mchip { display: inline-block; color: #fff; border-radius: 4px; padding: 0 0.4rem; font-size: 0.8rem; font-style: normal; margin-right: 0.3rem; }
+  #details .q { margin: 0 0 0.5rem; padding: 0.35rem 0.55rem; border-left: 3px solid var(--line); background: #fff; font-size: 0.94rem; }
+  #details .q .t { font-style: italic; }
+  #details .q .c { display: flex; gap: 0.5rem; align-items: baseline; margin-top: 0.2rem; font-size: 0.8rem; }
+  #details .q .c button { background: none; border: 0; padding: 0; color: var(--accent-light); text-decoration: underline; cursor: pointer; font-size: 0.8rem; }
+  #details .q .c .chk { color: #a0661a; }
+  #details .q .c .x { margin-left: auto; color: var(--faded); }
+  #details .stmt { background: #fff; border: 1.5px dashed var(--accent-light); border-radius: 6px; padding: 0.4rem 0.6rem; white-space: pre-wrap; }
+  #details .stmt.machine { border-style: dotted; color: var(--faded); }
+  #details .stmt.problem { border-color: var(--prob); }
+  #details .by { font-size: 0.82rem; color: var(--faded); margin: 0.25rem 0 0; }
+  #details .rel { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line-soft); border-radius: 6px; padding: 0.25rem 0.5rem; margin: 0.22rem 0; cursor: pointer; font-size: 0.9rem; }
+  #details .rel:hover { border-color: var(--accent-light); }
+  #details .rel b { color: var(--accent); font-weight: 600; }
+  #details .empty { color: var(--faded); font-style: italic; font-size: 0.92rem; margin: 0.2rem 0; }
+  #details .warn { color: var(--prob); font-size: 0.86rem; }
+  #details .row { display: flex; gap: 0.4rem 0.6rem; margin-top: 0.9rem; flex-wrap: wrap; align-items: center; }
+  #details label.f { display: block; font-size: 0.86rem; color: var(--faded); margin: 0.65rem 0 0.2rem; }
+  #details textarea, #details input[type=text], #details select { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 0.3rem 0.45rem; background: #fff; }
+  #details textarea { min-height: 4.5rem; resize: vertical; }
+  #details .ev { display: flex; gap: 0.4rem; align-items: flex-start; font-size: 0.86rem; margin: 0.25rem 0; cursor: pointer; }
+  #details .ev input { margin-top: 0.25rem; flex: none; }
+  #details .addq { border: 1px dashed var(--line); border-radius: 8px; padding: 0.2rem 0.6rem 0.6rem; margin-top: 0.5rem; background: #fff; }
+  #details .intro p, #details .intro li { font-size: 0.95rem; }
+  #details .intro p { margin: 0 0 0.55rem; }
+  #details .intro ul { margin: 0 0 0.6rem; padding-left: 1.1rem; }
+  #details .intro li { margin-bottom: 0.25rem; }
+  #details kbd { font-family: inherit; font-size: 0.82rem; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 0.3rem; background: #fff; }
+  #details .swatches { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  #details .swatches label { width: 1.7rem; height: 1.7rem; border-radius: 50%; cursor: pointer; display: block; border: 3px solid transparent; }
+  #details .swatches input { display: none; }
+  #details .swatches input:checked + label { border-color: var(--ink); }
+  #details .photo { background: #fff; border: 1px solid var(--line-soft); border-radius: 8px; padding: 0.35rem 0.6rem; margin: 0.35rem 0; }
+  #details .photo b { color: var(--accent); }
+  #details .photo .meta { font-size: 0.8rem; color: var(--faded); }
+</style>
+</head>
+<body>
+<header>
+  <a href="../../index.html">The Logic Portal</a><span class="slash">/</span>
+  <a href="../../index.html#studies">Studies</a><span class="slash">/</span>
+  <a href="index.html">The kinds of nothing</a><span class="slash">/</span>
+  <b>The board</b>
+</header>
+<div class="tools">
+  <span class="grp"><span class="lbl">Add</span>
+    <button type="button" class="btn" data-add="part" title="A part of a model, in Kant’s terms">Part</button>
+    <button type="button" class="btn" data-add="passage" title="A passage, with its citation">Passage</button>
+    <button type="button" class="btn k-problem" data-add="problem" title="A model’s problem, in your words">Problem</button>
+    <button type="button" class="btn k-note" data-add="note" title="Anything else, as on a whiteboard">Note</button>
+    <button type="button" class="btn" data-add="model" title="A new model: a frame for parts">Model</button>
+  </span>
+  <span class="grp"><span class="lbl">View</span>
+    <select class="vsel" id="vsel" aria-label="View"></select>
+    <button type="button" class="btn" id="vnew" title="The same cards, in an arrangement of its own">New view</button>
+    <button type="button" class="linkish" id="vmore">this view…</button>
+  </span>
+  <span class="grp">
+    <input type="search" id="search" placeholder="Find on the board" aria-label="Find on the board"><span id="found"></span>
+  </span>
+  <span class="grp">
+    <button type="button" class="btn" id="undo" title="Undo (⌘Z)">↶</button>
+    <button type="button" class="btn" id="redo" title="Redo (⇧⌘Z)">↷</button>
+  </span>
+  <span class="grp">
+    <button type="button" class="btn solid" id="snap" title="Keep the board as it is now, to come back to">Photograph the board</button>
+    <button type="button" class="linkish" id="photos">Photographs</button>
+  </span>
+  <span class="grp">
+    <button type="button" class="linkish" id="export">Export</button>
+    <button type="button" class="linkish" id="import">Import</button>
+    <input type="file" id="file" accept=".json,application/json" hidden>
+  </span>
+</div>
+<div class="wrap">
+  <div id="stage">
+    <div id="world">
+      <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
+      <div id="cards"></div>
+    </div>
+    <div id="layers" class="float"></div>
+    <div id="zoom" class="float"><button type="button" id="zout" title="Zoom out">−</button><span id="zk">100%</span><button type="button" id="zin" title="Zoom in">+</button><button type="button" id="zfit" title="Show the whole view">Fit</button><button type="button" id="ztidy" title="Lay this view out again, a column per model">Tidy</button></div>
+    <div id="banner" class="float"></div>
+    <div id="chooser" class="float"></div>
+    <div id="toast" class="float"></div>
+  </div>
+  <aside id="side">
+    <div class="tabs"><button type="button" id="tdet" class="on">On the board</button><button type="button" id="tread">Reading</button></div>
+    <div id="details"></div>
+    <div id="reading"><div class="bar"><span>The Logic Portal</span><a id="full" href="../../index.html" target="_blank" rel="noopener">open it full size ↗</a></div><iframe id="portal" title="The Logic Portal"></iframe></div>
+  </aside>
+</div>
+
+<script src="board.js"></script>
+<script>
+/* ── Data ─────────────────────────────────────────────────────────────────── */
+const BASE = typeof STUDY_BOARD !== 'undefined' ? STUDY_BOARD : { models: [], items: [], arrows: [], views: [] };
+const PORTAL = '../../index.html';
+const KEY = 'kantlab-board-kinds-of-nothing-v1';   // this browser's board: { v, board, photos, viewId }
+const ME = 'kantlab-board-me';                     // the GitHub username last signed with
+const TYPES = ['kept', 'renamed', 'split into', 'merged from', 'dropped', 'new'];
+const PALETTE = ['#5c6e3a', '#8b5e3c', '#3b5068', '#6b4e7a', '#3f6b63', '#9a6a1e', '#7a3b3b', '#5a5a5a'];
+const LAYERS = [
+  { key: 'frames', label: 'Models, as frames', mark: 'sq' },
+  { key: 'division', label: 'Kant’s divisions', color: '#b8a88a' },
+  { key: 'hypothesis', label: 'Hypotheses, signed', color: '#5c3d1e' },
+  { key: 'problem', label: 'Problems, and what may answer them', color: '#8a3b12', dash: '7 4' },
+  { key: 'passage', label: 'Passages', mark: 'sq' },
+  { key: 'note', label: 'Notes', mark: 'sq' },
+  { key: 'computer', label: 'Same label (the computer’s)', color: '#9a8f7a', dash: '2 4' },
+];
+const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', computer: '#9a8f7a', passage: '#5c3d1e', note: '#5c3d1e' };
+const DASH = { problem: '7 4', computer: '2 4' };
+const FAR = 0.55, NEAR = 1.3;
+
+/* ── State ────────────────────────────────────────────────────────────────── */
+let B;                 // the board: { models, items, arrows, views, removed }
+let photos = [];       // photographs: { id, name, date, by, board }
+let viewId;            // the view shown
+let live = null;       // while a photograph is shown, the board it stands in for
+let undoStack = [], redoStack = [];
+let sel = { kind: null, ids: [] };   // kind: 'card' | 'arrow' | 'model'
+let form = null;       // the form open on the side, if any
+let mode = null;       // { linkFrom } while choosing where an arrow goes
+let focus = null;      // { id, hops }
+let query = '';
+let cam = { x: 40, y: 30, k: 1 };
+let size = {};         // card id → { w, h }, as last drawn
+let side = 'details';
+
+/* ── Builders: the board ──────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const uid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const today = () => new Date().toISOString().slice(0, 10);
+const me = () => { try { return localStorage.getItem(ME) || ''; } catch (e) { return ''; } };
+const view = () => B.views.find(v => v.id === viewId) || B.views[0];
+const item = id => B.items.find(i => i.id === id);
+const arrow = id => B.arrows.find(a => a.id === id);
+const model = id => B.models.find(m => m.id === id);
+const isLat = s => /^(nihil|ens|0)\b/.test(String(s || ''));
+const ro = () => !!live;
+const layerOn = k => { const L = view().layers || {}; return L[k] !== false; };
+const itemLayer = it => it.kind === 'part' ? null : it.kind;
+function shown(it) { if (!it || (view().hidden || []).includes(it.id)) return false; const l = itemLayer(it); return !l || layerOn(l); }
+const arrowShown = a => layerOn(a.layer) && shown(item(a.from)) && shown(item(a.to));
+function nameOf(id) { const it = item(id); if (!it) return '(gone)'; const m = model(it.model); return cardTitle(it) + (m ? ' (' + m.title + ')' : ''); }
+function cardTitle(it) {
+  if (it.kind === 'part') return it.label || '(a part)';
+  if (it.kind === 'passage') return it.label || (it.quotes[0] ? it.quotes[0].cite : 'a passage');
+  const t = String(it.text || ''); return (it.kind === 'problem' ? 'Problem: ' : 'Note: ') + (t.length > 50 ? t.slice(0, 49) + '…' : t);
+}
+
+/* Where a passage opens in the portal, as on the study's page. */
+function portalHref(q) {
+  if (q.ref) {
+    const k = q.ref.slice(0, q.ref.indexOf(':')), id = q.ref.slice(q.ref.indexOf(':') + 1);
+    if (k === 'baumgarten' || k === 'meier') return PORTAL + '#read=' + k + '&at=' + encodeURIComponent(id);
+    if (k === 'refl-meta' || k === 'refl-logik') return PORTAL + '#refl=' + id.replace(/^r/, '');
+    return PORTAL + '#read=' + encodeURIComponent(k) + '&at=' + encodeURIComponent(id);
+  }
+  return q.hash ? PORTAL + q.hash : null;
+}
+// A portal address pasted on the page: only its #… part is kept, and only the portal is opened.
+function hashOf(s) { const i = String(s || '').indexOf('#'); if (i < 0) return ''; const h = s.slice(i).trim(); return /^#[\w=&%.:,+*"' -]*$/.test(h) && h.length < 400 ? h : ''; }
+
+/* ── Builders: keeping it ─────────────────────────────────────────────────── */
+// The study's board, joined to what this browser has: anything new in board.js comes in,
+// unless it was deleted here.
+function merge(into, base) {
+  const gone = new Set(into.removed || []);
+  ['models', 'items', 'arrows'].forEach(k => {
+    const have = new Set(into[k].map(x => x.id));
+    base[k].forEach(x => { if (!have.has(x.id) && !gone.has(x.id)) into[k].push(clone(x)); });
+  });
+  const haveV = new Set(into.views.map(v => v.id));
+  base.views.forEach(bv => {
+    if (!haveV.has(bv.id)) { if (!gone.has(bv.id)) into.views.push(clone(bv)); return; }
+    const v = into.views.find(x => x.id === bv.id);
+    Object.keys(bv.pos).forEach(id => { if (!v.pos[id]) v.pos[id] = bv.pos[id].slice(); });
+  });
+  return into;
+}
+function load() {
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { saved = null; }
+  if (saved && saved.board && Array.isArray(saved.board.items)) {
+    B = merge(saved.board, BASE); photos = saved.photos || []; viewId = saved.viewId;
+  } else {
+    B = clone(BASE); B.removed = []; photos = [];
+  }
+  B.removed = B.removed || [];
+  if (!B.views.length) B.views.push({ id: 'v-1', name: 'The board', pos: {}, hidden: [], layers: {} });
+  if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
+}
+function save() {
+  if (ro()) return;
+  try { localStorage.setItem(KEY, JSON.stringify({ v: 1, board: B, photos, viewId })); }
+  catch (e) { toast('This browser would not keep the board. Export it now, so nothing is lost.'); }
+}
+// Every change goes through here: undo keeps the board as it was.
+function change(fn) {
+  if (ro()) { toast('This is a photograph. Bring it back to change it.'); return false; }
+  undoStack.push(JSON.stringify(B)); if (undoStack.length > 80) undoStack.shift();
+  redoStack = [];
+  fn();
+  save(); return true;
+}
+function undo() { if (ro() || !undoStack.length) return; redoStack.push(JSON.stringify(B)); B = JSON.parse(undoStack.pop()); afterSwap(); }
+function redo() { if (ro() || !redoStack.length) return; undoStack.push(JSON.stringify(B)); B = JSON.parse(redoStack.pop()); afterSwap(); }
+function afterSwap() {
+  if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
+  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : model(id));
+  if (!sel.ids.length) sel.kind = null;
+  if (focus && !item(focus.id)) focus = null;
+  form = null; save(); render();
+}
+
+/* ── Builders: where things stand ─────────────────────────────────────────── */
+// A card's place in this view; failing that, in the first view that has it; failing that, beside the rest.
+function posOf(id) {
+  const v = view();
+  if (v.pos[id]) return v.pos[id];
+  for (const w of B.views) if (w.pos[id]) return w.pos[id];
+  return null;
+}
+function placeUnplaced() {
+  const v = view(); let n = 0;
+  const xs = Object.values(v.pos).map(p => p[0]), ys = Object.values(v.pos).map(p => p[1]);
+  const x0 = (xs.length ? Math.max(...xs) : 0) + 320, y0 = ys.length ? Math.min(...ys) : 0;
+  B.items.forEach(it => { if (!posOf(it.id)) { v.pos[it.id] = [x0, y0 + n * 120]; n++; } });
+}
+const sz = id => size[id] || { w: 168, h: 60 };
+function rect(id) { const p = posOf(id), s = sz(id); return p ? { x: p[0], y: p[1], w: s.w, h: s.h } : null; }
+// A model's frame: the cards it holds, with room around them. An empty model keeps a place of its own.
+function frameOf(m, skip) {
+  const v = view(), rs = B.items.filter(it => it.model === m.id && shown(it) && !(skip && skip.has(it.id))).map(it => rect(it.id)).filter(Boolean);
+  if (!rs.length) { const p = v.pos[m.id] || B.views.map(w => w.pos[m.id]).find(Boolean); return p ? { x: p[0], y: p[1], w: 230, h: 130, empty: true } : null; }
+  const x = Math.min(...rs.map(r => r.x)) - 22, y = Math.min(...rs.map(r => r.y)) - 52;
+  const X = Math.max(...rs.map(r => r.x + r.w)) + 22, Y = Math.max(...rs.map(r => r.y + r.h)) + 22;
+  return { x, y, w: X - x, h: Y - y };
+}
+const inside = (r, px, py) => r && px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
+
+/* ── Builders: what is lit ────────────────────────────────────────────────── */
+function neighbourhood() {
+  if (!focus) return null;
+  const keep = new Set([focus.id]); let edge = [focus.id];
+  for (let h = 0; h < focus.hops; h++) {
+    const next = [];
+    B.arrows.filter(arrowShown).forEach(a => {
+      if (edge.includes(a.from) && !keep.has(a.to)) { keep.add(a.to); next.push(a.to); }
+      if (edge.includes(a.to) && !keep.has(a.from)) { keep.add(a.from); next.push(a.from); }
+    });
+    edge = next;
+  }
+  return keep;
+}
+function matches(it) {
+  if (!query) return true;
+  const hay = [it.label, it.sub, it.text, it.by].concat((it.quotes || []).map(q => q.q + ' ' + q.cite)).join(' ').toLowerCase();
+  return query.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
+
+/* ── Render: the board ────────────────────────────────────────────────────── */
+function cardHtml(it) {
+  const m = model(it.model), col = m ? m.color : '#b8a88a';
+  const mine = it.by ? '<span class="who">@' + esc(it.by) + (it.date ? ' · ' + esc(it.date) : '') + (it.editedBy ? ' · edited by @' + esc(it.editedBy) : '') + '</span>' : '';
+  const unchecked = (it.quotes || []).some(q => q.pasted) ? '<span class="chk">pasted, not yet checked</span>' : '';
+  const q0 = (it.quotes || [])[0];
+  let inner = '';
+  if (it.kind === 'part') {
+    inner = '<span class="lab' + (isLat(it.label) ? ' lat' : '') + '">' + esc(it.label) + '</span>' + (it.sub ? '<span class="sub">' + esc(it.sub) + '</span>' : '') +
+      (it.quotes.length ? '<span class="count">' + it.quotes.length + (it.quotes.length === 1 ? ' passage' : ' passages') + '</span>' : '') +
+      (q0 ? '<div class="nearq">“' + esc(q0.q.length > 230 ? q0.q.slice(0, 229) + '…' : q0.q) + '” <span>' + esc(q0.cite) + '</span></div>' : '') + unchecked + mine;
+  } else if (it.kind === 'passage') {
+    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 ? '<div class="pq">“' + esc(q0.q.length > 320 ? q0.q.slice(0, 319) + '…' : q0.q) + '”</div><span class="pc">' + esc(q0.cite) + '</span>' : '') + unchecked + mine;
+  } else {
+    inner = '<span class="tag">' + (it.kind === 'problem' ? 'Problem' : 'Note') + '</span>' + esc(it.text) + (it.quotes && it.quotes.length ? '<span class="count">' + it.quotes.length + (it.quotes.length === 1 ? ' passage' : ' passages') + '</span>' : '') + unchecked + mine;
+  }
+  return '<div class="card k-' + it.kind + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'part' || it.kind === 'passage' ? esc(col) : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+}
+function renderCards() {
+  placeUnplaced();
+  const vis = B.items.filter(shown), tabs = layerOn('frames') ? B.models.map(m => {
+    return '<div class="ftab" data-model="' + esc(m.id) + '" style="background:' + esc(m.color) + '"><b>' + esc(m.title) + '</b><i>' + esc(m.name || '') + '</i>' + (m.cite ? '<small>' + esc(m.cite) + (m.ocr ? ' · OCR' : '') + '</small>' : '') + '</div>';
+  }).join('') : '';
+  $('cards').innerHTML = tabs + vis.map(cardHtml).join('');
+  size = {};
+  $('cards').querySelectorAll('.card').forEach(el => { size[el.dataset.id] = { w: el.offsetWidth, h: el.offsetHeight }; });
+  placeCards();
+}
+function placeCards() {
+  $('cards').querySelectorAll('.card').forEach(el => { const p = posOf(el.dataset.id); el.style.left = p[0] + 'px'; el.style.top = p[1] + 'px'; });
+  $('cards').querySelectorAll('.ftab').forEach(el => {
+    const f = frameOf(model(el.dataset.model));
+    el.style.display = f ? '' : 'none';
+    if (f) { el.style.left = (f.x + 10) + 'px'; el.style.top = (f.y + 8) + 'px'; }
+  });
+}
+function lit() {
+  const nb = neighbourhood();
+  $('cards').querySelectorAll('.card').forEach(el => {
+    const it = item(el.dataset.id);
+    el.classList.toggle('sel', sel.kind === 'card' && sel.ids.includes(it.id));
+    el.classList.toggle('dim', (nb && !nb.has(it.id)) || !matches(it));
+    el.classList.toggle('hit', !!query && matches(it));
+  });
+  return nb;
+}
+function curve(a) {
+  const A = rect(a.from), Z = rect(a.to);
+  if (!A || !Z) return null;
+  if (a.layer === 'division') {
+    const x1 = A.x + A.w / 2, y1 = A.y + A.h, x2 = Z.x + Z.w / 2, y2 = Z.y, m = Math.max(24, (y2 - y1) / 2);
+    return { d: 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + (y1 + m) + ' ' + x2 + ',' + (y2 - m) + ' ' + x2 + ',' + y2, mx: (x1 + x2) / 2, my: (y1 + y2) / 2 };
+  }
+  const ax = A.x + A.w / 2, ay = A.y + A.h / 2, zx = Z.x + Z.w / 2, zy = Z.y + Z.h / 2, dx = zx - ax, dy = zy - ay;
+  // nearly level and far apart: leave from beneath and hang below what lies between
+  if (Math.abs(dy) < 70 && Math.abs(dx) > 300) {
+    const x1 = ax, y1 = A.y + A.h, x2 = zx, y2 = Z.y + Z.h, sag = Math.max(y1, y2) + 60 + 0.07 * Math.abs(dx);
+    return { d: 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + sag + ' ' + x2 + ',' + sag + ' ' + x2 + ',' + y2, mx: (x1 + x2) / 2, my: 0.25 * (y1 + y2) / 2 + 0.75 * sag };
+  }
+  const edgePt = (R, ux, uy) => { const hx = R.w / 2 + 3, hy = R.h / 2 + 3, t = Math.min(ux ? hx / Math.abs(ux) : 1e9, uy ? hy / Math.abs(uy) : 1e9); return [R.x + R.w / 2 + ux * t, R.y + R.h / 2 + uy * t]; };
+  const L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+  const [x1, y1] = edgePt(A, ux, uy), [x2, y2] = edgePt(Z, -ux, -uy);
+  const bend = Math.min(60, 0.12 * L), cx = (x1 + x2) / 2 - uy * bend, cy = (y1 + y2) / 2 + ux * bend;
+  return { d: 'M' + x1 + ',' + y1 + ' Q' + cx + ',' + cy + ' ' + x2 + ',' + y2, mx: 0.25 * x1 + 0.5 * cx + 0.25 * x2, my: 0.25 * y1 + 0.5 * cy + 0.25 * y2 };
+}
+function renderInk(nb) {
+  // markers, one per colour
+  $('defs').innerHTML = Object.entries(INK).map(([k, c]) => '<marker id="ah-' + k + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="' + c + '"/></marker>').join('');
+  let f = '';
+  if (layerOn('frames')) B.models.forEach(m => {
+    const r = frameOf(m); if (!r) return;
+    const on = sel.kind === 'model' && sel.ids.includes(m.id);
+    f += '<g class="frame' + (on ? ' sel' : '') + '"><rect class="f" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="14" fill="' + esc(m.color) + '" fill-opacity="0.06" stroke="' + esc(m.color) + '"' + (r.empty ? ' stroke-dasharray="8 6"' : '') + '/>' +
+      (r.empty ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h - 22) + '" text-anchor="middle" font-size="13" font-style="italic" fill="#7a6a52">drop cards here</text>' : '') + '</g>';
+  });
+  $('gframes').innerHTML = f;
+  let h = '';
+  B.arrows.filter(arrowShown).forEach(a => {
+    const c = curve(a); if (!c) return;
+    const col = INK[a.layer] || INK.hypothesis, on = sel.kind === 'arrow' && sel.ids.includes(a.id);
+    const dim = nb ? !(nb.has(a.from) && nb.has(a.to)) : query ? !(matches(item(a.from)) && matches(item(a.to))) : false;
+    const label = a.layer === 'division' ? '' : a.type, lw = label.length * 6.7 + 18;
+    h += '<g class="ar ' + esc(a.layer) + (on ? ' sel' : '') + (dim ? ' dim' : '') + '" data-arrow="' + esc(a.id) + '">' +
+      '<path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '" stroke="' + col + '"' + (DASH[a.layer] ? ' stroke-dasharray="' + DASH[a.layer] + '"' : '') + ' marker-end="url(#ah-' + esc(a.layer in INK ? a.layer : 'hypothesis') + ')"/>' +
+      (label ? '<g class="pill"><rect x="' + (c.mx - lw / 2) + '" y="' + (c.my - 10) + '" width="' + lw + '" height="20" rx="10" stroke="' + col + '"' + (a.layer === 'computer' ? ' stroke-dasharray="2 3"' : '') + '/><text x="' + c.mx + '" y="' + (c.my + 4.5) + '" text-anchor="middle">' + esc(label) + '</text></g>' : '') + '</g>';
+  });
+  $('garrows').innerHTML = h;
+}
+function applyCam() {
+  $('world').style.transform = 'translate(' + cam.x + 'px,' + cam.y + 'px) scale(' + cam.k + ')';
+  const far = cam.k < FAR, near = cam.k >= NEAR, w = $('world');
+  if (w.classList.contains('far') !== far || w.classList.contains('near') !== near) { w.classList.toggle('far', far); w.classList.toggle('near', near); renderBoard(); }
+  $('zk').textContent = Math.round(cam.k * 100) + '%';
+}
+function renderBoard() { renderCards(); const nb = lit(); renderInk(nb); }
+function renderLayers() {
+  const count = k => k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
+    k === 'problem' ? B.items.filter(i => i.kind === 'problem').length : B.items.filter(i => i.kind === k).length;
+  const closed = $('layers').classList.contains('closed');
+  $('layers').innerHTML = '<span class="ttl">Layers <button type="button" class="linkish" data-fold style="float:right;margin-left:1rem">' + (closed ? 'show' : 'hide') + '</button></span>' + LAYERS.map(L =>
+    '<label><input type="checkbox" data-layer="' + L.key + '"' + (layerOn(L.key) ? ' checked' : '') + '>' + (L.mark ? '<i class="sq"></i>' : '<i style="border-top:2px ' + (L.dash ? (L.dash.startsWith('2') ? 'dotted' : 'dashed') : 'solid') + ' ' + L.color + '"></i>') + esc(L.label) + '<span class="n">' + count(L.key) + '</span></label>').join('');
+}
+function renderTools() {
+  $('vsel').innerHTML = B.views.map(v => '<option value="' + esc(v.id) + '"' + (v.id === viewId ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('');
+  $('undo').disabled = ro() || !undoStack.length; $('redo').disabled = ro() || !redoStack.length;
+  $('photos').textContent = 'Photographs' + (photos.length ? ' (' + photos.length + ')' : '');
+  $('stage').classList.toggle('readonly', ro());
+  const n = query ? B.items.filter(it => shown(it) && matches(it)).length : null;
+  $('found').textContent = n == null ? '' : n + ' found';
+  banner();
+}
+function banner() {
+  const b = $('banner'); let h = '';
+  b.classList.remove('photo');
+  if (live) { const p = photos.find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
+  else if (mode) h = '<span>Click the card the arrow goes to.</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
+  else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
+  b.innerHTML = h; b.classList.toggle('show', !!h);
+}
+function render() { renderTools(); renderLayers(); renderBoard(); renderSide(); applyCam(); }
+let toastT;
+function toast(s) { const t = $('toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3800); }
+const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); };
+
+/* ── Render: the side ─────────────────────────────────────────────────────── */
+function quoteHtml(q, i, removable) {
+  const href = portalHref(q);
+  return '<div class="q">' + (q.q ? '<span class="t">“' + esc(q.q) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
+    (href ? '<button type="button" data-read="' + esc(href) + '">read it beside the board</button><a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : '') +
+    (q.pasted ? '<span class="chk">pasted, not yet checked against the portal</span>' : '') +
+    (removable ? '<button type="button" class="x" data-unq="' + i + '" title="Take this passage off the card">✕</button>' : '') + '</div></div>';
+}
+const signedHtml = x => '<p class="by">@' + esc(x.by) + (x.date ? ' · ' + esc(x.date) : '') + (x.editedBy ? ' · edited by @' + esc(x.editedBy) + (x.edited ? ' · ' + esc(x.edited) : '') : '') + '</p>';
+function sign(x, by) { if (!x.by) { x.by = by; x.date = today(); } else if (x.by !== by) { x.editedBy = by; x.edited = today(); } }
+function relBtn(a) { return '<button type="button" class="rel" data-arrow="' + esc(a.id) + '"><b>' + esc(a.type) + '</b>: ' + esc(nameOf(a.from)) + ' → ' + esc(nameOf(a.to)) + '</button>'; }
+const mchip = m => m ? '<span class="mchip" style="background:' + esc(m.color) + '">' + esc(m.title) + '</span>' : '';
+function sideIntro() {
+  return '<div class="intro"><h2>The board</h2><p class="sub">A whiteboard that keeps its texts</p>' +
+    '<p>Every card is a part of a model, a passage, a problem or a note. The parts are built from Kant’s own labels, and each carries the passages it rests on: click a card to read them, here or in the portal beside the board.</p>' +
+    '<ul><li><b>Move</b> anything by dragging it; drag the board itself to move about. <kbd>⇧</kbd>-drag on the board to select several cards.</li>' +
+    '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and say what it claims: <i>kept, renamed, split into, merged from, dropped, new</i>, or <i>answers?</i> to a problem, or a type of your own.</li>' +
+    '<li><b>Write anywhere</b>: double-click the board.</li>' +
+    '<li><b>Models</b> are frames around their cards. Drop a card into another frame to move it there; select several and make them a model of their own to split one.</li></ul>' +
+    '<span class="k">Its dimensions</span><ul>' +
+    '<li><b>Layers</b> (bottom left): show only the divisions, only the hypotheses, only the problems, or any mix.</li>' +
+    '<li><b>Views</b>: the same cards in other arrangements. Rearranging one view leaves the others as they were.</li>' +
+    '<li><b>Depth</b>: zoom out and a card is its name; zoom in and its first passage shows.</li>' +
+    '<li><b>Focus</b>: select a card and press <kbd>F</kbd> to see only what is joined to it.</li>' +
+    '<li><b>Time</b>: <i>Photograph the board</i> keeps it as it is now. Come back to any photograph later, or bring it back.</li></ul>' +
+    '<span class="k">Where it is kept</span><p>In this browser, on its own, until you export it. Send the export to be added to the study, where the whole seminar sees it. Claims carry your GitHub username, and quotations pasted here are marked until they are checked against the portal.</p>' +
+    '<p style="font-size:0.85rem;color:var(--faded)">' + B.items.length + ' cards · ' + B.arrows.length + ' arrows · ' + B.views.length + (B.views.length === 1 ? ' view' : ' views') + ' · ' + photos.length + (photos.length === 1 ? ' photograph' : ' photographs') + '</p></div>';
+}
+function sideCard(it) {
+  const m = model(it.model), arr = B.arrows.filter(a => a.from === it.id || a.to === it.id);
+  const title = it.kind === 'part' ? it.label : it.kind === 'passage' ? (it.label || 'A passage') : it.kind === 'problem' ? 'A problem' + (m ? ' of ' + m.title : '') : 'A note';
+  let h = '<h2' + (isLat(title) ? ' class="lat"' : '') + '>' + esc(title) + '</h2><p class="sub">' + mchip(m) + esc(it.kind === 'part' ? (it.sub || '') : (m ? m.name : '')) + '</p>';
+  if (it.text) h += '<span class="k">' + (it.kind === 'problem' ? 'In the seminar’s words' : 'Written on the board') + '</span><div class="stmt' + (it.kind === 'problem' ? ' problem' : '') + '">' + esc(it.text) + '</div>';
+  if (it.by) h += signedHtml(it);
+  if (it.src === 'labels') h += '<p class="by">A part built from Kant’s own label; the passages are cut from the portal’s text, verbatim.</p>';
+  h += '<span class="k">' + (it.kind === 'part' ? 'In Kant’s words' : it.kind === 'problem' ? 'The passages it shows in' : 'Passages') + '</span>' +
+    ((it.quotes || []).length ? it.quotes.map((q, i) => quoteHtml(q, i)).join('') : '<p class="empty">None yet.</p>');
+  if (m && m.ocr && it.kind === 'part') h += '<p class="warn">The portal’s text of AA II is OCR: these quotations keep its slips.</p>';
+  h += '<span class="k">Arrows</span>' + (arr.length ? arr.map(relBtn).join('') : '<p class="empty">None yet.</p>');
+  if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="edit">Edit</button><button type="button" class="btn" data-act="linkfrom">+ Arrow from here</button><button type="button" class="btn" data-act="focus">Focus</button></div>' +
+    '<div class="row"><button type="button" class="linkish" data-act="offview">Take it off this view</button><button type="button" class="linkish" data-act="delete">Delete it</button></div>';
+  else h += '<div class="row"><button type="button" class="btn" data-act="focus">Focus</button></div>';
+  return h;
+}
+function sideCards(ids) {
+  const its = ids.map(item).filter(Boolean);
+  return '<h2>' + its.length + ' cards</h2><p class="sub">' + its.map(it => esc(cardTitle(it))).join(' · ') + '</p>' +
+    (ro() ? '' : '<span class="k">Split a model</span><div class="row" style="margin-top:0"><button type="button" class="btn solid" data-act="newmodel">Make these a model of their own</button></div>' +
+    '<span class="k">Move them into a model</span><div class="row" style="margin-top:0"><select data-into style="width:auto;flex:1">' + '<option value="">no model</option>' + B.models.map(m => '<option value="' + esc(m.id) + '">' + esc(m.title + ' · ' + (m.name || '')) + '</option>').join('') + '</select><button type="button" class="btn" data-act="moveinto">Move</button></div>' +
+    '<div class="row"><button type="button" class="linkish" data-act="offview">Take them off this view</button><button type="button" class="linkish" data-act="delete">Delete them</button></div>');
+}
+function sideArrow(a) {
+  const machine = a.layer === 'computer', div = a.layer === 'division';
+  let h = '<h2>' + esc(a.type) + '</h2><p class="sub"><button type="button" class="linkish" data-card="' + esc(a.from) + '">' + esc(nameOf(a.from)) + '</button> → <button type="button" class="linkish" data-card="' + esc(a.to) + '">' + esc(nameOf(a.to)) + '</button></p>';
+  if (div) h += '<span class="k">Kant’s division</span><p class="empty" style="font-style:normal">A division inside the model, as the passages on its two cards give it.' + (a.by ? '' : ' Drawn when the study’s board was made from Kant’s labels.') + '</p>';
+  if (a.text) h += '<span class="k">' + (machine ? 'Drawn by the computer' : a.layer === 'problem' ? 'How it may answer the problem' : 'The hypothesis') + '</span><div class="stmt' + (machine ? ' machine' : '') + '">' + esc(a.text) + '</div>';
+  if (a.by && !machine) h += signedHtml(a);
+  if (!div || (a.evidence || []).length) h += '<span class="k">The passages it rests on</span>' + ((a.evidence || []).length ? a.evidence.map((q, i) => quoteHtml(q, i)).join('') : '<p class="empty">' + (machine ? 'None: it rests on the labels alone.' : 'None given yet.') + '</p>');
+  if (!ro()) h += '<div class="row">' + (machine ? '' : '<button type="button" class="btn solid" data-act="editarrow">Edit</button>') + '<button type="button" class="linkish" data-act="delarrow">Delete it</button></div>';
+  return h;
+}
+function sideModel(m) {
+  const its = B.items.filter(i => i.model === m.id), from = model(m.from);
+  return '<h2>' + esc(m.title) + '</h2><p class="sub">' + esc(m.name || '') + (m.cite ? ' · ' + esc(m.cite) : '') + '</p>' +
+    (m.from ? '<p class="by">Split off ' + esc(from ? from.title : m.from) + (m.by ? ' by @' + esc(m.by) : '') + (m.date ? ' · ' + esc(m.date) : '') + '</p>' : '') +
+    (m.ocr ? '<p class="warn">Its text in the portal is OCR.</p>' : '') +
+    '<span class="k">Its cards</span>' + (its.length ? its.map(it => '<button type="button" class="rel" data-card="' + esc(it.id) + '">' + esc(cardTitle(it)) + '</button>').join('') : '<p class="empty">None yet. Drop cards into its frame.</p>') +
+    (BASE.models.some(b => b.id === m.id) ? '<p class="by"><a href="models.html" target="_blank" rel="noopener">Its card, with Kant’s words for negating ↗</a></p>' : '') +
+    (ro() ? '' : '<div class="row"><button type="button" class="btn solid" data-act="editmodel">Rename it</button><button type="button" class="btn" data-act="selmodel">Select its cards</button><button type="button" class="linkish" data-act="delmodel">Delete the model</button></div>');
+}
+function sidePhotos() {
+  return '<h2>Photographs</h2><p class="sub">The board as it stood, kept to come back to</p>' +
+    (photos.length ? photos.slice().reverse().map(p => '<div class="photo"><b>' + esc(p.name) + '</b><div class="meta">' + esc(fmtDate(p.date)) + (p.by ? ' · @' + esc(p.by) : '') + ' · ' + p.board.items.length + ' cards, ' + p.board.arrows.length + ' arrows, ' + p.board.views.length + ' views</div>' +
+      '<div class="row" style="margin-top:0.3rem"><button type="button" class="btn" data-look="' + esc(p.id) + '">Look at it</button><button type="button" class="linkish" data-unphoto="' + esc(p.id) + '">Delete</button></div></div>').join('') : '<p class="empty">None yet. <i>Photograph the board</i> keeps it as it is now.</p>') +
+    '<span class="k">Start again</span><p style="font-size:0.9rem">Set the board back to the study’s own, as <code>board.js</code> has it. This board is photographed first, so nothing is lost.</p><div class="row" style="margin-top:0"><button type="button" class="btn" data-act="reset">Start again from the study’s board</button></div>';
+}
+function evChoices(ids, chosen) {
+  const seen = new Set(), qs = [];
+  ids.forEach(id => { const it = item(id); ((it && it.quotes) || []).forEach(q => { const k = (q.ref || q.hash || '') + '|' + q.q; if (!seen.has(k)) { seen.add(k); qs.push(q); } }); });
+  const on = new Set((chosen || []).map(q => (q.ref || q.hash || '') + '|' + q.q));
+  form.choices = qs;
+  return qs.length ? qs.map((q, i) => '<label class="ev"><input type="checkbox" data-ev="' + i + '"' + (on.has((q.ref || q.hash || '') + '|' + q.q) ? ' checked' : '') + '><span><i>“' + esc(q.q.length > 150 ? q.q.slice(0, 149) + '…' : q.q) + '”</i> <span style="color:var(--faded)">' + esc(q.cite) + '</span></span></label>').join('') : '<p class="empty">The cards carry no passages yet.</p>';
+}
+const addQ = (title) => '<div class="addq"><label class="f">' + title + '</label><textarea data-nq placeholder="Paste the words from the portal, exactly as it prints them"></textarea>' +
+  '<label class="f">Its citation</label><input type="text" data-nc placeholder="e.g. A 292 / B 348, or Refl. 4480 (AA 17:556)">' +
+  '<label class="f">Its address in the portal (optional: copy it from the portal’s address bar)</label><input type="text" data-nh placeholder="…/index.html#read=krv-a&at=krv-a-0492" spellcheck="false"></div>';
+const signField = () => '<label class="f">Signed (your GitHub username)</label><input type="text" data-me value="' + esc(me()) + '" placeholder="github-username" spellcheck="false">';
+const modelSelect = (cur) => '<label class="f">Model</label><select data-model><option value="">no model</option>' + B.models.map(m => '<option value="' + esc(m.id) + '"' + (m.id === cur ? ' selected' : '') + '>' + esc(m.title + ' · ' + (m.name || '')) + '</option>').join('') + '</select>';
+function sideCardForm() {
+  const it = form.id ? item(form.id) : null, kind = it ? it.kind : form.kind, cur = it || { model: form.model, quotes: [] };
+  const word = { part: 'part', passage: 'passage', problem: 'problem', note: 'note' }[kind];
+  let h = '<h2>' + (it ? 'Edit the ' + word : 'A new ' + word) + '</h2><p class="sub">' + {
+    part: 'A part of a model, named as Kant names it', passage: 'Words of Kant’s, or of anyone’s, with where they stand',
+    problem: 'A problem a model has, in your words, with the passages it shows in', note: 'Anything, as on a whiteboard' }[kind] + '</p>';
+  h += modelSelect(cur.model);
+  if (kind === 'part') h += '<label class="f">Kant’s term, as he writes it</label><input type="text" data-label value="' + esc(cur.label || '') + '"' + (it && it.src === 'labels' ? ' readonly title="Built from Kant’s label: kept as he writes it"' : '') + '>' +
+    '<label class="f">Beneath it (optional: a few of Kant’s words)</label><input type="text" data-sub value="' + esc(cur.sub || '') + '">';
+  if (kind === 'passage') h += '<label class="f">A heading (optional)</label><input type="text" data-label value="' + esc(cur.label || '') + '">';
+  if (kind === 'problem' || kind === 'note') h += '<label class="f">' + (kind === 'problem' ? 'The problem, in your words' : 'What to write') + '</label><textarea data-text>' + esc(cur.text || '') + '</textarea>';
+  if (it && form.quotes.length) h += '<span class="k">Its passages</span>' + form.quotes.map((q, i) => quoteHtml(q, i, true)).join('');
+  h += addQ(kind === 'passage' && !(it && form.quotes.length) ? 'The passage' : 'Add a passage (optional)');
+  if (kind !== 'part' || !it || it.src !== 'labels') h += signField();
+  h += '<div class="row"><button type="button" class="btn solid" data-act="savecard">' + (it ? 'Save' : 'Put it on the board') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div><p class="warn" data-err></p>';
+  return h;
+}
+function sideArrowForm() {
+  const a = form.id ? arrow(form.id) : null, from = form.from, to = form.to;
+  const A = item(from), Z = item(to), toProb = Z && Z.kind === 'problem', same = A && Z && A.model && A.model === Z.model;
+  const types = (toProb ? ['answers?'] : []).concat(same ? ['divides into'] : [], TYPES, toProb ? [] : ['answers?']);
+  const cur = a ? a.type : types[0], other = cur && !types.includes(cur);
+  return '<h2>' + (a ? 'Edit the arrow' : 'A new arrow') + '</h2><p class="sub">' + esc(nameOf(from)) + ' → ' + esc(nameOf(to)) + ' <button type="button" class="linkish" data-act="swap">turn it round</button></p>' +
+    '<label class="f">What happens here</label><select data-type>' + types.map(t => '<option' + (t === cur ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '<option value="__other"' + (other ? ' selected' : '') + '>a type of my own…</option></select>' +
+    '<input type="text" data-other placeholder="name the relation" value="' + esc(other ? cur : '') + '" style="margin-top:0.3rem;' + (other ? '' : 'display:none') + '">' +
+    '<label class="f">The claim, in your words</label><textarea data-text placeholder="e.g. what 1763 holds together here, 1781 divides in two, because …">' + esc(a ? a.text || '' : '') + '</textarea>' +
+    '<span class="k">The passages it rests on</span>' + evChoices([from, to], a ? a.evidence : []) +
+    (a && (a.evidence || []).some(q => !form.choices.some(c => c.q === q.q)) ? '<p class="by">Passages added by hand are kept.</p>' : '') +
+    addQ('Another passage (optional)') + signField() +
+    '<div class="row"><button type="button" class="btn solid" data-act="savearrow">' + (a ? 'Save' : 'Draw the arrow') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div><p class="warn" data-err></p>';
+}
+function sideModelForm() {
+  const m = form.id ? model(form.id) : null, col = m ? m.color : PALETTE.find(c => !B.models.some(x => x.color === c)) || PALETTE[3];
+  return '<h2>' + (m ? 'Rename the model' : form.split ? 'A model of their own' : 'A new model') + '</h2><p class="sub">' + (form.split ? form.split.length + ' cards will move into it, out of the model they were in' : 'A frame for parts; drop cards into it') + '</p>' +
+    '<label class="f">Its date, or a short title</label><input type="text" data-title value="' + esc(m ? m.title : '') + '" placeholder="e.g. c. 1772">' +
+    '<label class="f">What it is</label><input type="text" data-name value="' + esc(m ? m.name || '' : '') + '" placeholder="e.g. Refl. 4480, or Metaphysik Herder">' +
+    '<label class="f">Where it stands</label><input type="text" data-cite value="' + esc(m ? m.cite || '' : '') + '" placeholder="e.g. AA 17:556">' +
+    '<label class="f">Its colour</label><div class="swatches">' + PALETTE.map((c, i) => '<input type="radio" name="mc" id="mc' + i + '" value="' + c + '"' + (c === col ? ' checked' : '') + '><label for="mc' + i + '" style="background:' + c + '"></label>').join('') + '</div>' +
+    (m ? '' : signField()) +
+    '<div class="row"><button type="button" class="btn solid" data-act="savemodel">' + (m ? 'Save' : 'Make the model') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div><p class="warn" data-err></p>';
+}
+function renderSide() {
+  const D = $('details');
+  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : sideCardForm(); return; }
+  if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
+  else if (sel.kind === 'card' && item(sel.ids[0])) D.innerHTML = sideCard(item(sel.ids[0]));
+  else if (sel.kind === 'arrow' && arrow(sel.ids[0])) D.innerHTML = sideArrow(arrow(sel.ids[0]));
+  else if (sel.kind === 'model' && model(sel.ids[0])) D.innerHTML = sideModel(model(sel.ids[0]));
+  else D.innerHTML = sideIntro();
+}
+// Redraw a form without losing what was typed in it.
+function keepFields(fn) {
+  const sels = ['[data-label]', '[data-sub]', '[data-text]', '[data-nq]', '[data-nc]', '[data-nh]', '[data-me]', '[data-model]', '[data-other]', '[data-type]'];
+  const D = $('details'), vals = sels.map(q => { const el = D.querySelector(q); return el ? el.value : null; });
+  const ev = [...D.querySelectorAll('[data-ev]')].map(x => x.checked);
+  fn();
+  sels.forEach((q, i) => { const el = D.querySelector(q); if (el && vals[i] != null && !el.readOnly && (q !== '[data-type]' || [...el.options].some(o => o.value === vals[i]))) el.value = vals[i]; });
+  const o = D.querySelector('[data-other]'), t = D.querySelector('[data-type]'); if (o && t) o.style.display = t.value === '__other' ? '' : 'none';
+  D.querySelectorAll('[data-ev]').forEach((x, i) => { if (ev[i] != null) x.checked = ev[i]; });
+}
+function showSide(which) { side = which; $('tdet').classList.toggle('on', which === 'details'); $('tread').classList.toggle('on', which === 'reading'); $('details').style.display = which === 'details' ? '' : 'none'; $('reading').classList.toggle('on', which === 'reading'); }
+function read(href) { $('portal').src = href; $('full').href = href; showSide('reading'); }
+
+/* ── Actions ──────────────────────────────────────────────────────────────── */
+function select(kind, ids) { sel = { kind, ids }; form = null; showSide('details'); render(); }
+function readSigned(D) {
+  const v = (D.querySelector('[data-me]') || {}).value;
+  const u = String(v == null ? me() : v).trim().replace(/^@/, '');
+  if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(u)) return null;
+  try { localStorage.setItem(ME, u); } catch (e) { /* fine */ }
+  return u;
+}
+function readNewQuote(D) {
+  const q = (D.querySelector('[data-nq]') || {}).value, c = (D.querySelector('[data-nc]') || {}).value, hsh = hashOf((D.querySelector('[data-nh]') || {}).value);
+  if (!q || !q.trim()) return null;
+  const o = { q: q.trim(), cite: (c || '').trim() || 'citation not given', pasted: true };
+  if (hsh) o.hash = hsh;
+  return o;
+}
+function centre() { const r = $('stage').getBoundingClientRect(); return [(r.width / 2 - cam.x) / cam.k - 80, (r.height / 2 - cam.y) / cam.k - 30]; }
+function saveCard(D) {
+  const err = t => { D.querySelector('[data-err]').textContent = t; };
+  const it = form.id ? item(form.id) : null, kind = it ? it.kind : form.kind;
+  const label = (D.querySelector('[data-label]') || {}).value, sub = (D.querySelector('[data-sub]') || {}).value, text = (D.querySelector('[data-text]') || {}).value;
+  const mdl = D.querySelector('[data-model]').value || null, nq = readNewQuote(D);
+  if (kind === 'part' && !String(label || '').trim()) return err('Name the part as Kant does.');
+  if ((kind === 'problem' || kind === 'note') && !String(text || '').trim()) return err('Say it in your words.');
+  if (kind === 'passage' && !nq && !(it && form.quotes.length)) return err('Paste the passage.');
+  const needSign = !(it && it.src === 'labels');
+  const by = needSign ? readSigned(D) : null;
+  if (needSign && !by) return err('Sign with your GitHub username.');
+  const keep = form.quotes;   // passages left on the card while editing
+  let id = form.id;
+  change(() => {
+    if (it) {
+      if (label != null && it.src !== 'labels') it.label = label.trim();
+      if (sub != null) it.sub = sub.trim();
+      if (text != null) it.text = text.trim();
+      it.model = mdl; it.quotes = keep;
+      if (nq) it.quotes.push(nq);
+      if (needSign) sign(it, by);
+    } else {
+      id = uid(kind[0]);
+      const n = { id, kind, model: mdl, quotes: nq ? [nq] : [], by, date: today() };
+      if (kind === 'part') { n.label = label.trim(); n.sub = (sub || '').trim(); }
+      if (kind === 'passage') n.label = (label || '').trim();
+      if (kind === 'problem' || kind === 'note') n.text = text.trim();
+      B.items.push(n);
+      const at = form.at || centre(); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
+      if (kind === 'passage' || kind === 'note') view().layers[kind] = true;
+      if (kind === 'problem') view().layers.problem = true;
+    }
+  });
+  form = null; sel = { kind: 'card', ids: [id] }; render();
+}
+function saveArrow(D) {
+  const err = t => { D.querySelector('[data-err]').textContent = t; };
+  let type = D.querySelector('[data-type]').value;
+  if (type === '__other') type = D.querySelector('[data-other]').value.trim();
+  if (!type) return err('Name the relation.');
+  const text = D.querySelector('[data-text]').value.trim();
+  if (!text && type !== 'divides into') return err('Say what the arrow claims, in your words.');
+  const by = readSigned(D);
+  if (!by) return err('Sign with your GitHub username.');
+  const ev = [...D.querySelectorAll('[data-ev]')].filter(x => x.checked).map(x => clone(form.choices[+x.dataset.ev]));
+  const old = form.id ? arrow(form.id) : null;
+  if (old) (old.evidence || []).forEach(q => { if (!form.choices.some(c => c.q === q.q && c.cite === q.cite)) ev.push(q); });
+  const nq = readNewQuote(D); if (nq) ev.push(nq);
+  const layer = type === 'divides into' ? 'division' : type === 'answers?' ? 'problem' : 'hypothesis';
+  let id = form.id;
+  change(() => {
+    if (old) { Object.assign(old, { from: form.from, to: form.to, type, layer, text, evidence: ev }); sign(old, by); }
+    else { id = uid('a'); B.arrows.push({ id, from: form.from, to: form.to, type, layer, text, evidence: ev, by, date: today() }); view().layers[layer] = true; }
+  });
+  form = null; sel = { kind: 'arrow', ids: [id] }; render();
+}
+function saveModel(D) {
+  const err = t => { D.querySelector('[data-err]').textContent = t; };
+  const title = D.querySelector('[data-title]').value.trim(), name = D.querySelector('[data-name]').value.trim(), cite = D.querySelector('[data-cite]').value.trim();
+  const color = (D.querySelector('input[name=mc]:checked') || {}).value || PALETTE[3];
+  if (!title) return err('Give it a date or a short title.');
+  const m = form.id ? model(form.id) : null;
+  let by = null;
+  if (!m) { by = readSigned(D); if (!by) return err('Sign with your GitHub username.'); }
+  let id = form.id; const split = form.split;
+  change(() => {
+    if (m) Object.assign(m, { title, name, cite, color });
+    else {
+      id = uid('m');
+      const n = { id, title, name, cite, color, by, date: today() };
+      if (split) { const olds = [...new Set(split.map(x => (item(x) || {}).model).filter(Boolean))]; if (olds.length === 1) n.from = olds[0]; split.forEach(x => { const it = item(x); if (it) it.model = id; }); }
+      else { const c = centre(); view().pos[id] = [Math.round(c[0]), Math.round(c[1])]; }
+      B.models.push(n); view().layers.frames = true;
+    }
+  });
+  form = null; sel = { kind: 'model', ids: [id] }; render();
+}
+function removeCards(ids) {
+  const set = new Set(ids);
+  change(() => {
+    B.items = B.items.filter(it => !set.has(it.id));
+    const goneA = B.arrows.filter(a => set.has(a.from) || set.has(a.to)).map(a => a.id);
+    B.arrows = B.arrows.filter(a => !goneA.includes(a.id));
+    B.removed.push(...ids.filter(id => BASE.items.some(b => b.id === id)), ...goneA.filter(id => BASE.arrows.some(b => b.id === id)));
+    B.views.forEach(v => { ids.forEach(id => delete v.pos[id]); v.hidden = (v.hidden || []).filter(x => !set.has(x)); });
+  });
+  if (focus && set.has(focus.id)) focus = null;
+  sel = { kind: null, ids: [] }; render();
+}
+function photograph(name, quiet) {
+  photos.push({ id: uid('ph'), name: name || 'The board, ' + fmtDate(new Date().toISOString()), date: new Date().toISOString(), by: me() || undefined, board: clone(B) });
+  save();
+  if (!quiet) { toast('Photographed. Photographs keeps it.'); renderTools(); }
+}
+function look(id) {
+  const p = photos.find(x => x.id === id); if (!p) return;
+  if (!live) live = { board: B, viewId, photo: id }; else live.photo = id;
+  B = clone(p.board); B.removed = B.removed || [];
+  if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
+  sel = { kind: null, ids: [] }; form = null; focus = null; mode = null;
+  render(); fit();
+}
+function back() { if (!live) return; B = live.board; viewId = live.viewId; live = null; sel = { kind: null, ids: [] }; form = null; render(); }
+function restore() {
+  if (!live) return;
+  const p = photos.find(x => x.id === live.photo), keep = B;
+  B = live.board; viewId = live.viewId; live = null;
+  photograph('Before bringing back “' + (p ? p.name : '') + '”', true);
+  change(() => { B = clone(keep); });
+  toast('Brought back. The board as it was is in Photographs.');
+  sel = { kind: null, ids: [] }; render();
+}
+function newView() {
+  if (ro()) return;
+  const name = prompt('A name for the new view. It starts as a copy of this one, and changes to it leave this one as it is.', 'A view of my own');
+  if (!name || !name.trim()) return;
+  const v = view(), id = uid('v');
+  change(() => { B.views.push({ id, name: name.trim(), pos: clone(Object.assign({}, ...B.views.slice().reverse().map(w => w.pos), v.pos)), hidden: (v.hidden || []).slice(), layers: Object.assign({}, v.layers), by: me() || undefined, date: today() }); viewId = id; });
+  render();
+}
+function viewMenu() {
+  if (ro()) return;
+  const v = view(), off = (v.hidden || []).length;
+  const ans = prompt('This view: “' + v.name + '”\n\nType a new name to rename it,\nor type  delete  to delete it' + (off ? ',\nor type  back  to put back the ' + off + ' cards taken off it' : '') + '.', v.name);
+  if (ans == null) return;
+  const a = ans.trim();
+  if (a === 'delete') { if (B.views.length < 2) return toast('The board needs at least one view.'); change(() => { B.views = B.views.filter(x => x.id !== v.id); if (BASE.views.some(b => b.id === v.id)) B.removed.push(v.id); viewId = B.views[0].id; }); render(); return; }
+  if (a === 'back') { change(() => { v.hidden = []; }); render(); return; }
+  if (a && a !== v.name) { change(() => { v.name = a; }); render(); }
+}
+// Lay a view out again: a column per model, each part beneath what divides it, the rest below.
+function tidy() {
+  if (ro()) return;
+  if (!confirm('Lay this view out again, a column per model? Undo (⌘Z) puts it back.')) return;
+  change(() => {
+    const v = view(); let x = 0;
+    const groups = B.models.map(m => ({ m, its: B.items.filter(i => i.model === m.id && shown(i)) })).concat([{ m: null, its: B.items.filter(i => !model(i.model) && shown(i)) }]).filter(g => g.its.length);
+    groups.forEach(g => {
+      const parts = g.its.filter(i => i.kind === 'part'), rest = g.its.filter(i => i.kind !== 'part'), ids = new Set(parts.map(p => p.id));
+      const divs = B.arrows.filter(a => a.layer === 'division' && ids.has(a.from) && ids.has(a.to)), depth = {};
+      parts.forEach(p => { if (!divs.some(a => a.to === p.id)) depth[p.id] = 0; });
+      for (let k = 0; k < parts.length; k++) divs.forEach(a => { if (depth[a.from] != null && (depth[a.to] == null || depth[a.to] < depth[a.from] + 1) && depth[a.from] < parts.length) depth[a.to] = depth[a.from] + 1; });
+      parts.forEach(p => { if (depth[p.id] == null) depth[p.id] = 0; });
+      const rows = []; parts.forEach(p => { (rows[depth[p.id]] = rows[depth[p.id]] || []).push(p); });
+      const widest = Math.max(1, ...rows.map(r => (r || []).length)), w = Math.max(widest * 185, rest.length ? 280 : 0);
+      let y = 0;
+      rows.forEach(r => { if (!r) return; const slot = w / r.length; r.forEach((p, i) => { v.pos[p.id] = [Math.round(x + slot * (i + 0.5) - 84), y]; }); y += Math.max(...r.map(p => sz(p.id).h)) + 60; });
+      rest.forEach(it => { v.pos[it.id] = [x, y]; y += sz(it.id).h + 24; });
+      x += w + 90;
+    });
+  });
+  render(); fit();
+}
+
+/* ── Wiring: the camera ───────────────────────────────────────────────────── */
+function toWorld(cx, cy) { const r = $('stage').getBoundingClientRect(); return [(cx - r.left - cam.x) / cam.k, (cy - r.top - cam.y) / cam.k]; }
+function zoomAt(f, cx, cy) {
+  const r = $('stage').getBoundingClientRect(), px = cx == null ? r.width / 2 : cx - r.left, py = cy == null ? r.height / 2 : cy - r.top;
+  const k = Math.min(3, Math.max(0.15, cam.k * f));
+  cam.x = px - (px - cam.x) * (k / cam.k); cam.y = py - (py - cam.y) * (k / cam.k); cam.k = k;
+  applyCam(); keepCam();
+}
+function fit() {
+  const rs = B.items.filter(shown).map(it => rect(it.id)).filter(Boolean);
+  B.models.forEach(m => { const f = layerOn('frames') && frameOf(m); if (f) rs.push({ x: f.x, y: f.y - 30, w: f.w, h: f.h + 30 }); });
+  if (!rs.length) return;
+  const x = Math.min(...rs.map(r => r.x)), y = Math.min(...rs.map(r => r.y)), X = Math.max(...rs.map(r => r.x + r.w)), Y = Math.max(...rs.map(r => r.y + r.h)) + 40;
+  const s = $('stage').getBoundingClientRect(), k = Math.min(1.4, Math.max(0.15, Math.min((s.width - 60) / (X - x), (s.height - 60) / (Y - y))));
+  cam = { k, x: (s.width - (X - x) * k) / 2 - x * k, y: 40 - y * k };
+  applyCam(); keepCam();
+}
+let camT;
+function keepCam() { if (ro()) return; clearTimeout(camT); camT = setTimeout(() => { view().cam = Object.assign({}, cam); save(); }, 400); }
+$('stage').addEventListener('wheel', e => {
+  if (e.target.closest('.float')) return;
+  e.preventDefault();
+  if (e.ctrlKey || e.metaKey) zoomAt(Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY);
+  else { cam.x -= e.deltaX; cam.y -= e.deltaY; applyCam(); keepCam(); }
+}, { passive: false });
+$('zin').addEventListener('click', () => zoomAt(1.25));
+$('zout').addEventListener('click', () => zoomAt(0.8));
+$('zfit').addEventListener('click', fit);
+$('ztidy').addEventListener('click', tidy);
+
+/* ── Wiring: the board ────────────────────────────────────────────────────── */
+let drag = null;   // { what: 'pan' | 'cards' | 'model' | 'link' | 'marq', … }
+$('stage').addEventListener('pointerdown', e => {
+  if (e.button !== 0 || e.target.closest('.float')) return;
+  const knob = e.target.closest('.knob'), card = e.target.closest('.card'), tab = e.target.closest('.ftab'), ar = e.target.closest('.ar');
+  const [wx, wy] = toWorld(e.clientX, e.clientY);
+  if (knob && !ro()) { drag = { what: 'link', from: card.dataset.id, sx: e.clientX, sy: e.clientY }; $('stage').classList.add('linking'); }
+  else if (card) {
+    const id = card.dataset.id;
+    if (mode) { const from = mode.linkFrom; mode = null; if (id !== from) { form = { kind: 'arrow', from, to: id }; showSide('details'); } render(); return; }
+    if (e.shiftKey) { const ids = sel.kind === 'card' ? sel.ids.slice() : []; const i = ids.indexOf(id); if (i >= 0) ids.splice(i, 1); else ids.push(id); select(ids.length ? 'card' : null, ids); return; }
+    if (!(sel.kind === 'card' && sel.ids.includes(id))) select('card', [id]);
+    drag = { what: 'cards', ids: sel.ids.slice(), sx: e.clientX, sy: e.clientY, start: sel.ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false };
+  }
+  else if (tab) { const id = tab.dataset.model; select('model', [id]); const ids = B.items.filter(i => i.model === id && shown(i)).map(i => i.id); drag = { what: 'model', model: id, ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()), mstart: (view().pos[id] || frameOf(model(id)) && [frameOf(model(id)).x, frameOf(model(id)).y] || [0, 0]).slice(), moved: false }; }
+  else if (ar) { if (mode) return; select('arrow', [ar.dataset.arrow]); return; }
+  else if (e.shiftKey) { drag = { what: 'marq', wx, wy }; }
+  else { drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false }; $('stage').classList.add('panning'); }
+  $('stage').setPointerCapture(e.pointerId);
+});
+$('stage').addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dx = (e.clientX - (drag.sx || 0)) / cam.k, dy = (e.clientY - (drag.sy || 0)) / cam.k;
+  if (drag.what === 'pan') { cam.x = drag.cx + (e.clientX - drag.sx); cam.y = drag.cy + (e.clientY - drag.sy); if (Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 3) drag.moved = true; applyCam(); return; }
+  if (drag.what === 'cards' || drag.what === 'model') {
+    if (ro()) return;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 3 / cam.k) return;
+    if (!drag.moved) { drag.moved = true; undoStack.push(JSON.stringify(B)); if (undoStack.length > 80) undoStack.shift(); redoStack = []; }
+    const v = view();
+    drag.ids.forEach((id, i) => { v.pos[id] = [Math.round(drag.start[i][0] + dx), Math.round(drag.start[i][1] + dy)]; });
+    if (drag.what === 'model' && !drag.ids.length) v.pos[drag.model] = [Math.round(drag.mstart[0] + dx), Math.round(drag.mstart[1] + dy)];
+    placeCards(); renderInk(neighbourhood());
+    if (drag.what === 'cards') { const tgt = dropTarget(drag.ids); $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = tgt && t.dataset.model === tgt.id ? '3px solid var(--ink)' : ''); }
+    return;
+  }
+  if (drag.what === 'link') {
+    const it = rect(drag.from), [wx, wy] = toWorld(e.clientX, e.clientY);
+    $('ghost').setAttribute('d', 'M' + (it.x + it.w) + ',' + (it.y + it.h / 2) + ' L' + wx + ',' + wy);
+    return;
+  }
+  if (drag.what === 'marq') {
+    const [wx, wy] = toWorld(e.clientX, e.clientY), m = $('marq');
+    m.style.display = ''; m.setAttribute('x', Math.min(wx, drag.wx)); m.setAttribute('y', Math.min(wy, drag.wy)); m.setAttribute('width', Math.abs(wx - drag.wx)); m.setAttribute('height', Math.abs(wy - drag.wy));
+  }
+});
+// A card dropped into another model's frame joins that model.
+function dropTarget(ids) {
+  if (!layerOn('frames') || ids.length !== 1) return null;
+  const it = item(ids[0]), r = rect(ids[0]); if (!r) return null;
+  const cx = r.x + r.w / 2, cy = r.y + r.h / 2, skip = new Set(ids);
+  if (it.model && model(it.model) && inside(frameOf(model(it.model), skip), cx, cy)) return null;
+  return B.models.find(m => m.id !== it.model && inside(frameOf(m, skip), cx, cy)) || null;
+}
+$('stage').addEventListener('pointerup', e => {
+  if (!drag) return;
+  const d = drag; drag = null;
+  $('stage').classList.remove('panning', 'linking');
+  if (d.what === 'pan') { if (!d.moved && !mode && !form && sel.kind) select(null, []); $('chooser').classList.remove('show'); keepCam(); return; }
+  if (d.what === 'cards' || d.what === 'model') {
+    $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = '');
+    if (!d.moved) return;
+    if (d.what === 'cards') {
+      const tgt = dropTarget(d.ids);
+      if (tgt) { const it = item(d.ids[0]), was = model(it.model); it.model = tgt.id; toast('Moved into ' + tgt.title + (was ? ', out of ' + was.title : '') + '. Undo with ⌘Z.'); }
+    }
+    save(); render(); return;
+  }
+  if (d.what === 'link') {
+    $('ghost').setAttribute('d', '');
+    const el = document.elementFromPoint(e.clientX, e.clientY), card = el && el.closest('.card');
+    if (card && card.dataset.id !== d.from) { form = { kind: 'arrow', from: d.from, to: card.dataset.id }; sel = { kind: null, ids: [] }; showSide('details'); render(); }
+    else if (Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) < 4) { mode = { linkFrom: d.from }; render(); }
+    return;
+  }
+  if (d.what === 'marq') {
+    const m = $('marq'), x = +m.getAttribute('x'), y = +m.getAttribute('y'), w = +m.getAttribute('width'), h = +m.getAttribute('height');
+    m.style.display = 'none'; m.setAttribute('width', 0);
+    const ids = B.items.filter(shown).filter(it => { const r = rect(it.id); return r && r.x < x + w && r.x + r.w > x && r.y < y + h && r.y + r.h > y; }).map(it => it.id);
+    select(ids.length ? 'card' : null, ids);
+  }
+});
+$('stage').addEventListener('dblclick', e => {
+  const under = document.elementFromPoint(e.clientX, e.clientY);
+  if (ro() || !under || under.closest('.float, .ftab, .ar')) return;
+  const card = under.closest('.card');
+  if (card) { form = { kind: 'card', id: card.dataset.id, quotes: clone(item(card.dataset.id).quotes || []) }; showSide('details'); render(); return; }
+  const [wx, wy] = toWorld(e.clientX, e.clientY), r = $('stage').getBoundingClientRect(), c = $('chooser');
+  const inM = B.models.find(m => inside(frameOf(m), wx, wy));
+  c.dataset.at = JSON.stringify([wx - 20, wy - 15]); c.dataset.model = inM ? inM.id : '';
+  c.innerHTML = '<span class="ttl">Put here' + (inM ? ', in ' + esc(inM.title) : '') + ':</span><button type="button" class="btn" data-new="part">Part</button><button type="button" class="btn" data-new="passage">Passage</button><button type="button" class="btn k-problem" data-new="problem">Problem</button><button type="button" class="btn k-note" data-new="note">Note</button>';
+  c.style.left = Math.min(e.clientX - r.left, r.width - 240) + 'px'; c.style.top = Math.min(e.clientY - r.top, r.height - 90) + 'px';
+  c.classList.add('show');
+});
+$('chooser').addEventListener('click', e => {
+  const b = e.target.closest('[data-new]'); if (!b) return;
+  const c = $('chooser'); c.classList.remove('show');
+  form = { kind: b.dataset.new, at: JSON.parse(c.dataset.at), model: c.dataset.model || null, quotes: [] };
+  sel = { kind: null, ids: [] }; showSide('details'); render();
+});
+$('banner').addEventListener('click', e => {
+  const b = e.target.closest('[data-b]'); if (!b) return;
+  const k = b.dataset.b;
+  if (k === 'back') back(); else if (k === 'restore') restore();
+  else if (k === 'nolink') { mode = null; render(); }
+  else if (k === 'nofocus') { focus = null; render(); }
+  else if (k === 'hop1' || k === 'hop2') { focus.hops = k === 'hop1' ? 1 : 2; render(); }
+});
+$('layers').addEventListener('change', e => {
+  const k = e.target.dataset.layer; if (!k) return;
+  if (ro()) { view().layers[k] = e.target.checked; render(); return; }
+  view().layers = view().layers || {}; view().layers[k] = e.target.checked; save(); render();
+});
+$('layers').addEventListener('click', e => { if (e.target.closest('[data-fold]')) { $('layers').classList.toggle('closed'); renderLayers(); } });
+
+/* ── Wiring: the tools and the side ───────────────────────────────────────── */
+document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => {
+  if (ro()) return toast('This is a photograph. Go back to the board to add to it.');
+  const k = b.dataset.add, inM = sel.kind === 'model' ? sel.ids[0] : sel.kind === 'card' && item(sel.ids[0]) ? item(sel.ids[0]).model : null;
+  form = k === 'model' ? { kind: 'model' } : { kind: k, model: inM || null, quotes: [] };
+  showSide('details'); renderSide();
+}));
+$('vsel').addEventListener('change', () => {
+  viewId = $('vsel').value; focus = null; sel = { kind: null, ids: [] }; form = null;
+  render();
+  const c = view().cam; if (c) { cam = Object.assign({}, c); applyCam(); } else fit();
+  save();
+});
+$('vnew').addEventListener('click', newView);
+$('vmore').addEventListener('click', viewMenu);
+$('search').addEventListener('input', () => { query = $('search').value.trim(); renderTools(); lit(); renderInk(neighbourhood()); });
+$('undo').addEventListener('click', undo);
+$('redo').addEventListener('click', redo);
+$('snap').addEventListener('click', () => {
+  if (ro()) return;
+  const name = prompt('A name for this photograph of the board:', 'The board, ' + fmtDate(new Date().toISOString()));
+  if (name == null) return;
+  photograph(name.trim());
+});
+$('photos').addEventListener('click', () => { form = { kind: 'photos' }; showSide('details'); renderSide(); });
+$('tdet').addEventListener('click', () => showSide('details'));
+$('tread').addEventListener('click', () => { if (!$('portal').getAttribute('src')) read(PORTAL); else showSide('reading'); });
+$('details').addEventListener('click', e => {
+  const D = $('details');
+  const rd = e.target.closest('[data-read]'); if (rd) { read(rd.dataset.read); return; }
+  const ra = e.target.closest('[data-arrow]'); if (ra) { select('arrow', [ra.dataset.arrow]); return; }
+  const rc = e.target.closest('[data-card]'); if (rc) { select('card', [rc.dataset.card]); return; }
+  const lk = e.target.closest('[data-look]'); if (lk) { look(lk.dataset.look); return; }
+  const up = e.target.closest('[data-unphoto]'); if (up) { if (confirm('Delete this photograph? It cannot be brought back.')) { photos = photos.filter(p => p.id !== up.dataset.unphoto); save(); renderTools(); renderSide(); } return; }
+  const uq = e.target.closest('[data-unq]'); if (uq && form && form.quotes) { form.quotes.splice(+uq.dataset.unq, 1); keepFields(renderSide); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act, id = sel.ids[0];
+  if (act === 'cancel') { form = null; renderSide(); return; }
+  if (act === 'savecard') return saveCard(D);
+  if (act === 'savearrow') return saveArrow(D);
+  if (act === 'savemodel') return saveModel(D);
+  if (act === 'swap') { const t = form.from; form.from = form.to; form.to = t; keepFields(renderSide); return; }
+  if (act === 'edit') { form = { kind: 'card', id, quotes: clone(item(id).quotes || []) }; renderSide(); return; }
+  if (act === 'linkfrom') { mode = { linkFrom: id }; render(); return; }
+  if (act === 'focus') { focus = { id, hops: 1 }; render(); return; }
+  if (act === 'offview') { const ids = sel.ids.slice(); change(() => { const v = view(); v.hidden = (v.hidden || []).concat(ids); }); toast('Taken off this view; it is still on the others. “this view…” puts it back.'); select(null, []); return; }
+  if (act === 'delete') { if (confirm(sel.ids.length > 1 ? 'Delete these ' + sel.ids.length + ' cards, and their arrows, from every view?' : 'Delete this card, and its arrows, from every view?')) removeCards(sel.ids.slice()); return; }
+  if (act === 'newmodel') { form = { kind: 'model', split: sel.ids.slice() }; renderSide(); return; }
+  if (act === 'moveinto') { const to = D.querySelector('[data-into]').value || null, ids = sel.ids.slice(); change(() => ids.forEach(x => { item(x).model = to; })); render(); return; }
+  if (act === 'editarrow') { const a = arrow(id); form = { kind: 'arrow', id, from: a.from, to: a.to }; renderSide(); return; }
+  if (act === 'delarrow') { if (confirm('Delete this arrow?')) { change(() => { B.arrows = B.arrows.filter(a => a.id !== id); if (BASE.arrows.some(a => a.id === id)) B.removed.push(id); }); select(null, []); } return; }
+  if (act === 'editmodel') { form = { kind: 'model', id }; renderSide(); return; }
+  if (act === 'selmodel') { select('card', B.items.filter(i => i.model === id && shown(i)).map(i => i.id)); return; }
+  if (act === 'delmodel') { if (confirm('Delete this model? Its cards stay on the board, without a model.')) { change(() => { B.items.forEach(i => { if (i.model === id) i.model = null; }); B.models = B.models.filter(m => m.id !== id); if (BASE.models.some(m => m.id === id)) B.removed.push(id); }); select(null, []); } return; }
+  if (act === 'reset') { if (confirm('Set the board back to the study’s own? This board is photographed first.')) { photograph('Before starting again', true); change(() => { B = clone(BASE); B.removed = []; }); viewId = B.views[0].id; form = null; sel = { kind: null, ids: [] }; render(); fit(); toast('The study’s board. The one before is in Photographs.'); } return; }
+});
+$('details').addEventListener('change', e => {
+  if (e.target.matches('[data-type]')) { const o = $('details').querySelector('[data-other]'); o.style.display = e.target.value === '__other' ? '' : 'none'; if (e.target.value === '__other') o.focus(); }
+});
+document.addEventListener('keydown', e => {
+  const typing = e.target.closest && e.target.closest('input, textarea, select');
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+  if (typing) return;
+  if (e.key === 'Escape') { if (mode) mode = null; else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && sel.kind && !ro()) {
+    e.preventDefault();
+    if (sel.kind === 'card') { if (confirm(sel.ids.length > 1 ? 'Delete these ' + sel.ids.length + ' cards, and their arrows?' : 'Delete this card, and its arrows?')) removeCards(sel.ids.slice()); }
+    else if (sel.kind === 'arrow') { const id = sel.ids[0]; if (confirm('Delete this arrow?')) { change(() => { B.arrows = B.arrows.filter(a => a.id !== id); if (BASE.arrows.some(a => a.id === id)) B.removed.push(id); }); select(null, []); } }
+    return;
+  }
+  if ((e.key === 'f' || e.key === 'F') && sel.kind === 'card' && sel.ids.length === 1) { focus = { id: sel.ids[0], hops: focus && focus.id === sel.ids[0] && focus.hops === 1 ? 2 : 1 }; render(); }
+});
+$('export').addEventListener('click', () => {
+  const data = { kind: 'kantlab-board', study: 'kinds-of-nothing', v: 1, saved: new Date().toISOString(), by: me() || undefined, board: live ? live.board : B, photos };
+  const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'kinds-of-nothing-board-' + today() + (me() ? '-' + me() : '') + '.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+$('import').addEventListener('click', () => { if (ro()) return; $('file').value = ''; $('file').click(); });
+$('file').addEventListener('change', () => {
+  const f = $('file').files && $('file').files[0]; if (!f) return;
+  f.text().then(s => {
+    const d = JSON.parse(s);
+    if (!d || d.kind !== 'kantlab-board' || !d.board || !Array.isArray(d.board.items)) throw new Error('shape');
+    const before = { m: B.models.length, i: B.items.length, a: B.arrows.length, v: B.views.length };
+    // Someone else's board: what is new comes in beside yours; nothing of yours is overwritten.
+    change(() => { merge(B, { models: d.board.models || [], items: d.board.items, arrows: d.board.arrows || [], views: d.board.views || [] }); });
+    const have = new Set(photos.map(p => p.id)); (d.photos || []).forEach(p => { if (!have.has(p.id)) photos.push(p); }); save();
+    render();
+    toast('Added ' + (B.items.length - before.i) + ' cards, ' + (B.arrows.length - before.a) + ' arrows, ' + (B.models.length - before.m) + ' models and ' + (B.views.length - before.v) + ' views. Nothing of yours was changed.');
+  }).catch(() => alert('That file is not an export of this board.'));
+});
+
+/* ── Init ─────────────────────────────────────────────────────────────────── */
+load();
+render();
+// Cards are measured once the page is laid out, and again when its fonts arrive, since they change every card's size.
+const settle = () => { renderBoard(); if (view().cam) { cam = Object.assign({}, view().cam); applyCam(); } else fit(); };
+requestAnimationFrame(settle);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!drag) settle(); });
+</script>
+</body>
+</html>
