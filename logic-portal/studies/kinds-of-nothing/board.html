@@ -261,6 +261,19 @@
   #sync.bad i { background: var(--prob); }
   #sync.practice i { background: #2f5d8a; }
   #sync .linkish { font-size: 0.84rem; }
+
+  /* editing in place, on the board itself */
+  .card [contenteditable="true"], .card [contenteditable="plaintext-only"] { -webkit-user-select: text; user-select: text; cursor: text; outline: 2px solid #d9a441; outline-offset: 2px; border-radius: 3px; background: #fffdf3; min-width: 2.5rem; display: inline-block; }
+  .pill-edit { position: absolute; z-index: 5; font: inherit; font-size: 13px; border: 2px solid #d9a441; border-radius: 10px; padding: 0.05rem 0.5rem; background: #fff; text-align: center; width: 180px; }
+  /* boxes: divisions drawn on the board, behind the cards */
+  .card.k-box { background: rgba(255, 255, 255, 0.28); border: 2px dashed var(--accent-light); border-left-width: 2px; border-radius: 10px; box-shadow: none; padding: 0.3rem 0.6rem; }
+  .card.k-box:hover { box-shadow: none; background: rgba(255, 255, 255, 0.42); }
+  .card.k-box .blab { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 0.95rem; letter-spacing: 0.03em; }
+  .card.k-box .blab:empty::before { content: 'double-click to name it'; color: var(--faded); font-family: 'EB Garamond', serif; font-style: italic; font-weight: 400; letter-spacing: 0; }
+  .card .bgrip { position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, var(--accent-light) 50%); border-bottom-right-radius: 8px; opacity: 0.75; }
+  #world.far .card.k-box .blab { font-size: 1.5rem; }
+  #stage.tool-box, #stage.tool-box .card { cursor: crosshair; }
+  @media (pointer: coarse) { .card .bgrip { width: 30px; height: 30px; } }
 </style>
 </head>
 <body>
@@ -311,6 +324,7 @@
     <div id="palette" class="float" role="toolbar" aria-label="Tools">
       <button type="button" class="tl on" data-tool="move" title="Move cards and models, and drag the bare board to move about (V)"><span>✋</span>Move</button>
       <button type="button" class="tl" data-tool="select" title="Drag around cards to select several (S)"><span>⬚</span>Select</button>
+      <button type="button" class="tl" data-tool="box" title="Drag on the board to draw a box: a division you can name, resize, fill and draw arrows to (B)"><span>▭</span>Box</button>
       <button type="button" class="tl" data-tool="pen" title="Draw on the board (P). An Apple Pencil draws on the bare board in any tool."><span>✎</span>Draw</button>
       <button type="button" class="tl" data-tool="erase" title="Rub out drawing (E)"><span>⌫</span>Rub out</button>
       <div class="pens" id="pens"></div>
@@ -329,6 +343,7 @@
   </aside>
 </div>
 
+<datalist id="arrowtypes"><option value="divides into"><option value="kept"><option value="renamed"><option value="split into"><option value="merged from"><option value="dropped"><option value="new"><option value="answers?"></datalist>
 <div id="lock" class="lock" role="dialog" aria-modal="true" aria-labelledby="lockh">
   <div class="lockcard">
     <h2 id="lockh">The seminar’s board</h2>
@@ -382,6 +397,7 @@ const LAYERS = [
   { key: 'note', label: 'Notes', mark: 'sq' },
   { key: 'computer', label: 'Same label (the computer’s)', color: '#9a8f7a', dash: '2 4' },
   { key: 'drawing', label: 'Drawing', color: '#b03a2e' },
+  { key: 'box', label: 'Boxes', mark: 'sq' },
 ];
 const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', computer: '#9a8f7a', passage: '#5c3d1e', note: '#5c3d1e' };
 const DASH = { problem: '7 4', computer: '2 4' };
@@ -418,7 +434,8 @@ let shared = null;     // the shared board, once opened: { token, sha, base, eta
 let locked = false;    // the shared board is set up but not opened here: the study's board, read only
 let prefs = {};        // this device's camera, layers and view, kept apart from the board
 let migrate = null;    // a board of this device's own from before the board was shared: { old, n }
-let expiring = null;   // days until the board's key expires, while that is being shown
+let expiring = null;
+let editing = null;    // something being edited in place: { el, finish }   // days until the board's key expires, while that is being shown
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
@@ -444,6 +461,7 @@ function shown(it) { if (!it || (view().hidden || []).includes(it.id)) return fa
 const arrowShown = a => layerOn(a.layer) && shown(item(a.from)) && shown(item(a.to));
 function nameOf(id) { const it = item(id); if (!it) return '(gone)'; const m = model(it.model); return cardTitle(it) + (m ? ' (' + m.title + ')' : ''); }
 function cardTitle(it) {
+  if (it.kind === 'box') return 'Box' + (it.label ? ': ' + it.label : '');
   if (it.kind === 'part') return it.label || '(a part)';
   if (it.kind === 'passage') return it.label || (it.quotes[0] ? it.quotes[0].cite : 'a passage');
   const t = String(it.text || ''); return (it.kind === 'problem' ? 'Problem: ' : 'Note: ') + (t.length > 50 ? t.slice(0, 49) + '…' : t);
@@ -669,7 +687,7 @@ function scheduleSave() {
 async function push(tries) {
   tries = tries || 0;
   if (!shared || !shared.canSave || shared.broken || !shared.base) return;
-  if (drag) { scheduleSave(); return; }
+  if (drag || editing) { scheduleSave(); return; }
   if (shared.pushing) { shared.again = true; return; }
   if (!dirty()) { setStatus('saved'); return; }
   shared.pushing = true; setStatus('saving');
@@ -716,7 +734,7 @@ async function check() {
   } catch (e) { setStatus('error', e); if (e.status === 401) { forgetToken(); showLock('The board’s key no longer works. Ask for a new one to be made.'); } }
 }
 function incoming(theirs, sha, by) {
-  if (drag) { shared.waiting = { theirs, sha, by }; return; }   // taken in when the drag ends
+  if (drag || editing) { shared.waiting = { theirs, sha, by }; return; }   // taken in when the drag or the edit ends
   const mine = dirty();
   setCur(mine ? merge3(shared.base, curBoard(), theirs) : theirs);
   shared.base = clone(theirs); shared.sha = sha;
@@ -905,20 +923,23 @@ function cardHtml(it) {
   const unchecked = (it.quotes || []).some(q => q.pasted) ? '<span class="chk">pasted, not yet checked</span>' : '';
   const q0 = (it.quotes || [])[0];
   let inner = '';
+  if (it.kind === 'box') return '<div class="card k-box" data-id="' + esc(it.id) + '" style="width:' + (+it.w || 280) + 'px;height:' + (+it.h || 180) + 'px"><span class="blab">' + esc(it.label || '') + '</span>' + (ro() ? '' : '<span class="bgrip" title="Drag to resize"></span><span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+  if (it.kantLabel != null && it.kantLabel !== it.label) inner = '';
   if (it.kind === 'part') {
     inner = '<span class="lab' + (isLat(it.label) ? ' lat' : '') + '">' + esc(it.label) + '</span>' + (it.sub ? '<span class="sub">' + esc(it.sub) + '</span>' : '') +
       (it.quotes.length ? '<span class="count">' + it.quotes.length + (it.quotes.length === 1 ? ' passage' : ' passages') + '</span>' : '') +
-      (q0 ? '<div class="nearq">“' + esc(q0.q.length > 230 ? q0.q.slice(0, 229) + '…' : q0.q) + '” <span>' + esc(q0.cite) + '</span></div>' : '') + unchecked + mine;
+      (q0 ? '<div class="nearq">“' + esc(q0.q.length > 230 ? q0.q.slice(0, 229) + '…' : q0.q) + '” <span>' + esc(q0.cite) + '</span></div>' : '') + unchecked + mine +
+      (it.kantLabel != null && it.kantLabel !== it.label ? '<span class="who">Kant: ' + esc(it.kantLabel) + (it.editedBy ? ' · renamed by @' + esc(it.editedBy) : '') + '</span>' : '');
   } else if (it.kind === 'passage') {
     inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 ? '<div class="pq">“' + esc(q0.q.length > 320 ? q0.q.slice(0, 319) + '…' : q0.q) + '”</div><span class="pc">' + esc(q0.cite) + '</span>' : '') + unchecked + mine;
   } else {
-    inner = '<span class="tag">' + (it.kind === 'problem' ? 'Problem' : 'Note') + '</span>' + esc(it.text) + (it.quotes && it.quotes.length ? '<span class="count">' + it.quotes.length + (it.quotes.length === 1 ? ' passage' : ' passages') + '</span>' : '') + unchecked + mine;
+    inner = '<span class="tag">' + (it.kind === 'problem' ? 'Problem' : 'Note') + '</span><span class="txt">' + esc(it.text) + '</span>' + (it.quotes && it.quotes.length ? '<span class="count">' + it.quotes.length + (it.quotes.length === 1 ? ' passage' : ' passages') + '</span>' : '') + unchecked + mine;
   }
   return '<div class="card k-' + it.kind + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'part' || it.kind === 'passage' ? esc(col) : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
 }
 function renderCards() {
   placeUnplaced();
-  const vis = B.items.filter(shown), tabs = layerOn('frames') ? B.models.map(m => {
+  const vis = B.items.filter(shown).sort((a, b) => (b.kind === 'box') - (a.kind === 'box')), tabs = layerOn('frames') ? B.models.map(m => {
     return '<div class="ftab" data-model="' + esc(m.id) + '" style="background:' + esc(m.color) + '"><b>' + esc(m.title) + '</b><i>' + esc(m.name || '') + '</i>' + (m.cite ? '<small>' + esc(m.cite) + (m.ocr ? ' · OCR' : '') + '</small>' : '') + '</div>';
   }).join('') : '';
   const grips = layerOn('frames') && !ro() ? B.models.map(m => '<div class="fgrip" data-grip="' + esc(m.id) + '" style="background:' + esc(m.color) + '" title="Drag to spread its cards apart, or to pull them together">⤡</div>').join('') : '';
@@ -1008,7 +1029,7 @@ function renderDrawn() {
 function applyCam() {
   $('world').style.transform = 'translate(' + cam.x + 'px,' + cam.y + 'px) scale(' + cam.k + ')';
   const far = cam.k < FAR, near = cam.k >= NEAR, w = $('world');
-  if (w.classList.contains('far') !== far || w.classList.contains('near') !== near) { w.classList.toggle('far', far); w.classList.toggle('near', near); renderBoard(); }
+  if (w.classList.contains('far') !== far || w.classList.contains('near') !== near) { w.classList.toggle('far', far); w.classList.toggle('near', near); if (!editing) renderBoard(); }
   $('zk').textContent = Math.round(cam.k * 100) + '%';
 }
 function renderBoard() { renderCards(); const nb = lit(); renderInk(nb); }
@@ -1062,8 +1083,11 @@ function sideIntro() {
   return '<div class="intro"><h2>The board</h2><p class="sub">A whiteboard that keeps its texts</p>' +
     '<p>Every card is a part of a model, a passage, a problem or a note. The parts are built from Kant’s own labels, and each carries the passages it rests on: click a card to read them, here or in the portal beside the board.</p>' +
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
-    '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and say what it claims: <i>kept, renamed, split into, merged from, dropped, new</i>, or <i>answers?</i> to a problem, or a type of your own.</li>' +
-    '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a part, passage or problem.</li>' +
+    '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card. Inside a model it is a division; to a problem, <i>answers?</i>; otherwise type its name on the spot: <i>kept, renamed, split into, merged from, dropped, new</i>, or your own. Its claim and passages can be added under <i>Edit</i>.</li>' +
+    '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a part, passage, problem or box.</li>' +
+    '<li><b>A Reflexion by its number</b>: double-click the board, type <i>R 3990</i>, and press Enter. Its words come from the portal, with citation and phase.</li>' +
+    '<li><b>Edit in place</b>: double-click any card, arrow or model name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
+    '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag out a division; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
     '<li><b>Models</b> are frames around their cards. Grab any bare part of a frame to move the whole model; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into another frame to move it there; select several and make them a model of their own to split one.</li>' +
     '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
     '<li><b>On an iPad</b>: a finger moves cards, models and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>' +
@@ -1079,11 +1103,12 @@ function sideIntro() {
 }
 function sideCard(it) {
   const m = model(it.model), arr = B.arrows.filter(a => a.from === it.id || a.to === it.id);
-  const title = it.kind === 'part' ? it.label : it.kind === 'passage' ? (it.label || 'A passage') : it.kind === 'problem' ? 'A problem' + (m ? ' of ' + m.title : '') : 'A note';
+  const title = it.kind === 'box' ? 'A box' + (it.label ? ': ' + it.label : '') : it.kind === 'part' ? it.label : it.kind === 'passage' ? (it.label || 'A passage') : it.kind === 'problem' ? 'A problem' + (m ? ' of ' + m.title : '') : 'A note';
   let h = '<h2' + (isLat(title) ? ' class="lat"' : '') + '>' + esc(title) + '</h2><p class="sub">' + mchip(m) + esc(it.kind === 'part' ? (it.sub || '') : (m ? m.name : '')) + '</p>';
   if (it.text) h += '<span class="k">' + (it.kind === 'problem' ? 'In the seminar’s words' : 'Written on the board') + '</span><div class="stmt' + (it.kind === 'problem' ? ' problem' : '') + '">' + esc(it.text) + '</div>';
   if (it.by) h += signedHtml(it);
   if (it.src === 'labels') h += '<p class="by">A part built from Kant’s own label; the passages are cut from the portal’s text, verbatim.</p>';
+  if (it.kantLabel != null && it.kantLabel !== it.label) h += '<p class="warn">Kant’s own label is <i>' + esc(it.kantLabel) + '</i>; renamed here' + (it.editedBy ? ' by @' + esc(it.editedBy) : '') + '.</p>';
   h += '<span class="k">' + (it.kind === 'part' ? 'In Kant’s words' : it.kind === 'problem' ? 'The passages it shows in' : 'Passages') + '</span>' +
     ((it.quotes || []).length ? it.quotes.map((q, i) => quoteHtml(q, i)).join('') : '<p class="empty">None yet.</p>');
   if (m && m.ocr && it.kind === 'part') h += '<p class="warn">The portal’s text of AA II is OCR: these quotations keep its slips.</p>';
@@ -1379,9 +1404,9 @@ function tidy() {
   const before = {}; B.models.forEach(m => { const f = frameOf(m); if (f) before[m.id] = [f.x, f.y]; });
   change(() => {
     const v = view(); let x = 0;
-    const groups = B.models.map(m => ({ m, its: B.items.filter(i => i.model === m.id && shown(i)) })).concat([{ m: null, its: B.items.filter(i => !model(i.model) && shown(i)) }]).filter(g => g.its.length);
+    const groups = B.models.map(m => ({ m, its: B.items.filter(i => i.model === m.id && shown(i)) })).concat([{ m: null, its: B.items.filter(i => !model(i.model) && shown(i) && i.kind !== 'box') }]).filter(g => g.its.length);
     groups.forEach(g => {
-      const parts = g.its.filter(i => i.kind === 'part'), rest = g.its.filter(i => i.kind !== 'part'), ids = new Set(parts.map(p => p.id));
+      const parts = g.its.filter(i => i.kind === 'part'), rest = g.its.filter(i => i.kind !== 'part' && i.kind !== 'box'), ids = new Set(parts.map(p => p.id));
       const divs = B.arrows.filter(a => a.layer === 'division' && ids.has(a.from) && ids.has(a.to)), depth = {};
       parts.forEach(p => { if (!divs.some(a => a.to === p.id)) depth[p.id] = 0; });
       for (let k = 0; k < parts.length; k++) divs.forEach(a => { if (depth[a.from] != null && (depth[a.to] == null || depth[a.to] < depth[a.from] + 1) && depth[a.from] < parts.length) depth[a.to] = depth[a.from] + 1; });
@@ -1514,20 +1539,29 @@ $('stage').addEventListener('pointerdown', e => {
     if (touches.size > 2) return;
   }
   if (drag) return;
-  const t = e.target, knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), ar = t.closest('.ar'), fr = t.closest('.frame');
+  const t = e.target;
+  if (t.isContentEditable || t.closest('.pill-edit')) return;   // a caret or a selection in what is being edited
+  if (editing) commitEditing();
+  const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame');
   const bare = !knob && !card && !tab && !grip && !ar;
   const [wx, wy] = toWorld(e.clientX, e.clientY);
   if (spaceDown) drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
   else if (tool === 'erase' && !ro()) { drag = { what: 'erase', changed: false }; eraseAt(wx, wy, drag); }
   else if (draws(e, bare)) drag = { what: 'ink', pts: [[wx, wy]], pen: e.pointerType === 'pen' };
+  else if (tool === 'box' && !ro() && !knob && !bgrip) drag = { what: 'boxdraw', wx, wy, sx: e.clientX, sy: e.clientY };
+  else if (bgrip && !ro()) { const id = bgrip.closest('.card').dataset.id, it = item(id); select('card', [id]); drag = { what: 'boxsize', id, sx: e.clientX, sy: e.clientY, w0: +it.w || 280, h0: +it.h || 180, moved: false }; }
   else if (tool === 'select' && !card) drag = { what: 'marq', wx, wy };
   else if (knob && !ro()) { drag = { what: 'link', from: card.dataset.id, sx: e.clientX, sy: e.clientY }; $('stage').classList.add('linking'); }
   else if (card) {
     const id = card.dataset.id;
-    if (mode) { const from = mode.linkFrom; mode = null; if (id !== from) { form = { kind: 'arrow', from, to: id }; showSide('details'); } render(); return; }
+    if (mode) { const from = mode.linkFrom; mode = null; if (id !== from) makeArrow(from, id); else render(); return; }
     if (e.shiftKey || tool === 'select') { const ids = sel.kind === 'card' ? sel.ids.slice() : []; const i = ids.indexOf(id); if (i >= 0) ids.splice(i, 1); else ids.push(id); select(ids.length ? 'card' : null, ids); return; }
+    const wasSel = sel.kind === 'card' && sel.ids.length === 1 && sel.ids[0] === id;
     if (!(sel.kind === 'card' && sel.ids.includes(id))) select('card', [id]);
-    drag = { what: 'cards', ids: sel.ids.slice(), sx: e.clientX, sy: e.clientY, start: sel.ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false };
+    // a box carries what lies inside it
+    const ids = sel.ids.slice();
+    sel.ids.forEach(x => { const b = item(x); if (!b || b.kind !== 'box') return; const r = rect(x); B.items.filter(shown).forEach(o => { if (o.id === x || ids.includes(o.id)) return; const q = rect(o.id); if (q && inside(r, q.x + q.w / 2, q.y + q.h / 2)) ids.push(o.id); }); });
+    drag = { what: 'cards', ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false, wasSel, clicked: id };
   }
   else if (grip && !ro()) { select('model', [grip.dataset.grip]); drag = spreadDrag(grip.dataset.grip, e); }
   else if (tab) { select('model', [tab.dataset.model]); drag = modelDrag(tab.dataset.model, e); }
@@ -1589,7 +1623,16 @@ $('stage').addEventListener('pointermove', e => {
     $('ghost').setAttribute('d', 'M' + (it.x + it.w) + ',' + (it.y + it.h / 2) + ' L' + wx + ',' + wy);
     return;
   }
-  if (drag.what === 'marq') {
+  if (drag.what === 'boxsize') {
+    if (ro()) return;
+    if (!drag.moved) { drag.moved = true; startUndo(); }
+    const it = item(drag.id); if (!it) return;
+    it.w = Math.max(110, Math.round(drag.w0 + dx)); it.h = Math.max(70, Math.round(drag.h0 + dy));
+    const el = [...$('cards').querySelectorAll('.card')].find(c => c.dataset.id === drag.id);
+    if (el) { el.style.width = it.w + 'px'; el.style.height = it.h + 'px'; size[drag.id] = { w: el.offsetWidth, h: el.offsetHeight }; }
+    renderInk(neighbourhood()); return;
+  }
+  if (drag.what === 'marq' || drag.what === 'boxdraw') {
     const [wx, wy] = toWorld(e.clientX, e.clientY), m = $('marq');
     m.style.display = ''; m.setAttribute('x', Math.min(wx, drag.wx)); m.setAttribute('y', Math.min(wy, drag.wy)); m.setAttribute('width', Math.abs(wx - drag.wx)); m.setAttribute('height', Math.abs(wy - drag.wy));
   }
@@ -1597,7 +1640,7 @@ $('stage').addEventListener('pointermove', e => {
 // A card dropped into another model's frame joins that model.
 function dropTarget(ids) {
   if (!layerOn('frames') || ids.length !== 1) return null;
-  const it = item(ids[0]), r = rect(ids[0]); if (!r) return null;
+  const it = item(ids[0]), r = rect(ids[0]); if (!r || it.kind === 'box') return null;
   const cx = r.x + r.w / 2, cy = r.y + r.h / 2, skip = new Set(ids);
   if (it.model && model(it.model) && inside(frameOf(model(it.model), skip), cx, cy)) return null;
   return B.models.find(m => m.id !== it.model && inside(frameOf(m, skip), cx, cy)) || null;
@@ -1610,12 +1653,22 @@ function pointerEnd(e, cancelled) {
   const d = drag; drag = null;
   $('stage').classList.remove('panning', 'linking');
   if (d.what === 'pan') { if (!d.moved && !cancelled && !tapped(e) && !mode && !form && sel.kind) select(null, []); keepCam(); return; }
+  if (d.what === 'boxsize') { if (d.moved) { save(); render(); } return; }
+  if (d.what === 'boxdraw') {
+    const m = $('marq'), x = +m.getAttribute('x'), y = +m.getAttribute('y'), w = +m.getAttribute('width'), h = +m.getAttribute('height');
+    m.style.display = 'none'; m.setAttribute('width', 0);
+    if (cancelled) return;
+    setTool('move');
+    if (w * cam.k < 24 || h * cam.k < 24) { const [wx, wy] = toWorld(e.clientX, e.clientY); createBox(wx - 20, wy - 20, 280, 180); }
+    else createBox(x, y, w, h);
+    return;
+  }
   if (d.what === 'cards' || d.what === 'model' || d.what === 'spread') {
     $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = '');
-    if (!d.moved) { if (!cancelled) tapped(e); return; }
+    if (!d.moved) { if (!cancelled && !tapped(e) && d.what === 'cards' && d.wasSel) editInPlace(d.clicked); return; }
     if (d.what === 'cards' && !cancelled) {
       const tgt = dropTarget(d.ids);
-      if (tgt) { const it = item(d.ids[0]), was = model(it.model); it.model = tgt.id; toast('Moved into ' + tgt.title + (was ? ', out of ' + was.title : '') + '. Undo with ⌘Z.'); }
+      if (tgt && item(d.ids[0]).kind !== 'box') { const it = item(d.ids[0]), was = model(it.model); it.model = tgt.id; toast('Moved into ' + tgt.title + (was ? ', out of ' + was.title : '') + '. Undo with ⌘Z.'); }
     }
     save(); render(); return;
   }
@@ -1630,7 +1683,7 @@ function pointerEnd(e, cancelled) {
     $('ghost').setAttribute('d', '');
     if (cancelled) return;
     const el = document.elementFromPoint(e.clientX, e.clientY), card = el && el.closest('.card');
-    if (card && card.dataset.id !== d.from) { form = { kind: 'arrow', from: d.from, to: card.dataset.id }; sel = { kind: null, ids: [] }; showSide('details'); render(); }
+    if (card && card.dataset.id !== d.from) makeArrow(d.from, card.dataset.id);
     else if (Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) < 4) { mode = { linkFrom: d.from }; render(); }
     return;
   }
@@ -1651,39 +1704,198 @@ $('stage').addEventListener('pointercancel', e => afterPointer(e, true));
 // Double-click (or double tap): a card opens to be edited; the board offers something to put there.
 function doubleAt(cx, cy) {
   const under = document.elementFromPoint(cx, cy);
-  if (ro() || !under || under.closest('.float, .ftab, .fgrip, .ar')) return;
+  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob') || under.isContentEditable || under.closest('.pill-edit')) return;
   const card = under.closest('.card');
-  if (card) { form = { kind: 'card', id: card.dataset.id, quotes: clone(item(card.dataset.id).quotes || []) }; showSide('details'); render(); return; }
+  if (card) { editInPlace(card.dataset.id); return; }
+  const arEl = under.closest('.ar'); if (arEl) { editArrowLabel(arEl.dataset.arrow); return; }
+  const tabEl = under.closest('.ftab'); if (tabEl) { editModelTitle(tabEl.dataset.model); return; }
   const [wx, wy] = toWorld(cx, cy), r = $('stage').getBoundingClientRect(), c = $('chooser');
   const inM = B.models.find(m => inside(frameOf(m), wx, wy));
   c.dataset.at = JSON.stringify([wx - 20, wy - 15]); c.dataset.model = inM ? inM.id : '';
-  c.innerHTML = '<span class="ttl">Put here' + (inM ? ', in ' + esc(inM.title) : '') + ':</span><textarea id="qnote" rows="2" placeholder="Type a note and press Enter (⇧Enter for a new line)"></textarea><button type="button" class="btn" data-new="part">Part</button><button type="button" class="btn" data-new="passage">Passage</button><button type="button" class="btn k-problem" data-new="problem">Problem</button><button type="button" class="btn k-note" data-new="note">Note</button>';
+  c.innerHTML = '<span class="ttl">Put here' + (inM ? ', in ' + esc(inM.title) : '') + ': type, then Enter for a note, or choose what it is</span><textarea id="qnote" rows="2" placeholder="Type here, or a Reflexion: R 3990 (⇧Enter for a new line)"></textarea><button type="button" class="btn" data-new="part">Part</button><button type="button" class="btn" data-new="passage">Passage</button><button type="button" class="btn k-problem" data-new="problem">Problem</button><button type="button" class="btn k-note" data-new="note">Note</button><button type="button" class="btn" data-new="box">Box</button>';
   c.style.left = Math.min(cx - r.left, r.width - 240) + 'px'; c.style.top = Math.min(cy - r.top, r.height - 90) + 'px';
   c.classList.add('show');
   setTimeout(() => { const q = $('qnote'); if (q) q.focus(); }, 30);
 }
-// A note typed in the chooser goes straight onto the board where the double-click was, signed by whoever is signed in.
-function quickNote(text, at, modelId) {
-  if (ro() || !text.trim()) return;
+/* ── Editing in place: double-click (or tap a selected card) and type where it stands ── */
+function commitEditing() { if (editing && editing.finish) editing.finish(true); }
+function afterEdit() { if (!drag && !editing && shared && shared.waiting) { const w = shared.waiting; shared.waiting = null; incoming(w.theirs, w.sha, w.by); } }
+// Enter keeps it (⇧Enter for a new line where that makes sense), Esc leaves it as it was, clicking elsewhere keeps it.
+function inlineEdit(target, before, multiline, commit) {
+  commitEditing();
+  target.textContent = before;
+  target.contentEditable = 'true';
+  try { target.contentEditable = 'plaintext-only'; } catch (x) { /* plain 'true' then */ }
+  let done = false;
+  const finish = ok => {
+    if (done) return; done = true;
+    const v = target.innerText.replace(/ /g, ' ').trim();
+    target.contentEditable = 'false'; editing = null;
+    commit(ok ? v : null, v !== before);
+    render(); afterEdit();
+  };
+  editing = { el: target, finish };
+  target.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' && !(multiline && e.shiftKey)) { e.preventDefault(); finish(true); } else if (e.key === 'Escape') { e.preventDefault(); finish(false); } });
+  target.addEventListener('blur', () => finish(true), { once: true });
+  target.focus();
+  const r = document.createRange(); r.selectNodeContents(target); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r);
+}
+function editInPlace(id, fresh) {
+  const it = item(id); if (!it || ro()) return;
+  const el = [...$('cards').querySelectorAll('.card')].find(c => c.dataset.id === id); if (!el) return;
+  const field = it.kind === 'note' || it.kind === 'problem' ? 'text' : 'label';
+  let target = el.querySelector({ part: '.lab', passage: '.ttl', box: '.blab', note: '.txt', problem: '.txt' }[it.kind] || '.txt');
+  if (!target && it.kind === 'passage') { target = document.createElement('span'); target.className = 'ttl'; el.insertBefore(target, el.firstChild); }
+  if (!target) return;
+  inlineEdit(target, String(it[field] || ''), field === 'text', (v, changed) => {
+    if (v === null || (!v && (it.kind === 'part' || field === 'text'))) {   // nothing typed: a card just made goes again
+      if (fresh && !it[field]) change(() => { B.items = B.items.filter(x => x.id !== id); Object.values(B.views).forEach(w => delete w.pos[id]); });
+      return;
+    }
+    if (!changed) return;
+    change(() => {
+      const x = item(id); if (!x) return;
+      if (x.src === 'labels' && field === 'label' && x.kantLabel == null) x.kantLabel = x.label;   // Kant's own label stays beside the new one
+      x[field] = v;
+      if (x.src === 'labels') { if (me()) { x.editedBy = me(); x.edited = today(); } } else if (me()) sign(x, me());
+    });
+  });
+}
+function editModelTitle(id) {
+  const m = model(id); if (!m || ro()) return;
+  const el = [...$('cards').querySelectorAll('.ftab')].find(t => t.dataset.model === id), b = el && el.querySelector('b'); if (!b) return;
+  inlineEdit(b, m.title, false, (v, changed) => { if (v && changed) change(() => { const x = model(id); if (x) x.title = v; }); });
+}
+// An arrow's name, typed on the arrow: anything at all, or one of the usual (divides into, kept, split into, answers? …).
+function editArrowLabel(id) {
+  const a = arrow(id); if (!a || ro()) return;
+  const c = curve(a); if (!c) return;
+  commitEditing();
+  const inp = document.createElement('input');
+  inp.className = 'pill-edit'; inp.setAttribute('list', 'arrowtypes'); inp.placeholder = 'name it: kept, split into…';
+  inp.value = a.type === '?' ? '' : a.type;
+  inp.style.left = (c.mx - 90) + 'px'; inp.style.top = (c.my - 12) + 'px';
+  $('cards').appendChild(inp);
+  let done = false;
+  const finish = ok => {
+    if (done) return; done = true;
+    const v = inp.value.trim(); inp.remove(); editing = null;
+    if (ok && v && v !== a.type) change(() => {
+      const x = arrow(id); if (!x) return;
+      x.type = v;
+      x.layer = v === 'divides into' ? 'division' : v === 'answers?' ? 'problem' : (x.layer === 'division' || x.layer === 'computer') ? 'hypothesis' : x.layer;
+      if (me()) sign(x, me());
+    });
+    render(); afterEdit();
+  };
+  editing = { el: inp, finish };
+  inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); finish(true); } else if (e.key === 'Escape') { e.preventDefault(); finish(false); } });
+  inp.addEventListener('blur', () => finish(true));
+  inp.focus(); inp.select();
+}
+// An arrow made at once: inside a model, a division; to a problem, "answers?"; otherwise it is named on the spot.
+function makeArrow(from, to, stroke) {
+  const A = item(from), Z = item(to);
+  if (ro() || !A || !Z || from === to) { render(); return; }
+  const type = Z.kind === 'problem' ? 'answers?' : A.model && A.model === Z.model && A.kind === 'part' && Z.kind === 'part' ? 'divides into' : '?';
+  const layer = type === 'divides into' ? 'division' : type === 'answers?' ? 'problem' : 'hypothesis';
   let id;
   change(() => {
-    id = uid('n');
-    const n = { id, kind: 'note', model: modelId || null, quotes: [], date: today(), text: text.trim() };
+    id = uid('a');
+    const a = { id, from, to, type, layer, text: '', evidence: [], date: today() };
+    if (me()) a.by = me();
+    B.arrows.push(a);
+    if (stroke) { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== stroke); }
+  });
+  showLayer(layer); form = null; sel = { kind: 'arrow', ids: [id] }; render();
+  if (type === '?') editArrowLabel(id);
+}
+function createBox(x, y, w, h) {
+  if (ro()) return;
+  let id;
+  change(() => {
+    id = uid('b');
+    const b = { id, kind: 'box', model: null, label: '', w: Math.round(Math.max(110, w)), h: Math.round(Math.max(70, h)), quotes: [], date: today() };
+    if (me()) b.by = me();
+    B.items.push(b); view().pos[id] = [Math.round(x), Math.round(y)];
+  });
+  showLayer('box'); form = null; sel = { kind: 'card', ids: [id] }; render();
+  editInPlace(id);
+}
+// A card made straight from the chooser: what was typed becomes its words; with nothing typed, it opens to be written in.
+function quickCard(kind, text, at, modelId) {
+  if (ro()) return;
+  text = String(text || '').trim();
+  let id;
+  change(() => {
+    id = uid(kind[0]);
+    const n = { id, kind, model: modelId || null, quotes: [], date: today() };
     if (me()) n.by = me();
+    if (kind === 'part') { n.label = text; n.sub = ''; }
+    else if (kind === 'passage') { n.label = ''; if (text) n.quotes = [{ q: text, cite: 'citation to add', pasted: true }]; }
+    else n.text = text;
     B.items.push(n); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
   });
-  showLayer('note'); render();
+  showLayer(kind); sel = { kind: 'card', ids: [id] }; form = null; render();
+  if (!text) editInPlace(id, true);
 }
-$('stage').addEventListener('dblclick', e => { if (lastType === 'mouse' && tool === 'move' && !e.target.closest('.float')) doubleAt(e.clientX, e.clientY); });
+const quickNote = (text, at, modelId) => { if (String(text || '').trim()) quickCard('note', text, at, modelId); };
+/* ── A Reflexion by its number: its words, verbatim, from the portal's own data ──
+   The Reflexionen are large, so they are loaded only when a number is first asked for.
+   Refl. 1619–3488 are on Meier (AA XVI), the rest on Baumgarten (AA XVII–XVIII). */
+const REFL_FILES = { logik: '../../../data/reflexionen-16-meier.js', meta: '../../../data/reflexionen-17-18-baumgarten.js' };
+const scriptsLoading = {};
+function loadOnce(src) {
+  if (!scriptsLoading[src]) scriptsLoading[src] = new Promise((res, rej) => { const el = document.createElement('script'); el.src = src; el.onload = res; el.onerror = () => { delete scriptsLoading[src]; rej(new Error('load')); }; document.head.appendChild(el); });
+  return scriptsLoading[src];
+}
+// "R 3990", "Refl. 3990", "Reflexion 3990"; a bare "3990" only where a passage is asked for, since a bare number may be a year.
+function reflNumber(s, bareToo) {
+  const m = String(s || '').trim().match(bareToo ? /^(?:R|Refl\.?|Reflexion|Reflection)?\s*(\d{4,5})\.?$/i : /^(?:R|Refl\.?|Reflexion|Reflection)\s*(\d{4,5})\.?$/i);
+  return m ? +m[1] : null;
+}
+async function reflexion(n) {
+  const meier = n <= 3488;
+  await loadOnce(meier ? REFL_FILES.logik : REFL_FILES.meta);
+  const list = meier ? (typeof REFL_ENTRIES !== 'undefined' ? REFL_ENTRIES : []) : (typeof REFLM_ENTRIES !== 'undefined' ? REFLM_ENTRIES : []);
+  const e = list.find(x => x.r === n); if (!e) return null;
+  const vol = meier ? 16 : (e.vol || 17);
+  return { q: e.text, ref: (meier ? 'refl-logik:r' : 'refl-meta:r') + n, cite: 'Refl. ' + n + ' (AA ' + vol + (e.aa ? ':' + e.aa : '') + ')' + (e.phRaw ? ' · phase ' + e.phRaw : '') };
+}
+async function reflCard(n, at, modelId) {
+  if (ro()) return;
+  toast('Fetching Refl. ' + n + '…');
+  let q = null;
+  try { q = await reflexion(n); } catch (x) { q = null; }
+  if (!q) { toast('The portal has no Refl. ' + n + '.'); return; }
+  let id;
+  change(() => {
+    id = uid('p');
+    const c = { id, kind: 'passage', model: modelId || null, label: '', quotes: [q], date: today() };
+    if (me()) c.by = me();
+    B.items.push(c); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
+  });
+  showLayer('passage'); form = null; sel = { kind: 'card', ids: [id] }; render();
+  toast('Refl. ' + n + ', from the portal’s text.');
+}
+$('stage').addEventListener('dblclick', e => { if (lastType === 'mouse' && tool === 'move' && !e.target.closest('.float') && !e.target.isContentEditable && !e.target.closest('.pill-edit')) doubleAt(e.clientX, e.clientY); });
 $('chooser').addEventListener('keydown', e => {
   if (e.target.id !== 'qnote') return;
   if (e.key === 'Escape') { $('chooser').classList.remove('show'); return; }
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); const c = $('chooser'); c.classList.remove('show'); quickNote(e.target.value, JSON.parse(c.dataset.at), c.dataset.model || null); }
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault(); const c = $('chooser'), at = JSON.parse(c.dataset.at), mdl = c.dataset.model || null, n = reflNumber(e.target.value);
+    c.classList.remove('show');
+    if (n) reflCard(n, at, mdl); else quickNote(e.target.value, at, mdl);
+  }
 });
 $('chooser').addEventListener('click', e => {
   const b = e.target.closest('[data-new]'); if (!b) return;
-  const c = $('chooser'); c.classList.remove('show');
-  form = { kind: b.dataset.new, at: JSON.parse(c.dataset.at), model: c.dataset.model || null, quotes: [] };
+  const c = $('chooser'), at = JSON.parse(c.dataset.at), mdl = c.dataset.model || null, txt = ($('qnote') || {}).value || '', k = b.dataset.new;
+  c.classList.remove('show');
+  if (k === 'box') { createBox(at[0], at[1], 280, 180); return; }
+  if (k === 'passage' && reflNumber(txt, true)) { reflCard(reflNumber(txt, true), at, mdl); return; }
+  if (txt.trim() || k !== 'passage') { quickCard(k, txt, at, mdl); return; }
+  form = { kind: k, at, model: mdl, quotes: [] };   // a passage with nothing typed: its words and citation, in the form
   sel = { kind: null, ids: [] }; showSide('details'); render();
 });
 $('banner').addEventListener('click', e => {
@@ -1701,7 +1913,7 @@ $('banner').addEventListener('click', e => {
     if (k === 'm-add' && m) { change(() => { merge(B, { models: m.old.models || [], items: m.old.items, arrows: m.old.arrows || [], views: m.old.views || [] }); }); toast('Added to the shared board.'); }
     render();
   }
-  else if (k === 'o-arrow' && offer) { const o = offer; offer = null; form = { kind: 'arrow', from: o.from, to: o.to, fromStroke: o.stroke }; sel = { kind: null, ids: [] }; showSide('details'); render(); }
+  else if (k === 'o-arrow' && offer) { const o = offer; offer = null; makeArrow(o.from, o.to, o.stroke); }
   else if ((k === 'o-select' || k === 'o-model') && offer) {
     const o = offer; offer = null;
     change(() => { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== o.stroke); });
@@ -1743,7 +1955,7 @@ function setTool(t) {
   tool = t;
   document.querySelectorAll('#palette [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
   $('palette').classList.toggle('pen', t === 'pen');
-  ['move', 'select', 'pen', 'erase'].forEach(x => $('stage').classList.toggle('tool-' + x, x === t));
+  ['move', 'select', 'pen', 'erase', 'box'].forEach(x => $('stage').classList.toggle('tool-' + x, x === t));
   if (t !== 'move') { mode = null; }
   banner();
 }
@@ -1839,11 +2051,11 @@ $('details').addEventListener('change', e => {
   if (e.target.matches('[data-type]')) { const o = $('details').querySelector('[data-other]'); o.style.display = e.target.value === '__other' ? '' : 'none'; if (e.target.value === '__other') o.focus(); }
 });
 document.addEventListener('keydown', e => {
-  const typing = e.target.closest && e.target.closest('input, textarea, select');
+  const typing = (e.target.closest && e.target.closest('input, textarea, select')) || e.target.isContentEditable;
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
   if (typing) return;
   if (e.key === ' ') { e.preventDefault(); if (!spaceDown) { spaceDown = true; $('stage').classList.add('spacepan'); } return; }
-  if (!e.metaKey && !e.ctrlKey && !e.altKey) { const t = { v: 'move', s: 'select', p: 'pen', e: 'erase' }[e.key.toLowerCase()]; if (t) { setTool(t); return; } }
+  if (!e.metaKey && !e.ctrlKey && !e.altKey) { const t = { v: 'move', s: 'select', p: 'pen', e: 'erase', b: 'box' }[e.key.toLowerCase()]; if (t) { setTool(t); return; } }
   if (e.key === 'Escape') { if (mode) mode = null; else if (offer) offer = null; else if (tool !== 'move') setTool('move'); else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && sel.kind && !ro()) {
     e.preventDefault();
