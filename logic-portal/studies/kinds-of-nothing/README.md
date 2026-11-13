@@ -53,6 +53,8 @@ answers its second question, whether tools like these help at all.
 | [journal.md](journal.md) | What each feature showed, and whether it helped |
 | [CLAUDE.md](CLAUDE.md) | Rules for every Claude session working in this folder |
 | [queue.html](queue.html) | The queue: passages from the portal’s search, flagged by the seminar against the table of nothing. See below |
+| [models.html](models.html), [models.js](models.js) | Three models of nothing (1763, c. 1769, 1781) as cards in one format: Kant's words, quoted from the portal's texts, beside fields for the seminar to state and sign. A draft |
+| [board.html](board.html), [board.js](board.js) | The board: a whiteboard that keeps its texts. The three models as frames of cards built from Kant's labels, each card carrying its passages; arrows between parts for the seminar's hypotheses (kept, renamed, split into, …), and problems with what may answer them, each signed. Layers, views, focus and zoom keep it readable; photographs keep how it stood. What anyone changes stays in their browser until exported and added to `board.js`. A draft |
 | [queue-config.js](queue-config.js) | Where the queue keeps its flags: the organisation and repository on GitHub |
 
 ## Ideas to start from
