@@ -6,16 +6,11 @@
    off (English mode); write notes, the points to make to students, with passages under
    them, each passage with a label of its maker's own ("against X"); reorder, annotate
    and prune; export a handout as Word (which Pages opens), as a PDF by way of the
-   browser's Print, or as plain text in the Handout tool's markup; and share them with the
-   class, who read them on the same Handouts page, without being able to change them.
+   browser's Print, or as plain text in the Handout tool's markup.
 
    Everything is kept in this browser's localStorage, under one key, and nothing is sent
    anywhere: the repository is public, and a handout is its maker's own. "Save to file"
-   writes the lot to a .json file, and "Open file" reads one back. "Share with the class"
-   writes every handout, locked with the class password and without its maker's margin notes
-   or trash, to one file, handouts/class.json, for its maker to upload to the repository.
-   Anyone who gives the class password then sees those handouts on the Handouts page, to read
-   and export but not to change.
+   writes the lot to a .json file, and "Open file" reads one back.
 
    Each passage keeps its portal address ('textKey:id') beside its words, so that it opens
    where it stands in the reader, and a later handout builder can bring
@@ -25,11 +20,13 @@
    not ask for. The header's Handouts button turns it on and opens the Handouts page, and
    the page's switch turns it off (or, where the header has a Modes menu, its switch there).
    Off, the handouts are kept and nothing of the tray shows but that button; the choice is
-   remembered in this browser. The Handouts page's Class view shows the words left out of a
-   passage as … rather than struck through, as the room should see them.
+   remembered in this browser. The Handouts page has two views. Class view, for the class and on
+   whenever the page opens, shows the words left out of a passage as … rather than struck through
+   and puts away everything that would add to or change a handout. Instructor view is for making
+   and changing them.
 
    The handouts are the class's: nothing of them opens without the class password, which
-   handouts/lock.js checks (KANTLAB_LOCK), and the class's copy is encrypted with it.
+   handouts/lock.js checks (KANTLAB_LOCK).
    Handout mode stays off until the password is given; Lock, on the Handouts page, forgets it.
 
    The portal is a closed IIFE. This file reads it only through window.PORTAL, and it
@@ -51,8 +48,6 @@ const LOCK = window.KANTLAB_LOCK || null;                  // handouts/lock.js: 
 // or remembered on this computer. Without lock.js nothing opens.
 const gate = (text) => !LOCK ? Promise.resolve(false) : LOCK.key() ? Promise.resolve(true) : LOCK.ask(text ? { text } : undefined);
 const REPO = 'mikrishnan/kant-lab';
-const CLASS_FILE = 'handouts/class.json';   // the class's copy of the handouts, locked with the class password
-const UPLOAD = 'https://github.com/' + REPO + '/upload/main/logic-portal/handouts';   // where it goes up
 const SITE = PT.SITE_PORTAL || 'https://mikrishnan.github.io/kant-lab/logic-portal/index.html';
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -85,11 +80,7 @@ function load() {
 }
 let DB = load();
 let touched = null;   // the linked passage being changed, whose copies follow it when it is saved (syncLinked)
-// The class's handouts (from handouts/class.json), read only; `viewing` is the id of the one
-// open, or null when one of this browser's own is open.
-let CLASSH = [], CLASS_AT = '', viewing = null;
-const roNow = () => viewing != null;
-const cur = () => (viewing && CLASSH.find(h => h.id === viewing)) || DB.handouts.find(h => h.id === DB.current) || DB.handouts[0];
+const cur = () => DB.handouts.find(h => h.id === DB.current) || DB.handouts[0];
 function save() {
   syncLinked();
   try { localStorage.setItem(KEY, JSON.stringify(DB)); }
@@ -587,7 +578,7 @@ css.textContent = `
      the list of handouts, the trash and the backup in a line or two, not a column. */
   #hpage.docked .hbar .spacer { display: none; }
   #hpage.docked .hbar .hfile { order: 1; margin-left: auto; border-left: none; padding-left: 0; }
-  #hpage.docked .hbar .hseg, #hpage.docked .hbar [data-h="share"] { order: 2; }
+  #hpage.docked .hbar .hseg, #hpage.docked .hbar .hviews { order: 2; }
   #hpage.docked aside { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; max-height: 30vh; padding: 0.5rem 0.8rem; }
   #hpage.docked aside .hl { width: auto; margin: 0; padding: 0.15rem 0.6rem; }
   #hpage.docked aside .hl .n { display: inline; margin-left: 0.4rem; }
@@ -658,22 +649,21 @@ css.textContent = `
   #hpage .mk-cut { text-decoration: line-through; text-decoration-color: var(--accent-light); color: var(--faded); opacity: 0.6; cursor: pointer; }
   /* Class view: what is left out shows as …, as the room should see it */
   #hpage.hcv .mk-cut { text-decoration: none; opacity: 1; cursor: default; }
-  #hpage .hbar .hcv.on { background: var(--accent); border-color: var(--accent); color: var(--parchment); }
+  #hpage .hviews { display: inline-flex; border: 1px solid var(--accent-light); border-radius: 999px; overflow: hidden; }
+  #hpage .hview { background: transparent; border: none; padding: 0.15rem 0.75rem; font: inherit; font-size: 0.92rem; color: var(--accent); cursor: pointer; }
+  #hpage .hview + .hview { border-left: 1px solid var(--accent-light); }
+  #hpage .hview i { font-size: 0.82rem; color: var(--faded); margin-left: 0.15rem; }
+  #hpage .hview.on { background: var(--accent); color: var(--parchment); }
+  #hpage .hview.on i { color: var(--parchment-dark); }
+  #hpage.hcv .hbar [data-h="open"], #hpage.hcv .hbar .hmodesw { display: none; }
+  body.hclassview #hadd, body.hclassview #hsel, body.hclassview .hrail, body.hclassview #hcoll { display: none !important; }
   /* The class's handouts, to read: everything that would change them is put away */
-  #hpage aside .hsec { font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--accent); margin: 0.8rem 0.6rem 0.25rem; }
-  #hpage aside .hsec:first-child { margin-top: 0.1rem; }
-  #hpage .hro-note { margin: 0 0 1rem; padding: 0.45rem 0.8rem; border-left: 3px solid var(--accent-light); background: var(--card); font-size: 0.92rem; color: var(--faded); }
   #hpage.hro .hwrap button:not([data-h="go"]):not([data-h="gopart"]):not([data-h="fold"]):not([data-h="foldall"]):not([data-h="foldnotes"]):not([data-h="unfoldall"]),
   #hpage.hro .hwrap select, #hpage.hro .hwrap .hunder, #hpage.hro .hwrap .hcopysel, #hpage.hro .hwrap .grip, #hpage.hro .hwrap .hbtns,
   #hpage.hro .hwrap .henmode, #hpage.hro .hwrap .hhint { display: none; }
   #hpage.hro .hwrap :is(.hlab, .hnote, .nlab):placeholder-shown { display: none; }
   #hpage.hro .hwrap :is(input, textarea) { border-color: transparent; background: transparent; resize: none; }
   #hpage.hro .hcard .hcite { cursor: default; }
-  #hpage aside .hshare-st { margin: 0.8rem 0.6rem 0; font-size: 0.86rem; color: var(--faded); }
-  #hpage aside .hshare-st.changed { color: #8a3b12; }
-  #hpage aside .hshare-how { margin: 0.6rem 0.4rem 0; padding: 0.55rem 0.7rem; border: 1px solid var(--accent-light); border-radius: 8px; background: var(--card); font-size: 0.88rem; }
-  #hpage aside .hshare-how ol { margin: 0.3rem 0 0.3rem 1.1rem; padding: 0; }
-  #hpage aside .hshare-how li { margin: 0.2rem 0; }
   #hpage .mk-cut.approx { text-decoration-style: dashed; }
   .mk-n { color: var(--accent); font-size: 0.68em; font-weight: 600; margin-left: 1px; cursor: pointer; }
   .hcard.has-mn { position: relative; }
@@ -789,7 +779,7 @@ function marks() {
   hb.innerHTML = n || mode ? 'Handout<span class="hn">' + n + '</span>' : 'Handouts';
   hb.classList.toggle('full', n > 0);
   hb.title = n || mode ? '“' + h.name + '”: ' + plural(n, 'passage') + '. Open it to arrange and export.'
-    : 'Handouts: the class’s, to read with the class password, and your own, collected as you read';
+    : 'Handouts: collect passages as you read, arrange them, and show them to the class';
   hc.classList.toggle('on', !!(c || sec));
   if (c) { hc.textContent = 'Under: ' + noteName(c) + ' ✕'; hc.title = 'Passages you add go under this note. Click to stop.'; }
   else if (sec) { hc.textContent = 'Into: ' + clip(sectionName(sec), 30) + ' ✕'; hc.title = 'Passages you add go to the end of this section. Click to stop.'; }
@@ -957,8 +947,9 @@ page.innerHTML = '<div class="hdockgrip" title="Drag to make the handout wider o
   '<button type="button" class="btn" data-h="docx" title="A Word file. It opens in Pages too.">Word</button>' +
   '<button type="button" class="btn" data-h="pdf" title="Opens the browser’s Print window: choose Save as PDF">PDF</button>' +
   '<button type="button" class="btn" data-h="txt" title="Plain text in the Handout tool’s markup, ready to make into a handout in your house style">Handout tool text</button></span>' +
-  '<button type="button" class="btn solid hshare" data-h="share" title="Let everyone with the class password read your handouts: makes one locked file to upload to the repository">Share with the class</button>' +
-  '<button type="button" class="btn hcv" data-h="classview" aria-pressed="false" title="Show the words left out of a passage as …, as the room should see them, rather than struck through">Class view</button>' +
+  '<span class="hviews" role="group" aria-label="View">' +
+  '<button type="button" class="hview" data-h="classview" aria-pressed="true" title="For the class: the words left out of a passage shown as …, and nothing that adds to or changes a handout">Class view <i>for you</i></button>' +
+  '<button type="button" class="hview" data-h="instructorview" aria-pressed="false" title="For making and changing handouts">Instructor view <i>for Maya</i></button></span>' +
   '<button type="button" class="linkish" data-h="lock" title="Forget the class password on this computer: it is asked for again before the handouts open">Lock</button>' +
   ($('moremenu') ? '' : '<label class="hmodesw" title="Off, the portal shows nothing of the handouts but the Handouts button; your handouts are kept"><input type="checkbox" class="hmodein"' + (mode ? ' checked' : '') + '> + Handout on passages</label>') +
   '<span class="hfile"><button type="button" class="linkish" data-h="save" title="Every handout, in one file, to keep or to move to another browser">Save to file</button>' +
@@ -968,8 +959,8 @@ page.innerHTML = '<div class="hdockgrip" title="Drag to make the handout wider o
 document.body.appendChild(page);
 const picker = page.querySelector('input[type=file]');
 
-let classView = false;    // the words left out shown as …, not struck through
-let shareOpen = false;    // the steps for uploading the class's copy, after Share with the class
+let classView = true;     // Class view, whenever the page opens: the words left out shown as …, and nothing to change
+const locked = () => classView;   // nothing on the page may change the handout; Instructor view is for that
 /* Side by side: the Handouts page as a column on the right, the portal still in use on the left,
    so that passages can be added, and words selected, with the handout in view. The choice and the
    column's width are remembered in this browser. */
@@ -1007,7 +998,6 @@ document.addEventListener('mouseup', () => {
 });
 function openPage(focusId) {
   hideHover(); sb.hidden = true; tst.hidden = true; page.hidden = false; dockPlace(); render();
-  if (LOCK && LOCK.key()) loadClass().then(got => { if (got && !page.hidden) render(); });
   if (!focusId) return;
   const c = page.querySelector('.hcard[data-id="' + focusId + '"]');
   if (!c) return;
@@ -1015,7 +1005,7 @@ function openPage(focusId) {
   const lab = c.querySelector('.hlab');
   if (lab) lab.focus();
 }
-function closePage() { page.hidden = true; shareOpen = false; dockPlace(); }
+function closePage() { page.hidden = true; dockPlace(); }
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !page.hidden && !docked && !(e.target.matches && e.target.matches('input, textarea, select'))) closePage();
 });
@@ -1025,33 +1015,25 @@ function render() {
   const db = page.querySelector('.hdockbtn'), cb = page.querySelector('[data-h="close"]');
   if (db) { db.textContent = docked ? '⤢ Full page' : '⇆ Side by side'; db.title = docked ? 'Let the handout fill the window again' : 'Work with the portal on the left and this handout on the right'; }
   if (cb) cb.textContent = docked ? '✕ Close' : '← Back to the portal';
-  const ro = roNow(), cls = CLASSH.filter(x => !DB.handouts.some(y => y.id === x.id)), ownShown = !cls.length || !isEmpty();
-  page.classList.toggle('hro', ro);
+  const lk = classView;
+  page.classList.toggle('hro', lk);
   page.classList.toggle('hcv', classView);
-  const cvb = page.querySelector('.hcv');
-  if (cvb) { cvb.classList.toggle('on', classView); cvb.setAttribute('aria-pressed', String(classView)); }
-  const shb = page.querySelector('.hshare');
-  if (shb) shb.hidden = isEmpty();
-  page.querySelector('aside').innerHTML =
-    (cls.length ? '<div class="hsec">The class’s handouts</div>' + cls.map(x =>
-      '<button type="button" class="hl' + (viewing === x.id ? ' on' : '') + '" data-cpick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
-      '<span class="n">' + plural(countOf(x), 'passage') + ' · to read</span></button>').join('') + (ownShown ? '<div class="hsec">In this browser</div>' : '') : '') +
-    (ownShown ? DB.handouts.map(x =>
-      '<button type="button" class="hl' + (!ro && x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
+  document.body.classList.toggle('hclassview', classView);
+  page.querySelectorAll('.hview').forEach(b => { const on = (b.dataset.h === 'classview') === classView; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  page.querySelector('aside').innerHTML = DB.handouts.map(x =>
+      '<button type="button" class="hl' + (x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
       '<span class="n">' + plural(countOf(x), 'passage') + '</span></button>').join('') +
-      '<button type="button" class="btn hnew" data-h="new">+ New handout</button>' : '') +
-    (ro ? '' : trashHtml(h) + backupHtml() + shareHtml());
+    (lk ? backupHtml() : '<button type="button" class="btn hnew" data-h="new">+ New handout</button>' + trashHtml(h) + backupHtml());
   const n = h.items.length, over = viewOf(h), heads = h.items.filter(x => x.kind === 'heading');
   page.querySelector('.hwrap').innerHTML =
-    '<input class="hname" value="' + esc(h.name) + '" placeholder="Untitled handout" aria-label="Name of this handout" spellcheck="false"' + (ro ? ' readonly' : '') + '>' +
-    (ro ? '<p class="hro-note">The class’s handout' + (CLASS_AT ? ', as shared on ' + esc(CLASS_AT) : '') + '. You can read it, open its passages where they stand and export it; only its maker changes it.</p>' : '') +
+    '<input class="hname" value="' + esc(h.name) + '" placeholder="Untitled handout" aria-label="Name of this handout" spellcheck="false"' + (lk ? ' readonly' : '') + '>' +
     '<div class="hrow">' +
-    (ro ? '' : '<button type="button" class="btn" data-h="note" title="A note: what you want to say, with passages under it">+ Note</button>' +
+    (lk ? '' : '<button type="button" class="btn" data-h="note" title="A note: what you want to say, with passages under it">+ Note</button>' +
     '<button type="button" class="btn" data-h="heading">+ Heading</button>') +
     (heads.some(x => !isFolded(x)) ? '<button type="button" class="linkish" data-h="foldall" title="Fold every section away, to see just the headings">Fold all sections</button>' : '') +
     (notesOf(h).some(x => !noteFolded(x)) ? '<button type="button" class="linkish" data-h="foldnotes" title="Fold every note to its first line">Fold all notes</button>' : '') +
     (heads.some(isFolded) || notesOf(h).some(noteFolded) ? '<button type="button" class="linkish" data-h="unfoldall" title="Open every section and note">Open all</button>' : '') +
-    '<label class="hmodesw henmode" title="The English with every passage, beside it where there is room: here, in the class’s copy and in the exports. A passage can hide its own."><input type="checkbox" class="henin"' + (enMode(h) ? ' checked' : '') + '> English with every passage</label>' +
+    '<label class="hmodesw henmode" title="The English with every passage, beside it where there is room: here, in Class view and in the exports. A passage can hide its own."><input type="checkbox" class="henin"' + (enMode(h) ? ' checked' : '') + '> English with every passage</label>' +
     '<span class="spacer"></span><button type="button" class="linkish hdel" data-h="delete">Delete this handout</button></div>' +
     '<p class="hhint muted small">' + (c ? 'Passages you add go under the note “' + esc(noteName(c)) + '”.'
       : collectingSection() ? 'Passages you add go to the end of the section “' + esc(sectionName(collectingSection())) + '”.'
@@ -1066,12 +1048,12 @@ function render() {
     const c = inSec && page.querySelector('.hwrap > .hcard.top[data-key="' + k + '"]');
     if (c) c.classList.add('insec');
   });
-  if (ro) page.querySelectorAll('.hwrap input, .hwrap textarea, .hwrap select').forEach(x => { if (x.type === 'checkbox' || x.tagName === 'SELECT') x.disabled = true; else x.readOnly = true; });
+  if (lk) page.querySelectorAll('.hwrap input, .hwrap textarea, .hwrap select').forEach(x => { if (x.type === 'checkbox' || x.tagName === 'SELECT') x.disabled = true; else x.readOnly = true; });
   page.querySelectorAll('.hnote, .hnotetext').forEach(grow);
   mkbar.hidden = true;
   paintAll();
   if (classView) page.querySelectorAll('.hwrap [data-mf]').forEach(t => collapseCuts(t, '…'));
-  if (!ro && pairCuts(h)) { save(); render(); return; }   // German cuts whose English has not followed yet
+  if (!lk && pairCuts(h)) { save(); render(); return; }   // German cuts whose English has not followed yet
   if (enMode(h) && passagesOf(h).some(x => enWanted(h, x) && !x.en)) fillSoon();
 }
 // A text box as tall as its text. Measured only once it has a width, or a box drawn in a
@@ -1403,23 +1385,20 @@ function reparent(h, key, noteId) {
 page.addEventListener('click', e => {
   e.stopPropagation();   // the portal's handlers are not for this page
   const pick = e.target.closest('[data-pick]');
-  if (pick) { viewing = null; DB.current = pick.dataset.pick; shareOpen = false; save(); render(); return; }
-  const cpick = e.target.closest('[data-cpick]');
-  if (cpick) { viewing = cpick.dataset.cpick; shareOpen = false; render(); page.querySelector('main').scrollTop = 0; return; }
+  if (pick) { DB.current = pick.dataset.pick; save(); render(); return; }
   const tr = e.target.closest('[data-tr]');
-  if (tr && !roNow()) { const h = cur(); putBack(h, trashOf(h)[+tr.dataset.tr]); return; }
+  if (tr && !locked()) { const h = cur(); putBack(h, trashOf(h)[+tr.dataset.tr]); return; }
   const b = e.target.closest('[data-h]');
   if (!b) return;
-  if (roNow() && !RO_OK.has(b.dataset.h)) return;   // the class's handout is to read
+  if (locked() && !RO_OK.has(b.dataset.h)) return;   // Class view: to read
   const h = cur(), c = b.closest('[data-key]'), key = c ? c.dataset.key : null;
   switch (b.dataset.h) {
     case 'close': return closePage();
     case 'dock': return setDock(!docked);
-    case 'classview': classView = !classView; render(); toast(classView ? 'Class view: what is left out shows as …' : 'Class view is off: what is left out is struck through again.'); return;
-    case 'share': return share();
-    case 'sharedone': shareOpen = false; render(); return;
-    case 'lock': { if (LOCK) LOCK.forget().then(() => { CLASSH = []; viewing = null; setMode(false, true); closePage(); toast('Locked. The class password will be asked for before the handouts open again.'); }); return; }
-    case 'new': { viewing = null; const x = blank('Untitled handout'); DB.handouts.push(x); DB.current = x.id; shareOpen = false; save(); render(); const i = page.querySelector('.hname'); i.focus(); i.select(); return; }
+    case 'classview': if (!classView) { classView = true; render(); toast('Class view: what is left out shows as …, and nothing can be added or changed.'); } return;
+    case 'instructorview': if (classView) { classView = false; render(); toast('Instructor view: make and change handouts. What is left out is struck through.'); } return;
+    case 'lock': { if (LOCK) LOCK.forget().then(() => { setMode(false, true); closePage(); toast('Locked. The class password will be asked for before the handouts open again.'); }); return; }
+    case 'new': { const x = blank('Untitled handout'); DB.handouts.push(x); DB.current = x.id; save(); render(); const i = page.querySelector('.hname'); i.focus(); i.select(); return; }
     case 'delete': {
       const n = countOf(h);
       if (!confirm('Delete “' + h.name + '”' + (n ? ' and its ' + plural(n, 'passage') : '') + '? This cannot be undone, except from a saved file.')) return;
@@ -1508,7 +1487,7 @@ page.addEventListener('click', e => {
 });
 page.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('htrash')) trashOpen = e.target.open; }, true);
 page.addEventListener('input', e => {
-  if (roNow()) return;
+  if (locked()) return;
   const h = cur();
   if (e.target.classList.contains('hname')) { h.name = e.target.value; save(); const on = page.querySelector('aside .hl.on'); if (on && on.firstChild) on.firstChild.textContent = h.name || 'Untitled handout'; return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
@@ -1524,7 +1503,7 @@ page.addEventListener('input', e => {
 });
 page.addEventListener('change', e => {
   if (e.target.classList.contains('hmodein')) { setMode(e.target.checked); return; }
-  if (roNow()) return;
+  if (locked()) return;
   if (e.target.classList.contains('henin')) { cur().english = e.target.checked; save(); render(); return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
   if (!c) return;
@@ -1555,7 +1534,7 @@ picker.addEventListener('change', () => {
 let drag = null;   // { key, it }: the card being dragged
 page.addEventListener('mousedown', e => {
   const c = e.target.closest('.hcard');
-  if (!c || roNow()) return;
+  if (!c || locked()) return;
   if (e.target.closest('.grip') || !e.target.closest('button, input, select, textarea, a, label') &&
     (e.target.closest('.hcite') || e.target === c && c.classList.contains('hhead'))) c.draggable = true;
 });
@@ -1662,7 +1641,7 @@ function relocate(h, key, dest, shut) {
    Select words of a passage, or of its English, on the Handouts page: Highlight, Underline, or
    a Margin note beside them. A mark keeps its words and a little of what comes before and after
    them, not their positions, so it finds them wherever the passage is drawn: on this page, in
-   the PDF and the Word file, and in the class's copy. Highlights and underlines go
+   the PDF and the Word file, and in Class view. Highlights and underlines go
    everywhere; margin notes are yours and stay on this page. Leave out takes words out of what
    the class sees, which shows […] in the exports and … in Class view, while the passage keeps
    its address and opens in the portal where it stands, whole; on this page they stay, struck
@@ -1958,7 +1937,7 @@ function showBar(rect, html) {
   mkbar.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - mkbar.offsetWidth - 10)) + 'px';
 }
 page.addEventListener('mouseup', e => {
-  if (e.target.closest('#hmkbar') || roNow()) return;
+  if (e.target.closest('#hmkbar') || locked()) return;
   setTimeout(() => {
     const p = picked();
     if (p) {
@@ -2043,66 +2022,8 @@ page.addEventListener('click', e => {
   if (w && window.getSelection().isCollapsed) { const t = w.closest('.hcard').querySelector('[data-mnt="' + w.dataset.mk + '"]'); if (t) t.focus(); }
 });
 
-/* ── The class's copy ─────────────────────────────────────────────────────
-   Share with the class writes every handout with something in it to one file, locked with the
-   class password: each as it stands on the Handouts page, its words left out, English and notes
-   included, but without its maker's margin notes (marks of kind 'mn') or its trash. Its maker
-   uploads the file to logic-portal/handouts/class.json on GitHub. Anyone who gives the class
-   password then finds those handouts on the Handouts page, under "The class's handouts", to
-   read, open where they stand and export, but not to change. Nothing here writes to GitHub:
-   the site has no way to, without a token. */
-const RO_OK = new Set(['close', 'dock', 'classview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'new', 'share', 'sharedone']);
-const SHARED_KEY = 'kantlab-handouts-shared';   // { at, sig }: when this browser last made the class's copy, and of what
-function forClass(h) {
-  const x = JSON.parse(JSON.stringify(h));
-  delete x.trash; delete x.published;
-  const strip = it => { if (it.marks) it.marks = it.marks.filter(m => m.k !== 'mn'); };
-  x.items.forEach(it => { if (it.kind === 'note') kids(it).forEach(strip); else strip(it); });
-  return x;
-}
-const classSet = () => DB.handouts.filter(h => h.items.length).map(forClass);
-const sigOf = s => { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return (x >>> 0).toString(36); };
-const lastShare = () => { try { return JSON.parse(localStorage.getItem(SHARED_KEY) || 'null'); } catch (e) { return null; } };
-async function share() {
-  if (!LOCK || !(LOCK.key() || await gate())) { toast('The class password is needed to lock the class’s copy.'); return; }
-  const hs = classSet();
-  if (!hs.length) { toast('There is nothing in your handouts to share yet.'); return; }
-  const body = JSON.stringify(hs);
-  const text = await LOCK.seal(JSON.stringify({ kind: 'kantlab-class-handouts', v: 1, shared: today(), handouts: hs }));
-  download(new Blob([text], { type: 'application/json' }), 'class.json');
-  try { localStorage.setItem(SHARED_KEY, JSON.stringify({ at: new Date().toISOString(), sig: sigOf(body) })); } catch (e) { /* the steps still show */ }
-  window.open(UPLOAD, '_blank', 'noopener');
-  shareOpen = true; render();
-}
-function shareHtml() {
-  if (isEmpty()) return '';
-  const L = lastShare(), changed = !L || L.sig !== sigOf(JSON.stringify(classSet()));
-  const when = L ? new Date(L.at).toLocaleString('en-GB', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : '';
-  return '<p class="hshare-st' + (changed ? ' changed' : '') + '">' + (!L ? 'Not shared with the class yet.' : changed ? 'Changed since you last shared, on ' + esc(when) + '.' : 'Shared with the class on ' + esc(when) + '.') + '</p>' +
-    (shareOpen ? '<div class="hshare-how"><b>To finish sharing</b><ol>' +
-      '<li><b>class.json</b> is in your Downloads.</li>' +
-      '<li>On the GitHub page that opened (<a href="' + UPLOAD + '" target="_blank" rel="noopener">open it again</a>), drop it in and press <b>Commit changes</b>.</li>' +
-      '<li>Everyone with the class password sees it on the Handouts page within a few minutes.</li></ol>' +
-      '<p class="muted small">If your browser named the file <i>class (1).json</i>, rename it <i>class.json</i> first, or GitHub keeps both.</p>' +
-      '<button type="button" class="linkish" data-h="sharedone">Done</button></div>' : '');
-}
-// The class's copy, opened with the class password. On the first opening, someone with nothing
-// of their own is shown the class's first handout.
-async function loadClass() {
-  try {
-    const r = await fetch(CLASS_FILE, { cache: 'no-cache' });
-    if (!r.ok) return false;
-    let d = await r.json();
-    if (LOCK && LOCK.isLocked(d)) d = await LOCK.open(d);
-    if (!d || !Array.isArray(d.handouts)) return false;
-    CLASSH = d.handouts.filter(x => x && Array.isArray(x.items));
-    CLASS_AT = d.shared || '';
-    if (viewing && !CLASSH.some(x => x.id === viewing)) viewing = null;
-    const cls = CLASSH.filter(x => !DB.handouts.some(y => y.id === x.id));
-    if (!viewing && isEmpty() && cls.length) viewing = cls[0].id;
-    return true;
-  } catch (e) { return false; }
-}
+/* What Class view lets a click do: read, fold, open where it stands, export, and switch views. */
+const RO_OK = new Set(['close', 'dock', 'classview', 'instructorview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'save']);
 const ready = () => new Promise(res => { const t = () => ($('loading') && !$('loading').hidden ? setTimeout(t, 250) : res()); t(); });
 
 /* ── Exports ─────────────────────────────────────────────────────────────── */
@@ -2302,6 +2223,7 @@ function zip(files, type) {
 window.HANDOUTS = { get db() { return DB; }, toText: () => toText(cur()), docx: () => docxBlob(cur()), open: openPage };
 
 document.body.classList.toggle('hmode', mode);
+document.body.classList.toggle('hclassview', classView);
 document.body.classList.toggle('hnomenu', !$('moremenu'));
 if (LOCK) LOCK.remembered().then(k => { if (k && modeWas) setMode(true, true); });   // no Modes menu: the Handouts button is the switch
 // The English that handouts' passages lack, fetched once the portal's texts are in: in the portal's
