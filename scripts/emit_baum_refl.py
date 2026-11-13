@@ -143,7 +143,13 @@ def main():
             # An entry in Eberhard, on a loose sheet, or on the Roman-numbered
             # front matter has no § to be attached to, and inventing one would
             # file 550-odd notes against passages they say nothing about.
-            if not on_baumgarten or w['roman']:
+            if not w['hb'] and not w['blatt'] and x['groupParas']:
+                # No handbook named at all, yet the AA prints it under a § heading of
+                # its own: Refl. 3718-3721, Kant's remarks on a student's essay, which
+                # Adickes heads `Possibile. M § 7-18. Nr. 3718-3721`. That heading is
+                # the editor's filing, so it is attested, and says no more than it.
+                paras, src = x['groupParas'], 'block'
+            elif not on_baumgarten or w['roman']:
                 paras, src = [], 'none'
             elif loc and loc.get('paras'):
                 paras, src = loc['paras'], 'locus'
