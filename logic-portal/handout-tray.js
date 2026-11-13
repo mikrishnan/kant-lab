@@ -226,15 +226,19 @@ function itemFor(i, excerpt, fromEn) {
 }
 
 /* ── English mode ────────────────────────────────────────────────────────
-   A handout shows the English with every passage, beside it where there is room and beneath it
-   where not, for students who read no German or Latin,
-   unless its maker turns that off for the handout (english: false) or for one passage (enHide).
+   One switch, English, at the top of the Handouts page, in either view: on, every passage shows
+   its English, beside it where there is room and beneath it where not, for students who read no
+   German or Latin; off, none does. It is this browser's choice, kept in VIEW_EN, not the
+   handout's, so Class view can use it and it changes no handout. (A handout's english: false and a
+   passage's enHide, from when each could be switched alone, are kept but no longer read.)
    A handout made before English mode has it on. A passage added while the portal's English was
    off, or still loading, has no English kept with it: it is fetched from the portal's
    translations and kept with the passage, the passage's own words, label, note and marks
    untouched. (enOn, from before, is kept but no longer read.) */
-const enMode = h => h.english !== false;
-const enWanted = (h, it) => enMode(h) && isPass(it) && it.from !== 'english' && !it.enHide;
+const VIEW_EN = 'kantlab-handouts-english';   // 'off' where the English switch was turned off
+let showEn = (() => { try { return localStorage.getItem(VIEW_EN) !== 'off'; } catch (e) { return true; } })();
+const enMode = () => showEn;
+const enWanted = (h, it) => showEn && isPass(it) && it.from !== 'english';
 const enShown = (h, it) => enWanted(h, it) && !!it.en;
 // Fetch an item's English: true once it has it, false where the portal has none, 'loading' meanwhile.
 function fillEn(it) {
@@ -263,7 +267,7 @@ let fillT = 0;
 function fillAll(tries) {
   fillT = 0;
   let changed = false, waiting = false;
-  DB.handouts.filter(enMode).forEach(h => passagesOf(h).forEach(it => {
+  DB.handouts.filter(() => showEn).forEach(h => passagesOf(h).forEach(it => {
     if (!enWanted(h, it) || it.en) return;
     const r = fillEn(it);
     if (r === 'loading') waiting = true; else if (r) changed = true;
@@ -487,6 +491,8 @@ css.textContent = `
   .pmeta .hrail.on { color: var(--faded); }
   #hpage .hmodesw { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.9rem; color: var(--faded); cursor: pointer; }
   #hpage .hmodesw input { accent-color: var(--accent); margin: 0; }
+  #hpage .henswitch { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.92rem; color: var(--accent); cursor: pointer; }
+  #hpage .henswitch input { accent-color: var(--accent); margin: 0; }
   body.hmode #hcoll.on { display: inline-block; }
   #menu-ho .linkish { margin: 0.15rem 0 0.25rem; }
   #htray .hn { display: inline-block; min-width: 1.25rem; margin-left: 0.35rem; padding: 0 0.35rem; border-radius: 999px; background: var(--parchment-dark); color: var(--accent); font-size: 0.8rem; text-align: center; }
@@ -660,7 +666,7 @@ css.textContent = `
   /* The class's handouts, to read: everything that would change them is put away */
   #hpage.hro .hwrap button:not([data-h="go"]):not([data-h="gopart"]):not([data-h="fold"]):not([data-h="foldall"]):not([data-h="foldnotes"]):not([data-h="unfoldall"]),
   #hpage.hro .hwrap select, #hpage.hro .hwrap .hunder, #hpage.hro .hwrap .hcopysel, #hpage.hro .hwrap .grip, #hpage.hro .hwrap .hbtns,
-  #hpage.hro .hwrap .henmode, #hpage.hro .hwrap .hhint { display: none; }
+  #hpage.hro .hwrap .hhint { display: none; }
   #hpage.hro .hwrap :is(.hlab, .hnote, .nlab):placeholder-shown { display: none; }
   #hpage.hro .hwrap :is(input, textarea) { border-color: transparent; background: transparent; resize: none; }
   #hpage.hro .hcard .hcite { cursor: default; }
@@ -947,6 +953,7 @@ page.innerHTML = '<div class="hdockgrip" title="Drag to make the handout wider o
   '<button type="button" class="btn" data-h="docx" title="A Word file. It opens in Pages too.">Word</button>' +
   '<button type="button" class="btn" data-h="pdf" title="Opens the browser’s Print window: choose Save as PDF">PDF</button>' +
   '<button type="button" class="btn" data-h="txt" title="Plain text in the Handout tool’s markup, ready to make into a handout in your house style">Handout tool text</button></span>' +
+  '<label class="henswitch" title="The English translation with every passage, or with none, on this computer"><input type="checkbox" class="henall"> English</label>' +
   '<span class="hviews" role="group" aria-label="View">' +
   '<button type="button" class="hview" data-h="classview" aria-pressed="true" title="For the class: the words left out of a passage shown as …, and nothing that adds to or changes a handout">Class view <i>for you</i></button>' +
   '<button type="button" class="hview" data-h="instructorview" aria-pressed="false" title="For making and changing handouts">Instructor view <i>for Maya</i></button></span>' +
@@ -1019,6 +1026,8 @@ function render() {
   page.classList.toggle('hro', lk);
   page.classList.toggle('hcv', classView);
   document.body.classList.toggle('hclassview', classView);
+  const es = page.querySelector('.henall');
+  if (es) es.checked = showEn;
   page.querySelectorAll('.hview').forEach(b => { const on = (b.dataset.h === 'classview') === classView; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
   page.querySelector('aside').innerHTML = DB.handouts.map(x =>
       '<button type="button" class="hl' + (x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
@@ -1033,7 +1042,6 @@ function render() {
     (heads.some(x => !isFolded(x)) ? '<button type="button" class="linkish" data-h="foldall" title="Fold every section away, to see just the headings">Fold all sections</button>' : '') +
     (notesOf(h).some(x => !noteFolded(x)) ? '<button type="button" class="linkish" data-h="foldnotes" title="Fold every note to its first line">Fold all notes</button>' : '') +
     (heads.some(isFolded) || notesOf(h).some(noteFolded) ? '<button type="button" class="linkish" data-h="unfoldall" title="Open every section and note">Open all</button>' : '') +
-    '<label class="hmodesw henmode" title="The English with every passage, beside it where there is room: here, in Class view and in the exports. A passage can hide its own."><input type="checkbox" class="henin"' + (enMode(h) ? ' checked' : '') + '> English with every passage</label>' +
     '<span class="spacer"></span><button type="button" class="linkish hdel" data-h="delete">Delete this handout</button></div>' +
     '<p class="hhint muted small">' + (c ? 'Passages you add go under the note “' + esc(noteName(c)) + '”.'
       : collectingSection() ? 'Passages you add go to the end of the section “' + esc(sectionName(collectingSection())) + '”.'
@@ -1243,13 +1251,12 @@ function pickMove(h, n, keys) {
   save(); render();
   toast(plural(got.length, 'passage') + ' now under “' + noteName(n) + '”');
 }
-// A passage's English on its card, in English mode: shown, or hidden for this passage alone.
+// A passage's English on its card, while the English switch is on.
 function enCard(h, it, lab) {
   if (!enMode(h) || it.from === 'english') return '';
   if (!it.en) return '<div class="hen muted small">' + (enState(it) === 'loading' ? 'English loading…' : 'The portal has no English for this passage.') + '</div>';
-  return '<label class="hen"><input type="checkbox" data-f="enShow"' + (it.enHide ? '' : ' checked') + '> ' + lab +
-    ' <span class="muted small">machine translation, ' + esc(styleLabel(it.enStyle)) + (it.enHide ? ' · hidden for this passage' : '') + '</span></label>' +
-    (it.enHide ? '' : '<div class="htext en" data-mf="en" lang="en">' + rich(it.en) + '</div>');
+  return '<div class="hen">' + lab + ' <span class="muted small">machine translation, ' + esc(styleLabel(it.enStyle)) + '</span></div>' +
+    '<div class="htext en" data-mf="en" lang="en">' + rich(it.en) + '</div>';
 }
 // A passage's words and its English, side by side where the English is shown (one above the
 // other where the page is narrow, or beside the portal).
@@ -1491,7 +1498,7 @@ page.addEventListener('input', e => {
   const h = cur();
   if (e.target.classList.contains('hname')) { h.name = e.target.value; save(); const on = page.querySelector('aside .hl.on'); if (on && on.firstChild) on.firstChild.textContent = h.name || 'Untitled handout'; return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
-  if (!f || !c || f === 'enShow' || f === 'under' || f === 'moveto' || f === 'copyto') return;
+  if (!f || !c || f === 'under' || f === 'moveto' || f === 'copyto') return;
   at(h, c.dataset.key).it[f] = e.target.value;
   if (e.target.tagName === 'TEXTAREA') grow(e.target);
   if (e.target.classList.contains('nlab')) e.target.size = Math.max(4, e.target.value.length + 1);
@@ -1503,11 +1510,16 @@ page.addEventListener('input', e => {
 });
 page.addEventListener('change', e => {
   if (e.target.classList.contains('hmodein')) { setMode(e.target.checked); return; }
+  if (e.target.classList.contains('henall')) {
+    showEn = e.target.checked;
+    try { if (showEn) localStorage.removeItem(VIEW_EN); else localStorage.setItem(VIEW_EN, 'off'); } catch (x) { /* this visit only */ }
+    render();
+    toast(showEn ? 'English with every passage.' : 'No English: the passages in the original only.');
+    return;
+  }
   if (locked()) return;
-  if (e.target.classList.contains('henin')) { cur().english = e.target.checked; save(); render(); return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
   if (!c) return;
-  if (f === 'enShow') { const x = at(cur(), c.dataset.key).it; if (e.target.checked) delete x.enHide; else x.enHide = true; save(); render(); }
   if (f === 'under') reparent(cur(), c.dataset.key, e.target.value);
   if (f === 'moveto' && e.target.value) moveNote(cur(), +c.dataset.key, e.target.value);
   if (f === 'copyto' && e.target.value) copyPassage(cur(), c.dataset.key, e.target.value);

@@ -85,13 +85,12 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   same stretch, and marked so), shown from the start for students; words picked in the English
   bring the matching German. In Kant's published works the citation narrows to the pages the
   words are on.
-- **English with every passage.** A handout shows each passage's English beside it, for
-  students who read no German or Latin: on the Handouts page, on the class
-  screen and in every export. Where there is no room for two columns (a phone, a narrow window, the
-  handout side by side with the portal) the English goes beneath instead, and the exports keep
-  it beneath. The switch **English with every passage**, beside **+ Heading**, turns
-  it off for that handout, and a passage's own **English** box hides just that passage's. It is
-  on for every handout, including those made before it: a passage added while the English was
+- **English with every passage, or none.** One switch, **English**, in the Handouts page's top
+  bar, in Class view and Instructor view alike. On, every passage shows its English beside it,
+  for students who read no German or Latin, on the Handouts page and in every export; off, none
+  does. Where there is no room for two columns (a phone, a narrow window, the handout side by
+  side with the portal) the English goes beneath instead, and the exports keep it beneath. The
+  switch is this computer's choice and changes no handout. A passage added while the English was
   off gets its English from the portal's translations the next time the portal opens, and keeps
   it. Its words, label, note and marks stay as they were.
 - **Side by side.** **⇆ Side by side** on the Handouts page puts your handout in a column on the
