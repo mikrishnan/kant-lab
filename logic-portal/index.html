@@ -655,6 +655,9 @@
   /* in a narrow pane the margin stands above the text, in the one column, and the English under both */
   @container (max-width: 32rem) { .fp > .fen { grid-column: 1; } }
   .enb { display: inline-block; margin-top: 0.3rem; padding: 0 0.45rem; border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--faded); font-size: 0.72rem; line-height: 1.35; cursor: pointer; }
+  .ensnip { display: block; margin-top: 0.1rem; color: #3d3122; font-size: 0.92em; font-style: normal; }
+  .ensnip.wait { color: var(--faded); }
+  .enbox > .enb, .cmp-h .enb { margin: 0.2rem 0 0 0.5rem; }
   .enb:hover { border-color: var(--accent-light); color: var(--accent); }
   .enb.on { background: var(--parchment-dark); border-color: var(--accent-light); color: var(--accent); }
   .hit .cite .enb, .nfoot .enb { margin: 0 0 0 0.5rem; vertical-align: 0.05em; }
@@ -890,7 +893,7 @@
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
-<script src="catalogue.js?v=2026-11-13a"></script>
+<script src="catalogue.js?v=2026-11-13b"></script>
 <script src="studies/studies.js?v=2026-11-04a"></script>
 <script>
 (() => {
@@ -1052,7 +1055,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&am
 /* Inserted with async = false, the files download side by side but run in the order given. */
 /* Bump this, and the catalogue's ?v= in the page's <script> tag, whenever the portal's files change,
    so that a browser holding yesterday's copies fetches today's. */
-const PORTAL_V = '2026-11-13a';
+const PORTAL_V = '2026-11-13b';
 function loadScript(src) {
   return new Promise(res => {
     const el = document.createElement('script');
@@ -2745,11 +2748,22 @@ function enToggle(btn) {
   if (S.enOpen.has(k)) S.enOpen.delete(k); else S.enOpen.add(k);
   const on = S.enOpen.has(k);
   document.querySelectorAll('[data-enp="' + k + '"]').forEach(x => x.classList.toggle('on', on));
-  const box = btn.closest('[data-fp], .hit, .ncard');
+  const box = btn.closest('[data-fp], .hit, .ncard, .enbox');
   if (!box) return;
   box.querySelectorAll('.fen[data-for="' + k + '"]').forEach(x => x.remove());
-  const anchor = on && box.querySelector('.fpt, .kw, .ntext');
+  const anchor = on && box.querySelector('.fpt, .kw, .ntext, .enanc');
   if (anchor) anchor.insertAdjacentHTML('afterend', btn.dataset.a != null ? enLine(P[k], +btn.dataset.a, +btn.dataset.b) : enLine(P[k]));
+}
+/* Under a one-line excerpt in a list (Kant's notes on a §, the lectures on it, the parallel passages,
+   Compare's candidates), the start of its English, while English is switched on. */
+function enSnip(p, n) {
+  if (!S.en) return '';
+  const tr = trFor(TEXTS[p.t]);
+  if (!tr) return '';
+  const state = trState(tr, S.en);
+  if (state === 'loading') return '<span class="ensnip wait" lang="en">English loading…</span>';
+  const e = state === 'ready' && trEntry(tr, S.en, p);
+  return e ? '<span class="ensnip" lang="en">' + esc(clip(e.text.replace(/\*+/g, '').replace(/\s+/g, ' '), n)) + '</span>' : '';
 }
 let EN_TIMER = 0;
 function enRefresh() {
@@ -2907,7 +2921,8 @@ function textbookStrip(p) {
   }
   const de = '<div class="tbtext" lang="de">' + esc(bp.text) + '</div>';
   const tr = trFor(book);
-  h += '<div class="tbbody">' + (tr && S.en ? '<div class="pair">' + de + englishFor(tr, bp) + '</div>' : de) + '</div>';
+  // with English off, the § still has its own English button, as every passage does
+  h += '<div class="tbbody enbox">' + (tr && S.en ? '<div class="pair">' + de + englishFor(tr, bp) + '</div>' : de.replace('class="tbtext"', 'class="tbtext enanc"') + enLine(bp) + enButton(bp)) + '</div>';
   h += '<div class="tbfoot">' + esc(place.how) + ' · <span class="lnk" data-open="' + bp.i + '">open § ' + n + ' on its own</span></div>';
   return h + '</div>';
 }
@@ -3045,7 +3060,7 @@ function renderConnections(p, T) {
     const bp = book && passage(book.key, 'p' + place.paras[0]);
     const tierWord = place.tier === 'stated' ? 'stated' : place.tier === 'interp' ? 'interpolated' : 'inferred';
     h += sec('place', 'In ' + esc(bookName), '<span class="lnk" data-para="' + place.book + ':' + place.paras[0] + '">' + esc(paraLabel(place.paras)) + '</span><span class="tier ' + place.tier + '">' + tierWord + '</span>', null,
-      '<div class="how">' + esc(place.how) + '</div>' + (bp ? '<div class="preview" lang="de">' + esc(clip(bp.text, 320)) + '</div>' : ''),
+      '<div class="how">' + esc(place.how) + '</div>' + (bp ? '<div class="enbox"><div class="preview enanc" lang="de">' + esc(clip(bp.text, 320)) + '</div>' + enLine(bp, 0, Math.min(320, bp.text.length)) + enButton(bp, 0, Math.min(320, bp.text.length)) + '</div>' : ''),
       esc(place.who === 'jesus' ? 'Jesus’s Meier–Kant concordance' + (T.key === 'jaesche' ? ', re-keyed to Alex’s Jäsche' : '') : 'the Academy edition’s filing, through the shared Reflexionen data'), true);
     h += railForPara(place.book, place.paras[0], p);
   } else if (T.shape === 'meier' || T.shape === 'metaphysica') {
@@ -3082,7 +3097,7 @@ function parallelsSection(p) {
   if (!sims.length) return '';
   let body = '';
   if (sims.length) body += '<ul class="items">' +
-    sims.map(([q, sc]) => '<li data-cmpwith="' + q + '" title="Compare it with this passage, word by word"><span class="c">' + esc(TEXTS[P[q].t].short + ', ' + P[q].cite) + '</span>' + esc(clip(P[q].text.replace(/\s+/g, ' '), 100)) + '<span class="simv" title="similarity of wording, 0 to 1">' + sc.toFixed(2) + '</span></li>').join('') + '</ul>' +
+    sims.map(([q, sc]) => '<li data-cmpwith="' + q + '" title="Compare it with this passage, word by word"><span class="c">' + esc(TEXTS[P[q].t].short + ', ' + P[q].cite) + '</span>' + esc(clip(P[q].text.replace(/\s+/g, ' '), 100)) + enSnip(P[q], 130) + '<span class="simv" title="similarity of wording, 0 to 1">' + sc.toFixed(2) + '</span></li>').join('') + '</ul>' +
     '<div class="from">the words the passages share, weighted by rarity, as Jessie’s parallel passages compare the lectures, leaving out Jessie’s stopwords. Found by machine, not checked by hand. Click one to compare it with this passage, word by word</div>';
   return sec('parallels', 'Parallel passages', '', sims.length, body, '', true);
 }
@@ -3465,9 +3480,9 @@ function renderCompare(p, T) {
     });
     at += cmpHtml(a, pos, a.str.length, mkA);
   } else at = cmpHtml(a, 0, a.str.length, mkA);
-  let h = '<div class="cmp-a"><div class="cmp-h"><span class="cl">This ' + noun + '</span>' +
+  let h = '<div class="cmp-a enbox"><div class="cmp-h"><span class="cl">This ' + noun + '</span>' + enButton(p) +
     (sents.length > 1 ? '<span class="hint">' + (st.bit ? 'one sentence, compared alone · <span class="lnk" data-cbit="">the whole ' + noun + '</span>' : 'click a sentence to compare it alone') + '</span>' : '') + '</div>' +
-    '<div class="cmp-text" lang="de">' + at + '</div>' +
+    '<div class="cmp-text enanc" lang="de">' + at + '</div>' + enLine(p) +
     '<div class="cmp-key"><span><mark class="cs">shared word</mark> <mark class="cr">same words in a row</mark></span>' +
     (tags.size ? '<span><span class="ctag demo">≈ …</span> a sentence found nearly whole elsewhere</span>' : '') + '</div></div>';
 
@@ -3478,7 +3493,7 @@ function renderCompare(p, T) {
       '<span class="cc">' + esc(cmpCite(q)) + '</span>' + (cmpMeta(q) ? '<span class="cd">' + esc(cmpMeta(q)) + '</span>' : '') + tieChip(x) +
       '<span class="cn" title="' + x.n + ' of the ' + x.m + ' words of this ' + (st.bit ? 'sentence' : noun) + ' that count are in it' + (x.run >= 3 ? '; ' + x.run + ' stand in a row' : '') + '. The bar weighs each word by how rare it is in the corpus, as the order does."><i class="cbar"><b style="width:' + pct + '%"></b></i>' +
       x.n + ' of ' + x.m + (x.run >= 3 ? ' · ' + x.run + ' in a row' : '') + '</span>' +
-      (opening ? '<span class="cx" lang="de">' + esc(clip(q.text.replace(/\s+/g, ' '), 90)) + '</span>' : '') + '</button>';
+      (opening ? '<span class="cx" lang="de">' + esc(clip(q.text.replace(/\s+/g, ' '), 90)) + '</span>' + enSnip(q, 110) : '') + '</button>';
   };
   h += '<div class="cmp-list"><div class="cmp-h"><span class="cl">Compare with</span><span class="hint">' + (st.bit ? 'what shares this sentence’s wording' : 'what shares its wording') + ', closest first, rare words counting most</span></div>' +
     '<input id="cmpgo" class="cmpgo" type="search" spellcheck="false" placeholder="or name one: Refl. 4086 · 16:236 · Meier § 125" aria-label="Name a passage to compare with">';
@@ -3506,10 +3521,10 @@ function renderCompare(p, T) {
     for (let k = 0; k < nb; k++) if (H[b.st[k]] && r.shared.has(b.st[k]) && (whole || (k >= r.win[0] && k < r.win[1]))) mkB[k] = 1;
     r.runs.forEach(x => { for (let k = x[1]; k < x[1] + x[2]; k++) mkB[k] = 2; });
     const c0 = whole || !k0 ? 0 : b.s[k0], c1 = whole || k1 >= nb ? b.str.length : b.e[k1 - 1];
-    h += '<div class="cmp-b"><div class="cmp-h"><span class="layer">' + esc(LAYER_LABEL[TB.layer] || TB.layer) + '</span><b>' + esc(TB.shape === 'refl' ? B.cite : cmpCite(B)) + '</b>' +
+    h += '<div class="cmp-b enbox"><div class="cmp-h"><span class="layer">' + esc(LAYER_LABEL[TB.layer] || TB.layer) + '</span><b>' + esc(TB.shape === 'refl' ? B.cite : cmpCite(B)) + '</b>' +
       (cmpMeta(B) ? '<span class="cd">' + esc(cmpMeta(B)) + '</span>' : '') + tieChip(r) + '<span class="spacer"></span>' +
-      ftxLink(B.i, 'open it in its full text') + '</div>' +
-      '<div class="cmp-text" lang="de">' + (c0 > 0 ? '… ' : '') + cmpHtml(b, c0, c1, mkB) + (c1 < b.str.length ? ' …' : '') + '</div>' +
+      ftxLink(B.i, 'open it in its full text') + enButton(B) + '</div>' +
+      '<div class="cmp-text enanc" lang="de">' + (c0 > 0 ? '… ' : '') + cmpHtml(b, c0, c1, mkB) + (c1 < b.str.length ? ' …' : '') + '</div>' + enLine(B) +
       (windowed ? '<div class="cmp-foot"><span class="lnk" data-cwhole="' + (st.whole ? '0' : '1') + '">' + (st.whole ? 'only the stretch that shares its wording' : 'the whole passage, ' + nb.toLocaleString('en') + ' words') + '</span></div>' : '') + ftxBox(B.i) + '</div>';
     const runs = r.runs.slice(0, 8);
     if (runs.length) h += '<div class="cmp-runs"><div class="cgh">Word for word in both</div>' + runs.map(x => {
@@ -3552,8 +3567,8 @@ function renderReflLookup(box, rn) {
   const T = TEXTS[q.t], place = placeOf(q), book = place && textByKey(place.book);
   h += '<div class="summary">' + esc(T.title) + '</div>' + (rn.prefixed ? '' : '<p class="note">A number alone is taken for a Reflexion’s number.</p>') + '</div>';
   h += '<div class="hit' + (S.sel === q.i ? ' sel' : '') + '" data-open="' + q.i + '"><div class="cite"><b>' + esc(q.cite) + '</b> · ' + esc(q.dateLabel) +
-    ' · ' + (place ? esc((book ? book.short : place.book) + ' ' + paraLabel(place.paras)) : 'filed under no §') + '</div>' +
-    '<div class="kw" lang="de">' + esc(clip(q.text, 700)) + '</div></div>';
+    ' · ' + (place ? esc((book ? book.short : place.book) + ' ' + paraLabel(place.paras)) : 'filed under no §') + enButton(q) + '</div>' +
+    '<div class="kw" lang="de">' + esc(clip(q.text, 700)) + '</div>' + enLine(q) + '</div>';
   const prev = q.i > T.first ? P[q.i - 1] : null, next = q.i < T.last ? P[q.i + 1] : null;
   h += '<div class="rlook">' +
     (place && book ? '<span class="lnk" data-readat="' + q.i + '">Read it beside ' + esc(book.short + ' ' + paraLabel(place.paras)) + ', with the other notes there</span>' : '') +
@@ -4321,7 +4336,7 @@ function railForPara(bookKey, n, from) {
 
 function listItems(ps, key, fmt, lim0) {
   const lim = S.expand.has(key) ? 1e9 : (lim0 || 8);
-  let h = '<ul class="items">' + ps.slice(0, lim).map(q => '<li data-open="' + q.i + '">' + fmt(q) + '</li>').join('') + '</ul>';
+  let h = '<ul class="items">' + ps.slice(0, lim).map(q => '<li data-open="' + q.i + '">' + fmt(q) + enSnip(q, 140) + '</li>').join('') + '</ul>';
   if (ps.length > lim) h += '<button type="button" class="btn more" data-expand-rail="' + esc(key) + '">Show all ' + ps.length + '</button>';
   return h;
 }
