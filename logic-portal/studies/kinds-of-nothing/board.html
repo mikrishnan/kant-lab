@@ -139,6 +139,8 @@
   #chooser { display: none; padding: 0.35rem; gap: 0.3rem; flex-wrap: wrap; width: 230px; }
   #chooser.show { display: flex; }
   #chooser .ttl { flex-basis: 100%; font-size: 0.78rem; color: var(--faded); padding: 0 0.2rem; }
+  #chooser textarea { flex-basis: 100%; border: 1px solid #e6d58a; background: var(--note); border-radius: 6px; padding: 0.3rem 0.45rem; font-size: 0.92rem; resize: vertical; }
+  #chooser { width: 260px; }
   #toast { left: 50%; bottom: 14px; transform: translateX(-50%); padding: 0.3rem 0.8rem; display: none; }
   #toast.show { display: block; }
 
@@ -654,11 +656,15 @@ function renderSync() {
   }
   el.className = cls; el.innerHTML = h;
 }
+// GitHub lets one key make about 80 saves a minute and 500 an hour, and the whole seminar
+// shares one key. So each device saves at most once every minGapSeconds, taking every change
+// made since in that one save; nothing is lost while it waits.
 function scheduleSave() {
   if (!shared || !shared.canSave || shared.broken || !shared.base) return;
   setStatus('unsaved');
-  clearTimeout(shared.timer);
-  shared.timer = setTimeout(() => { shared.timer = null; push(); }, (SH.saveSeconds || 2.5) * 1000);
+  if (shared.timer) return;   // a save is already coming, and takes this change with it
+  const wait = Math.max((SH.saveSeconds || 2.5) * 1000, (SH.minGapSeconds || 12) * 1000 - (Date.now() - (shared.lastPush || 0)));
+  shared.timer = setTimeout(() => { shared.timer = null; push(); }, wait);
 }
 async function push(tries) {
   tries = tries || 0;
@@ -671,7 +677,7 @@ async function push(tries) {
   try {
     const r = await writeText(SH.path, boardText(snap, me(), new Date().toISOString()), shared.sha, msg);
     if (r.ok) {
-      shared.sha = r.data.content.sha; shared.etag = null; shared.base = snap; shared.pushing = false;
+      shared.sha = r.data.content.sha; shared.etag = null; shared.base = snap; shared.pushing = false; shared.lastPush = Date.now();
       writeCache();
       if (shared.again || dirty()) { shared.again = false; scheduleSave(); } else setStatus('saved');
       return;
@@ -691,7 +697,7 @@ async function push(tries) {
   } catch (e) {
     shared.pushing = false; setStatus('error', e);
     if (e.status === 401) { forgetToken(); showLock('The board’s key no longer works. Ask for a new one to be made.'); }
-    else if (e.status === 403 && (e.left === '0' || e.retry)) setTimeout(scheduleSave, 30000);
+    else if (e.status === 403 && (e.left === '0' || e.retry)) setTimeout(scheduleSave, 60000);
   }
 }
 // Has anyone else saved? One small question every few seconds, answered "no change" by GitHub at no cost.
@@ -1057,7 +1063,7 @@ function sideIntro() {
     '<p>Every card is a part of a model, a passage, a problem or a note. The parts are built from Kant’s own labels, and each carries the passages it rests on: click a card to read them, here or in the portal beside the board.</p>' +
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and say what it claims: <i>kept, renamed, split into, merged from, dropped, new</i>, or <i>answers?</i> to a problem, or a type of your own.</li>' +
-    '<li><b>Write anywhere</b>: double-click the board.</li>' +
+    '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a part, passage or problem.</li>' +
     '<li><b>Models</b> are frames around their cards. Grab any bare part of a frame to move the whole model; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into another frame to move it there; select several and make them a model of their own to split one.</li>' +
     '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
     '<li><b>On an iPad</b>: a finger moves cards, models and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>' +
@@ -1651,11 +1657,29 @@ function doubleAt(cx, cy) {
   const [wx, wy] = toWorld(cx, cy), r = $('stage').getBoundingClientRect(), c = $('chooser');
   const inM = B.models.find(m => inside(frameOf(m), wx, wy));
   c.dataset.at = JSON.stringify([wx - 20, wy - 15]); c.dataset.model = inM ? inM.id : '';
-  c.innerHTML = '<span class="ttl">Put here' + (inM ? ', in ' + esc(inM.title) : '') + ':</span><button type="button" class="btn" data-new="part">Part</button><button type="button" class="btn" data-new="passage">Passage</button><button type="button" class="btn k-problem" data-new="problem">Problem</button><button type="button" class="btn k-note" data-new="note">Note</button>';
+  c.innerHTML = '<span class="ttl">Put here' + (inM ? ', in ' + esc(inM.title) : '') + ':</span><textarea id="qnote" rows="2" placeholder="Type a note and press Enter (⇧Enter for a new line)"></textarea><button type="button" class="btn" data-new="part">Part</button><button type="button" class="btn" data-new="passage">Passage</button><button type="button" class="btn k-problem" data-new="problem">Problem</button><button type="button" class="btn k-note" data-new="note">Note</button>';
   c.style.left = Math.min(cx - r.left, r.width - 240) + 'px'; c.style.top = Math.min(cy - r.top, r.height - 90) + 'px';
   c.classList.add('show');
+  setTimeout(() => { const q = $('qnote'); if (q) q.focus(); }, 30);
+}
+// A note typed in the chooser goes straight onto the board where the double-click was, signed by whoever is signed in.
+function quickNote(text, at, modelId) {
+  if (ro() || !text.trim()) return;
+  let id;
+  change(() => {
+    id = uid('n');
+    const n = { id, kind: 'note', model: modelId || null, quotes: [], date: today(), text: text.trim() };
+    if (me()) n.by = me();
+    B.items.push(n); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
+  });
+  showLayer('note'); render();
 }
 $('stage').addEventListener('dblclick', e => { if (lastType === 'mouse' && tool === 'move' && !e.target.closest('.float')) doubleAt(e.clientX, e.clientY); });
+$('chooser').addEventListener('keydown', e => {
+  if (e.target.id !== 'qnote') return;
+  if (e.key === 'Escape') { $('chooser').classList.remove('show'); return; }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); const c = $('chooser'); c.classList.remove('show'); quickNote(e.target.value, JSON.parse(c.dataset.at), c.dataset.model || null); }
+});
 $('chooser').addEventListener('click', e => {
   const b = e.target.closest('[data-new]'); if (!b) return;
   const c = $('chooser'); c.classList.remove('show');
