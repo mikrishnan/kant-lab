@@ -86,7 +86,7 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   bring the matching German. In Kant's published works the citation narrows to the pages the
   words are on.
 - **English with every passage.** A handout shows each passage's English beside it, for
-  students who read no German or Latin: on the Handouts page, in the class's copy, on the class
+  students who read no German or Latin: on the Handouts page, on the class
   screen and in every export. Where there is no room for two columns (a phone, a narrow window, the
   handout side by side with the portal) the English goes beneath instead, and the exports keep
   it beneath. The switch **English with every passage**, beside **+ Heading**, turns
@@ -131,11 +131,11 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   section heading, adds one at the top of that section, just under its heading, and a note
   shows the section it is in. What stands under a heading is set in a little. **Note**, at the top
   of a note, is a title to type into: give the note one and it stands there in place of *Note*,
-  in the class's copy, on the class screen and in the exports (in the Handout tool text as a `###` heading).
+  on the class screen and in the exports (in the Handout tool text as a `###` heading).
 - **Ask a question, and keep its answer back.** In a note, or in a passage's note, start a
   paragraph with **Answer:**. On the class screen the question shows first, with only a small
   **Answer ▸** beneath it (**2 answers ▸** for two such paragraphs in a row), which ↓ opens
-  before going on. On the Handouts page, in the class's copy and in the exports the note stays
+  before going on. On the Handouts page and in the exports the note stays
   as you wrote it.
   **Add passages here**, on a section heading, sends every passage you add in the portal to
   the end of that section, in the order you add them, until you press it again or the
@@ -161,7 +161,7 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   on a narrow card it goes under the text. Click a highlight or underline to remove it, or
   select words and press **Remove marks**; ✕ removes a margin note (with **Undo**), and one
   left empty goes by itself. Highlights and underlines appear in the Word file, the PDF and the
-  class's copy, and underlines as `__…__` in the Handout tool text; margin notes are yours
+  Class view, and underlines as `__…__` in the Handout tool text; margin notes are yours
   and stay on the Handouts page. A mark keeps its words, not their position, so it stays on
   them however the passage is drawn.
 - **Change your mind.** ✕ moves a passage to the handout's **Trash**, which folds open on the
@@ -172,22 +172,16 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   markup of Maya's Handout tool, which turns it into a handout in her house style. Notes,
   labels and the passages under each note come along. Every export marks the English as
   machine translation.
-- **Class view.** **Class view**, in the Handouts page's top bar, shows what you have left out
-  of each passage as … rather than struck through, as the room should see it. Press it again to
-  go back. For the room's screen in large type, one passage after another, there is still the
-  [class screen](teaching/class-screen/), among the teaching tools.
-- **Share it with the class.** **Share with the class** puts every handout of yours with
-  something in it into one file, `class.json`, locked with the class password, and leaves out
-  your margin notes and your trash. It saves the file to your Downloads and opens GitHub's upload
-  page for [handouts/](handouts/): drop the file in and press *Commit changes*. Anyone who opens
-  **Handouts** and gives the class password then finds your handouts under *The class's
-  handouts*, as you see them, to read, to open each passage where it stands, to switch on Class
-  view and to export, but not to change. The left column says when you last shared and whether
-  you have changed anything since; share again to give the class the new version. The file is in
-  the public repository, but without the password it reads as nothing.
+- **Two views.** The Handouts page's top bar has **Class view** *for you* and **Instructor
+  view** *for Maya*. Class view is on whenever the page opens, and is the one to show the class:
+  what you have left out of each passage shows as … rather than struck through, and everything
+  that would add to or change a handout is put away (adding, moving, marking, typing, the trash,
+  **+ New handout**, **Open file**, and the **+ Handout** buttons on the portal's passages).
+  Reading, folding, exports and **Read it where it stands** stay. **Instructor view** is for
+  making and changing handouts. For the room's screen in large type, one passage after another,
+  there is still the [class screen](teaching/class-screen/), among the teaching tools.
 
-Your own handouts are kept in your own browser on your own computer, and nowhere else, until
-you share them. The repository and the site never see them. **Save to file** writes them all to one `.json`
+Your handouts are kept in your own browser on your own computer, and nowhere else. The repository and the site never see them. **Save to file** writes them all to one `.json`
 file, to keep or to open in another browser with **Open file**. Clearing the browser's
 site data deletes them.
 

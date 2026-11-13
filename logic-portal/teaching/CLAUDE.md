@@ -25,16 +25,15 @@ This folder holds small tools for teaching with the Logic Portal, one folder eac
 - **The handouts, read only.** `handout-tray.js` keeps every handout in this browser in
   `localStorage['kantlab-handouts-v1']`, as `{ v, current, collect, handouts }`
   (`current` the `id` of the one open), each `{ id, name, made, items, trash, published }`,
-  the shapes its comments give. The class's copy, made by **Share with the class**, is
-  `logic-portal/handouts/class.json` (`../../handouts/` from a tool's folder; see
-  `../handouts/README.md`): `{ kind: 'kantlab-class-handouts', v, shared, handouts }`, sealed. A tool reads these
+  the shapes its comments give. Handouts are no longer shared as a file: `handouts/class.json`
+  and any published `handouts/<name>.json` are left from before, and nothing reads them now. A tool reads these
   and never writes them. The `storage` event tells a tool when the portal, in another
   window, has changed them. Margin notes (`marks` with `k: 'mn'`) are their maker's own:
   never show them.
 - **The class password.** The handouts are the class's: a tool that shows them loads
   `../../handouts/lock.js` and shows nothing until `KANTLAB_LOCK.remembered()` or
-  `KANTLAB_LOCK.ask()` gives it the key. The class's copy is sealed with it
-  (`kind: 'kantlab-handout-locked'`): open it with `KANTLAB_LOCK.open(d)`. Never write the
+  `KANTLAB_LOCK.ask()` gives it the key. A file sealed with it (`kind: 'kantlab-handout-locked'`)
+  opens with `KANTLAB_LOCK.open(d)`. Never write the
   password into a file, a commit, a pull request or a log.
 - Pages under `logic-portal/` share one origin with the portal, so all of this works
   on GitHub Pages and on a local server, but not from a `file://` address.
