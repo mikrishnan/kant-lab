@@ -192,6 +192,48 @@
   #details .photo { background: #fff; border: 1px solid var(--line-soft); border-radius: 8px; padding: 0.35rem 0.6rem; margin: 0.35rem 0; }
   #details .photo b { color: var(--accent); }
   #details .photo .meta { font-size: 0.8rem; color: var(--faded); }
+
+  /* a model is moved by any bare part of its frame; its corner grip spreads its cards or gathers them */
+  #ink .frame rect.f { pointer-events: auto; cursor: move; }
+  #stage.tool-pen #ink .frame rect.f, #stage.tool-select #ink .frame rect.f, #stage.tool-erase #ink .frame rect.f { cursor: inherit; }
+  .fgrip { position: absolute; width: 26px; height: 26px; border-radius: 7px; color: #fff; font-size: 15px; line-height: 25px; text-align: center; cursor: nwse-resize; opacity: 0.8; }
+  .fgrip:hover { opacity: 1; }
+  /* drawing sits on top of everything, as marker does on a whiteboard */
+  #drawn { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
+  #drawn path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  #stage.tool-pen { cursor: crosshair; }
+  #stage.tool-erase { cursor: cell; }
+  #stage.tool-select { cursor: default; }
+  #stage.spacepan, #stage.spacepan * { cursor: grab !important; }
+  /* the tools */
+  #palette { left: 12px; top: 12px; padding: 0.3rem; display: flex; flex-direction: column; gap: 0.2rem; }
+  #palette button.tl { border: 0; background: none; border-radius: 8px; padding: 0.2rem 0.55rem; cursor: pointer; color: var(--accent); text-align: left; font-size: 0.88rem; white-space: nowrap; }
+  #palette button.tl span { display: inline-block; width: 1.2rem; text-align: center; margin-right: 0.25rem; }
+  #palette button.tl:hover { background: var(--parchment-dark); }
+  #palette button.tl.on { background: var(--accent); color: var(--parchment); }
+  #palette .pens { display: none; gap: 0.3rem; padding: 0.2rem 0.35rem 0.1rem; flex-wrap: wrap; width: 7.6rem; }
+  #palette.pen .pens { display: flex; }
+  #palette .pens button.pc { width: 1.35rem; height: 1.35rem; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0; }
+  #palette .pens button.pc.on { box-shadow: 0 0 0 2px var(--ink); }
+  #palette .pens .clr { flex-basis: 100%; text-align: left; margin-top: 0.15rem; }
+  /* the side can be put away, for a tablet or a projector */
+  body.sideclosed #side { display: none; }
+  #sideopen { right: 12px; top: 12px; padding: 0.15rem 0.7rem; display: none; cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+  body.sideclosed #sideopen { display: block; }
+  #side .tabs button.hide { flex: none; padding: 0.3rem 0.8rem; font-family: 'EB Garamond', serif; font-size: 1.05rem; letter-spacing: 0; color: var(--faded); }
+  #stage { -webkit-touch-callout: none; -webkit-user-select: none; }
+  /* fingers need bigger targets than a mouse */
+  @media (pointer: coarse) {
+    .card .knob { width: 34px; height: 34px; line-height: 33px; font-size: 18px; right: -19px; margin-top: -17px; }
+    .card:hover .knob { display: none; }
+    .card.sel .knob, .card.sel:hover .knob { display: block; }
+    .fgrip { width: 38px; height: 38px; line-height: 37px; font-size: 20px; }
+    .btn { padding: 0.25rem 0.9rem; }
+    #palette button.tl { padding: 0.5rem 0.65rem; font-size: 0.98rem; }
+    #palette .pens button.pc { width: 1.9rem; height: 1.9rem; }
+    #zoom button { padding: 0.4rem 0.65rem; }
+    #layers label { margin: 0.3rem 0; }
+  }
 </style>
 </head>
 <body>
@@ -236,7 +278,16 @@
     <div id="world">
       <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
       <div id="cards"></div>
+      <svg id="drawn" xmlns="http://www.w3.org/2000/svg"><g id="gdraw"></g><path id="wet" d=""></path></svg>
     </div>
+    <div id="palette" class="float" role="toolbar" aria-label="Tools">
+      <button type="button" class="tl on" data-tool="move" title="Move cards and models, and drag the bare board to move about (V)"><span>✋</span>Move</button>
+      <button type="button" class="tl" data-tool="select" title="Drag around cards to select several (S)"><span>⬚</span>Select</button>
+      <button type="button" class="tl" data-tool="pen" title="Draw on the board (P). An Apple Pencil draws on the bare board in any tool."><span>✎</span>Draw</button>
+      <button type="button" class="tl" data-tool="erase" title="Rub out drawing (E)"><span>⌫</span>Rub out</button>
+      <div class="pens" id="pens"></div>
+    </div>
+    <button type="button" id="sideopen" class="float" title="Show the side again">« the side</button>
     <div id="layers" class="float"></div>
     <div id="zoom" class="float"><button type="button" id="zout" title="Zoom out">−</button><span id="zk">100%</span><button type="button" id="zin" title="Zoom in">+</button><button type="button" id="zfit" title="Show the whole view">Fit</button><button type="button" id="ztidy" title="Lay this view out again, a column per model">Tidy</button></div>
     <div id="banner" class="float"></div>
@@ -244,7 +295,7 @@
     <div id="toast" class="float"></div>
   </div>
   <aside id="side">
-    <div class="tabs"><button type="button" id="tdet" class="on">On the board</button><button type="button" id="tread">Reading</button></div>
+    <div class="tabs"><button type="button" id="tdet" class="on">On the board</button><button type="button" id="tread">Reading</button><button type="button" class="hide" id="tside" title="Put the side away, for more board">»</button></div>
     <div id="details"></div>
     <div id="reading"><div class="bar"><span>The Logic Portal</span><a id="full" href="../../index.html" target="_blank" rel="noopener">open it full size ↗</a></div><iframe id="portal" title="The Logic Portal"></iframe></div>
   </aside>
@@ -267,10 +318,12 @@ const LAYERS = [
   { key: 'passage', label: 'Passages', mark: 'sq' },
   { key: 'note', label: 'Notes', mark: 'sq' },
   { key: 'computer', label: 'Same label (the computer’s)', color: '#9a8f7a', dash: '2 4' },
+  { key: 'drawing', label: 'Drawing', color: '#b03a2e' },
 ];
 const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', computer: '#9a8f7a', passage: '#5c3d1e', note: '#5c3d1e' };
 const DASH = { problem: '7 4', computer: '2 4' };
 const FAR = 0.55, NEAR = 1.3;
+const PENS = ['#1a1208', '#8b5e3c', '#b03a2e', '#2f5d8a', '#5c6e3a'];
 
 /* ── State ────────────────────────────────────────────────────────────────── */
 let B;                 // the board: { models, items, arrows, views, removed }
@@ -286,6 +339,11 @@ let query = '';
 let cam = { x: 40, y: 30, k: 1 };
 let size = {};         // card id → { w, h }, as last drawn
 let side = 'details';
+let tool = 'move';     // 'move' | 'select' | 'pen' | 'erase'
+let pen = PENS[2];
+let sawPencil = false; // once an Apple Pencil has drawn, fingers move the board rather than draw
+let offer = null;      // what a stroke just drawn may mean: { kind: 'arrow', from, to, stroke } | { kind: 'lasso', ids, stroke }
+let spaceDown = false;
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
@@ -445,7 +503,8 @@ function renderCards() {
   const vis = B.items.filter(shown), tabs = layerOn('frames') ? B.models.map(m => {
     return '<div class="ftab" data-model="' + esc(m.id) + '" style="background:' + esc(m.color) + '"><b>' + esc(m.title) + '</b><i>' + esc(m.name || '') + '</i>' + (m.cite ? '<small>' + esc(m.cite) + (m.ocr ? ' · OCR' : '') + '</small>' : '') + '</div>';
   }).join('') : '';
-  $('cards').innerHTML = tabs + vis.map(cardHtml).join('');
+  const grips = layerOn('frames') && !ro() ? B.models.map(m => '<div class="fgrip" data-grip="' + esc(m.id) + '" style="background:' + esc(m.color) + '" title="Drag to spread its cards apart, or to pull them together">⤡</div>').join('') : '';
+  $('cards').innerHTML = tabs + grips + vis.map(cardHtml).join('');
   size = {};
   $('cards').querySelectorAll('.card').forEach(el => { size[el.dataset.id] = { w: el.offsetWidth, h: el.offsetHeight }; });
   placeCards();
@@ -456,6 +515,11 @@ function placeCards() {
     const f = frameOf(model(el.dataset.model));
     el.style.display = f ? '' : 'none';
     if (f) { el.style.left = (f.x + 10) + 'px'; el.style.top = (f.y + 8) + 'px'; }
+  });
+  $('cards').querySelectorAll('.fgrip').forEach(el => {
+    const m = model(el.dataset.grip), f = frameOf(m), n = B.items.filter(i => i.model === m.id && shown(i)).length;
+    el.style.display = f && !f.empty && n > 1 ? '' : 'none';
+    if (f) { el.style.left = (f.x + f.w - el.offsetWidth / 2 - 4) + 'px'; el.style.top = (f.y + f.h - el.offsetHeight / 2 - 4) + 'px'; }
   });
 }
 function lit() {
@@ -494,7 +558,7 @@ function renderInk(nb) {
   if (layerOn('frames')) B.models.forEach(m => {
     const r = frameOf(m); if (!r) return;
     const on = sel.kind === 'model' && sel.ids.includes(m.id);
-    f += '<g class="frame' + (on ? ' sel' : '') + '"><rect class="f" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="14" fill="' + esc(m.color) + '" fill-opacity="0.06" stroke="' + esc(m.color) + '"' + (r.empty ? ' stroke-dasharray="8 6"' : '') + '/>' +
+    f += '<g class="frame' + (on ? ' sel' : '') + '" data-model="' + esc(m.id) + '"><rect class="f" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="14" fill="' + esc(m.color) + '" fill-opacity="0.06" stroke="' + esc(m.color) + '"' + (r.empty ? ' stroke-dasharray="8 6"' : '') + '/>' +
       (r.empty ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h - 22) + '" text-anchor="middle" font-size="13" font-style="italic" fill="#7a6a52">drop cards here</text>' : '') + '</g>';
   });
   $('gframes').innerHTML = f;
@@ -509,6 +573,19 @@ function renderInk(nb) {
       (label ? '<g class="pill"><rect x="' + (c.mx - lw / 2) + '" y="' + (c.my - 10) + '" width="' + lw + '" height="20" rx="10" stroke="' + col + '"' + (a.layer === 'computer' ? ' stroke-dasharray="2 3"' : '') + '/><text x="' + c.mx + '" y="' + (c.my + 4.5) + '" text-anchor="middle">' + esc(label) + '</text></g>' : '') + '</g>';
   });
   $('garrows').innerHTML = h;
+  renderDrawn();
+}
+// A stroke, smoothed through the midpoints of what the pen passed over.
+function strokeD(pts) {
+  if (!pts.length) return '';
+  if (pts.length < 3) return 'M' + pts[0][0] + ',' + pts[0][1] + ' L' + pts[pts.length - 1][0] + ',' + pts[pts.length - 1][1];
+  let d = 'M' + pts[0][0] + ',' + pts[0][1];
+  for (let i = 1; i < pts.length - 1; i++) d += ' Q' + pts[i][0] + ',' + pts[i][1] + ' ' + (pts[i][0] + pts[i + 1][0]) / 2 + ',' + (pts[i][1] + pts[i + 1][1]) / 2;
+  const l = pts[pts.length - 1]; return d + ' L' + l[0] + ',' + l[1];
+}
+function renderDrawn() {
+  const ink = layerOn('drawing') ? view().ink || [] : [], dim = focus || query;
+  $('gdraw').innerHTML = ink.map(st => '<path d="' + strokeD(st.pts) + '" stroke="' + esc(st.color) + '" stroke-width="' + (+st.w || 3) + '"' + (dim ? ' opacity="0.2"' : '') + '/>').join('');
 }
 function applyCam() {
   $('world').style.transform = 'translate(' + cam.x + 'px,' + cam.y + 'px) scale(' + cam.k + ')';
@@ -518,7 +595,7 @@ function applyCam() {
 }
 function renderBoard() { renderCards(); const nb = lit(); renderInk(nb); }
 function renderLayers() {
-  const count = k => k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
+  const count = k => k === 'drawing' ? (view().ink || []).length : k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
     k === 'problem' ? B.items.filter(i => i.kind === 'problem').length : B.items.filter(i => i.kind === k).length;
   const closed = $('layers').classList.contains('closed');
   $('layers').innerHTML = '<span class="ttl">Layers <button type="button" class="linkish" data-fold style="float:right;margin-left:1rem">' + (closed ? 'show' : 'hide') + '</button></span>' + LAYERS.map(L =>
@@ -538,6 +615,8 @@ function banner() {
   b.classList.remove('photo');
   if (live) { const p = photos.find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
   else if (mode) h = '<span>Click the card the arrow goes to.</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
+  else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(nameOf(offer.from)) + '</b> to <b>' + esc(nameOf(offer.to)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
+  else if (offer && offer.kind === 'lasso') { const one = offer.ids.length === 1; h = '<span>You drew round ' + offer.ids.length + (one ? ' card' : ' cards') + '.</span><button type="button" class="btn solid" data-b="o-select">Select ' + (one ? 'it' : 'them') + '</button><button type="button" class="btn" data-b="o-model">Make ' + (one ? 'it' : 'them') + ' a model</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>'; }
   else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
   b.innerHTML = h; b.classList.toggle('show', !!h);
 }
@@ -561,10 +640,12 @@ const mchip = m => m ? '<span class="mchip" style="background:' + esc(m.color) +
 function sideIntro() {
   return '<div class="intro"><h2>The board</h2><p class="sub">A whiteboard that keeps its texts</p>' +
     '<p>Every card is a part of a model, a passage, a problem or a note. The parts are built from Kant’s own labels, and each carries the passages it rests on: click a card to read them, here or in the portal beside the board.</p>' +
-    '<ul><li><b>Move</b> anything by dragging it; drag the board itself to move about. <kbd>⇧</kbd>-drag on the board to select several cards.</li>' +
+    '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and say what it claims: <i>kept, renamed, split into, merged from, dropped, new</i>, or <i>answers?</i> to a problem, or a type of your own.</li>' +
     '<li><b>Write anywhere</b>: double-click the board.</li>' +
-    '<li><b>Models</b> are frames around their cards. Drop a card into another frame to move it there; select several and make them a model of their own to split one.</li></ul>' +
+    '<li><b>Models</b> are frames around their cards. Grab any bare part of a frame to move the whole model; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into another frame to move it there; select several and make them a model of their own to split one.</li>' +
+    '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
+    '<li><b>On an iPad</b>: a finger moves cards, models and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>' +
     '<span class="k">Its dimensions</span><ul>' +
     '<li><b>Layers</b> (bottom left): show only the divisions, only the hypotheses, only the problems, or any mix.</li>' +
     '<li><b>Views</b>: the same cards in other arrangements. Rearranging one view leaves the others as they were.</li>' +
@@ -677,6 +758,7 @@ function sideModelForm() {
 }
 function renderSide() {
   const D = $('details');
+  if (form) document.body.classList.remove('sideclosed');
   if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : sideCardForm(); return; }
   if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
   else if (sel.kind === 'card' && item(sel.ids[0])) D.innerHTML = sideCard(item(sel.ids[0]));
@@ -695,7 +777,7 @@ function keepFields(fn) {
   D.querySelectorAll('[data-ev]').forEach((x, i) => { if (ev[i] != null) x.checked = ev[i]; });
 }
 function showSide(which) { side = which; $('tdet').classList.toggle('on', which === 'details'); $('tread').classList.toggle('on', which === 'reading'); $('details').style.display = which === 'details' ? '' : 'none'; $('reading').classList.toggle('on', which === 'reading'); }
-function read(href) { $('portal').src = href; $('full').href = href; showSide('reading'); }
+function read(href) { $('portal').src = href; $('full').href = href; document.body.classList.remove('sideclosed'); showSide('reading'); }
 
 /* ── Actions ──────────────────────────────────────────────────────────────── */
 function select(kind, ids) { sel = { kind, ids }; form = null; showSide('details'); render(); }
@@ -763,8 +845,9 @@ function saveArrow(D) {
   if (old) (old.evidence || []).forEach(q => { if (!form.choices.some(c => c.q === q.q && c.cite === q.cite)) ev.push(q); });
   const nq = readNewQuote(D); if (nq) ev.push(nq);
   const layer = type === 'divides into' ? 'division' : type === 'answers?' ? 'problem' : 'hypothesis';
-  let id = form.id;
+  let id = form.id; const stroke = form.fromStroke;
   change(() => {
+    if (stroke) { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== stroke); }
     if (old) { Object.assign(old, { from: form.from, to: form.to, type, layer, text, evidence: ev }); sign(old, by); }
     else { id = uid('a'); B.arrows.push({ id, from: form.from, to: form.to, type, layer, text, evidence: ev, by, date: today() }); view().layers[layer] = true; }
   });
@@ -831,7 +914,7 @@ function newView() {
   const name = prompt('A name for the new view. It starts as a copy of this one, and changes to it leave this one as it is.', 'A view of my own');
   if (!name || !name.trim()) return;
   const v = view(), id = uid('v');
-  change(() => { B.views.push({ id, name: name.trim(), pos: clone(Object.assign({}, ...B.views.slice().reverse().map(w => w.pos), v.pos)), hidden: (v.hidden || []).slice(), layers: Object.assign({}, v.layers), by: me() || undefined, date: today() }); viewId = id; });
+  change(() => { B.views.push({ id, name: name.trim(), pos: clone(Object.assign({}, ...B.views.slice().reverse().map(w => w.pos), v.pos)), hidden: (v.hidden || []).slice(), layers: Object.assign({}, v.layers), ink: clone(v.ink || []), by: me() || undefined, date: today() }); viewId = id; });
   render();
 }
 function viewMenu() {
@@ -848,6 +931,7 @@ function viewMenu() {
 function tidy() {
   if (ro()) return;
   if (!confirm('Lay this view out again, a column per model? Undo (⌘Z) puts it back.')) return;
+  const before = {}; B.models.forEach(m => { const f = frameOf(m); if (f) before[m.id] = [f.x, f.y]; });
   change(() => {
     const v = view(); let x = 0;
     const groups = B.models.map(m => ({ m, its: B.items.filter(i => i.model === m.id && shown(i)) })).concat([{ m: null, its: B.items.filter(i => !model(i.model) && shown(i)) }]).filter(g => g.its.length);
@@ -864,6 +948,8 @@ function tidy() {
       rest.forEach(it => { v.pos[it.id] = [x, y]; y += sz(it.id).h + 24; });
       x += w + 90;
     });
+    // drawing made inside a model's frame goes with it
+    B.models.forEach(m => { const f = frameOf(m), b = before[m.id]; if (!f || !b) return; const dx = f.x - b[0], dy = f.y - b[1]; (v.ink || []).forEach(st => { if (st.model === m.id) st.pts = st.pts.map(p => [p[0] + dx, p[1] + dy]); }); });
   });
   render(); fit();
 }
@@ -879,10 +965,11 @@ function zoomAt(f, cx, cy) {
 function fit() {
   const rs = B.items.filter(shown).map(it => rect(it.id)).filter(Boolean);
   B.models.forEach(m => { const f = layerOn('frames') && frameOf(m); if (f) rs.push({ x: f.x, y: f.y - 30, w: f.w, h: f.h + 30 }); });
+  if (layerOn('drawing')) (view().ink || []).forEach(st => st.pts.forEach(p => rs.push({ x: p[0], y: p[1], w: 1, h: 1 })));
   if (!rs.length) return;
   const x = Math.min(...rs.map(r => r.x)), y = Math.min(...rs.map(r => r.y)), X = Math.max(...rs.map(r => r.x + r.w)), Y = Math.max(...rs.map(r => r.y + r.h)) + 40;
-  const s = $('stage').getBoundingClientRect(), k = Math.min(1.4, Math.max(0.15, Math.min((s.width - 60) / (X - x), (s.height - 60) / (Y - y))));
-  cam = { k, x: (s.width - (X - x) * k) / 2 - x * k, y: 40 - y * k };
+  const s = $('stage').getBoundingClientRect(), L = 130, k = Math.min(1.4, Math.max(0.15, Math.min((s.width - L - 30) / (X - x), (s.height - 60) / (Y - y))));
+  cam = { k, x: L + (s.width - L - 30 - (X - x) * k) / 2 - x * k, y: 40 - y * k };
   applyCam(); keepCam();
 }
 let camT;
@@ -899,40 +986,158 @@ $('zfit').addEventListener('click', fit);
 $('ztidy').addEventListener('click', tidy);
 
 /* ── Wiring: the board ────────────────────────────────────────────────────── */
-let drag = null;   // { what: 'pan' | 'cards' | 'model' | 'link' | 'marq', … }
+let drag = null;   // { what: 'pan' | 'cards' | 'model' | 'spread' | 'link' | 'marq' | 'ink' | 'erase' | 'pinch', pid, … }
+const touches = new Map();   // the fingers on the board: pointerId → [x, y]
+let lastTap = null, lastType = 'mouse';
+function capture(e) { try { $('stage').setPointerCapture(e.pointerId); } catch (x) { /* a pointer already gone */ } }
+function startUndo() { undoStack.push(JSON.stringify(B)); if (undoStack.length > 80) undoStack.shift(); redoStack = []; }
+const modelInk = id => (view().ink || []).filter(st => st.model === id).map(st => ({ st, pts: clone(st.pts) }));
+function modelDrag(id, e) {
+  const ids = B.items.filter(i => i.model === id && shown(i)).map(i => i.id), f = frameOf(model(id));
+  return { what: 'model', model: id, ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()),
+           mstart: view().pos[id] ? view().pos[id].slice() : f ? [f.x, f.y] : [0, 0], ink: modelInk(id), moved: false };
+}
+// Spreading: each card's centre moves away from (or towards) the top-left card's, in proportion to the pull.
+function spreadDrag(id, e) {
+  const ids = B.items.filter(i => i.model === id && shown(i)).map(i => i.id);
+  const cs = ids.map(x => { const r = rect(x); return [r.x + r.w / 2, r.y + r.h / 2]; });
+  const ax = Math.min(...cs.map(c => c[0])), ay = Math.min(...cs.map(c => c[1]));
+  return { what: 'spread', model: id, ids, cs, ax, ay, spanX: Math.max(...cs.map(c => c[0])) - ax, spanY: Math.max(...cs.map(c => c[1])) - ay, sx: e.clientX, sy: e.clientY, ink: modelInk(id), moved: false };
+}
+// Whether this pointer draws: anything in the Draw tool (but fingers, once a Pencil has drawn), and a Pencil on the bare board in Move.
+function draws(e, bare) {
+  if (ro()) return false;
+  if (tool === 'pen') return !(e.pointerType === 'touch' && sawPencil);
+  return tool === 'move' && e.pointerType === 'pen' && bare;
+}
+// A double tap, with a finger or a Pencil, does what a double-click does with a mouse.
+function tapped(e) {
+  if (e.pointerType === 'mouse') return false;
+  const now = Date.now();
+  if (lastTap && now - lastTap.t < 420 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 32) { lastTap = null; doubleAt(e.clientX, e.clientY); return true; }
+  lastTap = { t: now, x: e.clientX, y: e.clientY }; return false;
+}
+function segDist(px, py, a, b) { const dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy; let t = L ? ((px - a[0]) * dx + (py - a[1]) * dy) / L : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - a[0] - t * dx, py - a[1] - t * dy); }
+function inPoly(x, y, pts) { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; }
+function eraseAt(wx, wy, d) {
+  const v = view(), ink = v.ink || [], r = 10 / cam.k;
+  const hit = ink.filter(st => st.pts.length === 1 ? Math.hypot(wx - st.pts[0][0], wy - st.pts[0][1]) < r : st.pts.some((p, i) => i && segDist(wx, wy, st.pts[i - 1], p) < r + (st.w || 3) / 2));
+  if (!hit.length) return;
+  if (!d.changed) { d.changed = true; startUndo(); }
+  v.ink = ink.filter(st => !hit.includes(st));
+  renderDrawn();
+}
+function finishStroke(raw) {
+  const pts = raw.map(p => [Math.round(p[0]), Math.round(p[1])]);
+  const inM = layerOn('frames') ? B.models.find(m => { const f = frameOf(m); return f && pts.every(p => inside(f, p[0], p[1])); }) : null;
+  const st = { id: uid('s'), pts, color: pen, w: Math.round(30 / cam.k) / 10, by: me() || undefined, date: today() };
+  if (inM) st.model = inM.id;   // drawn inside a model's frame, it moves and spreads with the model
+  change(() => { const v = view(); v.ink = v.ink || []; v.ink.push(st); v.layers = v.layers || {}; v.layers.drawing = true; });
+  // What the stroke may mean: from one card to another, an arrow; round some cards, a selection.
+  const onCard = p => { const it = B.items.filter(shown).find(i => inside(rect(i.id), p[0], p[1])); return it ? it.id : null; };
+  const a = onCard(pts[0]), z = onCard(pts[pts.length - 1]);
+  const len = pts.reduce((L, p, i) => i ? L + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0, 0);
+  const gap = Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]);
+  if (a && z && a !== z) offer = { kind: 'arrow', from: a, to: z, stroke: st.id };
+  else if (len * cam.k > 120 && gap < Math.max(50 / cam.k, len * 0.2)) {
+    const ids = B.items.filter(shown).filter(i => { const r = rect(i.id); return r && inPoly(r.x + r.w / 2, r.y + r.h / 2, pts); }).map(i => i.id);
+    if (ids.length) offer = { kind: 'lasso', ids, stroke: st.id };
+  }
+  render();
+}
 $('stage').addEventListener('pointerdown', e => {
-  if (e.button !== 0 || e.target.closest('.float')) return;
-  const knob = e.target.closest('.knob'), card = e.target.closest('.card'), tab = e.target.closest('.ftab'), ar = e.target.closest('.ar');
+  if (e.target.closest('.float')) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  lastType = e.pointerType;
+  if (e.pointerType === 'pen') sawPencil = true;
+  $('chooser').classList.remove('show');
+  if (offer) { offer = null; banner(); }
+  if (e.pointerType === 'touch') {
+    if (drag && drag.what === 'ink' && drag.pen) return;   // a palm resting while the Pencil draws
+    touches.set(e.pointerId, [e.clientX, e.clientY]);
+    if (touches.size === 2) {   // two fingers: pinch to zoom, and move the board
+      if (drag && drag.moved && ['cards', 'model', 'spread'].includes(drag.what)) { save(); render(); }
+      if (drag && drag.what === 'ink') $('wet').setAttribute('d', '');
+      if (drag && drag.what === 'erase' && drag.changed) save();
+      const [p, q] = [...touches.values()];
+      drag = { what: 'pinch', d0: Math.hypot(p[0] - q[0], p[1] - q[1]) || 1, m0: [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], cam0: Object.assign({}, cam) };
+      $('stage').classList.remove('panning', 'linking'); $('ghost').setAttribute('d', ''); $('marq').style.display = 'none';
+      capture(e);
+      return;
+    }
+    if (touches.size > 2) return;
+  }
+  if (drag) return;
+  const t = e.target, knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), ar = t.closest('.ar'), fr = t.closest('.frame');
+  const bare = !knob && !card && !tab && !grip && !ar;
   const [wx, wy] = toWorld(e.clientX, e.clientY);
-  if (knob && !ro()) { drag = { what: 'link', from: card.dataset.id, sx: e.clientX, sy: e.clientY }; $('stage').classList.add('linking'); }
+  if (spaceDown) drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
+  else if (tool === 'erase' && !ro()) { drag = { what: 'erase', changed: false }; eraseAt(wx, wy, drag); }
+  else if (draws(e, bare)) drag = { what: 'ink', pts: [[wx, wy]], pen: e.pointerType === 'pen' };
+  else if (tool === 'select' && !card) drag = { what: 'marq', wx, wy };
+  else if (knob && !ro()) { drag = { what: 'link', from: card.dataset.id, sx: e.clientX, sy: e.clientY }; $('stage').classList.add('linking'); }
   else if (card) {
     const id = card.dataset.id;
     if (mode) { const from = mode.linkFrom; mode = null; if (id !== from) { form = { kind: 'arrow', from, to: id }; showSide('details'); } render(); return; }
-    if (e.shiftKey) { const ids = sel.kind === 'card' ? sel.ids.slice() : []; const i = ids.indexOf(id); if (i >= 0) ids.splice(i, 1); else ids.push(id); select(ids.length ? 'card' : null, ids); return; }
+    if (e.shiftKey || tool === 'select') { const ids = sel.kind === 'card' ? sel.ids.slice() : []; const i = ids.indexOf(id); if (i >= 0) ids.splice(i, 1); else ids.push(id); select(ids.length ? 'card' : null, ids); return; }
     if (!(sel.kind === 'card' && sel.ids.includes(id))) select('card', [id]);
     drag = { what: 'cards', ids: sel.ids.slice(), sx: e.clientX, sy: e.clientY, start: sel.ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false };
   }
-  else if (tab) { const id = tab.dataset.model; select('model', [id]); const ids = B.items.filter(i => i.model === id && shown(i)).map(i => i.id); drag = { what: 'model', model: id, ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()), mstart: (view().pos[id] || frameOf(model(id)) && [frameOf(model(id)).x, frameOf(model(id)).y] || [0, 0]).slice(), moved: false }; }
+  else if (grip && !ro()) { select('model', [grip.dataset.grip]); drag = spreadDrag(grip.dataset.grip, e); }
+  else if (tab) { select('model', [tab.dataset.model]); drag = modelDrag(tab.dataset.model, e); }
   else if (ar) { if (mode) return; select('arrow', [ar.dataset.arrow]); return; }
-  else if (e.shiftKey) { drag = { what: 'marq', wx, wy }; }
-  else { drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false }; $('stage').classList.add('panning'); }
-  $('stage').setPointerCapture(e.pointerId);
+  else if (e.shiftKey) drag = { what: 'marq', wx, wy };
+  else if (fr && !mode) { select('model', [fr.dataset.model]); drag = modelDrag(fr.dataset.model, e); }
+  else drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
+  drag.pid = e.pointerId;
+  if (drag.what === 'pan') $('stage').classList.add('panning');
+  capture(e);
 });
 $('stage').addEventListener('pointermove', e => {
+  if (touches.has(e.pointerId)) touches.set(e.pointerId, [e.clientX, e.clientY]);
   if (!drag) return;
+  if (drag.what === 'pinch') {
+    if (touches.size < 2) return;
+    const [p, q] = [...touches.values()], d = Math.hypot(p[0] - q[0], p[1] - q[1]) || 1, m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+    const r = $('stage').getBoundingClientRect(), c0 = drag.cam0, k = Math.min(3, Math.max(0.15, c0.k * d / drag.d0));
+    const wx = (drag.m0[0] - r.left - c0.x) / c0.k, wy = (drag.m0[1] - r.top - c0.y) / c0.k;   // the board point first between the fingers stays between them
+    cam = { k, x: m[0] - r.left - wx * k, y: m[1] - r.top - wy * k };
+    applyCam(); return;
+  }
+  if (e.pointerId !== drag.pid) return;
   const dx = (e.clientX - (drag.sx || 0)) / cam.k, dy = (e.clientY - (drag.sy || 0)) / cam.k;
   if (drag.what === 'pan') { cam.x = drag.cx + (e.clientX - drag.sx); cam.y = drag.cy + (e.clientY - drag.sy); if (Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 3) drag.moved = true; applyCam(); return; }
-  if (drag.what === 'cards' || drag.what === 'model') {
+  if (drag.what === 'cards' || drag.what === 'model' || drag.what === 'spread') {
     if (ro()) return;
-    if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 3 / cam.k) return;
-    if (!drag.moved) { drag.moved = true; undoStack.push(JSON.stringify(B)); if (undoStack.length > 80) undoStack.shift(); redoStack = []; }
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4 / cam.k) return;
+    if (!drag.moved) { drag.moved = true; startUndo(); }
     const v = view();
-    drag.ids.forEach((id, i) => { v.pos[id] = [Math.round(drag.start[i][0] + dx), Math.round(drag.start[i][1] + dy)]; });
-    if (drag.what === 'model' && !drag.ids.length) v.pos[drag.model] = [Math.round(drag.mstart[0] + dx), Math.round(drag.mstart[1] + dy)];
+    if (drag.what === 'spread') {
+      const fx = drag.spanX > 20 ? Math.max(0.15, (drag.spanX + dx) / drag.spanX) : 1, fy = drag.spanY > 20 ? Math.max(0.15, (drag.spanY + dy) / drag.spanY) : 1;
+      const at = p => [Math.round(drag.ax + (p[0] - drag.ax) * fx), Math.round(drag.ay + (p[1] - drag.ay) * fy)];
+      drag.ids.forEach((id, i) => { const z = sz(id), c = at(drag.cs[i]); v.pos[id] = [c[0] - Math.round(z.w / 2), c[1] - Math.round(z.h / 2)]; });
+      drag.ink.forEach(o => { o.st.pts = o.pts.map(at); });
+    } else {
+      drag.ids.forEach((id, i) => { v.pos[id] = [Math.round(drag.start[i][0] + dx), Math.round(drag.start[i][1] + dy)]; });
+      if (drag.what === 'model') {
+        if (!drag.ids.length) v.pos[drag.model] = [Math.round(drag.mstart[0] + dx), Math.round(drag.mstart[1] + dy)];
+        drag.ink.forEach(o => { o.st.pts = o.pts.map(p => [p[0] + Math.round(dx), p[1] + Math.round(dy)]); });
+      }
+    }
     placeCards(); renderInk(neighbourhood());
     if (drag.what === 'cards') { const tgt = dropTarget(drag.ids); $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = tgt && t.dataset.model === tgt.id ? '3px solid var(--ink)' : ''); }
     return;
   }
+  if (drag.what === 'ink') {
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    (evs.length ? evs : [e]).forEach(ev => {
+      const [wx, wy] = toWorld(ev.clientX, ev.clientY), l = drag.pts[drag.pts.length - 1];
+      if (Math.hypot(wx - l[0], wy - l[1]) * cam.k >= 2.5) drag.pts.push([wx, wy]);
+    });
+    const w = $('wet'); w.setAttribute('d', strokeD(drag.pts)); w.setAttribute('stroke', pen); w.setAttribute('stroke-width', 3 / cam.k);
+    return;
+  }
+  if (drag.what === 'erase') { const [wx, wy] = toWorld(e.clientX, e.clientY); eraseAt(wx, wy, drag); return; }
   if (drag.what === 'link') {
     const it = rect(drag.from), [wx, wy] = toWorld(e.clientX, e.clientY);
     $('ghost').setAttribute('d', 'M' + (it.x + it.w) + ',' + (it.y + it.h / 2) + ' L' + wx + ',' + wy);
@@ -951,22 +1156,33 @@ function dropTarget(ids) {
   if (it.model && model(it.model) && inside(frameOf(model(it.model), skip), cx, cy)) return null;
   return B.models.find(m => m.id !== it.model && inside(frameOf(m, skip), cx, cy)) || null;
 }
-$('stage').addEventListener('pointerup', e => {
+function pointerEnd(e, cancelled) {
+  touches.delete(e.pointerId);
   if (!drag) return;
+  if (drag.what === 'pinch') { if (touches.size < 2) { drag = null; keepCam(); } return; }
+  if (e.pointerId !== drag.pid) return;
   const d = drag; drag = null;
   $('stage').classList.remove('panning', 'linking');
-  if (d.what === 'pan') { if (!d.moved && !mode && !form && sel.kind) select(null, []); $('chooser').classList.remove('show'); keepCam(); return; }
-  if (d.what === 'cards' || d.what === 'model') {
+  if (d.what === 'pan') { if (!d.moved && !cancelled && !tapped(e) && !mode && !form && sel.kind) select(null, []); keepCam(); return; }
+  if (d.what === 'cards' || d.what === 'model' || d.what === 'spread') {
     $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = '');
-    if (!d.moved) return;
-    if (d.what === 'cards') {
+    if (!d.moved) { if (!cancelled) tapped(e); return; }
+    if (d.what === 'cards' && !cancelled) {
       const tgt = dropTarget(d.ids);
       if (tgt) { const it = item(d.ids[0]), was = model(it.model); it.model = tgt.id; toast('Moved into ' + tgt.title + (was ? ', out of ' + was.title : '') + '. Undo with ⌘Z.'); }
     }
     save(); render(); return;
   }
+  if (d.what === 'ink') {
+    $('wet').setAttribute('d', '');
+    if (cancelled) return;
+    if (d.pts.length < 3) { if (tool === 'move' && !tapped(e) && !form && sel.kind) select(null, []); return; }
+    finishStroke(d.pts); return;
+  }
+  if (d.what === 'erase') { if (d.changed) save(); render(); return; }
   if (d.what === 'link') {
     $('ghost').setAttribute('d', '');
+    if (cancelled) return;
     const el = document.elementFromPoint(e.clientX, e.clientY), card = el && el.closest('.card');
     if (card && card.dataset.id !== d.from) { form = { kind: 'arrow', from: d.from, to: card.dataset.id }; sel = { kind: null, ids: [] }; showSide('details'); render(); }
     else if (Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) < 4) { mode = { linkFrom: d.from }; render(); }
@@ -975,22 +1191,27 @@ $('stage').addEventListener('pointerup', e => {
   if (d.what === 'marq') {
     const m = $('marq'), x = +m.getAttribute('x'), y = +m.getAttribute('y'), w = +m.getAttribute('width'), h = +m.getAttribute('height');
     m.style.display = 'none'; m.setAttribute('width', 0);
+    if (cancelled) return;
     const ids = B.items.filter(shown).filter(it => { const r = rect(it.id); return r && r.x < x + w && r.x + r.w > x && r.y < y + h && r.y + r.h > y; }).map(it => it.id);
     select(ids.length ? 'card' : null, ids);
   }
-});
-$('stage').addEventListener('dblclick', e => {
-  const under = document.elementFromPoint(e.clientX, e.clientY);
-  if (ro() || !under || under.closest('.float, .ftab, .ar')) return;
+}
+$('stage').addEventListener('pointerup', e => pointerEnd(e, false));
+$('stage').addEventListener('pointercancel', e => pointerEnd(e, true));
+// Double-click (or double tap): a card opens to be edited; the board offers something to put there.
+function doubleAt(cx, cy) {
+  const under = document.elementFromPoint(cx, cy);
+  if (ro() || !under || under.closest('.float, .ftab, .fgrip, .ar')) return;
   const card = under.closest('.card');
   if (card) { form = { kind: 'card', id: card.dataset.id, quotes: clone(item(card.dataset.id).quotes || []) }; showSide('details'); render(); return; }
-  const [wx, wy] = toWorld(e.clientX, e.clientY), r = $('stage').getBoundingClientRect(), c = $('chooser');
+  const [wx, wy] = toWorld(cx, cy), r = $('stage').getBoundingClientRect(), c = $('chooser');
   const inM = B.models.find(m => inside(frameOf(m), wx, wy));
   c.dataset.at = JSON.stringify([wx - 20, wy - 15]); c.dataset.model = inM ? inM.id : '';
   c.innerHTML = '<span class="ttl">Put here' + (inM ? ', in ' + esc(inM.title) : '') + ':</span><button type="button" class="btn" data-new="part">Part</button><button type="button" class="btn" data-new="passage">Passage</button><button type="button" class="btn k-problem" data-new="problem">Problem</button><button type="button" class="btn k-note" data-new="note">Note</button>';
-  c.style.left = Math.min(e.clientX - r.left, r.width - 240) + 'px'; c.style.top = Math.min(e.clientY - r.top, r.height - 90) + 'px';
+  c.style.left = Math.min(cx - r.left, r.width - 240) + 'px'; c.style.top = Math.min(cy - r.top, r.height - 90) + 'px';
   c.classList.add('show');
-});
+}
+$('stage').addEventListener('dblclick', e => { if (lastType === 'mouse' && tool === 'move' && !e.target.closest('.float')) doubleAt(e.clientX, e.clientY); });
 $('chooser').addEventListener('click', e => {
   const b = e.target.closest('[data-new]'); if (!b) return;
   const c = $('chooser'); c.classList.remove('show');
@@ -1004,6 +1225,13 @@ $('banner').addEventListener('click', e => {
   else if (k === 'nolink') { mode = null; render(); }
   else if (k === 'nofocus') { focus = null; render(); }
   else if (k === 'hop1' || k === 'hop2') { focus.hops = k === 'hop1' ? 1 : 2; render(); }
+  else if (k === 'o-keep') { offer = null; banner(); }
+  else if (k === 'o-arrow' && offer) { const o = offer; offer = null; form = { kind: 'arrow', from: o.from, to: o.to, fromStroke: o.stroke }; sel = { kind: null, ids: [] }; showSide('details'); render(); }
+  else if ((k === 'o-select' || k === 'o-model') && offer) {
+    const o = offer; offer = null;
+    change(() => { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== o.stroke); });
+    sel = { kind: 'card', ids: o.ids }; form = k === 'o-model' ? { kind: 'model', split: o.ids.slice() } : null; showSide('details'); render();
+  }
 });
 $('layers').addEventListener('change', e => {
   const k = e.target.dataset.layer; if (!k) return;
@@ -1037,6 +1265,25 @@ $('snap').addEventListener('click', () => {
   photograph(name.trim());
 });
 $('photos').addEventListener('click', () => { form = { kind: 'photos' }; showSide('details'); renderSide(); });
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('#palette [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
+  $('palette').classList.toggle('pen', t === 'pen');
+  ['move', 'select', 'pen', 'erase'].forEach(x => $('stage').classList.toggle('tool-' + x, x === t));
+  if (t !== 'move') { mode = null; }
+  banner();
+}
+function renderPens() {
+  $('pens').innerHTML = PENS.map(c => '<button type="button" class="pc' + (c === pen ? ' on' : '') + '" data-pen="' + c + '" style="background:' + c + '" aria-label="Pen colour"></button>').join('') +
+    '<button type="button" class="linkish clr" data-clear>clear this view’s drawing</button>';
+}
+$('palette').addEventListener('click', e => {
+  const t = e.target.closest('[data-tool]'); if (t) { setTool(t.dataset.tool); return; }
+  const p = e.target.closest('[data-pen]'); if (p) { pen = p.dataset.pen; renderPens(); return; }
+  if (e.target.closest('[data-clear]') && !ro() && (view().ink || []).length && confirm('Clear all the drawing on this view? Undo (⌘Z) brings it back.')) { change(() => { view().ink = []; }); render(); }
+});
+$('tside').addEventListener('click', () => document.body.classList.add('sideclosed'));
+$('sideopen').addEventListener('click', () => document.body.classList.remove('sideclosed'));
 $('tdet').addEventListener('click', () => showSide('details'));
 $('tread').addEventListener('click', () => { if (!$('portal').getAttribute('src')) read(PORTAL); else showSide('reading'); });
 $('details').addEventListener('click', e => {
@@ -1075,7 +1322,9 @@ document.addEventListener('keydown', e => {
   const typing = e.target.closest && e.target.closest('input, textarea, select');
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
   if (typing) return;
-  if (e.key === 'Escape') { if (mode) mode = null; else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
+  if (e.key === ' ') { e.preventDefault(); if (!spaceDown) { spaceDown = true; $('stage').classList.add('spacepan'); } return; }
+  if (!e.metaKey && !e.ctrlKey && !e.altKey) { const t = { v: 'move', s: 'select', p: 'pen', e: 'erase' }[e.key.toLowerCase()]; if (t) { setTool(t); return; } }
+  if (e.key === 'Escape') { if (mode) mode = null; else if (offer) offer = null; else if (tool !== 'move') setTool('move'); else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && sel.kind && !ro()) {
     e.preventDefault();
     if (sel.kind === 'card') { if (confirm(sel.ids.length > 1 ? 'Delete these ' + sel.ids.length + ' cards, and their arrows?' : 'Delete this card, and its arrows?')) removeCards(sel.ids.slice()); }
@@ -1084,6 +1333,8 @@ document.addEventListener('keydown', e => {
   }
   if ((e.key === 'f' || e.key === 'F') && sel.kind === 'card' && sel.ids.length === 1) { focus = { id: sel.ids[0], hops: focus && focus.id === sel.ids[0] && focus.hops === 1 ? 2 : 1 }; render(); }
 });
+document.addEventListener('keyup', e => { if (e.key === ' ') { spaceDown = false; $('stage').classList.remove('spacepan'); } });
+window.addEventListener('blur', () => { spaceDown = false; $('stage').classList.remove('spacepan'); });
 $('export').addEventListener('click', () => {
   const data = { kind: 'kantlab-board', study: 'kinds-of-nothing', v: 1, saved: new Date().toISOString(), by: me() || undefined, board: live ? live.board : B, photos };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
@@ -1107,6 +1358,7 @@ $('file').addEventListener('change', () => {
 
 /* ── Init ─────────────────────────────────────────────────────────────────── */
 load();
+renderPens();
 render();
 // Cards are measured once the page is laid out, and again when its fonts arrive, since they change every card's size.
 const settle = () => { renderBoard(); if (view().cam) { cam = Object.assign({}, view().cam); applyCam(); } else fit(); };

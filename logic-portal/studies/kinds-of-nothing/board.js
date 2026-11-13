@@ -26,7 +26,9 @@
             Claims carry text (in the seminar's words), evidence (quotes), by (a GitHub
             username) and date.
    views    arrangements of the same cards: pos (card id -> [x, y]), hidden (cards taken
-            off that view), layers (which are shown).
+            off that view), layers (which are shown), and ink, what was drawn on that view:
+            pts ([x, y] along the stroke), color, w (its width), model (when drawn inside a
+            model's frame, so that it moves with the model), by and date.
 
    Statements are the seminar's, never Claude's.
    ───────────────────────────────────────────────────────────────────────────── */

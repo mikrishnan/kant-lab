@@ -7,6 +7,29 @@ corrects it in their own words.
 Each entry: the date, who asked (GitHub username), what was asked for, what it showed,
 whether it helped, and what it got wrong or could not do.
 
+## 13 November 2026: the board, by hand
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** moving the models around more fluidly, by clicking on a model and dragging
+  it. Pulling things visually further apart or closer together. Using a tablet, and drawing,
+  since it is hard to draw with a mouse.
+- **What there is:**
+  - **Models.** A model moves by any bare part of its frame. Its corner grip ⤡ spreads its
+    cards apart, or pulls them together.
+  - **Tools.** A tool palette on the board: Move, Select, Draw and Rub out, with five pen
+    colours. An Apple Pencil draws on the bare board whatever the tool. A line drawn from one
+    card to another can become an arrow, and a loop drawn round cards selects them or makes
+    them a model. Drawing made inside a model's frame moves and spreads with the model.
+  - **On an iPad.** A finger moves cards, models and the board; two fingers pinch to zoom; a
+    double tap writes. The side can be put away for more board.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:** drawing is kept for each view, in the browser it was made in,
+  like everything else on the board. Handwriting is not turned into text by the page, though an
+  iPad's own Scribble can write into its text boxes. A physical whiteboard cannot be linked to
+  it yet.
+
 ## 13 November 2026: the board
 
 *A draft, to be corrected by mikrishnan in their own words.*
