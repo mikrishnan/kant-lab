@@ -234,6 +234,31 @@
     #zoom button { padding: 0.4rem 0.65rem; }
     #layers label { margin: 0.3rem 0; }
   }
+
+  /* the shared board: its lock, its setup, and what it is doing */
+  .lock { position: fixed; inset: 0; z-index: 50; background: rgba(245, 239, 224, 0.94); display: none; align-items: center; justify-content: center; padding: 1rem; }
+  .lock.show { display: flex; }
+  .lockcard { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 30px rgba(60, 40, 10, 0.18); padding: 1.2rem 1.4rem 1.1rem; width: 25rem; max-width: 100%; max-height: 100%; overflow-y: auto; }
+  .lockcard.wide { width: 36rem; }
+  .lockcard h2 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 1.15rem; margin: 0 0 0.3rem; letter-spacing: 0.02em; }
+  .lockcard p { margin: 0.3rem 0 0.6rem; font-size: 0.95rem; }
+  .lockcard .small { font-size: 0.86rem; color: var(--faded); }
+  .lockcard label.f { display: block; font-size: 0.88rem; color: var(--faded); margin: 0.6rem 0 0.2rem; }
+  .lockcard input[type=text], .lockcard input[type=password] { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 0.35rem 0.5rem; background: #fff; font-size: 1rem; }
+  .lockcard .chk { display: flex; gap: 0.4rem; align-items: center; font-size: 0.9rem; margin: 0.6rem 0; }
+  .lockcard .row { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-top: 0.8rem; }
+  .lockcard .warn { color: var(--prob); font-size: 0.9rem; }
+  .lockcard ol { margin: 0.3rem 0 0.6rem; padding-left: 1.2rem; font-size: 0.92rem; }
+  .lockcard ol li { margin-bottom: 0.3rem; }
+  .lockcard textarea { width: 100%; min-height: 6rem; font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; border: 1px solid var(--line); border-radius: 6px; }
+  .lockcard .ok { color: #3f6b2a; }
+  #sync { font-size: 0.84rem; color: var(--faded); display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
+  #sync i { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #b8a88a; display: inline-block; }
+  #sync.saved i { background: #5c8a3a; }
+  #sync.busy i { background: #d9a441; }
+  #sync.bad i { background: var(--prob); }
+  #sync.practice i { background: #2f5d8a; }
+  #sync .linkish { font-size: 0.84rem; }
 </style>
 </head>
 <body>
@@ -267,6 +292,7 @@
     <button type="button" class="btn solid" id="snap" title="Keep the board as it is now, to come back to">Photograph the board</button>
     <button type="button" class="linkish" id="photos">Photographs</button>
   </span>
+  <span class="grp"><span id="sync"></span></span>
   <span class="grp">
     <button type="button" class="linkish" id="export">Export</button>
     <button type="button" class="linkish" id="import">Import</button>
@@ -301,7 +327,42 @@
   </aside>
 </div>
 
-<script src="board.js"></script>
+<div id="lock" class="lock" role="dialog" aria-modal="true" aria-labelledby="lockh">
+  <div class="lockcard">
+    <h2 id="lockh">The seminar’s board</h2>
+    <p>One board, the same for everyone in the Kant Lab. Anyone with the password can open it and change it. The password is told in the seminar.</p>
+    <form id="lockform">
+      <label class="f" for="lpw">Password</label><input type="password" id="lpw" autocomplete="current-password">
+      <label class="f" for="lme">Your GitHub username, so the board can say who changed what</label><input type="text" id="lme" spellcheck="false" autocapitalize="off" autocomplete="username">
+      <label class="chk"><input type="checkbox" id="lrem" checked> remember on this device</label>
+      <div class="row"><button type="submit" class="btn solid" id="lgo">Open the board</button><span class="warn" id="lerr"></span></div>
+    </form>
+    <p class="small" style="margin-top:0.9rem"><button type="button" class="linkish" id="lpeek">Look without the password</button>: the study’s own starting board, read only.</p>
+  </div>
+</div>
+<div id="setup" class="lock" role="dialog" aria-modal="true" aria-labelledby="setuph">
+  <div class="lockcard wide">
+    <h2 id="setuph">Setting up the shared board</h2>
+    <p class="small">Done once, by whoever looks after the board, and again when its token expires or the password changes.</p>
+    <ol>
+      <li>On GitHub, a <b>private</b> repository <b id="srepo"></b>. It can be empty.</li>
+      <li>A <b>fine-grained token</b> for that repository alone: <i>Repository access</i> → <i>Only select repositories</i> → it; <i>Permissions</i> → <i>Contents: Read and write</i>.</li>
+      <li>Paste the token and choose the password below. The token is checked with GitHub, the starting board is put in the repository if it is empty, and you get back <code>board-shared.js</code> with the token locked by the password. The password is not kept anywhere.</li>
+    </ol>
+    <form id="setupform">
+      <label class="f" for="stok">The token</label><input type="password" id="stok" autocomplete="off" spellcheck="false">
+      <label class="f" for="spw1">The board’s password</label><input type="password" id="spw1" autocomplete="new-password">
+      <label class="f" for="spw2">The password again</label><input type="password" id="spw2" autocomplete="new-password">
+      <label class="f" for="sexp">The day the token expires, as GitHub showed it, so that the board can warn before it does</label><input type="text" id="sexp" placeholder="e.g. 2027-02-11" spellcheck="false">
+      <div class="row"><button type="submit" class="btn solid">Check the token and make the key</button><button type="button" class="linkish" id="sclose">Close</button></div>
+    </form>
+    <div id="sout"></div>
+  </div>
+</div>
+
+<!-- Bump ?v= when either file changes, so that browsers fetch it afresh rather than from their cache. -->
+<script src="board.js?v=2026-11-13c"></script>
+<script src="board-shared.js?v=2026-11-13c"></script>
 <script>
 /* ── Data ─────────────────────────────────────────────────────────────────── */
 const BASE = typeof STUDY_BOARD !== 'undefined' ? STUDY_BOARD : { models: [], items: [], arrows: [], views: [] };
@@ -324,6 +385,13 @@ const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', co
 const DASH = { problem: '7 4', computer: '2 4' };
 const FAR = 0.55, NEAR = 1.3;
 const PENS = ['#1a1208', '#8b5e3c', '#b03a2e', '#2f5d8a', '#5c6e3a'];
+const SH = typeof STUDY_BOARD_SHARED !== 'undefined' ? STUDY_BOARD_SHARED : null;
+const SHARED_ON = !!(SH && SH.key);                   // the one shared board is set up
+const API = 'https://api.github.com';                 // the only place the token is ever sent
+const TOKEN = 'kantlab-board-token';                  // the board's token, once unlocked on this device
+const CACHE = 'kantlab-board-shared-cache-v1';        // this device's copy of the shared board: { board, base, sha }
+const PREFS = 'kantlab-board-prefs-v1';               // this device's own: { viewId, cams, layers }
+const LETSAVE = 'kantlab-board-let-save';             // a copy away from the site, allowed to save (this tab only)
 
 /* ── State ────────────────────────────────────────────────────────────────── */
 let B;                 // the board: { models, items, arrows, views, removed }
@@ -344,6 +412,11 @@ let pen = PENS[2];
 let sawPencil = false; // once an Apple Pencil has drawn, fingers move the board rather than draw
 let offer = null;      // what a stroke just drawn may mean: { kind: 'arrow', from, to, stroke } | { kind: 'lasso', ids, stroke }
 let spaceDown = false;
+let shared = null;     // the shared board, once opened: { token, sha, base, etag, canSave, pushing, again, timer, status }
+let locked = false;    // the shared board is set up but not opened here: the study's board, read only
+let prefs = {};        // this device's camera, layers and view, kept apart from the board
+let migrate = null;    // a board of this device's own from before the board was shared: { old, n }
+let expiring = null;   // days until the board's key expires, while that is being shown
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
@@ -357,8 +430,13 @@ const item = id => B.items.find(i => i.id === id);
 const arrow = id => B.arrows.find(a => a.id === id);
 const model = id => B.models.find(m => m.id === id);
 const isLat = s => /^(nihil|ens|0)\b/.test(String(s || ''));
-const ro = () => !!live;
-const layerOn = k => { const L = view().layers || {}; return L[k] !== false; };
+const ro = () => !!live || locked;
+const roWhy = () => live ? 'This is a photograph. Bring it back to change it.' : 'The board is locked. Open it with the password to change it.';
+const layersOf = () => Object.assign({}, view().layers || {}, (prefs.layers || {})[viewId] || {});
+const layerOn = k => layersOf()[k] !== false;
+function showLayer(k, on) { prefs.layers = prefs.layers || {}; prefs.layers[viewId] = Object.assign(layersOf(), { [k]: on !== false }); savePrefs(); }
+function loadPrefs() { try { prefs = JSON.parse(localStorage.getItem(PREFS) || '{}') || {}; } catch (e) { prefs = {}; } }
+function savePrefs() { try { localStorage.setItem(PREFS, JSON.stringify(prefs)); } catch (e) { /* fine */ } }
 const itemLayer = it => it.kind === 'part' ? null : it.kind;
 function shown(it) { if (!it || (view().hidden || []).includes(it.id)) return false; const l = itemLayer(it); return !l || layerOn(l); }
 const arrowShown = a => layerOn(a.layer) && shown(item(a.from)) && shown(item(a.to));
@@ -396,6 +474,7 @@ function merge(into, base) {
     if (!haveV.has(bv.id)) { if (!gone.has(bv.id)) into.views.push(clone(bv)); return; }
     const v = into.views.find(x => x.id === bv.id);
     Object.keys(bv.pos).forEach(id => { if (!v.pos[id]) v.pos[id] = bv.pos[id].slice(); });
+    (bv.ink || []).forEach(st => { v.ink = v.ink || []; if (!v.ink.some(x => x.id === st.id)) v.ink.push(clone(st)); });
   });
   return into;
 }
@@ -413,12 +492,13 @@ function load() {
 }
 function save() {
   if (ro()) return;
+  if (SHARED_ON) { if (shared) { writeCache(); scheduleSave(); } return; }
   try { localStorage.setItem(KEY, JSON.stringify({ v: 1, board: B, photos, viewId })); }
   catch (e) { toast('This browser would not keep the board. Export it now, so nothing is lost.'); }
 }
 // Every change goes through here: undo keeps the board as it was.
 function change(fn) {
-  if (ro()) { toast('This is a photograph. Bring it back to change it.'); return false; }
+  if (ro()) { toast(roWhy()); return false; }
   undoStack.push(JSON.stringify(B)); if (undoStack.length > 80) undoStack.shift();
   redoStack = [];
   fn();
@@ -432,6 +512,338 @@ function afterSwap() {
   if (!sel.ids.length) sel.kind = null;
   if (focus && !item(focus.id)) focus = null;
   form = null; save(); render();
+}
+
+/* ── The shared board ─────────────────────────────────────────────────────────
+   One file, board.json, in a private repository (board-shared.js says which). The page
+   reads it, saves to it a moment after each change, and asks every few seconds whether
+   anyone else has saved. When two people change the board at once, both changes are kept:
+   whatever only one of them changed stands, and where both changed the same thing, the
+   later save's version does. The token that reaches the repository is kept locked by the
+   board's password; the password is written nowhere. */
+// The file, one card, arrow or view to a line, so that GitHub's history shows each change.
+function boardText(b, by, at) {
+  const head = { kind: 'kantlab-board', v: 1, study: 'kinds-of-nothing', savedBy: by || '', savedAt: at || '' };
+  const LISTS = ['models', 'items', 'arrows', 'views', 'photos'];
+  const list = k => JSON.stringify(k) + ':[\n' + (b[k] || []).map(x => JSON.stringify(x)).join(',\n') + '\n]';
+  const rest = Object.keys(b).filter(k => !LISTS.includes(k) && k !== 'removed').map(k => JSON.stringify(k) + ':' + JSON.stringify(b[k]));
+  return JSON.stringify(head).slice(0, -1) + ',\n' + LISTS.map(list).join(',\n') + ',\n"removed":' + JSON.stringify(b.removed || []) + (rest.length ? ',\n' + rest.join(',\n') : '') + '}\n';
+}
+// What comes back from GitHub is data: keep the shapes this page knows, and anything newer pages add.
+function cleanBoard(d) {
+  if (!d || typeof d !== 'object' || Array.isArray(d) || !Array.isArray(d.items)) return null;
+  const out = {};
+  Object.keys(d).forEach(k => { if (!['kind', 'v', 'study', 'savedBy', 'savedAt'].includes(k)) out[k] = d[k]; });
+  ['models', 'items', 'arrows', 'views', 'photos'].forEach(k => { out[k] = Array.isArray(out[k]) ? out[k].filter(x => x && typeof x === 'object' && typeof x.id === 'string') : []; });
+  out.removed = Array.isArray(out.removed) ? out.removed.filter(x => typeof x === 'string') : [];
+  out.views.forEach(v => { if (!v.pos || typeof v.pos !== 'object') v.pos = {}; if (!Array.isArray(v.hidden)) v.hidden = []; if (!Array.isArray(v.ink)) v.ink = []; });
+  if (!out.views.length) out.views.push({ id: 'v-1', name: 'The board', pos: {}, hidden: [], ink: [] });
+  return out;
+}
+// Three copies of the board: as last saved (base), as here (mine), as on GitHub now (theirs).
+// What only one side changed, that side's version stands; where both changed it, mine does.
+function merge3(base, mine, theirs) {
+  const S = x => x === undefined ? '\u0000' : JSON.stringify(x);
+  const pick = (b, m, t) => S(m) === S(b) ? t : m;
+  const byId = a => new Map((a || []).filter(x => x && x.id != null).map(x => [x.id, x]));
+  const list = (b, m, t, sub) => {
+    const Bm = byId(b), M = byId(m), T = byId(t), ids = [...T.keys()], out = [];
+    M.forEach((x, id) => { if (!T.has(id)) ids.push(id); });
+    ids.forEach(id => { const bb = Bm.get(id), mm = M.get(id), tt = T.get(id), v = sub && mm && tt ? sub(bb, mm, tt) : pick(bb, mm, tt); if (v !== undefined) out.push(v); });
+    return out;
+  };
+  const map = (b, m, t) => { b = b || {}; m = m || {}; t = t || {}; const out = {}; new Set([...Object.keys(t), ...Object.keys(m)]).forEach(k => { const v = pick(b[k], m[k], t[k]); if (v !== undefined) out[k] = v; }); return out; };
+  const set = (b, m, t) => { const Bs = new Set(b || []), Ms = new Set(m || []), Ts = new Set(t || []); return [...new Set([...Ts, ...Ms])].filter(x => Ms.has(x) === Bs.has(x) ? Ts.has(x) : Ms.has(x)); };
+  const view3 = (b, m, t) => {
+    b = b || {};
+    const v = Object.assign({}, t);
+    Object.keys(m).forEach(k => { if (k !== 'pos' && k !== 'hidden' && k !== 'ink') { const x = pick(b[k], m[k], t[k]); if (x === undefined) delete v[k]; else v[k] = x; } });
+    v.pos = map(b.pos, m.pos, t.pos); v.hidden = set(b.hidden, m.hidden, t.hidden); v.ink = list(b.ink, m.ink, t.ink);
+    return v;
+  };
+  const out = Object.assign({}, theirs);
+  ['models', 'items', 'arrows', 'photos'].forEach(k => { out[k] = list(base[k], mine[k], theirs[k]); });
+  out.views = list(base.views, mine.views, theirs.views, view3);
+  out.removed = [...new Set([...(theirs.removed || []), ...(mine.removed || [])])];
+  const have = new Set(out.items.map(i => i.id));
+  out.arrows = out.arrows.filter(a => have.has(a.from) && have.has(a.to));   // an arrow whose card has gone goes too
+  if (!out.views.length) out.views = theirs.views.length ? theirs.views : mine.views;
+  return out;
+}
+// What a save did, for the commit message.
+function summary(b, m) {
+  const parts = [];
+  const count = (k, word) => {
+    const Bm = new Map((b[k] || []).map(x => [x.id, JSON.stringify(x)])), M = new Map((m[k] || []).map(x => [x.id, JSON.stringify(x)]));
+    let add = 0, del = 0, ed = 0;
+    M.forEach((v, id) => { if (!Bm.has(id)) add++; else if (Bm.get(id) !== v) ed++; });
+    Bm.forEach((v, id) => { if (!M.has(id)) del++; });
+    const w = n => n + ' ' + word + (n > 1 ? 's' : '');
+    if (add) parts.push('+' + w(add)); if (del) parts.push('−' + w(del)); if (ed) parts.push(w(ed) + ' edited');
+  };
+  count('items', 'card'); count('arrows', 'arrow'); count('models', 'model'); count('views', 'view'); count('photos', 'photograph');
+  return parts.join(', ') || 'changes';
+}
+const getToken = () => { try { return localStorage.getItem(TOKEN) || sessionStorage.getItem(TOKEN) || ''; } catch (e) { return ''; } };
+const curBoard = () => live ? live.board : B;
+function setCur(b) { if (live) live.board = b; else B = b; }
+const dirty = () => !!shared && !!shared.base && JSON.stringify(curBoard()) !== JSON.stringify(shared.base);
+function writeCache() { if (!shared || !shared.canSave || !shared.base) return; try { localStorage.setItem(CACHE, JSON.stringify({ board: curBoard(), base: shared.base, sha: shared.sha })); } catch (e) { /* the board is still saved to GitHub */ } }
+function loadCache() { try { const c = JSON.parse(localStorage.getItem(CACHE) || 'null'); return c && c.board && c.base ? c : null; } catch (e) { return null; } }
+
+/* UTF-8 in and out of GitHub's base64. */
+function b64encode(str) { const bytes = new TextEncoder().encode(str); let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(bin); }
+function b64decode(b64) { const bin = atob(String(b64).replace(/\s/g, '')), bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder().decode(bytes); }
+async function gh(method, path, opts, tok) {
+  const o = opts || {}, headers = { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + (tok || shared.token) };
+  if (o.body) headers['Content-Type'] = 'application/json';
+  if (o.etag) headers['If-None-Match'] = o.etag;
+  let r;
+  try { r = await fetch(API + path, { method, headers, body: o.body ? JSON.stringify(o.body) : undefined, cache: 'no-store' }); }
+  catch (e) { const err = new Error('offline'); err.status = 0; throw err; }
+  let data = null;
+  if (r.status !== 304) { try { data = await r.json(); } catch (e) { data = null; } }
+  return { status: r.status, ok: r.ok, data, etag: r.headers.get('ETag'), left: r.headers.get('x-ratelimit-remaining'), retry: r.headers.get('retry-after') };
+}
+const repoPath = () => '/repos/' + encodeURIComponent(SH.owner) + '/' + encodeURIComponent(SH.repo);
+function apiError(r) { const e = new Error('GitHub ' + r.status); e.status = r.status; e.gh = r.data && r.data.message; e.left = r.left; e.retry = r.retry; return e; }
+async function readText(path, etag, tok) {
+  const r = await gh('GET', repoPath() + '/contents/' + path + '?ref=' + encodeURIComponent(SH.branch), { etag }, tok);
+  if (r.status === 304) return { same: true };
+  if (r.status === 404) return null;
+  if (!r.ok) throw apiError(r);
+  let text = r.data.content ? b64decode(r.data.content) : null;
+  if (text == null) { const b = await gh('GET', repoPath() + '/git/blobs/' + r.data.sha, null, tok); if (!b.ok) throw apiError(b); text = b64decode(b.data.content); }   // over a megabyte
+  return { sha: r.data.sha, etag: r.etag, text };
+}
+function writeText(path, text, sha, message, tok) {
+  const body = { message, content: b64encode(text), branch: SH.branch };
+  if (sha) body.sha = sha;
+  return gh('PUT', repoPath() + '/contents/' + path, { body }, tok);
+}
+function parseBoard(r) { let d = null; try { d = JSON.parse(r.text); } catch (e) { d = null; } return { d, newer: !!(d && d.v > 1), board: d && !(d.v > 1) ? cleanBoard(d) : null }; }
+function messageFor(e) {
+  if (!e || e.status === 0) return 'GitHub can’t be reached. Changes are kept on this device and saved when the connection returns.';
+  if (e.status === 401) return 'GitHub no longer accepts the board’s key: its token has expired or been withdrawn. A new key is made at board.html#setup.';
+  if (e.status === 403 && (e.left === '0' || e.retry)) return 'GitHub asks the page to wait a little. Changes are kept and saved shortly.';
+  if (e.status === 403) return 'The board’s token can read the board but not save to it. It needs “Contents: Read and write”.';
+  if (e.status === 404) return 'The board’s token can’t see ' + SH.owner + '/' + SH.repo + '.';
+  return 'GitHub answered ' + e.status + (e.gh ? ': “' + e.gh + '”' : '') + '.';
+}
+function setStatus(st, err) { if (shared) { shared.status = st; shared.err = err || null; } renderSync(); }
+function renderSync() {
+  const el = $('sync'); if (!el) return;
+  let cls = '', h = '';
+  if (!SHARED_ON) { h = '<i></i>On this device only'; el.title = 'The shared board is not set up yet. Until it is, this board is kept in this browser.'; }
+  else if (locked) { cls = 'bad'; h = '<i></i>Locked: the study’s board <button type="button" class="linkish" data-sync="open">open it</button>'; el.title = ''; }
+  else if (!shared) h = '<i></i>Opening…';
+  else {
+    const st = shared.status;
+    if (shared.broken) { cls = 'bad'; h = '<i></i>Can’t read the shared board: nothing is saved'; }
+    else if (!shared.canSave) { cls = 'practice'; h = '<i></i>Shared board, practice copy: nothing here is saved <button type="button" class="linkish" data-sync="letsave">let this copy save</button>'; }
+    else if (st === 'saved') { cls = 'saved'; h = '<i></i>Shared · saved'; }
+    else if (st === 'saving' || st === 'unsaved') { cls = 'busy'; h = '<i></i>Shared · saving…'; }
+    else if (st === 'connecting') { cls = 'busy'; h = '<i></i>Opening the shared board…'; }
+    else if (st === 'missing') { cls = 'bad'; h = '<i></i>The shared board isn’t in its repository yet'; }
+    else if (st === 'error') { cls = 'bad'; h = '<i></i>Shared · not saved yet'; }
+    el.title = shared.err ? messageFor(shared.err) : st === 'missing' ? 'Run the setup: board.html#setup.' : '';
+    const dl = daysLeft();
+    if (dl != null && dl <= 14) { h += ' <b style="color:var(--prob)">· the key expires in ' + Math.max(0, dl) + (dl === 1 ? ' day' : ' days') + '</b>'; if (cls === 'saved') cls = 'busy'; }
+    if (SH.expires) el.title = (el.title ? el.title + ' ' : '') + 'The board’s key works until ' + expiryDay() + '.';
+    if (!shared.broken) h += ' <button type="button" class="linkish" data-sync="lock" title="Forget the board’s key on this device">lock</button>';
+  }
+  el.className = cls; el.innerHTML = h;
+}
+function scheduleSave() {
+  if (!shared || !shared.canSave || shared.broken || !shared.base) return;
+  setStatus('unsaved');
+  clearTimeout(shared.timer);
+  shared.timer = setTimeout(() => { shared.timer = null; push(); }, (SH.saveSeconds || 2.5) * 1000);
+}
+async function push(tries) {
+  tries = tries || 0;
+  if (!shared || !shared.canSave || shared.broken || !shared.base) return;
+  if (drag) { scheduleSave(); return; }
+  if (shared.pushing) { shared.again = true; return; }
+  if (!dirty()) { setStatus('saved'); return; }
+  shared.pushing = true; setStatus('saving');
+  const snap = clone(curBoard()), msg = 'Board: ' + summary(shared.base, snap) + (me() ? ' (@' + me() + ')' : '');
+  try {
+    const r = await writeText(SH.path, boardText(snap, me(), new Date().toISOString()), shared.sha, msg);
+    if (r.ok) {
+      shared.sha = r.data.content.sha; shared.etag = null; shared.base = snap; shared.pushing = false;
+      writeCache();
+      if (shared.again || dirty()) { shared.again = false; scheduleSave(); } else setStatus('saved');
+      return;
+    }
+    if ((r.status === 409 || r.status === 422) && tries < 5) {
+      // Someone saved first: take what they saved, put this device's changes on it, and save again.
+      const got = await readText(SH.path);
+      const pb = got && parseBoard(got);
+      if (!pb || !pb.board) { shared.pushing = false; shared.broken = true; setStatus('error'); return; }
+      setCur(merge3(shared.base, curBoard(), pb.board)); shared.base = pb.board; shared.sha = got.sha; shared.etag = got.etag;
+      shared.pushing = false; undoStack = []; redoStack = [];
+      afterRemote(); renderAround();
+      return push(tries + 1);
+    }
+    shared.pushing = false;
+    throw apiError(r);
+  } catch (e) {
+    shared.pushing = false; setStatus('error', e);
+    if (e.status === 401) { forgetToken(); showLock('The board’s key no longer works. Ask for a new one to be made.'); }
+    else if (e.status === 403 && (e.left === '0' || e.retry)) setTimeout(scheduleSave, 30000);
+  }
+}
+// Has anyone else saved? One small question every few seconds, answered "no change" by GitHub at no cost.
+async function check() {
+  if (!shared || shared.pushing || shared.broken) return;
+  if (shared.canSave && dirty() && !shared.timer) { push(); return; }
+  try {
+    const r = await readText(SH.path, shared.etag);
+    if (!r || r.same) return;
+    shared.etag = r.etag;
+    if (r.sha === shared.sha) return;
+    const pb = parseBoard(r);
+    if (!pb.board) { shared.broken = true; setStatus('error'); toast(pb.newer ? 'The board was saved by a newer version of this page. Reload the page.' : 'The shared board can’t be read, so this page will save nothing to it.'); return; }
+    incoming(pb.board, r.sha, pb.d.savedBy);
+    if (shared.status === 'error') setStatus(dirty() ? 'unsaved' : 'saved');
+  } catch (e) { setStatus('error', e); if (e.status === 401) { forgetToken(); showLock('The board’s key no longer works. Ask for a new one to be made.'); } }
+}
+function incoming(theirs, sha, by) {
+  if (drag) { shared.waiting = { theirs, sha, by }; return; }   // taken in when the drag ends
+  const mine = dirty();
+  setCur(mine ? merge3(shared.base, curBoard(), theirs) : theirs);
+  shared.base = clone(theirs); shared.sha = sha;
+  undoStack = []; redoStack = [];   // undo reaches back only to the last change from someone else
+  writeCache();
+  afterRemote(); renderAround();
+  if (mine) scheduleSave();
+  if (by && by !== me()) toast('@' + by + ' changed the board.');
+}
+function renderAround() { renderTools(); renderLayers(); renderBoard(); if (!form) renderSide(); applyCam(); }
+function afterRemote() {
+  if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
+  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : model(id));
+  if (!sel.ids.length) sel.kind = null;
+  if (focus && !item(focus.id)) focus = null;
+  if (form && form.id && !(form.kind === 'arrow' ? arrow(form.id) : form.kind === 'model' ? model(form.id) : form.kind === 'photos' ? true : item(form.id))) form = null;
+}
+let pollTimer = null;
+function poll() {
+  clearTimeout(pollTimer);
+  if (!shared) return;
+  pollTimer = setTimeout(async () => { if (document.visibilityState === 'visible') await check(); poll(); }, (SH.pollSeconds || 5) * 1000);
+}
+async function connect(tok) {
+  const canSave = location.hostname === SH.site || sessionStorage.getItem(LETSAVE) === '1';
+  if (shared) clearTimeout(shared.timer);
+  shared = { token: tok, sha: null, base: null, etag: null, canSave, pushing: false, again: false, timer: null, status: 'connecting' };
+  locked = false; renderSync();
+  try {
+    const r = await readText(SH.path);
+    if (!r) { setStatus('missing'); toast('The shared board isn’t in its repository yet. Run the setup (board.html#setup).'); return; }
+    const pb = parseBoard(r);
+    if (!pb.board) { shared.broken = true; setStatus('error'); toast(pb.newer ? 'The board was saved by a newer version of this page. Reload the page.' : 'The shared board can’t be read, so this page will save nothing to it.'); return; }
+    shared.sha = r.sha; shared.etag = r.etag; shared.base = clone(pb.board);
+    const c = canSave ? loadCache() : null;
+    if (c && JSON.stringify(c.board) !== JSON.stringify(c.base)) { B = merge3(c.base, c.board, pb.board); toast('Changes made on this device while it was offline are added to the board.'); }
+    else B = pb.board;
+    afterRemote(); render(); setStatus('saved');
+    if (dirty()) scheduleSave(); else writeCache();
+    const cam0 = camOf(); if (cam0) { cam = Object.assign({}, cam0); applyCam(); } else fit();
+    if (canSave) offerLocal();
+    expiryWarn();
+  } catch (e) { setStatus('error', e); if (e.status === 401) { forgetToken(); showLock('The board’s key no longer works. Ask for a new one to be made.'); } }
+  poll();
+}
+// The key runs out with its token. Warn more often as the day comes: weekly from six weeks
+// before, daily from two, and every time the page opens in the last three days.
+const daysLeft = () => SH && SH.expires && !isNaN(Date.parse(SH.expires)) ? Math.ceil((Date.parse(SH.expires) - Date.now()) / 864e5) : null;
+function expiryWarn() {
+  const d = daysLeft();
+  if (d == null || d > 42) return;
+  const every = d <= 3 ? 0 : d <= 14 ? 864e5 : 7 * 864e5;
+  let last = 0; try { last = +localStorage.getItem('kantlab-board-expiry-warned') || 0; } catch (e) { last = 0; }
+  if (every && Date.now() - last < every) return;
+  try { localStorage.setItem('kantlab-board-expiry-warned', String(Date.now())); } catch (e) { /* fine */ }
+  expiring = d; banner();
+}
+const expiryDay = () => new Date(SH.expires).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+function forgetToken() { try { localStorage.removeItem(TOKEN); sessionStorage.removeItem(TOKEN); localStorage.removeItem(CACHE); } catch (e) { /* fine */ } }
+// A board this device kept for itself before the board was shared: offer to add what is new in it.
+function offerLocal() {
+  let old = null;
+  try { if (localStorage.getItem('kantlab-board-local-offered') === '1') return; old = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return; }
+  if (!old || !old.board || !Array.isArray(old.board.items)) return;
+  const has = new Set([].concat(B.items, B.arrows, B.models).map(x => x.id)), strokes = new Set([].concat(...B.views.map(v => (v.ink || []).map(s => s.id))));
+  const n = [].concat(old.board.items, old.board.arrows || [], old.board.models || []).filter(x => x && !has.has(x.id)).length + [].concat(...(old.board.views || []).map(v => (v.ink || []).filter(s => !strokes.has(s.id)))).length;
+  if (!n) { try { localStorage.setItem('kantlab-board-local-offered', '1'); } catch (e) { /* fine */ } return; }
+  migrate = { old: old.board, n }; banner();
+}
+
+/* The token, locked by the board's password: PBKDF2 makes a key of the password, AES-GCM locks the token with it. */
+const u8b64 = u8 => { let s = ''; u8.forEach(c => { s += String.fromCharCode(c); }); return btoa(s); };
+const b64u8 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function passKey(pw, salt, iter) {
+  const raw = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' }, raw, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+async function sealToken(tok, pw) {
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = 310000;
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await passKey(pw, salt, iter), new TextEncoder().encode(tok));
+  return { v: 1, iter, salt: u8b64(salt), iv: u8b64(iv), data: u8b64(new Uint8Array(ct)) };
+}
+async function openToken(key, pw) {
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64u8(key.iv) }, await passKey(pw, b64u8(key.salt), key.iter), b64u8(key.data));
+  return new TextDecoder().decode(pt);
+}
+function showLock(msg) {
+  const d = daysLeft();
+  if (!msg && d != null && d <= 0) msg = 'The board’s key expired on ' + expiryDay() + '. A new one is made at board.html#setup, with a new token.';
+  locked = true; $('lock').classList.add('show'); $('lerr').textContent = msg || '';
+  $('lme').value = me(); setTimeout(() => $('lpw').focus(), 50); renderSync();
+}
+async function unlock(pw, who, remember) {
+  if (!window.crypto || !crypto.subtle) throw new Error('This page has to be opened from the site (https) to open the board.');
+  let tok;
+  try { tok = await openToken(SH.key, pw); } catch (e) { throw new Error('That is not the password.'); }
+  const r = await gh('GET', repoPath(), null, tok);
+  if (r.status === 401) throw new Error('The password is right, but the board’s key has expired. A new key is made at board.html#setup.');
+  if (!r.ok) throw new Error(messageFor(apiError(r)));
+  try { localStorage.setItem(ME, who); (remember ? localStorage : sessionStorage).setItem(TOKEN, tok); } catch (e) { /* fine */ }
+  return tok;
+}
+// Setting up: check the token, put the starting board in the repository if it is empty, and lock the token with the password.
+async function setUp(tok, pw, exp) {
+  const out = $('sout'), say = h => { out.innerHTML += '<p>' + h + '</p>'; };
+  out.innerHTML = '';
+  if (!window.crypto || !crypto.subtle) { say('<span class="warn">Open this page from the site, or from localhost, to set it up.</span>'); return; }
+  const r = await gh('GET', repoPath(), null, tok);
+  if (!r.ok) { say('<span class="warn">' + (r.status === 401 ? 'GitHub doesn’t accept that token. Check that it was copied whole, and that it has not expired.' : esc(messageFor(apiError(r)))) + '</span>'); return; }
+  say('<span class="ok">✓</span> The token reaches ' + esc(SH.owner + '/' + SH.repo) + (r.data && r.data.private ? ', a private repository.' : '. <span class="warn">It is not private: make it private on GitHub.</span>'));
+  let have = null;
+  try { have = await readText(SH.path, null, tok); } catch (e) { say('<span class="warn">' + esc(messageFor(e)) + '</span>'); return; }
+  if (have) { const pb = parseBoard(have); say('<span class="ok">✓</span> The board is already there' + (pb.board ? ' (' + pb.board.items.length + ' cards, ' + pb.board.arrows.length + ' arrows)' : '') + ', and is left as it is.'); }
+  else {
+    const start = cleanBoard(Object.assign(clone(BASE), { photos: [], removed: [] }));
+    const w = await writeText(SH.path, boardText(start, me(), new Date().toISOString()), null, 'The shared board, starting from the study’s board', tok);
+    if (!w.ok) { say('<span class="warn">The starting board could not be saved: ' + esc(messageFor(apiError(w))) + '</span>'); return; }
+    say('<span class="ok">✓</span> The starting board, the study’s own, is saved in the repository; the token can save.');
+    const rd = '# The Kant Lab’s shared board\n\nThis private repository holds the board of the study *the kinds of nothing* (`logic-portal/studies/kinds-of-nothing/board.html` in mikrishnan/kant-lab), as the whole seminar has made it: `board.json`, with its photographs in `photos/`. The page saves to it, so every save is a commit here, and the history of this repository is the history of the board.\n\nDo not edit `board.json` by hand while anyone has the board open.\n';
+    try { const hr = await readText('README.md', null, tok); if (!hr) await writeText('README.md', rd, null, 'What this repository is', tok); } catch (e) { /* the board matters, the README does not */ }
+  }
+  const key = await sealToken(tok, pw);
+  let text = null;
+  try { const f = await fetch('board-shared.js', { cache: 'no-store' }); if (f.ok) text = await f.text(); } catch (e) { text = null; }
+  const line = '  key: ' + JSON.stringify(key) + ',', expLine = "  expires: '" + exp + "',   // when the token, and so the key, stops working: the page warns before";
+  if (text && /^  key: .*,$/m.test(text)) {
+    text = text.replace(/^  key: .*,$/m, line);
+    text = /^  expires: .*$/m.test(text) ? text.replace(/^  expires: .*$/m, expLine) : text.replace(line, expLine + '\n' + line);
+  } else text = 'const STUDY_BOARD_SHARED = ' + JSON.stringify(Object.assign({}, SH, { expires: exp, key }), null, 2) + ';\n';
+  say('<span class="ok">✓</span> The key is made. Save this file as <code>board-shared.js</code> in the study’s folder, in place of the one there, and push it; or give it to Claude to do.');
+  out.innerHTML += '<div class="row"><button type="button" class="btn solid" id="sdl">Download board-shared.js</button></div><textarea readonly id="stext"></textarea>';
+  $('stext').value = text;
+  $('sdl').addEventListener('click', () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' })); a.download = 'board-shared.js'; document.body.appendChild(a); a.click(); a.remove(); });
 }
 
 /* ── Builders: where things stand ─────────────────────────────────────────── */
@@ -604,7 +1016,8 @@ function renderLayers() {
 function renderTools() {
   $('vsel').innerHTML = B.views.map(v => '<option value="' + esc(v.id) + '"' + (v.id === viewId ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('');
   $('undo').disabled = ro() || !undoStack.length; $('redo').disabled = ro() || !redoStack.length;
-  $('photos').textContent = 'Photographs' + (photos.length ? ' (' + photos.length + ')' : '');
+  $('photos').textContent = 'Photographs' + (photoList().length ? ' (' + photoList().length + ')' : '');
+  renderSync();
   $('stage').classList.toggle('readonly', ro());
   const n = query ? B.items.filter(it => shown(it) && matches(it)).length : null;
   $('found').textContent = n == null ? '' : n + ' found';
@@ -613,7 +1026,9 @@ function renderTools() {
 function banner() {
   const b = $('banner'); let h = '';
   b.classList.remove('photo');
-  if (live) { const p = photos.find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
+  if (live) { const p = live.entry || photoList().find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
+  else if (expiring != null) h = '<span>' + (expiring > 0 ? 'The board’s key expires on <b>' + esc(expiryDay()) + '</b>, in ' + expiring + (expiring === 1 ? ' day' : ' days') + '. After that nobody can open the board' : 'The board’s key has expired, so nobody can open the board') + ' until a new token is made and locked in at board.html#setup (the study’s README, <i>The board</i>, says how).</span><button type="button" class="btn" data-b="x-ok">Understood</button>';
+  else if (migrate) h = '<span>This device has a board of its own from before the board was shared, with ' + migrate.n + ' things the shared board does not have.</span><button type="button" class="btn solid" data-b="m-add">Add them to the shared board</button><button type="button" class="btn" data-b="m-leave">Leave them</button>';
   else if (mode) h = '<span>Click the card the arrow goes to.</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
   else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(nameOf(offer.from)) + '</b> to <b>' + esc(nameOf(offer.to)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
   else if (offer && offer.kind === 'lasso') { const one = offer.ids.length === 1; h = '<span>You drew round ' + offer.ids.length + (one ? ' card' : ' cards') + '.</span><button type="button" class="btn solid" data-b="o-select">Select ' + (one ? 'it' : 'them') + '</button><button type="button" class="btn" data-b="o-model">Make ' + (one ? 'it' : 'them') + ' a model</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>'; }
@@ -652,8 +1067,9 @@ function sideIntro() {
     '<li><b>Depth</b>: zoom out and a card is its name; zoom in and its first passage shows.</li>' +
     '<li><b>Focus</b>: select a card and press <kbd>F</kbd> to see only what is joined to it.</li>' +
     '<li><b>Time</b>: <i>Photograph the board</i> keeps it as it is now. Come back to any photograph later, or bring it back.</li></ul>' +
-    '<span class="k">Where it is kept</span><p>In this browser, on its own, until you export it. Send the export to be added to the study, where the whole seminar sees it. Claims carry your GitHub username, and quotations pasted here are marked until they are checked against the portal.</p>' +
-    '<p style="font-size:0.85rem;color:var(--faded)">' + B.items.length + ' cards · ' + B.arrows.length + ' arrows · ' + B.views.length + (B.views.length === 1 ? ' view' : ' views') + ' · ' + photos.length + (photos.length === 1 ? ' photograph' : ' photographs') + '</p></div>';
+    (SHARED_ON ? '<span class="k">Where it is kept</span><p>One board for the whole seminar, opened with the password. Every change is saved for everyone a moment after it is made, and appears on everyone else’s screen within a few seconds. Each save is kept in the board’s history, so nothing is lost. Claims carry your GitHub username, and quotations pasted here are marked until they are checked against the portal.</p>'
+      : '<span class="k">Where it is kept</span><p>In this browser, on its own, until you export it. Send the export to be added to the study, where the whole seminar sees it. Claims carry your GitHub username, and quotations pasted here are marked until they are checked against the portal.</p>') +
+    '<p style="font-size:0.85rem;color:var(--faded)">' + B.items.length + ' cards · ' + B.arrows.length + ' arrows · ' + B.views.length + (B.views.length === 1 ? ' view' : ' views') + ' · ' + photoList().length + (photoList().length === 1 ? ' photograph' : ' photographs') + '</p></div>';
 }
 function sideCard(it) {
   const m = model(it.model), arr = B.arrows.filter(a => a.from === it.id || a.to === it.id);
@@ -699,7 +1115,7 @@ function sideModel(m) {
 }
 function sidePhotos() {
   return '<h2>Photographs</h2><p class="sub">The board as it stood, kept to come back to</p>' +
-    (photos.length ? photos.slice().reverse().map(p => '<div class="photo"><b>' + esc(p.name) + '</b><div class="meta">' + esc(fmtDate(p.date)) + (p.by ? ' · @' + esc(p.by) : '') + ' · ' + p.board.items.length + ' cards, ' + p.board.arrows.length + ' arrows, ' + p.board.views.length + ' views</div>' +
+    (photoList().length ? photoList().slice().reverse().map(p => '<div class="photo"><b>' + esc(p.name) + '</b><div class="meta">' + esc(fmtDate(p.date)) + (p.by ? ' · @' + esc(p.by) : '') + ' · ' + photoN(p).items + ' cards, ' + photoN(p).arrows + ' arrows, ' + photoN(p).views + ' views</div>' +
       '<div class="row" style="margin-top:0.3rem"><button type="button" class="btn" data-look="' + esc(p.id) + '">Look at it</button><button type="button" class="linkish" data-unphoto="' + esc(p.id) + '">Delete</button></div></div>').join('') : '<p class="empty">None yet. <i>Photograph the board</i> keeps it as it is now.</p>') +
     '<span class="k">Start again</span><p style="font-size:0.9rem">Set the board back to the study’s own, as <code>board.js</code> has it. This board is photographed first, so nothing is lost.</p><div class="row" style="margin-top:0"><button type="button" class="btn" data-act="reset">Start again from the study’s board</button></div>';
 }
@@ -825,8 +1241,7 @@ function saveCard(D) {
       if (kind === 'problem' || kind === 'note') n.text = text.trim();
       B.items.push(n);
       const at = form.at || centre(); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
-      if (kind === 'passage' || kind === 'note') view().layers[kind] = true;
-      if (kind === 'problem') view().layers.problem = true;
+      if (kind === 'passage' || kind === 'note' || kind === 'problem') showLayer(kind);
     }
   });
   form = null; sel = { kind: 'card', ids: [id] }; render();
@@ -849,7 +1264,7 @@ function saveArrow(D) {
   change(() => {
     if (stroke) { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== stroke); }
     if (old) { Object.assign(old, { from: form.from, to: form.to, type, layer, text, evidence: ev }); sign(old, by); }
-    else { id = uid('a'); B.arrows.push({ id, from: form.from, to: form.to, type, layer, text, evidence: ev, by, date: today() }); view().layers[layer] = true; }
+    else { id = uid('a'); B.arrows.push({ id, from: form.from, to: form.to, type, layer, text, evidence: ev, by, date: today() }); showLayer(layer); }
   });
   form = null; sel = { kind: 'arrow', ids: [id] }; render();
 }
@@ -869,7 +1284,7 @@ function saveModel(D) {
       const n = { id, title, name, cite, color, by, date: today() };
       if (split) { const olds = [...new Set(split.map(x => (item(x) || {}).model).filter(Boolean))]; if (olds.length === 1) n.from = olds[0]; split.forEach(x => { const it = item(x); if (it) it.model = id; }); }
       else { const c = centre(); view().pos[id] = [Math.round(c[0]), Math.round(c[1])]; }
-      B.models.push(n); view().layers.frames = true;
+      B.models.push(n); showLayer('frames');
     }
   });
   form = null; sel = { kind: 'model', ids: [id] }; render();
@@ -886,26 +1301,50 @@ function removeCards(ids) {
   if (focus && set.has(focus.id)) focus = null;
   sel = { kind: null, ids: [] }; render();
 }
-function photograph(name, quiet) {
-  photos.push({ id: uid('ph'), name: name || 'The board, ' + fmtDate(new Date().toISOString()), date: new Date().toISOString(), by: me() || undefined, board: clone(B) });
-  save();
-  if (!quiet) { toast('Photographed. Photographs keeps it.'); renderTools(); }
+const photoList = () => SHARED_ON ? (curBoard().photos || []) : photos;
+const photoN = p => p.n || (p.board ? { items: p.board.items.length, arrows: p.board.arrows.length, views: p.board.views.length } : { items: 0, arrows: 0, views: 0 });
+async function photograph(name, quiet) {
+  name = name || 'The board, ' + fmtDate(new Date().toISOString());
+  if (!SHARED_ON) {
+    photos.push({ id: uid('ph'), name, date: new Date().toISOString(), by: me() || undefined, board: clone(B) });
+    save();
+    if (!quiet) { toast('Photographed. Photographs keeps it.'); renderTools(); }
+    return true;
+  }
+  // The shared board's photographs are files of their own in its repository, listed in the board.
+  if (!shared || !shared.canSave || shared.broken) { toast('Only a copy that saves to the shared board can photograph it.'); return false; }
+  const id = uid('ph'), body = clone(curBoard()); body.photos = [];
+  try {
+    const r = await writeText('photos/' + id + '.json', boardText(body, me(), new Date().toISOString()), null, 'Photograph: ' + name + (me() ? ' (@' + me() + ')' : ''));
+    if (!r.ok) throw apiError(r);
+  } catch (e) { toast('The photograph could not be saved. ' + messageFor(e)); return false; }
+  const entry = { id, name, date: new Date().toISOString(), by: me() || undefined, n: { items: body.items.length, arrows: body.arrows.length, views: body.views.length } };
+  change(() => { B.photos = (B.photos || []).concat([entry]); });
+  if (!quiet) { toast('Photographed. Photographs keeps it, for everyone.'); renderTools(); }
+  return true;
 }
-function look(id) {
-  const p = photos.find(x => x.id === id); if (!p) return;
-  if (!live) live = { board: B, viewId, photo: id }; else live.photo = id;
-  B = clone(p.board); B.removed = B.removed || [];
+async function look(id) {
+  const p = photoList().find(x => x.id === id); if (!p) return;
+  let board = p.board ? clone(p.board) : null;
+  if (!board && shared) {
+    try { const r = await readText('photos/' + id + '.json'); board = r && parseBoard(r).board; } catch (e) { board = null; }
+    if (!board) { toast('That photograph could not be fetched.'); return; }
+  }
+  if (!board) return;
+  if (!live) live = { board: B, viewId, photo: id, entry: p }; else { live.photo = id; live.entry = p; }
+  B = board; B.removed = B.removed || [];
   if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
   sel = { kind: null, ids: [] }; form = null; focus = null; mode = null;
   render(); fit();
 }
 function back() { if (!live) return; B = live.board; viewId = live.viewId; live = null; sel = { kind: null, ids: [] }; form = null; render(); }
-function restore() {
+async function restore() {
   if (!live) return;
-  const p = photos.find(x => x.id === live.photo), keep = B;
+  const p = live.entry, keep = B;
   B = live.board; viewId = live.viewId; live = null;
-  photograph('Before bringing back “' + (p ? p.name : '') + '”', true);
-  change(() => { B = clone(keep); });
+  render();
+  if (!(await photograph('Before bringing back “' + (p ? p.name : '') + '”', true)) && !confirm('The board as it is now could not be photographed first. Bring the photograph back anyway?')) return;
+  change(() => { const ph = B.photos; B = clone(keep); if (SHARED_ON) B.photos = ph; });
   toast('Brought back. The board as it was is in Photographs.');
   sel = { kind: null, ids: [] }; render();
 }
@@ -914,7 +1353,7 @@ function newView() {
   const name = prompt('A name for the new view. It starts as a copy of this one, and changes to it leave this one as it is.', 'A view of my own');
   if (!name || !name.trim()) return;
   const v = view(), id = uid('v');
-  change(() => { B.views.push({ id, name: name.trim(), pos: clone(Object.assign({}, ...B.views.slice().reverse().map(w => w.pos), v.pos)), hidden: (v.hidden || []).slice(), layers: Object.assign({}, v.layers), ink: clone(v.ink || []), by: me() || undefined, date: today() }); viewId = id; });
+  change(() => { B.views.push({ id, name: name.trim(), pos: clone(Object.assign({}, ...B.views.slice().reverse().map(w => w.pos), v.pos)), hidden: (v.hidden || []).slice(), layers: layersOf(), ink: clone(v.ink || []), by: me() || undefined, date: today() }); viewId = id; });
   render();
 }
 function viewMenu() {
@@ -973,7 +1412,8 @@ function fit() {
   applyCam(); keepCam();
 }
 let camT;
-function keepCam() { if (ro()) return; clearTimeout(camT); camT = setTimeout(() => { view().cam = Object.assign({}, cam); save(); }, 400); }
+function keepCam() { if (live) return; clearTimeout(camT); camT = setTimeout(() => { prefs.cams = prefs.cams || {}; prefs.cams[viewId] = Object.assign({}, cam); savePrefs(); }, 400); }
+const camOf = () => (prefs.cams || {})[viewId] || view().cam;
 $('stage').addEventListener('wheel', e => {
   if (e.target.closest('.float')) return;
   e.preventDefault();
@@ -1032,7 +1472,7 @@ function finishStroke(raw) {
   const inM = layerOn('frames') ? B.models.find(m => { const f = frameOf(m); return f && pts.every(p => inside(f, p[0], p[1])); }) : null;
   const st = { id: uid('s'), pts, color: pen, w: Math.round(30 / cam.k) / 10, by: me() || undefined, date: today() };
   if (inM) st.model = inM.id;   // drawn inside a model's frame, it moves and spreads with the model
-  change(() => { const v = view(); v.ink = v.ink || []; v.ink.push(st); v.layers = v.layers || {}; v.layers.drawing = true; });
+  change(() => { const v = view(); v.ink = v.ink || []; v.ink.push(st); showLayer('drawing'); });
   // What the stroke may mean: from one card to another, an arrow; round some cards, a selection.
   const onCard = p => { const it = B.items.filter(shown).find(i => inside(rect(i.id), p[0], p[1])); return it ? it.id : null; };
   const a = onCard(pts[0]), z = onCard(pts[pts.length - 1]);
@@ -1196,8 +1636,12 @@ function pointerEnd(e, cancelled) {
     select(ids.length ? 'card' : null, ids);
   }
 }
-$('stage').addEventListener('pointerup', e => pointerEnd(e, false));
-$('stage').addEventListener('pointercancel', e => pointerEnd(e, true));
+function afterPointer(e, cancelled) {
+  pointerEnd(e, cancelled);
+  if (!drag && shared && shared.waiting) { const w = shared.waiting; shared.waiting = null; incoming(w.theirs, w.sha, w.by); }
+}
+$('stage').addEventListener('pointerup', e => afterPointer(e, false));
+$('stage').addEventListener('pointercancel', e => afterPointer(e, true));
 // Double-click (or double tap): a card opens to be edited; the board offers something to put there.
 function doubleAt(cx, cy) {
   const under = document.elementFromPoint(cx, cy);
@@ -1226,6 +1670,13 @@ $('banner').addEventListener('click', e => {
   else if (k === 'nofocus') { focus = null; render(); }
   else if (k === 'hop1' || k === 'hop2') { focus.hops = k === 'hop1' ? 1 : 2; render(); }
   else if (k === 'o-keep') { offer = null; banner(); }
+  else if (k === 'x-ok') { expiring = null; banner(); }
+  else if (k === 'm-add' || k === 'm-leave') {
+    const m = migrate; migrate = null;
+    try { localStorage.setItem('kantlab-board-local-offered', '1'); } catch (e) { /* fine */ }
+    if (k === 'm-add' && m) { change(() => { merge(B, { models: m.old.models || [], items: m.old.items, arrows: m.old.arrows || [], views: m.old.views || [] }); }); toast('Added to the shared board.'); }
+    render();
+  }
   else if (k === 'o-arrow' && offer) { const o = offer; offer = null; form = { kind: 'arrow', from: o.from, to: o.to, fromStroke: o.stroke }; sel = { kind: null, ids: [] }; showSide('details'); render(); }
   else if ((k === 'o-select' || k === 'o-model') && offer) {
     const o = offer; offer = null;
@@ -1235,8 +1686,7 @@ $('banner').addEventListener('click', e => {
 });
 $('layers').addEventListener('change', e => {
   const k = e.target.dataset.layer; if (!k) return;
-  if (ro()) { view().layers[k] = e.target.checked; render(); return; }
-  view().layers = view().layers || {}; view().layers[k] = e.target.checked; save(); render();
+  showLayer(k, e.target.checked); render();
 });
 $('layers').addEventListener('click', e => { if (e.target.closest('[data-fold]')) { $('layers').classList.toggle('closed'); renderLayers(); } });
 
@@ -1250,8 +1700,8 @@ document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click',
 $('vsel').addEventListener('change', () => {
   viewId = $('vsel').value; focus = null; sel = { kind: null, ids: [] }; form = null;
   render();
-  const c = view().cam; if (c) { cam = Object.assign({}, c); applyCam(); } else fit();
-  save();
+  const c = camOf(); if (c) { cam = Object.assign({}, c); applyCam(); } else fit();
+  if (!live) { prefs.viewId = viewId; savePrefs(); }
 });
 $('vnew').addEventListener('click', newView);
 $('vmore').addEventListener('click', viewMenu);
@@ -1282,6 +1732,40 @@ $('palette').addEventListener('click', e => {
   const p = e.target.closest('[data-pen]'); if (p) { pen = p.dataset.pen; renderPens(); return; }
   if (e.target.closest('[data-clear]') && !ro() && (view().ink || []).length && confirm('Clear all the drawing on this view? Undo (⌘Z) brings it back.')) { change(() => { view().ink = []; }); render(); }
 });
+$('sync').addEventListener('click', e => {
+  const b = e.target.closest('[data-sync]'); if (!b) return;
+  const k = b.dataset.sync;
+  if (k === 'open') showLock();
+  else if (k === 'lock') { if (confirm('Lock the board on this device? Opening it again takes the password.')) { forgetToken(); location.reload(); } }
+  else if (k === 'letsave') {
+    if (!confirm('This copy is not the live site: it may be a preview of changes not yet merged. Let it save to the shared board, for everyone? What was tried here so far is set aside, and the board is opened afresh.')) return;
+    try { sessionStorage.setItem(LETSAVE, '1'); } catch (x) { /* fine */ }
+    connect(shared.token);
+  }
+});
+$('lockform').addEventListener('submit', e => {
+  e.preventDefault();
+  const pw = $('lpw').value, who = $('lme').value.trim().replace(/^@/, '');
+  if (!pw) { $('lerr').textContent = 'Type the password.'; return; }
+  if (!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(who)) { $('lerr').textContent = 'Give your GitHub username.'; return; }
+  $('lerr').textContent = 'Opening…'; $('lgo').disabled = true;
+  unlock(pw, who, $('lrem').checked).then(tok => {
+    $('lock').classList.remove('show'); $('lpw').value = ''; $('lerr').textContent = ''; $('lgo').disabled = false;
+    connect(tok);
+  }).catch(err => { $('lerr').textContent = err.message; $('lgo').disabled = false; });
+});
+$('lpeek').addEventListener('click', () => { $('lock').classList.remove('show'); locked = true; render(); });
+$('setupform').addEventListener('submit', e => {
+  e.preventDefault();
+  const tok = $('stok').value.trim(), p1 = $('spw1').value, p2 = $('spw2').value, ex = $('sexp').value.trim();
+  if (!tok) { $('sout').innerHTML = '<p class="warn">Paste the token.</p>'; return; }
+  if (!p1 || p1 !== p2) { $('sout').innerHTML = '<p class="warn">Type the same password twice.</p>'; return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(ex) || isNaN(Date.parse(ex))) { $('sout').innerHTML = '<p class="warn">Give the day the token expires, as 2027-02-11.</p>'; return; }
+  $('sout').innerHTML = '<p>Checking…</p>';
+  setUp(tok, p1, ex + 'T00:00:00Z').catch(err => { $('sout').innerHTML += '<p class="warn">' + esc(err.message || String(err)) + '</p>'; });
+});
+$('sclose').addEventListener('click', () => { $('setup').classList.remove('show'); if (location.hash === '#setup') history.replaceState(null, '', location.pathname + location.search); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && shared) check(); });
 $('tside').addEventListener('click', () => document.body.classList.add('sideclosed'));
 $('sideopen').addEventListener('click', () => document.body.classList.remove('sideclosed'));
 $('tdet').addEventListener('click', () => showSide('details'));
@@ -1292,7 +1776,11 @@ $('details').addEventListener('click', e => {
   const ra = e.target.closest('[data-arrow]'); if (ra) { select('arrow', [ra.dataset.arrow]); return; }
   const rc = e.target.closest('[data-card]'); if (rc) { select('card', [rc.dataset.card]); return; }
   const lk = e.target.closest('[data-look]'); if (lk) { look(lk.dataset.look); return; }
-  const up = e.target.closest('[data-unphoto]'); if (up) { if (confirm('Delete this photograph? It cannot be brought back.')) { photos = photos.filter(p => p.id !== up.dataset.unphoto); save(); renderTools(); renderSide(); } return; }
+  const up = e.target.closest('[data-unphoto]'); if (up) {
+    if (!confirm(SHARED_ON ? 'Take this photograph off the list, for everyone? Its file stays in the board’s repository.' : 'Delete this photograph? It cannot be brought back.')) return;
+    if (SHARED_ON) change(() => { B.photos = (B.photos || []).filter(p => p.id !== up.dataset.unphoto); }); else { photos = photos.filter(p => p.id !== up.dataset.unphoto); save(); }
+    renderTools(); renderSide(); return;
+  }
   const uq = e.target.closest('[data-unq]'); if (uq && form && form.quotes) { form.quotes.splice(+uq.dataset.unq, 1); keepFields(renderSide); return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, id = sel.ids[0];
@@ -1313,7 +1801,15 @@ $('details').addEventListener('click', e => {
   if (act === 'editmodel') { form = { kind: 'model', id }; renderSide(); return; }
   if (act === 'selmodel') { select('card', B.items.filter(i => i.model === id && shown(i)).map(i => i.id)); return; }
   if (act === 'delmodel') { if (confirm('Delete this model? Its cards stay on the board, without a model.')) { change(() => { B.items.forEach(i => { if (i.model === id) i.model = null; }); B.models = B.models.filter(m => m.id !== id); if (BASE.models.some(m => m.id === id)) B.removed.push(id); }); select(null, []); } return; }
-  if (act === 'reset') { if (confirm('Set the board back to the study’s own? This board is photographed first.')) { photograph('Before starting again', true); change(() => { B = clone(BASE); B.removed = []; }); viewId = B.views[0].id; form = null; sel = { kind: null, ids: [] }; render(); fit(); toast('The study’s board. The one before is in Photographs.'); } return; }
+  if (act === 'reset') {
+    if (!confirm(SHARED_ON ? 'Set the board back to the study’s own, for everyone? This board is photographed first.' : 'Set the board back to the study’s own? This board is photographed first.')) return;
+    photograph('Before starting again', true).then(ok => {
+      if (!ok && !confirm('The board could not be photographed first. Start again anyway?')) return;
+      change(() => { const ph = B.photos; B = clone(BASE); B.removed = []; if (SHARED_ON) { B = cleanBoard(B); B.photos = ph || []; } });
+      viewId = B.views[0].id; form = null; sel = { kind: null, ids: [] }; render(); fit(); toast('The study’s board. The one before is in Photographs.');
+    });
+    return;
+  }
 });
 $('details').addEventListener('change', e => {
   if (e.target.matches('[data-type]')) { const o = $('details').querySelector('[data-other]'); o.style.display = e.target.value === '__other' ? '' : 'none'; if (e.target.value === '__other') o.focus(); }
@@ -1336,7 +1832,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('keyup', e => { if (e.key === ' ') { spaceDown = false; $('stage').classList.remove('spacepan'); } });
 window.addEventListener('blur', () => { spaceDown = false; $('stage').classList.remove('spacepan'); });
 $('export').addEventListener('click', () => {
-  const data = { kind: 'kantlab-board', study: 'kinds-of-nothing', v: 1, saved: new Date().toISOString(), by: me() || undefined, board: live ? live.board : B, photos };
+  const data = { kind: 'kantlab-board', study: 'kinds-of-nothing', v: 1, saved: new Date().toISOString(), by: me() || undefined, board: curBoard(), photos: SHARED_ON ? [] : photos };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'kinds-of-nothing-board-' + today() + (me() ? '-' + me() : '') + '.json';
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
@@ -1350,18 +1846,33 @@ $('file').addEventListener('change', () => {
     const before = { m: B.models.length, i: B.items.length, a: B.arrows.length, v: B.views.length };
     // Someone else's board: what is new comes in beside yours; nothing of yours is overwritten.
     change(() => { merge(B, { models: d.board.models || [], items: d.board.items, arrows: d.board.arrows || [], views: d.board.views || [] }); });
-    const have = new Set(photos.map(p => p.id)); (d.photos || []).forEach(p => { if (!have.has(p.id)) photos.push(p); }); save();
+    if (!SHARED_ON) { const have = new Set(photos.map(p => p.id)); (d.photos || []).forEach(p => { if (p.board && !have.has(p.id)) photos.push(p); }); save(); }
     render();
-    toast('Added ' + (B.items.length - before.i) + ' cards, ' + (B.arrows.length - before.a) + ' arrows, ' + (B.models.length - before.m) + ' models and ' + (B.views.length - before.v) + ' views. Nothing of yours was changed.');
+    toast('Added ' + (B.items.length - before.i) + ' cards, ' + (B.arrows.length - before.a) + ' arrows, ' + (B.models.length - before.m) + ' models and ' + (B.views.length - before.v) + ' views. Nothing already on the board was changed.');
   }).catch(() => alert('That file is not an export of this board.'));
 });
 
 /* ── Init ─────────────────────────────────────────────────────────────────── */
-load();
+loadPrefs();
+if (SHARED_ON) {
+  // The one shared board: this device's last copy of it while GitHub is asked, or the study's board, locked, until the password is given.
+  const tok = getToken(), c = tok ? loadCache() : null;
+  B = c ? cleanBoard(c.board) || cleanBoard(clone(BASE)) : cleanBoard(Object.assign(clone(BASE), { photos: [], removed: [] }));
+  photos = [];
+  viewId = B.views.some(v => v.id === prefs.viewId) ? prefs.viewId : B.views[0].id;
+  if (!tok) showLock();
+} else {
+  load();
+  if (prefs.viewId && B.views.some(v => v.id === prefs.viewId)) viewId = prefs.viewId;
+}
 renderPens();
 render();
+if (SHARED_ON && getToken()) connect(getToken());
+function openSetup() { if (location.hash !== '#setup') return; $('srepo').textContent = SH ? SH.owner + '/' + SH.repo : '(board-shared.js is missing)'; $('setup').classList.add('show'); }
+openSetup();
+window.addEventListener('hashchange', openSetup);
 // Cards are measured once the page is laid out, and again when its fonts arrive, since they change every card's size.
-const settle = () => { renderBoard(); if (view().cam) { cam = Object.assign({}, view().cam); applyCam(); } else fit(); };
+const settle = () => { renderBoard(); const c0 = camOf(); if (c0) { cam = Object.assign({}, c0); applyCam(); } else fit(); };
 requestAnimationFrame(settle);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!drag) settle(); });
 </script>

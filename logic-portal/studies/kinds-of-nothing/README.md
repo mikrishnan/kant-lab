@@ -54,7 +54,8 @@ answers its second question, whether tools like these help at all.
 | [CLAUDE.md](CLAUDE.md) | Rules for every Claude session working in this folder |
 | [queue.html](queue.html) | The queue: passages from the portal’s search, flagged by the seminar against the table of nothing. See below |
 | [models.html](models.html), [models.js](models.js) | Three models of nothing (1763, c. 1769, 1781) as cards in one format: Kant's words, quoted from the portal's texts, beside fields for the seminar to state and sign. A draft |
-| [board.html](board.html), [board.js](board.js) | The board: a whiteboard that keeps its texts. The three models as frames of cards built from Kant's labels, each card carrying its passages; arrows between parts for the seminar's hypotheses (kept, renamed, split into, …), and problems with what may answer them, each signed. Models move by their frames and spread or gather by a corner grip. It can be drawn on, with a mouse or an Apple Pencil, and works on an iPad. Layers, views, focus and zoom keep it readable; photographs keep how it stood. What anyone changes stays in their browser until exported and added to `board.js`. A draft |
+| [board.html](board.html), [board.js](board.js) | The board: a whiteboard that keeps its texts. The three models as frames of cards built from Kant's labels, each card carrying its passages; arrows between parts for the seminar's hypotheses (kept, renamed, split into, …), and problems with what may answer them, each signed. Models move by their frames and spread or gather by a corner grip. It can be drawn on, with a mouse or an Apple Pencil, and works on an iPad. Layers, views, focus and zoom keep it readable; photographs keep how it stood. One board for the whole seminar, opened with a password: see *The board* below. `board.js` is the study's starting board, what anyone without the password sees. A draft |
+| [board-shared.js](board-shared.js) | Where the one shared board is kept, a private repository, and the key to it, locked by the board's password |
 | [queue-config.js](queue-config.js) | Where the queue keeps its flags: the organisation and repository on GitHub |
 
 ## Ideas to start from
@@ -77,6 +78,70 @@ negativum*:
 
 5 and 6 need only data the repository already has. The page already does the first
 step of 1: the starting points in date order, each opening in the portal.
+
+## The board
+
+[The board](board.html) is one board, the same for everyone in the seminar. Open it, type
+the password (it is told in the seminar, and written nowhere) and your GitHub username, and
+you are on the board everyone else is on. Each change is saved for everyone a moment after
+you make it, and appears on everyone else's screen within a few seconds; the status beside
+*Export* says *Shared · saved* when it has gone. If two people change the board at once,
+both changes are kept. Where both changed the very same thing, the later save's version
+stands, and the other is still in the board's history.
+
+Every save is kept: the board lives in a private repository of its own,
+`mikrishnan/kant-lab-board`, and each save is a commit there. *Photograph the board* keeps
+a moment for everyone, under a name. Anything else can be brought back from the history by
+asking Claude. Each device keeps its own camera, layers and view, so moving about or
+switching layers changes nobody else's screen. *lock*, beside the status, forgets the key on
+that device. Without the password the page shows the study's starting board, read only.
+
+### Asking for a change to the board, in class
+
+One person drives, on their own laptop, while the rest of the room says what it wants:
+
+1. At [claude.ai/code](https://claude.ai/code), on the **mikrishnan/kant-lab** repository,
+   ask for one thing at a time:
+
+   > In logic-portal/studies/kinds-of-nothing/board.html, [what we want]. Change only files
+   > in that folder, and keep the shared board readable. Push the branch and give me the
+   > preview link.
+
+2. **Open the preview link.** It shows the real shared board, as a *practice copy*:
+   anything tried there is saved nowhere, so the new feature can be tried on today's board
+   without touching it.
+3. When it is right, **ask Claude to open the pull request, and press Squash and merge.**
+   Nobody needs to approve a change under `logic-portal/`. A few minutes later everyone
+   reloads the board (⇧⌘R) and has the feature, with the board as it was.
+
+A small change takes five or ten minutes from asking to everyone's screen. Anything longer
+is better as an issue, for after the session. If a merged change breaks the board, press
+**Revert** on its pull request: the page goes back, and the board itself, in its own
+repository, is untouched.
+
+### Setting it up, and renewing the key (the board's keeper)
+
+The page reaches the board's repository with a fine-grained GitHub token that can touch
+that repository and nothing else, kept in `board-shared.js` locked by the password.
+
+1. On GitHub, a **private** repository `kant-lab-board` (it can be empty).
+2. A fine-grained token: *Settings* → *Developer settings* → *Personal access tokens* →
+   *Fine-grained tokens* → *Generate new token*
+   ([straight there](https://github.com/settings/personal-access-tokens/new)).
+   *Repository access:* **Only select repositories** → `kant-lab-board`.
+   *Permissions* → *Repository permissions* → **Contents: Read and write**. Nothing else.
+3. Open `board.html#setup`, paste the token, type the password twice, and give the day the
+   token expires. The page checks
+   the token, puts the study's starting board in the repository if it is empty, and gives
+   back `board-shared.js` with the key. Put that file in this folder in place of the old one
+   and push it, or give it to Claude to do.
+
+Do the same when the token expires, or to change the password; the board itself is not
+touched. From six weeks before the token expires, the board warns whoever opens it: weekly,
+then daily, then every time. After that day nobody can open the board until a new key is
+made, though nothing on it is lost. Whoever has the password can change the board, and the key is in a public
+repository, so a weak password can be guessed by anyone who tries: the board's history is
+the safety net.
 
 ## The queue
 
