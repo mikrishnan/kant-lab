@@ -194,6 +194,11 @@
   #details .photo { background: #fff; border: 1px solid var(--line-soft); border-radius: 8px; padding: 0.35rem 0.6rem; margin: 0.35rem 0; }
   #details .photo b { color: var(--accent); }
   #details .photo .meta { font-size: 0.8rem; color: var(--faded); }
+  #details .req { background: #fff; border: 1px solid var(--line-soft); border-left: 3px solid #d9a441; border-radius: 6px; padding: 0.3rem 0.55rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  #details .req.done { opacity: 0.6; border-left-color: #5c8a3a; }
+  #details .req.done .rt { text-decoration: line-through; }
+  #details .req .meta { font-size: 0.78rem; color: var(--faded); }
+  #details textarea[data-req] { min-height: 4rem; }
 
   /* a model is moved by any bare part of its frame; its corner grip spreads its cards or gathers them */
   #ink .frame rect.f { pointer-events: auto; cursor: move; }
@@ -306,6 +311,9 @@
   <span class="grp">
     <button type="button" class="btn solid" id="snap" title="Keep the board as it is now, to come back to">Photograph the board</button>
     <button type="button" class="linkish" id="photos">Photographs</button>
+  </span>
+  <span class="grp">
+    <button type="button" class="btn" id="reqs" title="What should the board do differently? Note it here: everyone’s notes are kept together for the end of the session">Ask for a change</button>
   </span>
   <span class="grp"><span id="sync"></span></span>
   <span class="grp">
@@ -544,7 +552,7 @@ function afterSwap() {
 // The file, one card, arrow or view to a line, so that GitHub's history shows each change.
 function boardText(b, by, at) {
   const head = { kind: 'kantlab-board', v: 1, study: 'kinds-of-nothing', savedBy: by || '', savedAt: at || '' };
-  const LISTS = ['models', 'items', 'arrows', 'views', 'photos'];
+  const LISTS = ['models', 'items', 'arrows', 'views', 'photos', 'requests'];
   const list = k => JSON.stringify(k) + ':[\n' + (b[k] || []).map(x => JSON.stringify(x)).join(',\n') + '\n]';
   const rest = Object.keys(b).filter(k => !LISTS.includes(k) && k !== 'removed').map(k => JSON.stringify(k) + ':' + JSON.stringify(b[k]));
   return JSON.stringify(head).slice(0, -1) + ',\n' + LISTS.map(list).join(',\n') + ',\n"removed":' + JSON.stringify(b.removed || []) + (rest.length ? ',\n' + rest.join(',\n') : '') + '}\n';
@@ -554,7 +562,7 @@ function cleanBoard(d) {
   if (!d || typeof d !== 'object' || Array.isArray(d) || !Array.isArray(d.items)) return null;
   const out = {};
   Object.keys(d).forEach(k => { if (!['kind', 'v', 'study', 'savedBy', 'savedAt'].includes(k)) out[k] = d[k]; });
-  ['models', 'items', 'arrows', 'views', 'photos'].forEach(k => { out[k] = Array.isArray(out[k]) ? out[k].filter(x => x && typeof x === 'object' && typeof x.id === 'string') : []; });
+  ['models', 'items', 'arrows', 'views', 'photos', 'requests'].forEach(k => { out[k] = Array.isArray(out[k]) ? out[k].filter(x => x && typeof x === 'object' && typeof x.id === 'string') : []; });
   out.removed = Array.isArray(out.removed) ? out.removed.filter(x => typeof x === 'string') : [];
   out.views.forEach(v => { if (!v.pos || typeof v.pos !== 'object') v.pos = {}; if (!Array.isArray(v.hidden)) v.hidden = []; if (!Array.isArray(v.ink)) v.ink = []; });
   if (!out.views.length) out.views.push({ id: 'v-1', name: 'The board', pos: {}, hidden: [], ink: [] });
@@ -582,7 +590,7 @@ function merge3(base, mine, theirs) {
     return v;
   };
   const out = Object.assign({}, theirs);
-  ['models', 'items', 'arrows', 'photos'].forEach(k => { out[k] = list(base[k], mine[k], theirs[k]); });
+  ['models', 'items', 'arrows', 'photos', 'requests'].forEach(k => { out[k] = list(base[k] || [], mine[k] || [], theirs[k] || []); });
   out.views = list(base.views, mine.views, theirs.views, view3);
   out.removed = [...new Set([...(theirs.removed || []), ...(mine.removed || [])])];
   const have = new Set(out.items.map(i => i.id));
@@ -601,7 +609,7 @@ function summary(b, m) {
     const w = n => n + ' ' + word + (n > 1 ? 's' : '');
     if (add) parts.push('+' + w(add)); if (del) parts.push('−' + w(del)); if (ed) parts.push(w(ed) + ' edited');
   };
-  count('items', 'card'); count('arrows', 'arrow'); count('models', 'model'); count('views', 'view'); count('photos', 'photograph');
+  count('items', 'card'); count('arrows', 'arrow'); count('models', 'model'); count('views', 'view'); count('photos', 'photograph'); count('requests', 'request');
   return parts.join(', ') || 'changes';
 }
 const getToken = () => { try { return localStorage.getItem(TOKEN) || sessionStorage.getItem(TOKEN) || ''; } catch (e) { return ''; } };
@@ -744,7 +752,7 @@ function incoming(theirs, sha, by) {
   if (mine) scheduleSave();
   if (by && by !== me()) toast('@' + by + ' changed the board.');
 }
-function renderAround() { renderTools(); renderLayers(); renderBoard(); if (!form) renderSide(); applyCam(); }
+function renderAround() { renderTools(); renderLayers(); renderBoard(); if (!form) renderSide(); else if (form.kind === 'requests' && $('reqlist')) $('reqlist').innerHTML = reqListHtml(); applyCam(); }
 function afterRemote() {
   if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
   sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : model(id));
@@ -1044,6 +1052,8 @@ function renderTools() {
   $('vsel').innerHTML = B.views.map(v => '<option value="' + esc(v.id) + '"' + (v.id === viewId ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('');
   $('undo').disabled = ro() || !undoStack.length; $('redo').disabled = ro() || !redoStack.length;
   $('photos').textContent = 'Photographs' + (photoList().length ? ' (' + photoList().length + ')' : '');
+  const nr = (curBoard().requests || []).filter(r => !r.done).length;
+  $('reqs').textContent = 'Ask for a change' + (nr ? ' (' + nr + ')' : '');
   renderSync();
   $('stage').classList.toggle('readonly', ro());
   const n = query ? B.items.filter(it => shown(it) && matches(it)).length : null;
@@ -1085,6 +1095,7 @@ function sideIntro() {
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card. Inside a model it is a division; to a problem, <i>answers?</i>; otherwise type its name on the spot: <i>kept, renamed, split into, merged from, dropped, new</i>, or your own. Its claim and passages can be added under <i>Edit</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a part, passage, problem or box.</li>' +
+    '<li><b>Ask for a change</b> (in the tools above): note what the board should do differently. Everyone’s requests are kept together for the end of the session.</li>' +
     '<li><b>A Reflexion by its number</b>: double-click the board, type <i>R 3990</i>, and press Enter. Its words come from the portal, with citation and phase.</li>' +
     '<li><b>Edit in place</b>: double-click any card, arrow or model name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
     '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag out a division; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
@@ -1143,6 +1154,34 @@ function sideModel(m) {
     '<span class="k">Its cards</span>' + (its.length ? its.map(it => '<button type="button" class="rel" data-card="' + esc(it.id) + '">' + esc(cardTitle(it)) + '</button>').join('') : '<p class="empty">None yet. Drop cards into its frame.</p>') +
     (BASE.models.some(b => b.id === m.id) ? '<p class="by"><a href="models.html" target="_blank" rel="noopener">Its card, with Kant’s words for negating ↗</a></p>' : '') +
     (ro() ? '' : '<div class="row"><button type="button" class="btn solid" data-act="editmodel">Rename it</button><button type="button" class="btn" data-act="selmodel">Select its cards</button><button type="button" class="linkish" data-act="delmodel">Delete the model</button></div>');
+}
+/* ── Requests: what the board should do differently, noted by anyone, kept together for the end of the session ── */
+function reqListHtml() {
+  const rs = (curBoard().requests || []).slice().reverse();
+  return rs.length ? rs.map(r => '<div class="req' + (r.done ? ' done' : '') + '"><div class="rt">' + esc(r.text) + '</div><div class="meta">' + (r.by ? '@' + esc(r.by) + ' · ' : '') + esc(fmtDate(r.date)) +
+    (r.done ? ' · done' + (r.doneBy ? ' (@' + esc(r.doneBy) + ')' : '') : '') + '</div><div class="row" style="margin-top:0.15rem">' + (ro() ? '' : '<button type="button" class="linkish" data-reqdone="' + esc(r.id) + '">' + (r.done ? 'not done after all' : 'mark it done') + '</button>' +
+    (!r.by || r.by === me() ? '<button type="button" class="linkish" data-reqdel="' + esc(r.id) + '">delete</button>' : '')) + '</div></div>').join('') : '<p class="empty">None yet.</p>';
+}
+function sideRequests() {
+  return '<h2>Ask for a change</h2><p class="sub">What should the board do differently? Everyone’s requests are kept together, on the shared board, for the end of the session.</p>' +
+    (ro() ? '' : '<textarea data-req placeholder="e.g. let us colour boxes; a way to fold a model away…"></textarea><div class="row"><button type="button" class="btn solid" data-act="addreq">Add it</button><span class="by">⌘Enter adds it too</span></div><p class="warn" data-err></p>') +
+    '<span class="k">Everyone’s requests</span><div id="reqlist">' + reqListHtml() + '</div>' +
+    '<div class="row"><button type="button" class="linkish" data-act="dlreq">Download them as a list</button><button type="button" class="linkish" data-act="cancel">Close</button></div>';
+}
+function addRequest() {
+  const ta = $('details').querySelector('[data-req]'), text = ta ? ta.value.trim() : '';
+  if (!text) { const er = $('details').querySelector('[data-err]'); if (er) er.textContent = 'Say what should change.'; return; }
+  change(() => { B.requests = (B.requests || []).concat([Object.assign({ id: uid('q'), text, date: new Date().toISOString() }, me() ? { by: me() } : {})]); });
+  ta.value = ''; const er = $('details').querySelector('[data-err]'); if (er) er.textContent = '';
+  $('reqlist').innerHTML = reqListHtml(); renderTools();
+  toast('Added. It is kept with everyone’s for the end of the session.');
+}
+function downloadRequests() {
+  const rs = curBoard().requests || [];
+  const md = '# What the board should do differently\n\nThe kinds of nothing, the shared board: requests as of ' + fmtDate(new Date().toISOString()) + '.\n\n' +
+    (rs.length ? rs.map(r => '- [' + (r.done ? 'x' : ' ') + '] ' + r.text.replace(/\n+/g, ' ') + ' (' + (r.by ? '@' + r.by + ', ' : '') + fmtDate(r.date) + ')').join('\n') : '(none yet)') + '\n';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); a.download = 'board-requests-' + today() + '.md';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 function sidePhotos() {
   return '<h2>Photographs</h2><p class="sub">The board as it stood, kept to come back to</p>' +
@@ -1206,7 +1245,7 @@ function sideModelForm() {
 function renderSide() {
   const D = $('details');
   if (form) document.body.classList.remove('sideclosed');
-  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : sideCardForm(); return; }
+  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'requests' ? sideRequests() : sideCardForm(); return; }
   if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
   else if (sel.kind === 'card' && item(sel.ids[0])) D.innerHTML = sideCard(item(sel.ids[0]));
   else if (sel.kind === 'arrow' && arrow(sel.ids[0])) D.innerHTML = sideArrow(arrow(sel.ids[0]));
@@ -1375,7 +1414,7 @@ async function restore() {
   B = live.board; viewId = live.viewId; live = null;
   render();
   if (!(await photograph('Before bringing back “' + (p ? p.name : '') + '”', true)) && !confirm('The board as it is now could not be photographed first. Bring the photograph back anyway?')) return;
-  change(() => { const ph = B.photos; B = clone(keep); if (SHARED_ON) B.photos = ph; });
+  change(() => { const ph = B.photos, rq = B.requests; B = clone(keep); if (SHARED_ON) B.photos = ph; B.requests = rq || []; });
   toast('Brought back. The board as it was is in Photographs.');
   sel = { kind: null, ids: [] }; render();
 }
@@ -1950,6 +1989,8 @@ $('snap').addEventListener('click', () => {
   if (name == null) return;
   photograph(name.trim());
 });
+$('reqs').addEventListener('click', () => { form = { kind: 'requests' }; document.body.classList.remove('sideclosed'); showSide('details'); renderSide(); const t = $('details').querySelector('[data-req]'); if (t) t.focus(); });
+$('details').addEventListener('keydown', e => { if (e.target.matches('[data-req]') && e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); addRequest(); } });
 $('photos').addEventListener('click', () => { form = { kind: 'photos' }; showSide('details'); renderSide(); });
 function setTool(t) {
   tool = t;
@@ -2018,9 +2059,15 @@ $('details').addEventListener('click', e => {
     renderTools(); renderSide(); return;
   }
   const uq = e.target.closest('[data-unq]'); if (uq && form && form.quotes) { form.quotes.splice(+uq.dataset.unq, 1); keepFields(renderSide); return; }
+  const rqd = e.target.closest('[data-reqdone]');
+  if (rqd) { const rid = rqd.dataset.reqdone; change(() => { const r = (B.requests || []).find(x => x.id === rid); if (!r) return; r.done = !r.done; if (r.done && me()) r.doneBy = me(); if (!r.done) delete r.doneBy; }); $('reqlist').innerHTML = reqListHtml(); renderTools(); return; }
+  const rqx = e.target.closest('[data-reqdel]');
+  if (rqx) { const rid = rqx.dataset.reqdel; if (confirm('Delete this request?')) { change(() => { B.requests = (B.requests || []).filter(x => x.id !== rid); }); $('reqlist').innerHTML = reqListHtml(); renderTools(); } return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, id = sel.ids[0];
   if (act === 'cancel') { form = null; renderSide(); return; }
+  if (act === 'addreq') { addRequest(); return; }
+  if (act === 'dlreq') { downloadRequests(); return; }
   if (act === 'savecard') return saveCard(D);
   if (act === 'savearrow') return saveArrow(D);
   if (act === 'savemodel') return saveModel(D);
@@ -2041,7 +2088,7 @@ $('details').addEventListener('click', e => {
     if (!confirm(SHARED_ON ? 'Set the board back to the study’s own, for everyone? This board is photographed first.' : 'Set the board back to the study’s own? This board is photographed first.')) return;
     photograph('Before starting again', true).then(ok => {
       if (!ok && !confirm('The board could not be photographed first. Start again anyway?')) return;
-      change(() => { const ph = B.photos; B = clone(BASE); B.removed = []; if (SHARED_ON) { B = cleanBoard(B); B.photos = ph || []; } });
+      change(() => { const ph = B.photos, rq = B.requests; B = clone(BASE); B.removed = []; if (SHARED_ON) { B = cleanBoard(B); B.photos = ph || []; } B.requests = rq || []; });
       viewId = B.views[0].id; form = null; sel = { kind: null, ids: [] }; render(); fit(); toast('The study’s board. The one before is in Photographs.');
     });
     return;
