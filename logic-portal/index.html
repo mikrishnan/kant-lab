@@ -890,7 +890,7 @@
 
 <div id="loading"><div class="box"><div class="t">The Logic Portal</div><div id="loadmsg">Loading the catalogue…</div><div class="bar"><i id="loadbar"></i></div></div></div>
 
-<script src="catalogue.js?v=2026-11-06a"></script>
+<script src="catalogue.js?v=2026-11-13a"></script>
 <script src="studies/studies.js?v=2026-11-04a"></script>
 <script>
 (() => {
@@ -1052,7 +1052,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&am
 /* Inserted with async = false, the files download side by side but run in the order given. */
 /* Bump this, and the catalogue's ?v= in the page's <script> tag, whenever the portal's files change,
    so that a browser holding yesterday's copies fetches today's. */
-const PORTAL_V = '2026-11-01b';
+const PORTAL_V = '2026-11-13a';
 function loadScript(src) {
   return new Promise(res => {
     const el = document.createElement('script');
@@ -3050,6 +3050,14 @@ function renderConnections(p, T) {
     h += railForPara(place.book, place.paras[0], p);
   } else if (T.shape === 'meier' || T.shape === 'metaphysica') {
     h += railForPara(T.key, p.para, p);
+  } else if (T.shape === 'refl') {
+    // A note with no §: name the handbook it is on, and say why the AA gives it none.
+    const book = textByKey(T.on), e = (T.entries || [])[p.entry] || {};
+    const why = e.front ? 'Kant wrote it on the prefaces or the Synopsis, which come before § 1, so it has no § to be filed under.'
+      : e.blatt ? 'It is on a loose sheet (loses Blatt), not in Kant’s copy of the handbook, and the Academy edition files it under no §.'
+      : e.other ? 'It is in another handbook, ' + e.other + ', not in this one.'
+      : 'The Academy edition files it under no §.';
+    h += sec('place', 'In ' + esc(book ? book.short : T.on), '<span class="muted">no § for this note</span>', null, '<div class="empty">' + esc(why) + ' The passages below share its wording.</div>', '', false);
   } else if (T.shape !== 'passages') {
     h += sec('place', 'In Meier', '<span class="muted">no link for this passage yet</span>', null, '<div class="empty">Neither the text nor the concordance places this passage.</div>', '', false);
   }
