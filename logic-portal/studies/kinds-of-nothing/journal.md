@@ -7,6 +7,36 @@ corrects it in their own words.
 Each entry: the date, who asked (GitHub username), what was asked for, what it showed,
 whether it helped, and what it got wrong or could not do.
 
+## 13 November 2026: one board for everyone
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** a quick way to ask for new features on the board, or new ways of
+  representing things, in real time, with someone other than the professor driving and an
+  easy flow of changes. For now, a single board that is the same for everyone, which anyone
+  can change once they have the password, rather than access for some people and not
+  others. Protections against accidental changes can come later.
+- **What there is:**
+  - **One board.** The board is kept in a private repository, `mikrishnan/kant-lab-board`,
+    and opened with the password, which is told in the seminar.
+  - **Saving.** Each change is saved for everyone a moment after it is made and appears on
+    the other screens within a few seconds. Changes made at the same moment are combined.
+    Each save is a commit, so the board's whole history is kept.
+  - **What is shared.** Photographs are kept for everyone. Each device keeps its own camera,
+    layers and view.
+  - **Previews.** A preview of a change opens the real board as a practice copy, which saves
+    nothing.
+  - **In class.** The README says how a driver asks for a change during the session and
+    merges it.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:**
+  - nothing stops an accidental change except undo, photographs and the history;
+  - the password guards a key that sits in a public repository, so it keeps out the casual,
+    not the determined;
+  - changes made at the very same moment to the very same card keep only the later one on
+    the board.
+
 ## 13 November 2026: the board, by hand
 
 *A draft, to be corrected by mikrishnan in their own words.*
