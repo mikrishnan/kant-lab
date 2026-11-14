@@ -482,6 +482,37 @@ function add(i, excerpt, fromEn) {
   ]);
 }
 
+// Sent to a chosen place, from the ▾ beside "+ Handout": the end of a section, a new heading at the
+// handout's end, or the end of the handout. A passage already in the handout, at its top level, moves there.
+function addTo(i, target) {
+  const h = cur();
+  let sec = null, made = null;
+  if (target.newHeading != null) { made = { id: uid(), kind: 'heading', text: target.newHeading }; h.items.push(made); sec = made; }
+  else if (target.section) sec = h.items.find(x => x.kind === 'heading' && x.id === target.section) || null;
+  const where = sec ? '“' + sectionName(sec) + '”' + (made ? ', a new heading' : '') : 'the end of “' + h.name + '”';
+  const dropMade = () => { if (made && sectionEnd(h, h.items.indexOf(made)) === h.items.indexOf(made) + 1) h.items.splice(h.items.indexOf(made), 1); };
+  const there = h.items.find(x => x.kind === 'passage' && refsOf(x).includes(refOf(i)));
+  if (there) {
+    const from = h.items.indexOf(there);
+    h.items.splice(from, 1);
+    h.items.splice(sec ? sectionEnd(h, h.items.indexOf(sec)) : h.items.length, 0, there);
+    save();
+    if (!page.hidden) render();
+    toast('Moved to ' + where + '.', [['Undo', () => { const k = h.items.indexOf(there); if (k >= 0) { h.items.splice(k, 1); h.items.splice(Math.min(from, h.items.length), 0, there); dropMade(); save(); if (!page.hidden) render(); } }]]);
+    return;
+  }
+  if (has(i)) { if (made) h.items.splice(h.items.indexOf(made), 1); toast('It is under a note in “' + h.name + '”. Move it in the handout itself.', [['Open it', () => openPage()]]); return; }
+  const it = itemFor(i, false, false);
+  h.items.splice(sec ? sectionEnd(h, h.items.indexOf(sec)) : h.items.length, 0, it);
+  save();
+  if (!it.en) fillSoon();
+  if (!page.hidden) { render(); const card = page.querySelector('.hcard[data-id="' + it.id + '"]'); if (card) card.scrollIntoView({ block: 'nearest' }); }
+  toast('Added to ' + where + '.', [
+    ['Undo', () => { const k = h.items.indexOf(it); if (k >= 0) { h.items.splice(k, 1); dropMade(); save(); if (!page.hidden) render(); } }],
+    ['Label it', () => openPage(it.id)],
+  ]);
+}
+
 /* ── Styles ──────────────────────────────────────────────────────────────── */
 const css = el('style');
 css.textContent = `
@@ -501,6 +532,15 @@ css.textContent = `
   .hfloat { position: fixed; z-index: 45; border: 1px solid var(--accent-light); background: var(--card); color: var(--accent); border-radius: 999px; padding: 0.08rem 0.65rem; font-size: 0.8rem; cursor: pointer; box-shadow: 0 1px 5px rgba(60, 40, 20, 0.15); }
   .hfloat:hover { background: var(--accent); color: var(--parchment); }
   .hfloat.in { border-color: var(--line); color: var(--faded); }
+  .hfloat.hmore { padding: 0.08rem 0.45rem; }
+  .pmeta .hrail.hrailmore, .pactions .hrail.hrailmore { margin-left: 0.2rem; padding: 0 0.4rem; }
+  #hfmenu { position: fixed; z-index: 46; background: var(--card); border: 1px solid var(--accent-light); border-radius: 8px; box-shadow: 0 4px 16px rgba(60, 40, 20, 0.2); padding: 0.3rem; min-width: 14rem; max-width: 22rem; max-height: 60vh; overflow-y: auto; font-size: 0.88rem; }
+  #hfmenu .t { color: var(--faded); font-size: 0.78rem; padding: 0.15rem 0.5rem 0.3rem; }
+  #hfmenu button { display: block; width: 100%; text-align: left; background: none; border: 0; border-radius: 5px; padding: 0.25rem 0.5rem; cursor: pointer; color: var(--accent); font: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #hfmenu button:hover, #hfmenu button:focus { background: var(--parchment-dark); outline: none; }
+  #hfmenu button.here { font-weight: 600; }
+  #hfmenu hr { border: 0; border-top: 1px solid var(--line); margin: 0.25rem 0.3rem; }
+  #hfmenu input { width: 100%; box-sizing: border-box; border: 1px solid var(--accent-light); border-radius: 5px; padding: 0.25rem 0.45rem; font: inherit; margin: 0.15rem 0; }
   #hsel { background: var(--accent); color: var(--parchment); border-color: var(--accent); font-size: 0.86rem; padding: 0.2rem 0.8rem; }
   .pactions .hrail.on { color: var(--faded); }
   #htoast { position: fixed; z-index: 60; left: 50%; bottom: 1.4rem; transform: translateX(-50%); background: #3b2a17; color: var(--parchment); border-radius: 6px; padding: 0.5rem 0.9rem; font-size: 0.92rem; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25); display: flex; gap: 0.9rem; align-items: baseline; max-width: 90vw; }
@@ -662,7 +702,7 @@ css.textContent = `
   #hpage .hview.on { background: var(--accent); color: var(--parchment); }
   #hpage .hview.on i { color: var(--parchment-dark); }
   #hpage.hcv .hbar [data-h="open"], #hpage.hcv .hbar .hmodesw { display: none; }
-  body.hclassview #hadd, body.hclassview #hsel, body.hclassview .hrail, body.hclassview #hcoll { display: none !important; }
+  body.hclassview #hadd, body.hclassview #hsel, body.hclassview .hrail, body.hclassview #hcoll, body.hclassview #hmore, body.hclassview #hfmenu { display: none !important; }
   /* The class's handouts, to read: everything that would change them is put away */
   #hpage.hro .hwrap button:not([data-h="go"]):not([data-h="gopart"]):not([data-h="fold"]):not([data-h="foldall"]):not([data-h="foldnotes"]):not([data-h="unfoldall"]),
   #hpage.hro .hwrap select, #hpage.hro .hwrap .hunder, #hpage.hro .hwrap .hcopysel, #hpage.hro .hwrap .grip, #hpage.hro .hwrap .hbtns,
@@ -756,11 +796,59 @@ hb.addEventListener('click', () => {
 hc.addEventListener('click', () => { DB.collect = null; save(); if (!page.hidden) render(); toast('Passages you add now go to the end of the handout, under no note.'); });
 
 const hov = el('button', 'hadd', 'hfloat');   // on the passage under the pointer
+const hmore = el('button', 'hmore', 'hfloat hmore');   // beside it: which heading it goes under
+const hmenu = el('div', 'hfmenu');
 const sb = el('button', 'hsel', 'hfloat');    // under a selection of words
 const tst = el('div', 'htoast');
-[hov, sb].forEach(b => { b.type = 'button'; b.hidden = true; b.addEventListener('mousedown', e => e.preventDefault()); });
+[hov, hmore, sb].forEach(b => { b.type = 'button'; b.hidden = true; b.addEventListener('mousedown', e => e.preventDefault()); });
+hmore.textContent = '▾'; hmore.title = 'Choose the heading it goes under, or start a new one';
+hmenu.hidden = true;
 tst.hidden = true;
-document.body.append(hov, sb, tst);
+document.body.append(hov, hmore, hmenu, sb, tst);
+
+/* The heading menu: the current handout's headings, a new one, or its end. */
+let menuI = null;
+const closeMenu = () => { hmenu.hidden = true; menuI = null; };
+function openMenu(i, anchor) {
+  if (i == null || !P[i] || locked()) return;
+  const h = cur(), inn = has(i), top = h.items.some(x => x.kind === 'passage' && refsOf(x).includes(refOf(i)));
+  const c = collecting(), sec = !c && collectingSection();
+  menuI = i;
+  const heads = h.items.filter(x => x.kind === 'heading');
+  hmenu.innerHTML = '<div class="t">' + (inn ? (top ? 'Move it, in “' : 'It is under a note in “') : 'Add it to “') + esc(clip(h.name, 34)) + '”</div>' +
+    (inn && !top ? '' :
+      heads.map(x => '<button type="button" data-to="' + esc(x.id) + '"' + (sec && sec.id === x.id ? ' class="here"' : '') + '>→ ' + esc(clip(sectionName(x), 40)) + '</button>').join('') +
+      (heads.length ? '<hr>' : '') +
+      '<button type="button" data-to="new">+ Under a new heading…</button>' +
+      '<button type="button" data-to="end">At the end of the handout</button>');
+  if (inn && !top) hmenu.innerHTML += '<button type="button" data-to="open">Open the handout</button>';
+  hmenu.hidden = false;
+  const r = anchor.getBoundingClientRect();
+  hmenu.style.top = Math.min(r.bottom + 4, window.innerHeight - hmenu.offsetHeight - 8) + 'px';
+  hmenu.style.left = Math.max(8, Math.min(r.right - hmenu.offsetWidth, window.innerWidth - hmenu.offsetWidth - 8)) + 'px';
+}
+hmore.addEventListener('click', e => { e.stopPropagation(); if (!hmenu.hidden && menuI === hovI) { closeMenu(); return; } openMenu(hovI, hmore); });
+hmenu.addEventListener('mousedown', e => { if (!e.target.closest('input')) e.preventDefault(); });
+hmenu.addEventListener('click', e => {
+  e.stopPropagation();
+  const b = e.target.closest('button[data-to]'); if (!b || menuI == null) return;
+  const i = menuI, to = b.dataset.to;
+  if (to === 'open') { closeMenu(); openPage(); return; }
+  if (to === 'new') {
+    b.outerHTML = '<input type="text" placeholder="The new heading, then Enter" spellcheck="false">';
+    const inp = hmenu.querySelector('input'); inp.focus();
+    inp.addEventListener('keydown', ev => {
+      ev.stopPropagation();
+      if (ev.key === 'Escape') { closeMenu(); return; }
+      if (ev.key === 'Enter') { ev.preventDefault(); const t = inp.value.trim(); if (!t) return; closeMenu(); addTo(i, { newHeading: t }); }
+    });
+    return;
+  }
+  closeMenu();
+  addTo(i, to === 'end' ? { end: true } : { section: to });
+});
+document.addEventListener('mousedown', e => { if (!hmenu.hidden && !hmenu.contains(e.target) && e.target !== hmore && !e.target.closest('.hrailmore')) closeMenu(); }, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !hmenu.hidden) closeMenu(); });
 
 function toast(msg, acts) {
   tst._acts = acts || [];
@@ -789,7 +877,7 @@ function marks() {
   hc.classList.toggle('on', !!(c || sec));
   if (c) { hc.textContent = 'Under: ' + noteName(c) + ' ✕'; hc.title = 'Passages you add go under this note. Click to stop.'; }
   else if (sec) { hc.textContent = 'Into: ' + clip(sectionName(sec), 30) + ' ✕'; hc.title = 'Passages you add go to the end of this section. Click to stop.'; }
-  document.querySelectorAll('.hrail').forEach(railLabel);
+  document.querySelectorAll('.hrail:not(.hrailmore)').forEach(railLabel);
   if (!hov.hidden && hovEl && hovEl.isConnected) placeHover();
   menuDraw();
 }
@@ -833,11 +921,11 @@ msec.addEventListener('click', e => {
 /* A passage under the pointer, in the search results or in a full text, gets "+ Handout"
    at its top right. */
 let hovEl = null, hovI = null, hideT = 0;
-const hideHover = () => { hov.hidden = true; hovEl = null; hovI = null; };
+const hideHover = () => { hov.hidden = true; hmore.hidden = true; hovEl = null; hovI = null; };
 const overlayOpen = () => !page.hidden && !docked;
 document.addEventListener('mouseover', e => {
   if (!mode || overlayOpen()) return;
-  if (e.target === hov) { clearTimeout(hideT); return; }
+  if (e.target === hov || e.target === hmore || hmenu.contains(e.target)) { clearTimeout(hideT); return; }
   const box = e.target.closest && e.target.closest('.hit[data-open], .fp[data-fp]');
   if (!box) { if (hovEl) { clearTimeout(hideT); hideT = setTimeout(hideHover, 300); } return; }
   clearTimeout(hideT);
@@ -858,12 +946,13 @@ function placeHover() {
   const sc = hovEl.closest('#left, #railbody'), bar = sc && sc.querySelector('.readbar');
   const floor = Math.max(52, sc ? sc.getBoundingClientRect().top + 4 : 0, bar && bar.getBoundingClientRect().bottom > 0 ? bar.getBoundingClientRect().bottom + 4 : 0);
   const top = Math.max(r.top + 4, floor);
-  if (top > r.bottom - 18 || top > window.innerHeight - 24) { hov.hidden = true; return; }
-  hov.hidden = false;
-  hov.style.top = top + 'px';
-  hov.style.left = Math.max(8, r.right - hov.offsetWidth - 8) + 'px';
+  if (top > r.bottom - 18 || top > window.innerHeight - 24) { hov.hidden = true; hmore.hidden = true; return; }
+  hov.hidden = false; hmore.hidden = false;
+  hov.style.top = top + 'px'; hmore.style.top = top + 'px';
+  hmore.style.left = Math.max(8, r.right - hmore.offsetWidth - 8) + 'px';
+  hov.style.left = Math.max(8, r.right - hmore.offsetWidth - hov.offsetWidth - 12) + 'px';
 }
-document.addEventListener('scroll', () => { sb.hidden = true; if (hovEl && hovEl.isConnected) placeHover(); else hideHover(); }, true);
+document.addEventListener('scroll', e => { if (hmenu.contains(e.target)) return; sb.hidden = true; closeMenu(); if (hovEl && hovEl.isConnected) placeHover(); else hideHover(); }, true);
 hov.addEventListener('click', e => {
   e.stopPropagation();
   if (hovI == null) return;
@@ -885,7 +974,9 @@ function railButton() {
   const b = el('button', null, 'btn hrail');
   b.type = 'button';
   b.title = 'Add this passage, with its English';
-  if (pa.classList.contains('pmeta')) pa.appendChild(b); else pa.insertBefore(b, pa.querySelector('a'));
+  const m = el('button', null, 'btn hrail hrailmore');
+  m.type = 'button'; m.textContent = '▾'; m.title = 'Choose the heading it goes under, or start a new one';
+  if (pa.classList.contains('pmeta')) { pa.appendChild(b); pa.appendChild(m); } else { pa.insertBefore(b, pa.querySelector('a')); pa.insertBefore(m, pa.querySelector('a')); }
   railLabel(b);
 }
 ['railbody', 'railhead'].forEach(id => { const x = $(id); if (x) new MutationObserver(railButton).observe(x, { childList: true, subtree: true }); });
@@ -893,6 +984,7 @@ document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('.hrail');
   if (!b || S.sel == null || !P[S.sel]) return;
   e.preventDefault();
+  if (b.classList.contains('hrailmore')) { if (!hmenu.hidden && menuI === S.sel) closeMenu(); else openMenu(S.sel, b); return; }
   if (has(S.sel)) openPage(); else add(S.sel);
 });
 
