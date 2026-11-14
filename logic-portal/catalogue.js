@@ -54,7 +54,14 @@
                                    the two (meta.otherFrom names that text); not in either print
                     aa, aapb       beside B's pages, AA III's own
                     fix            words an OCR text's extractor repaired: [[offset, the OCR's reading]]
-                  meta.query lists pages read uncertainly, which are shown with a query.
+                    par            the § a passage stands in, where the work numbers its §§ and is
+                                   cited by its own pages (the KU): cited "§ 59, A 251"
+                    scan           the page image's number in the viewer meta.scan names
+                    sic, supplied  in the KU, the misprints the DTA corrected ([[offset, the print's
+                                   reading]]) and the letters it supplied ([[offset, length]])
+                    gap            what the transcription left out where the passage stands ('table')
+                  meta.query lists pages read uncertainly, which are shown with a query. A page
+                  label in brackets ([xi], [1]) is a number the print does not show.
    ───────────────────────────────────────────────────────────────────────────── */
 
 const PORTAL_TEXTS = [
@@ -161,8 +168,9 @@ const PORTAL_TEXTS = [
     credit: 'Alex' },
 
   // Kant's published works. Where each text comes from, its licence and how clean it is:
-  // published/README.md. AA I and the A edition are clean texts; AA II and the B edition are
-  // OCR of the old Academy edition, repaired by rule: check quotations against the page image.
+  // published/README.md. AA I, the Critique's A edition and the Critique of Judgment's are clean
+  // texts; AA II and the B edition are OCR of the old Academy edition, repaired by rule: check
+  // quotations against the page image.
   { key: 'aa01', title: 'Kant, Schriften 1747–1756 (AA I)', short: 'AA I', layer: 'published',
     date: '1747–1756', year: 1747, vol: 1, shape: 'passages',
     file: 'published/kant-aa01.js', global: 'KANT_AA01',
@@ -190,6 +198,13 @@ const PORTAL_TEXTS = [
     source: 'The 1787 text as AA III (1904/1911) prints it, OCR of the Internet Archive’s scan, spelling repaired by rule: about 98% of words agree with the Bonner Kant-Korpus. B pages from AA III’s margin, a query where uncertain. Check quotations against the page image',
     accuracy: { ocr: true, words: 98, how: 'Measured on every page against the Bonner Kant-Korpus’s text of AA III, with spelling differences set aside. The OCR’s commonest misreadings were repaired by rule; each repaired word keeps the OCR’s reading in the data. B pages shown with a query are uncertain.' },
     credit: 'mikrishnan (OCR import)' },
+
+  { key: 'ku-a', title: 'Kritik der Urteilskraft, 1st ed. (A, 1790)', short: 'KU A', layer: 'published',
+    date: '1790', year: 1790, cite: 'A', shape: 'passages',
+    file: 'published/kant-ku-a.js', global: 'KANT_KU_A',
+    source: 'The 1790 print (Berlin und Libau: Lagarde und Friederich) as the Deutsches Textarchiv transcribed it (double-keyed), cited by § and A page, with a link to the DTA’s image of each page; not yet by AA V’s pages. CC BY-SA 4.0',
+    accuracy: { label: 'Clean text: typed twice and compared (Deutsches Textarchiv)', how: 'Keyed twice by the Deutsches Textarchiv and the two compared. Proofread here word for word against the print’s page images on four pages (A v, xx, 180 and 400; 762 words): one word differs, a turned letter in the print (uud) that the DTA gives as und. The DTA corrected nine misprints (the print’s reading is kept in the data) and left the table on A lvi untranscribed, which the text marks.' },
+    credit: 'mikrishnan (import of the DTA’s TEI)' },
   // Christian Wolff's German Logic, the school logic Meier and Baumgarten wrote from: read off
   // Munich's scan of the 1754 print by OCR, four readings of each page merged by vote, and not
   // corrected. Cited by the print's own chapter, § and page. See wolff/README.md before quoting.

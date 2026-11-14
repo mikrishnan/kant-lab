@@ -1261,7 +1261,8 @@ const ADAPT = {
   },
   /* Kant's published works (published/) bring their pages along: an AA volume its AA pages,
      the Critique the pages of its own edition (T.cite, 'A' or 'B'), with the other edition's pages
-     beside them where the matching found the same words, and B also AA III's. */
+     beside them where the matching found the same words, and B also AA III's. A work cited by its
+     own pages that numbers its §§ (the Critique of Judgment) puts the § before the page. */
   passages(T, D) {
     const M = D.meta || {}, vol = M.volume || T.vol, ed = T.cite || null;
     const oT = M.otherFrom && PORTAL_TEXTS.find(x => x.key === M.otherFrom), oed = oT ? oT.cite : '';
@@ -1276,6 +1277,7 @@ const ADAPT = {
         const end = x.pgMay || x.pgEnd;
         cite = ed + ' ' + q(x.pg) + (end != null && end !== x.pg ? '–' + q(end) + (x.pgMay && !query.has(String(end)) ? '?' : '') : '');
         if (x.other != null) cite += ' / ' + oed + ' ' + span(x.other, x.otherEnd);
+        if (x.par != null) { cite = '§ ' + x.par + ', ' + cite; T.hasPara = true; }
         pbm = (x.pb || []).map(([o, n]) => [o, ed + ' ' + q(n)]);
         aaEnd = x.aapb && x.aapb.length ? x.aapb[x.aapb.length - 1][1] : x.aa;
       } else if (x.aa == null && x.pg != null) {
@@ -2814,7 +2816,8 @@ function pageAgreement(p) {
   const M = TEXTS[p.t].meta, ag = M && M.agreement;
   return ag && p.aa != null && ag[p.aa] != null ? ag[p.aa] : null;
 }
-/* The scan of the page a passage begins on: archive.org's page/n<leaf>. */
+/* The scan of the page a passage begins on: archive.org's page/n<leaf>, or the passage's own
+   scan number in the viewer meta.scan names (Munich's for Wolff, the DTA's for the KU). */
 function pageImage(p) {
   const sc = (TEXTS[p.t].meta || {}).scan;
   if (sc && sc.item && sc.url && p.scan != null && p.aa == null) return sc.url.replace('{item}', sc.item).replace('{n}', p.scan);
@@ -2826,7 +2829,11 @@ function pageImage(p) {
 function accLine(p, T) {
   const a = T.accuracy;
   if (!a) return '';
-  if (!a.ocr) return '<div class="pacc" title="' + esc(a.how) + '">' + esc(a.label || 'Clean text') + '</div>';
+  if (!a.ocr) {
+    const img = pageImage(p);
+    return '<div class="pacc" title="' + esc(a.how) + '">' + esc(a.label || 'Clean text') +
+      (img ? ' · <a href="' + esc(img) + '" target="_blank" rel="noopener" title="The scan of the page this passage begins on">page image ↗</a>' : '') + '</div>';
+  }
   const pg = pageAgreement(p), img = pageImage(p);
   return '<div class="pacc ocr" title="' + esc(a.how) + '"><b>Machine-read (OCR).</b> About ' + a.words + '% of the words in this text are right' +
     (pg != null ? ', about ' + pg + '% on this page' : '') + '. Check quotations against the ' +
@@ -4386,7 +4393,7 @@ function tocFor(T) {
 function jumpHint(T) {
   if (T.shape === 'meier' || T.shape === 'metaphysica') return 'Go to §, AA page or Refl.';
   if (T.shape === 'refl') return 'Go to Refl. no. or §';
-  if (T.cite) return 'Go to A or B page (A 51, B xvi)';
+  if (T.cite) return T.hasPara ? 'Go to § or page (§ 59, A 254, A xi)' : 'Go to A or B page (A 51, B xvi)';
   if (T.layer === 'tradition') return T.key === 'wolff-dl' ? 'Go to page, or Cap. 5 § 2' : 'Go to § or page';
   return T.key === 'jaesche' ? 'Go to § or AA page' : 'Go to AA page';
 }
@@ -4401,9 +4408,10 @@ function jumpMiss(box, msg) {
 }
 /* ── The Critique's pages: A for 1781, B for 1787, Roman for the front matter (A xvi) ── */
 const ROMAN_LC = { i: 1, v: 5, x: 10, l: 50, c: 100 };
-/* A page label's place in its edition's order: the Roman front matter before page 1. */
+/* A page label's place in its edition's order: the Roman front matter before page 1. A number the
+   print does not show is in brackets ([xi], [1]). */
 function edOrder(lab) {
-  const s = String(lab == null ? '' : lab).replace(/\?$/, '').toLowerCase();
+  const s = String(lab == null ? '' : lab).replace(/\?$/, '').replace(/[[\]]/g, '').toLowerCase();
   if (/^\d+$/.test(s)) return 1000 + +s;
   let n = 0;
   for (let k = 0; k < s.length; k++) { const v = ROMAN_LC[s[k]] || 0, nx = ROMAN_LC[s[k + 1]] || 0; n += v < nx ? -v : v; }
@@ -4429,9 +4437,10 @@ function findOnEdPage(T, ed, page) {
   }
   return null;
 }
-/* "A 51" in the search box: the edition named, at that page. */
+/* "A 51" in the search box: the edition named, at that page (of the Critique of Pure Reason, which
+   the letters name; the KU's A pages are reached from its own jump box). */
 function goAB(c) {
-  const T = TEXTS.find(t => t.cite === c.ed);
+  const T = TEXTS.find(t => t.cite === c.ed && /^krv-/.test(t.key));
   const k = T && findOnEdPage(T, c.ed, c.page);
   if (k == null) return false;
   S.sel = k;
@@ -4442,6 +4451,11 @@ function goAB(c) {
 /* A passage of T named by a § number, a Reflexion number or an AA page. */
 function findInText(T, v) {
   if (T.cite) {
+    if (T.hasPara && /§/.test(v)) {
+      const n = parseInt(String(v).replace(/[^\d]/g, ''), 10);
+      for (let k = T.first; k <= T.last; k++) if (P[k].para === n) return k;
+      return null;
+    }
     const ab = parseAB(/^\s*[AaBb]/.test(v) ? v.replace(/^\s*([ab])/, (x, l) => l.toUpperCase()) : T.cite + ' ' + v);
     return ab ? findOnEdPage(T, ab.ed, ab.page) : null;
   }
@@ -5284,6 +5298,6 @@ boot();
 })();
 </script>
 <script src="handouts/lock.js?v=2026-11-08a"></script>
-<script src="handout-tray.js?v=2026-11-14a"></script>
+<script src="handout-tray.js?v=2026-11-14b"></script>
 </body>
 </html>

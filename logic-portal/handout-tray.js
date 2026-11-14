@@ -225,6 +225,22 @@ function itemFor(i, excerpt, fromEn) {
   return it;
 }
 
+/* A Reflexion's dating, shown with it on the handout and in every export: Adickes' phase as he
+   prints it, and the years his chronology gives it (ca.), just as the portal shows it beside the
+   note. A passage keeps it from when it was added (date); one added before it was shown, or
+   without it, has it read from the portal. Nothing in the handout is changed by showing it. */
+const isRefl = x => /^refl-(?:meta|logik):/.test(String((x && x.ref) || ''));
+function reflDateOf(x) {
+  if (!isRefl(x)) return '';
+  if (x.date && /phase|undated|\d/.test(x.date)) return x.date;
+  const i = PT.BYID ? PT.BYID.get(x.ref) : null;
+  return i != null && P[i] && P[i].dateLabel ? P[i].dateLabel : '';
+}
+function adickesOf(it) {
+  const ds = [...new Set(partsOf(it).filter(isRefl).map(reflDateOf).filter(Boolean))];
+  return ds.length ? 'Adickes: ' + ds.join('; ') : '';
+}
+
 /* ── English mode ────────────────────────────────────────────────────────
    One switch, English, at the top of the Handouts page, in either view: on, every passage shows
    its English, beside it where there is room and beneath it where not, for students who read no
@@ -533,6 +549,7 @@ css.textContent = `
   .hfloat:hover { background: var(--accent); color: var(--parchment); }
   .hfloat.in { border-color: var(--line); color: var(--faded); }
   .hfloat.hmore { padding: 0.08rem 0.45rem; }
+  #hpage .hcite .hdate { color: var(--faded); font-size: 0.86rem; margin-left: 0.45rem; white-space: nowrap; }
   .pmeta .hrail.hrailmore, .pactions .hrail.hrailmore { margin-left: 0.2rem; padding: 0 0.4rem; }
   #hfmenu { position: fixed; z-index: 46; background: var(--card); border: 1px solid var(--accent-light); border-radius: 8px; box-shadow: 0 4px 16px rgba(60, 40, 20, 0.2); padding: 0.3rem; min-width: 14rem; max-width: 22rem; max-height: 60vh; overflow-y: auto; font-size: 0.88rem; }
   #hfmenu .t { color: var(--faded); font-size: 0.78rem; padding: 0.15rem 0.5rem 0.3rem; }
@@ -1406,7 +1423,8 @@ function passCard(it, key, h, parent, len) {
     notes.map(x => '<option value="' + esc(x.id) + '"' + (parent === x ? ' selected' : '') + '>' + esc(noteName(x)) + '</option>').join('') + '</select></label>' : '';
   return '<div class="hcard ' + (parent ? 'child' : 'top') + '" data-key="' + key + '" data-id="' + esc(it.id) + '"><div class="hcite">' + GRIP +
     '<span class="w"><b>' + esc(it.author) + '</b>, <i>' + esc(it.work) + '</i>, ' +
-      (live ? '<button type="button" class="hgo" data-h="go" title="Read it where it stands, in its text">' + esc(it.cite) + '</button>' : esc(it.cite)) + tag + linked + '</span>' +
+      (live ? '<button type="button" class="hgo" data-h="go" title="Read it where it stands, in its text">' + esc(it.cite) + '</button>' : esc(it.cite)) +
+      (adickesOf(it) ? '<span class="hdate" title="Adickes’ dating of the note: his phase as printed, and the years his chronology (AA XIV) gives it">' + esc(adickesOf(it)) + '</span>' : '') + tag + linked + '</span>' +
     '<span class="hbtns">' + moveBtns(i, len) + '</span></div>' +
     '<input class="hlab" data-f="label" value="' + esc(it.label || '') + '" placeholder="Label (optional), e.g. Against X" spellcheck="false">' +
     duoCard(h, it, '<div class="htext" data-mf="text"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text)
@@ -2141,7 +2159,7 @@ function download(blob, name) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
   toast('Saved “' + name + '” to your Downloads folder.');
 }
-const citeLine = it => it.work + ', ' + it.cite + (it.from === 'english' ? '; English: machine translation' : '');
+const citeLine = it => it.work + ', ' + it.cite + (adickesOf(it) ? ' · ' + adickesOf(it) : '') + (it.from === 'english' ? '; English: machine translation' : '');
 
 /* The Handout tool's markup (FORMAT.md in the Handout tool): a title, # headings, a note as
    its paragraphs, and each passage as  > Author: "words" (work, cite), its label in italics
@@ -2191,7 +2209,7 @@ function exportPdf(h) {
   const pass = it => '<div class="item">' + (flat(it.label) ? '<div class="lab">' + esc(it.label) + '</div>' : '') +
     '<div class="q" data-pi="' + (its.push(it) - 1) + '" data-mf="text">' + (it.from === 'english' ? rich(it.text) : esc(it.text)) + '</div>' +
     (enShown(h, it) ? '<div class="en" data-pi="' + (its.length - 1) + '" data-mf="en">' + rich(it.en) + '</div>' : '') +
-    '<div class="c">' + esc(it.author) + ', <i>' + esc(it.work) + '</i>, ' + esc(it.cite) +
+    '<div class="c">' + esc(it.author) + ', <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + (adickesOf(it) ? ' · ' + esc(adickesOf(it)) : '') +
     (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : '') + '</div>' +
     (flat(it.note) ? '<p class="pn">' + esc(it.note) + '</p>' : '') + '</div>';
   box.innerHTML = '<h1>' + esc(h.name) + '</h1>' + h.items.map(it => {
@@ -2250,7 +2268,7 @@ function docxBlob(h) {
     if (it.parts) paras(cutOut(it.text, marksOf(it, 'text'))).forEach(t => B.push(para('Passage', markedRuns(t, false, marksOf(it, 'text')))));   // a joined passage, part by part
     else B.push(para('Passage', markedRuns(cutOut(it.text, marksOf(it, 'text')), it.from === 'english', marksOf(it, 'text'))));
     if (enShown(h, it)) B.push(para('PassageEnglish', markedRuns(cutOut(it.en, marksOf(it, 'en')), true, marksOf(it, 'en'))));
-    B.push(para('Citation', runs(it.author + ', ') + runs(it.work, false, '<w:i/>') + runs(', ' + it.cite +
+    B.push(para('Citation', runs(it.author + ', ') + runs(it.work, false, '<w:i/>') + runs(', ' + it.cite + (adickesOf(it) ? ' · ' + adickesOf(it) : '') +
       (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : ''))));
     paras(it.note).forEach(n => B.push(para('PassageNote', runs(n))));
   };
