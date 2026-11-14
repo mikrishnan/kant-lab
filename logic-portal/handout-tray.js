@@ -181,9 +181,19 @@ const collectingSection = () => { const c = DB.collect; return c && c.h === cur(
 function sectionEnd(h, k) { let e = k + 1; while (e < h.items.length && h.items[e].kind !== 'heading') e++; return e; }
 
 /* ── A passage, as an item ───────────────────────────────────────────────── */
-// Meier and Baumgarten wrote the textbooks; everything else in the portal is Kant's.
-const authorOf = T => T.layer === 'textbook' ? T.title.split(',')[0].trim() : 'Kant';
-const workOf = T => { const w = T.title.replace(/\s*\((?:uncorrected )?OCR\)\s*$/i, ''); return T.layer === 'textbook' ? w.replace(/^[^,]+,\s*/, '') : w; };
+// A title that opens with one name and a comma names its author: "Meier, Auszug …",
+// "Kant, Reflexionen zur Logik …", "Wolff, Vernünfftige Gedancken …". The rest (the lectures,
+// the Critiques, Jäsche's Logik) is Kant's. The work is the title after the name.
+const NAMED = /^([A-ZÄÖÜ][a-zäöüß]+),\s*(.+)$/;
+const authorOf = T => { const m = NAMED.exec(T.title); return m ? m[1] : 'Kant'; };
+const workOf = T => { const w = T.title.replace(/\s*\((?:uncorrected )?OCR\)\s*$/i, ''), m = NAMED.exec(w); return m ? m[2] : w; };
+// A passage added before kept its work as the whole title ("Kant, Reflexionen …", shown as
+// "Kant, Kant, Reflexionen …"), and a passage of Wolff's kept Kant as its author. Shown, the name
+// comes once and from the title; nothing kept in the handout is changed.
+function byline(it) {
+  const m = NAMED.exec(String(it.work || ''));
+  return m && (m[1] === it.author || it.author === 'Kant') ? { author: m[1], work: m[2] } : { author: it.author, work: it.work };
+}
 // Kant's published works: a passage of an AA volume names its own work (Nova dilucidatio, not
 // the volume), and the Critique is the Critique, its citation saying which edition (A 51 / B 75).
 const workOfPassage = (p, T) => {
@@ -1347,7 +1357,7 @@ function pickHtml(n, h) {
   });
   if (!rows.length) return '<div class="hpick">Every passage in this handout is already under this note. Add more in the portal. <div class="acts"><button type="button" class="linkish" data-h="pickclose">Close</button></div></div>';
   return '<div class="hpick"><b>Which passages go under this note?</b>' + rows.map(([key, x, where]) =>
-    '<label><input type="checkbox" data-pk="' + key + '"> <b>' + esc(x.author) + '</b>, ' + esc(x.cite) + (flat(x.label) ? ' · <i>' + esc(x.label) + '</i>' : '') +
+    '<label><input type="checkbox" data-pk="' + key + '"> <b>' + esc(byline(x).author) + '</b>, ' + esc(x.cite) + (flat(x.label) ? ' · <i>' + esc(x.label) + '</i>' : '') +
     ' <span>' + esc(clip(flat(x.text), 70)) + (where ? ' · ' + esc(where) : '') + '</span></label>').join('') +
     '<div class="acts"><button type="button" class="btn solid" data-h="pickgo">Put them under this note</button><button type="button" class="linkish" data-h="pickclose">Cancel</button></div></div>';
 }
@@ -1422,7 +1432,7 @@ function passCard(it, key, h, parent, len) {
   const under = notes.length ? '<label class="hunder">Under <select data-f="under"><option value="">no note</option>' +
     notes.map(x => '<option value="' + esc(x.id) + '"' + (parent === x ? ' selected' : '') + '>' + esc(noteName(x)) + '</option>').join('') + '</select></label>' : '';
   return '<div class="hcard ' + (parent ? 'child' : 'top') + '" data-key="' + key + '" data-id="' + esc(it.id) + '"><div class="hcite">' + GRIP +
-    '<span class="w"><b>' + esc(it.author) + '</b>, <i>' + esc(it.work) + '</i>, ' +
+    '<span class="w"><b>' + esc(byline(it).author) + '</b>, <i>' + esc(byline(it).work) + '</i>, ' +
       (live ? '<button type="button" class="hgo" data-h="go" title="Read it where it stands, in its text">' + esc(it.cite) + '</button>' : esc(it.cite)) +
       (adickesOf(it) ? '<span class="hdate" title="Adickes’ dating of the note: his phase as printed, and the years his chronology (AA XIV) gives it">' + esc(adickesOf(it)) + '</span>' : '') + tag + linked + '</span>' +
     '<span class="hbtns">' + moveBtns(i, len) + '</span></div>' +
@@ -1449,7 +1459,7 @@ const trashOf = h => h.trash || (h.trash = []);
 function trashLabel(it) {
   if (it.kind === 'heading') return { head: 'Heading', text: flat(it.text) || '(empty)' };
   if (it.kind === 'note') return { head: (flat(it.title) || 'Note') + (kids(it).length ? ' · ' + plural(kids(it).length, 'passage') : ''), text: clip(flat(it.text), 90) || '(empty)' };
-  return { head: it.author + ', ' + it.cite + (it.kind === 'excerpt' ? ' · excerpt' : ''), text: clip(flat(it.text), 90) };
+  return { head: byline(it).author + ', ' + it.cite + (it.kind === 'excerpt' ? ' · excerpt' : ''), text: clip(flat(it.text), 90) };
 }
 function trashHtml(h) {
   const T = trashOf(h);
@@ -2159,7 +2169,7 @@ function download(blob, name) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
   toast('Saved “' + name + '” to your Downloads folder.');
 }
-const citeLine = it => it.work + ', ' + it.cite + (adickesOf(it) ? ' · ' + adickesOf(it) : '') + (it.from === 'english' ? '; English: machine translation' : '');
+const citeLine = it => byline(it).work + ', ' + it.cite + (adickesOf(it) ? ' · ' + adickesOf(it) : '') + (it.from === 'english' ? '; English: machine translation' : '');
 
 /* The Handout tool's markup (FORMAT.md in the Handout tool): a title, # headings, a note as
    its paragraphs, and each passage as  > Author: "words" (work, cite), its label in italics
@@ -2180,7 +2190,7 @@ function toText(h) {
   const pass = (it, ind) => {
     if (L[L.length - 1] !== '') L.push('');
     if (flat(it.label)) L.push(ind + '*' + flat(it.label).replace(/\*/g, '') + '*');
-    L.push(ind + '> ' + it.author + ': "' + underlined(flat(cutOut(it.text, marksOf(it, 'text'))), marksOf(it, 'text')) + '" (' + citeLine(it) + ')');
+    L.push(ind + '> ' + byline(it).author + ': "' + underlined(flat(cutOut(it.text, marksOf(it, 'text'))), marksOf(it, 'text')) + '" (' + citeLine(it) + ')');
     if (enShown(h, it)) L.push(ind + '> "' + underlined(flat(cutOut(it.en, marksOf(it, 'en'))), marksOf(it, 'en')) + '" (English: machine translation' + (it.kind === 'excerpt' && !it.enSnippet ? ', of the whole passage' : it.enApprox ? ', approximate' : '') + ')');
     L.push(ind + '%% ' + SITE + '#p=' + encodeURIComponent(it.ref));
     if (flat(it.note)) L.push('', ind + flat(it.note));
@@ -2209,7 +2219,7 @@ function exportPdf(h) {
   const pass = it => '<div class="item">' + (flat(it.label) ? '<div class="lab">' + esc(it.label) + '</div>' : '') +
     '<div class="q" data-pi="' + (its.push(it) - 1) + '" data-mf="text">' + (it.from === 'english' ? rich(it.text) : esc(it.text)) + '</div>' +
     (enShown(h, it) ? '<div class="en" data-pi="' + (its.length - 1) + '" data-mf="en">' + rich(it.en) + '</div>' : '') +
-    '<div class="c">' + esc(it.author) + ', <i>' + esc(it.work) + '</i>, ' + esc(it.cite) + (adickesOf(it) ? ' · ' + esc(adickesOf(it)) : '') +
+    '<div class="c">' + esc(byline(it).author) + ', <i>' + esc(byline(it).work) + '</i>, ' + esc(it.cite) + (adickesOf(it) ? ' · ' + esc(adickesOf(it)) : '') +
     (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : '') + '</div>' +
     (flat(it.note) ? '<p class="pn">' + esc(it.note) + '</p>' : '') + '</div>';
   box.innerHTML = '<h1>' + esc(h.name) + '</h1>' + h.items.map(it => {
@@ -2268,7 +2278,7 @@ function docxBlob(h) {
     if (it.parts) paras(cutOut(it.text, marksOf(it, 'text'))).forEach(t => B.push(para('Passage', markedRuns(t, false, marksOf(it, 'text')))));   // a joined passage, part by part
     else B.push(para('Passage', markedRuns(cutOut(it.text, marksOf(it, 'text')), it.from === 'english', marksOf(it, 'text'))));
     if (enShown(h, it)) B.push(para('PassageEnglish', markedRuns(cutOut(it.en, marksOf(it, 'en')), true, marksOf(it, 'en'))));
-    B.push(para('Citation', runs(it.author + ', ') + runs(it.work, false, '<w:i/>') + runs(', ' + it.cite + (adickesOf(it) ? ' · ' + adickesOf(it) : '') +
+    B.push(para('Citation', runs(byline(it).author + ', ') + runs(byline(it).work, false, '<w:i/>') + runs(', ' + it.cite + (adickesOf(it) ? ' · ' + adickesOf(it) : '') +
       (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : ''))));
     paras(it.note).forEach(n => B.push(para('PassageNote', runs(n))));
   };
