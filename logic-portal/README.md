@@ -266,6 +266,9 @@ type on the room's screen.
   edition and `B 75` a page of the other. Each passage of the Critique shows its own pages and,
   where the matching found the same words, the other edition's beside them (`A 50–51 = B 74–75`).
   Pages that begin inside a passage are marked in the line, in all of Kant's published works.
+- **Go to a § or page of the Critique of Judgment.** In its jump box, `§ 59` opens the §, and
+  `254`, `A 254` or `xi` the page of the 1790 print. Each passage is cited by its § and page
+  (`§ 59, A 251`) and links to the Deutsches Textarchiv's image of that page.
 - **Go through every result.** A passage opened from a search shows "‹ 3 of 22 ›" at the top
   of the right-hand pane. The arrows, or ← → and J K on the keyboard, open the next or
   previous result in the Passages list's order, and each result opened gets a tick in the list,
@@ -377,7 +380,7 @@ Every connection says where it comes from; the **Contributors** page lists every
 | Dates of the Reflexionen | Adickes' phases, `data/phases-adickes.js` |
 | The tradition behind Meier's §§ | the Meier Reader's `data/tradition-meier.js` |
 | English translations | Jesus's `translations/`, machine-made in two styles |
-| Kant's published works: AA I, AA II, the *Critique* in A and B | [published/](published/README.md): the BBAW's new edition of AA I, the Deutsches Textarchiv's 1781 *Critique*, and OCR of the old Academy edition's AA II and AA III |
+| Kant's published works: AA I, AA II, the *Critique* in A and B, the *Critique of Judgment* in A | [published/](published/README.md): the BBAW's new edition of AA I, the Deutsches Textarchiv's 1781 *Critique* and 1790 *Critique of Judgment*, and OCR of the old Academy edition's AA II and AA III |
 | Four more AA XXIV lectures (Herder, Philippi, Pölitz, Dohna-Wundlacken) | [aa24-ocr/](aa24-ocr/README.md): uncorrected OCR of the Internet Archive's scan of AA XXIV |
 | AA XXIX's 1983 part: Metaphysik Mrongovius, Metaphysik K3, Logik Mrongovius | [aa29-ocr/](aa29-ocr/README.md): uncorrected OCR of the Internet Archive's scan, by the same extractor. AA XXIX's 1980 part is not in the portal (below) |
 | Wolff's German Logic (*Vernünfftige Gedancken von den Kräfften des menschlichen Verstandes*, 1754) | [wolff/](wolff/README.md): uncorrected OCR of Munich's scan of the 1754 print, four readings of each page merged by vote; cited by chapter, § and page of that print |
@@ -390,9 +393,9 @@ else changes. A further transcript of AA XXIV comes out of `scripts/parse_logik.
 right shape already. A published work can use the plain `passages` shape: one passage per
 paragraph, each with its AA page. Passages are cited by AA page, so when a clean digital
 edition arrives its text can replace these transcriptions without breaking the links.
-[published/](published/README.md) has four such texts, and the fields they add (the
+[published/](published/README.md) has five such texts, and the fields they add (the
 work in a volume, Kant's notes, the pages that begin inside a passage, the Critique's A and B
-pages) are listed in the catalogue's header.
+pages, the KU's §§) are listed in the catalogue's header.
 
 ## The pinned files
 
@@ -427,8 +430,9 @@ When that data moves into `data/`, the pins can go.
 
 ## Limits
 
-- Many of its transcriptions are not clean. Of Kant's published works only AA I and the A
-  edition of the *Critique* are; AA II and the B edition are OCR of the old Academy edition,
+- Many of its transcriptions are not clean. Of Kant's published works only AA I, the A
+  edition of the *Critique* and the 1790 *Critique of Judgment* are (the last cited by its own
+  pages, not yet by AA V's); AA II and the B edition are OCR of the old Academy edition,
   about 96% and 98% of words right, and B's pages are uncertain where shown with a query (see
   [published/](published/README.md)). Check quotations from OCR texts against the page image.
 - **Wolff's German Logic** is OCR of the 1754 print, about 99% of the words in the text right and
