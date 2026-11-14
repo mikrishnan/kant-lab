@@ -1,6 +1,6 @@
 # Kant's published works, for the Logic Portal
 
-Four texts the Logic Portal reads beside the logic corpus, each a data file in the portal's
+Five texts the Logic Portal reads beside the logic corpus, each a data file in the portal's
 `passages` shape (see `../portal/catalogue.js`), all made by [build_published.py](build_published.py).
 
 | File | Global | Text | Cited by | Words | Clean? |
@@ -9,6 +9,7 @@ Four texts the Logic Portal reads beside the logic corpus, each a data file in t
 | [kant-aa02-ocr.js](kant-aa02-ocr.js) | `KANT_AA02` | AA II: the seventeen works of 1757–1777 | AA 2:page | 142,000 | **No: OCR**, about 96% of words right |
 | [kant-krv-a.js](kant-krv-a.js) | `KANT_KRV_A` | *Critik der reinen Vernunft*, Riga 1781 | A page (A xvi, A 51) | 176,000 | Yes: double-keyed transcription |
 | [kant-krv-b-ocr.js](kant-krv-b-ocr.js) | `KANT_KRV_B` | *Kritik der reinen Vernunft*, 2nd ed. 1787, as AA III prints it | B page, and AA 3:page | 187,000 | **No: OCR**, about 98% of words right |
+| [kant-ku-a.js](kant-ku-a.js) | `KANT_KU_A` | *Critik der Urtheilskraft*, Berlin und Libau 1790 | § and A page (§ 59, A 251; A xi) | 108,000 | Yes: double-keyed transcription |
 
 Every work in AA I and AA II stays separately identifiable: each passage carries `work` (a key
 such as `nova-dilucidatio` or `falsche-spitzfindigkeit`), and each file's `meta.works` lists the
@@ -40,6 +41,15 @@ compared, from the DTA's core-corpus download of 10 February 2026. **Licence: CC
 (DTA, BBAW); the file is shared under the same licence. The DTA has no transcription of the 1787
 edition.
 
+**The Critique of Judgment, A.** The Deutsches Textarchiv's transcription of the first edition,
+Berlin und Libau: Lagarde und Friederich, 1790 (LVIII, 476 pp.; the copy of the Zentral- und
+Landesbibliothek Berlin, KucRg 685),
+[kant_urtheilskraft_1790](https://www.deutschestextarchiv.de/kant_urtheilskraft_1790), keyed
+twice and compared, from the same core-corpus download as the 1781 *Critique*. **Licence: CC BY-SA
+4.0** (DTA, BBAW); the file is shared under the same licence. The Bonner Kant-Korpus has AA V
+but forbids passing it on (as for AA II), and the BBAW's new edition has not reached it. The
+DTA's core corpus has neither the 1793 nor the 1799 edition.
+
 **The Critique, B.** For the same reasons as AA II, the B edition is the old Academy edition's
 AA III (1904, 2nd printing 1911, public domain), which prints the 1787 text in the AA's spelling
 and gives the B pages in its margin: the Internet Archive's scan
@@ -63,6 +73,14 @@ reading. **Licence: public domain**; the extraction is CC0.
   DTA's own slips found that way are a handful, e.g. *unterwirſt* for *unterwirft*; they are left
   as the DTA has them. That comparison also caught a fault of this extractor (words broken over a
   page turn came out split), now fixed.
+- **The Critique of Judgment, A**: proofread word for word against the DTA's images of the print
+  on four pages, A v, xx, 180 and 400 (762 words). One word differs: on A 180 the print has a
+  turned letter, *uud*, which the DTA gives as *und*; elsewhere it keeps the print's turned
+  letters (*znsammenstimme*, A xx; *Weltursnche*, A 400; *uud* twice) and its misprints
+  (*allgememen*, A v). One slip of the DTA's own was found outside those pages, in the print's
+  list of errata: *eriterisch l. eritisches* for *criterisch l. critisches*; it is left as the DTA
+  has it. The page breaks follow the DTA's, which agree with the print on all four pages, and the
+  link from each passage to its page image was checked (A 251 is the DTA's image 315).
 - **AA II and B**: every page compared with the Bonner Kant-Korpus's text of the same page: 96.3%
   of AA II's words agree, 98.1% of B's. A disagreement is not always the OCR's fault (spelling
   normalisation also differs), so these are lower bounds on how close the text is.
@@ -109,9 +127,35 @@ two texts word for word: 1,016 of A's 1,341 passages and 1,912 of B's 2,482 have
 the extractor's inference, printed in neither edition. Where the editions differ (the prefaces,
 the Deduction, the Paralogisms, Phenomena and Noumena) there is no match, as there should not be.
 
-**Spelling.** A keeps the 1781 print's spelling (*Erkentniß*, *seyn*, *Critik*); B and AA II have
-the old Academy edition's; AA I has the first prints'. The portal's search treats the spellings as
-one word, so a question finds all four.
+**The Critique of Judgment, A**, is a clean text, but these are worth knowing:
+- **It is cited by the 1790 print's pages, not yet by AA V's**, which is how most of the
+  literature cites it. AA V follows the second edition (1793), so its pages cannot simply be
+  counted from these; they could be found by matching this text against an OCR of AA V, as the
+  Critique's A and B pages are matched, and would then be marked as the matching's.
+- **Its §§ are the 1790 print's.** It has §§ 1–53 and 55–91: the *Anmerkung* after § 53, which
+  the second edition (and AA V) numbers § 54, is unnumbered, so `§ 54` finds nothing. Each passage
+  carries the § whose heading it follows (`par`); a bare *Anmerkung* heading keeps the § it stands
+  in, so that *Anmerkung* is cited as § 53. Other headings (the Einleitung's sections, the
+  *Momente*, the *Allgemeine Anmerkungen*) begin no §.
+- **Its pages.** Roman for the Vorrede and Einleitung (A iv–lviii), then 4–476 and the errata
+  (477). A page that prints no number is cited with its number counted, in brackets: the title
+  page and the Vorrede's first page ([i], [iii]), the Einleitung's ([xi]), the contents' ([lvii]),
+  the part title and the first page after it ([1], [3]), and the errata ([477]). Three front-matter
+  pages print an irregular number, cited by its value and kept in `meta.printedAs`: VIV (ix),
+  XXIIII (xxiv), LIIII (liv).
+- **What the DTA changed is kept.** The DTA corrected nine misprints (*Veruunft*, *nnr*,
+  *dnrch* …); the text has the correction and the passage's `sic` the print's reading. It supplied
+  38 letters where the print's are missing or illegible; they are in the text, and the passage's
+  `supplied` marks where (a 39th, a line-end hyphen, went with the rejoined word).
+- **The table on A lvi**, at the end of the Einleitung (the faculties of the mind, the cognitive
+  faculties, their principles a priori and what they apply to), is printed sideways and the DTA
+  did not transcribe it. The passage there
+  says so and links to the page image; it is not transcribed here either.
+- **The title vignette** is not reproduced.
+
+**Spelling.** A keeps the 1781 print's spelling (*Erkentniß*, *seyn*, *Critik*), and the KU the
+1790 print's (*Urtheilskraft*, *Begrif*); B and AA II have the old Academy edition's; AA I has the
+first prints'. The portal's search treats the spellings as one word, so a question finds all five.
 
 **Not in yet.** The new edition's German translations of AA I's Latin works (*Trans* files in the
 dataset), and AA III/IV's own pages for the A text.
@@ -121,14 +165,21 @@ dataset), and AA III/IV's own pages for the A text.
 ```sh
 git clone --depth 1 https://github.com/telota/kant /tmp/telota-kant
 curl -LO https://www.deutschestextarchiv.de/media/download/dta_kernkorpus_1700-1799_2026-02-10.zip
-unzip dta_kernkorpus_1700-1799_2026-02-10.zip '*/kant_rvernunft_1781.TEI-P5.xml'
+unzip dta_kernkorpus_1700-1799_2026-02-10.zip '*/kant_rvernunft_1781.TEI-P5.xml' '*/kant_urtheilskraft_1790.TEI-P5.xml'
 curl -LO https://archive.org/download/gesammelteschrif0002kant/gesammelteschrif0002kant_djvu.xml
 curl -LO https://archive.org/download/gesammelteschrif0003kant/gesammelteschrif0003kant_djvu.xml
 python3 logic-portal/published/build_published.py all /tmp/telota-kant/db \
   dta_kernkorpus_1700-1799_2026-02-10/kant_rvernunft_1781.TEI-P5.xml \
   gesammelteschrif0002kant_djvu.xml gesammelteschrif0003kant_djvu.xml \
   logic-portal/published
+python3 logic-portal/published/build_published.py ku \
+  dta_kernkorpus_1700-1799_2026-02-10/kant_urtheilskraft_1790.TEI-P5.xml logic-portal/published
 ```
+
+The `ku` step builds the Critique of Judgment alone, in a second or two, and prints its own
+report: passages and words, the §§ headed (it should say `not printed: [54]` and nothing else),
+the pages counted and printed irregularly, any break in the page count (there should be none),
+the DTA's corrections and supplied letters, and the gap marked on A lvi.
 
 To refresh the page figures after a change to the OCR texts, run `measure_ocr.py` on a folder of
 saved korpora.org pages (see its docstring) and build again.
@@ -146,3 +197,5 @@ own route for machines. The word list for the OCR repairs is built from the file
   Schröder), or take the BBAW's new edition of each volume when it appears, as AA I is taken now.
   Either text can replace these without breaking links, since passages are cited by page.
 - **Highlighting crucial works** within AA I and AA II: the `work` keys are there for it.
+- **AA V's pages for the Critique of Judgment**, found by matching (above), and the table on
+  A lvi.

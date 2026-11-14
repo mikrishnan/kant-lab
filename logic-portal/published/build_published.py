@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Kant's published works for the Logic Portal: AA I, AA II and the Critique of Pure Reason
-in its two editions, each as a data file in the portal's `passages` shape.
+"""Kant's published works for the Logic Portal: AA I, AA II, the Critique of Pure Reason
+in its two editions and the Critique of the Power of Judgment in its first, each as a data file
+in the portal's `passages` shape.
 
     python3 build_published.py aa01 <telota-kant/db>           kant-aa01.js
     python3 build_published.py aa02 <gesammelteschrif0002kant_djvu.xml>  kant-aa02-ocr.js
     python3 build_published.py krv  <kant_rvernunft_1781.TEI-P5.xml> <kant_rvernunft_1787.TEI-P5.xml>  <out folder>
+    python3 build_published.py ku   <kant_urtheilskraft_1790.TEI-P5.xml>  <out folder>    kant-ku-a.js
 
 Where each source comes from, its licence and how good it is: README.md beside this file.
 
@@ -665,7 +667,9 @@ def finish_print(b):
         out.append(part)
     b2 = Block(b.kind, b.page)
     b2.parts = out
-    return b2.finish()
+    res = b2.finish()
+    b.aas, b.aa_start = b2.aas, b2.aa_start    # the ('aa', …) marks, where an edition sets them
+    return res
 
 
 def krv_a_page(pb):
@@ -689,6 +693,207 @@ def build_krv_a(src, out):
         if not p['pb']:
             del p['pb']
     return e.out
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The Critique of the Power of Judgment, first edition (A, Berlin und Libau 1790): the Deutsches
+# Textarchiv's double-keyed transcription of the print (TEI, DTA-Basisformat, CC BY-SA 4.0)
+# ─────────────────────────────────────────────────────────────────────────────
+
+KU_ITEM = 'kant_urtheilskraft_1790'
+# A heading that is only a remark inside a § ("Anmerkung.", "Anmerkung I."): it opens no line
+# of the contents and keeps the § it stands in.
+KU_REMARK = re.compile(r'^Anmerkung\.?(?:\s+[IVX]+\.)?$')
+FOOTMARK = re.compile(r'\s*[*†]+\)')
+KU_TABLE_NOTE = '[A table stands here in the print, which the Deutsches Textarchiv did not transcribe: see the page image.]'
+
+
+def ku_pages(body):
+    """({facs number: page label}, {label: the print's own form}, [labels counted, not printed]).
+
+    The DTA gives a page's number as the print has it ('IV', '4'), a correction after it in
+    brackets where the print's form is irregular ('XXIIII[XXIV]'), and a number the print does not
+    show in brackets alone ('[XI]'). A page it gives no number, before the first numbered page of
+    a run, is counted back from that page and bracketed too: the title page [i], the part title
+    [1]. Roman numbers are given in lower case, as the 1781 Critique's are (A xvi). The print's
+    irregular forms are cited by their value (VIV, between VIII and X, as ix) and kept in
+    `printed`; a number that breaks the count stops the run."""
+    pbs = [(int(e.get('facs', '#f0').lstrip('#f') or 0), e.get('n')) for e in body.iter(TEI + 'pb')]
+    val = [None] * len(pbs)              # (value, roman?, bracketed?, the print's form or None)
+    for i, (f, n) in enumerate(pbs):
+        if not n:
+            continue
+        m = re.fullmatch(r'(\[)?([0-9IVXLC]+)(\])?(?:\[([0-9IVXLC]+)\])?', n)
+        if not m or bool(m.group(1)) != bool(m.group(3)):
+            raise SystemExit('KU: a page number the extractor cannot read: %r (facs %d)' % (n, f))
+        printed, corr = m.group(2), m.group(4)
+        num = corr or printed
+        rom = not num.isdigit()
+        v = roman_value(num) if rom else int(num)
+        irregular = rom and roman(v) != num.lower()
+        val[i] = (v, rom, bool(m.group(1)), printed if (corr or irregular) else None)
+    labels, printed_as, counted = {}, {}, []
+    for i, (f, n) in enumerate(pbs):
+        if val[i] is None:
+            nxt = next((k for k in range(i + 1, len(pbs)) if val[k] is not None), None)
+            if nxt is None:
+                continue
+            v, rom = val[nxt][0] - (nxt - i), val[nxt][1]
+            if v < 1:
+                continue                 # the binding and flyleaves before the title page
+            lab = '[' + (roman(v) if rom else str(v)) + ']'
+            counted.append(lab)
+        else:
+            v, rom, br, pr = val[i]
+            lab = roman(v) if rom else str(v)
+            if br:
+                lab = '[' + lab + ']'
+            if pr:
+                printed_as[lab] = pr
+        labels[f] = lab
+    return labels, printed_as, counted
+
+
+class KUEdition(DTAEdition):
+    """The 1790 Critique of Judgment, walked as the 1781 Critique is, with three things more.
+    Every heading opens a line of the contents (sec) but a bare remark's. A §'s number, as its
+    heading prints it, goes on each passage (par) up to the next heading that is not a bare
+    remark. And what the DTA did to the print's text stays with the passage: the misprints it
+    corrected, with the print's reading (sic: [[offset, the print's reading]]), and the letters it
+    supplied where the print's are missing or illegible (supplied: [[offset, length]])."""
+
+    def __init__(self, root, labels):
+        super().__init__(root, 'A', lambda pb: labels.get(int(pb.get('facs', '#f0').lstrip('#f') or 0)))
+        self.par = None
+        self.bad_marks, self.rejoined = [], []
+
+    def walk(self, el, block=None, note=None):
+        tag, tgt = local(el.tag), note or block
+        if tag == 'choice' and tgt is not None:
+            sic = el.find(TEI + 'sic')
+            if sic is not None:
+                tgt.parts.append(('aa', ('sic', normalise_print(''.join(sic.itertext())))))
+        if tag == 'table' and not ''.join(el.itertext()).strip():
+            self.flush()
+            self.cur_block = Block('p', self.cur)
+            self.cur_block.text(KU_TABLE_NOTE)
+            self.flush()
+            self.out[-1]['gap'] = 'table'
+            return
+        super().walk(el, block, note)
+
+    def inline(self, el, block, note):
+        if local(el.tag) == 'supplied':
+            block.parts.append(('aa', ('sup', normalise_print(''.join(el.itertext())))))
+        super().inline(el, block, note)
+
+    def emit(self, b):
+        text, start, end, pbs, trailing = finish_print(b)
+        if not text:
+            return
+        if b.kind == 'head':
+            flat = FOOTMARK.sub('', text.replace('\n', ' ')).strip()
+            m = re.match(r'§\.\s*(\d+)\.', flat)
+            if m:
+                self.par = int(m.group(1))
+                self.sec = clean_head(flat, 90)
+            elif not KU_REMARK.match(flat):
+                self.par = None
+                self.sec = clean_head(flat, 90)
+        self.n += 1
+        p = {'id': 'ku-a-' + str(self.n).zfill(4), 'kind': b.kind, 'sec': self.sec or 'Title page'}
+        if self.par is not None:
+            p['par'] = self.par
+        p.update({'pg': start, 'pgEnd': end, 'pb': pbs, 'text': text})
+        marks = list(getattr(b, 'aas', []))
+        if getattr(b, 'aa_start', None) is not None:
+            marks.insert(0, [0, b.aa_start])
+        sic, sup = [], []
+        for o, (what, s) in marks:
+            if what == 'sic':
+                sic.append([o, s])
+            elif text[o:o + len(s)] == s:
+                sup.append([o, len(s)])
+            elif s in ('-', '¬'):
+                self.rejoined.append(p['id'])    # a supplied line-end hyphen, gone with the rejoin
+            else:
+                self.bad_marks.append((p['id'], o, s, text[o:o + len(s) + 5]))
+        if sic:
+            p['sic'] = sic
+        if sup:
+            p['supplied'] = sup
+        self.out.append(p)
+
+
+def build_ku_a(src, outdir):
+    root = ET.parse(src).getroot()
+    body = root.find('.//' + TEI + 'text')
+    labels, printed_as, counted = ku_pages(body)
+    e = KUEdition(root, labels)
+    e.walk(e.body)
+    e.flush()
+    facs_of = {lab: f for f, lab in labels.items()}
+    for p in e.out:
+        if p['pg'] in facs_of:
+            p['scan'] = facs_of[p['pg']]
+        if p['pgEnd'] == p['pg']:
+            del p['pgEnd']
+        if not p['pb']:
+            del p['pb']
+    ps = e.out
+    meta = {'work': 'Critik der Urtheilskraft (1790)', 'edition': 'A', 'cite': 'A',
+            'source': 'Deutsches Textarchiv, ' + KU_ITEM + ' (https://www.deutschestextarchiv.de/' + KU_ITEM + '), from the core corpus download of 2026-02-10; the copy of the Zentral- und Landesbibliothek Berlin, KucRg 685',
+            'licence': 'CC BY-SA 4.0 (Deutsches Textarchiv, BBAW): https://creativecommons.org/licenses/by-sa/4.0/',
+            'scan': {'item': KU_ITEM, 'url': 'https://www.deutschestextarchiv.de/book/view/{item}?p={n}'},
+            'pageNote': 'The pages of the 1790 print. In brackets, a page that prints no number ([xi], [1]), its number counted. printedAs: the print’s own irregular form of a number, cited here by its value',
+            'printedAs': printed_as,
+            'parNote': 'The § numbers as the headings print them. The 1790 print has no § 54: the Anmerkung after § 53, which the second edition numbers § 54, is unnumbered here'}
+    head = """/* The Critique of the Power of Judgment, first edition (A, Berlin und Libau 1790), for the Logic
+   Portal. GENERATED by logic-portal/published/build_published.py from the Deutsches Textarchiv's
+   double-keyed transcription of the print (DTA-Basisformat TEI). Do not edit by hand.
+
+   LICENCE: an adaptation of the DTA's text, shared under the same licence, CC BY-SA 4.0
+   (Deutsches Textarchiv, Berlin-Brandenburgische Akademie der Wissenschaften).
+   https://creativecommons.org/licenses/by-sa/4.0/
+   What changed: long s printed as s, the e over a vowel as the umlaut, ꝛc. as etc.; line-end
+   hyphens rejoined; the DTA's corrections (<corr>) taken for its misprints, the print's reading
+   kept in `sic`; the letters the DTA supplied (<supplied>) taken, and marked in `supplied`;
+   running heads, catchwords and signatures left out; split paragraphs and footnotes joined; the
+   table on A lvi, which the DTA leaves empty, marked (`gap`). Spelling, punctuation and the A
+   pages (pg, pgEnd, pb; Roman for the front matter, a counted number in brackets) are the
+   print's. `par`: the § a passage stands in, from the § headings. `scan`: the DTA's page image. */"""
+    write_js(os.path.join(outdir, 'kant-ku-a.js'), head, 'KANT_KU_A', {'meta': meta, 'passages': ps})
+    # the report
+    words = sum(len(re.findall(r'[^\W\d_]+', p['text'])) for p in ps)
+    kinds = collections.Counter(p['kind'] for p in ps)
+    print('KU A:', len(ps), 'passages,', words, 'words;', dict(kinds))
+    heads = [p for p in ps if p['kind'] == 'head']
+    pars = []
+    for p in heads:
+        m = re.match(r'§\.\s*(\d+)\.', p['text'])
+        if m:
+            pars.append(int(m.group(1)))
+    dup = sorted(n for n, c in collections.Counter(pars).items() if c > 1)
+    missing = sorted(set(range(1, max(pars) + 1)) - set(pars)) if pars else []
+    print('  §§ headed:', len(pars), 'from §', min(pars), 'to §', max(pars), '; out of order:',
+          [b for a, b in zip(pars, pars[1:]) if b <= a] or 'none', '; twice:', dup or 'none', '; not printed:', missing or 'none')
+    print('  contents lines:', len({p['sec'] for p in ps}), '; passages in a §:', sum(1 for p in ps if 'par' in p))
+    print('  pages:', ps[0]['pg'], 'to', ps[-1].get('pgEnd', ps[-1]['pg']), '; numbers counted, not printed:', counted,
+          '; printed irregularly:', printed_as)
+    seq = [lab for f, lab in sorted(labels.items())]
+    breaks = []
+    for a, b in zip(seq, seq[1:]):
+        va, vb = [roman_value(x.strip('[]')) if not x.strip('[]').isdigit() else int(x.strip('[]')) for x in (a, b)]
+        if vb != va + 1 and not (b.strip('[]') == '1'):
+            breaks.append((a, b))
+    print('  page count breaks:', breaks or 'none')
+    print('  misprints corrected by the DTA:', sum(len(p.get('sic', [])) for p in ps),
+          [s for p in ps for o, s in p.get('sic', [])])
+    print('  letters supplied by the DTA:', sum(len(p.get('supplied', [])) for p in ps), 'in', sum(1 for p in ps if 'supplied' in p), 'passages',
+          '; line-end hyphens supplied, gone with the rejoin:', e.rejoined or 'none', '; misplaced:', e.bad_marks or 'none')
+    print('  gaps marked:', [(p['id'], p['pg'], p['gap']) for p in ps if 'gap' in p] or 'none')
+    print('  passages without a scan:', [p['id'] for p in ps if 'scan' not in p] or 'none')
+    return ps
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1555,6 +1760,8 @@ if __name__ == '__main__':
         build_aa01(sys.argv[2], sys.argv[3])
     elif cmd == 'all':
         build_all(*sys.argv[2:7])
+    elif cmd == 'ku':
+        build_ku_a(sys.argv[2], sys.argv[3])
     elif cmd == 'krv-a-test':
         ps = build_krv_a(sys.argv[2], None)
         json.dump(ps, open(sys.argv[3], 'w', encoding='utf-8'), ensure_ascii=False)
