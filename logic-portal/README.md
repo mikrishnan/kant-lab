@@ -192,6 +192,74 @@ beside the textbook § it is on, picked out among the notes there. The code
 is [handout-tray.js](handout-tray.js). It reads the portal only through `window.PORTAL`, and
 keeps everything under one `localStorage` key, `kantlab-handouts-v1`.
 
+## My topics
+
+While you read, you can keep the passages you find under topics of your own: *Nihil
+negativum*, *Real opposition*, whatever your research is following. They are yours alone. Press
+**My topics** in the header: it turns on the ☆ Topic buttons and opens the My topics page.
+The page's **☆ Topic on passages** switch turns the buttons off again, and your topics are kept.
+
+- **Keep a passage.** Point at a passage in the search results, in a full text, in Meier or
+  Baumgarten, or among Kant's notes, and press **☆ Topic**, or press it beside the passage open
+  on the right. Tick one or more of your topics, or type a new one and press Enter. A topic
+  works like a label, not a folder: one passage can stand under several topics at once, as one
+  passage with one note. A kept passage's button says where it is: *★ Real opposition*, *★ 3
+  topics*.
+- **Keep some of its words.** Select a few words of a passage, in the original or in its
+  English, and press **☆ Keep these words**. They are kept with the passage's address.
+- **Read them.** The My topics page lists your topics on the left. Each passage shows its
+  citation, its opening words (**▾ the whole passage** shows all of it) and a note of your own.
+  Click the citation to read it where it stands in the reader. **Also under** shows only the
+  passages under two topics at once, and **Order** puts a topic as you arranged it (↑ ↓), the
+  newest first, or by the date of the text. Each topic has a note of its own, for the question
+  it is following.
+- **Change your mind.** **×** on a topic's label takes the passage off that topic; a passage
+  under no topic is kept, under **Unsorted**. **✕** removes it from My topics, with **Undo**.
+  **Delete this topic**, on a topic, puts its passages under their other topics, or under
+  Unsorted: none of them goes.
+
+**Where they are kept.** In your own browser, on your own computer, under one `localStorage`
+key, `kantlab-topics-v1`, and nowhere else unless you choose. The line at the top of the page
+says how things stand. **Save to file**, in its **⋯** menu, writes them all to one `.json` file,
+to keep or to open in another browser with **Open file**, which merges the file with what is
+there rather than replacing it. Clearing the browser's site data deletes them, and Safari can
+clear a site's data by itself if you go a week of using Safari without opening it: keep a file.
+The line turns red when your last file is three weeks old, or when you have kept ten passages
+and saved no file yet.
+
+**On GitHub too, if you want the same topics on every computer.** **Keep on GitHub…**, in the
+⋯ menu, keeps a copy in one file of your own, `topics/<your GitHub name>.json`, in the
+seminar's private repository `kant-lab-seminar/queues`, which the kinds-of-nothing queue keeps
+its flags in. Everyone in the organisation can open that repository, so the file is locked in
+your browser before it leaves, with a passphrase only you know (PBKDF2-SHA-256, 600,000 rounds,
+then AES-GCM). They can see that your file is there and when it changed, never what is in it.
+Your browser's copy is still the one you work on: each change goes there at once, and to GitHub
+a few seconds later.
+
+1. Accept the invitation to `kant-lab-seminar`, and make a token, as for the queue
+   ([the queue's *Joining, once*](studies/kinds-of-nothing/README.md#joining-once)). If you have
+   joined the queue in this browser, its token serves, and the page offers it.
+2. Open My topics, choose **⋯ → Keep on GitHub…**, give the token, and choose a passphrase, typed
+   twice. Tick **Remember on this computer** only on a computer of your own: it keeps the token,
+   and a key made from the passphrase that can't be copied out of the browser.
+3. On another computer, do the same, with the same passphrase. Its topics and these are merged.
+
+**Nobody can recover a forgotten passphrase**, you included, so keep a file as well. **Change
+passphrase…** locks the file again under a new one; your other computers ask for it the next time
+they sync. **Stop keeping on GitHub here** forgets the token and key on that computer, and leaves
+both copies as they are.
+
+**When two copies meet** (GitHub's and this browser's, or a file you open), they become one. The
+same passage kept in both is one passage, and the later change to it wins. A passage or topic you
+deleted stays deleted, however old the copy that still has it. Two topics of the same name, made
+on two computers, become one, and a note changed in both copies keeps both versions, the second
+marked *— from another copy —*. The page tells you when a merge did one of those last two
+things, and otherwise says nothing.
+
+The code is [topics.js](topics.js). It reads the portal only through `window.PORTAL`, as the
+handout tray does. Where the GitHub copy goes is set at its top (`GH`): to give the topics a
+repository of their own, change `repo` there, and give everyone's token that repository.
+
 ## Studies
 
 [studies/](studies/) holds research sandboxes beside the portal: a page for one question
