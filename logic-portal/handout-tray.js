@@ -1272,17 +1272,7 @@ function render() {
   const es = page.querySelector('.henall');
   if (es) es.checked = showEn;
   page.querySelectorAll('.hview').forEach(b => { const on = (b.dataset.h === 'classview') === classView; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
-  // The class's handouts first, those not this browser's own; then this browser's own, unless it has
-  // nothing of its own and the class has something to read.
-  const cls = classOthers(), ownShown = !cls.length || !isEmpty() || !classView;
-  page.querySelector('aside').innerHTML =
-    (cls.length || /loading|err/.test(classSt.st) ? '<div class="hgrp">Shown to the class</div>' + cls.map(x =>
-      '<button type="button" class="hl cls' + (viewing === x.id ? ' on' : '') + '" data-cpick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
-      '<span class="n">' + plural(countOf(x), 'passage') + ' · to read</span></button>').join('') + classStHtml() + (ownShown ? '<div class="hgrp">In this browser</div>' : '') : '') +
-    (ownShown ? DB.handouts.map(x =>
-      '<button type="button" class="hl' + (!ro && x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
-      '<span class="n">' + plural(countOf(x), 'passage') + (classHas(x.id) ? ' · <span class="hshown">shown to the class</span>' : '') + '</span></button>').join('') : '') +
-    (classView ? (ownShown ? backupHtml() : '') : '<button type="button" class="btn hnew" data-h="new">+ New handout</button>' + classHtml(h) + (ro ? '' : trashHtml(h)) + backupHtml());
+  renderAside();
   const n = h.items.length, over = viewOf(h), heads = h.items.filter(x => x.kind === 'heading');
   page.querySelector('.hwrap').innerHTML =
     '<input class="hname" value="' + esc(h.name) + '" placeholder="Untitled handout" aria-label="Name of this handout" spellcheck="false"' + (lk ? ' readonly' : '') + '>' +
@@ -1314,6 +1304,23 @@ function render() {
   if (classView) page.querySelectorAll('.hwrap [data-mf]').forEach(t => collapseCuts(t, '…'));
   if (!lk && pairCuts(h)) { save(); render(); return; }   // German cuts whose English has not followed yet
   if (enMode(h) && passagesOf(h).some(x => enWanted(h, x) && !x.en)) fillSoon();
+}
+// The column on the left: the class's handouts, this browser's own, the class box, trash and backups.
+// Drawn with the page, and alone when only the class's copy has changed, so that what is being typed
+// on the page keeps its place and its cursor.
+function renderAside() {
+  const h = cur(), ro = viewing != null;
+  // The class's handouts first, those not this browser's own; then this browser's own, unless it has
+  // nothing of its own and the class has something to read.
+  const cls = classOthers(), ownShown = !cls.length || !isEmpty() || !classView;
+  page.querySelector('aside').innerHTML =
+    (cls.length || /loading|err/.test(classSt.st) ? '<div class="hgrp">Shown to the class</div>' + cls.map(x =>
+      '<button type="button" class="hl cls' + (viewing === x.id ? ' on' : '') + '" data-cpick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
+      '<span class="n">' + plural(countOf(x), 'passage') + ' · to read</span></button>').join('') + classStHtml() + (ownShown ? '<div class="hgrp">In this browser</div>' : '') : '') +
+    (ownShown ? DB.handouts.map(x =>
+      '<button type="button" class="hl' + (!ro && x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
+      '<span class="n">' + plural(countOf(x), 'passage') + (classHas(x.id) ? ' · <span class="hshown">shown to the class</span>' : '') + '</span></button>').join('') : '') +
+    (classView ? (ownShown ? backupHtml() : '') : '<button type="button" class="btn hnew" data-h="new">+ New handout</button>' + classHtml(h) + (ro ? '' : trashHtml(h)) + backupHtml());
 }
 // A text box as tall as its text. Measured only once it has a width, or a box drawn in a
 // hidden or squeezed window would come out absurdly tall; drawn again when the window resizes.
@@ -2444,7 +2451,7 @@ async function classLoad() {
   if (!CS || !LOCK || !LOCK.key()) return;
   if (classBusy) return classBusy;
   const first = classSt.st !== 'ok' && classSt.st !== 'none';
-  if (classSt.st === 'idle') { classSt = { st: 'loading', msg: 'Fetching the class’s handouts…' }; if (!page.hidden) render(); }
+  if (classSt.st === 'idle') { classSt = { st: 'loading', msg: 'Fetching the class’s handouts…' }; classRender(); }
   classBusy = (async () => {
     const was = JSON.stringify(CLASSH), wasV = viewing, wasSt = classSt.st, fresh = first && !anonTried;
     if (fresh) anonTried = true;
@@ -2459,9 +2466,19 @@ async function classLoad() {
       if (first && !viewing && isEmpty() && classOthers().length) viewing = classOthers()[0].id;
       if (first) classCatchUp();
     }
-    if (!page.hidden && (first || JSON.stringify(CLASSH) !== was || viewing !== wasV || classSt.st !== wasSt)) { const m = page.querySelector('main'), top = m ? m.scrollTop : 0; render(); if (m) m.scrollTop = top; }
+    if (first || JSON.stringify(CLASSH) !== was || viewing !== wasV || classSt.st !== wasSt) classRender(viewing !== wasV || (viewing && JSON.stringify(cur()) !== JSON.stringify((JSON.parse(was).find(x => x.id === viewing)) || null)));
   })().finally(() => { classBusy = null; });
   return classBusy;
+}
+/* Redrawing for the class's copy. Only the left column changes (its list, and the class box), unless
+   the handout open is one shown to the class and it has changed (whole: the page too). Nothing is
+   redrawn under the reader's fingers: while they type in the handout, the page waits. */
+function classRender(whole) {
+  if (page.hidden) return;
+  const a = document.activeElement, typing = a && page.contains(a) && a.matches('input:not([readonly]):not([type=checkbox]), textarea:not([readonly]), select, [contenteditable="true"]');
+  if (whole && !typing) { const m = page.querySelector('main'), top = m ? m.scrollTop : 0; render(); if (m) m.scrollTop = top; return; }
+  if (a && a.closest && a.closest('aside') && typing) return;   // the key box in the setup: left as it is
+  renderAside();
 }
 // The branch the copy is kept on, made if it is not there: a branch of its own, holding nothing else.
 async function makeBranch(tok) {
@@ -2482,7 +2499,7 @@ async function classWrite(fn, message, ids) {
   if (!tok) { setupOpen = true; pendingWrite = { fn, message, ids: id }; sendSt = { st: '', msg: '', ids: id }; if (!page.hidden) render(); focusKey(); return false; }
   let ok = false;
   classBusy = (async () => {
-    sendSt = { st: 'sending', msg: '', ids: id }; if (!page.hidden) render();
+    sendSt = { st: 'sending', msg: '', ids: id }; classRender();
     let branchMade = false;
     for (let tries = 0; tries < 4; tries++) {
       const f = await classFetch(null);
@@ -2506,7 +2523,7 @@ async function classWrite(fn, message, ids) {
       sendSt = { st: 'err', msg: ghWhy(r), ids: id }; return;
     }
     sendSt = { st: 'err', msg: 'The class’s copy kept changing under this one. Try again.', ids: id };
-  })().finally(() => { classBusy = null; if (!page.hidden) render(); });
+  })().finally(() => { classBusy = null; classRender(); });
   await classBusy;
   return ok;
 }
