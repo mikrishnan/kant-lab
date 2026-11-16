@@ -284,6 +284,14 @@ const PORTAL_LAYERS = [
      map    for a text cut differently from the one the translation was made from: a pinned file
             naming, for each of the portal's passages, the entries that make it up (mapGlobal)
      who    the Contributors entry the portal credits for it
+     styles the styles it has, if not the two machine styles: ['pub'] for a published translation
+     pub    for a published translation: who translated it, when, and its status, as the portal shows it
+
+   A published translation is a translator's own, out of copyright, cut to the portal's passages by
+   matching its paragraphs to the German (Jesus's finder had it already cut at the AA pages); a
+   passage it could not be matched to with confidence has no English. A text with only a published
+   translation shows it whichever style is chosen. The few passages its translator did not translate
+   (title-page lines, contents) have a machine translation, and their note says so.
 
    These are machine translations, each following one published translator's stated method;
    neither translator translated these texts. The portal says so wherever it shows one.
@@ -292,6 +300,7 @@ const PORTAL_TR_STYLES = [
   { key: 'guyer', label: 'Guyer–Wood principles', tag: 'literal; one English word per German term; sentences kept whole' },
   { key: 'kemp', label: 'Kemp Smith principles', tag: 'faithful to the sense; readable English; tangled sentences resolved' },
 ];
+const PORTAL_TR_PUBLISHED = { key: 'pub', label: 'Published translation', tag: 'a translator’s own published translation, out of copyright, cut to these passages' };
 const PORTAL_TRANSLATIONS = [
   { text: 'meier', set: 'meier', key: 'meier:N', file: '../Individuals/Jesus-La-Paz/translations/meier-STYLE.js', who: 'jesus' },
   { text: 'refl-logik', set: 'refl', key: 'refl:N', file: '../Individuals/Jesus-La-Paz/translations/refl-STYLE.js', who: 'jesus' },
@@ -313,4 +322,12 @@ const PORTAL_TRANSLATIONS = [
   { text: 'krv-b', set: 'krv-b', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/krv-b-STYLE.js', who: 'jesus' },
   { text: 'aa01', set: 'aa01', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/aa01-STYLE.js', who: 'jesus' },
   { text: 'aa02', set: 'aa02', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/aa02-STYLE.js', who: 'jesus' },
+  { text: 'gms', set: 'gms', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/gms-STYLE.js', who: 'jesus', styles: ['pub'],
+    pub: 'T. K. Abbott’s translation, Fundamental Principles of the Metaphysic of Morals (1873); public domain' },
+  { text: 'kpv-aa', set: 'kpv-aa', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/kpv-aa-STYLE.js', who: 'jesus', styles: ['pub'],
+    pub: 'T. K. Abbott’s translation, The Critique of Practical Reason (1879); public domain' },
+  { text: 'ku-aa', set: 'ku-aa', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/ku-aa-STYLE.js', who: 'jesus', styles: ['pub'],
+    pub: 'J. H. Bernard’s translation, Kant’s Critique of Judgement (2nd ed. 1914); public domain' },
+  { text: 'ku-a', set: 'ku-a', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/ku-a-STYLE.js', who: 'jesus', styles: ['pub'],
+    pub: 'J. H. Bernard’s translation of the second edition, Kant’s Critique of Judgement (2nd ed. 1914), matched to the 1790 text paragraph by paragraph; public domain' },
 ];

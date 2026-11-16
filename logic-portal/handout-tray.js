@@ -286,8 +286,10 @@ const workOfPassage = (p, T) => {
 };
 const refOf = i => TEXTS[P[i].t].key + ':' + P[i].id;
 const styleKey = () => S.en || S.enStyle || 'guyer';
+// what a passage's English is, as the handout names it: a machine translation, or a translator's published one
+const enKind = it => it.enStyle === 'pub' ? 'published translation, public domain' : 'machine translation';
 function styleLabel(k) {
-  const L = typeof PORTAL_TR_STYLES === 'undefined' ? [] : PORTAL_TR_STYLES;
+  const L = (typeof PORTAL_TR_STYLES === 'undefined' ? [] : PORTAL_TR_STYLES).concat(typeof PORTAL_TR_PUBLISHED === 'undefined' ? [] : [PORTAL_TR_PUBLISHED]);
   const st = L.find(x => x.key === k);
   return st ? st.label : k;
 }
@@ -299,7 +301,7 @@ function englishOf(p) {
   if (st === 'loading') return 'loading';
   if (st !== 'ready') return null;
   const e = PT.trEntry(tr, k, p);
-  return e ? { text: e.text, style: k, part: !!e.part } : null;
+  return e ? { text: e.text, style: PT.trStyleFor ? PT.trStyleFor(tr, k) : k, part: !!e.part } : null;
 }
 function itemFor(i, excerpt, fromEn) {
   const p = P[i], T = TEXTS[p.t], got = englishOf(p), e = got && got !== 'loading' ? got : null;
@@ -1513,7 +1515,7 @@ function pickMove(h, n, keys) {
 function enCard(h, it, lab) {
   if (!enMode(h) || it.from === 'english') return '';
   if (!it.en) return '<div class="hen muted small">' + (enState(it) === 'loading' ? 'English loading…' : 'The portal has no English for this passage.') + '</div>';
-  return '<div class="hen">' + lab + ' <span class="muted small">machine translation, ' + esc(styleLabel(it.enStyle)) + '</span></div>' +
+  return '<div class="hen">' + lab + ' <span class="muted small">' + (it.enStyle === 'pub' ? enKind(it) : 'machine translation, ' + esc(styleLabel(it.enStyle))) + '</span></div>' +
     '<div class="htext en" data-mf="en" lang="en">' + rich(it.en) + '</div>';
 }
 // A passage's words and its English, side by side where the English is shown (one above the
@@ -1602,7 +1604,7 @@ function passCard(it, key, h, parent, len) {
     duoCard(h, it, '<div class="htext" data-mf="text"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text)
       : it.parts ? partsHtml(it, p => '<button type="button" class="hpart" data-h="gopart" data-ref="' + esc(p.ref) + '" title="Read this part where it stands">' + esc(p.cite) + '</button> ')
       : esc(it.text)) + '</div>' +
-    (it.from === 'english' ? '<div class="hfoot muted">Machine translation, ' + esc(styleLabel(it.enStyle)) + '</div>' : ''), enCard(h, it, enLab)) +
+    (it.from === 'english' ? '<div class="hfoot muted">' + (it.enStyle === 'pub' ? 'Published translation, public domain' : 'Machine translation, ' + esc(styleLabel(it.enStyle))) + '</div>' : ''), enCard(h, it, enLab)) +
     '<textarea class="hnote" data-f="note" rows="1" placeholder="A note on this passage (optional)">' + esc(it.note) + '</textarea>' +
     '<div class="hfoot">' + (live ? '<button type="button" class="linkish" data-h="go" title="Its paragraph in the reader, whatever has been changed here">' + (it.parts ? 'Read it where it stands, from the first part ›' : 'Read it where it stands ›') + '</button>'
       : '<span class="muted">This passage is no longer in the portal; its words are kept here.</span>') +
@@ -2640,7 +2642,7 @@ function download(blob, name) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
   toast('Saved “' + name + '” to your Downloads folder.');
 }
-const citeLine = it => byline(it).work + ', ' + it.cite + (datingOf(it) ? ' · ' + datingOf(it) : '') + (it.from === 'english' ? '; English: machine translation' : '');
+const citeLine = it => byline(it).work + ', ' + it.cite + (datingOf(it) ? ' · ' + datingOf(it) : '') + (it.from === 'english' ? '; English: ' + enKind(it) : '');
 
 /* The Handout tool's markup (FORMAT.md in the Handout tool): a title, # headings, a note as
    its paragraphs, and each passage as  > Author: "words" (work, cite), its label in italics
@@ -2662,7 +2664,7 @@ function toText(h) {
     if (L[L.length - 1] !== '') L.push('');
     if (flat(it.label)) L.push(ind + '*' + flat(it.label).replace(/\*/g, '') + '*');
     L.push(ind + '> ' + byline(it).author + ': "' + underlined(flat(cutOut(it.text, marksOf(it, 'text'))), marksOf(it, 'text')) + '" (' + citeLine(it) + ')');
-    if (enShown(h, it)) L.push(ind + '> "' + underlined(flat(cutOut(it.en, marksOf(it, 'en'))), marksOf(it, 'en')) + '" (English: machine translation' + (it.kind === 'excerpt' && !it.enSnippet ? ', of the whole passage' : it.enApprox ? ', approximate' : '') + ')');
+    if (enShown(h, it)) L.push(ind + '> "' + underlined(flat(cutOut(it.en, marksOf(it, 'en'))), marksOf(it, 'en')) + '" (English: ' + enKind(it) + (it.kind === 'excerpt' && !it.enSnippet ? ', of the whole passage' : it.enApprox ? ', approximate' : '') + ')');
     L.push(ind + '%% ' + SITE + '#p=' + encodeURIComponent(it.ref));
     if (flat(it.note)) L.push('', ind + flat(it.note));
   };
@@ -2691,7 +2693,7 @@ function exportPdf(h) {
     '<div class="q" data-pi="' + (its.push(it) - 1) + '" data-mf="text">' + (it.from === 'english' ? rich(it.text) : esc(it.text)) + '</div>' +
     (enShown(h, it) ? '<div class="en" data-pi="' + (its.length - 1) + '" data-mf="en">' + rich(it.en) + '</div>' : '') +
     '<div class="c">' + esc(byline(it).author) + ', <i>' + esc(byline(it).work) + '</i>, ' + esc(it.cite) + (datingOf(it) ? ' · ' + esc(datingOf(it)) : '') +
-    (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : '') + '</div>' +
+    (it.from === 'english' || enShown(h, it) ? ' · English: ' + enKind(it) : '') + '</div>' +
     (flat(it.note) ? '<p class="pn">' + esc(it.note) + '</p>' : '') + '</div>';
   box.innerHTML = '<h1>' + esc(h.name) + '</h1>' + h.items.map(it => {
     if (it.kind === 'heading') return flat(it.text) ? '<h2>' + esc(it.text) + '</h2>' : '';
@@ -2750,7 +2752,7 @@ function docxBlob(h) {
     else B.push(para('Passage', markedRuns(cutOut(it.text, marksOf(it, 'text')), it.from === 'english', marksOf(it, 'text'))));
     if (enShown(h, it)) B.push(para('PassageEnglish', markedRuns(cutOut(it.en, marksOf(it, 'en')), true, marksOf(it, 'en'))));
     B.push(para('Citation', runs(byline(it).author + ', ') + runs(byline(it).work, false, '<w:i/>') + runs(', ' + it.cite + (datingOf(it) ? ' · ' + datingOf(it) : '') +
-      (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : ''))));
+      (it.from === 'english' || enShown(h, it) ? ' · English: ' + enKind(it) : ''))));
     paras(it.note).forEach(n => B.push(para('PassageNote', runs(n))));
   };
   h.items.forEach(it => {
