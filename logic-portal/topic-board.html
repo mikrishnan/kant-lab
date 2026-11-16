@@ -167,7 +167,8 @@
   #passages .pp .pc { font-size: 0.84rem; color: var(--accent); font-weight: 600; }
   #passages .pp .pc span { color: var(--faded); font-weight: 400; }
   #passages .pp .pw { font-style: italic; font-size: 0.9rem; line-height: 1.25; margin: 0.15rem 0 0.3rem; }
-  #passages .pp .row { display: flex; gap: 0.6rem; align-items: center; }
+  #passages .pp .row { display: flex; flex-wrap: wrap; gap: 0.2rem 0.6rem; align-items: center; }
+  #passages .pp .pl { display: block; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--accent); margin: 0.35rem 0 0.1rem; }
   #passages .rel { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line-soft); border-radius: 6px; padding: 0.2rem 0.5rem; margin: 0.2rem 0; cursor: pointer; font-size: 0.88rem; color: var(--accent); }
   #passages .rel:hover { border-color: var(--accent-light); }
   /* finding among them: the box stays at the top as the list scrolls (top: less the padding above it) */
@@ -532,6 +533,7 @@ let mode = null;       // { linkFrom } while choosing where an arrow goes
 let focus = null;      // { id, hops }
 let query = '';
 let ppQuery = '';      // what is being looked for among the topic's passages, under Passages
+let ppOpen = new Set(); // the topic's passages opened under Passages, to be read there in full, by id
 let cam = { x: 40, y: 30, k: 1 };
 let size = {};         // card id → { w, h }, as last drawn
 let side = 'details';
@@ -1678,8 +1680,17 @@ function renderPassages() {
   if (side !== 'passages') return;
   const all = underTopic().length, on = B.items.filter(i => i.kind === 'passage' && i.kx && Array.isArray(i.kx.topics) && i.kx.topics.includes(TID));
   const words = x => { const t = String(x.excerpt || x.words || '').replace(/\s+/g, ' ').trim(); return t.length > 160 ? t.slice(0, 159) + '…' : t; };
+  // A passage waiting can be opened, to be read in full: one longer than its row shows, or kept as some of its words.
+  const whole = x => { const f = fullText(x.ref); return f != null ? f : x.words || ''; };
+  const canOpen = x => !!x.excerpt || String(whole(x)).replace(/\s+/g, ' ').trim().length > 160, isOpen = x => ppOpen.has(x.id) && canOpen(x);
   const q = ppWords(), found = (rows, shown, tag) => rows.map(r => [r, q.length ? ppFind(r.kx || r, shown(r), q, tag) : '']).filter(r => r[1] != null);
-  const fw = found(w, x => [x.cite || x.ref, x.work || '', words(x)], 'div'), fo = found(on, it => [cardTitle(it)], 'span');
+  const fw = found(w, x => [x.cite || x.ref, x.work || ''].concat(isOpen(x) ? [x.excerpt || '', whole(x)] : [words(x)]), 'div'), fo = found(on, it => [cardTitle(it)], 'span');
+  const body = x => {
+    const lang = x.en ? ' lang="en"' : '', pw = s => '<div class="pw"' + lang + '>“' + marked(s, q) + '”</div>';
+    if (!isOpen(x)) return pw(words(x));
+    const f = fullText(x.ref), rest = f != null ? '' : '<span class="pin">The rest comes in once the portal beside the board has its texts in.</span>';
+    return x.excerpt ? '<span class="pl">The words you kept</span>' + pw(x.excerpt) + '<span class="pl">The passage, in full</span>' + (f != null ? pw(f) : rest) : pw(whole(x)) + rest;
+  };
   const P = $('passages'), top = P.scrollTop;
   $('pphead').innerHTML = '<h2>The topic’s passages</h2><p class="sub">' + (topic ? esc(all + (all === 1 ? ' passage' : ' passages') + ' under “' + topic.name + '”') : '') + '</p>';
   $('ppbar').hidden = !topic || !all;
@@ -1687,7 +1698,8 @@ function renderPassages() {
   $('pplist').innerHTML = (!topic ? '' : n ? '<p style="font-size:0.9rem;margin:0 0 0.6rem">Put them on the board one at a time: press <b>+ On the board</b>, or drag one onto the board where you want it.</p>' +
       (q.length && !FW ? '<p class="pin">Until the portal beside the board has its texts in, only each passage’s opening words are looked in.</p>' : '') +
       fw.map(([x, where]) => '<div class="pp" draggable="' + (ro() ? 'false' : 'true') + '" data-pp="' + esc(x.id) + '"><div class="pc">' + marked(x.cite || x.ref, q) + (x.work ? ' <span>· ' + marked(x.work, q) + '</span>' : '') + '</div>' +
-        '<div class="pw"' + (x.en ? ' lang="en"' : '') + '>“' + marked(words(x), q) + '”</div>' + where + '<div class="row">' + (ro() ? '' : '<button type="button" class="btn solid" data-ppadd="' + esc(x.id) + '">+ On the board</button>') +
+        body(x) + where + '<div class="row">' + (ro() ? '' : '<button type="button" class="btn solid" data-ppadd="' + esc(x.id) + '">+ On the board</button>') +
+        (canOpen(x) ? '<button type="button" class="linkish" data-ppopen="' + esc(x.id) + '" aria-expanded="' + isOpen(x) + '">' + (isOpen(x) ? '▴ less' : '▾ read it all here') + '</button>' : '') +
         '<button type="button" class="linkish" data-ppread="' + esc(x.id) + '">read it beside the board</button></div></div>').join('') +
       (q.length && !fw.length ? '<p class="empty">' + (n === 1 ? 'The passage waiting does not have' : 'None of the ' + n + ' waiting has') + ' “' + esc(ppQuery.trim()) + '”.</p>' : '')
       : '<p class="empty">' + (all ? 'All of them are on the board.' : 'None yet. In the portal, press ☆ Topic on a passage and tick “' + esc(topic.name) + '”: it waits here.') + '</p>') +
@@ -2574,6 +2586,15 @@ $('boards').addEventListener('dragend', e => { const p = e.target.closest && e.t
 $('addp').addEventListener('click', () => { document.body.classList.remove('sideclosed'); showSide('passages'); });
 $('passages').addEventListener('click', e => {
   const a = e.target.closest('[data-ppadd]'); if (a) { putPassage(a.dataset.ppadd); return; }
+  const o = e.target.closest('[data-ppopen]');
+  if (o) {   // open a passage to read it in full, or close it again; closed, its row is brought back into view
+    const id = o.dataset.ppopen, P = $('passages');
+    if (ppOpen.has(id)) ppOpen.delete(id); else ppOpen.add(id);
+    renderPassages();
+    const row = [...P.querySelectorAll('.pp')].find(el => el.dataset.pp === id);
+    if (row && !ppOpen.has(id)) { const d = row.getBoundingClientRect().top - P.getBoundingClientRect().top - ($('ppbar').hidden ? 0 : $('ppbar').offsetHeight) - 6; if (d < 0) P.scrollTop += d; }
+    return;
+  }
   const r = e.target.closest('[data-ppread]'); if (r) { const x = itemOf(r.dataset.ppread), h = x && portalHref(x); if (h) read(h); return; }
   const s = e.target.closest('[data-ppshow]'); if (s) { select('card', [s.dataset.ppshow]); showCard(s.dataset.ppshow); }
 });

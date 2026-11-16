@@ -240,7 +240,9 @@ reader's topic rather than the seminar's one board.
 - **You put the passages on it, one at a time.** A new board is empty. The topic's passages
   wait under **Passages**, a tab in the side (or **Passage…** among the tools), in the order you
   arranged them, with a count of those still waiting. Press **+ On the board**, or drag one onto
-  the board where you want it. A passage you put under the topic later, anywhere in the portal,
+  the board where you want it. **▾ read it all here**, on a passage waiting, opens its words in
+  full where it stands in the list (and, for words you kept, the passage they are from); **▴
+  less** closes it again. A passage you put under the topic later, anywhere in the portal,
   the portal beside the board included, joins them there; nothing comes onto the board by
   itself. **Take it off the board**, on a passage's card, sends it back to Passages; it stays
   under the topic.
