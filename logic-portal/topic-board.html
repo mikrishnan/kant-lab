@@ -151,7 +151,7 @@
   /* ── The side: what is selected, and the portal ── */
   #side { width: 400px; flex: none; border-left: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
   #side .tabs { display: flex; border-bottom: 1px solid var(--line-soft); flex: none; }
-  #side .tabs button { flex: 1; border: 0; background: none; padding: 0.4rem; cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.08em; color: var(--faded); border-bottom: 2px solid transparent; }
+  #side .tabs button { flex: 1; border: 0; background: none; padding: 0.45rem 0.15rem; white-space: nowrap; cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.04em; color: var(--faded); border-bottom: 2px solid transparent; }
   #side .tabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
   #details { flex: 1; overflow-y: auto; padding: 0.8rem 1rem 2rem; }
   #reading { flex: 1; display: none; flex-direction: column; min-height: 0; }
@@ -179,8 +179,35 @@
   #passages .pin { display: block; font-size: 0.84rem; line-height: 1.25; color: var(--faded); margin: -0.1rem 0 0.3rem; }
   #passages .pin i { font-style: normal; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--accent); margin-right: 0.3rem; }
   #passages .rel .pin { margin: 0.1rem 0 0; }
+  #boards { flex: 1; overflow-y: auto; padding: 0.8rem 1rem 2rem; display: none; }
+  #boards h2 { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--accent); margin: 0 0 0.15rem; font-weight: 600; letter-spacing: 0.02em; }
+  #boards .sub { color: var(--faded); font-style: italic; margin: 0 0 0.5rem; font-size: 0.92rem; }
+  #boards .k { display: block; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); margin: 0.9rem 0 0.3rem; }
+  #boards .empty { color: var(--faded); font-style: italic; font-size: 0.92rem; }
+  #boards .pp { background: #fff; border: 1px solid var(--line-soft); border-left: 4px solid var(--line); border-radius: 6px; padding: 0.35rem 0.55rem 0.4rem; margin: 0 0 0.45rem; cursor: grab; }
+  #boards .pp:hover { border-color: var(--accent-light); }
+  #boards .pp.dragging { opacity: 0.5; }
+  #boards .pp .pc { font-size: 0.84rem; color: var(--accent); font-weight: 600; }
+  #boards .pp .pc span { color: var(--faded); font-weight: 400; }
+  #boards .pp .pw { font-style: italic; font-size: 0.9rem; line-height: 1.25; margin: 0.15rem 0 0.3rem; }
+  #boards .pp .row { display: flex; gap: 0.6rem; align-items: center; }
+  #boards .rel { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line-soft); border-radius: 6px; padding: 0.2rem 0.5rem; margin: 0.2rem 0; cursor: pointer; font-size: 0.88rem; color: var(--accent); }
+  #boards .rel:hover { border-color: var(--accent-light); }
   #side .tabs button b.n { display: inline-block; min-width: 1.1rem; margin-left: 0.25rem; padding: 0 0.3rem; border-radius: 999px; background: var(--accent); color: var(--parchment); font-family: 'EB Garamond', serif; font-size: 0.75rem; letter-spacing: 0; font-weight: 400; }
   #stage.dropping { outline: 3px dashed var(--accent-light); outline-offset: -6px; }
+  /* a link to another topic's board, or to a card or group on it */
+  .card.k-link { width: 230px; background: #eef3f8; border-color: #a9bed2; border-left-color: #2f5d8a; font-size: 0.86rem; line-height: 1.25; }
+  .card.k-link .lt { display: block; font-family: 'Cinzel', serif; font-size: 0.64rem; letter-spacing: 0.06em; color: #2f5d8a; margin-bottom: 0.1rem; }
+  .card.k-link .ttl { display: block; font-weight: 600; color: var(--accent); font-size: 0.92rem; }
+  .card.k-link .lti { display: block; color: var(--accent); }
+  .card.k-link .lw { font-style: italic; color: #3b3328; margin-top: 0.1rem; }
+  .card.k-link.gone { border-style: dashed; border-left-style: dashed; background: #f3f2ef; opacity: 0.85; }
+  .card .inl, .ftab .inl { position: absolute; top: -0.65rem; left: 0.5rem; background: #2f5d8a; color: #fff; border-radius: 999px; padding: 0 0.45rem; font-size: 0.7rem; font-style: normal; font-family: 'EB Garamond', serif; letter-spacing: 0; }
+  .card .also { display: inline-block; margin-top: 0.25rem; border: 1px dashed #9a8f7a; color: var(--faded); border-radius: 999px; padding: 0 0.45rem; font-size: 0.68rem; font-style: normal; }
+  .card.flash, .ftab.flash { box-shadow: 0 0 0 5px rgba(47, 93, 138, 0.45); transition: box-shadow 0.3s; }
+  #details .lfrom { background: #fff; border: 1px solid #a9bed2; border-left: 3px solid #2f5d8a; border-radius: 6px; padding: 0.3rem 0.55rem; margin: 0.3rem 0; font-size: 0.9rem; }
+  #details .lrow, #boards .lrow { font-size: 0.88rem; margin: 0.15rem 0 0 0.4rem; }
+  #details .alsobox { border: 1px dashed #9a8f7a; border-radius: 6px; padding: 0.3rem 0.55rem; margin: 0.5rem 0; font-size: 0.9rem; }
   #reading.on { display: flex; }
   #reading .bar { display: flex; justify-content: space-between; padding: 0.3rem 0.8rem; font-size: 0.82rem; color: var(--faded); border-bottom: 1px solid var(--parchment-dark); }
   #reading .bar a { color: var(--accent); }
@@ -367,6 +394,7 @@
     <button type="button" class="btn k-problem" data-add="problem" title="A question the topic raises, in your words: draw arrows to it from the passages that may answer it">Question</button>
     <button type="button" class="btn" data-add="model" title="A group: a named frame for cards, which move with it">Group</button>
     <button type="button" class="btn" id="addp" title="The topic’s passages: put them on the board one at a time">Passage…</button>
+    <button type="button" class="btn" id="addl" title="A link to another of your topics, or to a card or group on its board">Link…</button>
   </span>
   <span class="grp"><span class="lbl">View</span>
     <select class="vsel" id="vsel" aria-label="View"></select>
@@ -417,9 +445,10 @@
     <div id="toast" class="float"></div>
   </div>
   <aside id="side">
-    <div class="tabs"><button type="button" id="tdet" class="on">On the board</button><button type="button" id="tpass" title="The topic’s passages, to put on the board one at a time">Passages</button><button type="button" id="tread">Reading</button><button type="button" class="hide" id="tside" title="Put the side away, for more board">»</button></div>
+    <div class="tabs"><button type="button" id="tdet" class="on">On the board</button><button type="button" id="tpass" title="The topic’s passages, to put on the board one at a time">Passages</button><button type="button" id="tbrd" title="Your other topics’ boards: link this one to them">Boards</button><button type="button" id="tread">Reading</button><button type="button" class="hide" id="tside" title="Put the side away, for more board">»</button></div>
     <div id="details"></div>
     <div id="passages"><div id="pphead"></div><div class="ppbar" id="ppbar" hidden><input type="search" id="ppfind" placeholder="Find among them" aria-label="Find among the topic’s passages" autocomplete="off" spellcheck="false"><span id="ppfound"></span></div><div id="pplist"></div></div>
+    <div id="boards"></div>
     <div id="reading"><div class="bar"><span>The Logic Portal</span><a id="full" href="index.html" target="_blank" rel="noopener">open it full size ↗</a></div><iframe id="portal" title="The Logic Portal" src="index.html"></iframe></div>
   </aside>
 </div>
@@ -463,6 +492,7 @@ const LAYERS = [
   { key: 'hypothesis', label: 'Arrows', color: '#5c3d1e' },
   { key: 'problem', label: 'Questions, and what may answer them', color: '#8a3b12', dash: '7 4' },
   { key: 'passage', label: 'Passages', mark: 'sq' },
+  { key: 'link', label: 'Links to other boards', mark: 'sq' },
   { key: 'note', label: 'Notes', mark: 'sq' },
   { key: 'drawing', label: 'Drawing', color: '#b03a2e' },
   { key: 'box', label: 'Boxes', mark: 'sq' },
@@ -547,6 +577,7 @@ function nameOf(id) { const it = item(id); if (!it) return '(gone)'; const m = m
 function cardTitle(it) {
   if (it.kind === 'box') return 'Box' + (it.label ? ': ' + it.label : '');
   if (it.kind === 'passage') return it.label || (it.quotes[0] && it.quotes[0].cite) || it.cite || 'a passage';
+  if (it.kind === 'link') { const L = it.lk || (DB ? linkOf(it) : null), cp = it.copy || {}; return it.label || (L ? (L.whole ? L.topic : L.topic + ': ' + L.title) : cp.title || 'a link'); }
   const t = String(it.text || ''); return (it.kind === 'problem' ? 'Question: ' : 'Note: ') + (t.length > 50 ? t.slice(0, 49) + '…' : t);
 }
 
@@ -634,10 +665,7 @@ function putPassage(mt, at) {
   if (ro()) { toast(roWhy()); return; }
   const x = itemOf(mt); if (!x || !Array.isArray(x.topics) || !x.topics.includes(TID)) return;
   if (B.items.some(i => i.kind === 'passage' && i.mt === mt)) { toast('It is on the board already.'); return; }
-  if (!at) {
-    const c = centre(), near = lastPut && Date.now() - lastPut.t < 120000 && Math.hypot(lastPut.at[0] - c[0], lastPut.at[1] - c[1]) < 600;
-    at = near ? [lastPut.at[0] + 30, lastPut.at[1] + 40] : [c[0] - 45, c[1] - 40];
-  }
+  if (!at) at = nextSpot();
   let id;
   change(() => {
     const card = passageCard(x);
@@ -648,6 +676,130 @@ function putPassage(mt, at) {
   });
   lastPut = { at, t: Date.now() };
   sel = { kind: 'card', ids: [id] }; form = null; render(); showCard(id);
+}
+/* ── Links to other boards ────────────────────────────────────────────────────
+   A link card stands on this board for another topic, or for one card or group on that topic's board:
+   { kind: 'link', to: { t: topic, item: card or group, or null for the whole topic }, copy }. It names its
+   target by ids, in the same store as both boards, and reads what is there now; copy is what it pointed
+   to when it was made, shown only once that has gone. Nothing is put on the other board: what is linked
+   to there carries a mark, and its side lists the links, worked out afresh each time and never saved. */
+const boardOf = t => DB && isObj(DB.boards) ? DB.boards[t] || null : null;
+const topicName = t => { const T = DB && DB.topics.find(x => x && x.id === t); return T ? T.name : ''; };
+const boardAddr = (t, item) => 'topic-board.html#t=' + encodeURIComponent(t) + (item ? '&at=' + encodeURIComponent(item) : '');
+const shortly = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+const cap1 = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+// A card on any of the reader's boards, in a line: what it is, its title, its words.
+function aboutCard(c) {
+  if (!c) return null;
+  if (c.kind === 'passage') { const x = itemOf(c.mt); return { what: 'a passage', title: c.label || (x && x.cite) || c.cite || c.ref || 'a passage', words: x ? (x.excerpt || x.words || '') : '', ref: (x && x.ref) || c.ref, work: x ? x.work || '' : '' }; }
+  if (c.kind === 'note') return { what: 'a note', title: shortly(c.text, 60) || 'a note', words: c.text || '' };
+  if (c.kind === 'problem') return { what: 'a question', title: shortly(c.text, 60) || 'a question', words: c.text || '' };
+  if (c.kind === 'box') return { what: 'a box', title: c.label ? 'Box: ' + c.label : 'a box', words: '' };
+  if (c.kind === 'link') return { what: 'a link', title: c.label || (c.copy && c.copy.title) || 'a link', words: '' };
+  return { what: 'a card', title: c.label || shortly(c.text, 60) || 'a card', words: '' };
+}
+// What a link points to, as it stands now.
+function linkOf(it) {
+  const to = it.to || {}, cp = it.copy || {}, t = DB ? realTopic(DB, to.t || '') : to.t || '';
+  const T = DB && DB.topics.find(x => x && x.id === t);
+  if (!T) return { state: 'topic-gone', t, title: cp.title || cp.topic || 'a topic', topic: cp.topic || '', what: cp.what || '' };
+  const b = boardOf(t);
+  if (!to.item) {
+    const n = DB.items.filter(x => x && Array.isArray(x.topics) && x.topics.includes(t)).length;
+    return { state: 'ok', whole: true, t, T, b, title: T.name, topic: T.name, words: T.note || '', what: 'the whole topic', count: n };
+  }
+  const c = b && (b.items || []).find(i => i && i.id === to.item), g = !c && b && (b.models || []).find(m => m && m.id === to.item);
+  if (!c && !g) return { state: 'item-gone', t, T, b, title: cp.title || 'a card', topic: T.name, what: cp.what || 'a card' };
+  if (g) return { state: 'ok', t, T, b, group: g, title: g.title || 'a group', topic: T.name, words: g.name || '', what: 'a group', color: g.color, cards: (b.items || []).filter(i => i && i.model === g.id) };
+  const m = c.model && (b.models || []).find(x => x && x.id === c.model);
+  return Object.assign({ state: 'ok', t, T, b, card: c, topic: T.name, color: m ? m.color : '' }, aboutCard(c));
+}
+// Every link among the reader's boards that bears on this one: into its cards and groups (by id, '' for
+// the topic as a whole), the topics linking here (from) and linked to from here (to); and, the page's own
+// finding, the other boards the same passage stands on (also).
+let LX = null;
+function linkIndex() {
+  const into = new Map(), from = new Map(), to = new Map(), also = new Map();
+  const add = (m, k, v) => { if (!m.has(k)) m.set(k, []); m.get(k).push(v); };
+  LX = { into, from, to, also };
+  if (!DB || !isObj(DB.boards)) return LX;
+  Object.keys(DB.boards).forEach(k => {
+    const rk = realTopic(DB, k), b = DB.boards[k];
+    if (rk === TID || !DB.topics.some(t => t && t.id === rk) || !b || !Array.isArray(b.items)) return;
+    b.items.forEach(c => {
+      if (!c) return;
+      if (c.kind === 'link' && c.to && realTopic(DB, c.to.t || '') === TID) {
+        const arrows = (b.arrows || []).filter(a => a && (a.from === c.id || a.to === c.id)).map(a => {
+          const o = (b.items || []).find(i => i && i.id === (a.from === c.id ? a.to : a.from));
+          return { type: a.type, out: a.from === c.id, other: o ? o.id : null, title: o ? aboutCard(o).title : '' };
+        });
+        add(into, c.to.item || '', { t: rk, card: c, arrows });
+        if (!from.has(rk)) from.set(rk, []); from.get(rk).push(c);
+      }
+      if (c.kind === 'passage' && c.mt && !(also.get(c.mt) || []).some(x => x.t === rk)) add(also, c.mt, { t: rk, id: c.id });
+    });
+  });
+  B.items.forEach(c => { if (c.kind === 'link' && c.to) { const rt = realTopic(DB, c.to.t || ''); if (rt !== TID) add(to, rt, c); } });
+  return LX;
+}
+const inMark = id => { const n = LX ? (LX.into.get(id) || []).length : 0; return n ? '<span class="inl" title="Linked from ' + n + (n === 1 ? ' card' : ' cards') + ' on other boards of yours: select it to see">↖ ' + n + '</span>' : ''; };
+function alsoChip(it) {
+  const ks = LX && it.mt ? LX.also.get(it.mt) || [] : [];
+  return ks.length ? '<span class="also" title="The same passage stands on the board of ' + esc(ks.map(x => topicName(x.t)).join(', ')) + '. The page found it; it is not a link you made.">also on ' + esc(ks.length === 1 ? topicName(ks[0].t) : ks.length + ' boards') + '</span>' : '';
+}
+// Where the next card put on the board goes: the middle of the view, or a little below the last one put there.
+function nextSpot() {
+  const c = centre(), near = lastPut && Date.now() - lastPut.t < 120000 && Math.hypot(lastPut.at[0] - c[0], lastPut.at[1] - c[1]) < 600;
+  return near ? [lastPut.at[0] + 30, lastPut.at[1] + 40] : [c[0] - 45, c[1] - 40];
+}
+// A link card here, to topic t as a whole, or to item, a card or group on its board.
+function makeLink(t, item, at) {
+  if (ro()) { toast(roWhy()); return; }
+  t = realTopic(DB, t); item = item || null;
+  if (!DB.topics.some(x => x && x.id === t)) { toast('That topic is not in My topics in this browser.'); return; }
+  if (t === TID) { toast(item ? 'That is on this board: draw an arrow to it instead.' : 'That is this board.'); return; }
+  const L = linkOf({ to: { t, item } });
+  if (L.state !== 'ok') { toast('That is no longer on the board of “' + topicName(t) + '”.'); return; }
+  const have = B.items.find(i => i.kind === 'link' && i.to && realTopic(DB, i.to.t || '') === t && (i.to.item || null) === item);
+  if (have) { select('card', [have.id]); showCard(have.id); toast('A link to it is on this board already.'); return; }
+  at = at || nextSpot();
+  let id;
+  change(() => {
+    id = uid('l');
+    B.items.push({ id, kind: 'link', to: { t, item }, copy: { topic: L.topic, title: L.title, what: L.what }, label: '', model: null, quotes: [], date: today() });
+    view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
+    showLayer('link');
+  });
+  lastPut = { at, t: Date.now() };
+  sel = { kind: 'card', ids: [id] }; form = null; render(); showCard(id);
+}
+// A board's address, as "Copy a link to it" gives it, wherever it is pasted.
+function parseBoardAddr(s) {
+  const m = /topic-board\.html#([^\s"'<>]+)/.exec(String(s || '')); if (!m) return null;
+  const u = new URLSearchParams(m[1]), t = u.get('t');
+  return t ? { t, item: u.get('at') || null } : null;
+}
+function copyLink(item) {
+  const url = new URL(boardAddr(TID, item), location.href).href;
+  const ok = () => toast('Copied a link to ' + (item ? 'it' : 'this board') + '. Paste it on another board (⌘V), or into “Relevant to…”.');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, () => prompt('Copy this link:', url)); else prompt('Copy this link:', url);
+}
+function goBoard(t, item) { noteNow(); location.href = new URL(boardAddr(realTopic(DB, t), item || null), location.href).href; }
+function followLink(it) {
+  const L = it.lk || linkOf(it);
+  if (L.state === 'topic-gone') { toast('That topic is no longer in My topics.'); return; }
+  goBoard(L.t, L.state === 'ok' && !L.whole ? it.to.item : null);
+}
+// The board arrived at by an address with &at=: that card or group, in the middle of the view, lit for a moment.
+let arriveAt = new URLSearchParams(location.hash.slice(1)).get('at') || '';
+function arrive() {
+  const id = arriveAt, it = item(id), m = !it && model(id);
+  if (!it && !m) { arriveAt = ''; toast('That is no longer on this board.'); return; }
+  const r = it ? rect(id) : frameOf(m);   // an empty group has no frame to centre on: it is still chosen, and shown in the side
+  if (r) { const s = $('stage').getBoundingClientRect(); cam.x = s.width / 2 - (r.x + r.w / 2) * cam.k; cam.y = s.height / 2 - (r.y + r.h / 2) * cam.k; applyCam(); }
+  sel = it ? { kind: 'card', ids: [id] } : { kind: 'model', ids: [id] }; form = null; showSide('details'); render();
+  const el = [...$('cards').querySelectorAll(it ? '.card' : '.ftab')].find(x => (it ? x.dataset.id : x.dataset.model) === id);
+  if (el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1800); }
 }
 // The portal in the side, once its texts are in: where a passage's words are read from.
 function portalReady() {
@@ -663,6 +815,7 @@ function fullText(ref) {
 // Each passage card's words and standing, worked out afresh and never saved.
 function hydrate() {
   [B].concat(live ? [live.board] : []).forEach(b => (b.items || []).forEach(it => {
+    if (it.kind === 'link') { hide(it, 'lk', linkOf(it)); return; }
     if (it.kind !== 'passage') return;
     if (!Array.isArray(it.quotes) || !it.quotes.length) it.quotes = [{ ref: it.ref, cite: it.cite || '' }];
     const q = it.quotes[0], x = itemOf(it.mt), full = fullText(q.ref || it.ref);
@@ -672,6 +825,7 @@ function hydrate() {
     hide(q, 'kept', x && x.excerpt ? x.excerpt : '');
     hide(it, 'kx', x || null);
   }));
+  linkIndex();
 }
 // What changed in the store since this page last read or wrote it, folded into what is here.
 function fold(d) {
@@ -793,7 +947,7 @@ function takeIn() {
   afterRemote(); renderHead(); renderAround();
 }
 function renderAround() {
-  hydrate(); renderTools(); renderLayers(); renderBoard(); renderPassages();
+  hydrate(); renderTools(); renderLayers(); renderBoard(); renderPassages(); renderBoards();
   if (!form || form.kind === 'annotate') { if (selInSide() || noteFocused()) sideStale = true; else renderSide(); }   // words being selected, or a note being written, in the side are not lost
   else if (form.kind === 'annotations' && $('annlist')) $('annlist').innerHTML = annListAll();
   applyCam();
@@ -851,7 +1005,7 @@ function neighbourhood() {
 }
 function matches(it) {
   if (!query) return true;
-  const hay = [it.label, it.sub, it.text, it.by].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it)).join(' ').toLowerCase();
+  const hay = [it.label, it.sub, it.text, it.by, it.copy && it.copy.title, it.copy && it.copy.topic, it.lk && it.lk.title, it.lk && it.lk.topic].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it)).join(' ').toLowerCase();
   return query.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w));
 }
 
@@ -971,15 +1125,24 @@ function cardHtml(it) {
       '<span class="pc">' + esc((q0 && q0.cite) || it.cite || it.ref || '') + '</span>' +
       (it.off ? '<span class="flag">' + (it.off === 'gone' ? 'no longer in My topics' : 'no longer under this topic') + '</span>' : '') +
       (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it);
+  } else if (it.kind === 'link') {
+    const L = it.lk || linkOf(it), gone = L.state !== 'ok';
+    inner = '<span class="lt">↗ ' + esc(L.topic || 'another topic') + (L.whole ? ' · the whole topic' : L.group ? ' · a group' : '') + '</span>' +
+      (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') +
+      '<span class="lti">' + esc(L.whole ? L.count + (L.count === 1 ? ' passage' : ' passages') : L.title) + '</span>' +
+      (!gone && L.words ? '<div class="lw">' + (L.whole ? '' : '“') + esc(shortly(L.words, L.whole ? 120 : 150)) + (L.whole ? '' : '”') + '</div>' : '') +
+      (gone ? '<span class="flag">' + (L.state === 'topic-gone' ? 'that topic is no longer in My topics' : 'no longer on that board') + '</span>' : '');
   } else {
     inner = '<span class="tag">' + (it.kind === 'problem' ? 'Question' : 'Note') + '</span><span class="txt">' + esc(it.text) + '</span>' + annDots(it);
   }
-  return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+  inner += inMark(it.id) + (it.kind === 'passage' ? alsoChip(it) : '');
+  const lc = it.kind === 'link' && it.lk ? (it.lk.state !== 'ok' ? ' gone' : '') : '';
+  return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + lc + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : it.kind === 'link' && it.lk && it.lk.color ? esc(it.lk.color) : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
 }
 function renderCards() {
   hydrate(); placeUnplaced();
   const vis = B.items.filter(shown).sort((a, b) => (b.kind === 'box') - (a.kind === 'box')), tabs = layerOn('frames') ? B.models.map(m => {
-    return '<div class="ftab" data-model="' + esc(m.id) + '" style="background:' + esc(m.color) + '"><b>' + esc(m.title) + '</b><i>' + esc(m.name || '') + '</i></div>';
+    return '<div class="ftab" data-model="' + esc(m.id) + '" style="background:' + esc(m.color) + '"><b>' + esc(m.title) + '</b><i>' + esc(m.name || '') + '</i>' + inMark(m.id) + '</div>';
   }).join('') : '';
   const grips = layerOn('frames') && !ro() ? B.models.map(m => '<div class="fgrip" data-grip="' + esc(m.id) + '" style="background:' + esc(m.color) + '" title="Drag to spread its cards apart, or to pull them together">⤡</div>').join('') : '';
   $('cards').innerHTML = tabs + grips + vis.map(cardHtml).join('');
@@ -1120,7 +1283,7 @@ function banner() {
   else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
   b.innerHTML = h; b.classList.toggle('show', !!h);
 }
-function render() { hydrate(); renderTools(); renderLayers(); renderBoard(); renderSide(); renderPassages(); applyCam(); }
+function render() { hydrate(); renderTools(); renderLayers(); renderBoard(); renderSide(); renderPassages(); renderBoards(); applyCam(); }
 let toastT;
 function toast(s) { const t = $('toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3800); }
 const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); };
@@ -1141,13 +1304,14 @@ const mchip = m => m ? '<span class="mchip" style="background:' + esc(m.color) +
 function sideIntro() {
   const n = B.items.filter(i => i.kind === 'passage').length, gh = (() => { try { return !!localStorage.getItem(TOPICS_GH); } catch (e) { return false; } })();
   return '<div class="intro"><h2>' + esc(topic ? topic.name : 'A topic’s board') + '</h2><p class="sub">The board of a topic in My topics</p>' +
-    (topic ? '<span class="k">The topic, in your words</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
+    boardsAround() + (topic ? '<span class="k">The topic, in your words</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
     '<p>The topic’s passages wait under <b>Passages</b>, in the side. Put them on the board one at a time, with <b>+ On the board</b> or by dragging one onto it. A passage you put under the topic later, anywhere in the portal, joins them there; one taken off the board goes back. Click a card to read its passage in full, here or in the portal.</p>' +
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
     '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
     '<li><b>Your note</b> on a passage, here in the side, is the note it has in My topics: write it in either.</li>' +
+    '<li><b>Link to another topic</b>: under <b>Boards</b>, in the side, choose one of your topics and link to it as a whole, or to a card or group on its board; or press <i>Copy a link to it</i> on a card there, and paste it here (⌘V). Arrows join a link card like any card. The card linked to carries a mark, <b>↖</b>, and lists the links in its side.</li>' +
     '<li><b>Edit in place</b>: double-click any card, arrow or group name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
     '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag one out; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
     '<li><b>Groups</b> are frames around their cards. Grab any bare part of a frame to move the whole group; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into a frame to put it in that group.</li>' +
@@ -1164,8 +1328,8 @@ function sideIntro() {
 }
 function cardButtons(it, arr) {
   let h = '<span class="k">Arrows</span>' + (arr.length ? arr.map(relBtn).join('') : '<p class="empty">None yet.</p>');
-  if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="edit">' + (it.kind === 'passage' ? 'Give it a heading' : 'Edit') + '</button><button type="button" class="btn" data-act="linkfrom">+ Arrow from here</button><button type="button" class="btn" data-act="focus">Focus</button></div>' +
-    '<div class="row"><button type="button" class="linkish" data-act="offview">Take it off this view</button><button type="button" class="linkish" data-act="delete">' + (it.kind === 'passage' ? 'Take it off the board' : 'Delete it') + '</button></div>';
+  if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="edit">' + (it.kind === 'passage' || it.kind === 'link' ? 'Give it a heading' : 'Edit') + '</button><button type="button" class="btn" data-act="linkfrom">+ Arrow from here</button><button type="button" class="btn" data-act="focus">Focus</button></div>' +
+    '<div class="row"><button type="button" class="linkish" data-act="offview">Take it off this view</button><button type="button" class="linkish" data-act="delete">' + (it.kind === 'passage' ? 'Take it off the board' : 'Delete it') + '</button><button type="button" class="linkish" data-act="copylink">Copy a link to it</button></div>';
   else h += '<div class="row"><button type="button" class="btn" data-act="focus">Focus</button></div>';
   return h;
 }
@@ -1181,15 +1345,18 @@ function sidePassage(it, m, arr) {
   if (!q.full) h += '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal. The words are the copy My topics kept when the passage was saved.' : 'The portal beside the board is still loading its texts, so these are the words My topics kept. The passage in full, and its annotations, follow in a moment.') + '</p>';
   else if (!ro()) h += '<p class="by">Select some of its words to annotate them.</p>';
   if (x) h += '<span class="k">Your note on it</span><textarea class="mtnote" data-mtnote="' + esc(x.id) + '" placeholder="The same note as in My topics: write it here or there"' + (lost ? ' readonly' : '') + '>' + esc(x.note || '') + '</textarea>';
-  return h + cardButtons(it, arr);
+  const ks = (LX && it.mt && LX.also.get(it.mt)) || [];
+  if (ks.length) h += '<div class="alsobox"><b>Also on the boards of</b> ' + ks.map(x => '<button type="button" class="linkish" data-goboard="' + esc(x.t + '|' + x.id) + '">' + esc(topicName(x.t)) + '</button>').join(', ') + '<p class="by">The page found the same passage there: it is not a link you made.</p></div>';
+  return h + linkedFromHtml(it.id) + cardButtons(it, arr);
 }
 function sideCard(it) {
   const m = model(it.model), arr = B.arrows.filter(a => a.from === it.id || a.to === it.id);
   if (it.kind === 'passage') return sidePassage(it, m, arr);
+  if (it.kind === 'link') return sideLink(it, m, arr);
   const title = it.kind === 'box' ? 'A box' + (it.label ? ': ' + it.label : '') : it.kind === 'problem' ? 'A question' : 'A note';
   let h = '<h2>' + esc(title) + '</h2><p class="sub">' + mchip(m) + esc(m ? m.name || '' : '') + '</p>';
   if (it.text) h += '<span class="k">Written on the board</span><div class="stmt' + (it.kind === 'problem' ? ' problem' : '') + '">' + esc(it.text) + '</div>';
-  return h + cardButtons(it, arr);
+  return h + linkedFromHtml(it.id) + cardButtons(it, arr);
 }
 function sideCards(ids) {
   const its = ids.map(item).filter(Boolean);
@@ -1205,16 +1372,87 @@ function sideArrow(a) {
   return h;
 }
 function sideModel(m) {
+  return sideModel0(m) + '<div class="row"><button type="button" class="linkish" data-act="copylink">Copy a link to this group</button></div>' + linkedFromHtml(m.id);
+}
+function sideModel0(m) {
   const its = B.items.filter(i => i.model === m.id);
   return '<h2>' + esc(m.title) + '</h2><p class="sub">' + esc(m.name || 'A group') + '</p>' +
     '<span class="k">Its cards</span>' + (its.length ? its.map(it => '<button type="button" class="rel" data-card="' + esc(it.id) + '">' + esc(cardTitle(it)) + '</button>').join('') : '<p class="empty">None yet. Drop cards into its frame.</p>') +
     (ro() ? '' : '<div class="row"><button type="button" class="btn solid" data-act="editmodel">Rename it</button><button type="button" class="btn" data-act="selmodel">Select its cards</button><button type="button" class="linkish" data-act="delmodel">Delete the group</button></div>');
+}
+// What links to a card or group here from other boards, with the arrows there, and the way back.
+function linkedFromHtml(id) {
+  const xs = (LX && LX.into.get(id)) || []; if (!xs.length) return '';
+  return '<span class="k">Linked from other boards</span>' + xs.map(x => '<div class="lfrom"><div><b>' + esc(topicName(x.t)) + '</b>' + (x.card.label ? ' · ' + esc(x.card.label) : '') +
+    ' <button type="button" class="linkish" data-goboard="' + esc(x.t + '|' + x.card.id) + '">open there</button>' + (ro() ? '' : ' <button type="button" class="linkish" data-linkback="' + esc(x.t + '|') + '">link back to the topic</button>') + '</div>' +
+    x.arrows.map(a => '<div class="lrow">' + (a.out ? 'this <b>' + esc(a.type) + '</b> → ' + esc(a.title) : esc(a.title) + ' <b>' + esc(a.type) + '</b> → this') +
+      (ro() || !a.other ? '' : ' <button type="button" class="linkish" data-linkback="' + esc(x.t + '|' + a.other) + '">link back to it</button>') + '</div>').join('') + '</div>').join('');
+}
+// The boards that link to this one, and those it links to: a way about the reader's topics.
+function boardsAround() {
+  if (!LX) return '';
+  const row = k => '<button type="button" class="rel" data-goboard="' + esc(k + '|') + '">' + esc(topicName(k) || 'a topic deleted since') + '</button>';
+  const fr = [...LX.from.keys()], tt = [...LX.to.keys()];
+  return (fr.length ? '<span class="k">Boards that link here</span>' + fr.map(row).join('') : '') + (tt.length ? '<span class="k">Boards this one links to</span>' + tt.map(row).join('') : '');
+}
+function sideLink(it, m, arr) {
+  const L = it.lk || linkOf(it);
+  let h = '<h2>' + esc(it.label || (L.whole ? L.topic : L.title)) + '</h2><p class="sub">' + mchip(m) + '↗ ' + esc(L.topic || 'another topic') + ' · ' + esc(L.whole ? 'the whole topic' : (L.what || 'a card') + ' on its board') + '</p>';
+  if (L.state === 'topic-gone') h += '<div class="offnote">The topic this pointed to is no longer in My topics. The card keeps what it was: “' + esc(L.title) + '”.</div>';
+  else if (L.state === 'item-gone') h += '<div class="offnote">That is no longer on the board of “' + esc(L.topic) + '”. The card keeps what it was: “' + esc(L.title) + '”.<div class="row"><button type="button" class="btn" data-act="followlink">Open that board</button></div></div>';
+  else {
+    if (L.whole) h += (L.words ? '<span class="k">The topic, in your words</span><div class="stmt">' + esc(L.words) + '</div>' : '') + '<p class="by">' + L.count + (L.count === 1 ? ' passage' : ' passages') + (L.b ? ' · ' + (L.b.items || []).length + ' cards on its board' : ' · no board yet') + '</p>';
+    else if (L.group) h += '<span class="k">Its cards there</span>' + (L.cards.length ? L.cards.map(c => '<div class="lrow">' + esc(aboutCard(c).title) + '</div>').join('') : '<p class="empty">None.</p>');
+    else if (L.card && L.card.kind === 'passage') {
+      const full = fullText(L.ref), href = L.ref ? portalHref({ ref: L.ref }) : null;
+      h += '<span class="k">The passage</span><div class="q"><span class="t">“' + esc(full != null ? full : L.words) + '”</span><div class="c"><span>' + esc(L.title) + (L.work ? ' · ' + esc(L.work) : '') + '</span>' + (href ? '<button type="button" data-read="' + esc(href) + '">read it beside the board</button>' : '') + '</div></div>';
+    } else if (L.words) h += '<span class="k">Written on that board</span><div class="stmt' + (L.card && L.card.kind === 'problem' ? ' problem' : '') + '">' + esc(L.words) + '</div>';
+    if (!L.whole && L.b) {
+      const id = it.to.item, ar = (L.b.arrows || []).filter(a => a && (a.from === id || a.to === id));
+      if (ar.length) h += '<span class="k">Its arrows on that board</span>' + ar.map(a => { const o = (L.b.items || []).find(i => i && i.id === (a.from === id ? a.to : a.from)), ot = o ? aboutCard(o).title : '(gone)'; return '<div class="lrow">' + (a.from === id ? 'it <b>' + esc(a.type) + '</b> → ' + esc(ot) : esc(ot) + ' <b>' + esc(a.type) + '</b> → it') + '</div>'; }).join('');
+    }
+    h += '<div class="row"><button type="button" class="btn solid" data-act="followlink">' + (L.whole ? 'Open that board' : 'Open that board at it') + '</button>' + (L.whole ? '<a class="linkish" href="index.html#mt=' + esc(encodeURIComponent(L.t)) + '">its list in My topics</a>' : '') + '</div>';
+  }
+  return h + linkedFromHtml(it.id) + cardButtons(it, arr);
+}
+// Your other topics' boards, to link to: the topic as a whole, or a card or group on its board.
+let brdT = '', brdQ = '';
+const brdEntry = (t, item, title, sub, words, color) => '<div class="pp" draggable="' + (ro() ? 'false' : 'true') + '" data-bl="' + esc(t + '|' + (item || '')) + '"' + (color ? ' style="border-left-color:' + esc(color) + '"' : '') + '>' +
+  '<div class="pc">' + esc(title) + (sub ? ' <span>· ' + esc(sub) + '</span>' : '') + '</div>' + (words ? '<div class="pw">' + esc(shortly(words, 160)) + '</div>' : '') +
+  '<div class="row">' + (ro() ? '' : '<button type="button" class="btn solid" data-bladd="' + esc(t + '|' + (item || '')) + '">+ Link here</button>') + '<button type="button" class="linkish" data-goboard="' + esc(t + '|' + (item || '')) + '">open it there</button></div></div>';
+function boardList(b) {
+  const ws = brdQ.toLowerCase().split(/\s+/).filter(Boolean), hit = s => ws.every(w => String(s).toLowerCase().includes(w));
+  const groups = (b.models || []).filter(g => g && g.id), cards = (b.items || []).filter(c => c && c.id && c.kind !== 'link'), rows = [];
+  groups.forEach(g => rows.push({ id: g.id, title: 'Group: ' + (g.title || ''), sub: cards.filter(c => c.model === g.id).length + ' cards', words: g.name || '', color: g.color }));
+  cards.forEach(c => { const a = aboutCard(c), g = groups.find(x => x.id === c.model); rows.push({ id: c.id, title: a.title, sub: cap1(a.what) + (g ? ' · in ' + g.title : ''), words: a.words, color: g ? g.color : '' }); });
+  const shown = rows.filter(r => hit(r.title + ' ' + r.sub + ' ' + r.words));
+  return shown.length ? shown.map(r => brdEntry(brdT, r.id, r.title, r.sub, r.words, r.color)).join('') : '<p class="empty">' + (rows.length ? 'Nothing on its board has those words.' : 'Its board is empty.') + '</p>';
+}
+function renderBoards() {
+  if (side !== 'boards') return;
+  const P = $('boards'), act = document.activeElement;
+  if (act && P.contains(act) && act.matches('[data-brdq]')) { const l = $('blist'), b = boardOf(brdT); if (l && b) l.innerHTML = boardList(b); return; }   // what is being typed stays
+  const others = (DB ? DB.topics : []).filter(t => t && t.id !== TID).sort((a, b) => a.name.localeCompare(b.name, 'de', { sensitivity: 'base' }));
+  if (brdT && !others.some(t => t.id === brdT)) brdT = '';
+  const top = P.scrollTop;
+  let h = '<h2>Your other boards</h2><p class="sub">Link this board to another of your topics, or to a card or group on its board</p>' + boardsAround();
+  if (!others.length) h += '<p class="empty">You have no other topics yet. Make one in My topics, and link to it here.</p>';
+  else {
+    h += '<span class="k">Link to</span><select data-brdt style="width:100%"><option value="">one of your topics…</option>' + others.map(t => '<option value="' + esc(t.id) + '"' + (t.id === brdT ? ' selected' : '') + '>' + esc(t.name) + '</option>').join('') + '</select>';
+    if (brdT) {
+      const b = boardOf(brdT), L = linkOf({ to: { t: brdT, item: null } });
+      h += '<p style="font-size:0.88rem;margin:0.5rem 0 0.4rem">Press <b>+ Link here</b>, or drag one onto the board where you want it.</p>' + brdEntry(brdT, '', 'The whole topic', L.count + (L.count === 1 ? ' passage' : ' passages') + (b ? '' : ' · no board yet'), L.words, '');
+      if (b) h += '<input type="search" data-brdq placeholder="Find on its board" value="' + esc(brdQ) + '" style="width:100%;margin:0.5rem 0 0.4rem"><div id="blist">' + boardList(b) + '</div>';
+    }
+  }
+  P.innerHTML = h; P.scrollTop = top;
 }
 /* ── Annotations, in the side: beneath each passage, and all of them in one list ── */
 const whoHtml = a => (a.by ? '@' + esc(a.by) + ' · ' : '') + esc(a.date ? fmtDate(a.date) : '') + (a.edited ? ' · edited' + (a.editedBy ? ' by @' + esc(a.editedBy) : '') : '');
 function toHtml(to) {
   if (to.word) return '<button type="button" class="tw" data-annword="' + esc(to.word) + '" title="Light every card that has these words, on it or in its annotations">' + esc(to.word) + '</button>';
   if (to.card) return item(to.card) ? '<button type="button" class="linkish" data-card="' + esc(to.card) + '">' + esc(nameOf(to.card)) + '</button>' : '<i>a card no longer on the board</i>';
+  if (to.board) return '<button type="button" class="linkish" data-goboard="' + esc(to.board.t + '|' + (to.board.item || '')) + '">' + esc(to.cite || 'another board') + '</button> ↗';
   const href = portalHref(to);
   return href ? '<button type="button" class="linkish" data-read="' + esc(href) + '">' + esc(to.cite || 'the passage') + '</button> <a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : esc(to.cite || '');
 }
@@ -1252,7 +1490,7 @@ function composerHtml() {
   const f = form, reply = !!f.re, K = annKind(f.ann);
   const kinds = reply ? '' : '<div class="akinds">' + ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + (k.key === f.ann ? ' on' : '') + '" data-annkind="' + k.key + '">' + esc(k.label) + '</button>').join('') + '</div>';
   const on = '<p class="aon">' + (reply ? (f.id ? 'Your reply' : 'A reply') : f.on && f.on.exact ? 'On “<i>' + esc(short(f.on.exact, 120)) + '</i>”' : 'On the passage as a whole') + '</p>';
-  const to = !reply && f.ann === 'relevant' ? '<label class="f">Relevant to</label><input type="text" data-ann-to value="' + esc(f.to0 || '') + '" placeholder="a word, R 3990, or a portal address" spellcheck="false">' +
+  const to = !reply && f.ann === 'relevant' ? '<label class="f">Relevant to</label><input type="text" data-ann-to value="' + esc(f.to0 || '') + '" placeholder="a word, R 3990, a portal address, or a link to another board" spellcheck="false">' +
     '<div class="by" style="margin-top:0.2rem">' + (f.to && f.to.card ? 'the card <b>' + esc(nameOf(f.to.card)) + '</b> <button type="button" class="linkish" data-annunpick>not that card</button>' : '<button type="button" class="linkish" data-act="annpick">or click a card on the board</button>') + '</div>' : '';
   return '<div class="anncomp ak-' + (reply ? 'reply' : esc(f.ann)) + '" data-fkey="' + esc(f.key) + '">' + kinds + on + to +
     '<textarea data-ann-text rows="2" placeholder="' + esc(reply ? 'Your reply' : K.hint) + '">' + esc(f.text0 || '') + '</textarea>' +
@@ -1322,11 +1560,11 @@ function sidePhotos() {
 const modelSelect = (cur) => '<label class="f">Group</label><select data-model><option value="">no group</option>' + B.models.map(m => '<option value="' + esc(m.id) + '"' + (m.id === cur ? ' selected' : '') + '>' + esc(m.title) + '</option>').join('') + '</select>';
 function sideCardForm() {
   const it = form.id ? item(form.id) : null, kind = it ? it.kind : form.kind, cur = it || { model: form.model, quotes: [] };
-  const word = { passage: 'passage', problem: 'question', note: 'note', box: 'box' }[kind] || 'note';
-  let h = '<h2>' + (it ? (kind === 'passage' ? 'A heading for the passage' : 'Edit the ' + word) : 'A new ' + word) + '</h2><p class="sub">' + {
-    passage: esc(cardTitle(cur)), problem: 'A question the topic raises, in your words', note: 'Anything, as on a whiteboard', box: 'A box on the board' }[kind] + '</p>';
+  const word = { passage: 'passage', problem: 'question', note: 'note', box: 'box', link: 'link' }[kind] || 'note';
+  let h = '<h2>' + (it ? (kind === 'passage' || kind === 'link' ? 'A heading for the ' + word : 'Edit the ' + word) : 'A new ' + word) + '</h2><p class="sub">' + {
+    passage: esc(cardTitle(cur)), link: esc(cardTitle(cur)), problem: 'A question the topic raises, in your words', note: 'Anything, as on a whiteboard', box: 'A box on the board' }[kind] + '</p>';
   h += modelSelect(cur.model);
-  if (kind === 'passage' || kind === 'box') h += '<label class="f">' + (kind === 'passage' ? 'A heading (optional): its citation shows when there is none' : 'Its name') + '</label><input type="text" data-label value="' + esc(cur.label || '') + '">';
+  if (kind === 'passage' || kind === 'box' || kind === 'link') h += '<label class="f">' + (kind === 'passage' ? 'A heading (optional): its citation shows when there is none' : kind === 'link' ? 'A heading (optional): what it points to shows when there is none' : 'Its name') + '</label><input type="text" data-label value="' + esc(cur.label || '') + '">';
   else h += '<label class="f">' + (kind === 'problem' ? 'The question, in your words' : 'What to write') + '</label><textarea data-text>' + esc(cur.text || '') + '</textarea>';
   h += '<div class="row"><button type="button" class="btn solid" data-act="savecard">' + (it ? 'Save' : 'Put it on the board') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div><p class="warn" data-err></p>';
   return h;
@@ -1371,9 +1609,10 @@ function keepFields(fn) {
 }
 function showSide(which) {
   side = which;
-  $('tdet').classList.toggle('on', which === 'details'); $('tpass').classList.toggle('on', which === 'passages'); $('tread').classList.toggle('on', which === 'reading');
-  $('details').style.display = which === 'details' ? '' : 'none'; $('passages').style.display = which === 'passages' ? 'block' : 'none'; $('reading').classList.toggle('on', which === 'reading');
+  $('tdet').classList.toggle('on', which === 'details'); $('tpass').classList.toggle('on', which === 'passages'); $('tbrd').classList.toggle('on', which === 'boards'); $('tread').classList.toggle('on', which === 'reading');
+  $('details').style.display = which === 'details' ? '' : 'none'; $('passages').style.display = which === 'passages' ? 'block' : 'none'; $('boards').style.display = which === 'boards' ? 'block' : 'none'; $('reading').classList.toggle('on', which === 'reading');
   if (which === 'passages') renderPassages();
+  if (which === 'boards') renderBoards();
 }
 // Finding among the topic's passages, under Passages. Every word looked for must be somewhere in the
 // passage: its citation, its work, its words — in full once the portal beside the board has its texts
@@ -1654,6 +1893,12 @@ async function readTo(v) {
     const n = +m[1], ref = (n <= 3488 ? 'refl-logik:r' : 'refl-meta:r') + n;
     if (FW && fullText(ref) == null) throw new Error('The portal has no Refl. ' + n + '.');
     return { ref, cite: 'Refl. ' + n };
+  }
+  const ba = parseBoardAddr(v);
+  if (ba) {
+    const L = linkOf({ to: { t: ba.t, item: ba.item } });
+    if (L.state !== 'ok') throw new Error('That is no longer on its board.');
+    return { board: { t: realTopic(DB, ba.t), item: ba.item }, cite: L.whole ? L.topic : L.topic + ': ' + L.title };
   }
   const h = hashOf(v);
   return h ? { hash: h, cite: hashCite(h) } : { word: v };
@@ -2093,8 +2338,8 @@ function editInPlace(id, fresh) {
   const it = item(id); if (!it || ro()) return;
   const el = [...$('cards').querySelectorAll('.card')].find(c => c.dataset.id === id); if (!el) return;
   const field = it.kind === 'note' || it.kind === 'problem' ? 'text' : 'label';
-  let target = el.querySelector({ passage: '.ttl', box: '.blab', note: '.txt', problem: '.txt' }[it.kind] || '.txt');
-  if (!target && it.kind === 'passage') { target = document.createElement('span'); target.className = 'ttl'; el.insertBefore(target, el.firstChild); }
+  let target = el.querySelector({ passage: '.ttl', link: '.ttl', box: '.blab', note: '.txt', problem: '.txt' }[it.kind] || '.txt');
+  if (!target && (it.kind === 'passage' || it.kind === 'link')) { target = document.createElement('span'); target.className = 'ttl'; el.insertBefore(target, el.firstChild); }
   if (!target) return;
   inlineEdit(target, String(it[field] || ''), field === 'text', (v, changed) => {
     if (v === null || (!v && field === 'text')) {   // nothing typed: a card just made goes again
@@ -2188,9 +2433,9 @@ $('chooser').addEventListener('keydown', e => {
   if (e.target.id !== 'qnote') return;
   if (e.key === 'Escape') { $('chooser').classList.remove('show'); return; }
   if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault(); const c = $('chooser'), at = JSON.parse(c.dataset.at), mdl = c.dataset.model || null;
+    e.preventDefault(); const c = $('chooser'), at = JSON.parse(c.dataset.at), mdl = c.dataset.model || null, ba = parseBoardAddr(e.target.value);
     c.classList.remove('show');
-    quickNote(e.target.value, at, mdl);
+    if (ba) makeLink(ba.t, ba.item, at); else quickNote(e.target.value, at, mdl);
   }
 });
 $('chooser').addEventListener('click', e => {
@@ -2302,6 +2547,30 @@ $('tside').addEventListener('click', () => document.body.classList.add('sideclos
 $('sideopen').addEventListener('click', () => document.body.classList.remove('sideclosed'));
 $('tdet').addEventListener('click', () => showSide('details'));
 $('tpass').addEventListener('click', () => showSide('passages'));
+$('tbrd').addEventListener('click', () => showSide('boards'));
+$('addl').addEventListener('click', () => { document.body.classList.remove('sideclosed'); showSide('boards'); });
+$('boards').addEventListener('change', e => { if (e.target.matches('[data-brdt]')) { brdT = e.target.value; brdQ = ''; renderBoards(); } });
+$('boards').addEventListener('input', e => { if (e.target.matches('[data-brdq]')) { brdQ = e.target.value; const l = $('blist'), b = boardOf(brdT); if (l && b) l.innerHTML = boardList(b); } });
+$('boards').addEventListener('click', e => { const a = e.target.closest('[data-bladd]'); if (a) { const [t, i] = a.dataset.bladd.split('|'); makeLink(t, i || null); } });
+// Opening another board, at a card, and linking back: from anywhere in the side.
+document.addEventListener('click', e => {
+  const g = e.target.closest && e.target.closest('[data-goboard]'); if (g) { e.preventDefault(); const [t, i] = g.dataset.goboard.split('|'); goBoard(t, i); return; }
+  const lb = e.target.closest && e.target.closest('[data-linkback]'); if (lb) { const [t, i] = lb.dataset.linkback.split('|'); makeLink(t, i || null); }
+});
+// A board's address pasted anywhere on the page but in a box being typed in: a link card.
+document.addEventListener('paste', e => {
+  const t = e.target; if (t && t.closest && (t.closest('input, textarea') || t.isContentEditable)) return;
+  const a = parseBoardAddr(e.clipboardData && e.clipboardData.getData('text')); if (!a) return;
+  e.preventDefault(); makeLink(a.t, a.item);
+});
+const BL_TYPE = 'application/x-kantlab-board-link';
+$('boards').addEventListener('dragstart', e => {
+  const p = e.target.closest && e.target.closest('.pp[data-bl]'); if (!p || ro()) return;
+  e.dataTransfer.setData(BL_TYPE, p.dataset.bl); e.dataTransfer.setData('text/plain', p.querySelector('.pc').textContent);
+  e.dataTransfer.effectAllowed = 'copy'; p.classList.add('dragging');
+});
+$('boards').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); });
+
 $('addp').addEventListener('click', () => { document.body.classList.remove('sideclosed'); showSide('passages'); });
 $('passages').addEventListener('click', e => {
   const a = e.target.closest('[data-ppadd]'); if (a) { putPassage(a.dataset.ppadd); return; }
@@ -2322,13 +2591,14 @@ $('passages').addEventListener('dragstart', e => {
   e.dataTransfer.effectAllowed = 'copy'; p.classList.add('dragging');
 });
 $('passages').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); });
-$('stage').addEventListener('dragover', e => { if (![...(e.dataTransfer.types || [])].includes(PP_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); });
+$('stage').addEventListener('dragover', e => { const ty = [...(e.dataTransfer.types || [])]; if (!ty.includes(PP_TYPE) && !ty.includes(BL_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); });
 $('stage').addEventListener('dragleave', e => { if (e.target === $('stage')) $('stage').classList.remove('dropping'); });
 $('stage').addEventListener('drop', e => {
-  const mt = e.dataTransfer.getData(PP_TYPE); $('stage').classList.remove('dropping'); if (!mt) return;
+  const mt = e.dataTransfer.getData(PP_TYPE), bl = e.dataTransfer.getData(BL_TYPE); $('stage').classList.remove('dropping'); if (!mt && !bl) return;
   e.preventDefault();
   const [wx, wy] = toWorld(e.clientX, e.clientY);
-  putPassage(mt, [wx - 120, wy - 25]);
+  if (mt) putPassage(mt, [wx - 120, wy - 25]);
+  else { const [t, i] = bl.split('|'); makeLink(t, i || null, [wx - 115, wy - 25]); }
 });
 $('tread').addEventListener('click', () => { if (!$('portal').getAttribute('src')) read(PORTAL); else showSide('reading'); });
 $('details').addEventListener('click', e => {
@@ -2359,6 +2629,8 @@ $('details').addEventListener('click', e => {
   if (act === 'annpick') { mode = { annTo: true }; banner(); return; }
   if (act === 'dlann') { downloadAnns(); return; }
   if (act === 'cancel') { form = null; renderSide(); return; }
+  if (act === 'followlink') { const it = item(id); if (it) followLink(it); return; }
+  if (act === 'copylink') { copyLink(id); return; }
   if (act === 'putback') { const it = item(id); if (it && !ro()) { setPassage(it.mt, x => { if (Array.isArray(x.topics) && !x.topics.includes(TID)) x.topics.push(TID); }); render(); toast('Back under “' + (topic ? topic.name : '') + '”.'); } return; }
   if (act === 'offboard') { removeCards([id]); toast('Taken off the board. Undo (⌘Z) puts it back.'); return; }
   if (act === 'savecard') return saveCard(D);
@@ -2499,6 +2771,7 @@ function start() {
   B.annotations = clone(anns);
   seenB = saved ? keyOf(saved) : ''; seenA = JSON.stringify(anns);
   viewId = B.views.some(v => v.id === prefs.viewId) ? prefs.viewId : B.views[0].id;
+  const V = new URLSearchParams(location.hash.slice(1)).get('v'); if (V && B.views.some(v => v.id === V)) viewId = V;
   if (topic && (!saved || syncCards() || !Array.isArray(d.annotations))) writeOut(d);   // a board made now, or cards for passages put under the topic since: kept at once
 }
 start();
@@ -2512,7 +2785,7 @@ if (topic && !lost && waiting().length && !B.items.some(i => i.kind === 'passage
 showLost();
 watchPortal();
 // Cards are measured once the page is laid out, and again when its fonts arrive, since they change every card's size.
-const settle = () => { renderBoard(); const c0 = camOf(); if (c0) { cam = Object.assign({}, c0); applyCam(); } else fit(); };
+const settle = () => { renderBoard(); if (arriveAt) { arrive(); return; } const c0 = camOf(); if (c0) { cam = Object.assign({}, c0); applyCam(); } else fit(); };
 requestAnimationFrame(settle);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!drag) settle(); });
 </script>

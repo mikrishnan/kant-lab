@@ -264,6 +264,22 @@ reader's topic rather than the seminar's one board.
   *Problem*, *Relevant to…*, *Interpretation*, *Comment*, with replies and *resolved*. An
   annotation belongs to the passage, not the board, so it shows on every one of your boards
   where that passage stands.
+- **Link to another topic.** A link card stands on one board for another of your topics, as a
+  whole, or for one card or group on that topic's board, and shows what it points to as it is
+  now. Make one under **Boards**, a tab in the side (or **Link…** among the tools): choose the
+  topic, then **+ Link here** on the topic or on one of its board's cards, or drag it onto the
+  board. Or press **Copy a link to it** on a card or group, and paste it on another board (⌘V),
+  or into *Relevant to…* in an annotation. Arrows join a link card like any card, so that one
+  board can say how its passages bear on another topic's. Click it to see what it points to in
+  the side; **Open that board at it** goes there, centred on that card, and the browser's Back
+  button returns.
+- **Being linked to** puts nothing on the other board. The card or group linked to carries a
+  mark, **↖ 1**, and its side lists the links, with the arrows on them and **link back**. A
+  board's side lists the boards that link to it and those it links to. A link whose card has
+  gone from the other board is drawn dashed and says so, keeping what it was. A passage that
+  stands on several of your boards says *also on …*, dashed, since that is the page's own
+  finding, not a link you made. In My topics, a topic's heading says which topics it is linked
+  with.
 - **Photograph the board** keeps it as it is now, to look at again or bring back. **Export**
   saves the one board to a file, and **Import** brings such a file's cards in beside yours.
 
