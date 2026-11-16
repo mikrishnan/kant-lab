@@ -1,6 +1,6 @@
 # Kant's published works, for the Logic Portal
 
-Five texts the Logic Portal reads beside the logic corpus, each a data file in the portal's
+Eight texts the Logic Portal reads beside the logic corpus, each a data file in the portal's
 `passages` shape (see `../portal/catalogue.js`), all made by [build_published.py](build_published.py).
 
 | File | Global | Text | Cited by | Words | Clean? |
@@ -10,6 +10,9 @@ Five texts the Logic Portal reads beside the logic corpus, each a data file in t
 | [kant-krv-a.js](kant-krv-a.js) | `KANT_KRV_A` | *Critik der reinen Vernunft*, Riga 1781 | A page (A xvi, A 51) | 176,000 | Yes: double-keyed transcription |
 | [kant-krv-b-ocr.js](kant-krv-b-ocr.js) | `KANT_KRV_B` | *Kritik der reinen Vernunft*, 2nd ed. 1787, as AA III prints it | B page, and AA 3:page | 187,000 | **No: OCR**, about 98% of words right |
 | [kant-ku-a.js](kant-ku-a.js) | `KANT_KU_A` | *Critik der Urtheilskraft*, Berlin und Libau 1790 | § and A page (§ 59, A 251; A xi) | 108,000 | Yes: double-keyed transcription |
+| [kant-gms-aa04-ocr.js](kant-gms-aa04-ocr.js) | `KANT_GMS` | *Grundlegung zur Metaphysik der Sitten* (1785), as AA IV prints it | AA 4:page | 28,000 | **No: OCR**, about 99% of words right |
+| [kant-kpv-aa05.js](kant-kpv-aa05.js) | `KANT_KPV_AA` | *Kritik der praktischen Vernunft* (1788), as AA V prints it | § and AA 5:page | 57,000 | Yes: proofread transcription |
+| [kant-ku-aa05.js](kant-ku-aa05.js) | `KANT_KU_AA` | *Kritik der Urtheilskraft*, as AA V prints it (the text of the 2nd ed., 1793) | § and AA 5:page (§ 59, AA 5:351) | 109,000 | Yes: proofread transcription |
 
 Every work in AA I and AA II stays separately identifiable: each passage carries `work` (a key
 such as `nova-dilucidatio` or `falsche-spitzfindigkeit`), and each file's `meta.works` lists the
@@ -50,6 +53,30 @@ twice and compared, from the same core-corpus download as the 1781 *Critique*. *
 but forbids passing it on (as for AA II), and the BBAW's new edition has not reached it. The
 DTA's core corpus has neither the 1793 nor the 1799 edition.
 
+**AA V: the Critique of Practical Reason and the Critique of Judgment.** The old Academy
+edition's AA V (1908, printing of 1913, public domain), as Project Gutenberg's volunteers
+transcribed and proofread it (Distributed Proofreaders): [EBook #49543](https://www.gutenberg.org/ebooks/49543),
+the *Kritik der praktischen Vernunft*, and [EBook #55925](https://www.gutenberg.org/ebooks/55925),
+the *Kritik der Urtheilskraft*, produced by Jana Srna, Norbert H. Langkau and the Online
+Distributed Proofreading Team. They mark every AA page, AA's line numbers and the original
+edition's pages in AA's margin. AA V's text of the second Critique follows its first edition
+(1788), that of the third its second (1793): "Die Zahlen an den Seiten geben die
+Originalpaginirung der dem Text zu Grunde gelegten Ausgaben (1788 und 1793) wieder" (AA V's
+Anmerkungen). So the portal has the KU twice, as it has the first Critique: the 1790 print from the
+DTA, and AA V's text, which is the one the literature cites by page. **Licence: public domain**;
+the extraction is CC0. Project Gutenberg's licence governs its own files, not the public-domain
+text taken from them.
+
+**The Groundwork.** No proofread transcription of the *Grundlegung* may be put in a public
+repository: the Deutsches Textarchiv and Wikisource have none, Project Gutenberg has no German
+text of AA IV, and the Bonner Kant-Korpus forbids passing its text on. So, as for AA II and B, it
+is the old Academy edition (AA IV, 1903, printing of 1911, public domain) read by OCR, from the
+Internet Archive's scan [gesammelteschrif0004kant](https://archive.org/details/gesammelteschrif0004kant).
+The Archive's own OCR of it agrees with the Bonner Kant-Korpus on 97.0% of words; the scan's page
+images read again here with Tesseract and UB Mannheim's Fraktur model `frak2021` (the model that
+read Wolff's *Logik*) agree on 98.8%, so that reading is the one used. **Licence: public domain**;
+the extraction is CC0.
+
 **The Critique, B.** For the same reasons as AA II, the B edition is the old Academy edition's
 AA III (1904, 2nd printing 1911, public domain), which prints the 1787 text in the AA's spelling
 and gives the B pages in its margin: the Internet Archive's scan
@@ -81,6 +108,18 @@ reading. **Licence: public domain**; the extraction is CC0.
   list of errata: *eriterisch l. eritisches* for *criterisch l. critisches*; it is left as the DTA
   has it. The page breaks follow the DTA's, which agree with the print on all four pages, and the
   link from each passage to its page image was checked (A 251 is the DTA's image 315).
+- **AA V**: AA's pages are the transcription's page marks. Checked against the Internet Archive's
+  scan of AA V, whose running heads give every leaf's page: the AA page of every passage links to
+  its leaf, and the running heads confirm the link (leaf 368 is headed 351, 47 is 30, 100 is 83,
+  400 is 383). Headings fall on the pages known from citations (the KU's Einleitung 5:171, the
+  KpV's Vorrede 5:3 and § 1 5:19). The transcription sets a page mark after a heading's first
+  word; a heading is put on the page so marked, since no heading is split over a page. It marks
+  the KU's title page 166; the scan has it on 165 (166 is blank), and it is put there
+  (`meta.pageFix`). AA 5:198, the table of the higher faculties, is there with the footnote on
+  5:197 that leads to it ("Man hat es bedenklich gefunden, daß meine Eintheilungen … fast immer
+  dreitheilig ausfallen").
+- **The Groundwork**: every page compared with the Bonner Kant-Korpus's text of it (used only to
+  check, never copied), as for AA II: 98.8% of words agree over 77 pages, none under 96%.
 - **AA II and B**: every page compared with the Bonner Kant-Korpus's text of the same page: 96.3%
   of AA II's words agree, 98.1% of B's. A disagreement is not always the OCR's fault (spelling
   normalisation also differs), so these are lower bounds on how close the text is.
@@ -98,7 +137,8 @@ figures and what they rest on are the catalogue's `accuracy` field. The page fig
 file's `meta.agreement`, from [measure_ocr.py](measure_ocr.py), which compares every page with
 the Bonner Kant-Korpus's text of it (kept as [ocr-agreement.json](ocr-agreement.json), which
 holds percentages only, none of the corpus's text): AA II 96.3% over 409 pages, 20 of them under
-90% (mostly the early pages cut at the gutter); B 98.1% over 542 pages, 5 under 90%. The AA XXIV
+90% (mostly the early pages cut at the gutter); B 98.1% over 542 pages, 5 under 90%; the
+Groundwork 98.8% over 77 pages, none under 96%. The AA XXIV
 lectures from OCR show their figure too (about 98%, measured on Busolt) and their page images.
 
 ## What is not clean yet
@@ -117,6 +157,33 @@ AA II. What remains:
   notes on A's readings are left in it (*1) A¹: kann.*);
 - Greek, formulas and tables, which the OCR cannot read; figures are not reproduced in any file.
 
+**The Groundwork is OCR**, read from AA IV's page images by `frak2021` and put into passages by
+the same code as AA II. Check every quotation against the page image (`meta.scan`). Its spelling
+was repaired by the same rules, against the same word list with AA V's two Critiques added (they
+are in AA IV's own spelling); 76 words were repaired, each kept in `fix` with the OCR's reading,
+and one on the title page by hand (*Hitten* for *Sitten*, the Fraktur S read as H), kept in `fix`
+too. Where the passage maker cut a heading or a paragraph wrongly (a heading's centred lines split
+apart, a heading's first word left at the end of the paragraph before it, a paragraph's first line
+taken for a heading), the pieces are put back together from the OCR's own lines; nothing is added
+or dropped. What remains:
+- AA's letter-spaced words, which the model sometimes splits or runs together (*gleich sam*,
+  *freilichnurim*), and the odd misread word (*nüch lerne Uhenegung* for *nüchterne Überlegung*);
+- AA's line numbers, now and then read into the text (*so wird 5 Erstlich*);
+- footnote marks read as „) or ), not *); one heading, "Von der äußersten Grenze aller praktischen
+  Philosophie", stands as a paragraph.
+
+**AA V's two Critiques** are proofread texts. Worth knowing:
+- Footnotes follow the paragraph that refers to them, on the page of the reference, marked with the
+  transcription's numbers in brackets (*[3]*), not AA's marks.
+- The transcribers corrected 13 misprints in the KU and 4 in the KpV and listed them; all are in
+  `meta.changes`, and where the corrected word stands once on its page the passage's `sic` gives
+  AA's reading at its place (9 of the 17).
+- The pages of the edition AA follows, which it prints in its margin (the KpV's A pages, the KU's
+  B pages), are kept in `orig` and `origpb`, though the portal does not show them yet.
+- AA's editorial introduction and apparatus (*Lesarten*, *Sachliche Erläuterungen*) are not
+  included; nor is AA's line numbering.
+- AA 5:2, 18, 150, 200, 202 and 358 are blank pages, with nothing to mark.
+
 **B's pages** come from AA III's margin as the OCR read it: 577 page numbers read whole, 122
 numbered in sequence between read ones, and 177 uncertain, shown with a query (*B 123?*). Where
 the margin number was not found at all (47 pages), the passage before it is cited with a query
@@ -128,10 +195,10 @@ the extractor's inference, printed in neither edition. Where the editions differ
 the Deduction, the Paralogisms, Phenomena and Noumena) there is no match, as there should not be.
 
 **The Critique of Judgment, A**, is a clean text, but these are worth knowing:
-- **It is cited by the 1790 print's pages, not yet by AA V's**, which is how most of the
-  literature cites it. AA V follows the second edition (1793), so its pages cannot simply be
-  counted from these; they could be found by matching this text against an OCR of AA V, as the
-  Critique's A and B pages are matched, and would then be marked as the matching's.
+- **It is cited by the 1790 print's pages.** For AA V's pages, which most of the literature
+  cites, use *Kritik der Urteilskraft (AA V)*, AA's own text of the KU (the second edition's);
+  `5:198` in the search box opens it. The 1790 text carries no AA pages: AA V follows the second
+  edition, so they could be put on it only by matching the two texts, as an inference.
 - **Its §§ are the 1790 print's.** It has §§ 1–53 and 55–91: the *Anmerkung* after § 53, which
   the second edition (and AA V) numbers § 54, is unnumbered, so `§ 54` finds nothing. Each passage
   carries the § whose heading it follows (`par`); a bare *Anmerkung* heading keeps the § it stands
@@ -149,13 +216,17 @@ the Deduction, the Paralogisms, Phenomena and Noumena) there is no match, as the
   `supplied` marks where (a 39th, a line-end hyphen, went with the rejoined word).
 - **The table on A lvi**, at the end of the Einleitung (the faculties of the mind, the cognitive
   faculties, their principles a priori and what they apply to), is printed sideways and the DTA
-  did not transcribe it. The passage there
-  says so and links to the page image; it is not transcribed here either.
+  did not transcribe it. It is transcribed here from the DTA's image of the page (image 62, at
+  1600 pixels), as the print has it (*Erkenntnisvermögen*, *Freyheit.*), and the passage's first
+  line says so: "[Table transcribed here from the page image; the Deutsches Textarchiv does not
+  transcribe it.]" (in the data, `ours`). Its words agree with AA V's table on 5:198, which
+  Project Gutenberg's transcribers read independently.
 - **The title vignette** is not reproduced.
 
 **Spelling.** A keeps the 1781 print's spelling (*Erkentniß*, *seyn*, *Critik*), and the KU the
 1790 print's (*Urtheilskraft*, *Begrif*); B and AA II have the old Academy edition's; AA I has the
-first prints'. The portal's search treats the spellings as one word, so a question finds all five.
+first prints'; AA V's two Critiques and the Groundwork have the old Academy edition's. The portal's
+search treats the spellings as one word, so a question finds them all.
 
 **Not in yet.** The new edition's German translations of AA I's Latin works (*Trans* files in the
 dataset), and AA III/IV's own pages for the A text.
@@ -174,7 +245,29 @@ python3 logic-portal/published/build_published.py all /tmp/telota-kant/db \
   logic-portal/published
 python3 logic-portal/published/build_published.py ku \
   dta_kernkorpus_1700-1799_2026-02-10/kant_urtheilskraft_1790.TEI-P5.xml logic-portal/published
+# AA V's two Critiques, from Project Gutenberg, each page linked to the AA V scan
+curl -L -o pg49543.html https://www.gutenberg.org/cache/epub/49543/pg49543-images.html
+curl -L -o pg55925.html https://www.gutenberg.org/cache/epub/55925/pg55925-images.html
+curl -LO https://archive.org/download/gesammelteschrif0005kant/gesammelteschrif0005kant_djvu.xml
+python3 logic-portal/published/build_published.py aa05 pg49543.html kpv logic-portal/published gesammelteschrif0005kant_djvu.xml
+python3 logic-portal/published/build_published.py aa05 pg55925.html ku logic-portal/published gesammelteschrif0005kant_djvu.xml
+# The Groundwork: AA IV's pages (scan leaves 398–476) read by Tesseract with frak2021 (the model's
+# URL and the tessdata folder as in ../wolff/README.md), then built
+curl -LO https://archive.org/download/gesammelteschrif0004kant/gesammelteschrif0004kant_djvu.xml
+mkdir -p aa04-img && for n in $(seq 398 476); do
+  curl -sL -o aa04-img/n$n.jpg https://archive.org/download/gesammelteschrif0004kant/page/n${n}_w2000.jpg
+  tesseract aa04-img/n$n.jpg aa04-img/t_frak2021_$n --tessdata-dir tessdata -l frak2021 --psm 4 \
+    -c thresholding_method=2 -c tessedit_create_tsv=1 -c tessedit_create_txt=0
+done
+python3 logic-portal/published/build_published.py gms gesammelteschrif0004kant_djvu.xml logic-portal/published aa04-img
 ```
+
+Build the AA V texts before the Groundwork: its repairs use them. The `aa05` step reports the §§,
+the footnotes placed, the transcribers' corrections placed and not, and the AA pages linked to the
+scan (all of them); the `gms` step, the passages, the contents lines and the repairs. For the
+Groundwork's page figures, put the korpora.org pages of AA 4:385–463 in an `aa04/` folder beside
+`aa02/` and `aa03/`, and run `measure_ocr.py` (it measures each volume whose folder is there and
+keeps the others' figures), then build again.
 
 The `ku` step builds the Critique of Judgment alone, in a second or two, and prints its own
 report: passages and words, the §§ headed (it should say `not printed: [54]` and nothing else),
@@ -197,5 +290,8 @@ own route for machines. The word list for the OCR repairs is built from the file
   Schröder), or take the BBAW's new edition of each volume when it appears, as AA I is taken now.
   Either text can replace these without breaking links, since passages are cited by page.
 - **Highlighting crucial works** within AA I and AA II: the `work` keys are there for it.
-- **AA V's pages for the Critique of Judgment**, found by matching (above), and the table on
-  A lvi.
+- **Showing AA V's margin pages**: the KpV's A pages and the KU's B pages, which the data keeps
+  (`orig`, `origpb`), beside the AA page.
+- **A better Groundwork**: reading AA IV's pages with a second model as well and keeping, word by
+  word, what the readings agree on, as for Wolff (with two readings, a disagreement is a tie, and
+  would be marked as such); or a clean text, when the BBAW's new edition reaches AA IV.
