@@ -278,6 +278,19 @@ reader's topic rather than the seminar's one board.
   copied from Word, a spreadsheet or a web page and pasted on the board becomes a table, with
   headings only where it marked them; pasted into a cell being typed in, it fills the cells from
   there on.
+- **Arrows from and to one cell.** Each cell of a table has a **→** of its own, beside it when
+  the mouse is over it, or once it is tapped: drag it to a card (a passage, a note, a question,
+  a link to another topic), to another cell of any table, or to a group's frame or name, and
+  the arrow goes from that cell alone. An arrow drawn from any card's **→** goes to the cell it
+  is let go over; let go over the table's name or edge, it goes to the table as a whole, and
+  so does the table's own **→**. What it would go to is lit as you drag. **+ Arrow from this
+  cell**, in the side, does the same with two clicks. Over its table the arrow is drawn again
+  as far as the cell, with a dot where it leaves one, and it is named by the cell's headings,
+  *row “nihil privativum”, column “Wolff”*, or by number. It keeps to its cell when rows and
+  columns are inserted round it; deleting the cell's row or column asks first, and takes its
+  arrows too. **From the table as a whole instead**, in an arrow's side, lets go of the cell.
+  Any arrow can now go to or from a group as well: the group's side lists its arrows, and
+  deleting the group takes them.
 - **Click a card** to read its passage in full in the side, with the words you kept, if you kept
   only some, and **your note on it**, which is the same note as in the list: write it in either.
   The passage opens in the portal beside the board at the same time, under **Reading**.
