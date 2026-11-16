@@ -637,6 +637,9 @@ css.textContent = `
   #mtpage .mthead { display: flex; gap: 0.8rem; align-items: baseline; }
   #mtpage .mtbrd { flex: none; background: var(--accent); color: var(--parchment); border-color: var(--accent); }
   #mtpage .mtbrd:hover { background: var(--accent-light); border-color: var(--accent-light); }
+  #mtpage .mtlinked { margin: 0.15rem 0 0.45rem; font-size: 0.88rem; color: var(--faded); }
+  #mtpage .mtlinked button { background: none; border: none; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
+  #mtpage .mtlinked span { font-style: italic; }
   #mtpage .mthead h2, #mtpage .mthead input { flex: 1; margin: 0; font-family: 'EB Garamond', serif; font-size: 1.45rem; font-weight: 600; color: var(--accent); background: transparent; border: none; border-bottom: 1px dashed transparent; padding: 0; min-width: 0; }
   #mtpage .mthead input:hover, #mtpage .mthead input:focus { border-bottom-color: var(--accent-light); outline: none; }
   #mtpage textarea { display: block; width: 100%; font: inherit; background: var(--card); border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.35rem 0.55rem; resize: vertical; min-height: 2.3rem; color: var(--ink); }
@@ -1031,7 +1034,7 @@ function renderMain() {
   const head = t
     ? '<div class="mthead"><input type="text" class="mtname" value="' + esc(t.name) + '" maxlength="120" title="Rename this topic" spellcheck="false">' +
       '<button type="button" class="btn mtbrd" data-mta="board" title="' + (DB.boards[t.id] ? 'This topic’s board: its passages as cards, to lay out, join with arrows and annotate' : 'Make a board for this topic: its passages as cards, to lay out, join with arrows and annotate') + '">▦ ' + (DB.boards[t.id] ? 'Board' : 'Make a board') + '</button>' +
-      '<button type="button" class="mtlink" data-mta="deltopic">Delete this topic</button></div>' +
+      '<button type="button" class="mtlink" data-mta="deltopic">Delete this topic</button></div>' + linkedWith(t.id) +
       '<textarea class="mttnote" rows="2" placeholder="What this topic is for: a question, a hunch, what to look for next. Only you see it.">' + esc(t.note) + '</textarea>'
     : '<div class="mthead"><h2>' + (view === 'unsorted' ? 'Unsorted' : 'All passages') + '</h2></div>' +
       (view === 'unsorted' ? '<p class="mtempty">Passages kept under no topic. Give each one a topic with <b>+ topic</b>.</p>' : '');
@@ -1063,6 +1066,20 @@ function cardHtml(it, canMove, k, n) {
     (ready() && !live ? '<p class="mtlost">This address no longer opens in the portal. The words above are the copy kept when it was saved.</p>' : '') +
     '<div class="mtchips">' + chips + '<button type="button" class="mtaddt" data-mta="pick">+ topic</button></div>' +
     '<textarea class="mtinote" rows="1" placeholder="Your note">' + esc(it.note) + '</textarea></div>';
+}
+// The topics a topic's board links to, and those whose boards link to it, by the link cards on them
+// (topic-board.html), with how many links there are each way.
+function linkedWith(id) {
+  const real = k => { let x = k, n = 0; while (DB.alias[x] && n++ < 50) x = DB.alias[x]; return x; };
+  const n = new Map(), bump = k => { if (k !== id && topicOf(k)) n.set(k, (n.get(k) || 0) + 1); };
+  Object.keys(DB.boards).forEach(k => (DB.boards[k].items || []).forEach(c => {
+    if (!c || c.kind !== 'link' || !c.to) return;
+    const to = real(c.to.t || ''), fr = real(k);
+    if (fr === id) bump(to); else if (to === id) bump(fr);
+  }));
+  if (!n.size) return '';
+  return '<p class="mtlinked">Linked with ' + [...n].sort((a, b) => topicOf(a[0]).name.localeCompare(topicOf(b[0]).name, 'de')).map(([k, c]) =>
+    '<button type="button" data-mta="view" data-mtt="' + esc(k) + '">' + esc(topicOf(k).name) + '</button>' + (c > 1 ? ' (' + c + ')' : '')).join(', ') + ' <span>· by links on the boards</span></p>';
 }
 function grow(t) { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, 320) + 'px'; }
 
