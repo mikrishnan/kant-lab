@@ -334,6 +334,29 @@
   #world.far .card.k-box .blab { font-size: 1.5rem; }
   #stage.tool-box, #stage.tool-box .card { cursor: crosshair; }
   @media (pointer: coarse) { .card .bgrip { width: 30px; height: 30px; } }
+  /* tables: rows and columns of the reader's words and passages, the first row or column headings if the reader chose */
+  .card.k-table { background: #fff; border-left-width: 1.5px; padding: 0.3rem 0.4rem 0.45rem; font-size: 0.86rem; line-height: 1.25; }
+  .card.k-table .tcap { display: block; font-weight: 600; color: var(--accent); font-size: 0.95rem; margin: 0 0.1rem 0.25rem; }
+  .card.k-table table { border-collapse: collapse; table-layout: fixed; }
+  .card.k-table td, .card.k-table th { border: 1px solid var(--line-soft); padding: 0.2rem 0.35rem; vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+  .card.k-table th { background: var(--parchment-dark); color: var(--accent); font-weight: 600; }
+  .card.k-table th.corner { background: #ddd0b2; }
+  .card.k-table .tt { display: block; white-space: pre-wrap; min-height: 1.15em; }
+  .card.k-table .tt[contenteditable="true"], .card.k-table .tt[contenteditable="plaintext-only"] { display: block; min-width: 0; }
+  .card.k-table .tps { display: flex; flex-wrap: wrap; gap: 0.15rem; margin-top: 0.15rem; }
+  .card.k-table .tt:empty + .tps { margin-top: 0; }
+  .card.k-table td:has(.tps) .tt:empty, .card.k-table th:has(.tps) .tt:empty { min-height: 0; }
+  .card.k-table .tp { display: inline-block; border: 1px solid var(--line); border-left: 3px solid var(--accent-light); border-radius: 4px; background: var(--card); color: var(--accent); font-size: 0.78rem; font-weight: 400; padding: 0 0.3rem; cursor: pointer; }
+  .card.k-table .tp:hover { border-color: var(--accent-light); }
+  .card.k-table .tp.gone { border-style: dashed; color: var(--faded); }
+  .card.k-table.sel td.tsel, .card.k-table.sel th.tsel { box-shadow: inset 0 0 0 2px #d9a441; }
+  .card.k-table td.tdrop, .card.k-table th.tdrop { background: color-mix(in srgb, #d9a441 30%, #fff); }
+  .card .tcol { position: absolute; width: 9px; margin-left: -4px; cursor: col-resize; display: none; border-radius: 3px; }
+  .card .tcol:hover { background: color-mix(in srgb, var(--accent-light) 35%, transparent); }
+  .card.k-table:hover .tcol, .card.k-table.sel .tcol { display: block; }
+  #stage.readonly .tcol { display: none !important; }
+  #world.far .card.k-table .tcap { font-size: 1.5rem; }
+  @media (pointer: coarse) { .card .tcol { width: 18px; margin-left: -9px; } }
   /* annotations: words of a passage marked by the seminar. Each kind's colour is --kc, set from ANN_KINDS. */
   mark.ann { color: inherit; background: color-mix(in srgb, var(--kc) 15%, transparent); border-bottom: 2px solid var(--kc); border-radius: 2px; padding: 0 1px; cursor: pointer; }
   mark.ann.many { background: color-mix(in srgb, var(--kc) 28%, transparent); }
@@ -379,6 +402,24 @@
   #details .anncomp label.f { margin-top: 0.2rem; }
   #details .annf { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.3rem 0 0.5rem; }
   #details .annf select { width: auto; flex: 1; min-width: 6rem; }
+  /* a new table: its size swept on a grid or typed, its headings ticked */
+  #details .tgrid { display: grid; grid-template-columns: repeat(10, 1.3rem); gap: 3px; margin: 0.35rem 0 0.25rem; touch-action: none; width: max-content; }
+  #details .tgrid button { width: 1.3rem; height: 1.3rem; padding: 0; border: 1px solid var(--line-soft); border-radius: 3px; background: #fff; cursor: pointer; }
+  #details .tgrid button.on { background: color-mix(in srgb, var(--accent-light) 40%, #fff); border-color: var(--accent); }
+  #details .tnums { display: flex; gap: 0.9rem; align-items: center; flex-wrap: wrap; margin: 0.35rem 0 0.2rem; font-size: 0.92rem; }
+  #details .tnums input[type=number] { width: 4.2rem; margin-left: 0.25rem; border: 1px solid var(--line); border-radius: 6px; padding: 0.1rem 0.35rem; background: #fff; }
+  #details .tsize { font-weight: 600; color: var(--accent); }
+  #details .tprev table { border-collapse: collapse; table-layout: fixed; width: 100%; }
+  #details .tprev td, #details .tprev th { border: 1px solid var(--line-soft); height: 0.95rem; background: #fff; padding: 0; }
+  #details .tprev th { background: var(--parchment-dark); }
+  #details .tprev th.corner { background: #ddd0b2; }
+  #details .tprev .more { font-size: 0.8rem; color: var(--faded); font-style: italic; margin: 0.15rem 0 0; }
+  #details .tcellp { display: flex; gap: 0.5rem; align-items: baseline; }
+  #details .tcellp .rel { flex: 1; }
+  #details .tacts { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.7rem; align-items: baseline; font-size: 0.92rem; margin-top: 0.5rem; }
+  #details .tacts .lbl { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); }
+  #details .tacts .b { display: flex; flex-wrap: wrap; gap: 0.2rem 0.7rem; }
+  #details select[data-tcellp] { margin-top: 0.35rem; }
 </style>
 </head>
 <body>
@@ -393,6 +434,7 @@
   <span class="grp"><span class="lbl">Add</span>
     <button type="button" class="btn k-note" data-add="note" title="Anything, as on a whiteboard">Note</button>
     <button type="button" class="btn k-problem" data-add="problem" title="A question the topic raises, in your words: draw arrows to it from the passages that may answer it">Question</button>
+    <button type="button" class="btn" data-add="table" title="A table: choose how many columns and rows, and whether its first row or column are headings. A table can also be pasted onto the board.">Table</button>
     <button type="button" class="btn" data-add="model" title="A group: a named frame for cards, which move with it">Group</button>
     <button type="button" class="btn" id="addp" title="The topic’s passages: put them on the board one at a time">Passage…</button>
     <button type="button" class="btn" id="addl" title="A link to another of your topics, or to a card or group on its board">Link…</button>
@@ -497,12 +539,17 @@ const LAYERS = [
   { key: 'note', label: 'Notes', mark: 'sq' },
   { key: 'drawing', label: 'Drawing', color: '#b03a2e' },
   { key: 'box', label: 'Boxes', mark: 'sq' },
+  { key: 'table', label: 'Tables', mark: 'sq' },
   { key: 'annotations', label: 'Annotations, and what they join', color: '#2f5d8a', dash: '2 4' },
 ];
 const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', computer: '#9a8f7a', passage: '#5c3d1e', note: '#5c3d1e' };
 const DASH = { problem: '7 4', computer: '2 4' };
 const FAR = 0.55, NEAR = 1.3;
 const PENS = ['#1a1208', '#8b5e3c', '#b03a2e', '#2f5d8a', '#5c6e3a'];
+// Tables: the most rows and columns one can have, a new column's width on the board, and the narrowest a column can be.
+const TABLE_MAX = { cols: 12, rows: 40 };
+const TABLE_CW = 140, TABLE_MINW = 48;
+const TABLE_TYPE = 'application/x-kantlab-table';   // a table copied from a board, whole: its headings, widths and passages too
 // What can be said about a passage, or some of its words. A new kind is one more line here.
 const ANN_KINDS = [
   { key: 'problem', label: 'Problem', color: '#8a3b12', hint: 'What is wrong or puzzling here: an OCR slip, a reading that does not fit, a clash with another passage' },
@@ -547,6 +594,8 @@ let editing = null;    // something being edited in place: { el, finish }
 let annPick = null;    // words selected in a passage in the side, for the annotation bar: { card, qi, start, end, rect }
 let sideStale = false; // someone else saved while words were being selected in the side: redraw it once the selection ends
 let AX = null;         // the annotations, indexed by passage (see annIndex)
+let tcell = null;      // the cell of a table last clicked: { id, r, c }
+let copyTable = null;  // a table being copied by its button in the side
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
@@ -578,6 +627,7 @@ const arrowShown = a => layerOn(a.layer) && shown(item(a.from)) && shown(item(a.
 function nameOf(id) { const it = item(id); if (!it) return '(gone)'; const m = model(it.model); return cardTitle(it) + (m ? ' (' + m.title + ')' : ''); }
 function cardTitle(it) {
   if (it.kind === 'box') return 'Box' + (it.label ? ': ' + it.label : '');
+  if (it.kind === 'table') { const d = dims(it); return 'Table' + (it.label ? ': ' + it.label : ', ' + d.cols + ' × ' + d.rows); }
   if (it.kind === 'passage') return it.label || (it.quotes[0] && it.quotes[0].cite) || it.cite || 'a passage';
   if (it.kind === 'link') { const L = it.lk || (DB ? linkOf(it) : null), cp = it.copy || {}; return it.label || (L ? (L.whole ? L.topic : L.topic + ': ' + L.title) : cp.title || 'a link'); }
   const t = String(it.text || ''); return (it.kind === 'problem' ? 'Question: ' : 'Note: ') + (t.length > 50 ? t.slice(0, 49) + '…' : t);
@@ -1007,7 +1057,7 @@ function neighbourhood() {
 }
 function matches(it) {
   if (!query) return true;
-  const hay = [it.label, it.sub, it.text, it.by, it.copy && it.copy.title, it.copy && it.copy.topic, it.lk && it.lk.title, it.lk && it.lk.topic].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it)).join(' ').toLowerCase();
+  const hay = [it.label, it.sub, it.text, it.by, it.copy && it.copy.title, it.copy && it.copy.topic, it.lk && it.lk.title, it.lk && it.lk.topic].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it), it.kind === 'table' ? tableHay(it) : '').join(' ').toLowerCase();
   return query.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w));
 }
 
@@ -1116,12 +1166,155 @@ function annDots(it) {
     (n.resolved ? '<span class="ak-problem"><i class="hollow"></i>' + n.resolved + ' resolved</span>' : '') + '</span>';
 }
 
+/* ── Builders: tables ─────────────────────────────────────────────────────────
+   A table keeps its cells a row at a time. A cell is its words, or, once a passage is put in
+   it, { t: its words, ps: its passages }. A passage in a cell names the passage kept in My
+   topics by its id (mt), with its address and citation beside it in case it is later taken
+   out of My topics, as a passage card does; its citation is always the passage's own. The
+   numbers of rows and columns are the shape of cells and are never kept beside it. head says
+   whether the first row and the first column are headings, and cw is each column's width on
+   the board; the height follows the words. Nothing in a table is filled in by the page. */
+const blank = () => ({ t: '', ps: [] });
+const cellOf = x => typeof x === 'string' ? { t: x, ps: [] } : isObj(x) ? { t: typeof x.t === 'string' ? x.t : '', ps: Array.isArray(x.ps) ? x.ps.filter(p => isObj(p) && (p.mt || p.ref)) : [] } : blank();
+const packCell = c => c.ps.length ? { t: c.t, ps: c.ps } : c.t;
+// The cells as a grid: every row as long as the longest, nothing cut, never less than one cell.
+function grid(it) {
+  const rows = (Array.isArray(it.cells) ? it.cells : []).map(r => (Array.isArray(r) ? r : [r]).map(cellOf));
+  if (!rows.length) rows.push([]);
+  const n = Math.max(1, ...rows.map(r => r.length));
+  rows.forEach(r => { while (r.length < n) r.push(blank()); });
+  return rows;
+}
+const dims = it => { const g = grid(it); return { rows: g.length, cols: g[0].length }; };
+function colW(it) { const n = dims(it).cols, cw = Array.isArray(it.cw) ? it.cw : []; return Array.from({ length: n }, (_, i) => +cw[i] >= TABLE_MINW ? Math.round(+cw[i]) : TABLE_CW); }
+const headOf = it => ({ top: !!(it.head && it.head.top), left: !!(it.head && it.head.left) });
+const isHead = (h, r, c) => (h.top && r === 0) || (h.left && c === 0);
+const clampN = (v, d, max) => { v = Math.round(+v); return v >= 1 ? Math.min(max, v) : d; };
+const hasWords = cs => cs.some(c => c.t.trim() || c.ps.length);
+const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+const cardEl = id => [...$('cards').querySelectorAll('.card')].find(c => c.dataset.id === id);
+// A passage in a cell as it stands now: its citation, where it opens, and whether My topics still has it.
+function cellPassage(p) {
+  const x = p.mt ? itemOf(p.mt) : null, ref = (x && x.ref) || p.ref;
+  return { x, cite: (x && x.cite) || p.cite || p.ref || 'a passage', href: ref ? portalHref({ ref }) : null, gone: !x };
+}
+// A cell as text: its words, and its passages' citations.
+function cellText(c) { const cs = c.ps.map(p => cellPassage(p).cite).join('; '); return c.t && cs ? c.t + ' (' + cs + ')' : c.t || cs; }
+const tableHay = it => grid(it).map(r => r.map(cellText).join(' ')).join(' ');
+// Every change to a table goes through here: fn changes its grid and widths in place, and they are kept as cells again.
+function withTable(id, fn) {
+  return change(() => {
+    const it = item(id); if (!it) return;
+    const g = grid(it), cw = colW(it);
+    fn(g, cw, it);
+    it.cells = g.map(r => r.map(packCell));
+    it.cw = cw.slice(0, g[0].length); while (it.cw.length < g[0].length) it.cw.push(TABLE_CW);
+  });
+}
+function tableHtml(it) {
+  const g = grid(it), cw = colW(it), h = headOf(it), at = tcell && tcell.id === it.id ? tcell : null;
+  return '<table style="width:' + cw.reduce((a, b) => a + b, 0) + 'px"><colgroup>' + cw.map(w => '<col style="width:' + w + 'px">').join('') + '</colgroup>' +
+    g.map((row, r) => '<tr>' + row.map((c, k) => {
+      const th = isHead(h, r, k), tag = th ? 'th' : 'td';
+      const cls = [th && h.top && h.left && !r && !k ? 'corner' : '', at && at.r === r && at.c === k ? 'tsel' : ''].filter(Boolean).join(' ');
+      return '<' + tag + (th ? ' scope="' + (h.top && r === 0 ? 'col' : 'row') + '"' : '') + (cls ? ' class="' + cls + '"' : '') + ' data-cell="' + r + ',' + k + '"><span class="tt">' + esc(c.t) + '</span>' +
+        (c.ps.length ? '<span class="tps">' + c.ps.map((p, j) => { const P = cellPassage(p); return '<span class="tp' + (P.gone ? ' gone' : '') + '" data-tp="' + j + '" title="' + (P.gone ? 'No longer in My topics: the citation kept when it was put here' : 'Open it beside the board') + '">' + esc(P.cite) + '</span>'; }).join('') + '</span>' : '') +
+        '</' + tag + '>';
+    }).join('') + '</tr>').join('') + '</table>';
+}
+// The handles that widen a column stand on the right edge of each, the table's full height.
+function placeTcols(el) {
+  const tb = el.querySelector('table'), row = tb && tb.rows[0]; if (!row) return;
+  el.querySelectorAll('.tcol').forEach(h => { const td = row.cells[+h.dataset.tcol]; if (!td) return; h.style.left = (tb.offsetLeft + td.offsetLeft + td.offsetWidth) + 'px'; h.style.top = tb.offsetTop + 'px'; h.style.height = tb.offsetHeight + 'px'; });
+}
+function markCell() {
+  $('cards').querySelectorAll('.k-table .tsel').forEach(x => x.classList.remove('tsel'));
+  const el = tcell && cardEl(tcell.id), td = el && el.querySelector('[data-cell="' + tcell.r + ',' + tcell.c + '"]');
+  if (td) td.classList.add('tsel');
+}
+function previewHtml(rows, cols, top, left) {
+  const n = Math.min(rows, 10);
+  return '<table>' + Array.from({ length: n }, (_, r) => '<tr>' + Array.from({ length: cols }, (_, c) => { const th = (top && r === 0) || (left && c === 0); return th ? '<th' + (top && left && !r && !c ? ' class="corner"' : '') + '></th>' : '<td></td>'; }).join('') + '</tr>').join('') + '</table>' +
+    (rows > n ? '<p class="more">and ' + plural(rows - n, 'row') + ' more</p>' : '');
+}
+// A table as text for Word or a spreadsheet: a row to a line, its cells divided by tabs, quoted where a cell has a tab, a line break or a quote.
+function tableTSV(it) { return grid(it).map(r => r.map(c => { const s = cellText(c); return /[\t\n"]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join('\t')).join('\n'); }
+function tableHTMLOut(it) {
+  const h = headOf(it), abs = u => { try { return new URL(u, location.href).href; } catch (e) { return u; } };
+  return '<table>' + (it.label ? '<caption>' + esc(it.label) + '</caption>' : '') + grid(it).map((r, i) => '<tr>' + r.map((c, k) => {
+    const tag = isHead(h, i, k) ? 'th' : 'td';
+    const ps = c.ps.map(p => { const P = cellPassage(p); return P.href ? '<a href="' + esc(abs(P.href)) + '">' + esc(P.cite) + '</a>' : esc(P.cite); }).join('; ');
+    return '<' + tag + '>' + [esc(c.t).replace(/\n/g, '<br>'), ps].filter(Boolean).join('<br>') + '</' + tag + '>';
+  }).join('') + '</tr>').join('') + '</table>';
+}
+// What was pasted, as a table, if it is one: a board's own table, a table in HTML (Word, a web page, Numbers, Excel,
+// Google Sheets), or lines of tab-separated text. Only words are taken from it; headings only where it marks them.
+function fromTSV(t, quotes) {
+  t = t.replace(/\r\n?/g, '\n').replace(/\n+$/, '');
+  const rows = [[]]; let cur = '', q = false;
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (q) { if (ch === '"') { if (t[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (quotes && ch === '"' && cur === '') q = true;
+    else if (ch === '\t') { rows[rows.length - 1].push(cur); cur = ''; }
+    else if (ch === '\n') { rows[rows.length - 1].push(cur); cur = ''; rows.push([]); }
+    else cur += ch;
+  }
+  if (q) return fromTSV(t, false);   // a quote that was only a quote
+  rows[rows.length - 1].push(cur);
+  return { cells: rows.map(r => r.map(x => x.trim())), head: { top: false, left: false }, label: '' };
+}
+function fromHtml(h) {
+  let tb; try { tb = new DOMParser().parseFromString(h, 'text/html').querySelector('table'); } catch (e) { return null; }
+  if (!tb) return null;
+  const words = el => { const c = el.cloneNode(true); c.querySelectorAll('style, script').forEach(x => x.remove()); c.querySelectorAll('br').forEach(b => b.replaceWith('\n')); c.querySelectorAll('p, div, li').forEach(b => b.append('\n')); return c.textContent.split('\n').map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n'); };
+  const out = [], th = [];
+  [...tb.rows].forEach((tr, r) => {
+    out[r] = out[r] || []; th[r] = th[r] || [];
+    let c = 0;
+    [...tr.cells].forEach(td => {
+      while (out[r][c] != null) c++;
+      const cs = Math.max(1, Math.min(TABLE_MAX.cols, +td.colSpan || 1)), rs = Math.max(1, Math.min(TABLE_MAX.rows, +td.rowSpan || 1));
+      for (let i = 0; i < rs; i++) for (let k = 0; k < cs; k++) { out[r + i] = out[r + i] || []; th[r + i] = th[r + i] || []; out[r + i][c + k] = i || k ? '' : words(td); th[r + i][c + k] = td.tagName === 'TH'; }
+      c += cs;
+    });
+  });
+  const n = Math.max(0, ...out.map(r => r.length));
+  const cells = out.map(r => Array.from({ length: n }, (_, k) => r[k] == null ? '' : r[k])).filter((r, i) => r.length);
+  if (!cells.length || cells.length * n < 2) return null;
+  const top = th[0] && th[0].length === n && th[0].every(Boolean);
+  const left = cells.length > 1 && th.every((r, i) => (top && i === 0) || (r && r[0]));
+  return { cells, head: { top: !!top, left: !!left }, label: tb.caption ? words(tb.caption) : '' };
+}
+function pastedTable(cd) {
+  let T = null;
+  const j = cd.getData(TABLE_TYPE), str = v => typeof v === 'string' ? v : '';
+  if (j) try {
+    const o = JSON.parse(j);
+    if (o && Array.isArray(o.cells) && o.cells.length) T = {
+      cells: grid({ cells: o.cells }).map(r => r.map(c => packCell({ t: c.t, ps: c.ps.map(p => ({ mt: str(p.mt), ref: str(p.ref), cite: str(p.cite) })) }))),
+      head: { top: !!(o.head && o.head.top), left: !!(o.head && o.head.left) }, label: str(o.label), cw: Array.isArray(o.cw) ? o.cw.map(Number) : null, whole: true };
+  } catch (e) { T = null; }
+  if (!T) { const h = cd.getData('text/html'); if (h && /<table/i.test(h)) T = fromHtml(h); }
+  if (!T) { const t = cd.getData('text/plain'); if (t && t.includes('\t')) T = fromTSV(t, true); }
+  if (!T || !T.cells.length) return null;
+  const n = Math.max(1, ...T.cells.map(r => r.length));
+  T.cells.forEach(r => { while (r.length < n) r.push(''); });
+  T.was = { rows: T.cells.length, cols: n };
+  T.cells = T.cells.slice(0, TABLE_MAX.rows).map(r => r.slice(0, TABLE_MAX.cols));
+  if (T.cw) T.cw = T.cw.slice(0, TABLE_MAX.cols);
+  return T;
+}
+const cutNote = T => T.was.rows > TABLE_MAX.rows || T.was.cols > TABLE_MAX.cols ? ' It had ' + plural(T.was.cols, 'column') + ' and ' + plural(T.was.rows, 'row') + ': a table holds ' + TABLE_MAX.cols + ' and ' + TABLE_MAX.rows + ' at most, so the rest was left out.' : '';
+
 /* ── Render: the board ────────────────────────────────────────────────────── */
 function cardHtml(it) {
   const m = model(it.model), col = m ? m.color : '#b8a88a';
   const q0 = (it.quotes || [])[0];
   let inner = '';
   if (it.kind === 'box') return '<div class="card k-box" data-id="' + esc(it.id) + '" style="width:' + (+it.w || 280) + 'px;height:' + (+it.h || 180) + 'px"><span class="blab">' + esc(it.label || '') + '</span>' + (ro() ? '' : '<span class="bgrip" title="Drag to resize"></span><span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+  if (it.kind === 'table') return '<div class="card k-table" data-id="' + esc(it.id) + '">' + (it.label ? '<span class="tcap">' + esc(it.label) + '</span>' : '') + tableHtml(it) +
+    (ro() ? '' : colW(it).map((w, i) => '<span class="tcol" data-tcol="' + i + '" title="Drag to widen this column"></span>').join('') + '<span class="bgrip" title="Drag to widen the table"></span><span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
   if (it.kind === 'passage') {
     inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 && q0.q ? '<div class="pq">“' + excerpt(it, 240) + '”</div>' : '') +
       '<span class="pc">' + esc((q0 && q0.cite) || it.cite || it.ref || '') + '</span>' +
@@ -1147,7 +1340,9 @@ function renderCards() {
     return '<div class="ftab" data-model="' + esc(m.id) + '" style="background:' + esc(m.color) + '"><b>' + esc(m.title) + '</b><i>' + esc(m.name || '') + '</i>' + inMark(m.id) + '</div>';
   }).join('') : '';
   const grips = layerOn('frames') && !ro() ? B.models.map(m => '<div class="fgrip" data-grip="' + esc(m.id) + '" style="background:' + esc(m.color) + '" title="Drag to spread its cards apart, or to pull them together">⤡</div>').join('') : '';
+  if (editing && $('cards').contains(editing.el)) { commitEditing(); return; }   // what is being typed is kept first; keeping it draws the board again
   $('cards').innerHTML = tabs + grips + vis.map(cardHtml).join('');
+  $('cards').querySelectorAll('.card.k-table').forEach(placeTcols);
   size = {};
   $('cards').querySelectorAll('.card').forEach(el => { size[el.dataset.id] = { w: el.offsetWidth, h: el.offsetHeight }; });
   placeCards();
@@ -1316,6 +1511,7 @@ function sideIntro() {
     '<li><b>Link to another topic</b>: under <b>Boards</b>, in the side, choose one of your topics and link to it as a whole, or to a card or group on its board; or press <i>Copy a link to it</i> on a card there, and paste it here (⌘V). Arrows join a link card like any card. The card linked to carries a mark, <b>↖</b>, and lists the links in its side.</li>' +
     '<li><b>Edit in place</b>: double-click any card, arrow or group name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
     '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag one out; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
+    '<li><b>Tables</b>: press <i>Table</i>, choose its columns and rows on the grid, and whether its first row or its first column are headings. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next, and in the last cell adds a row. Drag a passage from <b>Passages</b> onto a cell to put it there. Paste a table from Word or a spreadsheet onto the board, and copy one back with <kbd>⌘C</kbd>.</li>' +
     '<li><b>Groups</b> are frames around their cards. Grab any bare part of a frame to move the whole group; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into a frame to put it in that group.</li>' +
     '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
     '<li><b>On an iPad</b>: a finger moves cards, groups and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>' +
@@ -1355,11 +1551,64 @@ function sideCard(it) {
   const m = model(it.model), arr = B.arrows.filter(a => a.from === it.id || a.to === it.id);
   if (it.kind === 'passage') return sidePassage(it, m, arr);
   if (it.kind === 'link') return sideLink(it, m, arr);
+  if (it.kind === 'table') return sideTable(it, m, arr);
   const title = it.kind === 'box' ? 'A box' + (it.label ? ': ' + it.label : '') : it.kind === 'problem' ? 'A question' : 'A note';
   let h = '<h2>' + esc(title) + '</h2><p class="sub">' + mchip(m) + esc(m ? m.name || '' : '') + '</p>';
   if (it.text) h += '<span class="k">Written on the board</span><div class="stmt' + (it.kind === 'problem' ? ' problem' : '') + '">' + esc(it.text) + '</div>';
   return h + linkedFromHtml(it.id) + cardButtons(it, arr);
 }
+function sideTable(it, m, arr) {
+  const { rows, cols } = dims(it), h = headOf(it), g = grid(it), at = tcell && tcell.id === it.id && tcell.r < rows && tcell.c < cols ? tcell : null;
+  let s = '<h2>' + esc(it.label ? 'A table: ' + it.label : 'A table') + '</h2><p class="sub">' + mchip(m) + esc(plural(cols, 'column') + ' × ' + plural(rows, 'row')) + '</p>';
+  if (!ro()) s += '<span class="k">Its size and headings</span>' +
+    '<div class="tnums"><label>Columns<input type="number" data-tshape="cols" min="1" max="' + TABLE_MAX.cols + '" value="' + cols + '"></label><label>Rows<input type="number" data-tshape="rows" min="1" max="' + TABLE_MAX.rows + '" value="' + rows + '"></label></div>' +
+    '<label class="ev"><input type="checkbox" data-thead="top"' + (h.top ? ' checked' : '') + '>Headings across the top</label>' +
+    '<label class="ev"><input type="checkbox" data-thead="left"' + (h.left ? ' checked' : '') + '>Headings down the left side</label>';
+  if (at) {
+    const cl = g[at.r][at.c];
+    s += '<span class="k">Row ' + (at.r + 1) + ', column ' + (at.c + 1) + ': the cell last clicked</span>' +
+      (cl.t ? '<div class="stmt">' + esc(cl.t) + '</div>' : '<p class="empty">No words in it' + (ro() ? '' : ': double-click it on the board to type') + '.</p>') +
+      cl.ps.map((p, j) => { const P = cellPassage(p); return '<div class="tcellp">' + (P.href ? '<button type="button" class="rel" data-read="' + esc(P.href) + '" title="Read it beside the board">' + esc(P.cite) + '</button>' : '<span class="rel">' + esc(P.cite) + '</span>') + (ro() ? '' : '<button type="button" class="linkish" data-tpout="' + j + '">take it out</button>') + '</div>' + (P.gone ? '<p class="ocr">No longer in My topics: the citation is the one kept when it was put here.</p>' : ''); }).join('');
+    if (!ro()) {
+      const under = underTopic().filter(x => !cl.ps.some(p => p.mt === x.id));
+      s += (under.length ? '<select data-tcellp aria-label="Put a passage in this cell"><option value="">Put one of the topic’s passages in this cell…</option>' + under.map(x => '<option value="' + esc(x.id) + '">' + esc((x.cite || x.ref) + (x.work ? ' · ' + x.work : '')) + '</option>').join('') + '</select>' : '') +
+        '<p class="by">Or drag one onto the cell from <b>Passages</b>, in the side.</p>' +
+        '<div class="tacts"><span class="lbl">Row</span><span class="b"><button type="button" class="linkish" data-tact="rowabove">insert above</button><button type="button" class="linkish" data-tact="rowbelow">insert below</button>' + (rows > 1 ? '<button type="button" class="linkish" data-tact="rowdel">delete it</button>' : '') + '</span>' +
+        '<span class="lbl">Column</span><span class="b"><button type="button" class="linkish" data-tact="colleft">insert left</button><button type="button" class="linkish" data-tact="colright">insert right</button>' + (cols > 1 ? '<button type="button" class="linkish" data-tact="coldel">delete it</button>' : '') + '</span></div>';
+    }
+  } else if (!ro()) s += '<p class="by">Click a cell to put a passage in it, or to add or delete a row or column there. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next.</p>';
+  s += '<div class="row"><button type="button" class="btn" data-act="tcopy" title="To paste into Word, a spreadsheet, or onto a board (⌘C does it too)">Copy the table</button></div>';
+  return s + cardButtons(it, arr);
+}
+function sideTableForm() {
+  const f = form, last = prefs.table || {};
+  if (f.rows == null) { f.rows = clampN(last.rows, 3, TABLE_MAX.rows); f.cols = clampN(last.cols, 3, TABLE_MAX.cols); f.top = last.top !== false; f.left = !!last.left; }
+  let g = '';
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 10; c++) g += '<button type="button" data-g="' + r + ',' + c + '" aria-label="' + (c + 1) + ' × ' + (r + 1) + '"></button>';
+  return '<h2>A new table</h2><p class="sub">Sweep the grid and click to choose its size, or type the numbers</p>' +
+    '<div class="tgrid" data-tgrid>' + g + '</div>' +
+    '<div class="tnums"><label>Columns<input type="number" data-tnew="cols" min="1" max="' + TABLE_MAX.cols + '" value="' + f.cols + '"></label><label>Rows<input type="number" data-tnew="rows" min="1" max="' + TABLE_MAX.rows + '" value="' + f.rows + '"></label><span class="tsize" data-tsize></span></div>' +
+    '<label class="ev"><input type="checkbox" data-tnewh="top"' + (f.top ? ' checked' : '') + '>Headings across the top</label>' +
+    '<label class="ev"><input type="checkbox" data-tnewh="left"' + (f.left ? ' checked' : '') + '>Headings down the left side</label>' +
+    '<label class="f">Its name (optional)</label><input type="text" data-label placeholder="What it sets side by side">' + modelSelect(f.model) +
+    '<span class="k">As it will be</span><div class="tprev" data-tprev></div>' +
+    '<div class="row"><button type="button" class="btn solid" data-act="savetable">Put it on the board</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div>';
+}
+// The new table's grid, numbers and preview, kept in step: lit to r × c while the grid is swept, else to the size chosen.
+function tableFormSync(r, c) {
+  const D = $('details'), f = form; if (!f || f.kind !== 'table') return;
+  const R = r || f.rows, C = c || f.cols;
+  D.querySelectorAll('[data-tgrid] button').forEach(b => { const [y, x] = b.dataset.g.split(',').map(Number); b.classList.toggle('on', y < R && x < C); });
+  const z = D.querySelector('[data-tsize]'); if (z) z.textContent = C + ' × ' + R;
+  const p = D.querySelector('[data-tprev]'); if (p) p.innerHTML = previewHtml(R, C, f.top, f.left);
+}
+function pickSize(b) {
+  const [r, c] = b.dataset.g.split(',').map(Number), D = $('details');
+  form.rows = r + 1; form.cols = c + 1;
+  D.querySelector('[data-tnew="rows"]').value = form.rows; D.querySelector('[data-tnew="cols"]').value = form.cols;
+  tableFormSync();
+}
+const gridAt = e => { if (!form || form.kind !== 'table') return null; const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.closest ? el.closest('[data-tgrid] button') : null; };
 function sideCards(ids) {
   const its = ids.map(item).filter(Boolean);
   return '<h2>' + its.length + ' cards</h2><p class="sub">' + its.map(it => esc(cardTitle(it))).join(' · ') + '</p>' +
@@ -1562,11 +1811,11 @@ function sidePhotos() {
 const modelSelect = (cur) => '<label class="f">Group</label><select data-model><option value="">no group</option>' + B.models.map(m => '<option value="' + esc(m.id) + '"' + (m.id === cur ? ' selected' : '') + '>' + esc(m.title) + '</option>').join('') + '</select>';
 function sideCardForm() {
   const it = form.id ? item(form.id) : null, kind = it ? it.kind : form.kind, cur = it || { model: form.model, quotes: [] };
-  const word = { passage: 'passage', problem: 'question', note: 'note', box: 'box', link: 'link' }[kind] || 'note';
+  const word = { passage: 'passage', problem: 'question', note: 'note', box: 'box', link: 'link', table: 'table' }[kind] || 'note';
   let h = '<h2>' + (it ? (kind === 'passage' || kind === 'link' ? 'A heading for the ' + word : 'Edit the ' + word) : 'A new ' + word) + '</h2><p class="sub">' + {
-    passage: esc(cardTitle(cur)), link: esc(cardTitle(cur)), problem: 'A question the topic raises, in your words', note: 'Anything, as on a whiteboard', box: 'A box on the board' }[kind] + '</p>';
+    passage: esc(cardTitle(cur)), link: esc(cardTitle(cur)), problem: 'A question the topic raises, in your words', note: 'Anything, as on a whiteboard', box: 'A box on the board', table: 'A table on the board: its name and its group' }[kind] + '</p>';
   h += modelSelect(cur.model);
-  if (kind === 'passage' || kind === 'box' || kind === 'link') h += '<label class="f">' + (kind === 'passage' ? 'A heading (optional): its citation shows when there is none' : kind === 'link' ? 'A heading (optional): what it points to shows when there is none' : 'Its name') + '</label><input type="text" data-label value="' + esc(cur.label || '') + '">';
+  if (kind === 'passage' || kind === 'box' || kind === 'link' || kind === 'table') h += '<label class="f">' + (kind === 'passage' ? 'A heading (optional): its citation shows when there is none' : kind === 'link' ? 'A heading (optional): what it points to shows when there is none' : kind === 'table' ? 'Its name (optional)' : 'Its name') + '</label><input type="text" data-label value="' + esc(cur.label || '') + '">';
   else h += '<label class="f">' + (kind === 'problem' ? 'The question, in your words' : 'What to write') + '</label><textarea data-text>' + esc(cur.text || '') + '</textarea>';
   h += '<div class="row"><button type="button" class="btn solid" data-act="savecard">' + (it ? 'Save' : 'Put it on the board') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div><p class="warn" data-err></p>';
   return h;
@@ -1594,7 +1843,7 @@ function renderSide() {
   const D = $('details');
   if (form) document.body.classList.remove('sideclosed');
   if (composing()) { keepComposer(() => { const it = item(form.card); D.innerHTML = it ? sideCard(it) : sideAnnAlone(); }); return; }
-  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'annotations' ? sideAnnotations() : sideCardForm(); return; }
+  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'annotations' ? sideAnnotations() : form.kind === 'table' ? sideTableForm() : sideCardForm(); tableFormSync(); return; }
   if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
   else if (sel.kind === 'card' && item(sel.ids[0])) D.innerHTML = sideCard(item(sel.ids[0]));
   else if (sel.kind === 'arrow' && arrow(sel.ids[0])) D.innerHTML = sideArrow(arrow(sel.ids[0]));
@@ -1776,6 +2025,141 @@ function saveModel(D) {
     }
   });
   form = null; sel = { kind: 'model', ids: [id] }; render();
+}
+// A table put on the board: from the side's form, or pasted. Returns its id.
+function newTable(cells, head, at, o) {
+  if (ro()) { toast(roWhy()); return null; }
+  o = o || {};
+  let id;
+  const cols = Math.max(1, ...cells.map(r => r.length));
+  if (!at) {   // in the middle of the view, a little below the last thing put there, so that several in a row don't hide one another
+    const c = centre(), near = lastPut && Date.now() - lastPut.t < 120000 && Math.hypot(lastPut.at[0] - c[0], lastPut.at[1] - c[1]) < 600;
+    at = near ? [lastPut.at[0] + 30, lastPut.at[1] + 40] : [c[0] + 80 - Math.min(cols, 5) * TABLE_CW / 2, c[1] - 20];
+    lastPut = { at, t: Date.now() };
+  }
+  change(() => {
+    id = uid('t');
+    B.items.push({ id, kind: 'table', model: o.model || null, label: o.label || '', head: { top: !!head.top, left: !!head.left }, cells,
+      cw: Array.from({ length: cols }, (_, i) => o.cw && +o.cw[i] >= TABLE_MINW ? Math.round(+o.cw[i]) : TABLE_CW), quotes: [], date: today() });
+    view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
+  });
+  showLayer('table'); form = null; sel = { kind: 'card', ids: [id] }; tcell = { id, r: 0, c: 0 }; showSide('details'); render();
+  return id;
+}
+function saveTable(D) {
+  const f = form, label = ((D.querySelector('[data-label]') || {}).value || '').trim(), mdl = (D.querySelector('[data-model]') || {}).value || null;
+  const rows = clampN(f.rows, 3, TABLE_MAX.rows), cols = clampN(f.cols, 3, TABLE_MAX.cols);
+  prefs.table = { rows, cols, top: !!f.top, left: !!f.left }; savePrefs();
+  const id = newTable(Array.from({ length: rows }, () => Array(cols).fill('')), { top: f.top, left: f.left }, f.at, { label, model: mdl });
+  if (id) editCell(id, 0, 0);
+}
+// A cell typed in where it stands. Tab keeps it and opens the next, ⇧Tab the one before; Tab in the last cell adds a row.
+function editCell(id, r, c) {
+  commitEditing();
+  const it = item(id); if (!it || it.kind !== 'table' || ro()) return;
+  const el = cardEl(id), td = el && el.querySelector('[data-cell="' + r + ',' + c + '"]'), tt = td && td.querySelector('.tt'); if (!tt) return;
+  tcell = { id, r, c }; markCell();
+  inlineEdit(tt, grid(it)[r][c].t, true, (v, changed) => {
+    if (v === null || !changed) return;
+    withTable(id, g => { if (g[r] && g[r][c]) g[r][c].t = v; });
+  }, e => {
+    if (e.key !== 'Tab') return false;
+    e.preventDefault();
+    const d = dims(it); let nr = r, nc = c + (e.shiftKey ? -1 : 1);
+    if (nc >= d.cols) { nc = 0; nr++; } else if (nc < 0) { nc = d.cols - 1; nr--; }
+    if (editing) editing.finish(true);
+    if (nr < 0) return true;
+    if (nr >= dims(item(id) || it).rows) {
+      if (nr >= TABLE_MAX.rows) { toast('A table holds ' + TABLE_MAX.rows + ' rows at most.'); return true; }
+      withTable(id, g => { g.push(g[0].map(blank)); }); render();
+    }
+    editCell(id, nr, nc); return true;
+  });
+  if (editing) editing.cell = { id, r, c };
+}
+// The table's size, from the side: rows and columns added or taken at the end, and asked first if words would go.
+function setShape(id, rows, cols) {
+  const it = item(id); if (!it || ro()) return;
+  const d = dims(it), g = grid(it);
+  rows = clampN(rows, d.rows, TABLE_MAX.rows); cols = clampN(cols, d.cols, TABLE_MAX.cols);
+  if (rows === d.rows && cols === d.cols) { renderSide(); return; }
+  const going = g.slice(rows).flat().concat(g.slice(0, rows).flatMap(x => x.slice(cols))), what = [];
+  if (rows < d.rows) what.push('the last ' + (d.rows - rows === 1 ? 'row' : plural(d.rows - rows, 'row')));
+  if (cols < d.cols) what.push('the last ' + (d.cols - cols === 1 ? 'column' : plural(d.cols - cols, 'column')));
+  if (hasWords(going) && !confirm('Taking off ' + what.join(' and ') + ' takes words or passages with ' + (what.length > 1 || rows < d.rows - 1 || cols < d.cols - 1 ? 'them' : 'it') + '. Go on? Undo (⌘Z) puts it all back.')) { renderSide(); return; }
+  withTable(id, (g, cw) => {
+    g.splice(rows); while (g.length < rows) g.push(g[0].map(blank));
+    g.forEach(x => { x.splice(cols); while (x.length < cols) x.push(blank()); });
+    cw.splice(cols); while (cw.length < cols) cw.push(TABLE_CW);
+  });
+  render();
+}
+// A row or a column, inserted or deleted where the cell last clicked is.
+function tableAct(act) {
+  if (ro() || !tcell) return;
+  const { id, r, c } = tcell, it = item(id); if (!it) return;
+  const d = dims(it), g = grid(it);
+  if (r >= d.rows || c >= d.cols) return;
+  if (/^row(above|below)$/.test(act) && d.rows >= TABLE_MAX.rows) return toast('A table holds ' + TABLE_MAX.rows + ' rows at most.');
+  if (/^col(left|right)$/.test(act) && d.cols >= TABLE_MAX.cols) return toast('A table holds ' + TABLE_MAX.cols + ' columns at most.');
+  if (act === 'rowdel' && hasWords(g[r]) && !confirm('Row ' + (r + 1) + ' has words or passages in it. Delete it? Undo (⌘Z) brings it back.')) return;
+  if (act === 'coldel' && hasWords(g.map(x => x[c])) && !confirm('Column ' + (c + 1) + ' has words or passages in it. Delete it? Undo (⌘Z) brings it back.')) return;
+  withTable(id, (g, cw) => {
+    if (act === 'rowabove') g.splice(r, 0, g[0].map(blank));
+    else if (act === 'rowbelow') g.splice(r + 1, 0, g[0].map(blank));
+    else if (act === 'rowdel' && g.length > 1) g.splice(r, 1);
+    else if (act === 'colleft') { g.forEach(x => x.splice(c, 0, blank())); cw.splice(c, 0, TABLE_CW); }
+    else if (act === 'colright') { g.forEach(x => x.splice(c + 1, 0, blank())); cw.splice(c + 1, 0, TABLE_CW); }
+    else if (act === 'coldel' && g[0].length > 1) { g.forEach(x => x.splice(c, 1)); cw.splice(c, 1); }
+  });
+  const n = dims(item(id));
+  if (act === 'rowabove') tcell.r = r + 1; else if (act === 'colleft') tcell.c = c + 1;
+  tcell.r = Math.min(tcell.r, n.rows - 1); tcell.c = Math.min(tcell.c, n.cols - 1);
+  render();
+}
+// One of the topic's passages, put in a cell: it stays under Passages, to go on the board as a card too.
+function putInCell(id, r, c, mt) {
+  if (ro()) { toast(roWhy()); return; }
+  const x = itemOf(mt), it = item(id), cl = it && grid(it)[r] && grid(it)[r][c]; if (!x || !cl) return;
+  if (cl.ps.some(p => p.mt === mt)) { toast('It is in that cell already.'); return; }
+  const wait = waiting().some(w => w.id === mt);
+  withTable(id, g => { g[r][c].ps.push({ mt, ref: x.ref, cite: x.cite || '' }); });
+  tcell = { id, r, c }; sel = { kind: 'card', ids: [id] }; form = null; showSide('details'); render();
+  toast((x.cite || 'The passage') + ' is in the table.' + (wait ? ' It is still under Passages, to put on the board as a card as well.' : ''));
+}
+function takeFromCell(id, r, c, j) {
+  if (ro()) return;
+  withTable(id, g => { if (g[r] && g[r][c]) g[r][c].ps.splice(j, 1); });
+  render();
+}
+function openCellPassage(id, r, c, j) {
+  const it = item(id), row = it && grid(it)[r], p = row && row[c] && row[c].ps[j]; if (!p) return;
+  const P = cellPassage(p);
+  if (P.href) read(P.href); else toast('This passage has no address in the portal to open it at.');
+}
+// A table pasted while a cell is being typed in fills the cells from that one on, the table growing to take it.
+function fillFrom(id, r, c, cells, T) {
+  let cut = false;
+  withTable(id, (g, cw) => {
+    cells.forEach((row, i) => row.forEach((v, k) => {
+      const R = r + i, C = c + k;
+      if (R >= TABLE_MAX.rows || C >= TABLE_MAX.cols) { cut = true; return; }
+      while (g.length <= R) g.push(g[0].map(blank));
+      while (g[0].length <= C) { g.forEach(x => x.push(blank())); cw.push(TABLE_CW); }
+      g[R][C] = cellOf(v);
+    }));
+  });
+  render();
+  toast('Pasted ' + plural(cells[0].length, 'column') + ' × ' + plural(cells.length, 'row') + ' from row ' + (r + 1) + ', column ' + (c + 1) + '. Undo (⌘Z) puts back what was there.' + (cut || cutNote(T) ? ' A table holds ' + TABLE_MAX.cols + ' columns and ' + TABLE_MAX.rows + ' rows at most, so the rest was left out.' : ''));
+}
+function copyOut(it) {
+  if (!it) return;
+  copyTable = it; let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  copyTable = null;
+  if (ok) toast('Copied: paste it into Word or a spreadsheet, or onto a board.');
+  else if (navigator.clipboard) navigator.clipboard.writeText(tableTSV(it)).then(() => toast('Copied as text: paste it into Word or a spreadsheet.'), () => toast('This browser would not copy it.'));
+  else toast('This browser would not copy it.');
 }
 // Deleting a passage's card takes the passage off the topic too, since every passage under the topic has its card.
 function delAsk(ids) {
@@ -2012,7 +2396,7 @@ function tidy() {
       for (let k = 0; k < parts.length; k++) divs.forEach(a => { if (depth[a.from] != null && (depth[a.to] == null || depth[a.to] < depth[a.from] + 1) && depth[a.from] < parts.length) depth[a.to] = depth[a.from] + 1; });
       parts.forEach(p => { if (depth[p.id] == null) depth[p.id] = 0; });
       const rows = []; parts.forEach(p => { (rows[depth[p.id]] = rows[depth[p.id]] || []).push(p); });
-      const widest = Math.max(1, ...rows.map(r => (r || []).length)), w = Math.max(widest * 185, rest.length ? 280 : 0);
+      const widest = Math.max(1, ...rows.map(r => (r || []).length)), w = Math.max(widest * 185, rest.length ? Math.max(280, ...rest.map(it => sz(it.id).w)) : 0);
       let y = 0;
       rows.forEach(r => { if (!r) return; const slot = w / r.length; r.forEach((p, i) => { v.pos[p.id] = [Math.round(x + slot * (i + 0.5) - 84), y]; }); y += Math.max(...r.map(p => sz(p.id).h)) + 60; });
       rest.forEach(it => { v.pos[it.id] = [x, y]; y += sz(it.id).h + 24; });
@@ -2143,13 +2527,15 @@ $('stage').addEventListener('pointerdown', e => {
   if (t.isContentEditable || t.closest('.pill-edit')) return;   // a caret or a selection in what is being edited
   if (editing) commitEditing();
   const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame'), th = t.closest('.annt');
+  const tcolEl = t.closest('.tcol'), cellEl = t.closest('.k-table [data-cell]'), chipEl = t.closest('.k-table .tp');
   const bare = !knob && !card && !tab && !grip && !ar && !th;
   const [wx, wy] = toWorld(e.clientX, e.clientY);
   if (spaceDown) drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
   else if (tool === 'erase' && !ro()) { drag = { what: 'erase', changed: false }; eraseAt(wx, wy, drag); }
   else if (draws(e, bare)) drag = { what: 'ink', pts: [[wx, wy]], pen: e.pointerType === 'pen' };
   else if (tool === 'box' && !ro() && !knob && !bgrip) drag = { what: 'boxdraw', wx, wy, sx: e.clientX, sy: e.clientY };
-  else if (bgrip && !ro()) { const id = bgrip.closest('.card').dataset.id, it = item(id); select('card', [id]); drag = { what: 'boxsize', id, sx: e.clientX, sy: e.clientY, w0: +it.w || 280, h0: +it.h || 180, moved: false }; }
+  else if (bgrip && !ro()) { const id = bgrip.closest('.card').dataset.id, it = item(id); select('card', [id]); drag = it.kind === 'table' ? { what: 'tablesize', id, sx: e.clientX, sy: e.clientY, cw0: colW(it), moved: false } : { what: 'boxsize', id, sx: e.clientX, sy: e.clientY, w0: +it.w || 280, h0: +it.h || 180, moved: false }; }
+  else if (tcolEl && !ro()) { const id = tcolEl.closest('.card').dataset.id, k = +tcolEl.dataset.tcol; if (!(sel.kind === 'card' && sel.ids.length === 1 && sel.ids[0] === id)) select('card', [id]); drag = { what: 'colsize', id, col: k, sx: e.clientX, sy: e.clientY, w0: colW(item(id))[k], moved: false }; }
   else if (tool === 'select' && !card) drag = { what: 'marq', wx, wy };
   else if (knob && !ro()) { drag = { what: 'link', from: card.dataset.id, sx: e.clientX, sy: e.clientY }; $('stage').classList.add('linking'); }
   else if (card) {
@@ -2162,11 +2548,14 @@ $('stage').addEventListener('pointerdown', e => {
     if (mode) { const from = mode.linkFrom; mode = null; if (id !== from) makeArrow(from, id); else render(); return; }
     if (e.shiftKey || tool === 'select') { const ids = sel.kind === 'card' ? sel.ids.slice() : []; const i = ids.indexOf(id); if (i >= 0) ids.splice(i, 1); else ids.push(id); select(ids.length ? 'card' : null, ids); return; }
     const wasSel = sel.kind === 'card' && sel.ids.length === 1 && sel.ids[0] === id;
+    const cellAt = cellEl && card.classList.contains('k-table') ? cellEl.dataset.cell.split(',').map(Number) : null;
+    if (cellAt) tcell = { id, r: cellAt[0], c: cellAt[1] };
     if (!(sel.kind === 'card' && sel.ids.includes(id))) select('card', [id]);
+    else if (cellAt) { markCell(); if (sel.ids.length === 1 && !form) renderSide(); }
     // a box carries what lies inside it
     const ids = sel.ids.slice();
     sel.ids.forEach(x => { const b = item(x); if (!b || b.kind !== 'box') return; const r = rect(x); B.items.filter(shown).forEach(o => { if (o.id === x || ids.includes(o.id)) return; const q = rect(o.id); if (q && inside(r, q.x + q.w / 2, q.y + q.h / 2)) ids.push(o.id); }); });
-    drag = { what: 'cards', ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false, wasSel, clicked: id };
+    drag = { what: 'cards', ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false, wasSel, clicked: id, cell: cellAt, chip: cellAt && chipEl ? +chipEl.dataset.tp : null };
   }
   else if (grip && !ro()) { select('model', [grip.dataset.grip]); drag = spreadDrag(grip.dataset.grip, e); }
   else if (tab) { select('model', [tab.dataset.model]); drag = modelDrag(tab.dataset.model, e); }
@@ -2238,6 +2627,16 @@ $('stage').addEventListener('pointermove', e => {
     if (el) { el.style.width = it.w + 'px'; el.style.height = it.h + 'px'; size[drag.id] = { w: el.offsetWidth, h: el.offsetHeight }; }
     renderInk(neighbourhood()); return;
   }
+  if (drag.what === 'tablesize' || drag.what === 'colsize') {
+    if (ro()) return;
+    if (!drag.moved) { drag.moved = true; startUndo(); }
+    const it = item(drag.id); if (!it) return;
+    if (drag.what === 'colsize') { const cw = colW(it); cw[drag.col] = Math.max(TABLE_MINW, Math.round(drag.w0 + dx)); it.cw = cw; }
+    else { const W0 = drag.cw0.reduce((a, b) => a + b, 0), f = Math.max(0.1, (W0 + dx) / W0); it.cw = drag.cw0.map(w => Math.max(TABLE_MINW, Math.round(w * f))); }
+    const el = cardEl(drag.id), tb = el && el.querySelector('table');
+    if (tb) { const cw = colW(it); tb.style.width = cw.reduce((a, b) => a + b, 0) + 'px'; tb.querySelectorAll('col').forEach((c, i) => { c.style.width = cw[i] + 'px'; }); placeTcols(el); size[drag.id] = { w: el.offsetWidth, h: el.offsetHeight }; }
+    renderInk(neighbourhood()); return;
+  }
   if (drag.what === 'marq' || drag.what === 'boxdraw') {
     const [wx, wy] = toWorld(e.clientX, e.clientY), m = $('marq');
     m.style.display = ''; m.setAttribute('x', Math.min(wx, drag.wx)); m.setAttribute('y', Math.min(wy, drag.wy)); m.setAttribute('width', Math.abs(wx - drag.wx)); m.setAttribute('height', Math.abs(wy - drag.wy));
@@ -2259,7 +2658,7 @@ function pointerEnd(e, cancelled) {
   const d = drag; drag = null;
   $('stage').classList.remove('panning', 'linking');
   if (d.what === 'pan') { if (!d.moved && !cancelled && !tapped(e) && !mode && !form && sel.kind) select(null, []); keepCam(); return; }
-  if (d.what === 'boxsize') { if (d.moved) { save(); render(); } return; }
+  if (d.what === 'boxsize' || d.what === 'tablesize' || d.what === 'colsize') { if (d.moved) { save(); render(); } return; }
   if (d.what === 'boxdraw') {
     const m = $('marq'), x = +m.getAttribute('x'), y = +m.getAttribute('y'), w = +m.getAttribute('width'), h = +m.getAttribute('height');
     m.style.display = 'none'; m.setAttribute('width', 0);
@@ -2271,7 +2670,11 @@ function pointerEnd(e, cancelled) {
   }
   if (d.what === 'cards' || d.what === 'model' || d.what === 'spread') {
     $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = '');
-    if (!d.moved) { if (!cancelled && !tapped(e) && d.what === 'cards' && d.wasSel) editInPlace(d.clicked); return; }
+    if (!d.moved) {
+      if (!cancelled && d.what === 'cards' && d.cell && d.chip != null) { openCellPassage(d.clicked, d.cell[0], d.cell[1], d.chip); return; }   // a passage in a cell opens beside the board
+      if (!cancelled && !tapped(e) && d.what === 'cards' && d.wasSel) { if (d.cell) editCell(d.clicked, d.cell[0], d.cell[1]); else editInPlace(d.clicked); }
+      return;
+    }
     if (d.what === 'cards' && !cancelled) {
       const tgt = dropTarget(d.ids);
       if (tgt && item(d.ids[0]).kind !== 'box') { const it = item(d.ids[0]), was = model(it.model); it.model = tgt.id; toast('Moved into ' + tgt.title + (was ? ', out of ' + was.title : '') + '. Undo with ⌘Z.'); }
@@ -2310,15 +2713,17 @@ $('stage').addEventListener('pointercancel', e => afterPointer(e, true));
 // Double-click (or double tap): a card opens to be edited; the board offers something to put there.
 function doubleAt(cx, cy) {
   const under = document.elementFromPoint(cx, cy);
-  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob') || under.isContentEditable || under.closest('.pill-edit')) return;
+  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob, .tcol, .tp') || under.isContentEditable || under.closest('.pill-edit')) return;
   const card = under.closest('.card');
+  const cl = card && card.classList.contains('k-table') && under.closest('[data-cell]');
+  if (cl) { const [r, c] = cl.dataset.cell.split(',').map(Number); editCell(card.dataset.id, r, c); return; }
   if (card) { editInPlace(card.dataset.id); return; }
   const arEl = under.closest('.ar'); if (arEl) { editArrowLabel(arEl.dataset.arrow); return; }
   const tabEl = under.closest('.ftab'); if (tabEl) { editModelTitle(tabEl.dataset.model); return; }
   const [wx, wy] = toWorld(cx, cy), r = $('stage').getBoundingClientRect(), c = $('chooser');
   const inM = B.models.find(m => inside(frameOf(m), wx, wy));
   c.dataset.at = JSON.stringify([wx - 20, wy - 15]); c.dataset.model = inM ? inM.id : '';
-  c.innerHTML = '<span class="ttl">Put here' + (inM ? ', in ' + esc(inM.title) : '') + ': type, then Enter for a note, or choose what it is</span><textarea id="qnote" rows="2" placeholder="Type here (⇧Enter for a new line)"></textarea><button type="button" class="btn k-note" data-new="note">Note</button><button type="button" class="btn k-problem" data-new="problem">Question</button><button type="button" class="btn" data-new="box">Box</button>';
+  c.innerHTML = '<span class="ttl">Put here' + (inM ? ', in ' + esc(inM.title) : '') + ': type, then Enter for a note, or choose what it is</span><textarea id="qnote" rows="2" placeholder="Type here (⇧Enter for a new line)"></textarea><button type="button" class="btn k-note" data-new="note">Note</button><button type="button" class="btn k-problem" data-new="problem">Question</button><button type="button" class="btn" data-new="box">Box</button><button type="button" class="btn" data-new="table">Table</button>';
   c.style.left = Math.min(cx - r.left, r.width - 240) + 'px'; c.style.top = Math.min(cy - r.top, r.height - 90) + 'px';
   c.classList.add('show');
   setTimeout(() => { const q = $('qnote'); if (q) q.focus(); }, 30);
@@ -2327,7 +2732,7 @@ function doubleAt(cx, cy) {
 function commitEditing() { if (editing && editing.finish) editing.finish(true); }
 function afterEdit() { if (!drag && !editing && pendingStore) takeIn(); }
 // Enter keeps it (⇧Enter for a new line where that makes sense), Esc leaves it as it was, clicking elsewhere keeps it.
-function inlineEdit(target, before, multiline, commit) {
+function inlineEdit(target, before, multiline, commit, onKey) {
   commitEditing();
   target.textContent = before;
   target.contentEditable = 'true';
@@ -2341,7 +2746,7 @@ function inlineEdit(target, before, multiline, commit) {
     render(); afterEdit();
   };
   editing = { el: target, finish };
-  target.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' && !(multiline && e.shiftKey)) { e.preventDefault(); finish(true); } else if (e.key === 'Escape') { e.preventDefault(); finish(false); } });
+  target.addEventListener('keydown', e => { e.stopPropagation(); if (onKey && onKey(e)) return; if (e.key === 'Enter' && !(multiline && e.shiftKey)) { e.preventDefault(); finish(true); } else if (e.key === 'Escape') { e.preventDefault(); finish(false); } });
   target.addEventListener('blur', () => finish(true), { once: true });
   target.focus();
   const r = document.createRange(); r.selectNodeContents(target); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r);
@@ -2350,8 +2755,8 @@ function editInPlace(id, fresh) {
   const it = item(id); if (!it || ro()) return;
   const el = [...$('cards').querySelectorAll('.card')].find(c => c.dataset.id === id); if (!el) return;
   const field = it.kind === 'note' || it.kind === 'problem' ? 'text' : 'label';
-  let target = el.querySelector({ passage: '.ttl', link: '.ttl', box: '.blab', note: '.txt', problem: '.txt' }[it.kind] || '.txt');
-  if (!target && (it.kind === 'passage' || it.kind === 'link')) { target = document.createElement('span'); target.className = 'ttl'; el.insertBefore(target, el.firstChild); }
+  let target = el.querySelector({ passage: '.ttl', link: '.ttl', box: '.blab', note: '.txt', problem: '.txt', table: '.tcap' }[it.kind] || '.txt');
+  if (!target && (it.kind === 'passage' || it.kind === 'link' || it.kind === 'table')) { target = document.createElement('span'); target.className = it.kind === 'table' ? 'tcap' : 'ttl'; el.insertBefore(target, el.firstChild); }
   if (!target) return;
   inlineEdit(target, String(it[field] || ''), field === 'text', (v, changed) => {
     if (v === null || (!v && field === 'text')) {   // nothing typed: a card just made goes again
@@ -2455,6 +2860,7 @@ $('chooser').addEventListener('click', e => {
   const c = $('chooser'), at = JSON.parse(c.dataset.at), mdl = c.dataset.model || null, txt = ($('qnote') || {}).value || '', k = b.dataset.new;
   c.classList.remove('show');
   if (k === 'box') { createBox(at[0], at[1], 280, 180); return; }
+  if (k === 'table') { form = { kind: 'table', at, model: mdl }; showSide('details'); renderSide(); return; }
   quickCard(k, txt, at, mdl);
 });
 $('banner').addEventListener('click', e => {
@@ -2545,6 +2951,7 @@ function noteSoon(fn) { clearTimeout(noteT); noteFn = fn; noteT = setTimeout(() 
 function noteNow() { if (noteFn) { clearTimeout(noteT); const f = noteFn; noteFn = null; f(); } }
 $('details').addEventListener('input', e => {
   const t = e.target;
+  if (t.matches('[data-tnew]') && form && form.kind === 'table') { const k = t.dataset.tnew, v = clampN(t.value, 0, TABLE_MAX[k]); if (v) { form[k] = v; tableFormSync(); } return; }
   if (t.matches('textarea[data-mtnote]')) { const mt = t.dataset.mtnote, v = t.value; noteSoon(() => setPassage(mt, x => { x.note = v; })); }
   else if (t.matches('textarea[data-mttopic]')) { const v = t.value; noteSoon(() => setTopic(x => { x.note = v; })); }
 });
@@ -2554,6 +2961,41 @@ $('details').addEventListener('focusout', e => {
   setTimeout(() => { if (sideStale && !noteFocused() && !selInSide()) { sideStale = false; renderSide(); } }, 0);
 });
 window.addEventListener('pagehide', noteNow);
+// The new table's grid: swept with a mouse or a finger, its size chosen where the pointer lifts.
+$('details').addEventListener('pointermove', e => { const b = gridAt(e); if (b) { const [r, c] = b.dataset.g.split(',').map(Number); tableFormSync(r + 1, c + 1); } });
+$('details').addEventListener('pointerout', e => { if (e.target.closest && e.target.closest('[data-tgrid]') && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('[data-tgrid]'))) tableFormSync(); });
+$('details').addEventListener('pointerup', e => { const b = gridAt(e); if (b) pickSize(b); });
+// A table copied: as text and as HTML for Word and spreadsheets, and whole for a board. ⌘C copies the table selected.
+document.addEventListener('copy', e => {
+  let it = copyTable;
+  if (!it) {
+    const a = document.activeElement, s = getSelection();
+    if ((a && a.closest && a.closest('input, textarea, select')) || (a && a.isContentEditable) || (s && !s.isCollapsed) || sel.kind !== 'card' || sel.ids.length !== 1) return;
+    it = item(sel.ids[0]); if (!it || it.kind !== 'table') return;
+  }
+  e.preventDefault();
+  e.clipboardData.setData('text/plain', tableTSV(it));
+  e.clipboardData.setData('text/html', tableHTMLOut(it));
+  try { e.clipboardData.setData(TABLE_TYPE, JSON.stringify({ label: it.label || '', head: headOf(it), cells: it.cells, cw: colW(it) })); } catch (x) { /* a browser that keeps only the usual kinds */ }
+  if (!copyTable) toast('Copied the table: paste it into Word or a spreadsheet, or onto a board.');
+});
+// A table pasted: onto the board, a new table; into a cell being typed in, the cells from there on.
+document.addEventListener('paste', e => {
+  const cd = e.clipboardData; if (!cd) return;
+  if (editing && editing.cell) {
+    const T = pastedTable(cd);
+    if (!T || (!T.whole && T.cells.length === 1 && T.cells[0].length === 1)) return;   // words alone go into the cell as words
+    e.preventDefault();
+    const { id, r, c } = editing.cell; editing.finish(true); fillFrom(id, r, c, T.cells, T); return;
+  }
+  const a = document.activeElement;
+  if ((a && a.closest && a.closest('input, textarea, select')) || (a && a.isContentEditable) || editing) return;
+  const T = pastedTable(cd); if (!T) return;
+  e.preventDefault();
+  if (ro()) { toast(roWhy()); return; }
+  const id = newTable(T.cells, T.head, null, { label: T.label, cw: T.cw });
+  if (id) { const d = dims(item(id)); toast('Pasted as a table, ' + plural(d.cols, 'column') + ' × ' + plural(d.rows, 'row') + (T.whole || T.head.top || T.head.left ? '' : ', with no headings: tick them in the side if it has any') + '.' + cutNote(T)); }
+});
 $('back').addEventListener('click', noteNow);
 $('tside').addEventListener('click', () => document.body.classList.add('sideclosed'));
 $('sideopen').addEventListener('click', () => document.body.classList.remove('sideclosed'));
@@ -2611,12 +3053,20 @@ $('passages').addEventListener('dragstart', e => {
   e.dataTransfer.setData(PP_TYPE, p.dataset.pp); e.dataTransfer.setData('text/plain', p.querySelector('.pc').textContent);
   e.dataTransfer.effectAllowed = 'copy'; p.classList.add('dragging');
 });
-$('passages').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); });
-$('stage').addEventListener('dragover', e => { const ty = [...(e.dataTransfer.types || [])]; if (!ty.includes(PP_TYPE) && !ty.includes(BL_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); });
-$('stage').addEventListener('dragleave', e => { if (e.target === $('stage')) $('stage').classList.remove('dropping'); });
+// The cell of a table a passage is being dragged over, lit: dropped there, the passage goes in it.
+function dropCell(e) {
+  const el = e ? document.elementFromPoint(e.clientX, e.clientY) : null, td = el && el.closest ? el.closest('.card.k-table [data-cell]') : null;
+  $('cards').querySelectorAll('.tdrop').forEach(x => { if (x !== td) x.classList.remove('tdrop'); });
+  if (td) td.classList.add('tdrop');
+  return td;
+}
+$('passages').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); dropCell(null); });
+$('stage').addEventListener('dragover', e => { const ty = [...(e.dataTransfer.types || [])]; if (!ty.includes(PP_TYPE) && !ty.includes(BL_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); dropCell(ty.includes(PP_TYPE) ? e : null); });
+$('stage').addEventListener('dragleave', e => { if (e.target === $('stage')) { $('stage').classList.remove('dropping'); dropCell(null); } });
 $('stage').addEventListener('drop', e => {
-  const mt = e.dataTransfer.getData(PP_TYPE), bl = e.dataTransfer.getData(BL_TYPE); $('stage').classList.remove('dropping'); if (!mt && !bl) return;
+  const mt = e.dataTransfer.getData(PP_TYPE), bl = e.dataTransfer.getData(BL_TYPE), td = mt ? dropCell(e) : null; $('stage').classList.remove('dropping'); dropCell(null); if (!mt && !bl) return;
   e.preventDefault();
+  if (td) { const [r, c] = td.dataset.cell.split(',').map(Number); putInCell(td.closest('.card').dataset.id, r, c, mt); return; }
   const [wx, wy] = toWorld(e.clientX, e.clientY);
   if (mt) putPassage(mt, [wx - 120, wy - 25]);
   else { const [t, i] = bl.split('|'); makeLink(t, i || null, [wx - 115, wy - 25]); }
@@ -2643,6 +3093,9 @@ $('details').addEventListener('click', e => {
   const awd = e.target.closest('[data-annword]'); if (awd) { findWord(awd.dataset.annword); return; }
   const aop = e.target.closest('[data-annopen]'); if (aop) { openAnn(aop.dataset.annopen); return; }
   const aun = e.target.closest('[data-annunpick]'); if (aun && composing()) { form.to = null; renderSide(); focusComposer(); return; }
+  const gb = e.target.closest('[data-tgrid] button'); if (gb) { if (e.detail === 0) pickSize(gb); return; }   // the keyboard's click; a pointer's is taken on pointerup
+  const tac = e.target.closest('[data-tact]'); if (tac) { tableAct(tac.dataset.tact); return; }
+  const tpo = e.target.closest('[data-tpout]'); if (tpo && tcell) { takeFromCell(tcell.id, tcell.r, tcell.c, +tpo.dataset.tpout); return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, id = sel.ids[0];
   if (act === 'annsave') { saveAnn(); return; }
@@ -2655,6 +3108,8 @@ $('details').addEventListener('click', e => {
   if (act === 'putback') { const it = item(id); if (it && !ro()) { setPassage(it.mt, x => { if (Array.isArray(x.topics) && !x.topics.includes(TID)) x.topics.push(TID); }); render(); toast('Back under “' + (topic ? topic.name : '') + '”.'); } return; }
   if (act === 'offboard') { removeCards([id]); toast('Taken off the board. Undo (⌘Z) puts it back.'); return; }
   if (act === 'savecard') return saveCard(D);
+  if (act === 'savetable') return saveTable(D);
+  if (act === 'tcopy') { copyOut(item(id)); return; }
   if (act === 'savearrow') return saveArrow(D);
   if (act === 'savemodel') return saveModel(D);
   if (act === 'swap') { const t = form.from; form.from = form.to; form.to = t; keepFields(renderSide); return; }
@@ -2673,6 +3128,10 @@ $('details').addEventListener('click', e => {
 });
 $('details').addEventListener('change', e => {
   if (e.target.matches('[data-annf]') && form && form.kind === 'annotations') { form.f = form.f || {}; form.f[e.target.dataset.annf] = e.target.value; $('annlist').innerHTML = annListAll(); return; }
+  if (e.target.matches('[data-tnewh]') && form && form.kind === 'table') { form[e.target.dataset.tnewh] = e.target.checked; tableFormSync(); return; }
+  if (e.target.matches('[data-tshape]') && sel.kind === 'card') { const it = item(sel.ids[0]), d = it && dims(it); if (d) setShape(it.id, e.target.dataset.tshape === 'rows' ? e.target.value : d.rows, e.target.dataset.tshape === 'cols' ? e.target.value : d.cols); return; }
+  if (e.target.matches('[data-thead]') && sel.kind === 'card') { const id = sel.ids[0], k = e.target.dataset.thead, on = e.target.checked; change(() => { const it = item(id); if (it) it.head = Object.assign(headOf(it), { [k]: on }); }); render(); return; }
+  if (e.target.matches('[data-tcellp]') && tcell) { const mt = e.target.value; if (mt) putInCell(tcell.id, tcell.r, tcell.c, mt); return; }
   if (e.target.matches('[data-type]')) { const o = $('details').querySelector('[data-other]'); o.style.display = e.target.value === '__other' ? '' : 'none'; if (e.target.value === '__other') o.focus(); }
 });
 document.addEventListener('keydown', e => {
@@ -2762,7 +3221,8 @@ $('file').addEventListener('change', () => {
 let fwT = 0;
 function watchPortal() {
   clearInterval(fwT);
-  fwT = setInterval(() => { const w = portalReady(); if (!w) return; clearInterval(fwT); FW = w; renderAround(); }, 500);
+  // drawn again once a drag or an edit ends, as a change from elsewhere is: what is being typed on the board is not lost
+  fwT = setInterval(() => { const w = portalReady(); if (!w) return; clearInterval(fwT); FW = w; if (drag || editing) pendingStore = true; else renderAround(); }, 500);
 }
 $('portal').addEventListener('load', () => { FW = null; watchPortal(); });
 function showLost() {
@@ -2808,7 +3268,7 @@ watchPortal();
 // Cards are measured once the page is laid out, and again when its fonts arrive, since they change every card's size.
 const settle = () => { renderBoard(); if (arriveAt) { arrive(); return; } const c0 = camOf(); if (c0) { cam = Object.assign({}, c0); applyCam(); } else fit(); };
 requestAnimationFrame(settle);
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!drag) settle(); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!drag && !editing) settle(); else pendingStore = true; });   // drawn again, measured in its fonts, once the drag or the edit ends
 </script>
 </body>
 </html>
