@@ -440,6 +440,83 @@
   #details .anncomp label.f { margin-top: 0.2rem; }
   #details .annf { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.3rem 0 0.5rem; }
   #details .annf select { width: auto; flex: 1; min-width: 6rem; }
+  /* parallels: words in several passages that answer one another. Each parallel's colour is --pc, one of PAR_COLORS;
+     its letter follows its words. Dashed is kept for what the page placed by itself, as for annotations. */
+  .par { background: color-mix(in srgb, var(--pc) 22%, transparent); box-shadow: inset 0 -1.5px 0 color-mix(in srgb, var(--pc) 60%, transparent); border-radius: 2px; }
+  .par.many { background: color-mix(in srgb, var(--pc) 34%, transparent); }
+  .par.placed { outline: 1.5px dashed var(--pc); outline-offset: 0; }
+  .par.pend::after { content: attr(data-sig); font: 600 0.64em/1 'EB Garamond', Georgia, serif; font-style: normal; vertical-align: 0.6em; margin-left: 1px; color: var(--pc); }
+  .par.phov { background: rgba(217, 164, 65, 0.32); box-shadow: 0 0 0 2px #d9a441; }
+  #details .par, #compare .par { cursor: pointer; }
+  #world.far .card .par { background: none; box-shadow: none; outline: 0; }
+  #world.far .card .par.pend::after { display: none; }
+  .card .pchips { display: flex; flex-wrap: wrap; gap: 0.2rem; margin-top: 0.25rem; }
+  .card .pchip { min-width: 1.3rem; height: 1.3rem; padding: 0 0.3rem; border: 0; border-radius: 0.65rem; background: var(--pc); color: #fff; font: 600 0.74rem/1.3rem 'EB Garamond', Georgia, serif; cursor: pointer; }
+  .card .pchip.on { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--pc); }
+  .card .pchip.held, .card .pchip.phov { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #d9a441; }
+  #world.far .card .pchip { font-size: 1.05rem; height: 1.8rem; min-width: 1.8rem; line-height: 1.8rem; border-radius: 0.9rem; }
+  .card.pwin .pq { border-left: 2px solid color-mix(in srgb, var(--pw) 60%, transparent); padding-left: 0.3rem; }
+  #ink .part { opacity: 0.5; }
+  #ink .part line { stroke: var(--pc); stroke-width: 1.8; }
+  #ink .part circle { fill: var(--pc); stroke: #fff; stroke-width: 2; pointer-events: auto; cursor: pointer; }
+  #ink .part text { fill: #fff; font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 13px; pointer-events: none; }
+  #ink .part.on, #ink .part.phov { opacity: 1; }
+  #ink .part.on line { stroke-width: 2.6; }
+  #ink .part.phov circle { stroke: #d9a441; stroke-width: 3; }
+  #ink .part.dim { opacity: 0.08; }
+  .annbar .bsep { width: 1px; align-self: stretch; background: var(--line-soft); margin: 0.1rem; }
+  .annbar button.pin { background: var(--kc); color: #fff; }
+  .psw { display: inline-block; min-width: 1.3rem; height: 1.3rem; padding: 0 0.3rem; margin-right: 0.35rem; border: 0; border-radius: 0.65rem; background: var(--pc); color: #fff; font: 600 0.8rem/1.3rem 'EB Garamond', Georgia, serif; font-style: normal; text-align: center; cursor: pointer; vertical-align: 0.05rem; }
+  #details .pars-l { margin-top: 0.45rem; }
+  #details .pars-l > .k { margin-top: 0.4rem; }
+  #details .par-e { border-left: 3px solid var(--pc); background: var(--panel); border-radius: 0 6px 6px 0; padding: 0.2rem 0.5rem 0.3rem; margin: 0.3rem 0 0 0.3rem; font-size: 0.88rem; font-style: normal; }
+  #details .par-e.placed { border-left-style: dashed; }
+  #details .par-e .ph b, #details .prow b { color: var(--pc); font-weight: 600; }
+  #details .pk, #details .pn { color: var(--faded); font-style: italic; }
+  #details .par-e .pon { color: var(--faded); margin-top: 0.1rem; }
+  #details .par-e .po { margin-top: 0.15rem; }
+  #details .par-e .w, #details .plc .w { font-style: italic; }
+  #details .par-e .pg, #details .plc .pg, #details .prow .pg { font-size: 0.78rem; color: var(--faded); font-style: italic; }
+  #details .par-e button.linkish, #details .plc button.linkish { font-size: inherit; }
+  #details .par-e.phov, #details .prow.phov, #details .plc.phov { box-shadow: 0 0 0 2px #d9a441; }
+  #details h2.parh { display: flex; align-items: center; color: var(--pc); }
+  #details .plc { background: #fff; border: 1px solid var(--line-soft); border-left: 3px solid var(--pc); border-radius: 0 6px 6px 0; padding: 0.3rem 0.55rem 0.35rem; margin: 0.35rem 0; font-size: 0.9rem; }
+  #details .plc.placed, #details .plc.lost, #details .plc.away { border-left-style: dashed; }
+  #details .plc .ctx { font-style: italic; margin: 0.15rem 0 0.1rem; }
+  #details .plc .ctx b { font-weight: 600; background: color-mix(in srgb, var(--pc) 22%, transparent); }
+  #details .plc input[data-plnote] { font-size: 0.86rem; margin-top: 0.2rem; padding: 0.15rem 0.4rem; }
+  #details .plc .pact { display: flex; gap: 0.6rem; flex-wrap: wrap; font-size: 0.8rem; margin-top: 0.15rem; }
+  #details .prow { display: flex; align-items: baseline; gap: 0.1rem; }
+  #details .prow .pmeta { margin-left: auto; padding-left: 0.5rem; font-size: 0.8rem; color: var(--faded); white-space: nowrap; }
+  #details .pinline { display: flex; gap: 0.5rem; align-items: flex-end; }
+  #details .pinline > div { flex: 1; }
+  #details .pinline input[data-pf="sign"] { width: 4rem; }
+  /* Compare: two to four passages side by side over the board, bands between the words of each parallel */
+  #compare { left: 10px; top: 10px; right: 10px; bottom: 10px; z-index: 4; display: flex; flex-direction: column; padding: 0; font-size: 1rem; background: var(--panel); user-select: text; -webkit-user-select: text; cursor: auto; }
+  #compare[hidden] { display: none; }
+  #stage.comparing #palette, #stage.comparing #layers, #stage.comparing #zoom { display: none; }
+  #stage.comparing #banner { top: auto; bottom: 12px; z-index: 6; }
+  #stage.comparing #toast { z-index: 6; bottom: 58px; }
+  #compare .cbar { display: flex; align-items: center; gap: 0.5rem 0.8rem; flex-wrap: wrap; padding: 0.4rem 0.8rem; border-bottom: 1px solid var(--line-soft); font-size: 0.88rem; color: var(--faded); }
+  #compare .cbar b { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 0.85rem; letter-spacing: 0.05em; }
+  #compare .cbar select { border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 0.05rem 0.3rem; color: var(--accent); max-width: 16rem; }
+  #compare .cbar .btn { margin-left: auto; }
+  #compare .ccols { position: relative; flex: 1; display: flex; min-height: 0; padding: 0.5rem 0.7rem 0.7rem; }
+  #compare .ccol { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line-soft); border-radius: 8px; }
+  #compare .cgut { flex: none; width: 56px; }
+  #compare .chead { display: flex; align-items: baseline; gap: 0.3rem; padding: 0.35rem 0.6rem 0.15rem; border-bottom: 1px solid var(--line-soft); }
+  #compare .chead .cc { font-weight: 600; color: var(--accent); flex: 1; min-width: 0; }
+  #compare .chead button { border: 0; background: none; color: var(--faded); cursor: pointer; font-size: 1rem; padding: 0 0.25rem; }
+  #compare .chead button:hover { color: var(--accent); }
+  #compare .csub { font-size: 0.8rem; color: var(--faded); padding: 0.1rem 0.6rem 0; }
+  #compare .cbody { flex: 1; overflow-y: auto; padding: 0.5rem 0.75rem 2.5rem; touch-action: pan-y; }
+  #compare .ct { font-style: italic; line-height: 1.55; white-space: pre-line; }
+  #compare .ocr { font-size: 0.8rem; color: #a0661a; }
+  #compare .cbands { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  #compare .cband { fill: var(--pc); fill-opacity: 0.3; stroke: var(--pc); stroke-opacity: 0.5; stroke-width: 0.8; pointer-events: auto; cursor: pointer; }
+  #compare .cband.on, #compare .cband.phov { fill-opacity: 0.6; }
+  #compare .cband.off { fill-opacity: 0.1; stroke-opacity: 0.2; }
+  #compare .cnote { font-size: 0.82rem; color: var(--faded); padding: 0 0.8rem 0.4rem; }
   /* a new table: its size swept on a grid or typed, its headings ticked */
   #details .tgrid { display: grid; grid-template-columns: repeat(10, 1.3rem); gap: 3px; margin: 0.35rem 0 0.25rem; touch-action: none; width: max-content; }
   #details .tgrid button { width: 1.3rem; height: 1.3rem; padding: 0; border: 1px solid var(--line-soft); border-radius: 3px; background: #fff; cursor: pointer; }
@@ -495,6 +572,7 @@
   </span>
   <span class="grp">
     <button type="button" class="btn" id="annsb" title="Every annotation on the board: problems, what passages are relevant to, interpretations and comments">Annotations</button>
+    <button type="button" class="btn" id="parsb" title="Every parallel on the board: words in several passages that answer one another">Parallels</button>
   </span>
   <span class="grp"><span id="sync"></span></span>
   <span class="grp">
@@ -507,10 +585,11 @@
 <div class="wrap">
   <div id="stage">
     <div id="world">
-      <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="gann"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
+      <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="gann"></g><g id="gpar"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
       <div id="cards"></div>
       <svg id="drawn" xmlns="http://www.w3.org/2000/svg"><g id="gdraw"></g><path id="wet" d=""></path></svg>
     </div>
+    <div id="compare" class="float" role="region" aria-label="Passages compared side by side" hidden></div>
     <div id="palette" class="float" role="toolbar" aria-label="Tools">
       <button type="button" class="tl on" data-tool="move" title="Move cards and models, and drag the bare board to move about (V)"><span>✋</span>Move</button>
       <button type="button" class="tl" data-tool="select" title="Drag around cards to select several (S)"><span>⬚</span>Select</button>
@@ -536,7 +615,8 @@
 </div>
 
 <datalist id="arrowtypes"><option value="develops"><option value="contradicts"><option value="qualifies"><option value="same as"><option value="answers?"><option value="cf."></datalist>
-<div id="annbar" class="annbar" role="toolbar" aria-label="Annotate these words"></div>
+<datalist id="partypes"></datalist>
+<div id="annbar" class="annbar" role="toolbar" aria-label="Annotate these words, or make them a parallel"></div>
 <div id="lock" class="lock" role="dialog" aria-modal="true" aria-labelledby="lockh"><div class="lockcard"><h2 id="lockh"></h2><div id="lockbody"></div></div></div>
 <div id="sharedlg" class="lock" role="dialog" aria-modal="true" aria-labelledby="shareh"><div class="lockcard wide"><h2 id="shareh"></h2><div id="sharebody"></div></div></div>
 
@@ -589,6 +669,7 @@ const LAYERS = [
   { key: 'box', label: 'Boxes', mark: 'sq' },
   { key: 'table', label: 'Tables', mark: 'sq' },
   { key: 'annotations', label: 'Annotations, and what they join', color: '#2f5d8a', dash: '2 4' },
+  { key: 'parallels', label: 'Parallels, through their knots', color: '#3b5068' },
 ];
 const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', computer: '#9a8f7a', passage: '#5c3d1e', note: '#5c3d1e' };
 const DASH = { problem: '7 4', computer: '2 4' };
@@ -606,6 +687,13 @@ const ANN_KINDS = [
   { key: 'comment', label: 'Comment', color: '#9a6a1e', hint: 'Anything else' },
 ];
 const ANN_CTX = 32;   // the characters kept either side of the words annotated, so that they can be found again
+// Parallels: words in several passages that answer one another, each passage's words a place in it. The kinds
+// offered for one (any word of one's own will do), their colours (the groups' palette, in another order), how many
+// characters a card shows before the chosen parallel's words, and the most passages Compare sets side by side.
+const PAR_TYPES = ['same words', 'same term', 'translation', 'paraphrase', 'example', 'contrast', 'cf.'];
+const PAR_COLORS = ['#3b5068', '#9a6a1e', '#6b4e7a', '#3f6b63', '#5c6e3a', '#7a3b3b', '#8b5e3c', '#5a5a5a'];
+const PAR_WIN = 80;
+const CMP_MAX = 4;
 const PREFS = 'kantlab-topic-board-prefs-v1:';      // + the topic: this device's own camera, layers and view, kept apart from the board
 
 /* ── State ────────────────────────────────────────────────────────────────── */
@@ -648,6 +736,11 @@ let annPick = null;    // words selected in a passage in the side, for the annot
 let sideStale = false; // someone else saved while words were being selected in the side: redraw it once the selection ends
 let AX = null;         // the annotations, indexed by passage (see annIndex)
 let tcell = null;      // the cell of a table last clicked: { id, r, c }
+let hand = null;       // the parallel in hand, by id: offered first by words selected, until it is put down
+let parSel = null;     // the parallel chosen, by id: its cards turn to its words and the rest dim, until Esc
+let compare = null;    // Compare, while it is open: { ids: the passage cards side by side, top: card id → scroll }
+let cmpStale = false;  // the store changed while words were being selected in Compare: drawn again once that ends
+let hovPar = '';       // the parallel pointed at, lit wherever its words stand
 let copyTable = null;  // a table being copied by its button in the side
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
@@ -1307,10 +1400,16 @@ function changeBoth(mts, boardFn, storeFn) {
 }
 function afterSwap() {
   if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
-  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : model(id));
+  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : sel.kind === 'par' ? parById(id) : model(id));
   if (!sel.ids.length) sel.kind = null;
   if (focus && !item(focus.id)) focus = null;
+  parsGone();
   form = null; save(); render();
+}
+function parsGone() {
+  if (hand && !parById(hand)) hand = null;
+  if (parSel && !parById(parSel)) parSel = null;
+  if (compare) compare.ids = compare.ids.filter(id => item(id) && item(id).kind === 'passage');
 }
 // A passage's note, its topics, or the topic's own note: changed in My topics' store itself, where the list reads them.
 function setPassage(mt, fn) { return save(d => { const x = d.items.find(y => y && y.id === mt); if (x) { fn(x); x.at = now(); } }); }
@@ -1361,16 +1460,18 @@ function takeIn() {
 }
 function renderAround() {
   hydrate(); renderTools(); renderLayers(); renderBoard(); renderPassages(); renderBoards();
-  if (!form || form.kind === 'annotate') { if (selInSide() || noteFocused()) sideStale = true; else renderSide(); }   // words being selected, or a note being written, in the side are not lost
+  if (!form || form.kind === 'annotate' || form.kind === 'parnew' || form.kind === 'parallels') { if (selInSide() || noteFocused()) sideStale = true; else renderSide(); }   // words being selected, or a note being written, in the side are not lost
   else if (form.kind === 'annotations' && $('annlist')) $('annlist').innerHTML = annListAll();
+  renderCompare();
   applyCam();
 }
-const noteFocused = () => { const a = document.activeElement; return !!(a && a.matches && a.matches('#details textarea.mtnote')); };
+const noteFocused = () => { const a = document.activeElement; return !!(a && a.matches && a.matches('#details textarea.mtnote, #details [data-pf], #details [data-plnote], #details [data-pn]')); };
 function afterRemote() {
   if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
-  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : model(id));
+  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : sel.kind === 'par' ? parById(id) : model(id));
   if (!sel.ids.length) sel.kind = null;
   if (focus && !item(focus.id)) focus = null;
+  parsGone();
   if (form && form.id && form.kind !== 'annotate' && !(form.kind === 'arrow' ? arrow(form.id) : form.kind === 'model' ? model(form.id) : form.kind === 'photos' ? true : item(form.id))) form = null;
   if (live && !photos.some(p => p.id === live.photo)) back();
   // An annotation's card may go while it is being written: it still belongs on the passage. What it edits or answers may not.
@@ -1674,19 +1775,21 @@ const inside = (r, px, py) => r && px >= r.x && px <= r.x + r.w && py >= r.y && 
 function neighbourhood() {
   if (!focus) return null;
   const keep = new Set([focus.id]); let edge = [focus.id];
+  const pw = layerOn('parallels') ? [...parPlaces().values()].filter(cs => cs.length > 1) : [];   // a parallel joins its cards, as an arrow does
   for (let h = 0; h < focus.hops; h++) {
     const next = [];
     B.arrows.filter(arrowShown).forEach(a => {
       if (edge.includes(a.from) && !keep.has(a.to)) { keep.add(a.to); next.push(a.to); }
       if (edge.includes(a.to) && !keep.has(a.from)) { keep.add(a.from); next.push(a.from); }
     });
+    pw.forEach(cs => { if (cs.some(c => edge.includes(c))) cs.forEach(c => { if (!keep.has(c) && shown(item(c))) { keep.add(c); next.push(c); } }); });
     edge = next;
   }
   return keep;
 }
 function matches(it) {
   if (!query) return true;
-  const hay = [it.label, it.sub, it.text, it.by, it.copy && it.copy.title, it.copy && it.copy.topic, it.lk && it.lk.title, it.lk && it.lk.topic].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it), it.kind === 'table' ? tableHay(it) : '').join(' ').toLowerCase();
+  const hay = [it.label, it.sub, it.text, it.by, it.copy && it.copy.title, it.copy && it.copy.topic, it.lk && it.lk.title, it.lk && it.lk.topic].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it), parHay(it), it.kind === 'table' ? tableHay(it) : '').join(' ').toLowerCase();
   return query.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w));
 }
 
@@ -1704,17 +1807,28 @@ function annIndex() {
   const list = B.annotations || [];
   if (AX && AX.src === list && AX.n === list.length) return AX;
   const byAddr = new Map(), byCard = new Map(), replies = new Map(), byId = new Map();
+  const pars = [], placesByAddr = new Map(), placesByCard = new Map(), placesOf = new Map();
   const put = (m, k, a) => { if (!m.has(k)) m.set(k, []); m.get(k).push(a); };
   list.forEach(a => {
     if (!a || typeof a.id !== 'string') return;
     byId.set(a.id, a);
     if (a.kind === 'reply') { if (a.re) put(replies, a.re, a); return; }
+    // a parallel, and its places: kept under place, not on, so that a page from before parallels passes them by
+    if (a.kind === 'parallel') { pars.push(a); return; }
+    if (a.kind === 'place') {
+      const pl = a.place; if (typeof a.re !== 'string' || !pl || typeof pl !== 'object' || typeof pl.exact !== 'string' || !pl.exact) return;
+      put(placesOf, a.re, a);
+      const k = pl.ref || pl.hash; if (k) put(placesByAddr, k, a); else if (pl.card) put(placesByCard, pl.card, a);
+      return;
+    }
     if (!a.on || typeof a.on !== 'object') return;
     const k = a.on.ref || a.on.hash;
     if (k) put(byAddr, k, a); else if (a.on.card) put(byCard, a.on.card, a);
   });
   replies.forEach(rs => rs.sort((x, y) => String(x.date).localeCompare(String(y.date))));
-  return (AX = { src: list, n: list.length, byAddr, byCard, replies, byId });
+  placesOf.forEach(ps => ps.sort((x, y) => String(x.date).localeCompare(String(y.date))));
+  pars.sort(bySign);
+  return (AX = { src: list, n: list.length, byAddr, byCard, replies, byId, pars, placesByAddr, placesByCard, placesOf });
 }
 const annById = id => annIndex().byId.get(id);
 // Where the words annotated stand in this passage's text: { s, e, placed }, placed when the page had to judge
@@ -1765,22 +1879,34 @@ function annPlaces() {
 }
 const annHay = it => annsOfCard(it).map(a => [a.text, a.by, a.to && (a.to.word || a.to.cite)].concat((annIndex().replies.get(a.id) || []).map(r => r.text + ' ' + r.by)).join(' ')).join(' ');
 // A passage's words, the annotated ones marked; spans are { s, e, placed, a }. The latest made shows its colour.
-function markText(t, spans) {
-  if (!spans.length) return esc(t);
+// ps are the places of parallels in it, { s, e, placed, a, p }: tinted in the parallel's colour, its letter after
+// them (drawn by CSS, so that it is no part of the words selected).
+function markText(t, spans, ps) {
+  ps = ps || [];
+  if (!spans.length && !ps.length) return esc(t);
   const cuts = new Set([0, t.length]);
-  spans.forEach(x => { cuts.add(Math.max(0, Math.min(t.length, x.s))); cuts.add(Math.max(0, Math.min(t.length, x.e))); });
+  spans.concat(ps).forEach(x => { cuts.add(Math.max(0, Math.min(t.length, x.s))); cuts.add(Math.max(0, Math.min(t.length, x.e))); });
   const pts = [...cuts].sort((a, b) => a - b);
   let h = '';
   for (let i = 0; i < pts.length - 1; i++) {
-    const a = pts[i], b = pts[i + 1], seg = t.slice(a, b), on = spans.filter(x => x.s <= a && x.e >= b);
-    if (!on.length) { h += esc(seg); continue; }
-    const top = on[on.length - 1].a, done = on.every(x => x.a.kind === 'problem' && x.a.resolved);
-    h += '<mark class="ann ak-' + esc(top.kind) + (on.some(x => x.placed) ? ' placed' : '') + (done ? ' done' : '') + (on.length > 1 ? ' many' : '') + '" data-ann="' + esc(on.map(x => x.a.id).join(' ')) + '">' + esc(seg) + '</mark>';
+    const a = pts[i], b = pts[i + 1], seg = t.slice(a, b), on = spans.filter(x => x.s <= a && x.e >= b), po = ps.filter(x => x.s <= a && x.e >= b);
+    let m = esc(seg);
+    if (on.length) {
+      const top = on[on.length - 1].a, done = on.every(x => x.a.kind === 'problem' && x.a.resolved);
+      m = '<mark class="ann ak-' + esc(top.kind) + (on.some(x => x.placed) ? ' placed' : '') + (done ? ' done' : '') + (on.length > 1 ? ' many' : '') + '" data-ann="' + esc(on.map(x => x.a.id).join(' ')) + '">' + m + '</mark>';
+    }
+    if (po.length) {
+      const top = (po.find(x => x.p.id === parSel) || po[po.length - 1]).p, ends = po.filter(x => x.e === b), ids = [...new Set(po.map(x => x.p.id))];
+      m = '<span class="par' + (po.some(x => x.placed) ? ' placed' : '') + (ids.length > 1 ? ' many' : '') + (ends.length ? ' pend' : '') + '" style="--pc:' + parColor(top) + '" data-par="' + esc(ids.join(' ')) + '" data-pl="' + esc(po.map(x => x.a.id).join(' ')) + '"' +
+        (ends.length ? ' data-sig="' + esc([...new Set(ends.map(x => parSign(x.p)))].join(',')) + '"' : '') + '>' + m + '</span>';
+    }
+    h += m;
   }
   return h;
 }
 // The first words of a card's passage, as the card shows them, with what is annotated in them lit.
 // For a passage of which only some words were kept, the words kept.
+// With a parallel chosen that has words in it, those words, from a little before them.
 function excerpt(it, n) {
   if (it.st && it.quotes.length === it.st.parts.length) {   // a stretch: its words, from each passage it runs over
     let h = '', left = n;
@@ -1788,16 +1914,26 @@ function excerpt(it, n) {
       if (left <= 0) return;
       if (k) h += ' <span class="para" title="A new paragraph in the text">¶</span> ';
       const cut = p.text.length > left, s = cut ? p.text.slice(0, Math.max(0, left - 1)) : p.text;
-      const spans = layerOn('annotations') ? placeOn(it, k).spans.filter(x => x.e > p.a && x.s < p.a + s.length).map(x => Object.assign({}, x, { s: Math.max(0, x.s - p.a), e: Math.min(s.length, x.e - p.a) })) : [];
-      h += markText(s, spans) + (cut ? '…' : '');
+      const sh = xs => xs.filter(x => x.e > p.a && x.s < p.a + s.length).map(x => Object.assign({}, x, { s: Math.max(0, x.s - p.a), e: Math.min(s.length, x.e - p.a) }));
+      h += markText(s, layerOn('annotations') ? sh(placeOn(it, k).spans) : [], layerOn('parallels') ? sh(parsOn(it, k).spans) : []) + (cut ? '…' : '');
       left -= p.text.length + 3;
     });
     return h;
   }
   const q = it.quotes[0], only = !!(q.kept && q.q !== q.kept);
+  const P = layerOn('parallels') ? parsOn(it, 0).spans : [], fx = parSel && q.q ? P.find(x => x.p.id === parSel) : null;
+  if (fx) {
+    const t = String(q.q); let w0 = Math.max(0, fx.s - PAR_WIN);
+    if (w0 > 0) { const sp = t.indexOf(' ', w0); if (sp >= 0 && sp < fx.s) w0 = sp + 1; }
+    const w1 = Math.min(t.length, Math.max(w0 + n, fx.e + 12)), s = t.slice(w0, w1);
+    const sh = x => Object.assign({}, x, { s: Math.max(0, x.s - w0), e: Math.min(s.length, x.e - w0) }), near = x => x.e > w0 && x.s < w1;
+    const spans = layerOn('annotations') ? placeOn(it, 0).spans.filter(near).map(sh) : [];
+    return (w0 > 0 ? '…' : '') + markText(s, spans, P.filter(near).map(sh)) + (w1 < t.length ? '…' : '');
+  }
   const t = String(only ? q.kept : q.q || ''), cut = t.length > n, s = cut ? t.slice(0, n - 1) : t;
-  const spans = !only && layerOn('annotations') ? placeOn(it, 0).spans.filter(x => x.s < s.length).map(x => Object.assign({}, x, { e: Math.min(x.e, s.length) })) : [];
-  return markText(s, spans) + (cut ? '…' : '');
+  const clip = x => Object.assign({}, x, { e: Math.min(x.e, s.length) });
+  const spans = !only && layerOn('annotations') ? placeOn(it, 0).spans.filter(x => x.s < s.length).map(clip) : [];
+  return markText(s, spans, only ? [] : P.filter(x => x.s < s.length).map(clip)) + (cut ? '…' : '');
 }
 // A dot on the card for each annotation on its passages, by kind; a resolved problem's is hollow.
 function annDots(it) {
@@ -1808,6 +1944,75 @@ function annDots(it) {
     ANN_KINDS.filter(K => n[K.key]).map(K => '<span class="ak-' + K.key + '"><i></i>' + n[K.key] + '</span>').join('') +
     (n.resolved ? '<span class="ak-problem"><i class="hollow"></i>' + n.resolved + ' resolved</span>' : '') + '</span>';
 }
+
+/* ── Builders: parallels ──────────────────────────────────────────────────────
+   A parallel is a set of places, each some words of one passage, that answer one another:
+   nihil negativum in Baumgarten § 7, (nihil negativum) in KrV A 291, Leerer Gegenstand ohne
+   Begriff nihil negativum at A 292. It is kept with the annotations, once for all the reader's
+   boards: an entry for the parallel (its name, letter, colour, kind and note) and one for each
+   place, which names its parallel by re and keeps its words as an annotation does, so that two
+   copies each given a place keep both when they meet. The page never adds a place, nor joins
+   two parallels because they share words: a parallel is what the reader said, and nothing is
+   concluded from it. A place found again where it was not made is drawn dashed. */
+const parById = id => { const a = id && annById(id); return a && a.kind === 'parallel' ? a : null; };
+const parsAll = () => annIndex().pars;
+const placesOfPar = id => annIndex().placesOf.get(id) || [];
+const parColor = p => PAR_COLORS.includes(p && p.color) ? p.color : PAR_COLORS[0];
+const parSign = p => String((p && p.sign) || '?').slice(0, 6);
+const signKey = s => { s = String(s || ''); const m = s.match(/^([a-z])(′*)$/); return m ? m[2].length * 26 + m[1].charCodeAt(0) - 97 : 1e6; };
+function bySign(x, y) { return signKey(x.sign) - signKey(y.sign) || String(x.sign).localeCompare(String(y.sign)) || String(x.date).localeCompare(String(y.date)); }
+// The first letter no parallel of the reader's has: a to z, then a′ to z′, and so on.
+function freeSign(used) { for (let r = 0; r < 50; r++) for (let i = 0; i < 26; i++) { const s = String.fromCharCode(97 + i) + '′'.repeat(r); if (!used.has(s)) return s; } return 'z' + used.size; }
+const nextSign = () => freeSign(new Set(parsAll().map(p => p.sign)));
+function nextColor() { const here = parsHere(), used = new Set(here.map(p => p.color)); return PAR_COLORS.find(c => !used.has(c)) || PAR_COLORS[here.length % PAR_COLORS.length]; }
+// The places of parallels in one passage of a card, as spans, { s, e, placed, a: the place, p: its parallel }, and
+// those made on this card whose words its passage no longer has (lost). Worked out once for each card and text.
+let PCACHE = { ax: null, m: new Map() };
+function parsOn(it, qi) {
+  const q = it && it.kind === 'passage' && (it.quotes || [])[qi], empty = { spans: [], lost: [] };
+  if (!q || !q.q) return empty;
+  const X = annIndex(); if (PCACHE.ax !== X) PCACHE = { ax: X, m: new Map() };
+  const key = it.id + '|' + qi, c = PCACHE.m.get(key); if (c && c.t === q.q && c.full === q.full) return c.r;
+  const k = qAddr(q), out = { spans: [], lost: [] };
+  (k ? X.placesByAddr.get(k) || [] : []).concat((X.placesByCard.get(it.id) || []).filter(a => (+a.place.qi || 0) === qi)).forEach(a => {
+    const p = parById(a.re); if (!p) return;
+    const f = findWords(q.q, a.place);
+    if (f) out.spans.push({ s: f.s, e: f.e, placed: f.placed, a, p });
+    else if (q.full !== false && a.place.card === it.id) out.lost.push({ a, p, lost: true });
+  });
+  out.spans.sort((x, y) => x.s - y.s || bySign(x.p, y.p));
+  PCACHE.m.set(key, { t: q.q, full: q.full, r: out });
+  return out;
+}
+function parsOfCard(it) { const m = new Map(); const P = parsOn(it, 0); P.spans.concat(P.lost).forEach(x => m.set(x.p.id, x.p)); return [...m.values()].sort(bySign); }
+// Where each parallel stands on this board: its id → the cards with its words.
+function parPlaces() {
+  const W = new Map();
+  B.items.forEach(it => { if (it.kind !== 'passage') return; parsOn(it, 0).spans.forEach(x => { if (!W.has(x.p.id)) W.set(x.p.id, []); const L = W.get(x.p.id); if (!L.includes(it.id)) L.push(it.id); }); });
+  return W;
+}
+function parsHere() { const W = parPlaces(); return parsAll().filter(p => W.has(p.id)); }
+// Where one place stands: on a card here (its words found, or no longer there), or not on this board at all.
+function placeHere(a) {
+  const pl = a.place || {}, k = pl.ref || pl.hash;
+  const cards = B.items.filter(it => it.kind === 'passage' && (k ? qAddr(it.quotes[0]) === k : it.id === pl.card)).sort((x, y) => shown(y) - shown(x));
+  for (const it of cards) { const x = parsOn(it, 0).spans.find(z => z.a.id === a.id); if (x) return { card: it.id, s: x.s, e: x.e, placed: x.placed, t: String(it.quotes[0].q) }; }
+  const full = cards.find(it => it.quotes[0] && it.quotes[0].full !== false);
+  return full ? { card: full.id, lost: true } : cards.length ? { card: cards[0].id, waiting: true } : { away: true };
+}
+// The words a place was made on, with a few either side: from the passage where it stands, or as they were kept.
+function placeWords(a, H, n) {
+  const pl = a.place || {}; n = n || 60;
+  if (H && H.t != null && H.s != null) return (H.s > n ? '…' : '') + esc(H.t.slice(Math.max(0, H.s - n), H.s)) + '<b>' + esc(H.t.slice(H.s, H.e)) + '</b>' + esc(H.t.slice(H.e, H.e + n)) + (H.e + n < H.t.length ? '…' : '');
+  return (pl.prefix ? '…' + esc(pl.prefix) : '') + '<b>' + esc(pl.exact) + '</b>' + (pl.suffix ? esc(pl.suffix) + '…' : '');
+}
+// A chip on a card for each parallel with words in its passage: clicked, the parallel is chosen.
+function parChips(it) {
+  if (!layerOn('parallels') || it.kind !== 'passage') return '';
+  const ps = parsOfCard(it); if (!ps.length) return '';
+  return '<span class="pchips">' + ps.map(p => '<button type="button" class="pchip' + (p.id === parSel ? ' on' : '') + (p.id === hand ? ' held' : '') + '" data-pchip="' + esc(p.id) + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '" title="' + esc('(' + parSign(p) + ') ' + p.label + (p.type ? ' · ' + p.type : '') + ': click to show it on the board') + '">' + esc(parSign(p)) + '</button>').join('') + '</span>';
+}
+const parHay = it => parsOfCard(it).map(p => [p.label, p.type, p.text].join(' ')).concat(parsOn(it, 0).spans.map(x => x.a.text || '')).join(' ');
 
 /* ── Builders: tables ─────────────────────────────────────────────────────────
    A table keeps its cells a row at a time. A cell is its words, or, once a passage is put in
@@ -1963,7 +2168,7 @@ function cardHtml(it) {
       '<span class="pc">' + esc((it.st && it.st.cite) || (q0 && q0.cite) || it.cite || it.ref || '') + (it.st && !it.st.whole ? '<i class="pof">' + esc(stretchOfWhat(it.st)) + '</i>' : '') + '</span>' +
       (it.slost ? '<span class="flag">these words are no longer where they were kept</span>' : '') +
       (it.off ? '<span class="flag">' + (it.off === 'gone' ? (SHM ? 'taken out of the topic' : 'no longer in My topics') : 'no longer under this topic') + '</span>' : '') +
-      (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it);
+      (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it) + parChips(it);
   } else if (it.kind === 'link') {
     const L = it.lk || linkOf(it), gone = L.state !== 'ok';
     inner = '<span class="lt">↗ ' + esc(L.topic || 'another topic') + (L.whole ? ' · the whole topic' : L.group ? ' · a group' : '') + '</span>' +
@@ -1976,7 +2181,8 @@ function cardHtml(it) {
   }
   inner += inMark(it.id) + (it.kind === 'passage' ? alsoChip(it) : '');
   const lc = it.kind === 'link' && it.lk ? (it.lk.state !== 'ok' ? ' gone' : '') : '';
-  return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + (it.slost ? ' slost' : '') + lc + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : it.kind === 'link' && it.lk && it.lk.color ? esc(it.lk.color) : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+  const pw = parSel && it.kind === 'passage' && layerOn('parallels') && parsOn(it, 0).spans.some(x => x.p.id === parSel) ? parColor(parById(parSel)) : '';   // turned to the chosen parallel's words
+  return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + (it.slost ? ' slost' : '') + lc + (pw ? ' pwin' : '') + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : it.kind === 'link' && it.lk && it.lk.color ? esc(it.lk.color) : '') + (pw ? ';--pw:' + pw : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
 }
 function renderCards() {
   hydrate(); placeUnplaced();
@@ -2005,11 +2211,11 @@ function placeCards() {
   });
 }
 function lit() {
-  const nb = neighbourhood();
+  const nb = neighbourhood(), pc = parCards();
   $('cards').querySelectorAll('.card').forEach(el => {
     const it = item(el.dataset.id);
     el.classList.toggle('sel', sel.kind === 'card' && sel.ids.includes(it.id));
-    el.classList.toggle('dim', (nb && !nb.has(it.id)) || !matches(it));
+    el.classList.toggle('dim', (nb && !nb.has(it.id)) || !matches(it) || (pc && !pc.has(it.id)));
     el.classList.toggle('hit', !!query && matches(it));
   });
   return nb;
@@ -2045,10 +2251,11 @@ function renderInk(nb) {
   });
   $('gframes').innerHTML = f;
   let h = '';
+  const pc = parCards();
   B.arrows.filter(arrowShown).forEach(a => {
     const c = curve(a); if (!c) return;
     const col = INK[a.layer] || INK.hypothesis, on = sel.kind === 'arrow' && sel.ids.includes(a.id);
-    const dim = nb ? !(nb.has(a.from) && nb.has(a.to)) : query ? !(matches(item(a.from)) && matches(item(a.to))) : false;
+    const dim = nb ? !(nb.has(a.from) && nb.has(a.to)) : query ? !(matches(item(a.from)) && matches(item(a.to))) : pc ? !(pc.has(a.from) && pc.has(a.to)) : false;
     const label = a.layer === 'division' ? '' : a.type, lw = label.length * 6.7 + 18;
     h += '<g class="ar ' + esc(a.layer) + (on ? ' sel' : '') + (dim ? ' dim' : '') + '" data-arrow="' + esc(a.id) + '">' +
       '<path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '" stroke="' + col + '"' + (DASH[a.layer] ? ' stroke-dasharray="' + DASH[a.layer] + '"' : '') + ' marker-end="url(#ah-' + esc(a.layer in INK ? a.layer : 'hypothesis') + ')"/>' +
@@ -2056,7 +2263,37 @@ function renderInk(nb) {
   });
   $('garrows').innerHTML = h;
   renderThreads(nb);
+  renderParallels(nb);
   renderDrawn();
+}
+// The cards of the chosen parallel, or null when none is chosen.
+function parCards() { return parSel && layerOn('parallels') ? new Set(parPlaces().get(parSel) || []) : null; }
+// Each parallel with words on two or more cards in sight: a thread from each card to a knot marked with its letter,
+// at the middle of its cards. A knot, not a chain, so that no one place is drawn as answering another more than
+// the rest. Knots of parallels on the very same cards stand side by side, across the line between the first two.
+function renderParallels(nb) {
+  let h = '';
+  if (layerOn('parallels')) {
+    const W = parPlaces(), groups = new Map();
+    parsAll().forEach(p => {
+      const cs = (W.get(p.id) || []).filter(c => shown(item(c)) && rect(c)); if (cs.length < 2) return;
+      const k = cs.slice().sort().join(' '); if (!groups.has(k)) groups.set(k, []); groups.get(k).push({ p, cs });
+    });
+    const mid = R => [R.x + R.w / 2, R.y + R.h / 2];
+    const edge = (R, x, y) => { const [cx, cy] = mid(R), dx = x - cx, dy = y - cy, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, t = Math.min(ux ? (R.w / 2 + 3) / Math.abs(ux) : 1e9, uy ? (R.h / 2 + 3) / Math.abs(uy) : 1e9); return t < L - 12 ? [cx + ux * t, cy + uy * t] : null; };
+    groups.forEach(list => {
+      const ms = list[0].cs.map(c => mid(rect(c))), cx = ms.reduce((a, m) => a + m[0], 0) / ms.length, cy = ms.reduce((a, m) => a + m[1], 0) / ms.length;
+      const dx = ms[1][0] - ms[0][0], dy = ms[1][1] - ms[0][1], L = Math.hypot(dx, dy) || 1, px = -dy / L, py = dx / L;
+      list.forEach((o, i) => {
+        const off = (i - (list.length - 1) / 2) * 28, kx = cx + px * off, ky = cy + py * off, p = o.p;
+        const on = p.id === parSel || p.id === hand, dim = !on && (!!parSel || (nb && !o.cs.every(c => nb.has(c))) || (!!query && !o.cs.some(c => matches(item(c)))));
+        const lines = o.cs.map(c => { const e = edge(rect(c), kx, ky); return e ? '<line x1="' + e[0].toFixed(1) + '" y1="' + e[1].toFixed(1) + '" x2="' + kx.toFixed(1) + '" y2="' + ky.toFixed(1) + '"/>' : ''; }).join('');
+        h += '<g class="part' + (on ? ' on' : '') + (dim ? ' dim' : '') + (p.id === hovPar ? ' phov' : '') + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '"><title>' + esc('(' + parSign(p) + ') ' + p.label + (p.type ? ' · ' + p.type : '') + ': words in ' + o.cs.length + ' passages on this board. Click to show it.') + '</title>' + lines +
+          '<circle cx="' + kx.toFixed(1) + '" cy="' + ky.toFixed(1) + '" r="11"/><text x="' + kx.toFixed(1) + '" y="' + (ky + 4.5).toFixed(1) + '" text-anchor="middle">' + esc(parSign(p)) + '</text></g>';
+      });
+    });
+  }
+  $('gpar').innerHTML = h;
 }
 // "Relevant to" a card on the board: a dotted thread between the two cards, in the annotations' layer.
 // Not an arrow: it makes no claim about the models.
@@ -2095,7 +2332,7 @@ function applyCam() {
 }
 function renderBoard() { renderCards(); const nb = lit(); renderInk(nb); }
 function renderLayers() {
-  const count = k => k === 'annotations' ? annHere().length : k === 'drawing' ? (view().ink || []).length : k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
+  const count = k => k === 'annotations' ? annHere().length : k === 'parallels' ? parsHere().length : k === 'drawing' ? (view().ink || []).length : k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
     k === 'problem' ? B.items.filter(i => i.kind === 'problem').length : B.items.filter(i => i.kind === k).length;
   const closed = $('layers').classList.contains('closed');
   $('layers').innerHTML = '<span class="ttl">Layers <button type="button" class="linkish" data-fold style="float:right;margin-left:1rem">' + (closed ? 'show' : 'hide') + '</button></span>' + LAYERS.map(L =>
@@ -2105,8 +2342,9 @@ function renderTools() {
   $('vsel').innerHTML = B.views.map(v => '<option value="' + esc(v.id) + '"' + (v.id === viewId ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('');
   $('undo').disabled = ro() || !undoStack.length; $('redo').disabled = ro() || !redoStack.length;
   $('photos').textContent = 'Photographs' + (photoList().length ? ' (' + photoList().length + ')' : '');
-  const na = annHere().length;
+  const na = annHere().length, np = parsHere().length;
   $('annsb').textContent = 'Annotations' + (na ? ' (' + na + ')' : '');
+  $('parsb').textContent = 'Parallels' + (np ? ' (' + np + ')' : '');
   renderSync();
   $('stage').classList.toggle('readonly', ro());
   document.querySelector('.tools').classList.toggle('ro', ro());
@@ -2121,12 +2359,14 @@ function banner() {
   if (live) { const p = live.entry || photoList().find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
   else if (lost) h = '<span>' + esc(roWhy()) + '</span><a class="btn" href="index.html#mt=' + esc(encodeURIComponent(TID)) + '">Back to My topics</a>';
   else if (mode) h = '<span>' + (mode.annTo ? 'Click the card these words are relevant to.' : 'Click the card the arrow goes to.') + '</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
+  else if (hand && parById(hand)) { const p = parById(hand); h = '<span>Holding <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>: select its words in another passage, and press <b>+ (' + esc(parSign(p)) + ')</b> by them.</span><button type="button" class="btn" data-b="nohand">Done (Esc)</button>'; }
   else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(nameOf(offer.from)) + '</b> to <b>' + esc(nameOf(offer.to)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
   else if (offer && offer.kind === 'lasso') { const one = offer.ids.length === 1; h = '<span>You drew round ' + offer.ids.length + (one ? ' card' : ' cards') + '.</span><button type="button" class="btn solid" data-b="o-select">Select ' + (one ? 'it' : 'them') + '</button><button type="button" class="btn" data-b="o-model">Make ' + (one ? 'it' : 'them') + ' a group</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>'; }
+  else if (parSel && parById(parSel)) { const p = parById(parSel), n = (parPlaces().get(p.id) || []).length; h = '<span>Showing <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>' + (layerOn('parallels') ? ', its words on each of its ' + n + (n === 1 ? ' card' : ' cards') : ' (the Parallels layer is hidden)') + '</span>' + (n >= 2 && !compare ? '<button type="button" class="btn" data-b="parcompare">Compare its passages</button>' : '') + '<button type="button" class="btn" data-b="noparsel">Show everything (Esc)</button>'; }
   else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
   b.innerHTML = h; b.classList.toggle('show', !!h);
 }
-function render() { hydrate(); renderTools(); renderLayers(); renderBoard(); renderSide(); renderPassages(); renderBoards(); applyCam(); }
+function render() { hydrate(); renderTools(); renderLayers(); renderBoard(); renderSide(); renderPassages(); renderBoards(); renderCompare(); applyCam(); }
 let toastT;
 function toast(s) { const t = $('toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3800); }
 const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); };
@@ -2135,17 +2375,19 @@ const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLo
 // A passage in the side. Given its card (it), its words can be selected and annotated, and its annotations are shown.
 function quoteHtml(q, i, removable, it) {
   const href = portalHref(q), P = it && q.q ? placeOn(it, i) : null;
-  return '<div class="q">' + (q.q ? '<span class="t">“' + (P ? '<span data-qt="' + i + '" data-qcard="' + esc(it.id) + '">' + litText(q, P.spans) + '</span>' : esc(q.q)) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
+  return '<div class="q">' + (q.q ? '<span class="t">“' + (P ? '<span data-qt="' + i + '" data-qcard="' + esc(it.id) + '">' + litText(q, P.spans, parsOn(it, i).spans) + '</span>' : esc(q.q)) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
     (href ? '<button type="button" data-read="' + esc(href) + '">read it beside the board</button><a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : '') +
     (q.pasted ? '<span class="chk">pasted, not yet checked against the portal</span>' : '') +
     (removable ? '<button type="button" class="x" data-unq="' + i + '" title="Take this passage off the card">✕</button>' : '') +
     (P && !ro() && q.full !== false ? '<button type="button" data-annwhole="' + i + '" data-qcard="' + esc(it.id) + '" title="Annotate this passage as a whole. To annotate some of its words, select them.">annotate</button>' : '') + '</div>' +
-    (P ? annEntries(P, it, i) : '') + '</div>';
+    (P ? annEntries(P, it, i) + parApparatus(it, i) : '') + '</div>';
 }
 // A passage's words with the annotated ones marked, and the words a card quotes of it lit, the rest faint.
-function litText(q, spans) {
-  if (q.ka == null || (q.ka <= 0 && q.kb >= q.q.length)) return markText(q.q, spans);
-  const seg = (a, b) => markText(q.q.slice(a, b), spans.filter(x => x.e > a && x.s < b).map(x => Object.assign({}, x, { s: Math.max(0, x.s - a), e: Math.min(b - a, x.e - a) })));
+function litText(q, spans, ps) {
+  ps = ps || [];
+  if (q.ka == null || (q.ka <= 0 && q.kb >= q.q.length)) return markText(q.q, spans, ps);
+  const cut = (a, b) => xs => xs.filter(x => x.e > a && x.s < b).map(x => Object.assign({}, x, { s: Math.max(0, x.s - a), e: Math.min(b - a, x.e - a) }));
+  const seg = (a, b) => markText(q.q.slice(a, b), cut(a, b)(spans), cut(a, b)(ps));
   return '<span class="out">' + seg(0, q.ka) + '</span><span class="in">' + seg(q.ka, q.kb) + '</span><span class="out">' + seg(q.kb, q.q.length) + '</span>';
 }
 function relBtn(a) { return '<button type="button" class="rel" data-arrow="' + esc(a.id) + '"><b>' + esc(a.type) + '</b>: ' + esc(nameOf(a.from)) + ' → ' + esc(nameOf(a.to)) + '</button>'; }
@@ -2159,6 +2401,7 @@ function sideIntro() {
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
     '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
+    '<li><b>Parallels</b>: when words in several passages answer one another, select them in one passage and choose <i>Parallel…</i>. The parallel is then in hand: select its words in the next passage and press <b>+ (a)</b> in the bar. Its words are tinted in its colour, with its letter, on every card; a thread runs from each of its cards to its knot; pointing at its words lights them everywhere; click a chip or a knot to show only it. Beneath a passage here, <i>Parallels</i> lists the words elsewhere that answer to its own. Select two to four cards and <i>Compare them side by side</i>.</li>' +
     '<li><b>Your note</b> on a passage, here in the side, is the note it has in My topics: write it in either.</li>' +
     '<li><b>Link to another topic</b>: under <b>Boards</b>, in the side, choose one of your topics and link to it as a whole, or to a card or group on its board; or press <i>Copy a link to it</i> on a card there, and paste it here (⌘V). Arrows join a link card like any card. The card linked to carries a mark, <b>↖</b>, and lists the links in its side.</li>' +
     '<li><b>Edit in place</b>: double-click any card, arrow or group name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
@@ -2203,7 +2446,7 @@ function sidePassage(it, m, arr) {
   if (it.slost) h += '<p class="ocr">These words are no longer where they were kept in the text: it may have been extracted again since. The card keeps the copy My topics kept with them, and what it quotes can’t be changed here.</p>';
   if (sn && !lost && !SHM) h += '<div class="row"><button type="button" class="btn" data-act="stretch" title="Trim it to the words you want, or take in more">Change what it quotes</button><button type="button" class="btn" data-act="splitit">Split it in two…</button></div>';
   if (!q.full) h += '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal. The words are the copy My topics kept when the passage was saved.' : 'The portal beside the board is still loading its texts, so these are the words My topics kept. The passage in full, and its annotations, follow in a moment.') + '</p>';
-  else if (!ro()) h += '<p class="by">Select some of its words to annotate them.</p>';
+  else if (!ro()) h += '<p class="by">Select some of its words to annotate them, or to make them a <i>Parallel…</i> with words in other passages.</p>';
   if (x && SHM) {
     const mine = DB && DB.items.find(y => y && y.ref === x.ref && (y.excerpt || '') === (x.excerpt || ''));
     h += '<span class="k">The note on the board</span><textarea class="mtnote" data-sharednote="' + esc(x.id) + '" placeholder="' + (writable() ? 'A note everyone on this board sees' : 'No note on the board') + '"' + (writable() ? '' : ' readonly') + '>' + esc(x.note || '') + '</textarea>' +
@@ -2278,12 +2521,14 @@ function pickSize(b) {
 }
 const gridAt = e => { if (!form || form.kind !== 'table') return null; const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.closest ? el.closest('[data-tgrid] button') : null; };
 function sideCards(ids) {
-  const its = ids.map(item).filter(Boolean);
+  const its = ids.map(item).filter(Boolean), np = its.filter(it => it.kind === 'passage').length;
   const J = !ro() && !SHM && its.length > 1 && its.every(c => c.kind === 'passage') ? joinPlan(ids) : null;   // on a shared board, not yet: its passages are kept apart from My topics
   const join = !J ? '' : '<span class="k">Join them</span>' + (J.st
     ? '<p class="by" style="margin-top:0">One card, quoting ' + esc(J.st.cite) + (J.between.length ? ', with ' + (J.between.length === 1 ? 'the passage' : 'the passages') + ' between them that no card quotes (' + esc(J.between.join(', ')) + ')' : '') + '. It keeps the first card’s place, group and heading, the arrows of all of them, and every note.</p><div class="row" style="margin-top:0"><button type="button" class="btn solid" data-act="join">Join into one card</button></div>'
     : '<p class="by" style="margin-top:0">' + esc(J.why) + ' A group keeps them together instead.</p>');
   return '<h2>' + its.length + ' cards</h2><p class="sub">' + its.map(it => esc(cardTitle(it))).join(' · ') + '</p>' + join +
+    (np >= 2 ? '<div class="row" style="margin-top:0.2rem"><button type="button" class="btn solid" data-act="compare">' + (np > CMP_MAX ? 'Compare the first ' + CMP_MAX + ' side by side' : 'Compare them side by side') + '</button></div>' +
+      (np > CMP_MAX ? '<p class="by">Compare sets ' + CMP_MAX + ' passages side by side at most.</p>' : '') : '') +
     (ro() ? '' : '<span class="k">Make a group</span><div class="row" style="margin-top:0"><button type="button" class="btn solid" data-act="newmodel">Make these a group of their own</button></div>' +
     '<span class="k">Move them into a group</span><div class="row" style="margin-top:0"><select data-into style="width:auto;flex:1">' + '<option value="">no group</option>' + B.models.map(m => '<option value="' + esc(m.id) + '">' + esc(m.title) + '</option>').join('') + '</select><button type="button" class="btn" data-act="moveinto">Move</button></div>' +
     '<div class="row"><button type="button" class="linkish" data-act="offview">Take them off this view</button><button type="button" class="linkish" data-act="delete">Delete them</button></div>');
@@ -2567,6 +2812,95 @@ function downloadAnns() {
   const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); el.download = 'topic-board-annotations-' + today() + '.md';
   document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(el.href), 2000);
 }
+/* ── Parallels, in the side: beneath each passage, one parallel, all of them, and a new one ── */
+// Beneath a passage: for each parallel with words in it, the words elsewhere that answer, as an apparatus does.
+function parApparatus(it, qi) {
+  if (it.kind !== 'passage') return '';
+  const P = parsOn(it, qi), by = new Map();
+  P.spans.concat(P.lost).forEach(x => { if (!by.has(x.p.id)) by.set(x.p.id, { p: x.p, here: [] }); by.get(x.p.id).here.push(x); });
+  if (!by.size) return '';
+  return '<div class="pars-l"><span class="k">Parallels: the words elsewhere that answer</span>' + [...by.values()].sort((x, y) => bySign(x.p, y.p)).map(o => {
+    const p = o.p, mine = new Set(o.here.map(x => x.a.id)), others = placesOfPar(p.id).filter(a => !mine.has(a.id));
+    return '<div class="par-e' + (o.here.some(x => x.placed || x.lost) ? ' placed' : '') + '" style="--pc:' + parColor(p) + '" data-par="' + esc(p.id) + '">' +
+      '<div class="ph"><button type="button" class="psw" data-parsel="' + esc(p.id) + '" title="Show this parallel on the board">' + esc(parSign(p)) + '</button><b>' + esc(p.label) + '</b>' + (p.type ? ' <span class="pk">· ' + esc(p.type) + '</span>' : '') + '</div>' +
+      '<div class="pon">Here: ' + o.here.map(x => '<span class="w">“' + esc(short(x.a.place.exact, 90)) + '”</span>' + (x.placed ? ' <span class="pg">placed by the page</span>' : '') + (x.lost ? ' <span class="pg">no longer in this passage</span>' : '') + (x.a.text ? ' <span class="pn">· ' + esc(x.a.text) + '</span>' : '')).join('; ') + '</div>' +
+      (others.length ? others.map(placeLine).join('') : '<div class="po pg">No other words in it yet.' + (ro() ? '' : ' <button type="button" class="linkish" data-parhold="' + esc(p.id) + '">Hold it</button>, and select its words in another passage.') + '</div>') + '</div>';
+  }).join('') + '</div>';
+}
+// One place, in a line: where it stands, its words, and whether the page had to find them.
+function placeLine(a) {
+  const H = placeHere(a), pl = a.place || {};
+  return '<div class="po">' + placeWhere(a, H) + ' <span class="w">“' + esc(short(pl.exact, 110)) + '”</span>' + placeState(H) + (a.text ? ' <span class="pn">· ' + esc(a.text) + '</span>' : '') + '</div>';
+}
+function placeWhere(a, H) {
+  const pl = a.place || {}, href = portalHref(pl), cite = pl.cite || (H.card && item(H.card) ? cardTitle(item(H.card)) : 'a passage');
+  if (H.card && !H.lost) return '<button type="button" class="linkish" data-pcard="' + esc(H.card) + '" title="Its card on this board">' + esc(cite) + '</button>';
+  return href ? '<button type="button" class="linkish" data-read="' + esc(href) + '" title="Read it beside the board">' + esc(cite) + '</button>' : esc(cite);
+}
+const placeState = H => H.away ? ' <span class="pg">not on this board</span>' : H.lost ? ' <span class="pg">its words are no longer in the passage</span>' : H.waiting ? ' <span class="pg">waiting for the portal’s texts</span>' : H.placed ? ' <span class="pg">placed by the page</span>' : '';
+// A parallel chosen: what it is, in your words, and each of its places.
+function sideParallel(p) {
+  const pls = placesOfPar(p.id), w = !ro(), Hs = new Map(pls.map(a => [a.id, placeHere(a)])), onB = pls.filter(a => Hs.get(a.id).card && !Hs.get(a.id).lost).length;
+  const order = pls.slice().sort((x, y) => { const X = Hs.get(x.id), Y = Hs.get(y.id), px = X.card ? posOf(X.card) : null, py = Y.card ? posOf(Y.card) : null; return (!!Y.card - !!X.card) || (px && py ? px[0] - py[0] || px[1] - py[1] : 0); });
+  const nCards = (parPlaces().get(p.id) || []).length;
+  let h = '<h2 class="parh" style="--pc:' + parColor(p) + '"><span class="psw">' + esc(parSign(p)) + '</span><span data-parname>' + esc(p.label) + '</span></h2><p class="sub">A parallel' + (p.type ? ' · ' + esc(p.type) : '') + ' · ' + plural(pls.length, 'place') + (onB < pls.length ? ', ' + onB + ' on this board' : '') +
+    (SHM ? (p.only ? ' · only you see it' : p.by ? ' · by @' + esc(p.by) : '') : '') + '</p>';
+  if (w) h += '<div data-pform="edit"><label class="f">Its name</label><input type="text" data-pf="label" value="' + esc(p.label) + '">' +
+    '<div class="pinline"><div><label class="f">What kind of correspondence (optional)</label><input type="text" data-pf="type" list="partypes" value="' + esc(p.type || '') + '" placeholder="same term, translation, paraphrase…"></div><div style="flex:none"><label class="f">Its letter</label><input type="text" data-pf="sign" value="' + esc(parSign(p)) + '" maxlength="6" spellcheck="false"></div></div>' +
+    '<label class="f">In your words (optional)</label><textarea data-pf="text" rows="2" placeholder="What the words have in common, or how they differ">' + esc(p.text || '') + '</textarea>' +
+    '<label class="f">Its colour</label><div class="swatches">' + PAR_COLORS.map((c, i) => '<input type="radio" name="pcol" id="pcol' + i + '" value="' + c + '" data-pf="color"' + (c === parColor(p) ? ' checked' : '') + '><label for="pcol' + i + '" style="background:' + c + '"></label>').join('') + '</div></div>';
+  else if (p.text) h += '<span class="k">In your words</span><div class="stmt">' + esc(p.text) + '</div>';
+  h += '<span class="k">Its places</span>' + (order.length ? order.map(a => {
+    const H = Hs.get(a.id);
+    return '<div class="plc' + (H.placed ? ' placed' : '') + (H.lost ? ' lost' : '') + (H.away ? ' away' : '') + '" style="--pc:' + parColor(p) + '" data-placeid="' + esc(a.id) + '"><div>' + placeWhere(a, H) + placeState(H) + '</div>' +
+      '<div class="ctx">“' + placeWords(a, H) + '”</div>' +
+      (w ? '<input type="text" data-plnote="' + esc(a.id) + '" value="' + esc(a.text || '') + '" placeholder="A note on these words, here (optional)">' : a.text ? '<div class="pn">' + esc(a.text) + '</div>' : '') +
+      (w ? '<div class="pact"><button type="button" class="linkish" data-plout="' + esc(a.id) + '">take these words out of it</button></div>' : '') + '</div>';
+  }).join('') : '<p class="empty">None.</p>');
+  h += '<div class="row">' + (parSel === p.id ? '<button type="button" class="btn" data-act="parunshow">Show everything</button>' : nCards ? '<button type="button" class="btn solid" data-act="parshow">Show it on the board</button>' : '') +
+    (w ? '<button type="button" class="btn" data-act="parhold">' + (hand === p.id ? 'Put it down' : 'Hold it, to add words') + '</button>' : '') +
+    (nCards >= 2 ? '<button type="button" class="btn" data-act="parcompare">Compare its passages</button>' : '') + '</div>';
+  if (w) h += '<div class="row"><button type="button" class="linkish" data-act="pardel">Delete the parallel</button></div>';
+  return h + '<p class="by">A parallel is what you said: the page never adds words to one, nor joins two that share words. It belongs to the passages, so it shows on every one of your boards where they stand.</p>';
+}
+// The parallels on this board, and those on your other boards.
+function sideParallels() {
+  const here = parsHere(), W = parPlaces(), else_ = parsAll().filter(p => !W.has(p.id));
+  const row = (p, att) => '<button type="button" class="rel prow" ' + att + '="' + esc(p.id) + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '"><span class="psw">' + esc(parSign(p)) + '</span><b>' + esc(p.label) + '</b>' + (p.type ? '<span class="pk">&nbsp;· ' + esc(p.type) + '</span>' : '') + '<span class="pmeta">' + plural(placesOfPar(p.id).length, 'place') + '</span></button>';
+  return '<h2>Parallels</h2><p class="sub">Words in several passages that answer one another. To make one, click a card, select some of its passage’s words, and choose <i>Parallel…</i></p>' +
+    (here.length ? here.map(p => row(p, 'data-parsel')).join('') : '<p class="empty">None on this board yet.</p>') +
+    (else_.length ? '<span class="k">On your other boards</span>' + else_.map(p => row(p, 'data-parview')).join('') : '') +
+    '<div class="row"><button type="button" class="linkish" data-act="dlpar"' + (here.length ? '' : ' disabled') + '>Download them as a list</button><button type="button" class="linkish" data-act="cancel">Close</button></div>';
+}
+function downloadPars() {
+  const one = x => String(x || '').replace(/\s*\n+\s*/g, ' ');
+  const md = '# Parallels on the board of “' + one(topic ? topic.name : '') + '”\n\nFrom My topics, in the Kant Lab Logic Portal: parallels as of ' + fmtDate(new Date().toISOString()) + '. Each is a set of words, in several passages, that answer one another, as you marked them.\n' +
+    parsHere().map(p => '\n## (' + parSign(p) + ') ' + one(p.label) + (p.type ? ' · ' + one(p.type) : '') + '\n\n' + (p.text ? one(p.text) + '\n\n' : '') +
+      placesOfPar(p.id).map(a => { const H = placeHere(a); return '- ' + one(a.place.cite || 'A passage') + ': “' + one(a.place.exact) + '”' + (a.text ? ' (' + one(a.text) + ')' : '') + (H.away ? ' [not on this board]' : H.lost ? ' [its words are no longer in the passage]' : H.placed ? ' [placed by the page]' : ''); }).join('\n')).join('\n') + '\n';
+  const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); el.download = 'topic-board-parallels-' + today() + '.md';
+  document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(el.href), 2000);
+}
+// Words selected: a new parallel, or a place in one already made.
+function sideParNew() {
+  const f = form, here = parsHere(), W = parPlaces(), else_ = parsAll().filter(p => !W.has(p.id));
+  return '<h2>A parallel</h2><p class="sub">On “<i>' + esc(short(f.on.exact, 120)) + '</i>”, in ' + esc(f.on.cite || 'this passage') + '</p>' +
+    (here.length ? '<span class="k">Add these words to a parallel on this board</span>' + here.map(p => '<button type="button" class="rel prow" data-parto="' + esc(p.id) + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '"><span class="psw">' + esc(parSign(p)) + '</span><b>' + esc(p.label) + '</b>' + (p.type ? '<span class="pk">&nbsp;· ' + esc(p.type) + '</span>' : '') + '<span class="pmeta">' + plural(placesOfPar(p.id).length, 'place') + '</span></button>').join('') : '') +
+    (else_.length ? '<span class="k">Or to one on another of your boards</span><div class="pinline"><div><select data-parother><option value="">choose one…</option>' + else_.map(p => '<option value="' + esc(p.id) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 50)) + '</option>').join('') + '</select></div><button type="button" class="btn" data-act="partoother">Add them</button></div>' : '') +
+    '<span class="k">' + (here.length || else_.length ? 'Or make a new one' : 'Make a new one') + '</span><div data-pform="new">' +
+    '<label class="f">Its name</label><input type="text" data-pn="label" value="' + esc(short(f.on.exact, 60)) + '">' +
+    '<label class="f">What kind of correspondence (optional)</label><input type="text" data-pn="type" list="partypes" placeholder="same words, same term, translation, paraphrase, example, contrast, cf.">' +
+    '<label class="f">In your words (optional)</label><textarea data-pn="text" rows="2" placeholder="What the words have in common, or how they differ"></textarea>' +
+    (SHM ? '<label class="chk onlyc"><input type="checkbox" data-pn-only> only me: kept in My topics, not on the shared board</label>' : '') + '</div>' +
+    '<div class="row"><button type="button" class="btn solid" data-act="parmake">Make the parallel</button><button type="button" class="linkish" data-act="cancel">Cancel</button><span class="by" style="margin:0">Enter makes it · Esc leaves it</span></div><p class="warn" data-err></p>' +
+    '<p class="by">It is then in hand: select its words in the next passage, and the bar offers it first.</p>';
+}
+// Redraw the new parallel's form without losing what was typed in it.
+function keepParForm(fn) {
+  const D = $('details'), same = D.querySelector('[data-pform="new"]') && form && D.dataset.pkey === form.key;
+  const vals = same ? [...D.querySelectorAll('[data-pn]')].map(el => [el.dataset.pn, el.value]) : [];
+  fn(); D.dataset.pkey = form ? form.key : '';
+  vals.forEach(([k, v]) => { const el = D.querySelector('[data-pn="' + k + '"]'); if (el) el.value = v; });
+}
 // Redraw the side without losing what is being typed into an annotation, or where the caret was.
 function keepComposer(fn) {
   const D = $('details'), c = D.querySelector('.anncomp'), same = !!(c && form && c.dataset.fkey === form.key);
@@ -2620,8 +2954,10 @@ function renderSide() {
   const D = $('details');
   if (form) document.body.classList.remove('sideclosed');
   if (composing()) { keepComposer(() => { const it = item(form.card); D.innerHTML = it ? sideCard(it) : sideAnnAlone(); }); return; }
-  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'annotations' ? sideAnnotations() : form.kind === 'table' ? sideTableForm() : form.kind === 'stretch' ? sideStretchForm() : form.kind === 'join' ? sideJoinAsk() : sideCardForm(); tableFormSync(); return; }
-  if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
+  if (form && form.kind === 'parnew') { keepParForm(() => { D.innerHTML = sideParNew(); }); return; }
+  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'annotations' ? sideAnnotations() : form.kind === 'parallels' ? sideParallels() : form.kind === 'table' ? sideTableForm() : form.kind === 'stretch' ? sideStretchForm() : form.kind === 'join' ? sideJoinAsk() : sideCardForm(); tableFormSync(); return; }
+  if (sel.kind === 'par' && parById(sel.ids[0])) D.innerHTML = sideParallel(parById(sel.ids[0]));
+  else if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
   else if (sel.kind === 'card' && item(sel.ids[0])) D.innerHTML = sideCard(item(sel.ids[0]));
   else if (sel.kind === 'arrow' && arrow(sel.ids[0])) D.innerHTML = sideArrow(arrow(sel.ids[0]));
   else if (sel.kind === 'model' && model(sel.ids[0])) D.innerHTML = sideModel(model(sel.ids[0]));
@@ -2992,11 +3328,12 @@ async function restore() {
   sel = { kind: null, ids: [] }; render();
 }
 /* ── Annotating: words selected in the side, then a kind, then a few words of one's own ── */
-const selInSide = () => { try { const s = getSelection(); return !!(s && s.rangeCount && !s.isCollapsed && $('details').contains(s.getRangeAt(0).commonAncestorContainer)); } catch (e) { return false; } };
+const selIn = el => { try { const s = getSelection(); return !!(el && s && s.rangeCount && !s.isCollapsed && el.contains(s.getRangeAt(0).commonAncestorContainer)); } catch (e) { return false; } };
+const selInSide = () => selIn($('details'));
 // The words selected in one passage in the side, as characters of its text.
 function readPick() {
   const s = getSelection(); if (!s || !s.rangeCount || s.isCollapsed) return null;
-  const r = s.getRangeAt(0), els = [...$('details').querySelectorAll('[data-qt]')].filter(el => r.intersectsNode(el));
+  const r = s.getRangeAt(0), els = [$('details'), $('compare')].flatMap(R => [...R.querySelectorAll('[data-qt]')]).filter(el => r.intersectsNode(el));
   if (els.length !== 1) return null;
   const el = els[0], full = document.createRange(); full.selectNodeContents(el);
   const c = r.cloneRange();
@@ -3011,10 +3348,18 @@ function readPick() {
   return { card: it.id, qi, start, end, rect: c.getBoundingClientRect() };
 }
 function hideBar() { annPick = null; $('annbar').classList.remove('show'); }
+// The bar by words selected: the parallel in hand first, if one is, then Parallel…, then the kinds of annotation.
+function barHtml() {
+  const h = parById(hand);
+  return (h ? '<button type="button" class="pin" data-parin="' + esc(h.id) + '" style="--kc:' + parColor(h) + '" title="Add these words to this parallel">+ (' + esc(parSign(h)) + ') ' + esc(short(h.label, 28)) + '</button>' : '') +
+    '<button type="button" data-parnew style="--kc:#5c3d1e" title="These words answer words in other passages: make them a parallel, or add them to one">Parallel…</button><span class="bsep"></span>' +
+    ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + '" data-annk="' + k.key + '" title="' + esc(k.key === 'relevant' ? 'What these words bear on: a word, a card on the board, R 3990, or a portal address' : k.hint) + '">' + esc(k.label) + '</button>').join('');
+}
 function showBar() {
   const b = $('annbar');
   annPick = ro() ? null : readPick();
-  if (!annPick) { b.classList.remove('show'); if (sideStale && !selInSide()) { sideStale = false; renderSide(); } return; }
+  if (!annPick) { b.classList.remove('show'); if (sideStale && !selInSide()) { sideStale = false; renderSide(); } if (cmpStale && !selIn($('compare'))) { cmpStale = false; renderCompare(); } return; }
+  const bh0 = barHtml(); if (b.dataset.h !== bh0) { b.innerHTML = bh0; b.dataset.h = bh0; }
   b.classList.add('show');
   const r = annPick.rect, bw = b.offsetWidth, bh = b.offsetHeight;
   // above the words with a mouse; below them with a finger, clear of the iPad's own menu above them
@@ -3043,6 +3388,106 @@ function startAnn(kind, card, qi, range) {
   form = { kind: 'annotate', key: uid('f'), card, qi, ann: kind, on };
   hideBar(); try { getSelection().removeAllRanges(); } catch (x) { /* fine */ }
   sel = { kind: 'card', ids: [card] }; showSide('details'); render(); focusComposer();
+}
+/* ── Parallels: words selected, then Parallel…, then the same in passage after passage ── */
+// The words chosen in a passage, as a place keeps them: its address, the words verbatim, a few either side.
+function placeOf(pick) {
+  const it = item(pick.card), q = it && (it.quotes || [])[pick.qi];
+  if (!q || !q.q || it.kind !== 'passage') return null;
+  if (q.full === false) { toast(q.dead ? 'This address no longer opens in the portal, so its words can’t be put in a parallel.' : 'The portal beside the board is still loading its texts. Try again in a moment, once the passage shows in full.'); return null; }
+  const t = q.q, on = { card: it.id, qi: pick.qi, cite: q.cite || it.cite || '' };
+  if (q.ref) on.ref = q.ref; else if (q.hash) on.hash = q.hash;
+  return Object.assign(on, { exact: t.slice(pick.start, pick.end), prefix: t.slice(Math.max(0, pick.start - ANN_CTX), pick.start), suffix: t.slice(pick.end, pick.end + ANN_CTX), start: pick.start });
+}
+function dropPick() { hideBar(); try { getSelection().removeAllRanges(); } catch (x) { /* fine */ } }
+function startPar(pick) {
+  if (ro()) { toast(roWhy()); return; }
+  const on = placeOf(pick); if (!on) return;
+  dropPick();
+  form = { kind: 'parnew', key: uid('f'), card: pick.card, on };
+  sel = { kind: 'card', ids: [pick.card] }; document.body.classList.remove('sideclosed'); showSide('details'); render();
+  setTimeout(() => { const el = $('details').querySelector('[data-pn="label"]'); if (el) { el.focus({ preventScroll: true }); el.select(); } $('details').scrollTop = 0; }, 20);
+}
+function makePar() {
+  const D = $('details'), f = form; if (!f || f.kind !== 'parnew') return;
+  const v = k => ((D.querySelector('[data-pn="' + k + '"]') || {}).value || '').trim();
+  const label = v('label') || short(f.on.exact, 60), type = v('type').slice(0, 60), text = v('text');
+  const at = now(), id = uid('n'), sign = nextSign(), color = nextColor();
+  // on a shared board a parallel is signed, as an annotation is, and can be kept for oneself
+  const who = Object.assign(me() ? { by: me() } : {}, SHM && (D.querySelector('[data-pn-only]') || {}).checked ? { only: true } : {});
+  change(() => {
+    B.annotations = B.annotations || [];
+    B.annotations.push(Object.assign({ id, kind: 'parallel', label: label.slice(0, 200), sign, color }, type ? { type } : {}, text ? { text } : {}, who, { date: at, at }));
+    B.annotations.push(Object.assign({ id: uid('n'), kind: 'place', re: id, place: clone(f.on), text: '' }, who, { date: at, at }));
+  });
+  hand = id; form = null; if (item(f.card)) sel = { kind: 'card', ids: [f.card] };
+  render(); toast('Made (' + sign + ') ' + short(label, 40) + '. It is in hand: select its words in another passage, and press + (' + sign + ') by them. Esc puts it down.');
+}
+function addPlace(pid, pick) {
+  const p = parById(pid); if (!p) return;
+  if (ro()) { toast(roWhy()); return; }
+  const on = placeOf(pick); if (!on) return;
+  dropPick();
+  const key = x => (x.ref || x.hash || 'card:' + x.card) + '|' + x.start + '|' + x.exact;
+  if (placesOfPar(pid).some(a => key(a.place) === key(on))) { toast('These words are in (' + parSign(p) + ') already.'); return; }
+  const at = now();
+  const who = Object.assign(me() ? { by: me() } : {}, p.only ? { only: true } : {});   // a place is kept where its parallel is
+  change(() => { B.annotations = B.annotations || []; B.annotations.push(Object.assign({ id: uid('n'), kind: 'place', re: pid, place: on, text: '' }, who, { date: at, at })); p.at = at; });
+  if (form && form.kind === 'parnew') form = null;
+  render(); toast('Added to (' + parSign(p) + ') ' + short(p.label, 40) + ': ' + plural(placesOfPar(pid).length, 'place') + '.');
+}
+function removePlace(id) {
+  const a = annById(id); if (!a || a.kind !== 'place' || ro()) return;
+  const p = parById(a.re), last = placesOfPar(a.re).length <= 1;
+  if (last && p && !confirm('These are the last words in (' + parSign(p) + ') ' + p.label + '. Take them out, and the parallel goes with them? Undo (⌘Z) brings it back.')) return;
+  change(() => { B.annotations = (B.annotations || []).filter(x => x.id !== id && !(last && x.id === a.re)); if (p && !last) p.at = now(); });
+  if (last) { if (hand === a.re) hand = null; if (parSel === a.re) parSel = null; if (sel.kind === 'par') sel = { kind: null, ids: [] }; }
+  render();
+}
+function delPar(id) {
+  const p = parById(id); if (!p || ro()) return;
+  const n = placesOfPar(id).length;
+  if (!confirm('Delete the parallel (' + parSign(p) + ') ' + p.label + (n ? ', and the ' + plural(n, 'place') + ' in it' : '') + '? The passages’ words stay as they are. Undo (⌘Z) brings it back.')) return;
+  change(() => { B.annotations = (B.annotations || []).filter(x => x.id !== id && !(x.kind === 'place' && x.re === id)); });
+  if (hand === id) hand = null; if (parSel === id) parSel = null;
+  select(null, []);
+}
+// Choose a parallel: its cards turn to its words, the rest dim, and the side shows it.
+function choosePar(id) { if (!parById(id)) return; parSel = id; select('par', [id]); }
+// The words of the new parallel's form, given to a parallel already made instead.
+function addPickTo(pid) {
+  const f = form; if (!f || f.kind !== 'parnew') return;
+  const it = item(f.card), q = it && it.quotes[f.on.qi || 0], st = q && q.q ? findWords(q.q, f.on) : null;
+  if (!st) { toast('Those words are no longer in the passage.'); return; }
+  addPlace(pid, { card: f.card, qi: f.on.qi || 0, start: st.s, end: st.e });
+  if (parById(pid) && !ro()) hand = pid;
+  render();
+}
+function holdPar(id) { if (!parById(id) || ro()) return; hand = hand === id ? null : id; render(); if (hand) toast('Holding (' + parSign(parById(id)) + '): select its words in another passage, and press + (' + parSign(parById(id)) + ') by them.'); }
+// A parallel's name, kind, note, letter or colour, changed in its side; or a place's note.
+function setParField(id, k, v) {
+  const p = parById(id); if (!p || ro()) return;
+  v = String(v == null ? '' : v);
+  if (k === 'label') { v = v.trim().slice(0, 200); if (!v) { toast('A parallel needs a name.'); renderSide(); return; } }
+  if (k === 'type') v = v.trim().slice(0, 60);
+  if (k === 'sign') {
+    v = v.trim().replace(/\s+/g, '').slice(0, 6);
+    if (!v) { renderSide(); return; }
+    if (parsAll().some(x => x.id !== id && x.sign === v)) { toast('(' + v + ') is another of your parallels already. Choose another letter.'); renderSide(); return; }
+  }
+  if (k === 'color' && !PAR_COLORS.includes(v)) return;
+  if ((p[k] || '') === v) return;
+  change(() => { if (v || k === 'label') p[k] = v; else delete p[k]; p.edited = now(); p.at = p.edited; });
+  if (k === 'sign') AX = null;   // the parallels are listed by their letters
+  renderTools(); renderLayers(); renderBoard(); renderCompare();
+  if (k === 'label') { const el = $('details').querySelector('[data-parname]'); if (el) el.textContent = v; }
+  if (k === 'sign' || k === 'color') renderSide();
+}
+function setPlaceNote(id, v) {
+  const a = annById(id); if (!a || a.kind !== 'place' || ro()) return;
+  v = String(v || '').trim(); if ((a.text || '') === v) return;
+  change(() => { a.text = v; a.at = now(); });
+  renderBoard(); renderCompare();
 }
 const sideCardId = () => composing() ? form.card : sel.kind === 'card' ? sel.ids[0] : null;
 function replyTo(id) { if (ro() || !annById(id)) return; form = { kind: 'annotate', key: uid('f'), card: sideCardId(), re: id, ann: 'reply' }; renderSide(); focusComposer(); }
@@ -3106,7 +3551,7 @@ async function saveAnn() {
   form = null; if (item(f.card)) sel = { kind: 'card', ids: [f.card] };
   refreshAnns(id);
 }
-function refreshAnns(id) { renderTools(); renderLayers(); renderBoard(); renderSide(); applyCam(); if (id) flashAnn(id); }
+function refreshAnns(id) { renderTools(); renderLayers(); renderBoard(); renderSide(); renderCompare(); applyCam(); if (id) flashAnn(id); }
 function resolveAnn(id) {
   if (ro()) return;
   change(() => { const a = (B.annotations || []).find(x => x.id === id); if (!a) return; if (a.resolved) delete a.resolved; else a.resolved = { date: new Date().toISOString() }; a.at = new Date().toISOString(); });
@@ -3308,7 +3753,9 @@ $('stage').addEventListener('pointerdown', e => {
   if (editing) commitEditing();
   const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame'), th = t.closest('.annt');
   const tcolEl = t.closest('.tcol'), cellEl = t.closest('.k-table [data-cell]'), chipEl = t.closest('.k-table .tp');
-  const bare = !knob && !card && !tab && !grip && !ar && !th;
+  const pk = t.closest('.part'), pch = t.closest('.pchip');   // a parallel's knot, or its chip on a card: chosen, not moved
+  if ((pk || pch) && !mode && !spaceDown && tool !== 'pen' && tool !== 'erase') { choosePar(pk ? pk.dataset.par : pch.dataset.pchip); return; }
+  const bare = !knob && !card && !tab && !grip && !ar && !th && !pk;
   const [wx, wy] = toWorld(e.clientX, e.clientY);
   if (spaceDown) drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
   else if (tool === 'erase' && !ro()) { drag = { what: 'erase', changed: false }; eraseAt(wx, wy, drag); }
@@ -3493,7 +3940,7 @@ $('stage').addEventListener('pointercancel', e => afterPointer(e, true));
 // Double-click (or double tap): a card opens to be edited; the board offers something to put there.
 function doubleAt(cx, cy) {
   const under = document.elementFromPoint(cx, cy);
-  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob, .tcol, .tp') || under.isContentEditable || under.closest('.pill-edit')) return;
+  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob, .tcol, .tp, .pchip, .part') || under.isContentEditable || under.closest('.pill-edit')) return;
   const card = under.closest('.card');
   const cl = card && card.classList.contains('k-table') && under.closest('[data-cell]');
   if (cl) { const [r, c] = cl.dataset.cell.split(',').map(Number); editCell(card.dataset.id, r, c); return; }
@@ -3650,6 +4097,9 @@ $('banner').addEventListener('click', e => {
   if (k === 'back') back(); else if (k === 'restore') restore();
   else if (k === 'nolink') { mode = null; render(); }
   else if (k === 'nofocus') { focus = null; render(); }
+  else if (k === 'nohand') { hand = null; render(); }
+  else if (k === 'noparsel') { parSel = null; render(); }
+  else if (k === 'parcompare' && parSel) parCompare(parSel);
   else if (k === 'hop1' || k === 'hop2') { focus.hops = k === 'hop1' ? 1 : 2; render(); }
   else if (k === 'o-keep') { offer = null; banner(); }
   else if (k === 'o-arrow' && offer) { const o = offer; offer = null; makeArrow(o.from, o.to, o.stroke); }
@@ -3664,6 +4114,113 @@ $('layers').addEventListener('change', e => {
   showLayer(k, e.target.checked); render();
 });
 $('layers').addEventListener('click', e => { if (e.target.closest('[data-fold]')) { $('layers').classList.toggle('closed'); renderLayers(); } });
+
+/* ── Compare: two to four passages side by side over the board ────────────────
+   Each passage in full in a column of its own, its annotations and parallels marked as in the
+   side. In the gutter between two columns a band in each parallel's colour joins its words in
+   the one to its words in the other, so that crossing bands show points taken in another order.
+   Click a band, or any of a parallel's words, and the columns scroll until its words stand
+   level. Words selected here can be annotated or made parallels, as in the side. Nothing about
+   Compare is saved: it is a way of reading the board, not a part of it. */
+function openCompare(ids) {
+  const ps = ids.filter(id => item(id) && item(id).kind === 'passage').slice(0, CMP_MAX);
+  if (!ps.length) { toast('Choose two to four passages to compare.'); return; }
+  compare = { ids: ps, top: {}, pad: {} }; render();
+}
+// A parallel's passages on this board, from left to right as they stand.
+function parCompare(id) {
+  const cs = (parPlaces().get(id) || []).filter(c => shown(item(c))).sort((a, b) => (posOf(a) || [0])[0] - (posOf(b) || [0])[0]);
+  if (cs.length < 2) { toast('Its words are in fewer than two passages on this board.'); return; }
+  if (cs.length > CMP_MAX) toast('Compare sets ' + CMP_MAX + ' passages side by side at most: the first ' + CMP_MAX + ', from the left of the board.');
+  openCompare(cs); if (parById(id)) setTimeout(() => bringLevel(id), 30);
+}
+function renderCompare() {
+  const C = $('compare'); if (!C) return;
+  $('stage').classList.toggle('comparing', !!compare);
+  if (compare) compare.ids = compare.ids.filter(id => item(id) && item(id).kind === 'passage');
+  if (compare && !compare.ids.length) compare = null;
+  if (!compare) { if (!C.hidden) { C.hidden = true; C.innerHTML = ''; } $('stage').classList.remove('comparing'); return; }
+  if (selIn(C)) { cmpStale = true; return; }   // words being selected here are not lost: drawn again once that ends
+  C.querySelectorAll('.cbody').forEach(el => { compare.top[el.dataset.cc] = el.scrollTop; });
+  const n = compare.ids.length, add = B.items.filter(it => it.kind === 'passage' && !compare.ids.includes(it.id));
+  const col = (id, i) => {
+    const it = item(id), q = it.quotes[0] || {}, an = layerOn('annotations') ? placeOn(it, 0).spans : [];
+    return '<div class="ccol"><div class="chead"><span class="cc">' + esc(it.label || q.cite || it.cite || 'A passage') + '</span>' +
+      (i > 0 ? '<button type="button" data-cmove="' + i + '|-1" title="Move it to the left">‹</button>' : '') + (i < n - 1 ? '<button type="button" data-cmove="' + i + '|1" title="Move it to the right">›</button>' : '') +
+      '<button type="button" data-cdrop="' + i + '" title="Take it out of the comparison">✕</button></div>' + (it.label && q.cite ? '<div class="csub">' + esc(q.cite) + '</div>' : '') +
+      '<div class="cbody" data-cc="' + esc(id) + '">' + (q.q ? '<div class="ct" data-qt="0" data-qcard="' + esc(id) + '"' + ((compare.pad || {})[id] ? ' style="padding-top:' + (+compare.pad[id]) + 'px"' : '') + '>' + markText(String(q.q), an, parsOn(it, 0).spans) + '</div>' : '<p class="empty">No words for this passage yet.</p>') +
+      (q.full === false ? '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal: these are the words My topics kept.' : 'The portal beside the board is still loading its texts: the passage in full follows in a moment.') + '</p>' : '') + '</div></div>';
+  };
+  C.innerHTML = '<div class="cbar"><b>Compare</b><span>' + (n === 1 ? 'One passage: add another to compare it with.' : n + ' passages side by side. A band joins the words of each parallel; click it to bring them level.') + '</span>' +
+    (n < CMP_MAX && add.length ? '<select data-cadd aria-label="Add a passage"><option value="">+ another passage…</option>' + add.map(it => '<option value="' + esc(it.id) + '">' + esc(short(cardTitle(it), 60)) + '</option>').join('') + '</select>' : '') +
+    '<button type="button" class="btn" data-cx>Back to the board (Esc)</button></div>' +
+    '<div class="ccols">' + compare.ids.map(col).join('<div class="cgut"></div>') + '<svg class="cbands" id="cbands" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
+    (parsHere().length ? '' : '<p class="cnote">Select words in one column and choose <i>Parallel…</i>; then select the words that answer them in the next, and press <b>+ (a)</b>.</p>');
+  C.hidden = false;
+  C.querySelectorAll('.cbody').forEach(el => { const t = compare.top[el.dataset.cc]; if (t) el.scrollTop = t; el.addEventListener('scroll', bandsSoon, { passive: true }); });
+  drawBands();
+}
+let bandF = 0;
+function bandsSoon() { if (!bandF) bandF = requestAnimationFrame(() => { bandF = 0; drawBands(); }); }
+// Where each place stands in each column, on the screen, and a band for each place of a parallel in the next column.
+function drawBands() {
+  const C = $('compare'), svg = $('cbands'); if (!compare || !svg || C.hidden) return;
+  const box = C.querySelector('.ccols').getBoundingClientRect();
+  const cols = [...C.querySelectorAll('.cbody')].map(b => {
+    const br = b.getBoundingClientRect(), m = new Map();
+    b.querySelectorAll('.par[data-pl]').forEach(el => [...el.getClientRects()].forEach(r => el.dataset.pl.split(' ').forEach(pl => {
+      const o = m.get(pl); if (!o) m.set(pl, { t: r.top, b: r.bottom }); else { o.t = Math.min(o.t, r.top); o.b = Math.max(o.b, r.bottom); }
+    })));
+    return { br, m };
+  });
+  let h = '';
+  for (let i = 0; i + 1 < cols.length; i++) {
+    const L = cols[i], R = cols[i + 1];
+    L.m.forEach((ly, pa) => { const A = annById(pa), p = A && parById(A.re); if (!p) return;
+      R.m.forEach((ry, pb) => { const Z = annById(pb); if (!Z || Z.re !== p.id) return; h += band(L.br, ly, R.br, ry, p, box); }); });
+  }
+  svg.innerHTML = h;
+}
+function band(lb, ly, rb, ry, p, box) {
+  const clip = (y, b) => Math.max(b.top, Math.min(b.bottom, y)), out = ly.b < lb.top || ly.t > lb.bottom || ry.b < rb.top || ry.t > rb.bottom;
+  const x1 = lb.right - box.left + 1, x2 = rb.left - box.left - 1, mx = (x1 + x2) / 2;
+  let a1 = clip(ly.t, lb) - box.top, a2 = clip(ly.b, lb) - box.top, b1 = clip(ry.t, rb) - box.top, b2 = clip(ry.b, rb) - box.top;
+  if (a2 - a1 < 3) a2 = a1 + 3; if (b2 - b1 < 3) b2 = b1 + 3;
+  const d = 'M' + x1 + ',' + a1 + ' C' + mx + ',' + a1 + ' ' + mx + ',' + b1 + ' ' + x2 + ',' + b1 + ' L' + x2 + ',' + b2 + ' C' + mx + ',' + b2 + ' ' + mx + ',' + a2 + ' ' + x1 + ',' + a2 + ' Z';
+  return '<path class="cband' + (out ? ' off' : '') + (p.id === parSel ? ' on' : '') + (p.id === hovPar ? ' phov' : '') + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '" d="' + d + '"><title>' + esc('(' + parSign(p) + ') ' + p.label + (p.type ? ' · ' + p.type : '') + (out ? ': out of sight in a column. Click to bring its words level.' : ': click to bring its words level.')) + '</title></path>';
+}
+// Bring a parallel's words level: each column with words of it scrolls, and one too short to scroll far enough
+// is let down by a space above its passage, until the words stand at the same height in every column.
+function bringLevel(id) {
+  const C = $('compare'); if (!compare || C.hidden) return;
+  compare.pad = {}; C.querySelectorAll('.ct').forEach(el => { el.style.paddingTop = ''; });
+  const cols = [...C.querySelectorAll('.cbody')].map(b => {
+    const el = [...b.querySelectorAll('.par[data-par]')].find(x => x.dataset.par.split(' ').includes(id)); if (!el) return null;
+    const br = b.getBoundingClientRect(), cur = el.getBoundingClientRect().top - br.top;
+    return { b, cur, h: br.height, min: cur - (b.scrollHeight - b.clientHeight - b.scrollTop) };
+  }).filter(Boolean);
+  if (!cols.length) return;
+  const T = Math.max(Math.max(...cols.map(c => c.min)), Math.min(Math.max(...cols.map(c => c.cur)), cols[0].h * 0.3));
+  cols.forEach(c => {
+    const need = c.cur - T;
+    if (need > 0) { c.b.scrollTop += need; return; }
+    const up = Math.min(-need, c.b.scrollTop), rest = Math.round(-need - up); c.b.scrollTop -= up;
+    if (rest > 0) { compare.pad[c.b.dataset.cc] = rest; c.b.querySelector('.ct').style.paddingTop = rest + 'px'; }
+  });
+  bandsSoon();
+}
+$('compare').addEventListener('click', e => {
+  if (e.target.closest('[data-cx]')) { compare = null; render(); return; }
+  const mv = e.target.closest('[data-cmove]'); if (mv) { const [i, d] = mv.dataset.cmove.split('|').map(Number), L = compare.ids, j = i + d; if (j >= 0 && j < L.length) { [L[i], L[j]] = [L[j], L[i]]; compare.pad = {}; renderCompare(); } return; }
+  const dr = e.target.closest('[data-cdrop]'); if (dr) { compare.ids.splice(+dr.dataset.cdrop, 1); compare.pad = {}; render(); return; }
+  const bd = e.target.closest('.cband'); if (bd) { const id = bd.dataset.par; choosePar(id); setTimeout(() => bringLevel(id), 0); return; }
+  const mk = e.target.closest('mark[data-ann]'); if (mk && getSelection().isCollapsed) { openAnn(mk.dataset.ann.split(' ').pop()); return; }
+  const pw = e.target.closest('.par[data-par]'); if (pw && getSelection().isCollapsed) { const id = pw.dataset.par.split(' ').includes(parSel) ? parSel : pw.dataset.par.split(' ').pop(); choosePar(id); setTimeout(() => bringLevel(id), 0); }
+});
+$('compare').addEventListener('change', e => { const a = e.target.closest('[data-cadd]'); if (a && a.value && compare && compare.ids.length < CMP_MAX) { compare.ids.push(a.value); compare.pad = {}; renderCompare(); } });
+$('compare').addEventListener('pointerdown', e => { selTouch = e.pointerType !== 'mouse'; if (!selTouch) selecting = true; });
+$('compare').addEventListener('scroll', () => { if ($('annbar').classList.contains('show')) showBar(); }, true);
+window.addEventListener('resize', bandsSoon);
 
 /* ── Wiring: the tools and the side ───────────────────────────────────────── */
 document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => {
@@ -3691,6 +4248,7 @@ $('snap').addEventListener('click', () => {
 });
 $('photos').addEventListener('click', () => { form = { kind: 'photos' }; showSide('details'); renderSide(); });
 $('annsb').addEventListener('click', () => { form = { kind: 'annotations', f: {} }; document.body.classList.remove('sideclosed'); showSide('details'); renderSide(); });
+$('parsb').addEventListener('click', () => { form = { kind: 'parallels' }; document.body.classList.remove('sideclosed'); showSide('details'); renderSide(); });
 // The annotation bar: it appears by words selected in a passage in the side, mouse or finger.
 let selT = null, selecting = false, selTouch = false, barDown = 0;
 document.addEventListener('selectionchange', () => { clearTimeout(selT); selT = setTimeout(() => { if (!selecting && Date.now() - barDown > 600) showBar(); }, 150); });
@@ -3701,8 +4259,19 @@ $('details').addEventListener('keyup', e => { if (e.shiftKey && !e.target.closes
 $('details').addEventListener('scroll', () => { if ($('annbar').classList.contains('show')) showBar(); });
 $('annbar').addEventListener('pointerdown', e => { e.preventDefault(); barDown = Date.now(); });
 $('annbar').addEventListener('mousedown', e => e.preventDefault());
-$('annbar').addEventListener('click', e => { const b = e.target.closest('[data-annk]'); if (b && annPick) startAnn(b.dataset.annk, annPick.card, annPick.qi, annPick); });
+$('annbar').addEventListener('click', e => {
+  if (!annPick) return;
+  const pi = e.target.closest('[data-parin]'); if (pi) { addPlace(pi.dataset.parin, annPick); return; }
+  if (e.target.closest('[data-parnew]')) { startPar(annPick); return; }
+  const b = e.target.closest('[data-annk]'); if (b) startAnn(b.dataset.annk, annPick.card, annPick.qi, annPick);
+});
 $('details').addEventListener('keydown', e => {
+  if (e.target.closest('[data-pform="new"]') && form && form.kind === 'parnew') {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); makePar(); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); form = null; renderSide(); }
+    return;
+  }
+  if (e.target.matches('[data-pf], [data-plnote]') && e.key === 'Enter' && !e.shiftKey && !e.isComposing && !e.target.matches('textarea')) { e.preventDefault(); e.target.blur(); return; }
   if (!e.target.closest('.anncomp')) return;
   if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); saveAnn(); }
   else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); form = null; renderSide(); }
@@ -3724,6 +4293,13 @@ $('palette').addEventListener('click', e => {
   const p = e.target.closest('[data-pen]'); if (p) { pen = p.dataset.pen; renderPens(); return; }
   if (e.target.closest('[data-clear]') && !ro() && (view().ink || []).length && confirm('Clear all the drawing on this view? Undo (⌘Z) brings it back.')) { change(() => { view().ink = []; }); render(); }
 });
+// Pointing at a parallel's words, chip, knot or entry lights its words, chips and knot everywhere, and its bands.
+function hoverPar(id) {
+  if (id === hovPar) return; hovPar = id;
+  document.querySelectorAll('.phov').forEach(el => el.classList.remove('phov'));
+  if (id) document.querySelectorAll('[data-par]').forEach(el => { if (el.dataset.par.split(' ').includes(id)) el.classList.add('phov'); });
+}
+document.addEventListener('pointerover', e => { if (drag) return; const el = e.target.closest && e.target.closest('[data-par]'); hoverPar(el ? (el.dataset.par.split(' ').includes(parSel) ? parSel : el.dataset.par.split(' ').pop()) : ''); });
 // The store changed elsewhere: another tab of the portal, the portal beside the board, GitHub's copy arriving through it.
 window.addEventListener('storage', e => { if (e.key === TOPICS || e.key == null) takeIn(); });
 const boardId = h => { const u = new URLSearchParams(String(h).slice(1)); return u.get('s') ? 's:' + u.get('s') : 't:' + (u.get('t') || ''); };
@@ -3741,7 +4317,7 @@ $('details').addEventListener('input', e => {
   else if (t.matches('textarea[data-mttopic]')) { const v = t.value; noteSoon(() => setTopic(x => { x.note = v; })); }
 });
 $('details').addEventListener('focusout', e => {
-  if (!e.target.matches('textarea.mtnote')) return;
+  if (!e.target.matches('textarea.mtnote, [data-pf], [data-plnote]')) return;
   noteNow();
   setTimeout(() => { if (sideStale && !noteFocused() && !selInSide()) { sideStale = false; renderSide(); } }, 0);
 });
@@ -3930,6 +4506,13 @@ $('details').addEventListener('click', e => {
     renderTools(); renderSide(); return;
   }
   const mk = e.target.closest('mark[data-ann]'); if (mk && getSelection().isCollapsed) { flashAnn(mk.dataset.ann.split(' ').pop()); return; }
+  const pw = e.target.closest('.par[data-par]'); if (pw && getSelection().isCollapsed) { choosePar(pw.dataset.par.split(' ').pop()); return; }
+  const ps = e.target.closest('[data-parsel]'); if (ps) { choosePar(ps.dataset.parsel); return; }
+  const pv = e.target.closest('[data-parview]'); if (pv) { select('par', [pv.dataset.parview]); return; }
+  const ph = e.target.closest('[data-parhold]'); if (ph) { holdPar(ph.dataset.parhold); return; }
+  const pt = e.target.closest('[data-parto]'); if (pt) { addPickTo(pt.dataset.parto); return; }
+  const pcd = e.target.closest('[data-pcard]'); if (pcd) { const id = pcd.dataset.pcard; select('card', [id]); showCard(id); return; }
+  const po = e.target.closest('[data-plout]'); if (po) { removePlace(po.dataset.plout); return; }
   const aw = e.target.closest('[data-annwhole]'); if (aw) { startAnn('comment', aw.dataset.qcard, +aw.dataset.annwhole, null); return; }
   const ak = e.target.closest('[data-annkind]'); if (ak && composing()) { form.ann = ak.dataset.annkind; renderSide(); focusComposer(); return; }
   const arp = e.target.closest('[data-annreply]'); if (arp) { replyTo(arp.dataset.annreply); return; }
@@ -3963,6 +4546,15 @@ $('details').addEventListener('click', e => {
   if (act === 'anncancel') { form = null; renderSide(); return; }
   if (act === 'annpick') { mode = { annTo: true }; banner(); return; }
   if (act === 'dlann') { downloadAnns(); return; }
+  if (act === 'dlpar') { downloadPars(); return; }
+  if (act === 'parmake') { makePar(); return; }
+  if (act === 'partoother') { const v = (D.querySelector('[data-parother]') || {}).value; if (v) addPickTo(v); return; }
+  if (act === 'parshow') { choosePar(id); return; }
+  if (act === 'parunshow') { parSel = null; render(); return; }
+  if (act === 'parhold') { holdPar(id); return; }
+  if (act === 'parcompare') { parCompare(id); return; }
+  if (act === 'pardel') { delPar(id); return; }
+  if (act === 'compare') { openCompare(sel.ids); return; }
   if (act === 'cancel') { form = null; renderSide(); return; }
   if (act === 'followlink') { const it = item(id); if (it) followLink(it); return; }
   if (act === 'copylink') { copyLink(id); return; }
@@ -3989,6 +4581,8 @@ $('details').addEventListener('click', e => {
 });
 $('details').addEventListener('change', e => {
   if (e.target.matches('[data-sxa]') && form && form.kind === 'stretch') { form.ar[e.target.dataset.sxa] = +e.target.value; return; }
+  if (e.target.matches('[data-pf]') && sel.kind === 'par') { setParField(sel.ids[0], e.target.dataset.pf, e.target.value); return; }
+  if (e.target.matches('[data-plnote]')) { setPlaceNote(e.target.dataset.plnote, e.target.value); return; }
   if (e.target.matches('[data-annf]') && form && form.kind === 'annotations') { form.f = form.f || {}; form.f[e.target.dataset.annf] = e.target.value; $('annlist').innerHTML = annListAll(); return; }
   if (e.target.matches('[data-tnewh]') && form && form.kind === 'table') { form[e.target.dataset.tnewh] = e.target.checked; tableFormSync(); return; }
   if (e.target.matches('[data-tshape]') && sel.kind === 'card') { const it = item(sel.ids[0]), d = it && dims(it); if (d) setShape(it.id, e.target.dataset.tshape === 'rows' ? e.target.value : d.rows, e.target.dataset.tshape === 'cols' ? e.target.value : d.cols); return; }
@@ -4003,11 +4597,12 @@ document.addEventListener('keydown', e => {
   if (e.key === ' ') { e.preventDefault(); if (!spaceDown) { spaceDown = true; $('stage').classList.add('spacepan'); } return; }
   if (!e.metaKey && !e.ctrlKey && !e.altKey) { const t = { v: 'move', s: 'select', p: 'pen', e: 'erase', b: 'box' }[e.key.toLowerCase()]; if (t) { setTool(t); return; } }
   if (e.key === 'Escape' && $('annbar').classList.contains('show')) { hideBar(); try { getSelection().removeAllRanges(); } catch (x) { /* fine */ } return; }
-  if (e.key === 'Escape') { if (mode) mode = null; else if (offer) offer = null; else if (tool !== 'move') setTool('move'); else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
+  if (e.key === 'Escape') { if (mode) mode = null; else if (hand) hand = null; else if (compare) compare = null; else if (offer) offer = null; else if (tool !== 'move') setTool('move'); else if (parSel) parSel = null; else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && sel.kind && !ro()) {
     e.preventDefault();
     if (sel.kind === 'card') { if (confirm(delAsk(sel.ids))) removeCards(sel.ids.slice()); }
     else if (sel.kind === 'arrow') { const id = sel.ids[0]; if (confirm('Delete this arrow?')) { change(() => { B.arrows = B.arrows.filter(a => a.id !== id); if (BASE.arrows.some(a => a.id === id)) B.removed.push(id); }); select(null, []); } }
+    else if (sel.kind === 'par') delPar(sel.ids[0]);
     return;
   }
   if ((e.key === 'f' || e.key === 'F') && sel.kind === 'card' && sel.ids.length === 1) { focus = { id: sel.ids[0], hops: focus && focus.id === sel.ids[0] && focus.hops === 1 ? 2 : 1 }; render(); }
@@ -4077,9 +4672,9 @@ function addFrom(into, from) {
   return into;
 }
 $('export').addEventListener('click', () => {
-  const ids = new Set(annHere().map(a => a.id));
+  const ids = new Set(annHere().map(a => a.id)), pids = new Set(parsHere().map(p => p.id));
   const data = { kind: 'kantlab-topic-board', v: 1, topic: topic ? topic.name : '', saved: new Date().toISOString(), board: kept(),
-    annotations: (B.annotations || []).filter(a => a && (ids.has(a.id) || (a.kind === 'reply' && ids.has(a.re)))) };
+    annotations: (B.annotations || []).filter(a => a && (ids.has(a.id) || (a.kind === 'reply' && ids.has(a.re)) || (a.kind === 'parallel' && pids.has(a.id)) || (a.kind === 'place' && pids.has(a.re)))) };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
   const slug = String(topic ? topic.name : 'topic').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'topic';
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'topic-board-' + slug + '-' + today() + '.json';
@@ -4093,7 +4688,13 @@ $('file').addEventListener('change', () => {
     if (!d || d.kind !== 'kantlab-topic-board' || !d.board || !Array.isArray(d.board.items)) throw new Error('shape');
     const before = { m: B.models.length, i: B.items.length, a: B.arrows.length, v: B.views.length };
     const b = cleanBoard(d.board);
-    change(() => { addFrom(B, { models: b.models, items: b.items, arrows: b.arrows, views: b.views, annotations: Array.isArray(d.annotations) ? d.annotations : [] }); });
+    change(() => {
+      const had = new Set((B.annotations || []).map(a => a && a.id));
+      addFrom(B, { models: b.models, items: b.items, arrows: b.arrows, views: b.views, annotations: Array.isArray(d.annotations) ? d.annotations : [] });
+      // a parallel brought in with a letter one of yours already has takes the next free letter; yours keep theirs
+      const ps = B.annotations.filter(a => a && a.kind === 'parallel'), used = new Set(ps.filter(p => had.has(p.id)).map(p => p.sign));
+      ps.filter(p => !had.has(p.id)).forEach(p => { if (!p.sign || used.has(p.sign)) p.sign = freeSign(used); used.add(p.sign); });
+    });
     const have = new Set(photos.map(p => p.id)); let np = 0;
     (b.photos || []).forEach(p => { if (p && p.board && !have.has(p.id)) { photos.push(p); np++; } });
     if (np) save();
@@ -4145,7 +4746,8 @@ function start() {
 start();
 // Each kind of annotation's colour, as --kc, and the bar that offers them.
 document.head.insertAdjacentHTML('beforeend', '<style>' + ANN_KINDS.map(k => '.ak-' + k.key + ' { --kc: ' + k.color + '; }').join(' ') + ' .ak-reply { --kc: #8b5e3c; }</style>');
-$('annbar').innerHTML = ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + '" data-annk="' + k.key + '" title="' + esc(k.key === 'relevant' ? 'What these words bear on: a word, a card on the board, R 3990, or a portal address' : k.hint) + '">' + esc(k.label) + '</button>').join('');
+$('annbar').innerHTML = barHtml();
+$('partypes').innerHTML = PAR_TYPES.map(t => '<option value="' + esc(t) + '">').join('');
 renderPens();
 renderHead();
 render();

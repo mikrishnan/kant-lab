@@ -301,6 +301,34 @@ reader's topic rather than the seminar's one board.
   *Problem*, *Relevant to…*, *Interpretation*, *Comment*, with replies and *resolved*. An
   annotation belongs to the passage, not the board, so it shows on every one of your boards
   where that passage stands.
+- **Parallels: words that answer one another.** When several passages say the same thing, select
+  the words in one of them and choose **Parallel…** in the bar by them: name it (the words are
+  offered), and, if you like, say what kind of correspondence it is (*same words*, *same term*,
+  *translation*, *paraphrase*, *example*, *contrast*, *cf.*, or a word of your own). The parallel
+  is then *in hand*, like a highlighter picked up: click the next card, select the words there
+  that answer, and the bar offers **+ (a)** first. **Esc** puts it down. Each parallel has a
+  colour and a letter, (a), (b), kept with it, so that a note can say "see (b)". Its words are
+  tinted in its colour, with its letter after them, on the cards and in the side; each card
+  carries a chip for it; and a thread runs from each of its cards to a knot marked with its
+  letter. Pointing at any of its words, chips or knot lights them all. Click a chip or a knot, or
+  its words in the side, and it is **chosen**: each of its cards turns to its words, even those
+  further in than the card's opening, the rest of the board dims, and the side shows it, its
+  name, kind and note to change, each of its places with the words round them and a note of its
+  own, **Hold it**, **Compare its passages** and **Delete the parallel**. Beneath a passage in
+  the side, **Parallels** lists the words elsewhere that answer to its own, each opening its
+  card, or, for a passage not on this board, its place in the portal. **Parallels**, among the
+  tools, lists them all and downloads them as a list. Like an annotation, a parallel belongs to
+  its passages, so it shows on every one of your boards where they stand. It is what you said:
+  the page never adds words to one, nor joins two because they share words. Words it had to find
+  again, because the passage now has them elsewhere or twice, are outlined dashed.
+- **Compare.** Select two to four passage cards and press **Compare them side by side**, or
+  **Compare its passages** on a parallel. The passages stand in full in columns over the board,
+  and in the gutter between two columns a band in each parallel's colour joins its words in the
+  one to its words in the other: bands that cross show the same points made in another order.
+  Click a band, or a parallel's words, and the columns move until its words stand level. Words
+  selected in a column can be annotated or made a parallel as in the side. **‹ ›** reorder the
+  columns, **✕** takes one out, and **Back to the board** (Esc) closes it. Nothing about Compare
+  is saved.
 - **Link to another topic.** A link card stands on one board for another of your topics, as a
   whole, or for one card or group on that topic's board, and shows what it points to as it is
   now. Make one under **Boards**, a tab in the side (or **Link…** among the tools): choose the
