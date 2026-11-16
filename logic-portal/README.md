@@ -244,6 +244,11 @@ reader's topic rather than the seminar's one board.
   the portal beside the board included, joins them there; nothing comes onto the board by
   itself. **Take it off the board**, on a passage's card, sends it back to Passages; it stays
   under the topic.
+- **Find among them**, at the top of Passages, narrows both lists, those waiting and those on
+  the board, to the passages with every word you type: in the citation, the work, the passage's
+  words in full or your note on it, with case, accents and ß left out of account. The words are
+  marked where they stand, and a word further into the passage than its row shows is given
+  beneath it, with the words round it. **Esc** clears it.
 - **A passage you take off the topic** in the list keeps its card, drawn dashed and marked *no
   longer under this topic*, with **Put it back under the topic** and **Take it off the board**,
   so that its arrows are not lost without your saying so.

@@ -170,6 +170,15 @@
   #passages .pp .row { display: flex; gap: 0.6rem; align-items: center; }
   #passages .rel { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line-soft); border-radius: 6px; padding: 0.2rem 0.5rem; margin: 0.2rem 0; cursor: pointer; font-size: 0.88rem; color: var(--accent); }
   #passages .rel:hover { border-color: var(--accent-light); }
+  /* finding among them: the box stays at the top as the list scrolls (top: less the padding above it) */
+  #passages .ppbar { position: sticky; top: -0.8rem; z-index: 1; display: flex; align-items: baseline; gap: 0.5rem; margin: 0 -1rem 0.5rem; padding: 0.45rem 1rem; background: var(--panel); border-bottom: 1px solid var(--line-soft); }
+  #passages .ppbar[hidden] { display: none; }
+  #ppfind { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 999px; padding: 0.1rem 0.7rem; background: #fff; font: inherit; font-size: 0.92rem; }
+  #ppfound { font-size: 0.82rem; color: var(--faded); white-space: nowrap; }
+  #passages mark.pf { color: inherit; background: color-mix(in srgb, #d9a441 38%, transparent); border-radius: 2px; padding: 0 1px; }
+  #passages .pin { display: block; font-size: 0.84rem; line-height: 1.25; color: var(--faded); margin: -0.1rem 0 0.3rem; }
+  #passages .pin i { font-style: normal; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.08em; color: var(--accent); margin-right: 0.3rem; }
+  #passages .rel .pin { margin: 0.1rem 0 0; }
   #side .tabs button b.n { display: inline-block; min-width: 1.1rem; margin-left: 0.25rem; padding: 0 0.3rem; border-radius: 999px; background: var(--accent); color: var(--parchment); font-family: 'EB Garamond', serif; font-size: 0.75rem; letter-spacing: 0; font-weight: 400; }
   #stage.dropping { outline: 3px dashed var(--accent-light); outline-offset: -6px; }
   #reading.on { display: flex; }
@@ -410,7 +419,7 @@
   <aside id="side">
     <div class="tabs"><button type="button" id="tdet" class="on">On the board</button><button type="button" id="tpass" title="The topic’s passages, to put on the board one at a time">Passages</button><button type="button" id="tread">Reading</button><button type="button" class="hide" id="tside" title="Put the side away, for more board">»</button></div>
     <div id="details"></div>
-    <div id="passages"></div>
+    <div id="passages"><div id="pphead"></div><div class="ppbar" id="ppbar" hidden><input type="search" id="ppfind" placeholder="Find among them" aria-label="Find among the topic’s passages" autocomplete="off" spellcheck="false"><span id="ppfound"></span></div><div id="pplist"></div></div>
     <div id="reading"><div class="bar"><span>The Logic Portal</span><a id="full" href="index.html" target="_blank" rel="noopener">open it full size ↗</a></div><iframe id="portal" title="The Logic Portal" src="index.html"></iframe></div>
   </aside>
 </div>
@@ -492,6 +501,7 @@ let form = null;       // the form open on the side, if any
 let mode = null;       // { linkFrom } while choosing where an arrow goes
 let focus = null;      // { id, hops }
 let query = '';
+let ppQuery = '';      // what is being looked for among the topic's passages, under Passages
 let cam = { x: 40, y: 30, k: 1 };
 let size = {};         // card id → { w, h }, as last drawn
 let side = 'details';
@@ -1365,22 +1375,85 @@ function showSide(which) {
   $('details').style.display = which === 'details' ? '' : 'none'; $('passages').style.display = which === 'passages' ? 'block' : 'none'; $('reading').classList.toggle('on', which === 'reading');
   if (which === 'passages') renderPassages();
 }
-// The topic's passages: those waiting to go on the board, then those on it.
+// Finding among the topic's passages, under Passages. Every word looked for must be somewhere in the
+// passage: its citation, its work, its words — in full once the portal beside the board has its texts
+// in, its opening words until then — or your note on it in My topics. Case, accents and ß are folded
+// away, as My topics does in comparing names, so “gewissheit” finds “Gewißheit”.
+const FOLDS = new Map();
+function folded(s) {   // s with its runs of space made one; the same folded; and where each folded character stood in s
+  s = String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  let r = FOLDS.get(s); if (r) return r;
+  let f = ''; const from = [], to = [];
+  for (let i = 0; i < s.length;) {
+    const c = String.fromCodePoint(s.codePointAt(i));
+    const k = c < '\u0080' ? c.toLowerCase() : c.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').replace(/ſ/g, 's');
+    for (let j = 0; j < k.length; j++) { from.push(i); to.push(i + c.length); }
+    f += k; i += c.length;
+  }
+  if (FOLDS.size > 4000) FOLDS.clear();
+  r = { s, f, from, to }; FOLDS.set(s, r); return r;
+}
+const ppWords = () => [...new Set(folded(ppQuery).f.split(' ').filter(Boolean))];
+// s, escaped, with the words looked for marked wherever they stand in it.
+function marked(s, ws) {
+  if (!ws.length) return esc(s);
+  const F = folded(s), hits = [];
+  ws.forEach(w => { for (let k = F.f.indexOf(w); k >= 0; k = F.f.indexOf(w, k + w.length)) hits.push([F.from[k], F.to[k + w.length - 1]]); });
+  hits.sort((a, b) => a[0] - b[0]);
+  let out = '', at = 0;
+  hits.forEach(([a, b]) => { if (b <= at) return; a = Math.max(a, at); out += esc(F.s.slice(at, a)) + '<mark class="pf">' + esc(F.s.slice(a, b)) + '</mark>'; at = b; });
+  return out + esc(F.s.slice(at));
+}
+// A stretch of s round the first place the folded word w stands in it, cut at spaces.
+function around(s, w) {
+  const F = folded(s), k = F.f.indexOf(w); if (k < 0) return '';
+  const a = F.from[k], b = F.to[k + w.length - 1];
+  let st = Math.max(0, a - 60), en = Math.min(F.s.length, b + 90);
+  if (st > 0) { const sp = F.s.indexOf(' ', st); if (sp >= 0 && sp < a) st = sp + 1; }
+  if (en < F.s.length) { const sp = F.s.lastIndexOf(' ', en); if (sp > b) en = sp; }
+  return (st > 0 ? '…' : '') + F.s.slice(st, en) + (en < F.s.length ? '…' : '');
+}
+// Whether passage x has every word looked for (null if not), and, beneath its row, where those its row
+// does not show stand: in the words you kept, in the passage, in your note. shown is what the row shows.
+function ppFind(x, shown, ws, tag) {
+  const S = shown.map(s => folded(s).f).join('\n'), en = x.en ? ' lang="en"' : '';
+  const src = [['the words you kept', x.excerpt || '', en], ['the passage', fullText(x.ref) || x.words || '', en], ['your note', x.note || '', '']].map(r => r.concat([folded(r[1]).f]));
+  if (!ws.every(w => S.includes(w) || src.some(r => r[3].includes(w)))) return null;
+  let rest = ws.filter(w => !S.includes(w)), out = '';
+  src.forEach(([lab, s, lang, f]) => {
+    for (let k = 0; k < 2; k++) {
+      const w = rest.find(v => f.includes(v)); if (!w) return;
+      const bit = around(s, w), bf = folded(bit).f;
+      rest = rest.filter(v => v !== w && !bf.includes(v));
+      out += '<' + tag + ' class="pin"' + lang + '><i>' + lab + '</i>' + marked(bit, ws) + '</' + tag + '>';
+    }
+  });
+  return out;
+}
+// The topic's passages: those waiting to go on the board, then those on it; with a word looked for,
+// only those that have it.
 function renderPassages() {
   const w = waiting(), n = w.length;
   $('tpass').innerHTML = 'Passages' + (n ? '<b class="n">' + n + '</b>' : '');
   $('addp').textContent = n ? 'Passage… (' + n + ')' : 'Passage…';
   if (side !== 'passages') return;
-  const on = B.items.filter(i => i.kind === 'passage' && i.kx && Array.isArray(i.kx.topics) && i.kx.topics.includes(TID));
+  const all = underTopic().length, on = B.items.filter(i => i.kind === 'passage' && i.kx && Array.isArray(i.kx.topics) && i.kx.topics.includes(TID));
   const words = x => { const t = String(x.excerpt || x.words || '').replace(/\s+/g, ' ').trim(); return t.length > 160 ? t.slice(0, 159) + '…' : t; };
+  const q = ppWords(), found = (rows, shown, tag) => rows.map(r => [r, q.length ? ppFind(r.kx || r, shown(r), q, tag) : '']).filter(r => r[1] != null);
+  const fw = found(w, x => [x.cite || x.ref, x.work || '', words(x)], 'div'), fo = found(on, it => [cardTitle(it)], 'span');
   const P = $('passages'), top = P.scrollTop;
-  P.innerHTML = '<h2>The topic’s passages</h2><p class="sub">' + (topic ? esc(underTopic().length + (underTopic().length === 1 ? ' passage' : ' passages') + ' under “' + topic.name + '”') : '') + '</p>' +
-    (!topic ? '' : n ? '<p style="font-size:0.9rem;margin:0 0 0.6rem">Put them on the board one at a time: press <b>+ On the board</b>, or drag one onto the board where you want it.</p>' +
-      w.map(x => '<div class="pp" draggable="' + (ro() ? 'false' : 'true') + '" data-pp="' + esc(x.id) + '"><div class="pc">' + esc(x.cite || x.ref) + (x.work ? ' <span>· ' + esc(x.work) + '</span>' : '') + '</div>' +
-        '<div class="pw"' + (x.en ? ' lang="en"' : '') + '>“' + esc(words(x)) + '”</div><div class="row">' + (ro() ? '' : '<button type="button" class="btn solid" data-ppadd="' + esc(x.id) + '">+ On the board</button>') +
-        '<button type="button" class="linkish" data-ppread="' + esc(x.id) + '">read it beside the board</button></div></div>').join('')
-      : '<p class="empty">' + (underTopic().length ? 'All of them are on the board.' : 'None yet. In the portal, press ☆ Topic on a passage and tick “' + esc(topic.name) + '”: it waits here.') + '</p>') +
-    (on.length ? '<span class="k">On the board</span>' + on.map(it => '<button type="button" class="rel" data-ppshow="' + esc(it.id) + '">' + esc(cardTitle(it)) + '</button>').join('') : '');
+  $('pphead').innerHTML = '<h2>The topic’s passages</h2><p class="sub">' + (topic ? esc(all + (all === 1 ? ' passage' : ' passages') + ' under “' + topic.name + '”') : '') + '</p>';
+  $('ppbar').hidden = !topic || !all;
+  $('ppfound').textContent = q.length ? (fw.length + fo.length) + ' found' : '';
+  $('pplist').innerHTML = (!topic ? '' : n ? '<p style="font-size:0.9rem;margin:0 0 0.6rem">Put them on the board one at a time: press <b>+ On the board</b>, or drag one onto the board where you want it.</p>' +
+      (q.length && !FW ? '<p class="pin">Until the portal beside the board has its texts in, only each passage’s opening words are looked in.</p>' : '') +
+      fw.map(([x, where]) => '<div class="pp" draggable="' + (ro() ? 'false' : 'true') + '" data-pp="' + esc(x.id) + '"><div class="pc">' + marked(x.cite || x.ref, q) + (x.work ? ' <span>· ' + marked(x.work, q) + '</span>' : '') + '</div>' +
+        '<div class="pw"' + (x.en ? ' lang="en"' : '') + '>“' + marked(words(x), q) + '”</div>' + where + '<div class="row">' + (ro() ? '' : '<button type="button" class="btn solid" data-ppadd="' + esc(x.id) + '">+ On the board</button>') +
+        '<button type="button" class="linkish" data-ppread="' + esc(x.id) + '">read it beside the board</button></div></div>').join('') +
+      (q.length && !fw.length ? '<p class="empty">' + (n === 1 ? 'The passage waiting does not have' : 'None of the ' + n + ' waiting has') + ' “' + esc(ppQuery.trim()) + '”.</p>' : '')
+      : '<p class="empty">' + (all ? 'All of them are on the board.' : 'None yet. In the portal, press ☆ Topic on a passage and tick “' + esc(topic.name) + '”: it waits here.') + '</p>') +
+    (fo.length ? '<span class="k">On the board</span>' + fo.map(([it, where]) => '<button type="button" class="rel" data-ppshow="' + esc(it.id) + '">' + marked(cardTitle(it), q) + where + '</button>').join('')
+      : q.length && on.length ? '<span class="k">On the board</span><p class="empty">' + (on.length === 1 ? 'The passage on the board does not have it.' : 'None of the ' + on.length + ' on the board has it.') + '</p>' : '');
   P.scrollTop = top;
 }
 function read(href) { $('portal').src = href; $('full').href = href; document.body.classList.remove('sideclosed'); showSide('reading'); }
@@ -2235,6 +2308,13 @@ $('passages').addEventListener('click', e => {
   const r = e.target.closest('[data-ppread]'); if (r) { const x = itemOf(r.dataset.ppread), h = x && portalHref(x); if (h) read(h); return; }
   const s = e.target.closest('[data-ppshow]'); if (s) { select('card', [s.dataset.ppshow]); showCard(s.dataset.ppshow); }
 });
+// Finding among them: the list narrows as you type, and Esc clears it.
+$('ppfind').addEventListener('input', () => {
+  ppQuery = $('ppfind').value; renderPassages();
+  const P = $('passages'), head = $('pphead').offsetHeight + parseFloat(getComputedStyle(P).paddingTop);
+  if (P.scrollTop > head) P.scrollTop = head;   // what was found starts just beneath the box
+});
+$('ppfind').addEventListener('keydown', e => { if (e.key === 'Escape' && $('ppfind').value) { e.preventDefault(); $('ppfind').value = ''; ppQuery = ''; renderPassages(); } });
 const PP_TYPE = 'application/x-kantlab-topic-passage';
 $('passages').addEventListener('dragstart', e => {
   const p = e.target.closest && e.target.closest('.pp'); if (!p || ro()) return;
