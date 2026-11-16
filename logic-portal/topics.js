@@ -7,6 +7,12 @@
    short copy of its words and its citation, so that it opens where it stands in the reader,
    and the list still reads if a text is later re-extracted.
 
+   Each topic can have a board of its own, topic-board.html, where its passages are cards to
+   lay out, join with arrows and annotate. The board is kept here, in the same store, so it goes
+   wherever the topics go: it is saved, filed, locked and merged with them. The board page
+   writes into this browser's store itself; this file sends that change to GitHub as it sends
+   its own.
+
    The topics are their owner's alone. They are kept in this browser's localStorage, under
    one key, and nothing is sent anywhere unless their owner turns on "Keep on GitHub". Then a
    copy goes, a few seconds after each change, to one file of their own in the seminar's
@@ -93,10 +99,27 @@ const ready = () => TEXTS.length > 0 && !!$('loading') && $('loading').hidden;
 
 /* ── The store: { v, topics: [{ id, name, note, made, at, order }],
    items: [{ id, ref, topics, cite, work, date, words, excerpt, en, note, added, at }],
-   gone: { id: when deleted }, alias: { id of a topic merged away: id it went into } }.
+   gone: { id: when deleted }, alias: { id of a topic merged away: id it went into },
+   boards: { topic id: its board }, annotations: [{ id, kind, on, text, date, at, … }] }.
    `order` is a topic's own arrangement, ids of its passages; passages not in it follow, in
-   the order they were kept. ─────────────────────────────────────────────────── */
-const blank = () => ({ v: 1, topics: [], items: [], gone: {}, alias: {} });
+   the order they were kept. A board is topic-board.html's, in the shape of the kinds-of-nothing
+   board: { at, models, items, arrows, views, photos }, its passage cards naming the passage
+   kept here by its id (mt). Annotations belong to a passage, not to a board, so they are kept
+   once, beside the boards, and show on every board where their passage stands. Both are kept
+   here as they come, so long as they have the shape the board page reads.
+   ─────────────────────────────────────────────────────────────────────────── */
+const blank = () => ({ v: 1, topics: [], items: [], gone: {}, alias: {}, boards: {}, annotations: [] });
+const clone = o => JSON.parse(JSON.stringify(o));
+const isObj = x => !!x && typeof x === 'object' && !Array.isArray(x);
+const withId = a => Array.isArray(a) ? a.filter(x => isObj(x) && typeof x.id === 'string') : [];
+function cleanBoard(b) {
+  if (!isObj(b) || !Array.isArray(b.items)) return null;
+  const out = Object.assign({}, b);
+  ['models', 'items', 'arrows', 'views', 'photos'].forEach(k => { out[k] = withId(b[k]); });
+  out.views.forEach(v => { if (!isObj(v.pos)) v.pos = {}; if (!Array.isArray(v.hidden)) v.hidden = []; if (!Array.isArray(v.ink)) v.ink = []; });
+  out.at = typeof b.at === 'string' ? b.at : '';
+  return out;
+}
 // Anything that reads, in one fixed shape, so that two copies of the same topics compare equal.
 function clean(d) {
   if (!d || typeof d !== 'object' || !Array.isArray(d.topics) || !Array.isArray(d.items)) return null;
@@ -116,17 +139,23 @@ function clean(d) {
   [['gone', out.gone], ['alias', out.alias]].forEach(([k, o]) => {
     if (d[k] && typeof d[k] === 'object') Object.keys(d[k]).forEach(id => { if (typeof d[k][id] === 'string') o[id] = d[k][id]; });
   });
+  if (isObj(d.boards)) Object.keys(d.boards).forEach(id => { const b = cleanBoard(d.boards[id]); if (b) out.boards[id] = b; });
+  out.annotations = withId(d.annotations);
   return out;
 }
 const byMade = (a, b) => a.made < b.made ? -1 : a.made > b.made ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 const byAdded = (a, b) => a.added < b.added ? -1 : a.added > b.added ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 const sortKeys = o => Object.keys(o).sort().reduce((r, k) => { r[k] = o[k]; return r; }, {});
+// Keys in one order all the way down, for the boards and annotations, which come from another page.
+const deep = x => Array.isArray(x) ? x.map(deep) : isObj(x) ? Object.keys(x).sort().reduce((r, k) => { r[k] = deep(x[k]); return r; }, {}) : x;
 function canonObj(d) {
   const c = clean(d) || blank();
   c.topics.sort(byMade);
   c.items.forEach(x => x.topics.sort());
   c.items.sort(byAdded);
   c.gone = sortKeys(c.gone); c.alias = sortKeys(c.alias);
+  c.boards = deep(c.boards);
+  c.annotations = deep(c.annotations.slice().sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   return c;
 }
 const canon = d => JSON.stringify(canonObj(d));
@@ -149,10 +178,17 @@ function save(quiet) {
   marks();
   if (!quiet) pushSoon();
 }
-// Another tab of the portal saved: take its copy, since every change is saved as it is made.
+// Another tab of the portal saved, or a topic's board: take its copy, since every change is
+// saved as it is made, and send it to GitHub, since the board page can't.
 window.addEventListener('storage', e => {
   if (e.key !== KEY || e.newValue == null) return;
-  try { const d = clean(JSON.parse(e.newValue)); if (d) { DB = d; marks(); if (!page.hidden) render(); } } catch (err) { /* not ours to read */ }
+  try { const d = clean(JSON.parse(e.newValue)); if (d) { DB = d; marks(); if (!page.hidden) render(); pushSoon(); } } catch (err) { /* not ours to read */ }
+});
+// Back to this page by the browser's Back button, from a store that may have changed meanwhile.
+window.addEventListener('pageshow', e => {
+  if (!e.persisted) return;
+  DB = load(); marks(); if (!page.hidden) render();
+  if (ghReady()) sync();
 });
 
 /* ── Topics and passages ─────────────────────────────────────────────────── */
@@ -287,7 +323,67 @@ function merge(A, B, base) {
     o.at = t0; gone[it.id] = t0;
     rep.dupes++;
   });
-  return { db: { v: 1, topics: kept, items: out, gone, alias }, report: rep };
+  // Boards: one per topic still here. A topic merged into another brings its board to it.
+  const boards = {}, ob = base ? base.boards : {};
+  new Set([...Object.keys(A.boards), ...Object.keys(B.boards)]).forEach(id => {
+    const to = real(id);
+    if (!live.has(to)) return;
+    const m = mergeBoard(ob[id] || null, A.boards[id], B.boards[id]);
+    boards[to] = boards[to] ? mergeBoard(null, boards[to], m) : m;
+  });
+  const annotations = mergeAnns(A.annotations, B.annotations, gone);
+  return { db: { v: 1, topics: kept, items: out, gone, alias, boards, annotations }, report: rep };
+}
+/* Boards. Three copies of one board: as both last stood (o, when known), here (a), and the
+   other (b). What only one changed, that one's version stands; where both changed the same
+   card, arrow or view, the version of the board saved later does. As the kinds-of-nothing
+   board merges two people's saves, and in its shape. */
+function merge3(base, mine, theirs) {
+  const S = x => x === undefined ? '\u0000' : JSON.stringify(x);
+  const pick = (b, m, t) => S(m) === S(b) ? t : m;
+  const byId = a => new Map((a || []).filter(x => x && x.id != null).map(x => [x.id, x]));
+  const list = (b, m, t, sub) => {
+    const Bm = byId(b), M = byId(m), T = byId(t), ids = [...T.keys()], out = [];
+    M.forEach((x, id) => { if (!T.has(id)) ids.push(id); });
+    ids.forEach(id => { const bb = Bm.get(id), mm = M.get(id), tt = T.get(id), v = sub && mm && tt ? sub(bb, mm, tt) : pick(bb, mm, tt); if (v !== undefined) out.push(v); });
+    return out;
+  };
+  const map = (b, m, t) => { b = b || {}; m = m || {}; t = t || {}; const out = {}; new Set([...Object.keys(t), ...Object.keys(m)]).forEach(k => { const v = pick(b[k], m[k], t[k]); if (v !== undefined) out[k] = v; }); return out; };
+  const set = (b, m, t) => { const Bs = new Set(b || []), Ms = new Set(m || []), Ts = new Set(t || []); return [...new Set([...Ts, ...Ms])].filter(x => Ms.has(x) === Bs.has(x) ? Ts.has(x) : Ms.has(x)); };
+  const view3 = (b, m, t) => {
+    b = b || {};
+    const v = Object.assign({}, t);
+    Object.keys(m).forEach(k => { if (k !== 'pos' && k !== 'hidden' && k !== 'ink') { const x = pick(b[k], m[k], t[k]); if (x === undefined) delete v[k]; else v[k] = x; } });
+    v.pos = map(b.pos, m.pos, t.pos); v.hidden = set(b.hidden, m.hidden, t.hidden); v.ink = list(b.ink, m.ink, t.ink);
+    return v;
+  };
+  const out = Object.assign({}, theirs);
+  ['models', 'items', 'arrows', 'photos'].forEach(k => { out[k] = list(base[k] || [], mine[k] || [], theirs[k] || []); });
+  out.views = list(base.views, mine.views, theirs.views, view3);
+  const have = new Set(out.items.map(i => i.id));
+  out.arrows = out.arrows.filter(a => have.has(a.from) && have.has(a.to));   // an arrow whose card has gone goes too
+  if (!out.views.length) out.views = (theirs.views || []).length ? theirs.views : mine.views || [];
+  return out;
+}
+// Compared with their keys in one order, since a copy back from GitHub has them sorted and one made here does not.
+const bare = b => { const c = Object.assign({}, b); delete c.at; return JSON.stringify(deep(c)); };
+function mergeBoard(o, a, b) {
+  if (!a || !b) return clone(a || b);
+  const sa = bare(a), sb = bare(b);
+  if (sa === sb) return clone(a.at >= b.at ? a : b);
+  if (o) { const so = bare(o); if (so === sa) return clone(b); if (so === sb) return clone(a); }
+  const later = (b.at || '') > (a.at || '') ? b : a, other = later === a ? b : a;
+  const m = cleanBoard(clone(merge3(o ? deep(o) : {}, deep(later), deep(other))));
+  m.at = later.at;
+  return m;
+}
+// Annotations: one per id, the one changed later standing, and none that was deleted after it.
+const annAt = a => String(a.at || a.edited || a.date || '');
+function mergeAnns(A, B, gone) {
+  const m = new Map();
+  A.concat(B).forEach(a => { const o = m.get(a.id); if (!o || annAt(a) > annAt(o)) m.set(a.id, a); });
+  return [...m.values()].filter(a => !(gone[a.id] && gone[a.id] >= annAt(a))).map(clone)
+    .sort((x, y) => String(x.date || '').localeCompare(String(y.date || '')) || (x.id < y.id ? -1 : 1));
 }
 function tellMerge(rep, from) {
   if (!rep) return;
@@ -374,8 +470,15 @@ async function readMine() {
   const r = await api('GET', REPO + '/contents/' + myPath() + '?ref=' + encodeURIComponent(GH.branch));
   if (r.status === 404) return null;
   if (!r.ok) throw apiError(r);
-  let file = null;
-  try { file = JSON.parse(b64decode(r.data.content)); } catch (e) { file = null; }
+  let file = null, content = r.data.content;
+  // Past 1 MB, which a board with drawing and photographs can reach, GitHub leaves a file's
+  // contents out of this answer, and gives them only as the blob.
+  if (!content && r.data.sha) {
+    const b = await api('GET', REPO + '/git/blobs/' + r.data.sha);
+    if (!b.ok) throw apiError(b);
+    content = b.data.content;
+  }
+  try { file = JSON.parse(b64decode(content)); } catch (e) { file = null; }
   return { sha: r.data.sha, file };
 }
 async function writeMine(text, sha) {
@@ -532,6 +635,8 @@ css.textContent = `
   #mtpage main { flex: 1; overflow: auto; padding: 1.1rem 1.8rem 3rem; }
   #mtpage .mtwrap { max-width: 52rem; }
   #mtpage .mthead { display: flex; gap: 0.8rem; align-items: baseline; }
+  #mtpage .mtbrd { flex: none; background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  #mtpage .mtbrd:hover { background: var(--accent-light); border-color: var(--accent-light); }
   #mtpage .mthead h2, #mtpage .mthead input { flex: 1; margin: 0; font-family: 'EB Garamond', serif; font-size: 1.45rem; font-weight: 600; color: var(--accent); background: transparent; border: none; border-bottom: 1px dashed transparent; padding: 0; min-width: 0; }
   #mtpage .mthead input:hover, #mtpage .mthead input:focus { border-bottom-color: var(--accent-light); outline: none; }
   #mtpage textarea { display: block; width: 100%; font: inherit; background: var(--card); border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.35rem 0.55rem; resize: vertical; min-height: 2.3rem; color: var(--ink); }
@@ -872,7 +977,20 @@ let sortBy = 'arranged';   // 'arranged' (a topic as you have arranged it), 'tex
 const whole = new Set();   // passages shown whole, not just their opening words
 
 function openPage() { closePicker(); hideHover(); sb.hidden = true; page.hidden = false; render(); }
-function closePage() { page.hidden = true; page.querySelector('.mtmenu').hidden = true; }
+function closePage() {
+  page.hidden = true; page.querySelector('.mtmenu').hidden = true;
+  if (/^#mt=[^&]*$/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
+}
+// An address of My topics' own, #mt=<topic id>, which a topic's board links back with.
+function openFromHash() {
+  const id = new URLSearchParams(location.hash.slice(1)).get('mt');
+  if (!id) return;
+  let k = id, n = 0;
+  while (DB.alias[k] && n++ < 50) k = DB.alias[k];
+  if (!mode) setMode(true, true);
+  view = topicOf(k) ? k : 'all'; also = ''; sortBy = topicOf(k) ? 'arranged' : 'newest';
+  openPage();
+}
 tb.addEventListener('click', () => {
   if (!page.hidden) { closePage(); return; }
   if (!mode) setMode(true, true);
@@ -911,7 +1029,9 @@ function renderMain() {
   const list = listFor(), canMove = !!t && sortBy === 'arranged' && !also;
   const others = sortedTopics().filter(x => x.id !== view);
   const head = t
-    ? '<div class="mthead"><input type="text" class="mtname" value="' + esc(t.name) + '" maxlength="120" title="Rename this topic" spellcheck="false"><button type="button" class="mtlink" data-mta="deltopic">Delete this topic</button></div>' +
+    ? '<div class="mthead"><input type="text" class="mtname" value="' + esc(t.name) + '" maxlength="120" title="Rename this topic" spellcheck="false">' +
+      '<button type="button" class="btn mtbrd" data-mta="board" title="' + (DB.boards[t.id] ? 'This topic’s board: its passages as cards, to lay out, join with arrows and annotate' : 'Make a board for this topic: its passages as cards, to lay out, join with arrows and annotate') + '">▦ ' + (DB.boards[t.id] ? 'Board' : 'Make a board') + '</button>' +
+      '<button type="button" class="mtlink" data-mta="deltopic">Delete this topic</button></div>' +
       '<textarea class="mttnote" rows="2" placeholder="What this topic is for: a question, a hunch, what to look for next. Only you see it.">' + esc(t.note) + '</textarea>'
     : '<div class="mthead"><h2>' + (view === 'unsorted' ? 'Unsorted' : 'All passages') + '</h2></div>' +
       (view === 'unsorted' ? '<p class="mtempty">Passages kept under no topic. Give each one a topic with <b>+ topic</b>.</p>' : '');
@@ -1015,17 +1135,27 @@ page.addEventListener('click', e => {
     if (c && !c.disabled) c.focus();
     return;
   }
+  if (a === 'board') {
+    const t = topicOf(view);
+    if (!t) return;
+    clearTimeout(noteT); save();
+    const url = new URL('topic-board.html#t=' + encodeURIComponent(t.id), location.href).href;
+    try { (window.top || window).location.href = url; } catch (x) { location.href = url; }   // from the portal inside a board, the board itself goes
+    return;
+  }
   if (a === 'deltopic') {
     const t = topicOf(view);
     if (!t) return;
-    const under = DB.items.filter(x => x.topics.includes(t.id));
-    DB.topics.splice(DB.topics.indexOf(t), 1); DB.gone[t.id] = now();
+    const under = DB.items.filter(x => x.topics.includes(t.id)), board = DB.boards[t.id];
+    if (board && !confirm('Delete “' + t.name + '” and its board? Its passages stay in My topics, and Undo brings both back.')) return;
+    DB.topics.splice(DB.topics.indexOf(t), 1); DB.gone[t.id] = now(); delete DB.boards[t.id];
     under.forEach(x => { x.topics = x.topics.filter(id => id !== t.id); x.at = now(); });
     const left = under.filter(x => !x.topics.length).length;
     view = 'all'; save(); render();
-    toast('Deleted “' + t.name + '”.' + (left ? ' ' + plural(left, 'passage') + ' under no other topic ' + (left === 1 ? 'is' : 'are') + ' under Unsorted now.' : ''), [['Undo', () => {
+    toast('Deleted “' + t.name + '”' + (board ? ' and its board' : '') + '.' + (left ? ' ' + plural(left, 'passage') + ' under no other topic ' + (left === 1 ? 'is' : 'are') + ' under Unsorted now.' : ''), [['Undo', () => {
       delete DB.gone[t.id]; t.at = now();
       if (!topicOf(t.id)) DB.topics.push(t);
+      if (board && !DB.boards[t.id]) DB.boards[t.id] = board;
       under.forEach(x => { const y = itemOf(x.id); if (y && !y.topics.includes(t.id)) { y.topics.push(t.id); y.at = now(); } });
       view = t.id; save(); render();
     }]]);
@@ -1124,11 +1254,12 @@ fileIn.addEventListener('change', () => {
     let d = null;
     try { d = clean(JSON.parse(String(r.result))); } catch (e) { d = null; }
     if (!d) { toast('That file isn’t one of My topics. Nothing was changed.'); return; }
-    const n0 = DB.items.length, t0 = DB.topics.length;
+    const n0 = DB.items.length, t0 = DB.topics.length, was = canon(DB);
     const m = merge(DB, d, null);
     DB = m.db; save(); render();
     const ni = DB.items.length - n0, nt = DB.topics.length - t0;
-    toast(ni || nt ? 'Opened “' + f.name + '”: ' + plural(Math.max(ni, 0), 'passage') + ' and ' + plural(Math.max(nt, 0), 'topic') + ' came in.' : 'Opened “' + f.name + '”: everything in it was here already.');
+    toast(ni || nt ? 'Opened “' + f.name + '”: ' + plural(Math.max(ni, 0), 'passage') + ' and ' + plural(Math.max(nt, 0), 'topic') + ' came in.'
+      : canon(DB) !== was ? 'Opened “' + f.name + '”: what was new in it, in notes, boards or annotations, came in.' : 'Opened “' + f.name + '”: everything in it was here already.');
     if (m.report.topics.length || m.report.dupes || m.report.notes) setTimeout(() => tellMerge(m.report, 'the file'), 6600);
   };
   r.readAsText(f);
@@ -1308,6 +1439,8 @@ function turnOn(s) {
 document.body.classList.toggle('mtmode', mode);
 marks();
 ghStart();
+openFromHash();
+window.addEventListener('hashchange', openFromHash);
 // Once the texts are in, passages can say whether their address still opens.
 const waitT = setInterval(() => {
   if (!ready()) return;

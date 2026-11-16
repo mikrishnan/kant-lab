@@ -1,0 +1,2363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A topic’s board · My topics · the Logic Portal · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  /* The Logic Portal's palette and fonts. This page began as the board of the study the kinds of
+     nothing (studies/kinds-of-nothing/board.html), and is now the portal's own: the two go their own ways. */
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --panel: #faf7f0;
+    --card: #fbf8f1;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #b8a88a;
+    --line-soft: #d9ccb0;
+    --prob: #8a3b12;      /* problems, and what may answer them */
+    --note: #fff6c9;      /* what is written on the board */
+    --machine: #9a8f7a;   /* what the computer drew */
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: 'EB Garamond', Georgia, serif; font-size: 16px; line-height: 1.35; color: var(--ink); background: var(--parchment);
+         display: flex; flex-direction: column; overflow: hidden; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  a { color: var(--accent-light); }
+
+  header { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--line); background: var(--parchment-dark);
+           font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 0.05em; flex: none; }
+  header a { color: var(--accent); text-decoration: none; }
+  header a:hover { text-decoration: underline; }
+  header .slash { color: var(--line); }
+  header b { color: var(--accent); font-weight: 600; }
+
+  .tools { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.5rem; padding: 0.4rem 0.8rem; border-bottom: 1px solid var(--line-soft); background: var(--panel); flex: none; }
+  .tools .grp { display: flex; align-items: center; gap: 0.3rem; padding-right: 0.6rem; margin-right: 0.1rem; border-right: 1px solid var(--line-soft); }
+  .tools .grp:last-child { border-right: 0; }
+  .tools .lbl { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); margin-right: 0.15rem; }
+  .btn { border: 1px solid var(--line); background: #fff; color: var(--accent); border-radius: 999px; padding: 0.05rem 0.7rem; cursor: pointer; font-size: 0.9rem; white-space: nowrap; }
+  .btn:hover { border-color: var(--accent-light); background: var(--card); }
+  .btn.solid { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  .btn.solid:hover { background: var(--accent-light); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .btn.k-problem { color: var(--prob); border-color: #d6b19c; }
+  header a.back { font-family: 'EB Garamond', serif; font-size: 1rem; letter-spacing: 0; border: 1px solid var(--accent); border-radius: 999px; padding: 0 0.7rem; margin-right: 0.4rem; background: var(--accent); color: var(--parchment); }
+  header a.back:hover { background: var(--accent-light); text-decoration: none; }
+  header #tname { font-family: 'EB Garamond', serif; font-size: 1.05rem; letter-spacing: 0; }
+  .btn.k-note { background: var(--note); }
+  select.vsel { border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 0.05rem 0.3rem; max-width: 16rem; color: var(--accent); }
+  #search { border: 1px solid var(--line); border-radius: 999px; padding: 0.05rem 0.7rem; width: 11rem; background: #fff; }
+  #found { font-size: 0.82rem; color: var(--faded); min-width: 3.5rem; }
+  .linkish { background: none; border: 0; padding: 0; color: var(--faded); cursor: pointer; text-decoration: underline; font-size: 0.86rem; }
+  .linkish:hover { color: var(--accent); }
+
+  .wrap { flex: 1; display: flex; min-height: 0; }
+
+  /* ── The stage: an endless board, panned and zoomed ── */
+  #stage { flex: 1; position: relative; overflow: hidden; cursor: grab; touch-action: none; user-select: none;
+           background-color: #f7f2e4; background-image: radial-gradient(#ddd1b6 1px, transparent 1px); background-size: 24px 24px; }
+  #stage.panning { cursor: grabbing; }
+  #stage.linking, #stage.linking .card { cursor: crosshair; }
+  #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  #ink { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
+  #ink .ar { pointer-events: auto; cursor: pointer; }
+  #ink .ar path.hit { fill: none; stroke: transparent; stroke-width: 16; }
+  #ink .ar path.v { fill: none; stroke-width: 2.2; }
+  #ink .ar.division path.v { stroke-width: 1.5; }
+  #ink .ar.sel path.v { stroke-width: 4; }
+  #ink .ar .pill rect { fill: #fff; stroke-width: 1.3; }
+  #ink .ar .pill text { font-family: 'EB Garamond', serif; font-size: 13px; fill: var(--accent); }
+  #ink .ar.problem .pill text { fill: var(--prob); }
+  #ink .ar.computer .pill text { fill: var(--faded); font-style: italic; }
+  #ink .frame rect.f { stroke-width: 2; }
+  #ink .frame.sel rect.f { stroke-width: 3.5; }
+  #ink .marq { fill: rgba(139, 94, 60, 0.08); stroke: var(--accent-light); stroke-dasharray: 5 4; }
+  #ink #ghost { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
+  .dim { opacity: 0.14; }
+  #ink .ar.dim { opacity: 0.08; }
+
+  /* frame tabs: a model's name, and the handle that moves it */
+  .ftab { position: absolute; color: #fff; border-radius: 7px 7px 7px 0; padding: 0.1rem 0.6rem 0.12rem; white-space: nowrap; cursor: move; font-size: 0.9rem; }
+  .ftab b { font-family: 'Cinzel', serif; letter-spacing: 0.04em; font-weight: 600; margin-right: 0.35rem; }
+  .ftab i { opacity: 0.92; }
+  .ftab small { display: block; font-size: 0.72rem; opacity: 0.85; margin-top: -0.1rem; }
+
+  /* cards */
+  .card { position: absolute; background: #fff; border: 1.5px solid var(--line); border-left-width: 5px; border-radius: 8px; padding: 0.3rem 0.55rem 0.35rem;
+          box-shadow: 0 1px 2px rgba(60, 40, 10, 0.12); cursor: pointer; }
+  .card:hover { box-shadow: 0 2px 8px rgba(60, 40, 10, 0.2); }
+  .card.sel { outline: 3px solid var(--accent-light); outline-offset: 1px; }
+  .card.hit { outline: 3px solid #d9a441; outline-offset: 1px; }
+  .card.k-part { width: 168px; text-align: center; }
+  .card.k-part .lab { display: block; font-weight: 600; color: var(--accent); font-size: 1.02rem; line-height: 1.15; }
+  .card.k-part .lab.lat { font-style: italic; }
+  .card .sub { display: block; font-size: 0.8rem; color: var(--faded); font-style: italic; margin-top: 0.1rem; line-height: 1.15; }
+  .card .count { display: block; font-size: 0.7rem; color: var(--faded); margin-top: 0.15rem; font-family: 'Cinzel', serif; letter-spacing: 0.06em; }
+  .card .nearq { display: none; text-align: left; font-size: 0.8rem; font-style: italic; margin-top: 0.3rem; border-top: 1px dotted var(--line-soft); padding-top: 0.25rem; line-height: 1.25; }
+  .card .nearq span { font-style: normal; color: var(--faded); font-size: 0.72rem; }
+  .card.k-passage { width: 250px; background: var(--card); border-color: var(--line); font-size: 0.86rem; }
+  .card.k-passage .ttl { display: block; font-weight: 600; color: var(--accent); font-size: 0.92rem; margin-bottom: 0.1rem; }
+  .card.k-passage .pq { font-style: italic; line-height: 1.25; }
+  .card.k-passage .pc { display: block; font-size: 0.75rem; color: var(--faded); margin-top: 0.2rem; }
+  .card.k-problem { width: 260px; background: #fff7f1; border-color: #d6b19c; border-left-color: var(--prob); font-size: 0.88rem; line-height: 1.25; }
+  .card .tag { display: block; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.09em; color: var(--prob); margin-bottom: 0.15rem; }
+  .card.k-note { width: 190px; background: var(--note); border-color: #e6d58a; font-size: 0.9rem; line-height: 1.25; transform: rotate(-0.6deg); }
+  .card.k-note .tag { color: #8a7420; }
+  .card .who { display: block; font-size: 0.7rem; color: var(--faded); margin-top: 0.2rem; text-align: right; }
+  .card .chk { color: #a0661a; font-size: 0.7rem; display: block; margin-top: 0.15rem; }
+  .card .knob { position: absolute; right: -13px; top: 50%; margin-top: -11px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff;
+                font-size: 13px; line-height: 21px; text-align: center; cursor: crosshair; display: none; box-shadow: 0 0 0 2px #fff; }
+  .card:hover .knob, .card.sel .knob { display: block; }
+  #stage.readonly .knob { display: none !important; }
+  /* depth: zoomed out, a card is its name; zoomed in, its first passage shows */
+  #world.far .card .sub, #world.far .card .count, #world.far .card .who, #world.far .card .chk { display: none; }
+  #world.far .card.k-part .lab { font-size: 1.5rem; }
+  #world.far .card.k-passage .pq, #world.far .card.k-problem, #world.far .card.k-note { font-size: 1.15rem; }
+  #world.near .card .nearq { display: block; }
+
+  /* floating boxes on the stage */
+  .float { position: absolute; background: rgba(250, 247, 240, 0.96); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 2px 10px rgba(60, 40, 10, 0.12); font-size: 0.86rem; cursor: default; }
+  #layers { left: 12px; bottom: 12px; padding: 0.45rem 0.7rem 0.5rem; max-width: 260px; }
+  #layers .ttl { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); display: block; margin-bottom: 0.2rem; }
+  #layers label { display: flex; align-items: center; gap: 0.4rem; margin: 0.05rem 0; cursor: pointer; }
+  #layers label i { display: inline-block; width: 1.4rem; height: 0; border-top: 2px solid var(--accent); }
+  #layers label i.sq { height: 0.7rem; border: 1.5px solid var(--line); border-radius: 3px; }
+  #layers label span.n { color: var(--faded); margin-left: auto; padding-left: 0.6rem; }
+  #layers.closed label { display: none; }
+  #zoom { right: 12px; bottom: 12px; padding: 0.2rem 0.3rem; display: flex; align-items: center; gap: 0.2rem; }
+  #zoom button { border: 0; background: none; cursor: pointer; color: var(--accent); font-size: 1rem; padding: 0.1rem 0.45rem; border-radius: 6px; }
+  #zoom button:hover { background: var(--parchment-dark); }
+  #zoom #zk { min-width: 3.2rem; text-align: center; color: var(--faded); font-size: 0.82rem; }
+  #banner { left: 50%; top: 12px; transform: translateX(-50%); padding: 0.3rem 0.8rem; display: none; align-items: center; gap: 0.6rem; max-width: 80%; }
+  #banner.show { display: flex; }
+  #banner.photo { background: #eef2f6; border-color: #3b5068; }
+  #banner .btn { font-size: 0.82rem; }
+  #chooser { display: none; padding: 0.35rem; gap: 0.3rem; flex-wrap: wrap; width: 230px; }
+  #chooser.show { display: flex; }
+  #chooser .ttl { flex-basis: 100%; font-size: 0.78rem; color: var(--faded); padding: 0 0.2rem; }
+  #chooser textarea { flex-basis: 100%; border: 1px solid #e6d58a; background: var(--note); border-radius: 6px; padding: 0.3rem 0.45rem; font-size: 0.92rem; resize: vertical; }
+  #chooser { width: 260px; }
+  #toast { left: 50%; bottom: 14px; transform: translateX(-50%); padding: 0.3rem 0.8rem; display: none; }
+  #toast.show { display: block; }
+
+  /* ── The side: what is selected, and the portal ── */
+  #side { width: 400px; flex: none; border-left: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+  #side .tabs { display: flex; border-bottom: 1px solid var(--line-soft); flex: none; }
+  #side .tabs button { flex: 1; border: 0; background: none; padding: 0.4rem; cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.08em; color: var(--faded); border-bottom: 2px solid transparent; }
+  #side .tabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
+  #details { flex: 1; overflow-y: auto; padding: 0.8rem 1rem 2rem; }
+  #reading { flex: 1; display: none; flex-direction: column; min-height: 0; }
+  #reading.on { display: flex; }
+  #reading .bar { display: flex; justify-content: space-between; padding: 0.3rem 0.8rem; font-size: 0.82rem; color: var(--faded); border-bottom: 1px solid var(--parchment-dark); }
+  #reading .bar a { color: var(--accent); }
+  #reading iframe { flex: 1; width: 100%; border: 0; background: var(--parchment); }
+  #details h2 { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--accent); margin: 0 0 0.15rem; font-weight: 600; letter-spacing: 0.02em; }
+  #details h2.lat { font-family: 'EB Garamond', serif; font-style: italic; font-size: 1.2rem; }
+  #details .sub { color: var(--faded); font-style: italic; margin: 0 0 0.5rem; font-size: 0.92rem; }
+  #details .k { display: block; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); margin: 0.9rem 0 0.3rem; }
+  #details .mchip { display: inline-block; color: #fff; border-radius: 4px; padding: 0 0.4rem; font-size: 0.8rem; font-style: normal; margin-right: 0.3rem; }
+  #details .q { margin: 0 0 0.5rem; padding: 0.35rem 0.55rem; border-left: 3px solid var(--line); background: #fff; font-size: 0.94rem; }
+  #details .q .t { font-style: italic; }
+  #details .q .c { display: flex; gap: 0.5rem; align-items: baseline; margin-top: 0.2rem; font-size: 0.8rem; }
+  #details .q .c button { background: none; border: 0; padding: 0; color: var(--accent-light); text-decoration: underline; cursor: pointer; font-size: 0.8rem; }
+  #details .q .c .chk { color: #a0661a; }
+  #details .q .c .x { margin-left: auto; color: var(--faded); }
+  #details .stmt { background: #fff; border: 1.5px dashed var(--accent-light); border-radius: 6px; padding: 0.4rem 0.6rem; white-space: pre-wrap; }
+  #details .stmt.machine { border-style: dotted; color: var(--faded); }
+  #details .stmt.problem { border-color: var(--prob); }
+  #details .by { font-size: 0.82rem; color: var(--faded); margin: 0.25rem 0 0; }
+  #details .rel { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line-soft); border-radius: 6px; padding: 0.25rem 0.5rem; margin: 0.22rem 0; cursor: pointer; font-size: 0.9rem; }
+  #details .rel:hover { border-color: var(--accent-light); }
+  #details .rel b { color: var(--accent); font-weight: 600; }
+  #details .empty { color: var(--faded); font-style: italic; font-size: 0.92rem; margin: 0.2rem 0; }
+  #details .warn { color: var(--prob); font-size: 0.86rem; }
+  #details .row { display: flex; gap: 0.4rem 0.6rem; margin-top: 0.9rem; flex-wrap: wrap; align-items: center; }
+  #details label.f { display: block; font-size: 0.86rem; color: var(--faded); margin: 0.65rem 0 0.2rem; }
+  #details textarea, #details input[type=text], #details select { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 0.3rem 0.45rem; background: #fff; }
+  #details textarea { min-height: 4.5rem; resize: vertical; }
+  #details .ev { display: flex; gap: 0.4rem; align-items: flex-start; font-size: 0.86rem; margin: 0.25rem 0; cursor: pointer; }
+  #details .ev input { margin-top: 0.25rem; flex: none; }
+  #details .addq { border: 1px dashed var(--line); border-radius: 8px; padding: 0.2rem 0.6rem 0.6rem; margin-top: 0.5rem; background: #fff; }
+  #details .intro p, #details .intro li { font-size: 0.95rem; }
+  #details .intro p { margin: 0 0 0.55rem; }
+  #details .intro ul { margin: 0 0 0.6rem; padding-left: 1.1rem; }
+  #details .intro li { margin-bottom: 0.25rem; }
+  #details kbd { font-family: inherit; font-size: 0.82rem; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 0.3rem; background: #fff; }
+  #details .swatches { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+  #details .swatches label { width: 1.7rem; height: 1.7rem; border-radius: 50%; cursor: pointer; display: block; border: 3px solid transparent; }
+  #details .swatches input { display: none; }
+  #details .swatches input:checked + label { border-color: var(--ink); }
+  #details .photo { background: #fff; border: 1px solid var(--line-soft); border-radius: 8px; padding: 0.35rem 0.6rem; margin: 0.35rem 0; }
+  #details .photo b { color: var(--accent); }
+  #details .photo .meta { font-size: 0.8rem; color: var(--faded); }
+  #details .req { background: #fff; border: 1px solid var(--line-soft); border-left: 3px solid #d9a441; border-radius: 6px; padding: 0.3rem 0.55rem; margin: 0.35rem 0; font-size: 0.93rem; }
+  #details .req.done { opacity: 0.6; border-left-color: #5c8a3a; }
+  #details .req.done .rt { text-decoration: line-through; }
+  #details .req .meta { font-size: 0.78rem; color: var(--faded); }
+  #details textarea[data-req] { min-height: 4rem; }
+
+  /* a model is moved by any bare part of its frame; its corner grip spreads its cards or gathers them */
+  #ink .frame rect.f { pointer-events: auto; cursor: move; }
+  #stage.tool-pen #ink .frame rect.f, #stage.tool-select #ink .frame rect.f, #stage.tool-erase #ink .frame rect.f { cursor: inherit; }
+  .fgrip { position: absolute; width: 26px; height: 26px; border-radius: 7px; color: #fff; font-size: 15px; line-height: 25px; text-align: center; cursor: nwse-resize; opacity: 0.8; }
+  .fgrip:hover { opacity: 1; }
+  /* drawing sits on top of everything, as marker does on a whiteboard */
+  #drawn { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
+  #drawn path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  #stage.tool-pen { cursor: crosshair; }
+  #stage.tool-erase { cursor: cell; }
+  #stage.tool-select { cursor: default; }
+  #stage.spacepan, #stage.spacepan * { cursor: grab !important; }
+  /* the tools */
+  #palette { left: 12px; top: 12px; padding: 0.3rem; display: flex; flex-direction: column; gap: 0.2rem; }
+  #palette button.tl { border: 0; background: none; border-radius: 8px; padding: 0.2rem 0.55rem; cursor: pointer; color: var(--accent); text-align: left; font-size: 0.88rem; white-space: nowrap; }
+  #palette button.tl span { display: inline-block; width: 1.2rem; text-align: center; margin-right: 0.25rem; }
+  #palette button.tl:hover { background: var(--parchment-dark); }
+  #palette button.tl.on { background: var(--accent); color: var(--parchment); }
+  #palette .pens { display: none; gap: 0.3rem; padding: 0.2rem 0.35rem 0.1rem; flex-wrap: wrap; width: 7.6rem; }
+  #palette.pen .pens { display: flex; }
+  #palette .pens button.pc { width: 1.35rem; height: 1.35rem; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0; }
+  #palette .pens button.pc.on { box-shadow: 0 0 0 2px var(--ink); }
+  #palette .pens .clr { flex-basis: 100%; text-align: left; margin-top: 0.15rem; }
+  /* the side can be put away, for a tablet or a projector */
+  body.sideclosed #side { display: none; }
+  #sideopen { right: 12px; top: 12px; padding: 0.15rem 0.7rem; display: none; cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+  body.sideclosed #sideopen { display: block; }
+  #side .tabs button.hide { flex: none; padding: 0.3rem 0.8rem; font-family: 'EB Garamond', serif; font-size: 1.05rem; letter-spacing: 0; color: var(--faded); }
+  #stage { -webkit-touch-callout: none; -webkit-user-select: none; }
+  /* fingers need bigger targets than a mouse */
+  @media (pointer: coarse) {
+    .card .knob { width: 34px; height: 34px; line-height: 33px; font-size: 18px; right: -19px; margin-top: -17px; }
+    .card:hover .knob { display: none; }
+    .card.sel .knob, .card.sel:hover .knob { display: block; }
+    .fgrip { width: 38px; height: 38px; line-height: 37px; font-size: 20px; }
+    .btn { padding: 0.25rem 0.9rem; }
+    #palette button.tl { padding: 0.5rem 0.65rem; font-size: 0.98rem; }
+    #palette .pens button.pc { width: 1.9rem; height: 1.9rem; }
+    #zoom button { padding: 0.4rem 0.65rem; }
+    #layers label { margin: 0.3rem 0; }
+  }
+
+  #sync { font-size: 0.84rem; color: var(--faded); display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; }
+  #sync i { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: #b8a88a; display: inline-block; }
+  #sync.saved i { background: #5c8a3a; }
+  #sync.busy i { background: #d9a441; }
+  #sync.bad i { background: var(--prob); }
+  #sync.practice i { background: #2f5d8a; }
+  #sync .linkish { font-size: 0.84rem; }
+
+  /* a topic's passages: one no longer under the topic, or no longer in My topics, is drawn dashed until it is put back or taken off */
+  .card.k-passage.off { border-style: dashed; border-left-style: dashed; background: #f6f1e6; opacity: 0.85; }
+  .card .flag { display: block; font-size: 0.7rem; color: var(--prob); margin-top: 0.2rem; font-style: normal; }
+  .card .newtag { position: absolute; top: -0.6rem; right: 0.5rem; background: #2f5d8a; color: #fff; border-radius: 999px; padding: 0 0.45rem; font-size: 0.68rem; font-family: 'Cinzel', serif; letter-spacing: 0.08em; }
+  #details .kept { background: var(--note); border: 1px solid #e6d58a; border-radius: 6px; padding: 0.3rem 0.55rem; font-size: 0.9rem; font-style: italic; margin: 0 0 0.4rem; }
+  #details .offnote { border: 1.5px dashed var(--prob); border-radius: 6px; padding: 0.35rem 0.6rem; margin: 0.3rem 0 0.5rem; font-size: 0.92rem; }
+  #details textarea.mtnote { min-height: 2.6rem; }
+  #details .ocr { font-size: 0.8rem; color: #a0661a; margin: 0.15rem 0 0; }
+  .lock { position: fixed; inset: 0; z-index: 50; background: rgba(245, 239, 224, 0.94); display: none; align-items: center; justify-content: center; padding: 1rem; }
+  .lock.show { display: flex; }
+  .lockcard { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 30px rgba(60, 40, 10, 0.18); padding: 1.2rem 1.4rem 1.1rem; width: 27rem; max-width: 100%; }
+  .lockcard h2 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 1.15rem; margin: 0 0 0.3rem; letter-spacing: 0.02em; }
+  .lockcard p { margin: 0.3rem 0 0.6rem; font-size: 0.95rem; }
+
+  /* editing in place, on the board itself */
+  .card [contenteditable="true"], .card [contenteditable="plaintext-only"] { -webkit-user-select: text; user-select: text; cursor: text; outline: 2px solid #d9a441; outline-offset: 2px; border-radius: 3px; background: #fffdf3; min-width: 2.5rem; display: inline-block; }
+  .pill-edit { position: absolute; z-index: 5; font: inherit; font-size: 13px; border: 2px solid #d9a441; border-radius: 10px; padding: 0.05rem 0.5rem; background: #fff; text-align: center; width: 180px; }
+  /* boxes: divisions drawn on the board, behind the cards */
+  .card.k-box { background: rgba(255, 255, 255, 0.28); border: 2px dashed var(--accent-light); border-left-width: 2px; border-radius: 10px; box-shadow: none; padding: 0.3rem 0.6rem; }
+  .card.k-box:hover { box-shadow: none; background: rgba(255, 255, 255, 0.42); }
+  .card.k-box .blab { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 0.95rem; letter-spacing: 0.03em; }
+  .card.k-box .blab:empty::before { content: 'double-click to name it'; color: var(--faded); font-family: 'EB Garamond', serif; font-style: italic; font-weight: 400; letter-spacing: 0; }
+  .card .bgrip { position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, var(--accent-light) 50%); border-bottom-right-radius: 8px; opacity: 0.75; }
+  #world.far .card.k-box .blab { font-size: 1.5rem; }
+  #stage.tool-box, #stage.tool-box .card { cursor: crosshair; }
+  @media (pointer: coarse) { .card .bgrip { width: 30px; height: 30px; } }
+  /* annotations: words of a passage marked by the seminar. Each kind's colour is --kc, set from ANN_KINDS. */
+  mark.ann { color: inherit; background: color-mix(in srgb, var(--kc) 15%, transparent); border-bottom: 2px solid var(--kc); border-radius: 2px; padding: 0 1px; cursor: pointer; }
+  mark.ann.many { background: color-mix(in srgb, var(--kc) 28%, transparent); }
+  mark.ann.placed { border-bottom-style: dashed; }
+  mark.ann.done { background: transparent; border-bottom: 1.5px dotted var(--kc); }
+  .card mark.ann { cursor: inherit; }
+  #world.far .card mark.ann { background: none; border-bottom-width: 0; }
+  .card .anns { display: flex; flex-wrap: wrap; gap: 0.15rem 0.5rem; font-size: 0.72rem; color: var(--faded); margin-top: 0.25rem; font-style: normal; }
+  .card .anns i { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--kc); margin-right: 0.15rem; vertical-align: -0.05rem; }
+  .card .anns i.hollow { background: transparent; box-shadow: inset 0 0 0 1.5px var(--kc); }
+  #world.far .card .anns { font-size: 1.05rem; }
+  #ink .annt { pointer-events: auto; cursor: pointer; }
+  #ink .annt path.hit { fill: none; stroke: transparent; stroke-width: 14; }
+  #ink .annt path.v { fill: none; stroke: #2f5d8a; stroke-width: 1.8; stroke-dasharray: 1 5; stroke-linecap: round; }
+  #ink .annt.dim { opacity: 0.1; }
+  .annbar { position: fixed; z-index: 40; display: none; gap: 0.25rem; padding: 0.25rem; background: #fff; border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 2px 12px rgba(60, 40, 10, 0.2); }
+  .annbar.show { display: flex; }
+  .annbar button { border: 1.5px solid var(--kc); color: var(--kc); background: #fff; border-radius: 999px; padding: 0.05rem 0.65rem; cursor: pointer; font-size: 0.86rem; white-space: nowrap; }
+  .annbar button:hover { background: var(--kc); color: #fff; }
+  @media (pointer: coarse) { .annbar button { padding: 0.35rem 0.8rem; font-size: 0.95rem; } }
+  #details .q .c button[data-annwhole] { color: var(--faded); }
+  #details .anns-l { margin-top: 0.35rem; }
+  #details .ann-e { border-left: 3px solid var(--kc); background: var(--panel); border-radius: 0 6px 6px 0; padding: 0.2rem 0.5rem 0.3rem; margin: 0.3rem 0 0 0.3rem; font-size: 0.88rem; font-style: normal; }
+  #details .ann-e.placed, #details .ann-e.lost { border-left-style: dashed; }
+  #details .ann-e.done > .ah, #details .ann-e.done > .at { opacity: 0.6; }
+  #details .ann-e.flash { box-shadow: 0 0 0 3px #d9a441; }
+  #details .ann-e .kl { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.09em; color: var(--kc); margin-right: 0.35rem; }
+  #details .ann-e .ex { font-style: italic; }
+  #details .ann-e .on { color: var(--faded); font-style: italic; }
+  #details .ann-e .pg { font-size: 0.78rem; color: var(--faded); font-style: italic; }
+  #details .ann-e .at { white-space: pre-wrap; margin-top: 0.1rem; }
+  #details .ann-e .to { margin-top: 0.1rem; color: var(--faded); }
+  #details .ann-e .to .tw { border: 1px solid var(--kc); color: var(--kc); background: #fff; border-radius: 999px; padding: 0 0.5rem; cursor: pointer; font-size: 0.85rem; font-style: italic; }
+  #details .ann-e .am { display: flex; flex-wrap: wrap; gap: 0.1rem 0.55rem; font-size: 0.78rem; color: var(--faded); margin-top: 0.15rem; }
+  #details .ann-e .am button, #details .ann-e .ah button.linkish, #details .ann-e .to button.linkish { background: none; border: 0; padding: 0; color: var(--accent-light); text-decoration: underline; cursor: pointer; font-size: inherit; }
+  #details .ann-r { margin: 0.3rem 0 0 0.4rem; padding-left: 0.5rem; border-left: 1px solid var(--line-soft); }
+  #details .anncomp { border: 1.5px solid var(--kc); border-radius: 8px; background: #fff; padding: 0.35rem 0.55rem 0.45rem; margin: 0.35rem 0 0.2rem 0.3rem; font-style: normal; font-size: 0.92rem; }
+  #details .anncomp .akinds { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.3rem; }
+  #details .anncomp .akinds button { border: 1px solid var(--kc); color: var(--kc); background: #fff; border-radius: 999px; padding: 0 0.55rem; cursor: pointer; font-size: 0.82rem; }
+  #details .anncomp .akinds button.on { background: var(--kc); color: #fff; }
+  #details .anncomp .aon { margin: 0 0 0.2rem; font-size: 0.86rem; color: var(--faded); }
+  #details .anncomp textarea { min-height: 3.2rem; margin-top: 0.25rem; }
+  #details .anncomp label.f { margin-top: 0.2rem; }
+  #details .annf { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.3rem 0 0.5rem; }
+  #details .annf select { width: auto; flex: 1; min-width: 6rem; }
+</style>
+</head>
+<body>
+<header>
+  <a class="back" id="back" href="index.html" title="Back to this topic’s passages, in My topics">← Passages</a>
+  <a href="index.html">The Logic Portal</a><span class="slash">/</span>
+  <a id="mtlink" href="index.html">My topics</a><span class="slash">/</span>
+  <b id="tname"></b><span class="slash">/</span>
+  <b>Its board</b>
+</header>
+<div class="tools">
+  <span class="grp"><span class="lbl">Add</span>
+    <button type="button" class="btn k-note" data-add="note" title="Anything, as on a whiteboard">Note</button>
+    <button type="button" class="btn k-problem" data-add="problem" title="A question the topic raises, in your words: draw arrows to it from the passages that may answer it">Question</button>
+    <button type="button" class="btn" data-add="model" title="A group: a named frame for cards, which move with it">Group</button>
+  </span>
+  <span class="grp"><span class="lbl">View</span>
+    <select class="vsel" id="vsel" aria-label="View"></select>
+    <button type="button" class="btn" id="vnew" title="The same cards, in an arrangement of its own">New view</button>
+    <button type="button" class="linkish" id="vmore">this view…</button>
+  </span>
+  <span class="grp">
+    <input type="search" id="search" placeholder="Find on the board" aria-label="Find on the board"><span id="found"></span>
+  </span>
+  <span class="grp">
+    <button type="button" class="btn" id="undo" title="Undo (⌘Z)">↶</button>
+    <button type="button" class="btn" id="redo" title="Redo (⇧⌘Z)">↷</button>
+  </span>
+  <span class="grp">
+    <button type="button" class="btn solid" id="snap" title="Keep the board as it is now, to come back to">Photograph the board</button>
+    <button type="button" class="linkish" id="photos">Photographs</button>
+  </span>
+  <span class="grp">
+    <button type="button" class="btn" id="annsb" title="Every annotation on the board: problems, what passages are relevant to, interpretations and comments">Annotations</button>
+  </span>
+  <span class="grp"><span id="sync"></span></span>
+  <span class="grp">
+    <button type="button" class="linkish" id="export">Export</button>
+    <button type="button" class="linkish" id="import">Import</button>
+    <input type="file" id="file" accept=".json,application/json" hidden>
+  </span>
+</div>
+<div class="wrap">
+  <div id="stage">
+    <div id="world">
+      <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="gann"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
+      <div id="cards"></div>
+      <svg id="drawn" xmlns="http://www.w3.org/2000/svg"><g id="gdraw"></g><path id="wet" d=""></path></svg>
+    </div>
+    <div id="palette" class="float" role="toolbar" aria-label="Tools">
+      <button type="button" class="tl on" data-tool="move" title="Move cards and models, and drag the bare board to move about (V)"><span>✋</span>Move</button>
+      <button type="button" class="tl" data-tool="select" title="Drag around cards to select several (S)"><span>⬚</span>Select</button>
+      <button type="button" class="tl" data-tool="box" title="Drag on the board to draw a box: a division you can name, resize, fill and draw arrows to (B)"><span>▭</span>Box</button>
+      <button type="button" class="tl" data-tool="pen" title="Draw on the board (P). An Apple Pencil draws on the bare board in any tool."><span>✎</span>Draw</button>
+      <button type="button" class="tl" data-tool="erase" title="Rub out drawing (E)"><span>⌫</span>Rub out</button>
+      <div class="pens" id="pens"></div>
+    </div>
+    <button type="button" id="sideopen" class="float" title="Show the side again">« the side</button>
+    <div id="layers" class="float"></div>
+    <div id="zoom" class="float"><button type="button" id="zout" title="Zoom out">−</button><span id="zk">100%</span><button type="button" id="zin" title="Zoom in">+</button><button type="button" id="zfit" title="Show the whole view">Fit</button><button type="button" id="ztidy" title="Lay this view out again, a column per group">Tidy</button></div>
+    <div id="banner" class="float"></div>
+    <div id="chooser" class="float"></div>
+    <div id="toast" class="float"></div>
+  </div>
+  <aside id="side">
+    <div class="tabs"><button type="button" id="tdet" class="on">On the board</button><button type="button" id="tread">Reading</button><button type="button" class="hide" id="tside" title="Put the side away, for more board">»</button></div>
+    <div id="details"></div>
+    <div id="reading"><div class="bar"><span>The Logic Portal</span><a id="full" href="index.html" target="_blank" rel="noopener">open it full size ↗</a></div><iframe id="portal" title="The Logic Portal" src="index.html"></iframe></div>
+  </aside>
+</div>
+
+<datalist id="arrowtypes"><option value="develops"><option value="contradicts"><option value="qualifies"><option value="same as"><option value="answers?"><option value="cf."></datalist>
+<div id="annbar" class="annbar" role="toolbar" aria-label="Annotate these words"></div>
+<div id="lock" class="lock" role="dialog" aria-modal="true" aria-labelledby="lockh"><div class="lockcard"><h2 id="lockh"></h2><div id="lockbody"></div></div></div>
+
+<script>
+/* ── Data ─────────────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   A topic's board. Each topic in My topics (topics.js) can have one: its passages are cards
+   on it, which come and go with the topic, and around them whatever the reader adds, notes,
+   questions, groups, boxes, arrows, drawing and annotations. It is the reader's alone.
+
+   It is kept in My topics' own store, in this browser's localStorage, beside the topics, so
+   that it goes wherever they go: Save to file, and the locked file on GitHub when Keep on
+   GitHub is on. This page never holds a token. It writes the store, and the portal in its
+   side, or any tab of the portal, sends the change to GitHub, as it sends any change of
+   its own. Before each save the page reads the store afresh and folds in whatever changed
+   there meanwhile, so nothing of the topics is written over.
+
+   The page began as the study's board (studies/kinds-of-nothing/board.html), and keeps its
+   shape: models (here called groups), items (the cards), arrows, views, photographs. A
+   passage card names the passage kept in My topics by its id (mt), with its address and
+   citation beside it in case the passage is later taken out of My topics; its words are
+   the portal's, read from the portal in the side, or the copy My topics kept until that has
+   loaded. Annotations belong to the passage, not the board: they are kept once, beside the
+   boards, and show on every board of the reader's where their passage stands.
+   ───────────────────────────────────────────────────────────────────────────── */
+const PORTAL = 'index.html';
+const TOPICS = 'kantlab-topics-v1';               // My topics' store (topics.js), which the board is kept in
+const TOPICS_GH = 'kantlab-topics-github';        // set while My topics keeps a copy on GitHub in this browser
+const BASE = { models: [], items: [], arrows: [], views: [] };
+const TYPES = ['develops', 'contradicts', 'qualifies', 'same as', 'cf.'];
+const COLS = 4, COLW = 275, ROWH = 215;           // where a topic's passages are laid out at first
+const BIG = 2e6;                                  // past this many characters the store has, the page warns
+const PALETTE = ['#5c6e3a', '#8b5e3c', '#3b5068', '#6b4e7a', '#3f6b63', '#9a6a1e', '#7a3b3b', '#5a5a5a'];
+const LAYERS = [
+  { key: 'frames', label: 'Groups, as frames', mark: 'sq' },
+  { key: 'hypothesis', label: 'Arrows', color: '#5c3d1e' },
+  { key: 'problem', label: 'Questions, and what may answer them', color: '#8a3b12', dash: '7 4' },
+  { key: 'passage', label: 'Passages', mark: 'sq' },
+  { key: 'note', label: 'Notes', mark: 'sq' },
+  { key: 'drawing', label: 'Drawing', color: '#b03a2e' },
+  { key: 'box', label: 'Boxes', mark: 'sq' },
+  { key: 'annotations', label: 'Annotations, and what they join', color: '#2f5d8a', dash: '2 4' },
+];
+const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', computer: '#9a8f7a', passage: '#5c3d1e', note: '#5c3d1e' };
+const DASH = { problem: '7 4', computer: '2 4' };
+const FAR = 0.55, NEAR = 1.3;
+const PENS = ['#1a1208', '#8b5e3c', '#b03a2e', '#2f5d8a', '#5c6e3a'];
+// What can be said about a passage, or some of its words. A new kind is one more line here.
+const ANN_KINDS = [
+  { key: 'problem', label: 'Problem', color: '#8a3b12', hint: 'What is wrong or puzzling here: an OCR slip, a reading that does not fit, a clash with another passage' },
+  { key: 'relevant', label: 'Relevant to…', color: '#2f5d8a', hint: 'Why, in a few words (optional)' },
+  { key: 'interpretation', label: 'Interpretation', color: '#5c6e3a', hint: 'A possible reading, in your words' },
+  { key: 'comment', label: 'Comment', color: '#9a6a1e', hint: 'Anything else' },
+];
+const ANN_CTX = 32;   // the characters kept either side of the words annotated, so that they can be found again
+const PREFS = 'kantlab-topic-board-prefs-v1:';      // + the topic: this device's own camera, layers and view, kept apart from the board
+
+/* ── State ────────────────────────────────────────────────────────────────── */
+let B;                 // the board: { models, items, arrows, views, removed }
+let photos = [];       // photographs: { id, name, date, board }, kept in the board, apart in memory so that undo does not copy them
+let TID = new URLSearchParams(location.hash.slice(1)).get('t') || '';   // the topic, by its id in My topics
+let DB = null;         // My topics' store, as last read or written here
+let topic = null;      // the topic in it
+let seenB = '';        // the board as kept, as last read or written here (the base two changes are merged against)
+let seenA = '[]';      // the annotations likewise
+let lost = '';         // why nothing can be saved: 'unreadable' (My topics would not read), 'gone' (the topic is not in it)
+let FW = null;         // the portal in the side, once its texts are in
+let pendingStore = false;   // the store changed during a drag or an edit: taken in when it ends
+let viewId;            // the view shown
+let live = null;       // while a photograph is shown, the board it stands in for
+let undoStack = [], redoStack = [];
+let sel = { kind: null, ids: [] };   // kind: 'card' | 'arrow' | 'model'
+let form = null;       // the form open on the side, if any
+let mode = null;       // { linkFrom } while choosing where an arrow goes
+let focus = null;      // { id, hops }
+let query = '';
+let cam = { x: 40, y: 30, k: 1 };
+let size = {};         // card id → { w, h }, as last drawn
+let side = 'details';
+let tool = 'move';     // 'move' | 'select' | 'pen' | 'erase'
+let pen = PENS[2];
+let sawPencil = false; // once an Apple Pencil has drawn, fingers move the board rather than draw
+let offer = null;      // what a stroke just drawn may mean: { kind: 'arrow', from, to, stroke } | { kind: 'lasso', ids, stroke }
+let spaceDown = false;
+let prefs = {};        // this device's camera, layers and view, kept apart from the board
+let editing = null;    // something being edited in place: { el, finish }
+let annPick = null;    // words selected in a passage in the side, for the annotation bar: { card, qi, start, end, rect }
+let sideStale = false; // someone else saved while words were being selected in the side: redraw it once the selection ends
+let AX = null;         // the annotations, indexed by passage (see annIndex)
+
+/* ── Builders: the board ──────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const uid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const today = () => new Date().toISOString().slice(0, 10);
+const me = () => '';    // the board is its reader's alone: nothing on it is signed
+const now = () => new Date().toISOString();
+const isObj = x => !!x && typeof x === 'object' && !Array.isArray(x);
+// Keys in one order all the way down, so that two copies of the same board compare equal.
+const deep = x => Array.isArray(x) ? x.map(deep) : isObj(x) ? Object.keys(x).sort().reduce((r, k) => { r[k] = deep(x[k]); return r; }, {}) : x;
+// What is worked out here for a card and never saved: its passage's words, whether it is still under the topic.
+const hide = (o, k, v) => Object.defineProperty(o, k, { value: v, writable: true, configurable: true, enumerable: false });
+const view = () => B.views.find(v => v.id === viewId) || B.views[0];
+const item = id => B.items.find(i => i.id === id);
+const arrow = id => B.arrows.find(a => a.id === id);
+const model = id => B.models.find(m => m.id === id);
+const ro = () => !!live || !!lost;
+const roWhy = () => live ? 'This is a photograph. Bring it back to change it.' : lost === 'unreadable' ? 'My topics would not read in this browser, so nothing here is saved.' : 'This topic is not in My topics in this browser, so nothing here is saved.';
+const layersOf = () => Object.assign({}, view().layers || {}, (prefs.layers || {})[viewId] || {});
+const layerOn = k => layersOf()[k] !== false;
+function showLayer(k, on) { prefs.layers = prefs.layers || {}; prefs.layers[viewId] = Object.assign(layersOf(), { [k]: on !== false }); savePrefs(); }
+function loadPrefs() { try { prefs = JSON.parse(localStorage.getItem(PREFS + TID) || '{}') || {}; } catch (e) { prefs = {}; } }
+function savePrefs() { try { localStorage.setItem(PREFS + TID, JSON.stringify(prefs)); } catch (e) { /* fine */ } }
+const itemLayer = it => it.kind;
+function shown(it) { if (!it || (view().hidden || []).includes(it.id)) return false; const l = itemLayer(it); return !l || layerOn(l); }
+const arrowShown = a => layerOn(a.layer) && shown(item(a.from)) && shown(item(a.to));
+function nameOf(id) { const it = item(id); if (!it) return '(gone)'; const m = model(it.model); return cardTitle(it) + (m ? ' (' + m.title + ')' : ''); }
+function cardTitle(it) {
+  if (it.kind === 'box') return 'Box' + (it.label ? ': ' + it.label : '');
+  if (it.kind === 'passage') return it.label || (it.quotes[0] && it.quotes[0].cite) || it.cite || 'a passage';
+  const t = String(it.text || ''); return (it.kind === 'problem' ? 'Question: ' : 'Note: ') + (t.length > 50 ? t.slice(0, 49) + '…' : t);
+}
+
+/* Where a passage opens in the portal. */
+function portalHref(q) {
+  if (q.ref) {
+    const k = q.ref.slice(0, q.ref.indexOf(':')), id = q.ref.slice(q.ref.indexOf(':') + 1);
+    if (k === 'baumgarten' || k === 'meier') return PORTAL + '#read=' + k + '&at=' + encodeURIComponent(id);
+    if (k === 'refl-meta' || k === 'refl-logik') return PORTAL + '#refl=' + id.replace(/^r/, '');
+    return PORTAL + '#read=' + encodeURIComponent(k) + '&at=' + encodeURIComponent(id);
+  }
+  return q.hash ? PORTAL + q.hash : null;
+}
+// A portal address pasted on the page: only its #… part is kept, and only the portal is opened.
+function hashOf(s) { const i = String(s || '').indexOf('#'); if (i < 0) return ''; const h = s.slice(i).trim(); return /^#[\w=&%.:,+*"' -]*$/.test(h) && h.length < 400 ? h : ''; }
+
+/* ── Builders: keeping it ─────────────────────────────────────────────────────
+   In My topics' store: boards[topic] is this board as kept (its photographs in it), and
+   annotations, kept once for all of a reader's boards, those on the passages. The page reads
+   the store afresh before each save, folds in what changed there meanwhile, and writes back
+   only this board, the annotations, and what it was asked to change in a passage or the
+   topic. A store that will not read is never written over. */
+// What is read from the store is data: keep the shapes this page knows, and anything newer pages add.
+function cleanBoard(d) {
+  if (!d || typeof d !== 'object' || Array.isArray(d) || !Array.isArray(d.items)) return null;
+  const out = {};
+  Object.keys(d).forEach(k => { if (k !== 'at') out[k] = d[k]; });
+  ['models', 'items', 'arrows', 'views', 'photos'].forEach(k => { out[k] = Array.isArray(out[k]) ? out[k].filter(x => x && typeof x === 'object' && typeof x.id === 'string') : []; });
+  out.removed = Array.isArray(out.removed) ? out.removed.filter(x => typeof x === 'string') : [];
+  out.views.forEach(v => { if (!v.pos || typeof v.pos !== 'object') v.pos = {}; if (!Array.isArray(v.hidden)) v.hidden = []; if (!Array.isArray(v.ink)) v.ink = []; });
+  if (!out.views.length) out.views.push({ id: 'v-1', name: 'The board', pos: {}, hidden: [], ink: [] });
+  return out;
+}
+function readStore() {
+  let raw = null;
+  try { raw = localStorage.getItem(TOPICS); } catch (e) { return null; }
+  if (raw == null) return { v: 1, topics: [], items: [], gone: {}, alias: {}, boards: {}, annotations: [] };
+  try { const d = JSON.parse(raw); if (isObj(d) && Array.isArray(d.topics) && Array.isArray(d.items)) return d; } catch (e) { /* below */ }
+  return null;
+}
+const realTopic = (d, id) => { let k = id, n = 0; while (isObj(d.alias) && d.alias[k] && n++ < 50) k = d.alias[k]; return k; };
+const realB = () => live ? live.board : B;   // the board, while a photograph is being looked at
+// The board as it is kept: without the annotations, which are kept beside it, and with its photographs.
+function kept() { const b = Object.assign({}, realB()); delete b.annotations; b.photos = photos; return b; }
+const keyOf = b => JSON.stringify(deep(b));
+function setKept(nb) {   // a board read or merged: its photographs apart, the annotations as they are here
+  const an = realB().annotations || [];
+  photos = nb.photos || []; delete nb.photos;
+  nb.annotations = an; nb.removed = nb.removed || [];
+  if (live) live.board = nb; else B = nb;
+}
+// The topic's passages, as My topics keeps them: those under it, in the order arranged there.
+const itemOf = id => DB && DB.items.find(x => x && x.id === id);
+function underTopic() {
+  if (!DB || !topic) return [];
+  const pos = new Map((topic.order || []).map((id, k) => [id, k]));
+  return DB.items.filter(x => x && Array.isArray(x.topics) && x.topics.includes(TID)).sort((a, b) => {
+    const pa = pos.has(a.id) ? pos.get(a.id) : Infinity, pb = pos.has(b.id) ? pos.get(b.id) : Infinity;
+    return pa !== pb ? pa - pb : String(a.added).localeCompare(String(b.added));
+  });
+}
+const passageCard = (x, fresh) => Object.assign({ id: 'p-' + x.id, kind: 'passage', mt: x.id, ref: x.ref, cite: x.cite || '', model: null, label: '', quotes: [{ ref: x.ref, cite: x.cite || '' }], date: today() }, fresh ? { fresh: true } : {});
+// A board made from the topic: its passages in rows, in the order arranged in My topics.
+function layOut() {
+  const b = cleanBoard({ models: [], items: [], arrows: [], views: [{ id: 'v-1', name: 'The board', pos: {}, hidden: [], layers: {}, ink: [] }], photos: [] });
+  underTopic().forEach((x, k) => { const c = passageCard(x); b.items.push(c); b.views[0].pos[c.id] = [(k % COLS) * COLW, Math.floor(k / COLS) * ROWH]; });
+  return b;
+}
+// Every passage under the topic has its card. One put under it since comes onto the board in a row
+// of its own beneath the rest, marked new. A card whose passage has gone from My topics takes the
+// passage again if it is kept again. Returns whether anything changed.
+function syncCards() {
+  const b = realB(); if (!topic || !b) return false;
+  let changed = false;
+  const v = b.views.find(w => w.id === viewId) || b.views[0];
+  const at = id => v.pos[id] || b.views.map(w => w.pos[id]).find(Boolean);
+  const ps = b.items.map(i => at(i.id)).filter(Boolean);
+  const x0 = ps.length ? Math.min(...ps.map(p => p[0])) : 0, y0 = ps.length ? Math.max(...ps.map(p => p[1])) + ROWH + 40 : 0;
+  let n = 0;
+  underTopic().forEach(x => {
+    if (b.items.some(i => i.kind === 'passage' && i.mt === x.id)) return;
+    const orphan = b.items.find(i => i.kind === 'passage' && !itemOf(i.mt) && i.ref === x.ref);
+    if (orphan) { orphan.mt = x.id; orphan.cite = x.cite || orphan.cite; changed = true; return; }
+    const c = passageCard(x, true);
+    if (b.items.some(i => i.id === c.id)) c.id = uid('p');
+    b.items.push(c); v.pos[c.id] = [x0 + (n % COLS) * COLW, y0 + Math.floor(n / COLS) * ROWH]; n++;
+    changed = true;
+  });
+  return changed;
+}
+// The portal in the side, once its texts are in: where a passage's words are read from.
+function portalReady() {
+  try {
+    const w = $('portal').contentWindow, L = w.document.getElementById('loading');
+    return w.PORTAL && Array.isArray(w.PORTAL.P) && w.PORTAL.P.length && w.PORTAL.BYID && L && L.hidden ? w : null;
+  } catch (e) { return null; }
+}
+function fullText(ref) {
+  if (!FW || !ref) return null;
+  try { const i = FW.PORTAL.BYID.get(ref), p = i != null ? FW.PORTAL.P[i] : null; return p ? String(p.text || '') : null; } catch (e) { return null; }
+}
+// Each passage card's words and standing, worked out afresh and never saved.
+function hydrate() {
+  [B].concat(live ? [live.board] : []).forEach(b => (b.items || []).forEach(it => {
+    if (it.kind !== 'passage') return;
+    if (!Array.isArray(it.quotes) || !it.quotes.length) it.quotes = [{ ref: it.ref, cite: it.cite || '' }];
+    const q = it.quotes[0], x = itemOf(it.mt), full = fullText(q.ref || it.ref);
+    hide(it, 'off', !x ? 'gone' : !x.topics.includes(TID) ? 'off' : '');
+    hide(q, 'q', full != null ? full : x ? (x.excerpt || x.words || '') : '');
+    hide(q, 'full', full != null);
+    hide(q, 'kept', x && x.excerpt ? x.excerpt : '');
+    hide(it, 'kx', x || null);
+  }));
+}
+// What changed in the store since this page last read or wrote it, folded into what is here.
+function fold(d) {
+  DB = d;
+  const k = realTopic(d, TID);
+  topic = d.topics.find(t => t && t.id === k) || null;
+  if (!topic) { lost = 'gone'; return; }
+  if (k !== TID) { TID = k; history.replaceState(null, '', '#t=' + encodeURIComponent(k)); seenB = ''; }   // merged into another of the same name
+  lost = '';
+  const tb = isObj(d.boards) && d.boards[TID] ? cleanBoard(JSON.parse(JSON.stringify(d.boards[TID]))) : null;
+  if (tb) {
+    const tk = keyOf(tb);
+    if (tk !== seenB) {
+      const mine = keyOf(kept()) !== seenB && seenB;
+      setKept(mine ? merge3(JSON.parse(seenB), deep(kept()), deep(tb)) : tb);
+      seenB = tk;
+    }
+  }   // a store without this board, written by an older copy of the portal, has not deleted it: it is written back
+  if (Array.isArray(d.annotations)) {
+    const ta = JSON.stringify(d.annotations);
+    if (ta !== seenA) {
+      const an = realB().annotations || [], mine = JSON.stringify(an) !== seenA;
+      const nA = mine ? merge3({ annotations: deep(JSON.parse(seenA)) }, { annotations: deep(an) }, { annotations: deep(d.annotations) }).annotations : clone(d.annotations);
+      realB().annotations = nA; if (live) B.annotations = nA;
+      seenA = ta;
+    }
+  }
+}
+// Write the board and the annotations into the store, with fn's changes to the topic or a passage.
+function writeOut(d, fn) {
+  if (fn) fn(d);
+  DB = d; syncCards();
+  const b = kept(), k = keyOf(b);
+  d.boards = isObj(d.boards) ? d.boards : {};
+  if (k !== seenB || !d.boards[TID]) d.boards[TID] = Object.assign(clone(b), { at: now() });
+  const an = realB().annotations || [], ids = new Set(an.map(a => a.id));
+  d.gone = isObj(d.gone) ? d.gone : {};
+  JSON.parse(seenA).forEach(a => { if (a && !ids.has(a.id)) d.gone[a.id] = now(); });   // so that no other copy brings it back
+  d.annotations = clone(an);
+  const text = JSON.stringify(d);
+  try { localStorage.setItem(TOPICS, text); }
+  catch (e) { saveFailed = true; renderSync(); toast('This browser would not keep the change: its storage is full. Export the board now, so nothing is lost.'); return false; }
+  DB = d; seenB = k; seenA = JSON.stringify(d.annotations);
+  if (saveFailed) { saveFailed = false; renderSync(); }
+  if (text.length > BIG && !bigWarned) { bigWarned = true; toast('Your topics and boards now take ' + (text.length / 1e6).toFixed(1) + ' MB of the 5 this browser gives the site. Drawing and photographs are what grow: delete a photograph you no longer need.'); }
+  return true;
+}
+let bigWarned = false, saveFailed = false;
+function save(fn) {
+  if (ro() && !fn) return false;
+  if (lost) return false;
+  const d = readStore();
+  if (!d) { lost = 'unreadable'; render(); toast('My topics would not read in this browser, so nothing was saved. Export the board now.'); return false; }
+  fold(d);
+  if (lost) { render(); return false; }
+  return writeOut(d, fn);
+}
+// Every change goes through here: undo keeps the board as it was.
+function change(fn) {
+  if (ro()) { toast(roWhy()); return false; }
+  undoStack.push(JSON.stringify(B)); if (undoStack.length > 80) undoStack.shift();
+  redoStack = [];
+  fn();
+  save(); return true;
+}
+function undo() { if (ro() || !undoStack.length) return; redoStack.push(JSON.stringify(B)); B = JSON.parse(undoStack.pop()); afterSwap(); }
+function redo() { if (ro() || !redoStack.length) return; undoStack.push(JSON.stringify(B)); B = JSON.parse(redoStack.pop()); afterSwap(); }
+function afterSwap() {
+  if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
+  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : model(id));
+  if (!sel.ids.length) sel.kind = null;
+  if (focus && !item(focus.id)) focus = null;
+  form = null; save(); render();
+}
+// A passage's note, its topics, or the topic's own note: changed in My topics' store itself, where the list reads them.
+function setPassage(mt, fn) { return save(d => { const x = d.items.find(y => y && y.id === mt); if (x) { fn(x); x.at = now(); } }); }
+function setTopic(fn) { return save(d => { const t = d.topics.find(y => y && y.id === TID); if (t) { fn(t); t.at = now(); } }); }
+// Three copies of the board: as last read or written here (base), as here (mine), as the store has it now (theirs).
+// What only one side changed, that side's version stands; where both changed it, mine does.
+function merge3(base, mine, theirs) {
+  const S = x => x === undefined ? '\u0000' : JSON.stringify(x);
+  const pick = (b, m, t) => S(m) === S(b) ? t : m;
+  const byId = a => new Map((a || []).filter(x => x && x.id != null).map(x => [x.id, x]));
+  const list = (b, m, t, sub) => {
+    const Bm = byId(b), M = byId(m), T = byId(t), ids = [...T.keys()], out = [];
+    M.forEach((x, id) => { if (!T.has(id)) ids.push(id); });
+    ids.forEach(id => { const bb = Bm.get(id), mm = M.get(id), tt = T.get(id), v = sub && mm && tt ? sub(bb, mm, tt) : pick(bb, mm, tt); if (v !== undefined) out.push(v); });
+    return out;
+  };
+  const map = (b, m, t) => { b = b || {}; m = m || {}; t = t || {}; const out = {}; new Set([...Object.keys(t), ...Object.keys(m)]).forEach(k => { const v = pick(b[k], m[k], t[k]); if (v !== undefined) out[k] = v; }); return out; };
+  const set = (b, m, t) => { const Bs = new Set(b || []), Ms = new Set(m || []), Ts = new Set(t || []); return [...new Set([...Ts, ...Ms])].filter(x => Ms.has(x) === Bs.has(x) ? Ts.has(x) : Ms.has(x)); };
+  const view3 = (b, m, t) => {
+    b = b || {};
+    const v = Object.assign({}, t);
+    Object.keys(m).forEach(k => { if (k !== 'pos' && k !== 'hidden' && k !== 'ink') { const x = pick(b[k], m[k], t[k]); if (x === undefined) delete v[k]; else v[k] = x; } });
+    v.pos = map(b.pos, m.pos, t.pos); v.hidden = set(b.hidden, m.hidden, t.hidden); v.ink = list(b.ink, m.ink, t.ink);
+    return v;
+  };
+  const out = Object.assign({}, theirs);
+  ['models', 'items', 'arrows', 'photos', 'annotations'].forEach(k => { if (mine[k] || theirs[k]) out[k] = list(base[k] || [], mine[k] || [], theirs[k] || []); });
+  if (!mine.views && !theirs.views) return out;
+  out.views = list(base.views, mine.views, theirs.views, view3);
+  out.removed = [...new Set([...(theirs.removed || []), ...(mine.removed || [])])];
+  const have = new Set((out.items || []).map(i => i.id));
+  out.arrows = (out.arrows || []).filter(a => have.has(a.from) && have.has(a.to));   // an arrow whose card has gone goes too
+  if (!out.views.length) out.views = (theirs.views || []).length ? theirs.views : mine.views;
+  return out;
+}
+// The store changed, in another tab of the portal, the portal beside the board, or from GitHub through it.
+function takeIn() {
+  if (drag || editing) { pendingStore = true; return; }   // taken in when the drag or the edit ends
+  pendingStore = false;
+  const d = readStore(); if (!d) return;
+  const was = lost, before = keyOf(kept());
+  fold(d);
+  // cards for passages put under the topic since, or a board or annotations an older copy of the portal left out: written back
+  if (!lost && (syncCards() || !(isObj(d.boards) && d.boards[TID]) || !Array.isArray(d.annotations))) writeOut(d);
+  if (lost !== was || keyOf(kept()) !== before) { undoStack = []; redoStack = []; }   // undo reaches back only to the last change made elsewhere
+  afterRemote(); renderHead(); renderAround();
+}
+function renderAround() {
+  hydrate(); renderTools(); renderLayers(); renderBoard();
+  if (!form || form.kind === 'annotate') { if (selInSide() || noteFocused()) sideStale = true; else renderSide(); }   // words being selected, or a note being written, in the side are not lost
+  else if (form.kind === 'annotations' && $('annlist')) $('annlist').innerHTML = annListAll();
+  applyCam();
+}
+const noteFocused = () => { const a = document.activeElement; return !!(a && a.matches && a.matches('#details textarea.mtnote')); };
+function afterRemote() {
+  if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
+  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : model(id));
+  if (!sel.ids.length) sel.kind = null;
+  if (focus && !item(focus.id)) focus = null;
+  if (form && form.id && form.kind !== 'annotate' && !(form.kind === 'arrow' ? arrow(form.id) : form.kind === 'model' ? model(form.id) : form.kind === 'photos' ? true : item(form.id))) form = null;
+  if (live && !photos.some(p => p.id === live.photo)) back();
+  // An annotation's card may go while it is being written: it still belongs on the passage. What it edits or answers may not.
+  if (form && form.kind === 'annotate' && ((form.id && !annById(form.id)) || (form.re && !annById(form.re)))) { form = null; toast('What you were writing on was deleted meanwhile.'); }
+}
+/* ── Builders: where things stand ─────────────────────────────────────────── */
+// A card's place in this view; failing that, in the first view that has it; failing that, beside the rest.
+function posOf(id) {
+  const v = view();
+  if (v.pos[id]) return v.pos[id];
+  for (const w of B.views) if (w.pos[id]) return w.pos[id];
+  return null;
+}
+function placeUnplaced() {
+  const v = view(); let n = 0;
+  const xs = Object.values(v.pos).map(p => p[0]), ys = Object.values(v.pos).map(p => p[1]);
+  const x0 = (xs.length ? Math.max(...xs) : 0) + 320, y0 = ys.length ? Math.min(...ys) : 0;
+  B.items.forEach(it => { if (!posOf(it.id)) { v.pos[it.id] = [x0, y0 + n * 120]; n++; } });
+}
+const sz = id => size[id] || { w: 168, h: 60 };
+function rect(id) { const p = posOf(id), s = sz(id); return p ? { x: p[0], y: p[1], w: s.w, h: s.h } : null; }
+// A model's frame: the cards it holds, with room around them. An empty model keeps a place of its own.
+function frameOf(m, skip) {
+  const v = view(), rs = B.items.filter(it => it.model === m.id && shown(it) && !(skip && skip.has(it.id))).map(it => rect(it.id)).filter(Boolean);
+  if (!rs.length) { const p = v.pos[m.id] || B.views.map(w => w.pos[m.id]).find(Boolean); return p ? { x: p[0], y: p[1], w: 230, h: 130, empty: true } : null; }
+  const x = Math.min(...rs.map(r => r.x)) - 22, y = Math.min(...rs.map(r => r.y)) - 52;
+  const X = Math.max(...rs.map(r => r.x + r.w)) + 22, Y = Math.max(...rs.map(r => r.y + r.h)) + 22;
+  return { x, y, w: X - x, h: Y - y };
+}
+const inside = (r, px, py) => r && px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
+
+/* ── Builders: what is lit ────────────────────────────────────────────────── */
+function neighbourhood() {
+  if (!focus) return null;
+  const keep = new Set([focus.id]); let edge = [focus.id];
+  for (let h = 0; h < focus.hops; h++) {
+    const next = [];
+    B.arrows.filter(arrowShown).forEach(a => {
+      if (edge.includes(a.from) && !keep.has(a.to)) { keep.add(a.to); next.push(a.to); }
+      if (edge.includes(a.to) && !keep.has(a.from)) { keep.add(a.from); next.push(a.from); }
+    });
+    edge = next;
+  }
+  return keep;
+}
+function matches(it) {
+  if (!query) return true;
+  const hay = [it.label, it.sub, it.text, it.by].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it)).join(' ').toLowerCase();
+  return query.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
+
+/* ── Builders: annotations ────────────────────────────────────────────────────
+   An annotation belongs to a passage, not to a card. It names the passage by its address in
+   the portal (the ref, or hash, its quote carries) and keeps the words it was made on verbatim,
+   with a few either side. So it shows wherever that passage stands on the board, found again by
+   its words. One the page could not find again with the same words around it is drawn dashed,
+   as the page's own placing; one whose words have gone from the passage is placed nowhere, and
+   says so. A passage pasted with no address is known by its card alone. */
+const annKind = k => ANN_KINDS.find(x => x.key === k) || { key: k, label: k === 'reply' ? 'Reply' : String(k || ''), color: '#8b5e3c', hint: '' };
+const qAddr = q => (q && (q.ref || q.hash)) || '';
+const short = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+function annIndex() {
+  const list = B.annotations || [];
+  if (AX && AX.src === list && AX.n === list.length) return AX;
+  const byAddr = new Map(), byCard = new Map(), replies = new Map(), byId = new Map();
+  const put = (m, k, a) => { if (!m.has(k)) m.set(k, []); m.get(k).push(a); };
+  list.forEach(a => {
+    if (!a || typeof a.id !== 'string') return;
+    byId.set(a.id, a);
+    if (a.kind === 'reply') { if (a.re) put(replies, a.re, a); return; }
+    if (!a.on || typeof a.on !== 'object') return;
+    const k = a.on.ref || a.on.hash;
+    if (k) put(byAddr, k, a); else if (a.on.card) put(byCard, a.on.card, a);
+  });
+  replies.forEach(rs => rs.sort((x, y) => String(x.date).localeCompare(String(y.date))));
+  return (AX = { src: list, n: list.length, byAddr, byCard, replies, byId });
+}
+const annById = id => annIndex().byId.get(id);
+// Where the words annotated stand in this passage's text: { s, e, placed }, placed when the page had to judge
+// where (the words around them differ, or they stand there more than once). null when they are not in it.
+function findWords(t, on) {
+  const ex = String(on.exact), pre = String(on.prefix || ''), suf = String(on.suffix || ''), hits = [];
+  for (let i = t.indexOf(ex); i >= 0; i = t.indexOf(ex, i + 1)) hits.push(i);
+  if (!hits.length) return null;
+  const fit = i => {   // how much of the context agrees, and whether all of it does (as far as the passage goes)
+    let n = 0, k = 1, j = 0;
+    for (; k <= pre.length && i - k >= 0 && t[i - k] === pre[pre.length - k]; k++) n++;
+    const e = i + ex.length;
+    for (; j < suf.length && e + j < t.length && t[e + j] === suf[j]; j++) n++;
+    return { i, n, ok: (k > pre.length || i - k < 0) && (j >= suf.length || e + j >= t.length) };
+  };
+  const scored = hits.map(fit), best = Math.max(...scored.map(x => x.n)), top = scored.filter(x => x.n === best);
+  const at = top.find(x => x.i === on.start) || top[0];
+  return { s: at.i, e: at.i + ex.length, placed: !(at.ok && top.length === 1) };
+}
+// The annotations on one passage of a card: on some of its words (spans), on the whole of it, and those
+// made here whose words it no longer has (lost).
+function placeOn(it, qi) {
+  const q = it && (it.quotes || [])[qi], out = { spans: [], whole: [], lost: [] };
+  if (!q || !q.q) return out;
+  const X = annIndex(), k = qAddr(q);
+  const cands = (k ? X.byAddr.get(k) || [] : []).concat((X.byCard.get(it.id) || []).filter(a => (+a.on.qi || 0) === qi));
+  cands.forEach(a => {
+    if (!a.on.exact) { out.whole.push(a); return; }
+    const f = findWords(q.q, a.on);
+    if (f) out.spans.push({ s: f.s, e: f.e, placed: f.placed, a });
+    else if (q.full !== false && a.on.card === it.id && (+a.on.qi || 0) === qi) out.lost.push(a);
+  });
+  out.spans.sort((x, y) => String(x.a.date).localeCompare(String(y.a.date)));
+  return out;
+}
+function annsOfCard(it) {
+  const seen = new Map();
+  (it.quotes || []).forEach((q, i) => { const P = placeOn(it, i); P.spans.map(x => x.a).concat(P.whole, P.lost).forEach(a => seen.set(a.id, a)); });
+  return [...seen.values()];
+}
+// Every annotation's places on the board: id → [{ card, qi }].
+function annPlaces() {
+  const W = new Map(), add = (id, card, qi) => { if (!W.has(id)) W.set(id, []); W.get(id).push({ card, qi }); };
+  B.items.forEach(it => (it.quotes || []).forEach((q, i) => { const P = placeOn(it, i); P.spans.forEach(x => add(x.a.id, it.id, i)); P.whole.concat(P.lost).forEach(a => add(a.id, it.id, i)); }));
+  return W;
+}
+const annHay = it => annsOfCard(it).map(a => [a.text, a.by, a.to && (a.to.word || a.to.cite)].concat((annIndex().replies.get(a.id) || []).map(r => r.text + ' ' + r.by)).join(' ')).join(' ');
+// A passage's words, the annotated ones marked; spans are { s, e, placed, a }. The latest made shows its colour.
+function markText(t, spans) {
+  if (!spans.length) return esc(t);
+  const cuts = new Set([0, t.length]);
+  spans.forEach(x => { cuts.add(Math.max(0, Math.min(t.length, x.s))); cuts.add(Math.max(0, Math.min(t.length, x.e))); });
+  const pts = [...cuts].sort((a, b) => a - b);
+  let h = '';
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1], seg = t.slice(a, b), on = spans.filter(x => x.s <= a && x.e >= b);
+    if (!on.length) { h += esc(seg); continue; }
+    const top = on[on.length - 1].a, done = on.every(x => x.a.kind === 'problem' && x.a.resolved);
+    h += '<mark class="ann ak-' + esc(top.kind) + (on.some(x => x.placed) ? ' placed' : '') + (done ? ' done' : '') + (on.length > 1 ? ' many' : '') + '" data-ann="' + esc(on.map(x => x.a.id).join(' ')) + '">' + esc(seg) + '</mark>';
+  }
+  return h;
+}
+// The first words of a card's passage, as the card shows them, with what is annotated in them lit.
+// For a passage of which only some words were kept, the words kept.
+function excerpt(it, n) {
+  const q = it.quotes[0], only = !!(q.kept && q.q !== q.kept);
+  const t = String(only ? q.kept : q.q || ''), cut = t.length > n, s = cut ? t.slice(0, n - 1) : t;
+  const spans = !only && layerOn('annotations') ? placeOn(it, 0).spans.filter(x => x.s < s.length).map(x => Object.assign({}, x, { e: Math.min(x.e, s.length) })) : [];
+  return markText(s, spans) + (cut ? '…' : '');
+}
+// A dot on the card for each annotation on its passages, by kind; a resolved problem's is hollow.
+function annDots(it) {
+  if (!layerOn('annotations')) return '';
+  const as = annsOfCard(it); if (!as.length) return '';
+  const n = {}; as.forEach(a => { const k = a.kind === 'problem' && a.resolved ? 'resolved' : a.kind; n[k] = (n[k] || 0) + 1; });
+  return '<span class="anns" title="' + as.length + (as.length === 1 ? ' annotation: click the card to read it' : ' annotations: click the card to read them') + '">' +
+    ANN_KINDS.filter(K => n[K.key]).map(K => '<span class="ak-' + K.key + '"><i></i>' + n[K.key] + '</span>').join('') +
+    (n.resolved ? '<span class="ak-problem"><i class="hollow"></i>' + n.resolved + ' resolved</span>' : '') + '</span>';
+}
+
+/* ── Render: the board ────────────────────────────────────────────────────── */
+function cardHtml(it) {
+  const m = model(it.model), col = m ? m.color : '#b8a88a';
+  const q0 = (it.quotes || [])[0];
+  let inner = '';
+  if (it.kind === 'box') return '<div class="card k-box" data-id="' + esc(it.id) + '" style="width:' + (+it.w || 280) + 'px;height:' + (+it.h || 180) + 'px"><span class="blab">' + esc(it.label || '') + '</span>' + (ro() ? '' : '<span class="bgrip" title="Drag to resize"></span><span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+  if (it.kind === 'passage') {
+    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 && q0.q ? '<div class="pq">“' + excerpt(it, 240) + '”</div>' : '') +
+      '<span class="pc">' + esc((q0 && q0.cite) || it.cite || it.ref || '') + '</span>' +
+      (it.off ? '<span class="flag">' + (it.off === 'gone' ? 'no longer in My topics' : 'no longer under this topic') + '</span>' : '') +
+      (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it);
+  } else {
+    inner = '<span class="tag">' + (it.kind === 'problem' ? 'Question' : 'Note') + '</span><span class="txt">' + esc(it.text) + '</span>' + annDots(it);
+  }
+  return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+}
+function renderCards() {
+  hydrate(); placeUnplaced();
+  const vis = B.items.filter(shown).sort((a, b) => (b.kind === 'box') - (a.kind === 'box')), tabs = layerOn('frames') ? B.models.map(m => {
+    return '<div class="ftab" data-model="' + esc(m.id) + '" style="background:' + esc(m.color) + '"><b>' + esc(m.title) + '</b><i>' + esc(m.name || '') + '</i></div>';
+  }).join('') : '';
+  const grips = layerOn('frames') && !ro() ? B.models.map(m => '<div class="fgrip" data-grip="' + esc(m.id) + '" style="background:' + esc(m.color) + '" title="Drag to spread its cards apart, or to pull them together">⤡</div>').join('') : '';
+  $('cards').innerHTML = tabs + grips + vis.map(cardHtml).join('');
+  size = {};
+  $('cards').querySelectorAll('.card').forEach(el => { size[el.dataset.id] = { w: el.offsetWidth, h: el.offsetHeight }; });
+  placeCards();
+}
+function placeCards() {
+  $('cards').querySelectorAll('.card').forEach(el => { const p = posOf(el.dataset.id); el.style.left = p[0] + 'px'; el.style.top = p[1] + 'px'; });
+  $('cards').querySelectorAll('.ftab').forEach(el => {
+    const f = frameOf(model(el.dataset.model));
+    el.style.display = f ? '' : 'none';
+    if (f) { el.style.left = (f.x + 10) + 'px'; el.style.top = (f.y + 8) + 'px'; }
+  });
+  $('cards').querySelectorAll('.fgrip').forEach(el => {
+    const m = model(el.dataset.grip), f = frameOf(m), n = B.items.filter(i => i.model === m.id && shown(i)).length;
+    el.style.display = f && !f.empty && n > 1 ? '' : 'none';
+    if (f) { el.style.left = (f.x + f.w - el.offsetWidth / 2 - 4) + 'px'; el.style.top = (f.y + f.h - el.offsetHeight / 2 - 4) + 'px'; }
+  });
+}
+function lit() {
+  const nb = neighbourhood();
+  $('cards').querySelectorAll('.card').forEach(el => {
+    const it = item(el.dataset.id);
+    el.classList.toggle('sel', sel.kind === 'card' && sel.ids.includes(it.id));
+    el.classList.toggle('dim', (nb && !nb.has(it.id)) || !matches(it));
+    el.classList.toggle('hit', !!query && matches(it));
+  });
+  return nb;
+}
+function curve(a) {
+  const A = rect(a.from), Z = rect(a.to);
+  if (!A || !Z) return null;
+  if (a.layer === 'division') {
+    const x1 = A.x + A.w / 2, y1 = A.y + A.h, x2 = Z.x + Z.w / 2, y2 = Z.y, m = Math.max(24, (y2 - y1) / 2);
+    return { d: 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + (y1 + m) + ' ' + x2 + ',' + (y2 - m) + ' ' + x2 + ',' + y2, mx: (x1 + x2) / 2, my: (y1 + y2) / 2 };
+  }
+  const ax = A.x + A.w / 2, ay = A.y + A.h / 2, zx = Z.x + Z.w / 2, zy = Z.y + Z.h / 2, dx = zx - ax, dy = zy - ay;
+  // nearly level and far apart: leave from beneath and hang below what lies between
+  if (Math.abs(dy) < 70 && Math.abs(dx) > 300) {
+    const x1 = ax, y1 = A.y + A.h, x2 = zx, y2 = Z.y + Z.h, sag = Math.max(y1, y2) + 60 + 0.07 * Math.abs(dx);
+    return { d: 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + sag + ' ' + x2 + ',' + sag + ' ' + x2 + ',' + y2, mx: (x1 + x2) / 2, my: 0.25 * (y1 + y2) / 2 + 0.75 * sag };
+  }
+  const edgePt = (R, ux, uy) => { const hx = R.w / 2 + 3, hy = R.h / 2 + 3, t = Math.min(ux ? hx / Math.abs(ux) : 1e9, uy ? hy / Math.abs(uy) : 1e9); return [R.x + R.w / 2 + ux * t, R.y + R.h / 2 + uy * t]; };
+  const L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
+  const [x1, y1] = edgePt(A, ux, uy), [x2, y2] = edgePt(Z, -ux, -uy);
+  const bend = Math.min(60, 0.12 * L), cx = (x1 + x2) / 2 - uy * bend, cy = (y1 + y2) / 2 + ux * bend;
+  return { d: 'M' + x1 + ',' + y1 + ' Q' + cx + ',' + cy + ' ' + x2 + ',' + y2, mx: 0.25 * x1 + 0.5 * cx + 0.25 * x2, my: 0.25 * y1 + 0.5 * cy + 0.25 * y2 };
+}
+function renderInk(nb) {
+  // markers, one per colour
+  $('defs').innerHTML = Object.entries(INK).map(([k, c]) => '<marker id="ah-' + k + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="' + c + '"/></marker>').join('');
+  let f = '';
+  if (layerOn('frames')) B.models.forEach(m => {
+    const r = frameOf(m); if (!r) return;
+    const on = sel.kind === 'model' && sel.ids.includes(m.id);
+    f += '<g class="frame' + (on ? ' sel' : '') + '" data-model="' + esc(m.id) + '"><rect class="f" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="14" fill="' + esc(m.color) + '" fill-opacity="0.06" stroke="' + esc(m.color) + '"' + (r.empty ? ' stroke-dasharray="8 6"' : '') + '/>' +
+      (r.empty ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h - 22) + '" text-anchor="middle" font-size="13" font-style="italic" fill="#7a6a52">drop cards here</text>' : '') + '</g>';
+  });
+  $('gframes').innerHTML = f;
+  let h = '';
+  B.arrows.filter(arrowShown).forEach(a => {
+    const c = curve(a); if (!c) return;
+    const col = INK[a.layer] || INK.hypothesis, on = sel.kind === 'arrow' && sel.ids.includes(a.id);
+    const dim = nb ? !(nb.has(a.from) && nb.has(a.to)) : query ? !(matches(item(a.from)) && matches(item(a.to))) : false;
+    const label = a.layer === 'division' ? '' : a.type, lw = label.length * 6.7 + 18;
+    h += '<g class="ar ' + esc(a.layer) + (on ? ' sel' : '') + (dim ? ' dim' : '') + '" data-arrow="' + esc(a.id) + '">' +
+      '<path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '" stroke="' + col + '"' + (DASH[a.layer] ? ' stroke-dasharray="' + DASH[a.layer] + '"' : '') + ' marker-end="url(#ah-' + esc(a.layer in INK ? a.layer : 'hypothesis') + ')"/>' +
+      (label ? '<g class="pill"><rect x="' + (c.mx - lw / 2) + '" y="' + (c.my - 10) + '" width="' + lw + '" height="20" rx="10" stroke="' + col + '"' + (a.layer === 'computer' ? ' stroke-dasharray="2 3"' : '') + '/><text x="' + c.mx + '" y="' + (c.my + 4.5) + '" text-anchor="middle">' + esc(label) + '</text></g>' : '') + '</g>';
+  });
+  $('garrows').innerHTML = h;
+  renderThreads(nb);
+  renderDrawn();
+}
+// "Relevant to" a card on the board: a dotted thread between the two cards, in the annotations' layer.
+// Not an arrow: it makes no claim about the models.
+function renderThreads(nb) {
+  let h = '';
+  const ts = layerOn('annotations') ? (B.annotations || []).filter(a => a && a.kind === 'relevant' && a.on && a.to && a.to.card && shown(item(a.to.card))) : [];
+  if (ts.length) {
+    const W = annPlaces();
+    ts.forEach(a => {
+      const at = (W.get(a.id) || []).map(x => x.card).filter(c => shown(item(c))), from = at.includes(a.on.card) ? a.on.card : at[0];
+      if (!from || from === a.to.card) return;
+      const c = curve({ from, to: a.to.card, layer: 'annotation' }); if (!c) return;
+      const dim = nb ? !(nb.has(from) && nb.has(a.to.card)) : false;
+      h += '<g class="annt' + (dim ? ' dim' : '') + '" data-annid="' + esc(a.id) + '"><title>' + esc('Relevant to ' + nameOf(a.to.card) + (a.text ? ': ' + a.text : '') + (a.by ? ' (@' + a.by + ')' : '')) + '</title><path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '"/></g>';
+    });
+  }
+  $('gann').innerHTML = h;
+}
+// A stroke, smoothed through the midpoints of what the pen passed over.
+function strokeD(pts) {
+  if (!pts.length) return '';
+  if (pts.length < 3) return 'M' + pts[0][0] + ',' + pts[0][1] + ' L' + pts[pts.length - 1][0] + ',' + pts[pts.length - 1][1];
+  let d = 'M' + pts[0][0] + ',' + pts[0][1];
+  for (let i = 1; i < pts.length - 1; i++) d += ' Q' + pts[i][0] + ',' + pts[i][1] + ' ' + (pts[i][0] + pts[i + 1][0]) / 2 + ',' + (pts[i][1] + pts[i + 1][1]) / 2;
+  const l = pts[pts.length - 1]; return d + ' L' + l[0] + ',' + l[1];
+}
+function renderDrawn() {
+  const ink = layerOn('drawing') ? view().ink || [] : [], dim = focus || query;
+  $('gdraw').innerHTML = ink.map(st => '<path d="' + strokeD(st.pts) + '" stroke="' + esc(st.color) + '" stroke-width="' + (+st.w || 3) + '"' + (dim ? ' opacity="0.2"' : '') + '/>').join('');
+}
+function applyCam() {
+  $('world').style.transform = 'translate(' + cam.x + 'px,' + cam.y + 'px) scale(' + cam.k + ')';
+  const far = cam.k < FAR, near = cam.k >= NEAR, w = $('world');
+  if (w.classList.contains('far') !== far || w.classList.contains('near') !== near) { w.classList.toggle('far', far); w.classList.toggle('near', near); if (!editing) renderBoard(); }
+  $('zk').textContent = Math.round(cam.k * 100) + '%';
+}
+function renderBoard() { renderCards(); const nb = lit(); renderInk(nb); }
+function renderLayers() {
+  const count = k => k === 'annotations' ? annHere().length : k === 'drawing' ? (view().ink || []).length : k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
+    k === 'problem' ? B.items.filter(i => i.kind === 'problem').length : B.items.filter(i => i.kind === k).length;
+  const closed = $('layers').classList.contains('closed');
+  $('layers').innerHTML = '<span class="ttl">Layers <button type="button" class="linkish" data-fold style="float:right;margin-left:1rem">' + (closed ? 'show' : 'hide') + '</button></span>' + LAYERS.map(L =>
+    '<label><input type="checkbox" data-layer="' + L.key + '"' + (layerOn(L.key) ? ' checked' : '') + '>' + (L.mark ? '<i class="sq"></i>' : '<i style="border-top:2px ' + (L.dash ? (L.dash.startsWith('2') ? 'dotted' : 'dashed') : 'solid') + ' ' + L.color + '"></i>') + esc(L.label) + '<span class="n">' + count(L.key) + '</span></label>').join('');
+}
+function renderTools() {
+  $('vsel').innerHTML = B.views.map(v => '<option value="' + esc(v.id) + '"' + (v.id === viewId ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('');
+  $('undo').disabled = ro() || !undoStack.length; $('redo').disabled = ro() || !redoStack.length;
+  $('photos').textContent = 'Photographs' + (photoList().length ? ' (' + photoList().length + ')' : '');
+  const na = annHere().length;
+  $('annsb').textContent = 'Annotations' + (na ? ' (' + na + ')' : '');
+  renderSync();
+  $('stage').classList.toggle('readonly', ro());
+  const n = query ? B.items.filter(it => shown(it) && matches(it)).length : null;
+  $('found').textContent = n == null ? '' : n + ' found';
+  banner();
+}
+function banner() {
+  const b = $('banner'); let h = '';
+  b.classList.remove('photo');
+  if (live) { const p = live.entry || photoList().find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
+  else if (lost) h = '<span>' + esc(roWhy()) + '</span><a class="btn" href="index.html#mt=' + esc(encodeURIComponent(TID)) + '">Back to My topics</a>';
+  else if (mode) h = '<span>' + (mode.annTo ? 'Click the card these words are relevant to.' : 'Click the card the arrow goes to.') + '</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
+  else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(nameOf(offer.from)) + '</b> to <b>' + esc(nameOf(offer.to)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
+  else if (offer && offer.kind === 'lasso') { const one = offer.ids.length === 1; h = '<span>You drew round ' + offer.ids.length + (one ? ' card' : ' cards') + '.</span><button type="button" class="btn solid" data-b="o-select">Select ' + (one ? 'it' : 'them') + '</button><button type="button" class="btn" data-b="o-model">Make ' + (one ? 'it' : 'them') + ' a group</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>'; }
+  else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
+  b.innerHTML = h; b.classList.toggle('show', !!h);
+}
+function render() { hydrate(); renderTools(); renderLayers(); renderBoard(); renderSide(); applyCam(); }
+let toastT;
+function toast(s) { const t = $('toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3800); }
+const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); };
+
+/* ── Render: the side ─────────────────────────────────────────────────────── */
+// A passage in the side. Given its card (it), its words can be selected and annotated, and its annotations are shown.
+function quoteHtml(q, i, removable, it) {
+  const href = portalHref(q), P = it && q.q ? placeOn(it, i) : null;
+  return '<div class="q">' + (q.q ? '<span class="t">“' + (P ? '<span data-qt="' + i + '" data-qcard="' + esc(it.id) + '">' + markText(q.q, P.spans) + '</span>' : esc(q.q)) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
+    (href ? '<button type="button" data-read="' + esc(href) + '">read it beside the board</button><a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : '') +
+    (q.pasted ? '<span class="chk">pasted, not yet checked against the portal</span>' : '') +
+    (removable ? '<button type="button" class="x" data-unq="' + i + '" title="Take this passage off the card">✕</button>' : '') +
+    (P && !ro() && q.full !== false ? '<button type="button" data-annwhole="' + i + '" data-qcard="' + esc(it.id) + '" title="Annotate this passage as a whole. To annotate some of its words, select them.">annotate</button>' : '') + '</div>' +
+    (P ? annEntries(P, it, i) : '') + '</div>';
+}
+function relBtn(a) { return '<button type="button" class="rel" data-arrow="' + esc(a.id) + '"><b>' + esc(a.type) + '</b>: ' + esc(nameOf(a.from)) + ' → ' + esc(nameOf(a.to)) + '</button>'; }
+const mchip = m => m ? '<span class="mchip" style="background:' + esc(m.color) + '">' + esc(m.title) + '</span>' : '';
+function sideIntro() {
+  const n = B.items.filter(i => i.kind === 'passage').length, gh = (() => { try { return !!localStorage.getItem(TOPICS_GH); } catch (e) { return false; } })();
+  return '<div class="intro"><h2>' + esc(topic ? topic.name : 'A topic’s board') + '</h2><p class="sub">The board of a topic in My topics</p>' +
+    (topic ? '<span class="k">The topic, in your words</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
+    '<p>Every passage under the topic is a card here, and comes onto the board by itself when you put it under the topic, anywhere in the portal: in the portal beside the board too, with <b>☆ Topic</b>. Click a card to read its passage in full, here or in the portal.</p>' +
+    '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
+    '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
+    '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
+    '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
+    '<li><b>Your note</b> on a passage, here in the side, is the note it has in My topics: write it in either.</li>' +
+    '<li><b>Edit in place</b>: double-click any card, arrow or group name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
+    '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag one out; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
+    '<li><b>Groups</b> are frames around their cards. Grab any bare part of a frame to move the whole group; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into a frame to put it in that group.</li>' +
+    '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
+    '<li><b>On an iPad</b>: a finger moves cards, groups and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>' +
+    '<span class="k">Its dimensions</span><ul>' +
+    '<li><b>Layers</b> (bottom left): show only the arrows, only the questions, only the drawing, or any mix.</li>' +
+    '<li><b>Views</b>: the same cards in other arrangements. Rearranging one view leaves the others as they were.</li>' +
+    '<li><b>Depth</b>: zoom out and a card is its citation; zoom in and its words show.</li>' +
+    '<li><b>Focus</b>: select a card and press <kbd>F</kbd> to see only what is joined to it.</li>' +
+    '<li><b>Time</b>: <i>Photograph the board</i> keeps it as it is now. Come back to any photograph later, or bring it back.</li></ul>' +
+    '<span class="k">Where it is kept</span><p>With your topics, in this browser, and nobody else sees it. <i>Save to file</i>, in My topics, saves it with them' + (gh ? ', and it goes to GitHub with them, locked with your passphrase, through the portal beside the board' : '; with <i>Keep on GitHub</i> on, it goes there with them, locked') + '. <i>Export</i>, above, saves this board alone.</p>' +
+    '<p style="font-size:0.85rem;color:var(--faded)">' + n + (n === 1 ? ' passage · ' : ' passages · ') + B.items.length + ' cards · ' + B.arrows.length + ' arrows · ' + B.views.length + (B.views.length === 1 ? ' view' : ' views') + ' · ' + photoList().length + (photoList().length === 1 ? ' photograph' : ' photographs') + '</p></div>';
+}
+function cardButtons(it, arr) {
+  let h = '<span class="k">Arrows</span>' + (arr.length ? arr.map(relBtn).join('') : '<p class="empty">None yet.</p>');
+  if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="edit">' + (it.kind === 'passage' ? 'Give it a heading' : 'Edit') + '</button><button type="button" class="btn" data-act="linkfrom">+ Arrow from here</button><button type="button" class="btn" data-act="focus">Focus</button></div>' +
+    '<div class="row"><button type="button" class="linkish" data-act="offview">Take it off this view</button><button type="button" class="linkish" data-act="delete">' + (it.kind === 'passage' && !it.off ? 'Take it off the board and the topic' : 'Delete it') + '</button></div>';
+  else h += '<div class="row"><button type="button" class="btn" data-act="focus">Focus</button></div>';
+  return h;
+}
+function sidePassage(it, m, arr) {
+  const q = it.quotes[0] || {}, x = it.kx;
+  let h = '<h2>' + esc(it.label || q.cite || it.cite || 'A passage') + '</h2><p class="sub">' + mchip(m) + esc([it.label ? q.cite : '', x ? x.work : '', x ? x.date : ''].filter(Boolean).join(' · ')) + '</p>';
+  if (it.off) h += '<div class="offnote">' + (it.off === 'gone'
+    ? 'This passage is no longer in My topics. Its card keeps its place, its arrows and its annotations until you take it off the board. Keep the passage again, with ☆ Topic, and it comes back to this card.'
+    : 'This passage is no longer under “' + esc(topic ? topic.name : '') + '”. Its card stays, with its arrows, until you put it back or take it off the board.') +
+    (ro() ? '' : '<div class="row">' + (it.off === 'off' ? '<button type="button" class="btn solid" data-act="putback">Put it back under the topic</button>' : '') + '<button type="button" class="linkish" data-act="offboard">Take it off the board</button></div>') + '</div>';
+  if (q.kept && q.full) h += '<span class="k">The words you kept</span><div class="kept">“' + esc(q.kept) + '”</div>';
+  h += '<span class="k">' + (q.full ? 'The passage, in full' : 'The passage') + '</span>' + quoteHtml(q, 0, false, it);
+  if (!q.full) h += '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal. The words are the copy My topics kept when the passage was saved.' : 'The portal beside the board is still loading its texts, so these are the words My topics kept. The passage in full, and its annotations, follow in a moment.') + '</p>';
+  else if (!ro()) h += '<p class="by">Select some of its words to annotate them.</p>';
+  if (x) h += '<span class="k">Your note on it</span><textarea class="mtnote" data-mtnote="' + esc(x.id) + '" placeholder="The same note as in My topics: write it here or there"' + (lost ? ' readonly' : '') + '>' + esc(x.note || '') + '</textarea>';
+  return h + cardButtons(it, arr);
+}
+function sideCard(it) {
+  const m = model(it.model), arr = B.arrows.filter(a => a.from === it.id || a.to === it.id);
+  if (it.kind === 'passage') return sidePassage(it, m, arr);
+  const title = it.kind === 'box' ? 'A box' + (it.label ? ': ' + it.label : '') : it.kind === 'problem' ? 'A question' : 'A note';
+  let h = '<h2>' + esc(title) + '</h2><p class="sub">' + mchip(m) + esc(m ? m.name || '' : '') + '</p>';
+  if (it.text) h += '<span class="k">Written on the board</span><div class="stmt' + (it.kind === 'problem' ? ' problem' : '') + '">' + esc(it.text) + '</div>';
+  return h + cardButtons(it, arr);
+}
+function sideCards(ids) {
+  const its = ids.map(item).filter(Boolean);
+  return '<h2>' + its.length + ' cards</h2><p class="sub">' + its.map(it => esc(cardTitle(it))).join(' · ') + '</p>' +
+    (ro() ? '' : '<span class="k">Make a group</span><div class="row" style="margin-top:0"><button type="button" class="btn solid" data-act="newmodel">Make these a group of their own</button></div>' +
+    '<span class="k">Move them into a group</span><div class="row" style="margin-top:0"><select data-into style="width:auto;flex:1">' + '<option value="">no group</option>' + B.models.map(m => '<option value="' + esc(m.id) + '">' + esc(m.title) + '</option>').join('') + '</select><button type="button" class="btn" data-act="moveinto">Move</button></div>' +
+    '<div class="row"><button type="button" class="linkish" data-act="offview">Take them off this view</button><button type="button" class="linkish" data-act="delete">Delete them</button></div>');
+}
+function sideArrow(a) {
+  let h = '<h2>' + esc(a.type) + '</h2><p class="sub"><button type="button" class="linkish" data-card="' + esc(a.from) + '">' + esc(nameOf(a.from)) + '</button> → <button type="button" class="linkish" data-card="' + esc(a.to) + '">' + esc(nameOf(a.to)) + '</button></p>';
+  if (a.text) h += '<span class="k">' + (a.layer === 'problem' ? 'How it may answer the question' : 'In your words') + '</span><div class="stmt">' + esc(a.text) + '</div>';
+  if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="editarrow">Edit</button><button type="button" class="linkish" data-act="delarrow">Delete it</button></div>';
+  return h;
+}
+function sideModel(m) {
+  const its = B.items.filter(i => i.model === m.id);
+  return '<h2>' + esc(m.title) + '</h2><p class="sub">' + esc(m.name || 'A group') + '</p>' +
+    '<span class="k">Its cards</span>' + (its.length ? its.map(it => '<button type="button" class="rel" data-card="' + esc(it.id) + '">' + esc(cardTitle(it)) + '</button>').join('') : '<p class="empty">None yet. Drop cards into its frame.</p>') +
+    (ro() ? '' : '<div class="row"><button type="button" class="btn solid" data-act="editmodel">Rename it</button><button type="button" class="btn" data-act="selmodel">Select its cards</button><button type="button" class="linkish" data-act="delmodel">Delete the group</button></div>');
+}
+/* ── Annotations, in the side: beneath each passage, and all of them in one list ── */
+const whoHtml = a => (a.by ? '@' + esc(a.by) + ' · ' : '') + esc(a.date ? fmtDate(a.date) : '') + (a.edited ? ' · edited' + (a.editedBy ? ' by @' + esc(a.editedBy) : '') : '');
+function toHtml(to) {
+  if (to.word) return '<button type="button" class="tw" data-annword="' + esc(to.word) + '" title="Light every card that has these words, on it or in its annotations">' + esc(to.word) + '</button>';
+  if (to.card) return item(to.card) ? '<button type="button" class="linkish" data-card="' + esc(to.card) + '">' + esc(nameOf(to.card)) + '</button>' : '<i>a card no longer on the board</i>';
+  const href = portalHref(to);
+  return href ? '<button type="button" class="linkish" data-read="' + esc(href) + '">' + esc(to.cite || 'the passage') + '</button> <a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : esc(to.cite || '');
+}
+const composing = () => form && form.kind === 'annotate';
+function annEntries(P, it, qi) {
+  const here = composing() && form.card === it.id && form.qi === qi && !form.id && !form.re;
+  const xs = P.spans.slice().sort((x, y) => x.s - y.s).map(x => ({ a: x.a, placed: x.placed })).concat(P.whole.map(a => ({ a, whole: true })), P.lost.map(a => ({ a, lost: true })));
+  if (!xs.length && !here) return '';
+  return '<div class="anns-l">' + xs.map(annEntryHtml).join('') + (here ? composerHtml() : '') + '</div>';
+}
+function annEntryHtml(x) {
+  const a = x.a, reps = annIndex().replies.get(a.id) || [], w = !ro(), mine = o => !o.by || o.by === me();
+  let h = '<div class="ann-e ak-' + esc(a.kind) + (x.placed ? ' placed' : '') + (x.lost ? ' lost' : '') + (a.kind === 'problem' && a.resolved ? ' done' : '') + '" data-annid="' + esc(a.id) + '">' +
+    '<div class="ah"><span class="kl">' + esc(annKind(a.kind).label) + '</span>' + (x.whole ? '<span class="on">the passage as a whole</span>' : '<span class="ex">“' + esc(short(a.on.exact, 110)) + '”</span>') + '</div>';
+  if (x.placed) h += '<div class="pg">Placed by the page: these words were not found with the same words around them, or stand here more than once, so it is put at the nearest match.</div>';
+  if (x.lost) h += '<div class="pg">These words are no longer in this passage, so it is placed nowhere in it.</div>';
+  if (composing() && form.id === a.id) h += composerHtml();
+  else {
+    if (a.to) h += '<div class="to">→ ' + toHtml(a.to) + '</div>';
+    if (a.text) h += '<div class="at">' + esc(a.text) + '</div>';
+    h += '<div class="am"><span>' + whoHtml(a) + '</span>' + (a.kind === 'problem' && a.resolved ? '<span>resolved' + (a.resolved.by ? ' by @' + esc(a.resolved.by) : '') + '</span>' : '') +
+      (w ? '<button type="button" data-annreply="' + esc(a.id) + '">reply</button>' + (a.kind === 'problem' ? '<button type="button" data-annres="' + esc(a.id) + '">' + (a.resolved ? 'reopen it' : 'mark it resolved') + '</button>' : '') +
+        (mine(a) ? '<button type="button" data-annedit="' + esc(a.id) + '">edit</button><button type="button" data-anndel="' + esc(a.id) + '">delete</button>' : '') : '') + '</div>';
+  }
+  reps.forEach(r => {
+    h += composing() && form.id === r.id ? '<div class="ann-r">' + composerHtml() + '</div>' :
+      '<div class="ann-r" data-annid="' + esc(r.id) + '"><div class="at">' + esc(r.text) + '</div><div class="am"><span>' + whoHtml(r) + '</span>' +
+      (w && mine(r) ? '<button type="button" data-annedit="' + esc(r.id) + '">edit</button><button type="button" data-anndel="' + esc(r.id) + '">delete</button>' : '') + '</div></div>';
+  });
+  if (composing() && form.re === a.id && !form.id) h += '<div class="ann-r">' + composerHtml() + '</div>';
+  return h + '</div>';
+}
+// The box an annotation is written in. Enter keeps it, ⇧Enter is a new line, Esc leaves it.
+function composerHtml() {
+  const f = form, reply = !!f.re, K = annKind(f.ann);
+  const kinds = reply ? '' : '<div class="akinds">' + ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + (k.key === f.ann ? ' on' : '') + '" data-annkind="' + k.key + '">' + esc(k.label) + '</button>').join('') + '</div>';
+  const on = '<p class="aon">' + (reply ? (f.id ? 'Your reply' : 'A reply') : f.on && f.on.exact ? 'On “<i>' + esc(short(f.on.exact, 120)) + '</i>”' : 'On the passage as a whole') + '</p>';
+  const to = !reply && f.ann === 'relevant' ? '<label class="f">Relevant to</label><input type="text" data-ann-to value="' + esc(f.to0 || '') + '" placeholder="a word, R 3990, or a portal address" spellcheck="false">' +
+    '<div class="by" style="margin-top:0.2rem">' + (f.to && f.to.card ? 'the card <b>' + esc(nameOf(f.to.card)) + '</b> <button type="button" class="linkish" data-annunpick>not that card</button>' : '<button type="button" class="linkish" data-act="annpick">or click a card on the board</button>') + '</div>' : '';
+  return '<div class="anncomp ak-' + (reply ? 'reply' : esc(f.ann)) + '" data-fkey="' + esc(f.key) + '">' + kinds + on + to +
+    '<textarea data-ann-text rows="2" placeholder="' + esc(reply ? 'Your reply' : K.hint) + '">' + esc(f.text0 || '') + '</textarea>' +
+    '<div class="row" style="margin-top:0.35rem"><button type="button" class="btn solid" data-act="annsave">' + (f.id ? 'Save' : reply ? 'Reply' : 'Keep it') + '</button><button type="button" class="linkish" data-act="anncancel">Cancel</button><span class="by" style="margin:0">Enter keeps it · ⇧Enter a new line · Esc leaves it</span></div><p class="warn" data-err></p></div>';
+}
+function sideAnnAlone() {
+  return '<h2>An annotation</h2><p class="sub">' + esc((form.on && form.on.cite) || '') + '</p><p class="warn">Its card has gone from the board meanwhile. What you write is still kept on the passage.</p>' + composerHtml();
+}
+// The annotations on passages that stand on this board: the rest are on other boards of yours.
+function annHere() { const W = annPlaces(); return (B.annotations || []).filter(a => a && a.kind !== 'reply' && a.on && W.has(a.id)); }
+function sideAnnotations() {
+  const f = form.f || {};
+  const opt = (v, t, cur) => '<option value="' + esc(v) + '"' + (v === (cur || '') ? ' selected' : '') + '>' + esc(t) + '</option>';
+  return '<h2>Annotations</h2><p class="sub">Yours, on the passages on this board, newest first. To add one, click a card and select some of its passage’s words.</p>' +
+    '<div class="annf"><select data-annf="kind" aria-label="Kind">' + opt('', 'every kind', f.kind) + ANN_KINDS.map(k => opt(k.key, k.label, f.kind)).join('') + '</select>' +
+    '<select data-annf="st" aria-label="Problems">' + opt('', 'open or resolved', f.st) + opt('open', 'open problems', f.st) + opt('resolved', 'resolved problems', f.st) + '</select></div>' +
+    '<div id="annlist">' + annListAll() + '</div>' +
+    '<div class="row"><button type="button" class="linkish" data-act="dlann">Download them as a list</button><button type="button" class="linkish" data-act="cancel">Close</button></div>';
+}
+function annListAll() {
+  const f = (form && form.f) || {}, X = annIndex(), W = annPlaces();
+  let as = annHere();
+  if (f.kind) as = as.filter(a => a.kind === f.kind);
+  if (f.st) as = as.filter(a => a.kind === 'problem' && !!a.resolved === (f.st === 'resolved'));
+  as = as.slice().sort((x, y) => String(y.date).localeCompare(String(x.date)));
+  if (!as.length) return '<p class="empty">' + (f.kind || f.by || f.st ? 'None of these.' : 'None yet.') + '</p>';
+  return as.map(a => {
+    const n = (X.replies.get(a.id) || []).length;
+    return '<div class="ann-e ak-' + esc(a.kind) + (a.kind === 'problem' && a.resolved ? ' done' : '') + '" data-annid="' + esc(a.id) + '"><div class="ah"><span class="kl">' + esc(annKind(a.kind).label) + '</span>' +
+      (W.has(a.id) ? '<button type="button" class="linkish" data-annopen="' + esc(a.id) + '">' + esc(a.on.cite || 'the passage') + '</button>' : esc(a.on.cite || 'a passage') + ' <span class="pg">· not on the board now</span>') + '</div>' +
+      (a.on.exact ? '<div class="ex">“' + esc(short(a.on.exact, 140)) + '”</div>' : '<div class="on">the passage as a whole</div>') +
+      (a.to ? '<div class="to">→ ' + toHtml(a.to) + '</div>' : '') + (a.text ? '<div class="at">' + esc(a.text) + '</div>' : '') +
+      '<div class="am"><span>' + whoHtml(a) + '</span>' + (n ? '<span>' + n + (n === 1 ? ' reply' : ' replies') + '</span>' : '') + (a.kind === 'problem' && a.resolved ? '<span>resolved' + (a.resolved.by ? ' by @' + esc(a.resolved.by) : '') + '</span>' : '') + '</div></div>';
+  }).join('');
+}
+function downloadAnns() {
+  const X = annIndex(), all = annHere(), groups = new Map();
+  all.forEach(a => { const k = a.on.cite || a.on.ref || a.on.hash || 'A passage'; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(a); });
+  const one = x => String(x || '').replace(/\s*\n+\s*/g, ' ');
+  const line = a => '- **' + annKind(a.kind).label.replace('…', '') + '** ' + (a.on.exact ? 'on “' + one(a.on.exact) + '”' : 'on the passage as a whole') +
+    (a.to ? ', relevant to ' + (a.to.word ? '*' + one(a.to.word) + '*' : a.to.card ? one(nameOf(a.to.card)) : one(a.to.cite)) : '') + (a.text ? ': ' + one(a.text) : '') +
+    ' (' + (a.by ? '@' + a.by + ', ' : '') + fmtDate(a.date) + (a.resolved ? '; resolved' + (a.resolved.by ? ' by @' + a.resolved.by : '') : '') + ')' +
+    (X.replies.get(a.id) || []).map(r => '\n  - ' + one(r.text) + ' (' + (r.by ? '@' + r.by + ', ' : '') + fmtDate(r.date) + ')').join('');
+  const md = '# Annotations on the board of “' + one(topic ? topic.name : '') + '”\n\nFrom My topics, in the Kant Lab Logic Portal: annotations as of ' + fmtDate(new Date().toISOString()) + '.\n' +
+    (all.length ? [...groups].map(([k, as]) => '\n## ' + one(k) + '\n\n' + as.map(line).join('\n')).join('\n') : '\n(none yet)') + '\n';
+  const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); el.download = 'topic-board-annotations-' + today() + '.md';
+  document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(el.href), 2000);
+}
+// Redraw the side without losing what is being typed into an annotation, or where the caret was.
+function keepComposer(fn) {
+  const D = $('details'), c = D.querySelector('.anncomp'), same = !!(c && form && c.dataset.fkey === form.key);
+  const F = ['[data-ann-text]', '[data-ann-to]', '[data-me]'], act = document.activeElement;
+  const vals = same ? F.map(q => { const el = c.querySelector(q); return el ? el.value : null; }) : [];
+  const foc = same && act && c.contains(act) ? F.find(q => act.matches(q)) : null, ss = foc ? [act.selectionStart, act.selectionEnd] : null, top = D.scrollTop;
+  fn();
+  const n = D.querySelector('.anncomp'); if (!n || !same) return;
+  F.forEach((q, i) => { const el = n.querySelector(q); if (el && vals[i] != null) el.value = vals[i]; });
+  if (foc) { const el = n.querySelector(foc); if (el) { el.focus({ preventScroll: true }); try { el.setSelectionRange(ss[0], ss[1]); } catch (x) { /* fine */ } } }
+  D.scrollTop = top;
+}
+function sidePhotos() {
+  return '<h2>Photographs</h2><p class="sub">The board as it stood, kept to come back to</p>' +
+    (photoList().length ? photoList().slice().reverse().map(p => '<div class="photo"><b>' + esc(p.name) + '</b><div class="meta">' + esc(fmtDate(p.date)) + ' · ' + photoN(p).items + ' cards, ' + photoN(p).arrows + ' arrows, ' + photoN(p).views + ' views</div>' +
+      '<div class="row" style="margin-top:0.3rem"><button type="button" class="btn" data-look="' + esc(p.id) + '">Look at it</button><button type="button" class="linkish" data-unphoto="' + esc(p.id) + '">Delete</button></div></div>').join('') : '<p class="empty">None yet. <i>Photograph the board</i> keeps it as it is now.</p>') +
+    '<p class="by">Photographs are kept in the board, with your topics, and take room in this browser. Delete one you no longer need.</p>';
+}
+const modelSelect = (cur) => '<label class="f">Group</label><select data-model><option value="">no group</option>' + B.models.map(m => '<option value="' + esc(m.id) + '"' + (m.id === cur ? ' selected' : '') + '>' + esc(m.title) + '</option>').join('') + '</select>';
+function sideCardForm() {
+  const it = form.id ? item(form.id) : null, kind = it ? it.kind : form.kind, cur = it || { model: form.model, quotes: [] };
+  const word = { passage: 'passage', problem: 'question', note: 'note', box: 'box' }[kind] || 'note';
+  let h = '<h2>' + (it ? (kind === 'passage' ? 'A heading for the passage' : 'Edit the ' + word) : 'A new ' + word) + '</h2><p class="sub">' + {
+    passage: esc(cardTitle(cur)), problem: 'A question the topic raises, in your words', note: 'Anything, as on a whiteboard', box: 'A box on the board' }[kind] + '</p>';
+  h += modelSelect(cur.model);
+  if (kind === 'passage' || kind === 'box') h += '<label class="f">' + (kind === 'passage' ? 'A heading (optional): its citation shows when there is none' : 'Its name') + '</label><input type="text" data-label value="' + esc(cur.label || '') + '">';
+  else h += '<label class="f">' + (kind === 'problem' ? 'The question, in your words' : 'What to write') + '</label><textarea data-text>' + esc(cur.text || '') + '</textarea>';
+  h += '<div class="row"><button type="button" class="btn solid" data-act="savecard">' + (it ? 'Save' : 'Put it on the board') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div><p class="warn" data-err></p>';
+  return h;
+}
+function sideArrowForm() {
+  const a = form.id ? arrow(form.id) : null, from = form.from, to = form.to;
+  const Z = item(to), toQ = Z && Z.kind === 'problem';
+  const types = toQ ? ['answers?'].concat(TYPES) : TYPES.concat(['answers?']);
+  const cur = a ? a.type : types[0], other = cur && !types.includes(cur);
+  return '<h2>' + (a ? 'Edit the arrow' : 'A new arrow') + '</h2><p class="sub">' + esc(nameOf(from)) + ' → ' + esc(nameOf(to)) + ' <button type="button" class="linkish" data-act="swap">turn it round</button></p>' +
+    '<label class="f">What it says</label><select data-type>' + types.map(t => '<option' + (t === cur ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '<option value="__other"' + (other ? ' selected' : '') + '>a word of my own…</option></select>' +
+    '<input type="text" data-other placeholder="name the relation" value="' + esc(other ? cur : '') + '" style="margin-top:0.3rem;' + (other ? '' : 'display:none') + '">' +
+    '<label class="f">In your words (optional)</label><textarea data-text placeholder="e.g. what the later passage takes back from the earlier, and why">' + esc(a ? a.text || '' : '') + '</textarea>' +
+    '<div class="row"><button type="button" class="btn solid" data-act="savearrow">' + (a ? 'Save' : 'Draw the arrow') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div><p class="warn" data-err></p>';
+}
+function sideModelForm() {
+  const m = form.id ? model(form.id) : null, col = m ? m.color : PALETTE.find(c => !B.models.some(x => x.color === c)) || PALETTE[3];
+  return '<h2>' + (m ? 'Rename the group' : form.split ? 'A group of their own' : 'A new group') + '</h2><p class="sub">' + (form.split ? form.split.length + ' cards will move into it' : 'A frame for cards; drop cards into it') + '</p>' +
+    '<label class="f">Its name</label><input type="text" data-title value="' + esc(m ? m.title : '') + '" placeholder="e.g. Before 1770">' +
+    '<label class="f">Beneath it (optional)</label><input type="text" data-name value="' + esc(m ? m.name || '' : '') + '" placeholder="e.g. what holds these together">' +
+    '<label class="f">Its colour</label><div class="swatches">' + PALETTE.map((c, i) => '<input type="radio" name="mc" id="mc' + i + '" value="' + c + '"' + (c === col ? ' checked' : '') + '><label for="mc' + i + '" style="background:' + c + '"></label>').join('') + '</div>' +
+    '<div class="row"><button type="button" class="btn solid" data-act="savemodel">' + (m ? 'Save' : 'Make the group') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div><p class="warn" data-err></p>';
+}
+function renderSide() {
+  const D = $('details');
+  if (form) document.body.classList.remove('sideclosed');
+  if (composing()) { keepComposer(() => { const it = item(form.card); D.innerHTML = it ? sideCard(it) : sideAnnAlone(); }); return; }
+  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'annotations' ? sideAnnotations() : sideCardForm(); return; }
+  if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
+  else if (sel.kind === 'card' && item(sel.ids[0])) D.innerHTML = sideCard(item(sel.ids[0]));
+  else if (sel.kind === 'arrow' && arrow(sel.ids[0])) D.innerHTML = sideArrow(arrow(sel.ids[0]));
+  else if (sel.kind === 'model' && model(sel.ids[0])) D.innerHTML = sideModel(model(sel.ids[0]));
+  else D.innerHTML = sideIntro();
+}
+// Redraw a form without losing what was typed in it.
+function keepFields(fn) {
+  const sels = ['[data-label]', '[data-text]', '[data-model]', '[data-other]', '[data-type]', '[data-title]', '[data-name]'];
+  const D = $('details'), vals = sels.map(q => { const el = D.querySelector(q); return el ? el.value : null; });
+  fn();
+  sels.forEach((q, i) => { const el = D.querySelector(q); if (el && vals[i] != null && !el.readOnly && (q !== '[data-type]' || [...el.options].some(o => o.value === vals[i]))) el.value = vals[i]; });
+  const o = D.querySelector('[data-other]'), t = D.querySelector('[data-type]'); if (o && t) o.style.display = t.value === '__other' ? '' : 'none';
+}
+function showSide(which) { side = which; $('tdet').classList.toggle('on', which === 'details'); $('tread').classList.toggle('on', which === 'reading'); $('details').style.display = which === 'details' ? '' : 'none'; $('reading').classList.toggle('on', which === 'reading'); }
+function read(href) { $('portal').src = href; $('full').href = href; document.body.classList.remove('sideclosed'); showSide('reading'); }
+
+/* ── Actions ──────────────────────────────────────────────────────────────── */
+function select(kind, ids) {
+  sel = { kind, ids }; form = null; showSide('details');
+  // a passage clicked opens in the portal beside the board too, ready under Reading
+  const one = kind === 'card' && ids.length === 1 ? item(ids[0]) : null, h = one && one.kind === 'passage' ? portalHref(one.quotes[0] || one) : null;
+  if (h && $('portal').getAttribute('src') !== h) { $('portal').src = h; $('full').href = h; }
+  if (kind === 'card' && !ro()) { let f = false; ids.forEach(id => { const it = item(id); if (it && it.fresh) { delete it.fresh; f = true; } }); if (f) save(); }
+  render();
+}
+function centre() { const r = $('stage').getBoundingClientRect(); return [(r.width / 2 - cam.x) / cam.k - 80, (r.height / 2 - cam.y) / cam.k - 30]; }
+function saveCard(D) {
+  const err = t => { D.querySelector('[data-err]').textContent = t; };
+  const it = form.id ? item(form.id) : null, kind = it ? it.kind : form.kind;
+  const label = (D.querySelector('[data-label]') || {}).value, text = (D.querySelector('[data-text]') || {}).value;
+  const mdl = D.querySelector('[data-model]').value || null;
+  if ((kind === 'problem' || kind === 'note') && !String(text || '').trim()) return err('Say it in your words.');
+  let id = form.id;
+  change(() => {
+    if (it) {
+      if (label != null) it.label = label.trim();
+      if (text != null) it.text = text.trim();
+      it.model = mdl;
+    } else {
+      id = uid(kind[0]);
+      const n = { id, kind, model: mdl, quotes: [], date: today() };
+      if (kind === 'problem' || kind === 'note') n.text = text.trim(); else n.label = (label || '').trim();
+      B.items.push(n);
+      const at = form.at || centre(); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
+      showLayer(kind);
+    }
+  });
+  form = null; sel = { kind: 'card', ids: [id] }; render();
+}
+function saveArrow(D) {
+  const err = t => { D.querySelector('[data-err]').textContent = t; };
+  let type = D.querySelector('[data-type]').value;
+  if (type === '__other') type = D.querySelector('[data-other]').value.trim();
+  if (!type) return err('Name the relation.');
+  const text = D.querySelector('[data-text]').value.trim();
+  const old = form.id ? arrow(form.id) : null;
+  const layer = type === 'answers?' ? 'problem' : 'hypothesis';
+  let id = form.id; const stroke = form.fromStroke;
+  change(() => {
+    if (stroke) { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== stroke); }
+    if (old) Object.assign(old, { from: form.from, to: form.to, type, layer, text });
+    else { id = uid('a'); B.arrows.push({ id, from: form.from, to: form.to, type, layer, text, date: today() }); showLayer(layer); }
+  });
+  form = null; sel = { kind: 'arrow', ids: [id] }; render();
+}
+function saveModel(D) {
+  const err = t => { D.querySelector('[data-err]').textContent = t; };
+  const title = D.querySelector('[data-title]').value.trim(), name = D.querySelector('[data-name]').value.trim();
+  const color = (D.querySelector('input[name=mc]:checked') || {}).value || PALETTE[3];
+  if (!title) return err('Give the group a name.');
+  const m = form.id ? model(form.id) : null;
+  let id = form.id; const split = form.split;
+  change(() => {
+    if (m) Object.assign(m, { title, name, color });
+    else {
+      id = uid('m');
+      const n = { id, title, name, color, date: today() };
+      if (split) split.forEach(x => { const it = item(x); if (it) it.model = id; });
+      else { const c = centre(); view().pos[id] = [Math.round(c[0]), Math.round(c[1])]; }
+      B.models.push(n); showLayer('frames');
+    }
+  });
+  form = null; sel = { kind: 'model', ids: [id] }; render();
+}
+// Deleting a passage's card takes the passage off the topic too, since every passage under the topic has its card.
+function delAsk(ids) {
+  const its = ids.map(item).filter(Boolean), n = its.filter(it => it.kind === 'passage' && !it.off).length;
+  return (its.length > 1 ? 'Delete these ' + its.length + ' cards, and their arrows, from every view?' : 'Delete this card, and its arrows, from every view?') +
+    (n ? '\n\n' + (n === 1 ? (its.length > 1 ? 'One passage among them is' : 'Its passage is') : n + ' of their passages are') + ' taken off “' + (topic ? topic.name : '') + '” too, and ' + (n === 1 ? 'stays' : 'stay') + ' in My topics.' : '');
+}
+function removeCards(ids) {
+  if (ro()) { toast(roWhy()); return; }
+  const set = new Set(ids);
+  const off = ids.map(item).filter(it => it && it.kind === 'passage' && !it.off).map(it => it.mt);
+  undoStack.push(JSON.stringify(B)); if (undoStack.length > 80) undoStack.shift();
+  redoStack = [];
+  B.items = B.items.filter(it => !set.has(it.id));
+  const goneA = B.arrows.filter(a => set.has(a.from) || set.has(a.to)).map(a => a.id);
+  B.arrows = B.arrows.filter(a => !goneA.includes(a.id));
+  B.views.forEach(v => { ids.forEach(id => delete v.pos[id]); v.hidden = (v.hidden || []).filter(x => !set.has(x)); });
+  save(off.length ? d => off.forEach(mt => { const x = d.items.find(y => y && y.id === mt); if (x && Array.isArray(x.topics)) { x.topics = x.topics.filter(t => t !== TID); x.at = now(); } }) : null);
+  if (focus && set.has(focus.id)) focus = null;
+  sel = { kind: null, ids: [] }; render();
+  if (off.length) toast((off.length === 1 ? 'Its passage is' : off.length + ' passages are') + ' off “' + (topic ? topic.name : '') + '” now, and still in My topics.');
+}
+const photoList = () => photos;
+const photoN = p => p.n || (p.board ? { items: p.board.items.length, arrows: p.board.arrows.length, views: p.board.views.length } : { items: 0, arrows: 0, views: 0 });
+async function photograph(name, quiet) {
+  name = name || 'The board, ' + fmtDate(new Date().toISOString());
+  const b = clone(B); delete b.annotations;
+  photos.push({ id: uid('ph'), name, date: new Date().toISOString(), board: b });
+  if (!save()) { photos.pop(); return false; }
+  if (!quiet) { toast('Photographed. Photographs keeps it, with your topics.'); renderTools(); }
+  return true;
+}
+async function look(id) {
+  const p = photoList().find(x => x.id === id); if (!p) return;
+  const board = p.board ? cleanBoard(clone(p.board)) : null;
+  if (!board) return;
+  if (!live) live = { board: B, viewId, photo: id, entry: p }; else { live.photo = id; live.entry = p; }
+  B = board; delete B.photos; B.removed = B.removed || []; B.annotations = live.board.annotations || [];
+  if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
+  sel = { kind: null, ids: [] }; form = null; focus = null; mode = null;
+  render(); fit();
+}
+function back() { if (!live) return; B = live.board; viewId = live.viewId; live = null; sel = { kind: null, ids: [] }; form = null; render(); }
+async function restore() {
+  if (!live) return;
+  const p = live.entry, keep = B;
+  B = live.board; viewId = live.viewId; live = null;
+  render();
+  if (!(await photograph('Before bringing back “' + (p ? p.name : '') + '”', true)) && !confirm('The board as it is now could not be photographed first. Bring the photograph back anyway?')) return;
+  change(() => { const an = B.annotations; B = clone(keep); B.removed = B.removed || []; B.annotations = an || []; });
+  toast('Brought back. The board as it was is in Photographs.');
+  sel = { kind: null, ids: [] }; render();
+}
+/* ── Annotating: words selected in the side, then a kind, then a few words of one's own ── */
+const selInSide = () => { try { const s = getSelection(); return !!(s && s.rangeCount && !s.isCollapsed && $('details').contains(s.getRangeAt(0).commonAncestorContainer)); } catch (e) { return false; } };
+// The words selected in one passage in the side, as characters of its text.
+function readPick() {
+  const s = getSelection(); if (!s || !s.rangeCount || s.isCollapsed) return null;
+  const r = s.getRangeAt(0), els = [...$('details').querySelectorAll('[data-qt]')].filter(el => r.intersectsNode(el));
+  if (els.length !== 1) return null;
+  const el = els[0], full = document.createRange(); full.selectNodeContents(el);
+  const c = r.cloneRange();
+  if (c.compareBoundaryPoints(Range.START_TO_START, full) < 0) c.setStart(full.startContainer, full.startOffset);
+  if (c.compareBoundaryPoints(Range.END_TO_END, full) > 0) c.setEnd(full.endContainer, full.endOffset);
+  const pre = document.createRange(); pre.selectNodeContents(el); pre.setEnd(c.startContainer, c.startOffset);
+  const it = item(el.dataset.qcard), qi = +el.dataset.qt, q = it && (it.quotes || [])[qi]; if (!q || !q.q) return null;
+  const t = q.q; let start = pre.toString().length, end = start + c.toString().length;
+  while (start < end && /\s/.test(t[start])) start++;
+  while (end > start && /\s/.test(t[end - 1])) end--;
+  if (end <= start) return null;
+  return { card: it.id, qi, start, end, rect: c.getBoundingClientRect() };
+}
+function hideBar() { annPick = null; $('annbar').classList.remove('show'); }
+function showBar() {
+  const b = $('annbar');
+  annPick = ro() ? null : readPick();
+  if (!annPick) { b.classList.remove('show'); if (sideStale && !selInSide()) { sideStale = false; renderSide(); } return; }
+  b.classList.add('show');
+  const r = annPick.rect, bw = b.offsetWidth, bh = b.offsetHeight;
+  // above the words with a mouse; below them with a finger, clear of the iPad's own menu above them
+  let top = selTouch ? r.bottom + 8 : r.top - bh - 8;
+  if (top < 8) top = r.bottom + 8;
+  if (top + bh > innerHeight - 8) top = Math.max(8, r.top - bh - 8);
+  b.style.left = Math.max(8, Math.min(innerWidth - bw - 8, r.left + r.width / 2 - bw / 2)) + 'px'; b.style.top = top + 'px';
+}
+function focusComposer() {
+  setTimeout(() => {
+    const c = $('details').querySelector('.anncomp'); if (!c) return;
+    const el = (form && form.ann === 'relevant' && !form.re && !(form.to && form.to.card) && c.querySelector('[data-ann-to]')) || c.querySelector('[data-ann-text]');
+    if (!el) return;
+    el.focus({ preventScroll: true }); try { el.setSelectionRange(el.value.length, el.value.length); } catch (x) { /* fine */ }
+    intoSide(c);
+  }, 20);
+}
+// A new annotation on a card's passage: on the words chosen (range), or on the whole of it.
+function startAnn(kind, card, qi, range) {
+  if (ro()) { toast(roWhy()); return; }
+  const it = item(card), q = it && (it.quotes || [])[qi]; if (!q || !q.q) return;
+  if (q.full === false) { toast(q.dead ? 'This address no longer opens in the portal, so its words can’t be annotated.' : 'The portal beside the board is still loading its texts. Annotate in a moment, once the passage shows in full.'); return; }
+  const on = { card, qi, cite: q.cite || '' };
+  if (q.ref) on.ref = q.ref; else if (q.hash) on.hash = q.hash;
+  if (range) { const t = q.q; Object.assign(on, { exact: t.slice(range.start, range.end), prefix: t.slice(Math.max(0, range.start - ANN_CTX), range.start), suffix: t.slice(range.end, range.end + ANN_CTX), start: range.start }); }
+  form = { kind: 'annotate', key: uid('f'), card, qi, ann: kind, on };
+  hideBar(); try { getSelection().removeAllRanges(); } catch (x) { /* fine */ }
+  sel = { kind: 'card', ids: [card] }; showSide('details'); render(); focusComposer();
+}
+const sideCardId = () => composing() ? form.card : sel.kind === 'card' ? sel.ids[0] : null;
+function replyTo(id) { if (ro() || !annById(id)) return; form = { kind: 'annotate', key: uid('f'), card: sideCardId(), re: id, ann: 'reply' }; renderSide(); focusComposer(); }
+function editAnn(id) {
+  const a = annById(id); if (ro() || !a) return;
+  const to0 = !a.to || a.to.card ? '' : a.to.word ? a.to.word : a.to.hash ? a.to.hash : /^refl-.*:r(\d+)$/.test(a.to.ref || '') ? 'R ' + a.to.ref.replace(/^.*:r/, '') : a.to.cite || '';
+  form = { kind: 'annotate', key: uid('f'), card: sideCardId(), id, re: a.kind === 'reply' ? a.re : undefined, ann: a.kind, on: a.on, to: a.to && a.to.card ? clone(a.to) : null, text0: a.text || '', to0 };
+  renderSide(); focusComposer();
+}
+// What a passage is relevant to, as typed: a Reflexion by number, a portal address, or else a word.
+function hashCite(h) {
+  const p = new URLSearchParams(h.slice(1)), g = k => p.get(k) || '';
+  if (g('refl')) return 'Refl. ' + g('refl');
+  if (g('aa')) return 'AA ' + g('aa');
+  if (g('read')) return g('read') + (g('at') ? ' ' + g('at') : '');
+  if (g('q')) return 'the search “' + g('q') + '”';
+  return h;
+}
+async function readTo(v) {
+  const m = String(v || '').trim().match(/^(?:R|Refl\.?|Reflexion|Reflection)\s*(\d{4,5})\.?$/i);
+  if (m) {
+    const n = +m[1], ref = (n <= 3488 ? 'refl-logik:r' : 'refl-meta:r') + n;
+    if (FW && fullText(ref) == null) throw new Error('The portal has no Refl. ' + n + '.');
+    return { ref, cite: 'Refl. ' + n };
+  }
+  const h = hashOf(v);
+  return h ? { hash: h, cite: hashCite(h) } : { word: v };
+}
+async function saveAnn() {
+  const D = $('details'), f = form; if (!composing()) return;
+  const err = t => { const e = D.querySelector('.anncomp [data-err]'); if (e) e.textContent = t; };
+  const text = ((D.querySelector('.anncomp [data-ann-text]') || {}).value || '').trim();
+  let to = null;
+  if (!f.re && f.ann === 'relevant') {
+    const v = ((D.querySelector('.anncomp [data-ann-to]') || {}).value || '').trim();
+    if (v) { try { to = await readTo(v); } catch (x) { return err(x.message); } } else to = f.to || null;
+    if (!to) return err('Say what it is relevant to: a word, R 3990, a portal address, or a card on the board.');
+  }
+  if (!text && (f.re || f.ann !== 'relevant')) return err(f.re ? 'Write the reply.' : 'Say it in your words.');
+  if (form !== f) return;   // closed while a Reflexion was fetched
+  const at = new Date().toISOString(); let id = f.id;
+  change(() => {
+    B.annotations = B.annotations || [];
+    if (f.id) {
+      const a = B.annotations.find(x => x.id === f.id); if (!a) return;
+      a.text = text; a.edited = at; a.at = at;
+      if (a.kind !== 'reply') { a.kind = f.ann; if (to) a.to = to; else delete a.to; }
+    } else {
+      id = uid('n');
+      B.annotations.push(f.re ? { id, kind: 'reply', re: f.re, text, date: at, at } : Object.assign({ id, kind: f.ann, on: clone(f.on) }, to ? { to } : {}, { text, date: at, at }));
+    }
+  });
+  form = null; if (item(f.card)) sel = { kind: 'card', ids: [f.card] };
+  refreshAnns(id);
+}
+function refreshAnns(id) { renderTools(); renderLayers(); renderBoard(); renderSide(); applyCam(); if (id) flashAnn(id); }
+function resolveAnn(id) {
+  if (ro()) return;
+  change(() => { const a = (B.annotations || []).find(x => x.id === id); if (!a) return; if (a.resolved) delete a.resolved; else a.resolved = { date: new Date().toISOString() }; a.at = new Date().toISOString(); });
+  refreshAnns(id);
+}
+function delAnn(id) {
+  const a = annById(id); if (ro() || !a) return;
+  const n = (annIndex().replies.get(id) || []).length;
+  if (!confirm(n ? 'Delete this annotation, and the ' + n + (n === 1 ? ' reply' : ' replies') + ' to it?' : a.kind === 'reply' ? 'Delete this reply?' : 'Delete this annotation?')) return;
+  change(() => { B.annotations = (B.annotations || []).filter(x => x.id !== id && x.re !== id); });
+  if (composing() && (form.id === id || form.re === id)) form = null;
+  refreshAnns();
+}
+// Scroll the side, and only the side, so that el is in sight.
+function intoSide(el) {
+  const D = $('details'), r = el.getBoundingClientRect(), d = D.getBoundingClientRect();
+  if (r.top < d.top) D.scrollTop += r.top - d.top - 8; else if (r.bottom > d.bottom) D.scrollTop += Math.min(r.bottom - d.bottom + 8, r.top - d.top - 8);
+}
+function flashAnn(id) {
+  const el = [...$('details').querySelectorAll('[data-annid]')].find(x => x.dataset.annid === id); if (!el) return;
+  intoSide(el); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1500);
+}
+// Bring a card into sight on the board, if it is out of it.
+function showCard(id) {
+  const r = rect(id); if (!r || !shown(item(id))) return;
+  const s = $('stage').getBoundingClientRect(), x = r.x * cam.k + cam.x, y = r.y * cam.k + cam.y;
+  if (x > 0 && y > 0 && x + r.w * cam.k < s.width && y + r.h * cam.k < s.height) return;
+  cam.x = s.width / 2 - (r.x + r.w / 2) * cam.k; cam.y = s.height / 2 - (r.y + r.h / 2) * cam.k; applyCam(); keepCam();
+}
+function openAnn(id) {
+  const a = annById(id); if (!a) return;
+  const root = a.kind === 'reply' ? annById(a.re) || a : a, at = annPlaces().get(root.id) || [], w = at.find(x => shown(item(x.card))) || at[0];
+  if (!w) { toast('Its passage is not on the board now.'); return; }
+  select('card', [w.card]); showCard(w.card); flashAnn(id);
+}
+function findWord(w) { $('search').value = w; query = w; renderTools(); lit(); renderInk(neighbourhood()); toast('Lit: every card with “' + w + '”, on it or in its annotations.'); }
+function newView() {
+  if (ro()) return;
+  const name = prompt('A name for the new view. It starts as a copy of this one, and changes to it leave this one as it is.', 'A view of my own');
+  if (!name || !name.trim()) return;
+  const v = view(), id = uid('v');
+  change(() => { B.views.push({ id, name: name.trim(), pos: clone(Object.assign({}, ...B.views.slice().reverse().map(w => w.pos), v.pos)), hidden: (v.hidden || []).slice(), layers: layersOf(), ink: clone(v.ink || []), by: me() || undefined, date: today() }); viewId = id; });
+  render();
+}
+function viewMenu() {
+  if (ro()) return;
+  const v = view(), off = (v.hidden || []).length;
+  const ans = prompt('This view: “' + v.name + '”\n\nType a new name to rename it,\nor type  delete  to delete it' + (off ? ',\nor type  back  to put back the ' + off + ' cards taken off it' : '') + '.', v.name);
+  if (ans == null) return;
+  const a = ans.trim();
+  if (a === 'delete') { if (B.views.length < 2) return toast('The board needs at least one view.'); change(() => { B.views = B.views.filter(x => x.id !== v.id); if (BASE.views.some(b => b.id === v.id)) B.removed.push(v.id); viewId = B.views[0].id; }); render(); return; }
+  if (a === 'back') { change(() => { v.hidden = []; }); render(); return; }
+  if (a && a !== v.name) { change(() => { v.name = a; }); render(); }
+}
+// Lay a view out again: a column per model, each part beneath what divides it, the rest below.
+function tidy() {
+  if (ro()) return;
+  if (!confirm('Lay this view out again, a column per group? Undo (⌘Z) puts it back.')) return;
+  const before = {}; B.models.forEach(m => { const f = frameOf(m); if (f) before[m.id] = [f.x, f.y]; });
+  change(() => {
+    const v = view(); let x = 0;
+    const groups = B.models.map(m => ({ m, its: B.items.filter(i => i.model === m.id && shown(i)) })).concat([{ m: null, its: B.items.filter(i => !model(i.model) && shown(i) && i.kind !== 'box') }]).filter(g => g.its.length);
+    groups.forEach(g => {
+      const parts = g.its.filter(i => i.kind === 'part'), rest = g.its.filter(i => i.kind !== 'part' && i.kind !== 'box'), ids = new Set(parts.map(p => p.id));
+      const divs = B.arrows.filter(a => a.layer === 'division' && ids.has(a.from) && ids.has(a.to)), depth = {};
+      parts.forEach(p => { if (!divs.some(a => a.to === p.id)) depth[p.id] = 0; });
+      for (let k = 0; k < parts.length; k++) divs.forEach(a => { if (depth[a.from] != null && (depth[a.to] == null || depth[a.to] < depth[a.from] + 1) && depth[a.from] < parts.length) depth[a.to] = depth[a.from] + 1; });
+      parts.forEach(p => { if (depth[p.id] == null) depth[p.id] = 0; });
+      const rows = []; parts.forEach(p => { (rows[depth[p.id]] = rows[depth[p.id]] || []).push(p); });
+      const widest = Math.max(1, ...rows.map(r => (r || []).length)), w = Math.max(widest * 185, rest.length ? 280 : 0);
+      let y = 0;
+      rows.forEach(r => { if (!r) return; const slot = w / r.length; r.forEach((p, i) => { v.pos[p.id] = [Math.round(x + slot * (i + 0.5) - 84), y]; }); y += Math.max(...r.map(p => sz(p.id).h)) + 60; });
+      rest.forEach(it => { v.pos[it.id] = [x, y]; y += sz(it.id).h + 24; });
+      x += w + 90;
+    });
+    // drawing made inside a model's frame goes with it
+    B.models.forEach(m => { const f = frameOf(m), b = before[m.id]; if (!f || !b) return; const dx = f.x - b[0], dy = f.y - b[1]; (v.ink || []).forEach(st => { if (st.model === m.id) st.pts = st.pts.map(p => [p[0] + dx, p[1] + dy]); }); });
+  });
+  render(); fit();
+}
+
+/* ── Wiring: the camera ───────────────────────────────────────────────────── */
+function toWorld(cx, cy) { const r = $('stage').getBoundingClientRect(); return [(cx - r.left - cam.x) / cam.k, (cy - r.top - cam.y) / cam.k]; }
+function zoomAt(f, cx, cy) {
+  const r = $('stage').getBoundingClientRect(), px = cx == null ? r.width / 2 : cx - r.left, py = cy == null ? r.height / 2 : cy - r.top;
+  const k = Math.min(3, Math.max(0.15, cam.k * f));
+  cam.x = px - (px - cam.x) * (k / cam.k); cam.y = py - (py - cam.y) * (k / cam.k); cam.k = k;
+  applyCam(); keepCam();
+}
+function fit() {
+  const rs = B.items.filter(shown).map(it => rect(it.id)).filter(Boolean);
+  B.models.forEach(m => { const f = layerOn('frames') && frameOf(m); if (f) rs.push({ x: f.x, y: f.y - 30, w: f.w, h: f.h + 30 }); });
+  if (layerOn('drawing')) (view().ink || []).forEach(st => st.pts.forEach(p => rs.push({ x: p[0], y: p[1], w: 1, h: 1 })));
+  if (!rs.length) return;
+  const x = Math.min(...rs.map(r => r.x)), y = Math.min(...rs.map(r => r.y)), X = Math.max(...rs.map(r => r.x + r.w)), Y = Math.max(...rs.map(r => r.y + r.h)) + 40;
+  const s = $('stage').getBoundingClientRect(), L = 130, k = Math.min(1.4, Math.max(0.15, Math.min((s.width - L - 30) / (X - x), (s.height - 60) / (Y - y))));
+  cam = { k, x: L + (s.width - L - 30 - (X - x) * k) / 2 - x * k, y: 40 - y * k };
+  applyCam(); keepCam();
+}
+let camT;
+function keepCam() { if (live) return; clearTimeout(camT); camT = setTimeout(() => { prefs.cams = prefs.cams || {}; prefs.cams[viewId] = Object.assign({}, cam); savePrefs(); }, 400); }
+const camOf = () => (prefs.cams || {})[viewId] || view().cam;
+$('stage').addEventListener('wheel', e => {
+  if (e.target.closest('.float')) return;
+  e.preventDefault();
+  if (e.ctrlKey || e.metaKey) zoomAt(Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY);
+  else { cam.x -= e.deltaX; cam.y -= e.deltaY; applyCam(); keepCam(); }
+}, { passive: false });
+$('zin').addEventListener('click', () => zoomAt(1.25));
+$('zout').addEventListener('click', () => zoomAt(0.8));
+$('zfit').addEventListener('click', fit);
+$('ztidy').addEventListener('click', tidy);
+
+/* ── Wiring: the board ────────────────────────────────────────────────────── */
+let drag = null;   // { what: 'pan' | 'cards' | 'model' | 'spread' | 'link' | 'marq' | 'ink' | 'erase' | 'pinch', pid, … }
+const touches = new Map();   // the fingers on the board: pointerId → [x, y]
+let lastTap = null, lastType = 'mouse';
+function capture(e) { try { $('stage').setPointerCapture(e.pointerId); } catch (x) { /* a pointer already gone */ } }
+function startUndo() { undoStack.push(JSON.stringify(B)); if (undoStack.length > 80) undoStack.shift(); redoStack = []; }
+const modelInk = id => (view().ink || []).filter(st => st.model === id).map(st => ({ st, pts: clone(st.pts) }));
+function modelDrag(id, e) {
+  const ids = B.items.filter(i => i.model === id && shown(i)).map(i => i.id), f = frameOf(model(id));
+  return { what: 'model', model: id, ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()),
+           mstart: view().pos[id] ? view().pos[id].slice() : f ? [f.x, f.y] : [0, 0], ink: modelInk(id), moved: false };
+}
+// Spreading: each card's centre moves away from (or towards) the top-left card's, in proportion to the pull.
+function spreadDrag(id, e) {
+  const ids = B.items.filter(i => i.model === id && shown(i)).map(i => i.id);
+  const cs = ids.map(x => { const r = rect(x); return [r.x + r.w / 2, r.y + r.h / 2]; });
+  const ax = Math.min(...cs.map(c => c[0])), ay = Math.min(...cs.map(c => c[1]));
+  return { what: 'spread', model: id, ids, cs, ax, ay, spanX: Math.max(...cs.map(c => c[0])) - ax, spanY: Math.max(...cs.map(c => c[1])) - ay, sx: e.clientX, sy: e.clientY, ink: modelInk(id), moved: false };
+}
+// Whether this pointer draws: anything in the Draw tool (but fingers, once a Pencil has drawn), and a Pencil on the bare board in Move.
+function draws(e, bare) {
+  if (ro()) return false;
+  if (tool === 'pen') return !(e.pointerType === 'touch' && sawPencil);
+  return tool === 'move' && e.pointerType === 'pen' && bare;
+}
+// A double tap, with a finger or a Pencil, does what a double-click does with a mouse.
+function tapped(e) {
+  if (e.pointerType === 'mouse') return false;
+  const now = Date.now();
+  if (lastTap && now - lastTap.t < 420 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 32) { lastTap = null; doubleAt(e.clientX, e.clientY); return true; }
+  lastTap = { t: now, x: e.clientX, y: e.clientY }; return false;
+}
+function segDist(px, py, a, b) { const dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy; let t = L ? ((px - a[0]) * dx + (py - a[1]) * dy) / L : 0; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - a[0] - t * dx, py - a[1] - t * dy); }
+function inPoly(x, y, pts) { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; }
+function eraseAt(wx, wy, d) {
+  const v = view(), ink = v.ink || [], r = 10 / cam.k;
+  const hit = ink.filter(st => st.pts.length === 1 ? Math.hypot(wx - st.pts[0][0], wy - st.pts[0][1]) < r : st.pts.some((p, i) => i && segDist(wx, wy, st.pts[i - 1], p) < r + (st.w || 3) / 2));
+  if (!hit.length) return;
+  if (!d.changed) { d.changed = true; startUndo(); }
+  v.ink = ink.filter(st => !hit.includes(st));
+  renderDrawn();
+}
+function finishStroke(raw) {
+  const pts = raw.map(p => [Math.round(p[0]), Math.round(p[1])]);
+  const inM = layerOn('frames') ? B.models.find(m => { const f = frameOf(m); return f && pts.every(p => inside(f, p[0], p[1])); }) : null;
+  const st = { id: uid('s'), pts, color: pen, w: Math.round(30 / cam.k) / 10, by: me() || undefined, date: today() };
+  if (inM) st.model = inM.id;   // drawn inside a model's frame, it moves and spreads with the model
+  change(() => { const v = view(); v.ink = v.ink || []; v.ink.push(st); showLayer('drawing'); });
+  // What the stroke may mean: from one card to another, an arrow; round some cards, a selection.
+  const onCard = p => { const it = B.items.filter(shown).find(i => inside(rect(i.id), p[0], p[1])); return it ? it.id : null; };
+  const a = onCard(pts[0]), z = onCard(pts[pts.length - 1]);
+  const len = pts.reduce((L, p, i) => i ? L + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0, 0);
+  const gap = Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]);
+  if (a && z && a !== z) offer = { kind: 'arrow', from: a, to: z, stroke: st.id };
+  else if (len * cam.k > 120 && gap < Math.max(50 / cam.k, len * 0.2)) {
+    const ids = B.items.filter(shown).filter(i => { const r = rect(i.id); return r && inPoly(r.x + r.w / 2, r.y + r.h / 2, pts); }).map(i => i.id);
+    if (ids.length) offer = { kind: 'lasso', ids, stroke: st.id };
+  }
+  render();
+}
+$('stage').addEventListener('pointerdown', e => {
+  if (e.target.closest('.float')) return;
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  lastType = e.pointerType;
+  if (e.pointerType === 'pen') sawPencil = true;
+  $('chooser').classList.remove('show');
+  if (offer) { offer = null; banner(); }
+  if (e.pointerType === 'touch') {
+    if (drag && drag.what === 'ink' && drag.pen) return;   // a palm resting while the Pencil draws
+    touches.set(e.pointerId, [e.clientX, e.clientY]);
+    if (touches.size === 2) {   // two fingers: pinch to zoom, and move the board
+      if (drag && drag.moved && ['cards', 'model', 'spread'].includes(drag.what)) { save(); render(); }
+      if (drag && drag.what === 'ink') $('wet').setAttribute('d', '');
+      if (drag && drag.what === 'erase' && drag.changed) save();
+      const [p, q] = [...touches.values()];
+      drag = { what: 'pinch', d0: Math.hypot(p[0] - q[0], p[1] - q[1]) || 1, m0: [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], cam0: Object.assign({}, cam) };
+      $('stage').classList.remove('panning', 'linking'); $('ghost').setAttribute('d', ''); $('marq').style.display = 'none';
+      capture(e);
+      return;
+    }
+    if (touches.size > 2) return;
+  }
+  if (drag) return;
+  const t = e.target;
+  if (t.isContentEditable || t.closest('.pill-edit')) return;   // a caret or a selection in what is being edited
+  if (editing) commitEditing();
+  const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame'), th = t.closest('.annt');
+  const bare = !knob && !card && !tab && !grip && !ar && !th;
+  const [wx, wy] = toWorld(e.clientX, e.clientY);
+  if (spaceDown) drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
+  else if (tool === 'erase' && !ro()) { drag = { what: 'erase', changed: false }; eraseAt(wx, wy, drag); }
+  else if (draws(e, bare)) drag = { what: 'ink', pts: [[wx, wy]], pen: e.pointerType === 'pen' };
+  else if (tool === 'box' && !ro() && !knob && !bgrip) drag = { what: 'boxdraw', wx, wy, sx: e.clientX, sy: e.clientY };
+  else if (bgrip && !ro()) { const id = bgrip.closest('.card').dataset.id, it = item(id); select('card', [id]); drag = { what: 'boxsize', id, sx: e.clientX, sy: e.clientY, w0: +it.w || 280, h0: +it.h || 180, moved: false }; }
+  else if (tool === 'select' && !card) drag = { what: 'marq', wx, wy };
+  else if (knob && !ro()) { drag = { what: 'link', from: card.dataset.id, sx: e.clientX, sy: e.clientY }; $('stage').classList.add('linking'); }
+  else if (card) {
+    const id = card.dataset.id;
+    if (mode && mode.annTo) {   // the card an annotation's words are relevant to
+      mode = null; if (composing()) form.to = { card: id };
+      render(); const ti = $('details').querySelector('.anncomp [data-ann-to]'); if (ti) ti.value = '';
+      focusComposer(); return;
+    }
+    if (mode) { const from = mode.linkFrom; mode = null; if (id !== from) makeArrow(from, id); else render(); return; }
+    if (e.shiftKey || tool === 'select') { const ids = sel.kind === 'card' ? sel.ids.slice() : []; const i = ids.indexOf(id); if (i >= 0) ids.splice(i, 1); else ids.push(id); select(ids.length ? 'card' : null, ids); return; }
+    const wasSel = sel.kind === 'card' && sel.ids.length === 1 && sel.ids[0] === id;
+    if (!(sel.kind === 'card' && sel.ids.includes(id))) select('card', [id]);
+    // a box carries what lies inside it
+    const ids = sel.ids.slice();
+    sel.ids.forEach(x => { const b = item(x); if (!b || b.kind !== 'box') return; const r = rect(x); B.items.filter(shown).forEach(o => { if (o.id === x || ids.includes(o.id)) return; const q = rect(o.id); if (q && inside(r, q.x + q.w / 2, q.y + q.h / 2)) ids.push(o.id); }); });
+    drag = { what: 'cards', ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false, wasSel, clicked: id };
+  }
+  else if (grip && !ro()) { select('model', [grip.dataset.grip]); drag = spreadDrag(grip.dataset.grip, e); }
+  else if (tab) { select('model', [tab.dataset.model]); drag = modelDrag(tab.dataset.model, e); }
+  else if (th) { if (mode) return; openAnn(th.dataset.annid); return; }
+  else if (ar) { if (mode) return; select('arrow', [ar.dataset.arrow]); return; }
+  else if (e.shiftKey) drag = { what: 'marq', wx, wy };
+  else if (fr && !mode) { select('model', [fr.dataset.model]); drag = modelDrag(fr.dataset.model, e); }
+  else drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
+  drag.pid = e.pointerId;
+  if (drag.what === 'pan') $('stage').classList.add('panning');
+  capture(e);
+});
+$('stage').addEventListener('pointermove', e => {
+  if (touches.has(e.pointerId)) touches.set(e.pointerId, [e.clientX, e.clientY]);
+  if (!drag) return;
+  if (drag.what === 'pinch') {
+    if (touches.size < 2) return;
+    const [p, q] = [...touches.values()], d = Math.hypot(p[0] - q[0], p[1] - q[1]) || 1, m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+    const r = $('stage').getBoundingClientRect(), c0 = drag.cam0, k = Math.min(3, Math.max(0.15, c0.k * d / drag.d0));
+    const wx = (drag.m0[0] - r.left - c0.x) / c0.k, wy = (drag.m0[1] - r.top - c0.y) / c0.k;   // the board point first between the fingers stays between them
+    cam = { k, x: m[0] - r.left - wx * k, y: m[1] - r.top - wy * k };
+    applyCam(); return;
+  }
+  if (e.pointerId !== drag.pid) return;
+  const dx = (e.clientX - (drag.sx || 0)) / cam.k, dy = (e.clientY - (drag.sy || 0)) / cam.k;
+  if (drag.what === 'pan') { cam.x = drag.cx + (e.clientX - drag.sx); cam.y = drag.cy + (e.clientY - drag.sy); if (Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 3) drag.moved = true; applyCam(); return; }
+  if (drag.what === 'cards' || drag.what === 'model' || drag.what === 'spread') {
+    if (ro()) return;
+    if (!drag.moved && Math.abs(dx) + Math.abs(dy) < 4 / cam.k) return;
+    if (!drag.moved) { drag.moved = true; startUndo(); }
+    const v = view();
+    if (drag.what === 'spread') {
+      const fx = drag.spanX > 20 ? Math.max(0.15, (drag.spanX + dx) / drag.spanX) : 1, fy = drag.spanY > 20 ? Math.max(0.15, (drag.spanY + dy) / drag.spanY) : 1;
+      const at = p => [Math.round(drag.ax + (p[0] - drag.ax) * fx), Math.round(drag.ay + (p[1] - drag.ay) * fy)];
+      drag.ids.forEach((id, i) => { const z = sz(id), c = at(drag.cs[i]); v.pos[id] = [c[0] - Math.round(z.w / 2), c[1] - Math.round(z.h / 2)]; });
+      drag.ink.forEach(o => { o.st.pts = o.pts.map(at); });
+    } else {
+      drag.ids.forEach((id, i) => { v.pos[id] = [Math.round(drag.start[i][0] + dx), Math.round(drag.start[i][1] + dy)]; });
+      if (drag.what === 'model') {
+        if (!drag.ids.length) v.pos[drag.model] = [Math.round(drag.mstart[0] + dx), Math.round(drag.mstart[1] + dy)];
+        drag.ink.forEach(o => { o.st.pts = o.pts.map(p => [p[0] + Math.round(dx), p[1] + Math.round(dy)]); });
+      }
+    }
+    placeCards(); renderInk(neighbourhood());
+    if (drag.what === 'cards') { const tgt = dropTarget(drag.ids); $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = tgt && t.dataset.model === tgt.id ? '3px solid var(--ink)' : ''); }
+    return;
+  }
+  if (drag.what === 'ink') {
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    (evs.length ? evs : [e]).forEach(ev => {
+      const [wx, wy] = toWorld(ev.clientX, ev.clientY), l = drag.pts[drag.pts.length - 1];
+      if (Math.hypot(wx - l[0], wy - l[1]) * cam.k >= 2.5) drag.pts.push([wx, wy]);
+    });
+    const w = $('wet'); w.setAttribute('d', strokeD(drag.pts)); w.setAttribute('stroke', pen); w.setAttribute('stroke-width', 3 / cam.k);
+    return;
+  }
+  if (drag.what === 'erase') { const [wx, wy] = toWorld(e.clientX, e.clientY); eraseAt(wx, wy, drag); return; }
+  if (drag.what === 'link') {
+    const it = rect(drag.from), [wx, wy] = toWorld(e.clientX, e.clientY);
+    $('ghost').setAttribute('d', 'M' + (it.x + it.w) + ',' + (it.y + it.h / 2) + ' L' + wx + ',' + wy);
+    return;
+  }
+  if (drag.what === 'boxsize') {
+    if (ro()) return;
+    if (!drag.moved) { drag.moved = true; startUndo(); }
+    const it = item(drag.id); if (!it) return;
+    it.w = Math.max(110, Math.round(drag.w0 + dx)); it.h = Math.max(70, Math.round(drag.h0 + dy));
+    const el = [...$('cards').querySelectorAll('.card')].find(c => c.dataset.id === drag.id);
+    if (el) { el.style.width = it.w + 'px'; el.style.height = it.h + 'px'; size[drag.id] = { w: el.offsetWidth, h: el.offsetHeight }; }
+    renderInk(neighbourhood()); return;
+  }
+  if (drag.what === 'marq' || drag.what === 'boxdraw') {
+    const [wx, wy] = toWorld(e.clientX, e.clientY), m = $('marq');
+    m.style.display = ''; m.setAttribute('x', Math.min(wx, drag.wx)); m.setAttribute('y', Math.min(wy, drag.wy)); m.setAttribute('width', Math.abs(wx - drag.wx)); m.setAttribute('height', Math.abs(wy - drag.wy));
+  }
+});
+// A card dropped into another model's frame joins that model.
+function dropTarget(ids) {
+  if (!layerOn('frames') || ids.length !== 1) return null;
+  const it = item(ids[0]), r = rect(ids[0]); if (!r || it.kind === 'box') return null;
+  const cx = r.x + r.w / 2, cy = r.y + r.h / 2, skip = new Set(ids);
+  if (it.model && model(it.model) && inside(frameOf(model(it.model), skip), cx, cy)) return null;
+  return B.models.find(m => m.id !== it.model && inside(frameOf(m, skip), cx, cy)) || null;
+}
+function pointerEnd(e, cancelled) {
+  touches.delete(e.pointerId);
+  if (!drag) return;
+  if (drag.what === 'pinch') { if (touches.size < 2) { drag = null; keepCam(); } return; }
+  if (e.pointerId !== drag.pid) return;
+  const d = drag; drag = null;
+  $('stage').classList.remove('panning', 'linking');
+  if (d.what === 'pan') { if (!d.moved && !cancelled && !tapped(e) && !mode && !form && sel.kind) select(null, []); keepCam(); return; }
+  if (d.what === 'boxsize') { if (d.moved) { save(); render(); } return; }
+  if (d.what === 'boxdraw') {
+    const m = $('marq'), x = +m.getAttribute('x'), y = +m.getAttribute('y'), w = +m.getAttribute('width'), h = +m.getAttribute('height');
+    m.style.display = 'none'; m.setAttribute('width', 0);
+    if (cancelled) return;
+    setTool('move');
+    if (w * cam.k < 24 || h * cam.k < 24) { const [wx, wy] = toWorld(e.clientX, e.clientY); createBox(wx - 20, wy - 20, 280, 180); }
+    else createBox(x, y, w, h);
+    return;
+  }
+  if (d.what === 'cards' || d.what === 'model' || d.what === 'spread') {
+    $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = '');
+    if (!d.moved) { if (!cancelled && !tapped(e) && d.what === 'cards' && d.wasSel) editInPlace(d.clicked); return; }
+    if (d.what === 'cards' && !cancelled) {
+      const tgt = dropTarget(d.ids);
+      if (tgt && item(d.ids[0]).kind !== 'box') { const it = item(d.ids[0]), was = model(it.model); it.model = tgt.id; toast('Moved into ' + tgt.title + (was ? ', out of ' + was.title : '') + '. Undo with ⌘Z.'); }
+    }
+    save(); render(); return;
+  }
+  if (d.what === 'ink') {
+    $('wet').setAttribute('d', '');
+    if (cancelled) return;
+    if (d.pts.length < 3) { if (tool === 'move' && !tapped(e) && !form && sel.kind) select(null, []); return; }
+    finishStroke(d.pts); return;
+  }
+  if (d.what === 'erase') { if (d.changed) save(); render(); return; }
+  if (d.what === 'link') {
+    $('ghost').setAttribute('d', '');
+    if (cancelled) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY), card = el && el.closest('.card');
+    if (card && card.dataset.id !== d.from) makeArrow(d.from, card.dataset.id);
+    else if (Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) < 4) { mode = { linkFrom: d.from }; render(); }
+    return;
+  }
+  if (d.what === 'marq') {
+    const m = $('marq'), x = +m.getAttribute('x'), y = +m.getAttribute('y'), w = +m.getAttribute('width'), h = +m.getAttribute('height');
+    m.style.display = 'none'; m.setAttribute('width', 0);
+    if (cancelled) return;
+    const ids = B.items.filter(shown).filter(it => { const r = rect(it.id); return r && r.x < x + w && r.x + r.w > x && r.y < y + h && r.y + r.h > y; }).map(it => it.id);
+    select(ids.length ? 'card' : null, ids);
+  }
+}
+function afterPointer(e, cancelled) {
+  pointerEnd(e, cancelled);
+  if (!drag && pendingStore) takeIn();
+}
+$('stage').addEventListener('pointerup', e => afterPointer(e, false));
+$('stage').addEventListener('pointercancel', e => afterPointer(e, true));
+// Double-click (or double tap): a card opens to be edited; the board offers something to put there.
+function doubleAt(cx, cy) {
+  const under = document.elementFromPoint(cx, cy);
+  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob') || under.isContentEditable || under.closest('.pill-edit')) return;
+  const card = under.closest('.card');
+  if (card) { editInPlace(card.dataset.id); return; }
+  const arEl = under.closest('.ar'); if (arEl) { editArrowLabel(arEl.dataset.arrow); return; }
+  const tabEl = under.closest('.ftab'); if (tabEl) { editModelTitle(tabEl.dataset.model); return; }
+  const [wx, wy] = toWorld(cx, cy), r = $('stage').getBoundingClientRect(), c = $('chooser');
+  const inM = B.models.find(m => inside(frameOf(m), wx, wy));
+  c.dataset.at = JSON.stringify([wx - 20, wy - 15]); c.dataset.model = inM ? inM.id : '';
+  c.innerHTML = '<span class="ttl">Put here' + (inM ? ', in ' + esc(inM.title) : '') + ': type, then Enter for a note, or choose what it is</span><textarea id="qnote" rows="2" placeholder="Type here (⇧Enter for a new line)"></textarea><button type="button" class="btn k-note" data-new="note">Note</button><button type="button" class="btn k-problem" data-new="problem">Question</button><button type="button" class="btn" data-new="box">Box</button>';
+  c.style.left = Math.min(cx - r.left, r.width - 240) + 'px'; c.style.top = Math.min(cy - r.top, r.height - 90) + 'px';
+  c.classList.add('show');
+  setTimeout(() => { const q = $('qnote'); if (q) q.focus(); }, 30);
+}
+/* ── Editing in place: double-click (or tap a selected card) and type where it stands ── */
+function commitEditing() { if (editing && editing.finish) editing.finish(true); }
+function afterEdit() { if (!drag && !editing && pendingStore) takeIn(); }
+// Enter keeps it (⇧Enter for a new line where that makes sense), Esc leaves it as it was, clicking elsewhere keeps it.
+function inlineEdit(target, before, multiline, commit) {
+  commitEditing();
+  target.textContent = before;
+  target.contentEditable = 'true';
+  try { target.contentEditable = 'plaintext-only'; } catch (x) { /* plain 'true' then */ }
+  let done = false;
+  const finish = ok => {
+    if (done) return; done = true;
+    const v = target.innerText.replace(/ /g, ' ').trim();
+    target.contentEditable = 'false'; editing = null;
+    commit(ok ? v : null, v !== before);
+    render(); afterEdit();
+  };
+  editing = { el: target, finish };
+  target.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' && !(multiline && e.shiftKey)) { e.preventDefault(); finish(true); } else if (e.key === 'Escape') { e.preventDefault(); finish(false); } });
+  target.addEventListener('blur', () => finish(true), { once: true });
+  target.focus();
+  const r = document.createRange(); r.selectNodeContents(target); const sl = getSelection(); sl.removeAllRanges(); sl.addRange(r);
+}
+function editInPlace(id, fresh) {
+  const it = item(id); if (!it || ro()) return;
+  const el = [...$('cards').querySelectorAll('.card')].find(c => c.dataset.id === id); if (!el) return;
+  const field = it.kind === 'note' || it.kind === 'problem' ? 'text' : 'label';
+  let target = el.querySelector({ passage: '.ttl', box: '.blab', note: '.txt', problem: '.txt' }[it.kind] || '.txt');
+  if (!target && it.kind === 'passage') { target = document.createElement('span'); target.className = 'ttl'; el.insertBefore(target, el.firstChild); }
+  if (!target) return;
+  inlineEdit(target, String(it[field] || ''), field === 'text', (v, changed) => {
+    if (v === null || (!v && field === 'text')) {   // nothing typed: a card just made goes again
+      if (fresh && !it[field]) change(() => { B.items = B.items.filter(x => x.id !== id); Object.values(B.views).forEach(w => delete w.pos[id]); });
+      return;
+    }
+    if (!changed) return;
+    change(() => {
+      const x = item(id); if (!x) return;
+      x[field] = v;
+    });
+  });
+}
+function editModelTitle(id) {
+  const m = model(id); if (!m || ro()) return;
+  const el = [...$('cards').querySelectorAll('.ftab')].find(t => t.dataset.model === id), b = el && el.querySelector('b'); if (!b) return;
+  inlineEdit(b, m.title, false, (v, changed) => { if (v && changed) change(() => { const x = model(id); if (x) x.title = v; }); });
+}
+// An arrow's name, typed on the arrow: anything at all, or one of the usual (develops, contradicts, answers? …).
+function editArrowLabel(id) {
+  const a = arrow(id); if (!a || ro()) return;
+  const c = curve(a); if (!c) return;
+  commitEditing();
+  const inp = document.createElement('input');
+  inp.className = 'pill-edit'; inp.setAttribute('list', 'arrowtypes'); inp.placeholder = 'name it: develops, contradicts…';
+  inp.value = a.type === '?' ? '' : a.type;
+  inp.style.left = (c.mx - 90) + 'px'; inp.style.top = (c.my - 12) + 'px';
+  $('cards').appendChild(inp);
+  let done = false;
+  const finish = ok => {
+    if (done) return; done = true;
+    const v = inp.value.trim(); inp.remove(); editing = null;
+    if (ok && v && v !== a.type) change(() => {
+      const x = arrow(id); if (!x) return;
+      x.type = v;
+      x.layer = v === 'answers?' ? 'problem' : 'hypothesis';
+    });
+    render(); afterEdit();
+  };
+  editing = { el: inp, finish };
+  inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') { e.preventDefault(); finish(true); } else if (e.key === 'Escape') { e.preventDefault(); finish(false); } });
+  inp.addEventListener('blur', () => finish(true));
+  inp.focus(); inp.select();
+}
+// An arrow made at once: to a question, "answers?"; otherwise it is named on the spot.
+function makeArrow(from, to, stroke) {
+  const A = item(from), Z = item(to);
+  if (ro() || !A || !Z || from === to) { render(); return; }
+  const type = Z.kind === 'problem' ? 'answers?' : '?';
+  const layer = type === 'answers?' ? 'problem' : 'hypothesis';
+  let id;
+  change(() => {
+    id = uid('a');
+    const a = { id, from, to, type, layer, text: '', evidence: [], date: today() };
+    if (me()) a.by = me();
+    B.arrows.push(a);
+    if (stroke) { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== stroke); }
+  });
+  showLayer(layer); form = null; sel = { kind: 'arrow', ids: [id] }; render();
+  if (type === '?') editArrowLabel(id);
+}
+function createBox(x, y, w, h) {
+  if (ro()) return;
+  let id;
+  change(() => {
+    id = uid('b');
+    const b = { id, kind: 'box', model: null, label: '', w: Math.round(Math.max(110, w)), h: Math.round(Math.max(70, h)), quotes: [], date: today() };
+    if (me()) b.by = me();
+    B.items.push(b); view().pos[id] = [Math.round(x), Math.round(y)];
+  });
+  showLayer('box'); form = null; sel = { kind: 'card', ids: [id] }; render();
+  editInPlace(id);
+}
+// A card made straight from the chooser: what was typed becomes its words; with nothing typed, it opens to be written in.
+function quickCard(kind, text, at, modelId) {
+  if (ro()) return;
+  text = String(text || '').trim();
+  let id;
+  change(() => {
+    id = uid(kind[0]);
+    const n = { id, kind, model: modelId || null, quotes: [], date: today() };
+    if (kind === 'box') n.label = text; else n.text = text;
+    B.items.push(n); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
+  });
+  showLayer(kind); sel = { kind: 'card', ids: [id] }; form = null; render();
+  if (!text) editInPlace(id, true);
+}
+const quickNote = (text, at, modelId) => { if (String(text || '').trim()) quickCard('note', text, at, modelId); };
+$('stage').addEventListener('dblclick', e => { if (lastType === 'mouse' && tool === 'move' && !e.target.closest('.float') && !e.target.isContentEditable && !e.target.closest('.pill-edit')) doubleAt(e.clientX, e.clientY); });
+$('chooser').addEventListener('keydown', e => {
+  if (e.target.id !== 'qnote') return;
+  if (e.key === 'Escape') { $('chooser').classList.remove('show'); return; }
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault(); const c = $('chooser'), at = JSON.parse(c.dataset.at), mdl = c.dataset.model || null;
+    c.classList.remove('show');
+    quickNote(e.target.value, at, mdl);
+  }
+});
+$('chooser').addEventListener('click', e => {
+  const b = e.target.closest('[data-new]'); if (!b) return;
+  const c = $('chooser'), at = JSON.parse(c.dataset.at), mdl = c.dataset.model || null, txt = ($('qnote') || {}).value || '', k = b.dataset.new;
+  c.classList.remove('show');
+  if (k === 'box') { createBox(at[0], at[1], 280, 180); return; }
+  quickCard(k, txt, at, mdl);
+});
+$('banner').addEventListener('click', e => {
+  const b = e.target.closest('[data-b]'); if (!b) return;
+  const k = b.dataset.b;
+  if (k === 'back') back(); else if (k === 'restore') restore();
+  else if (k === 'nolink') { mode = null; render(); }
+  else if (k === 'nofocus') { focus = null; render(); }
+  else if (k === 'hop1' || k === 'hop2') { focus.hops = k === 'hop1' ? 1 : 2; render(); }
+  else if (k === 'o-keep') { offer = null; banner(); }
+  else if (k === 'o-arrow' && offer) { const o = offer; offer = null; makeArrow(o.from, o.to, o.stroke); }
+  else if ((k === 'o-select' || k === 'o-model') && offer) {
+    const o = offer; offer = null;
+    change(() => { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== o.stroke); });
+    sel = { kind: 'card', ids: o.ids }; form = k === 'o-model' ? { kind: 'model', split: o.ids.slice() } : null; showSide('details'); render();
+  }
+});
+$('layers').addEventListener('change', e => {
+  const k = e.target.dataset.layer; if (!k) return;
+  showLayer(k, e.target.checked); render();
+});
+$('layers').addEventListener('click', e => { if (e.target.closest('[data-fold]')) { $('layers').classList.toggle('closed'); renderLayers(); } });
+
+/* ── Wiring: the tools and the side ───────────────────────────────────────── */
+document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => {
+  if (ro()) return toast('This is a photograph. Go back to the board to add to it.');
+  const k = b.dataset.add, inM = sel.kind === 'model' ? sel.ids[0] : sel.kind === 'card' && item(sel.ids[0]) ? item(sel.ids[0]).model : null;
+  form = k === 'model' ? { kind: 'model' } : { kind: k, model: inM || null, quotes: [] };
+  showSide('details'); renderSide();
+}));
+$('vsel').addEventListener('change', () => {
+  viewId = $('vsel').value; focus = null; sel = { kind: null, ids: [] }; form = null;
+  render();
+  const c = camOf(); if (c) { cam = Object.assign({}, c); applyCam(); } else fit();
+  if (!live) { prefs.viewId = viewId; savePrefs(); }
+});
+$('vnew').addEventListener('click', newView);
+$('vmore').addEventListener('click', viewMenu);
+$('search').addEventListener('input', () => { query = $('search').value.trim(); renderTools(); lit(); renderInk(neighbourhood()); });
+$('undo').addEventListener('click', undo);
+$('redo').addEventListener('click', redo);
+$('snap').addEventListener('click', () => {
+  if (ro()) return;
+  const name = prompt('A name for this photograph of the board:', 'The board, ' + fmtDate(new Date().toISOString()));
+  if (name == null) return;
+  photograph(name.trim());
+});
+$('photos').addEventListener('click', () => { form = { kind: 'photos' }; showSide('details'); renderSide(); });
+$('annsb').addEventListener('click', () => { form = { kind: 'annotations', f: {} }; document.body.classList.remove('sideclosed'); showSide('details'); renderSide(); });
+// The annotation bar: it appears by words selected in a passage in the side, mouse or finger.
+let selT = null, selecting = false, selTouch = false, barDown = 0;
+document.addEventListener('selectionchange', () => { clearTimeout(selT); selT = setTimeout(() => { if (!selecting && Date.now() - barDown > 600) showBar(); }, 150); });
+$('details').addEventListener('pointerdown', e => { selTouch = e.pointerType !== 'mouse'; if (!selTouch) selecting = true; });
+document.addEventListener('pointerup', () => { if (selecting) { selecting = false; setTimeout(showBar, 0); } });
+$('details').addEventListener('keyup', e => { if (e.shiftKey && !e.target.closest('input, textarea')) showBar(); });
+$('details').addEventListener('scroll', () => { if ($('annbar').classList.contains('show')) showBar(); });
+$('annbar').addEventListener('pointerdown', e => { e.preventDefault(); barDown = Date.now(); });
+$('annbar').addEventListener('mousedown', e => e.preventDefault());
+$('annbar').addEventListener('click', e => { const b = e.target.closest('[data-annk]'); if (b && annPick) startAnn(b.dataset.annk, annPick.card, annPick.qi, annPick); });
+$('details').addEventListener('keydown', e => {
+  if (!e.target.closest('.anncomp')) return;
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); saveAnn(); }
+  else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); form = null; renderSide(); }
+});
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('#palette [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
+  $('palette').classList.toggle('pen', t === 'pen');
+  ['move', 'select', 'pen', 'erase', 'box'].forEach(x => $('stage').classList.toggle('tool-' + x, x === t));
+  if (t !== 'move') { mode = null; }
+  banner();
+}
+function renderPens() {
+  $('pens').innerHTML = PENS.map(c => '<button type="button" class="pc' + (c === pen ? ' on' : '') + '" data-pen="' + c + '" style="background:' + c + '" aria-label="Pen colour"></button>').join('') +
+    '<button type="button" class="linkish clr" data-clear>clear this view’s drawing</button>';
+}
+$('palette').addEventListener('click', e => {
+  const t = e.target.closest('[data-tool]'); if (t) { setTool(t.dataset.tool); return; }
+  const p = e.target.closest('[data-pen]'); if (p) { pen = p.dataset.pen; renderPens(); return; }
+  if (e.target.closest('[data-clear]') && !ro() && (view().ink || []).length && confirm('Clear all the drawing on this view? Undo (⌘Z) brings it back.')) { change(() => { view().ink = []; }); render(); }
+});
+// The store changed elsewhere: another tab of the portal, the portal beside the board, GitHub's copy arriving through it.
+window.addEventListener('storage', e => { if (e.key === TOPICS || e.key == null) takeIn(); });
+window.addEventListener('hashchange', () => { if ((new URLSearchParams(location.hash.slice(1)).get('t') || '') !== TID) location.reload(); });
+// A passage's note, and the topic's, are written where My topics keeps them, a moment after typing stops.
+let noteT = 0, noteFn = null;
+function noteSoon(fn) { clearTimeout(noteT); noteFn = fn; noteT = setTimeout(() => { noteFn = null; fn(); }, 500); }
+function noteNow() { if (noteFn) { clearTimeout(noteT); const f = noteFn; noteFn = null; f(); } }
+$('details').addEventListener('input', e => {
+  const t = e.target;
+  if (t.matches('textarea[data-mtnote]')) { const mt = t.dataset.mtnote, v = t.value; noteSoon(() => setPassage(mt, x => { x.note = v; })); }
+  else if (t.matches('textarea[data-mttopic]')) { const v = t.value; noteSoon(() => setTopic(x => { x.note = v; })); }
+});
+$('details').addEventListener('focusout', e => {
+  if (!e.target.matches('textarea.mtnote')) return;
+  noteNow();
+  setTimeout(() => { if (sideStale && !noteFocused() && !selInSide()) { sideStale = false; renderSide(); } }, 0);
+});
+window.addEventListener('pagehide', noteNow);
+$('back').addEventListener('click', noteNow);
+$('tside').addEventListener('click', () => document.body.classList.add('sideclosed'));
+$('sideopen').addEventListener('click', () => document.body.classList.remove('sideclosed'));
+$('tdet').addEventListener('click', () => showSide('details'));
+$('tread').addEventListener('click', () => { if (!$('portal').getAttribute('src')) read(PORTAL); else showSide('reading'); });
+$('details').addEventListener('click', e => {
+  const D = $('details');
+  const rd = e.target.closest('[data-read]'); if (rd) { read(rd.dataset.read); return; }
+  const ra = e.target.closest('[data-arrow]'); if (ra) { select('arrow', [ra.dataset.arrow]); return; }
+  const rc = e.target.closest('[data-card]'); if (rc) { select('card', [rc.dataset.card]); return; }
+  const lk = e.target.closest('[data-look]'); if (lk) { look(lk.dataset.look); return; }
+  const up = e.target.closest('[data-unphoto]'); if (up) {
+    if (!confirm('Delete this photograph? It cannot be brought back.')) return;
+    photos = photos.filter(p => p.id !== up.dataset.unphoto); save();
+    renderTools(); renderSide(); return;
+  }
+  const mk = e.target.closest('mark[data-ann]'); if (mk && getSelection().isCollapsed) { flashAnn(mk.dataset.ann.split(' ').pop()); return; }
+  const aw = e.target.closest('[data-annwhole]'); if (aw) { startAnn('comment', aw.dataset.qcard, +aw.dataset.annwhole, null); return; }
+  const ak = e.target.closest('[data-annkind]'); if (ak && composing()) { form.ann = ak.dataset.annkind; renderSide(); focusComposer(); return; }
+  const arp = e.target.closest('[data-annreply]'); if (arp) { replyTo(arp.dataset.annreply); return; }
+  const aed = e.target.closest('[data-annedit]'); if (aed) { editAnn(aed.dataset.annedit); return; }
+  const adl = e.target.closest('[data-anndel]'); if (adl) { delAnn(adl.dataset.anndel); return; }
+  const ars = e.target.closest('[data-annres]'); if (ars) { resolveAnn(ars.dataset.annres); return; }
+  const awd = e.target.closest('[data-annword]'); if (awd) { findWord(awd.dataset.annword); return; }
+  const aop = e.target.closest('[data-annopen]'); if (aop) { openAnn(aop.dataset.annopen); return; }
+  const aun = e.target.closest('[data-annunpick]'); if (aun && composing()) { form.to = null; renderSide(); focusComposer(); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act, id = sel.ids[0];
+  if (act === 'annsave') { saveAnn(); return; }
+  if (act === 'anncancel') { form = null; renderSide(); return; }
+  if (act === 'annpick') { mode = { annTo: true }; banner(); return; }
+  if (act === 'dlann') { downloadAnns(); return; }
+  if (act === 'cancel') { form = null; renderSide(); return; }
+  if (act === 'putback') { const it = item(id); if (it && !ro()) { setPassage(it.mt, x => { if (Array.isArray(x.topics) && !x.topics.includes(TID)) x.topics.push(TID); }); render(); toast('Back under “' + (topic ? topic.name : '') + '”.'); } return; }
+  if (act === 'offboard') { removeCards([id]); toast('Taken off the board. Undo (⌘Z) puts it back.'); return; }
+  if (act === 'savecard') return saveCard(D);
+  if (act === 'savearrow') return saveArrow(D);
+  if (act === 'savemodel') return saveModel(D);
+  if (act === 'swap') { const t = form.from; form.from = form.to; form.to = t; keepFields(renderSide); return; }
+  if (act === 'edit') { form = { kind: 'card', id, quotes: clone(item(id).quotes || []) }; renderSide(); return; }
+  if (act === 'linkfrom') { mode = { linkFrom: id }; render(); return; }
+  if (act === 'focus') { focus = { id, hops: 1 }; render(); return; }
+  if (act === 'offview') { const ids = sel.ids.slice(); change(() => { const v = view(); v.hidden = (v.hidden || []).concat(ids); }); toast('Taken off this view; it is still on the others. “this view…” puts it back.'); select(null, []); return; }
+  if (act === 'delete') { if (confirm(delAsk(sel.ids))) removeCards(sel.ids.slice()); return; }
+  if (act === 'newmodel') { form = { kind: 'model', split: sel.ids.slice() }; renderSide(); return; }
+  if (act === 'moveinto') { const to = D.querySelector('[data-into]').value || null, ids = sel.ids.slice(); change(() => ids.forEach(x => { item(x).model = to; })); render(); return; }
+  if (act === 'editarrow') { const a = arrow(id); form = { kind: 'arrow', id, from: a.from, to: a.to }; renderSide(); return; }
+  if (act === 'delarrow') { if (confirm('Delete this arrow?')) { change(() => { B.arrows = B.arrows.filter(a => a.id !== id); if (BASE.arrows.some(a => a.id === id)) B.removed.push(id); }); select(null, []); } return; }
+  if (act === 'editmodel') { form = { kind: 'model', id }; renderSide(); return; }
+  if (act === 'selmodel') { select('card', B.items.filter(i => i.model === id && shown(i)).map(i => i.id)); return; }
+  if (act === 'delmodel') { if (confirm('Delete this group? Its cards stay on the board, in no group.')) { change(() => { B.items.forEach(i => { if (i.model === id) i.model = null; }); B.models = B.models.filter(m => m.id !== id); if (BASE.models.some(m => m.id === id)) B.removed.push(id); }); select(null, []); } return; }
+});
+$('details').addEventListener('change', e => {
+  if (e.target.matches('[data-annf]') && form && form.kind === 'annotations') { form.f = form.f || {}; form.f[e.target.dataset.annf] = e.target.value; $('annlist').innerHTML = annListAll(); return; }
+  if (e.target.matches('[data-type]')) { const o = $('details').querySelector('[data-other]'); o.style.display = e.target.value === '__other' ? '' : 'none'; if (e.target.value === '__other') o.focus(); }
+});
+document.addEventListener('keydown', e => {
+  const typing = (e.target.closest && e.target.closest('input, textarea, select')) || e.target.isContentEditable;
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+  if (typing) return;
+  if (e.key === ' ') { e.preventDefault(); if (!spaceDown) { spaceDown = true; $('stage').classList.add('spacepan'); } return; }
+  if (!e.metaKey && !e.ctrlKey && !e.altKey) { const t = { v: 'move', s: 'select', p: 'pen', e: 'erase', b: 'box' }[e.key.toLowerCase()]; if (t) { setTool(t); return; } }
+  if (e.key === 'Escape' && $('annbar').classList.contains('show')) { hideBar(); try { getSelection().removeAllRanges(); } catch (x) { /* fine */ } return; }
+  if (e.key === 'Escape') { if (mode) mode = null; else if (offer) offer = null; else if (tool !== 'move') setTool('move'); else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && sel.kind && !ro()) {
+    e.preventDefault();
+    if (sel.kind === 'card') { if (confirm(delAsk(sel.ids))) removeCards(sel.ids.slice()); }
+    else if (sel.kind === 'arrow') { const id = sel.ids[0]; if (confirm('Delete this arrow?')) { change(() => { B.arrows = B.arrows.filter(a => a.id !== id); if (BASE.arrows.some(a => a.id === id)) B.removed.push(id); }); select(null, []); } }
+    return;
+  }
+  if ((e.key === 'f' || e.key === 'F') && sel.kind === 'card' && sel.ids.length === 1) { focus = { id: sel.ids[0], hops: focus && focus.id === sel.ids[0] && focus.hops === 1 ? 2 : 1 }; render(); }
+});
+document.addEventListener('keyup', e => { if (e.key === ' ') { spaceDown = false; $('stage').classList.remove('spacepan'); } });
+window.addEventListener('blur', () => { spaceDown = false; $('stage').classList.remove('spacepan'); });
+/* ── Init ─────────────────────────────────────────────────────────────────── */
+function renderHead() {
+  const name = topic ? topic.name : '';
+  $('tname').textContent = name || 'a topic not in My topics here';
+  document.title = (name ? name + ' · ' : '') + 'its board · My topics · Kant Lab';
+  const back = 'index.html#mt=' + encodeURIComponent(TID);
+  $('back').href = back; $('mtlink').href = back;
+}
+// Where the board stands: saved with the topics here, and, with GitHub on, what the portal beside it says of GitHub.
+function renderSync() {
+  const el = $('sync'); if (!el) return;
+  let gh = false; try { gh = !!localStorage.getItem(TOPICS_GH); } catch (e) { gh = false; }
+  if (lost || saveFailed) { el.className = 'bad'; el.innerHTML = '<i></i>Not saved'; el.title = lost ? roWhy() : 'This browser would not keep the last change. Export the board, so nothing is lost.'; return; }
+  let st = '';
+  try { const s = FW && FW.document.querySelector('#mtpage .mtstat'); st = s ? s.textContent.replace(/\s+/g, ' ').trim() : ''; } catch (e) { st = ''; }
+  const bad = /locked|answered|can’t|isn’t|Try again|new token/i.test(st), busy = /moment|saving|catches up/.test(st);
+  el.className = bad ? 'bad' : busy ? 'busy' : 'saved';
+  el.innerHTML = '<i></i>' + (!gh ? 'Saved with My topics, in this browser' : !st ? 'Saved with My topics · GitHub when the portal beside the board has loaded' : bad ? 'Saved with My topics here · not yet on GitHub' : 'Saved with My topics · ' + esc(st.replace(/^Saved( on this computer)? · /, '')));
+  el.title = !gh ? 'Kept with your topics in this browser. Save to file, in My topics, keeps a copy of both.'
+    : bad ? 'GitHub: ' + st + ' Open My topics (← Passages) to put it right; the board is safe here meanwhile.'
+    : 'Kept with your topics in this browser. The portal beside the board sends them to GitHub, locked with your passphrase, a few seconds after each change.';
+}
+setInterval(renderSync, 2000);
+// What is new in an exported board comes in beside what is here; nothing here is overwritten.
+function addFrom(into, from) {
+  ['models', 'items', 'arrows', 'annotations'].forEach(k => {
+    into[k] = into[k] || [];
+    const have = new Set(into[k].map(x => x.id));
+    (from[k] || []).forEach(x => { if (x && typeof x.id === 'string' && !have.has(x.id)) into[k].push(clone(x)); });
+  });
+  const haveV = new Set(into.views.map(v => v.id));
+  (from.views || []).forEach(fv => {
+    if (!fv || !fv.pos) return;
+    if (!haveV.has(fv.id)) { into.views.push(Object.assign({ hidden: [], ink: [] }, clone(fv))); return; }
+    const v = into.views.find(x => x.id === fv.id);
+    Object.keys(fv.pos).forEach(id => { if (!v.pos[id]) v.pos[id] = fv.pos[id].slice(); });
+    (fv.ink || []).forEach(st => { v.ink = v.ink || []; if (!v.ink.some(x => x.id === st.id)) v.ink.push(clone(st)); });
+  });
+  return into;
+}
+$('export').addEventListener('click', () => {
+  const ids = new Set(annHere().map(a => a.id));
+  const data = { kind: 'kantlab-topic-board', v: 1, topic: topic ? topic.name : '', saved: new Date().toISOString(), board: kept(),
+    annotations: (B.annotations || []).filter(a => a && (ids.has(a.id) || (a.kind === 'reply' && ids.has(a.re)))) };
+  const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+  const slug = String(topic ? topic.name : 'topic').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'topic';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'topic-board-' + slug + '-' + today() + '.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+$('import').addEventListener('click', () => { if (ro()) return toast(roWhy()); $('file').value = ''; $('file').click(); });
+$('file').addEventListener('change', () => {
+  const f = $('file').files && $('file').files[0]; if (!f) return;
+  f.text().then(s => {
+    const d = JSON.parse(s);
+    if (!d || d.kind !== 'kantlab-topic-board' || !d.board || !Array.isArray(d.board.items)) throw new Error('shape');
+    const before = { m: B.models.length, i: B.items.length, a: B.arrows.length, v: B.views.length };
+    const b = cleanBoard(d.board);
+    change(() => { addFrom(B, { models: b.models, items: b.items, arrows: b.arrows, views: b.views, annotations: Array.isArray(d.annotations) ? d.annotations : [] }); });
+    const have = new Set(photos.map(p => p.id)); let np = 0;
+    (b.photos || []).forEach(p => { if (p && p.board && !have.has(p.id)) { photos.push(p); np++; } });
+    if (np) save();
+    render();
+    toast('Added ' + (B.items.length - before.i) + ' cards, ' + (B.arrows.length - before.a) + ' arrows, ' + (B.models.length - before.m) + ' groups and ' + (B.views.length - before.v) + ' views. Nothing already on the board was changed.');
+  }).catch(() => alert('That file is not an export of a topic’s board.'));
+});
+// The portal in the side: its texts give each passage its full words, and it sends the board to GitHub with the topics.
+let fwT = 0;
+function watchPortal() {
+  clearInterval(fwT);
+  fwT = setInterval(() => { const w = portalReady(); if (!w) return; clearInterval(fwT); FW = w; renderAround(); }, 500);
+}
+$('portal').addEventListener('load', () => { FW = null; watchPortal(); });
+function showLost() {
+  if (!lost) { $('lock').classList.remove('show'); return; }
+  $('lockh').textContent = lost === 'unreadable' ? 'My topics would not read' : 'This topic is not in My topics here';
+  $('lockbody').innerHTML = (lost === 'unreadable'
+    ? '<p>The topics this browser keeps could not be read, so the board can’t be shown or saved. Nothing has been changed.</p>'
+    : '<p>A topic’s board opens from My topics, in the portal: open the topic there and press <b>▦ Board</b>. This address may be to a topic deleted since, or kept in another browser.</p>') +
+    '<p><a class="btn solid" href="index.html#mt=' + esc(encodeURIComponent(TID)) + '">Open My topics</a> <button type="button" class="linkish" id="lockx">Look at the board anyway</button></p>';
+  $('lock').classList.add('show');
+  $('lockx').addEventListener('click', () => $('lock').classList.remove('show'));
+}
+function start() {
+  const d = readStore();
+  if (!d) { lost = 'unreadable'; B = cleanBoard(clone(BASE)); B.annotations = []; viewId = B.views[0].id; loadPrefs(); return; }
+  DB = d;
+  const k = realTopic(d, TID);
+  if (k !== TID) { TID = k; history.replaceState(null, '', '#t=' + encodeURIComponent(k)); }
+  topic = d.topics.find(t => t && t.id === TID) || null;
+  loadPrefs();
+  const saved = isObj(d.boards) && d.boards[TID] ? cleanBoard(JSON.parse(JSON.stringify(d.boards[TID]))) : null;
+  const anns = Array.isArray(d.annotations) ? d.annotations : [];
+  if (!topic) lost = 'gone';
+  B = saved ? clone(saved) : topic ? layOut() : cleanBoard(clone(BASE));
+  photos = B.photos || []; delete B.photos;
+  B.removed = B.removed || [];
+  B.annotations = clone(anns);
+  seenB = saved ? keyOf(saved) : ''; seenA = JSON.stringify(anns);
+  viewId = B.views.some(v => v.id === prefs.viewId) ? prefs.viewId : B.views[0].id;
+  if (topic && (!saved || syncCards() || !Array.isArray(d.annotations))) writeOut(d);   // a board made now, or cards for passages put under the topic since: kept at once
+}
+start();
+// Each kind of annotation's colour, as --kc, and the bar that offers them.
+document.head.insertAdjacentHTML('beforeend', '<style>' + ANN_KINDS.map(k => '.ak-' + k.key + ' { --kc: ' + k.color + '; }').join(' ') + ' .ak-reply { --kc: #8b5e3c; }</style>');
+$('annbar').innerHTML = ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + '" data-annk="' + k.key + '" title="' + esc(k.key === 'relevant' ? 'What these words bear on: a word, a card on the board, R 3990, or a portal address' : k.hint) + '">' + esc(k.label) + '</button>').join('');
+renderPens();
+renderHead();
+render();
+showLost();
+watchPortal();
+// Cards are measured once the page is laid out, and again when its fonts arrive, since they change every card's size.
+const settle = () => { renderBoard(); const c0 = camOf(); if (c0) { cam = Object.assign({}, c0); applyCam(); } else fit(); };
+requestAnimationFrame(settle);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!drag) settle(); });
+</script>
+</body>
+</html>

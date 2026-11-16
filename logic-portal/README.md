@@ -230,6 +230,41 @@ The page's **☆ Topic on passages** switch turns the buttons off again, and you
   **Delete this topic**, on a topic, puts its passages under their other topics, or under
   Unsorted: none of them goes.
 
+**A board for a topic.** Beside a topic's name is **▦ Make a board**, and once it has one, **▦
+Board**. It opens [the topic's board](topic-board.html), in the same tab: the topic's passages
+as cards, laid out at first in the order you arranged them, to move about, join with arrows and
+annotate, with the portal beside it. **← Passages**, at its top left, brings you back to the list.
+It is the board of the study [the kinds of nothing](studies/kinds-of-nothing/README.md#the-board),
+made the portal's own, for one reader's topic rather than the seminar's one board.
+
+- **Its cards follow the topic.** A passage you put under the topic, anywhere in the portal, the
+  portal beside the board included, comes onto the board by itself, marked *new*. One you take
+  off the topic in the list keeps its card, drawn dashed and marked *no longer under this
+  topic*, with **Put it back under the topic** and **Take it off the board**, so that its arrows
+  are not lost without your saying so. Deleting a passage's card on the board takes the passage
+  off the topic too; it stays in My topics.
+- **Around them,** whatever you add: **Notes**, **Questions** (what the topic asks, in your
+  words), **Groups** (a named frame whose cards move with it), boxes, arrows named on the spot
+  (*develops*, *contradicts*, *qualifies*, *same as*, *cf.*, *answers?* to a question, or a word
+  of your own), drawing with a pen or an Apple Pencil, views, layers, **Focus** and **Find on the
+  board**.
+- **Click a card** to read its passage in full in the side, with the words you kept, if you kept
+  only some, and **your note on it**, which is the same note as in the list: write it in either.
+  The passage opens in the portal beside the board at the same time, under **Reading**.
+- **Annotate** some of a passage's words, or the whole of it, as on the study's board:
+  *Problem*, *Relevant to…*, *Interpretation*, *Comment*, with replies and *resolved*. An
+  annotation belongs to the passage, not the board, so it shows on every one of your boards
+  where that passage stands.
+- **Photograph the board** keeps it as it is now, to look at again or bring back. **Export**
+  saves the one board to a file, and **Import** brings such a file's cards in beside yours.
+
+The board is kept with your topics, under the same `localStorage` key, so it goes wherever they
+go: into **Save to file**, and into your locked file on GitHub, if that is on. The board page
+itself never holds your token: the portal beside it sends each change to GitHub, as the portal
+sends its own. Deleting a topic deletes its board, and **Undo** brings both back. Passages and
+notes take little room, but drawing and photographs grow, and this browser gives the site about
+5 MB in all: the board warns once your topics and boards pass 2 MB.
+
 **Where they are kept.** In your own browser, on your own computer, under one `localStorage`
 key, `kantlab-topics-v1`, and nowhere else unless you choose. The line at the top of the page
 says how things stand. **Save to file**, in its **⋯** menu, writes them all to one `.json` file,
@@ -266,10 +301,15 @@ same passage kept in both is one passage, and the later change to it wins. A pas
 deleted stays deleted, however old the copy that still has it. Two topics of the same name, made
 on two computers, become one, and a note changed in both copies keeps both versions, the second
 marked *— from another copy —*. The page tells you when a merge did one of those last two
-things, and otherwise says nothing.
+things, and otherwise says nothing. A board changed in only one copy takes that change; one
+changed in both is merged card by card, arrow by arrow, and where both changed the very same
+card, the board saved later has its way. Annotations are merged one by one, the later change to
+each standing.
 
-The code is [topics.js](topics.js). It reads the portal only through `window.PORTAL`, as the
-handout tray does. Where the GitHub copy goes is set at its top (`GH`): to give the topics a
+The code is [topics.js](topics.js), and the board [topic-board.html](topic-board.html), which
+began as a copy of the study's `board.html` and now goes its own way: an improvement to one
+reaches the other only by asking for it. Both read the portal only through `window.PORTAL`, as
+the handout tray does, the board in the portal beside it. Where the GitHub copy goes is set at its top (`GH`): to give the topics a
 repository of their own, change `repo` there, and give everyone's token that repository.
 
 ## Studies
