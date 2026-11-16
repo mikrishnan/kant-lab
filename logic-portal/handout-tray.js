@@ -86,9 +86,8 @@ let touched = null;   // the linked passage being changed, whose copies follow i
 let CLASSH = [], viewing = null;
 const CS = window.KANTLAB_CLASS_SHARE || null;   // handouts/class-share.js: where the class's copy is kept
 const SHARE_HERE = !!CS && location.hostname === CS.site && window === window.top;   // changed from the live site only, never from the class screen's copy
-const BOARD_LINK = 'studies/kinds-of-nothing/board.html';   // opened once, it leaves the board's token in this browser
-let CLASS_SHA = null, CLASS_ETAG = null, classTok, classUsed = '', classKeyMade = false, classBusy = null, classT = 0, classPoll = 0;
-// classSt.st: 'idle' | 'loading' | 'ok' | 'none' (nothing shown) | 'nokey' (no token here) | 'err', with msg
+let CLASS_SHA = null, CLASS_ETAG = null, CLASS_AT = '', myTok, anonTried = false, classBusy = null, classT = 0, classPoll = 0, setupOpen = false, pendingWrite = null;
+// classSt.st: 'idle' | 'loading' | 'ok' | 'none' (nothing shown) | 'err', with msg; sendSt: this browser's last change to it
 let classSt = { st: 'idle', msg: '' }, sendSt = { st: '', msg: '', ids: [] };
 const own = () => DB.handouts.find(h => h.id === DB.current) || DB.handouts[0];
 const cur = () => (viewing && CLASSH.find(h => h.id === viewing)) || own();
@@ -864,7 +863,13 @@ css.textContent = `
   #hpage aside .hclass .btn { white-space: normal; text-align: left; }
   #hpage aside .hclass .ok, #hpage aside .hclass-st.ok { color: #3f6b3a; }
   #hpage aside .hclass .bad, #hpage aside .hclass-st.bad { color: #9a3b1e; }
-  #hpage aside .hclass-key { padding: 0.45rem 0.55rem; border: 1px dashed var(--accent-light); border-radius: 6px; background: var(--card); }
+  #hpage aside .hsetup { margin-top: 0.6rem; padding: 0.55rem 0.65rem; border: 1px dashed var(--accent-light); border-radius: 6px; background: var(--card); }
+  #hpage aside .hsetup > b { display: block; color: var(--accent); margin-bottom: 0.2rem; }
+  #hpage aside .hsetup ol { margin: 0.3rem 0 0.5rem 1.1rem; padding: 0; }
+  #hpage aside .hsetup li { margin: 0.2rem 0; }
+  #hpage aside .hsetup input { display: block; width: 100%; box-sizing: border-box; font: inherit; padding: 0.25rem 0.45rem; border: 1px solid var(--line); border-radius: 5px; background: var(--paper, #faf6ec); }
+  #hpage aside .hsetup .hkeyst { min-height: 1.1em; margin: 0.25rem 0; }
+  #hpage aside .hkeyforget { display: block; margin-top: 0.6rem; font-size: 0.8rem; color: var(--faded); }
   #hpage .hro-note { margin: 0.2rem 0 0.8rem; padding: 0.45rem 0.7rem; border-left: 3px solid var(--accent-light); background: var(--card); color: var(--faded); font-size: 0.92rem; }
   #hpage aside .hback.ok { color: #3f6b3a; }
   #hpage aside .hback.bad { color: #9a3b1e; }
@@ -1265,7 +1270,7 @@ function render() {
   // nothing of its own and the class has something to read.
   const cls = classOthers(), ownShown = !cls.length || !isEmpty() || !classView;
   page.querySelector('aside').innerHTML =
-    (cls.length || /loading|nokey|err/.test(classSt.st) ? '<div class="hgrp">Shown to the class</div>' + cls.map(x =>
+    (cls.length || /loading|err/.test(classSt.st) ? '<div class="hgrp">Shown to the class</div>' + cls.map(x =>
       '<button type="button" class="hl cls' + (viewing === x.id ? ' on' : '') + '" data-cpick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
       '<span class="n">' + plural(countOf(x), 'passage') + ' · to read</span></button>').join('') + classStHtml() + (ownShown ? '<div class="hgrp">In this browser</div>' : '') : '') +
     (ownShown ? DB.handouts.map(x =>
@@ -1653,6 +1658,9 @@ page.addEventListener('click', e => {
     case 'showclass': return classShow(h);
     case 'stopclass': return classStop(h);
     case 'classretry': return classSync(true);
+    case 'classkey': return saveKey();
+    case 'classsetupno': setupOpen = false; pendingWrite = null; render(); return;
+    case 'classkeyforget': if (confirm('Forget your GitHub key in this browser? Handouts already shown stay shown; to change them from here, paste a key again.')) { dropToken(); render(); } return;
     case 'new': { viewing = null; const x = blank('Untitled handout'); DB.handouts.push(x); DB.current = x.id; save(); render(); const i = page.querySelector('.hname'); i.focus(); i.select(); return; }
     case 'delete': {
       const n = countOf(h), shown = classHas(h.id);
@@ -1743,6 +1751,7 @@ page.addEventListener('click', e => {
   }
 });
 page.addEventListener('toggle', e => { if (e.target.classList && e.target.classList.contains('htrash')) trashOpen = e.target.open; }, true);
+page.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('hkeyin')) { e.preventDefault(); saveKey(); } });
 page.addEventListener('input', e => {
   if (locked()) return;
   const h = cur();
@@ -2287,7 +2296,7 @@ page.addEventListener('click', e => {
 /* What Class view lets a click do: read, fold, open where it stands, export, and switch views;
    and, in Instructor view with a handout shown to the class open, a new handout of one's own, or
    no longer showing it. */
-const RO_OK = new Set(['close', 'dock', 'classview', 'instructorview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'save', 'bkdir', 'bkresume', 'new', 'stopclass', 'classretry']);
+const RO_OK = new Set(['close', 'dock', 'classview', 'instructorview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'save', 'bkdir', 'bkresume', 'new', 'stopclass', 'classretry', 'classkey', 'classsetupno']);
 
 /* ── The class's copy ─────────────────────────────────────────────────────
    "Show this handout to the class", in Instructor view, puts a copy of it where everyone with
@@ -2298,15 +2307,20 @@ const RO_OK = new Set(['close', 'dock', 'classview', 'instructorview', 'lock', '
    without its maker's margin notes (marks of kind 'mn') or its trash, as in the exports.
 
    Where it is kept: handouts/class-share.js (KANTLAB_CLASS_SHARE). One file, holding every handout
-   shown, encrypted with the class password (lock.js), in the seminar's private board repository,
-   reached through GitHub's API with the board's token, which can touch that repository and
-   nothing else, and is sent nowhere but api.github.com. The token comes from that file's `key`
-   (the token, encrypted with the class password), or else from the board itself, in a browser
-   that has opened it (localStorage 'kantlab-board-token', which board.html keeps).
-   Every change reads the file afresh and changes only the handouts it is about, so that two
-   browsers showing different handouts never undo each other. Only the live site changes it. */
+   shown, encrypted with the class password (lock.js), on a branch of this public repository of its
+   own, which is never merged and so never touches main or the site. Reading it needs nothing but
+   the class password: the first time a page asks, GitHub's API, without a token (fresh, but GitHub
+   allows each address only 60 such requests an hour); after that, GitHub's raw file server, which
+   can be up to five minutes behind. An older copy never replaces a newer one.
+   Changing it needs a GitHub token of its maker's own (for kant-lab alone, Contents: Read and
+   write), pasted once into Instructor view and kept in this browser only, encrypted with the class
+   password, and sent nowhere but api.github.com. Every change reads the file afresh and changes
+   only the handouts it is about, so that two browsers showing different handouts never undo each
+   other. Only the live site changes it. */
 const CLASS_SENT = 'kantlab-handouts-class-sent';   // { [handout id]: what this browser last sent of it (sigOf) }
-const API = 'https://api.github.com';
+const MY_TOKEN = 'kantlab-handouts-share-token';    // the maker's GitHub token, encrypted with the class password
+const API = 'https://api.github.com', RAW = 'https://raw.githubusercontent.com';
+const NEW_TOKEN = 'https://github.com/settings/personal-access-tokens/new';
 function sigOf(s) { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return (x >>> 0).toString(36); }
 function forClass(h) {
   const x = JSON.parse(JSON.stringify(h));
@@ -2321,13 +2335,14 @@ function classOthers() { return CLASSH.filter(x => !DB.handouts.some(y => y.id =
 function whenOf(iso) { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString('en-GB', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }); }
 function sentOf() { try { return JSON.parse(localStorage.getItem(CLASS_SENT) || '{}') || {}; } catch (e) { return {}; } }
 function sentMark(id, sig) { const m = sentOf(); if (sig) m[id] = sig; else delete m[id]; try { localStorage.setItem(CLASS_SENT, JSON.stringify(m)); } catch (e) { /* only the next visit's check is lost */ } }
-function classForget() { CLASSH = []; viewing = null; CLASS_SHA = CLASS_ETAG = null; classTok = undefined; classUsed = ''; classSt = { st: 'idle', msg: '' }; sendSt = { st: '', msg: '', ids: [] }; }
+function classForget() { CLASSH = []; viewing = null; CLASS_SHA = CLASS_ETAG = null; CLASS_AT = ''; myTok = undefined; anonTried = false; setupOpen = false; pendingWrite = null; classSt = { st: 'idle', msg: '' }; sendSt = { st: '', msg: '', ids: [] }; }
 
-/* GitHub, as board.html reaches it: UTF-8 through base64, and a request that tells what came back. */
+/* GitHub: UTF-8 through base64, and a request that tells what came back. */
 function b64enc(str) { const u = new TextEncoder().encode(str); let b = ''; for (let i = 0; i < u.length; i += 0x8000) b += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(b); }
 function b64dec(b64) { const b = atob(String(b64).replace(/\s/g, '')), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return new TextDecoder().decode(u); }
 async function gh(method, path, tok, opts) {
-  const o = opts || {}, headers = { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + tok };
+  const o = opts || {}, headers = { Accept: 'application/vnd.github+json' };
+  if (tok) headers.Authorization = 'Bearer ' + tok;
   if (o.body) headers['Content-Type'] = 'application/json';
   if (o.etag) headers['If-None-Match'] = o.etag;
   let r;
@@ -2337,50 +2352,57 @@ async function gh(method, path, tok, opts) {
   if (r.status !== 304) { try { data = await r.json(); } catch (e) { data = null; } }
   return { status: r.status, ok: r.ok, data, etag: r.headers.get('ETag') };
 }
-const csPath = p => '/repos/' + encodeURIComponent(CS.owner) + '/' + encodeURIComponent(CS.repo) + '/contents/' + p.split('/').map(encodeURIComponent).join('/');
-const boardTok = () => { try { return localStorage.getItem('kantlab-board-token') || sessionStorage.getItem('kantlab-board-token') || ''; } catch (e) { return ''; } };
-// The tokens to try, the one that worked last first: the class password's, then the board's own.
-async function classToks() {
-  if (classTok === undefined) {
-    classTok = '';
-    if (CS && CS.key && LOCK && LOCK.key()) { try { const d = await LOCK.open(CS.key); if (d && d.kind === 'kantlab-class-token' && d.token) classTok = String(d.token); } catch (e) { /* made for another password, or not yet */ } }
-  }
-  const a = [classUsed, classTok, boardTok()].filter(Boolean);
-  return a.filter((t, j) => a.indexOf(t) === j);
-}
-// A request with each token in turn, until one is accepted. null when there is none to try.
-async function ghAny(method, path, opts) {
-  const toks = await classToks();
-  let r = null;
-  for (const t of toks) {
-    r = await gh(method, path, t, opts);
-    if (r.status !== 401) { if (r.status) classUsed = t; return Object.assign(r, { tok: t }); }
-  }
-  return r;
-}
+const repoApi = () => '/repos/' + encodeURIComponent(CS.owner) + '/' + encodeURIComponent(CS.repo);
+const csPath = p => repoApi() + '/contents/' + p.split('/').map(encodeURIComponent).join('/');
+const ghMsg = r => String((r && r.data && r.data.message) || '');
 function ghWhy(r) {
-  if (!r) return 'nokey';
-  if (r.status === 0) return 'GitHub can’t be reached from here just now.';
-  if (r.status === 401) return 'GitHub no longer accepts the key to the class’s copy: the board’s token has expired. It is renewed at the board’s setup page.';
-  if (r.status === 403) return 'GitHub would not let this key change the class’s copy (' + esc((r.data && r.data.message) || '403') + ').';
-  return 'GitHub answered ' + r.status + (r.data && r.data.message ? ': “' + esc(r.data.message) + '”' : '') + '.';
+  if (!r || r.status === 0) return 'GitHub can’t be reached from here just now.';
+  if (r.status === 401) return 'GitHub no longer accepts your key: it has run out or been withdrawn. Make a new one, below.';
+  if (r.status === 403 || r.status === 404) return 'Your key can’t change ' + esc(CS.repo) + ': it needs ' + esc(CS.repo) + ' under <i>Repository access</i>, and <i>Contents: Read and write</i>.';
+  return 'GitHub answered ' + r.status + (ghMsg(r) ? ': “' + esc(ghMsg(r)) + '”' : '') + '.';
 }
-// The file as it stands: { list, sha } (list null if there is no file), or { err }
-async function classFetch(etag) {
-  const r = await ghAny('GET', csPath(CS.path) + '?ref=' + encodeURIComponent(CS.branch), { etag });
-  if (!r || (!r.ok && r.status !== 304 && r.status !== 404)) return { err: ghWhy(r) };
-  if (r.status === 304) return { same: true };
-  if (r.status === 404) return { list: null, sha: null, etag: null };
-  let text = r.data.content ? b64dec(r.data.content) : null;
-  if (text == null) {   // over a megabyte: GitHub sends it apart
-    const b = await gh('GET', '/repos/' + encodeURIComponent(CS.owner) + '/' + encodeURIComponent(CS.repo) + '/git/blobs/' + r.data.sha, r.tok);
-    if (!b.ok) return { err: ghWhy(b) };
-    text = b64dec(b.data.content);
-  }
+
+/* The maker's token, in this browser only, encrypted with the class password; '' if there is none. */
+async function myToken() {
+  if (myTok !== undefined) return myTok;
+  myTok = '';
+  try {
+    const s = localStorage.getItem(MY_TOKEN);
+    if (s && LOCK && LOCK.key()) { const d = await LOCK.open(JSON.parse(s)); if (d && d.kind === 'kantlab-share-token' && d.token) myTok = String(d.token); }
+  } catch (e) { /* made with another class password: asked for again */ }
+  return myTok;
+}
+async function keepToken(tok) {
+  localStorage.setItem(MY_TOKEN, await LOCK.seal(JSON.stringify({ kind: 'kantlab-share-token', v: 1, token: tok, kept: new Date().toISOString() })));
+  myTok = tok;
+}
+function dropToken() { try { localStorage.removeItem(MY_TOKEN); } catch (e) { /* fine */ } myTok = ''; }
+
+// The handouts in the file's text, opened with the class key
+async function unseal(text) {
   let d = null;
   try { d = JSON.parse(text); if (LOCK.isLocked(d)) d = await LOCK.open(d); } catch (e) { d = null; }
   const list = d && d.kind === 'kantlab-class-handouts' && Array.isArray(d.handouts) ? d.handouts.filter(x => x && x.id && Array.isArray(x.items)) : null;
-  return { list, unreadable: !list, sha: r.data.sha, etag: r.etag };
+  return { list, unreadable: !list, at: (d && d.at) || '' };
+}
+// The file as it stands: { list, sha, etag, at } (list null if there is none yet), { same: true }, or { err }.
+// With the maker's token, GitHub's API; without, the API once (fresh: true), else the raw file server.
+async function classFetch(etag, fresh) {
+  const tok = await myToken();
+  if (tok || fresh) {
+    const r = await gh('GET', csPath(CS.path) + '?ref=' + encodeURIComponent(CS.branch), tok, { etag: tok ? etag : null });
+    if (r.status === 304) return { same: true };
+    if (r.status === 404) return { list: null, sha: null, etag: null, at: '' };
+    if (r.ok && r.data && r.data.content != null && r.data.content !== '') return Object.assign(await unseal(b64dec(r.data.content)), { sha: r.data.sha, etag: r.etag });
+    if (tok && !r.ok) return { err: ghWhy(r) };
+    // without a token, this address's allowance may be spent (or the file is over a megabyte): the raw file server
+  }
+  let r;
+  try { r = await fetch(RAW + '/' + encodeURIComponent(CS.owner) + '/' + encodeURIComponent(CS.repo) + '/' + encodeURIComponent(CS.branch) + '/' + CS.path, { cache: 'no-store' }); }
+  catch (e) { return { err: 'GitHub can’t be reached from here just now.' }; }
+  if (r.status === 404) return { list: null, sha: null, etag: null, at: '' };
+  if (!r.ok) return { err: 'GitHub answered ' + r.status + '.' };
+  return Object.assign(await unseal(await r.text()), { sha: null, etag: null });
 }
 function classTake(list) {
   CLASSH = list || [];
@@ -2394,48 +2416,63 @@ async function classLoad() {
   const first = classSt.st !== 'ok' && classSt.st !== 'none';
   if (classSt.st === 'idle') { classSt = { st: 'loading', msg: 'Fetching the class’s handouts…' }; if (!page.hidden) render(); }
   classBusy = (async () => {
-    const was = JSON.stringify(CLASSH), wasV = viewing, f = await classFetch(first ? null : CLASS_ETAG);
+    const was = JSON.stringify(CLASSH), wasV = viewing, wasSt = classSt.st, fresh = first && !anonTried;
+    if (fresh) anonTried = true;
+    const f = await classFetch(first ? null : CLASS_ETAG, fresh);
     if (f.same) return;
-    if (f.err === 'nokey') classSt = { st: 'nokey', msg: '' };
-    else if (f.err) classSt = { st: 'err', msg: f.err };
+    if (f.err) { if (first) classSt = { st: 'err', msg: f.err }; }   // a later look that fails leaves what is shown
     else if (f.unreadable) classSt = { st: 'err', msg: 'The class’s copy is locked with another class password.' };
+    else if (f.at && CLASS_AT && f.at < CLASS_AT) return;   // the raw file server, behind what is shown
     else {
-      classTake(f.list); CLASS_SHA = f.sha; CLASS_ETAG = f.etag;
+      classTake(f.list); CLASS_SHA = f.sha; CLASS_ETAG = f.etag; CLASS_AT = f.at || CLASS_AT;
       classSt = { st: f.list && f.list.length ? 'ok' : 'none', msg: '' };
       if (first && !viewing && isEmpty() && classOthers().length) viewing = classOthers()[0].id;
       if (first) classCatchUp();
     }
-    if (!page.hidden && (first || JSON.stringify(CLASSH) !== was || viewing !== wasV || classSt.st !== 'ok')) { const m = page.querySelector('main'), top = m ? m.scrollTop : 0; render(); if (m) m.scrollTop = top; }
+    if (!page.hidden && (first || JSON.stringify(CLASSH) !== was || viewing !== wasV || classSt.st !== wasSt)) { const m = page.querySelector('main'), top = m ? m.scrollTop : 0; render(); if (m) m.scrollTop = top; }
   })().finally(() => { classBusy = null; });
   return classBusy;
 }
+// The branch the copy is kept on, made if it is not there: a branch of its own, holding nothing else.
+async function makeBranch(tok) {
+  const t = await gh('POST', repoApi() + '/git/trees', tok, { body: { tree: [{ path: 'README.md', mode: '100644', type: 'blob',
+    content: '# The class’s copy of the handouts\n\nA branch of its own, never merged. It holds `' + CS.path + '`, the handouts shown to the class from the Logic Portal, encrypted with the class password. See `logic-portal/handouts/README.md` on main.\n' }] } });
+  if (!t.ok) return false;
+  const c = await gh('POST', repoApi() + '/git/commits', tok, { body: { message: 'The class’s copy of the handouts: a branch of its own', tree: t.data.sha, parents: [] } });
+  if (!c.ok) return false;
+  const r = await gh('POST', repoApi() + '/git/refs', tok, { body: { ref: 'refs/heads/' + CS.branch, sha: c.data.sha } });
+  return r.ok || r.status === 422;   // 422: made in between
+}
 // Change the class's copy: read it afresh, change it (fn: list → list), and write it back,
-// again if someone else wrote in between.
+// again if someone else wrote in between. Without a key yet, the setup comes first.
 async function classWrite(fn, message, ids) {
   if (!SHARE_HERE) { toast('The class’s copy is changed only from the live site, ' + CS.site + '.'); return false; }
   while (classBusy) await classBusy.catch(() => {});
+  const id = ids || [], tok = await myToken();
+  if (!tok) { setupOpen = true; pendingWrite = { fn, message, ids: id }; sendSt = { st: '', msg: '', ids: id }; if (!page.hidden) render(); focusKey(); return false; }
   let ok = false;
   classBusy = (async () => {
-    const id = ids || [];
     sendSt = { st: 'sending', msg: '', ids: id }; if (!page.hidden) render();
+    let branchMade = false;
     for (let tries = 0; tries < 4; tries++) {
       const f = await classFetch(null);
-      if (f.err) { sendSt = { st: f.err === 'nokey' ? 'nokey' : 'err', msg: f.err === 'nokey' ? '' : f.err, ids: id }; return; }
-      const list = fn((f.list || []).slice());
+      if (f.err) { sendSt = { st: 'err', msg: f.err, ids: id }; return; }
+      const list = fn((f.unreadable ? [] : f.list || []).slice());
       const now = new Date().toISOString();
       const text = await LOCK.seal(JSON.stringify({ kind: 'kantlab-class-handouts', v: 1, at: now, handouts: list }));
       const body = { message, content: b64enc(text), branch: CS.branch };
       if (f.sha) body.sha = f.sha;
-      const r = await ghAny('PUT', csPath(CS.path), { body });
-      if (r && r.ok) {
-        CLASS_SHA = r.data && r.data.content && r.data.content.sha; CLASS_ETAG = null;
+      const r = await gh('PUT', csPath(CS.path), tok, { body });
+      if (r.ok) {
+        CLASS_SHA = r.data && r.data.content && r.data.content.sha; CLASS_ETAG = null; CLASS_AT = now;
         classTake(list); classSt = { st: list.length ? 'ok' : 'none', msg: '' };
         list.forEach(x => sentMark(x.id, sigFor(x)));
         sendSt = { st: 'ok', msg: '', ids: id }; ok = true;
-        if (r.tok !== classTok) await classKey(r.tok);
         return;
       }
-      if (r && (r.status === 409 || r.status === 422)) continue;   // written in between: read it again
+      if (!branchMade && (r.status === 404 || r.status === 422) && /branch|ref/i.test(ghMsg(r))) { branchMade = true; if (await makeBranch(tok)) { tries--; continue; } }
+      if (r.status === 409 || r.status === 422) continue;   // written in between: read it again
+      if (r.status === 401) setupOpen = true;
       sendSt = { st: 'err', msg: ghWhy(r), ids: id }; return;
     }
     sendSt = { st: 'err', msg: 'The class’s copy kept changing under this one. Try again.', ids: id };
@@ -2443,21 +2480,27 @@ async function classWrite(fn, message, ids) {
   await classBusy;
   return ok;
 }
-/* The key in class-share.js, made the first time the board's own token is what reached the class's
-   copy (or once that key stops working): the token, encrypted with the class password, written to
-   the board repository as handouts/class-key.json, for its contents to go into class-share.js. */
-async function classKey(tok) {
-  if (classKeyMade || !tok) return;
-  classKeyMade = true;
-  try {
-    const text = await LOCK.seal(JSON.stringify({ kind: 'kantlab-class-token', v: 1, token: tok, made: new Date().toISOString() }));
-    const p = csPath(CS.keyPath), was = await gh('GET', p + '?ref=' + encodeURIComponent(CS.branch), tok);
-    const body = { message: 'Handouts: the class password’s key to the class’s copy', content: b64enc(text), branch: CS.branch };
-    if (was.ok && was.data && was.data.sha) body.sha = was.data.sha;
-    await gh('PUT', p, tok, { body });
-  } catch (e) { classKeyMade = false; }
+// The key, pasted into the setup: checked with GitHub, kept, and then whatever was waiting for it.
+async function saveKey() {
+  const inp = page.querySelector('.hkeyin'), tok = inp ? inp.value.trim() : '';
+  if (!tok) { focusKey(); return; }
+  const st = page.querySelector('.hkeyst');
+  if (st) st.textContent = 'Checking with GitHub…';
+  const r = await gh('GET', repoApi(), tok);
+  if (!r.ok) {
+    if (st) st.innerHTML = r.status === 401 ? 'GitHub does not accept that key. Copy it again, whole.' : r.status === 404 || r.status === 403 ? 'That key can’t see ' + esc(CS.repo) + ': choose it under <i>Repository access</i>.' : ghWhy(r);
+    return;
+  }
+  inp.value = '';
+  await keepToken(tok);
+  setupOpen = false;
+  const w = pendingWrite; pendingWrite = null;
+  toast('Your key is kept in this browser, locked with the class password.');
+  if (w) { const ok = await classWrite(w.fn, w.message, w.ids); if (ok) toast('Done. Everyone with the class password finds it on their Handouts page within five minutes.'); }
+  else render();
 }
-// Each shown handout of this browser's own whose copy is behind it: sent on (force: whatever differs).
+function focusKey() { setTimeout(() => { const i = page.querySelector('.hkeyin'); if (i) { i.focus(); i.scrollIntoView({ block: 'nearest' }); } }, 30); }
+// Each shown handout of this browser's own whose copy is behind it: sent on.
 function classSoon() {
   if (!SHARE_HERE || !CLASSH.length) return;
   clearTimeout(classT);
@@ -2467,6 +2510,7 @@ function classBehind() { return DB.handouts.filter(h => { const c = CLASSH.find(
 async function classSync(force) {
   const hs = classBehind();
   if (!hs.length) { if (force) classLoad(); return; }
+  if (!force && !(await myToken())) return;   // by itself only with a key; Send now asks for one
   const by = new Map(hs.map(h => [h.id, h])), now = new Date().toISOString();
   await classWrite(list => list.map(x => by.has(x.id) ? Object.assign(forClass(by.get(x.id)), { sent: now }) : x),
     'Handouts: ' + hs.map(h => '“' + h.name + '”').join(', ') + ' changed', hs.map(h => h.id));
@@ -2484,7 +2528,7 @@ async function classShow(h) {
   const now = new Date().toISOString(), was = classHas(h.id);
   const ok = await classWrite(list => { const x = Object.assign(forClass(h), { sent: now }), k = list.findIndex(y => y.id === h.id); if (k >= 0) list[k] = x; else list.push(x); return list; },
     'Handouts: “' + h.name + '” shown to the class', [h.id]);
-  if (ok) toast(was ? 'Sent to the class as it stands now.' : 'Shown to the class: everyone with the class password finds “' + h.name + '” on their Handouts page. What you change is sent on by itself, a few seconds later.');
+  if (ok) toast(was ? 'Sent to the class as it stands now.' : 'Shown to the class: everyone with the class password finds “' + h.name + '” on their Handouts page within five minutes. What you change is sent on by itself.');
 }
 async function classStop(h) {
   if (!h || !classHas(h.id)) return;
@@ -2495,9 +2539,21 @@ async function classStop(h) {
 // Under "Shown to the class", in the list: how the class's copy stands, when there is something to say.
 function classStHtml() {
   if (classSt.st === 'loading') return '<p class="hclass-st muted small">' + esc(classSt.msg) + '</p>';
-  if (classSt.st === 'nokey') return '<p class="hclass-st small">The class’s handouts can’t be fetched on this computer yet. Open <a href="' + BOARD_LINK + '" target="_blank" rel="noopener">the seminar’s board</a> once, with its password, then come back.</p>';
   if (classSt.st === 'err') return '<p class="hclass-st small bad">' + classSt.msg + ' <button type="button" class="linkish" data-h="classretry">Try again</button></p>';
   return '';
+}
+// Once, on this computer: the maker's own GitHub key, for changing the class's copy.
+function setupHtml() {
+  return '<div class="hsetup"><b>Once, on this computer</b>' +
+    '<p class="small">To show handouts to the class from here, this browser needs a GitHub key of yours, for ' + esc(CS.repo) + '. Students need nothing but the class password.</p>' +
+    '<ol class="small"><li><a href="' + NEW_TOKEN + '" target="_blank" rel="noopener">Make a new fine-grained token</a> on GitHub. Name it “Kant Lab handouts”, and give it an expiry date after the course ends.</li>' +
+    '<li><i>Repository access</i> → <i>Only select repositories</i> → <b>' + esc(CS.repo) + '</b>.</li>' +
+    '<li><i>Permissions</i> → <i>Contents</i> → <b>Read and write</b>. Nothing else.</li>' +
+    '<li><i>Generate token</i>, copy it, and paste it here.</li></ol>' +
+    '<input type="password" class="hkeyin" placeholder="github_pat_…" autocomplete="off" spellcheck="false" aria-label="Your GitHub key">' +
+    '<p class="hkeyst small bad" aria-live="polite"></p>' +
+    '<button type="button" class="btn solid" data-h="classkey">' + (pendingWrite ? 'Keep it, and go on' : 'Keep it') + '</button> <button type="button" class="linkish" data-h="classsetupno">Not now</button>' +
+    '<p class="small muted">It is kept in this browser only, locked with the class password. Keep a copy in your passwords: if this browser’s data is cleared, paste it here again.</p></div>';
 }
 // In Instructor view: the open handout and the class.
 function classHtml(h) {
@@ -2506,23 +2562,22 @@ function classHtml(h) {
   const c = shown && CLASSH.find(x => x.id === h.id);
   let st = '';
   if (mine && sendSt.st === 'sending') st = '<p class="small muted">Sending…</p>';
-  else if (mine && sendSt.st === 'nokey') st = '<p class="small bad">This computer has no key to the class’s copy yet. Open <a href="' + BOARD_LINK + '" target="_blank" rel="noopener">the seminar’s board</a> once, with its password, then press again.</p>';
   else if (mine && sendSt.st === 'err') st = '<p class="small bad">Not sent. ' + sendSt.msg + ' <button type="button" class="linkish" data-h="classretry">Try again</button></p>';
   else if (behind) st = '<p class="small muted">Changed since it was last sent. <button type="button" class="linkish" data-h="classretry">Send now</button></p>';
-  else if (shown) st = '<p class="small ok">✓ The class sees it as it is now' + (c && c.sent ? ', sent ' + esc(whenOf(c.sent)) : '') + '.</p>';
+  else if (shown) st = '<p class="small ok">✓ Sent as it is now' + (c && c.sent ? ', ' + esc(whenOf(c.sent)) : '') + '. Students see it within five minutes.</p>';
   let body;
   if (!SHARE_HERE) body = '<p class="small muted">Shown to the class from the live site only, ' + esc(CS.site) + '.</p>';
   else if (viewing) body = '<p class="small muted">Shown to the class from another browser.</p>' + st + '<button type="button" class="linkish" data-h="stopclass">Stop showing it</button>';
   else if (shown) body = '<p class="small">Shown to the class: everyone with the class password finds it on their Handouts page, to read.</p>' + st +
-    '<button type="button" class="linkish" data-h="stopclass">Stop showing it</button>' +
-    (classKeyMade ? '<p class="small hclass-key">Students who have opened the board on their own computer can read it now. For everyone else, the site needs the class password’s key, once: it is in the board’s repository as <i>' + esc(CS.keyPath) + '</i>, and goes into the portal’s <i>handouts/class-share.js</i>.</p>' : '');
+    '<button type="button" class="linkish" data-h="stopclass">Stop showing it</button>';
   else body = '<button type="button" class="btn solid" data-h="showclass" title="Everyone with the class password finds it on their Handouts page, to read; what you change is sent on by itself">Show this handout to the class</button>' + st;
-  return '<div class="hclass"><b class="cz">The class</b>' + body + '</div>';
+  return '<div class="hclass"><b class="cz">The class</b>' + body + (SHARE_HERE && setupOpen ? setupHtml() : '') +
+    (SHARE_HERE && !setupOpen && myTok ? '<button type="button" class="linkish hkeyforget" data-h="classkeyforget" title="Forget your GitHub key in this browser; it is asked for again the next time you show a handout">Forget my GitHub key here</button>' : '') + '</div>';
 }
 // While the page is open, the class's copy is asked after every so often, and when the page comes back into view.
 function classWatch() {
   clearInterval(classPoll);
-  classPoll = setInterval(() => { if (!page.hidden && document.visibilityState === 'visible') classLoad(); }, Math.max(10, (CS && CS.pollSeconds) || 20) * 1000);
+  classPoll = setInterval(() => { if (!page.hidden && document.visibilityState === 'visible') classLoad(); }, Math.max(15, (CS && CS.pollSeconds) || 60) * 1000);
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !page.hidden) classLoad(); });
 const ready = () => new Promise(res => { const t = () => ($('loading') && !$('loading').hidden ? setTimeout(t, 250) : res()); t(); });

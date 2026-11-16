@@ -25,8 +25,8 @@ This folder holds small tools for teaching with the Logic Portal, one folder eac
 - **The handouts, read only.** `handout-tray.js` keeps every handout in this browser in
   `localStorage['kantlab-handouts-v1']`, as `{ v, current, collect, handouts }`
   (`current` the `id` of the one open), each `{ id, name, made, items, trash, published }`,
-  the shapes its comments give. A handout shown to the class is kept apart, encrypted, in the
-  board's private repository (`handouts/class-share.js` says where); `handouts/class.json`
+  the shapes its comments give. A handout shown to the class is kept apart, encrypted, on a
+  branch of its own (`handouts/class-share.js` says where); `handouts/class.json`
   and any published `handouts/<name>.json` in this repository are left from before, and nothing
   reads them now. A tool reads these
   and never writes them. The `storage` event tells a tool when the portal, in another

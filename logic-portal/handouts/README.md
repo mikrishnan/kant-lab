@@ -11,29 +11,22 @@ everyone's own Handouts page by **Show this handout to the class**.
 In Instructor view, **Show this handout to the class** puts a copy of the handout where everyone
 with the class password finds it, on their own Handouts page under **Shown to the class**, to read
 but not to change. What its maker changes afterwards is sent on by itself a few seconds later, and
-an open Handouts page asks for it every twenty seconds. **Stop showing it**, or deleting the
-handout, takes it away. Margin notes and the trash are left out.
+reaches the students within five minutes. **Stop showing it**, or deleting the handout, takes it
+away. Margin notes and the trash are left out.
 
-The copy is not kept here, since this repository is public. It is one file, `handouts/class.json`,
-in the seminar's private board repository (`mikrishnan/kant-lab-board`), encrypted with the class
-password as well. The page reaches it through GitHub's API with the board's token, which can touch
-that repository and nothing else. The token reaches the page in one of two ways:
+The copy is one file, `class.json`, encrypted with the class password, as the class's handouts
+were before. It is kept on a branch of this repository of its own, `class-handouts`, which is
+never merged, so that its many small changes never touch `main` or the site. The class password
+is all anyone needs to read it: the page fetches it from GitHub without any token, through
+GitHub's API the first time and from GitHub's raw file server after that. That server can be up to
+five minutes behind, which is why a change takes that long to reach the students.
 
-- **`key` in [class-share.js](class-share.js)**: the token, encrypted with the class password, so
-  that the class password is all anyone needs.
-- **The board's own**, in a browser where someone has opened the board with its password.
-
-`key` is made by the page. The first time a handout is shown to the class with the board's own
-token, the page writes `handouts/class-key.json` into the board repository and says so in
-Instructor view. Copy that file's contents, as they stand, into `key` in `class-share.js`, and
-raise `class-share.js?v=` in `../index.html`. Do the same when the board's token is renewed
-(`board.html#setup`): the old key stops working, the page falls back on the board's token, and
-writes a new `class-key.json`.
-
-What this means: anyone with the class password can get the board's token out of `key`, as anyone
-with the board's password can get it out of the board. The class's copy changes only from the live
-site, and only from Instructor view, which is for Maya. Anyone there who presses it can show a
-handout to the class, and Maya can take it away again with **Stop showing it**.
+Changing it needs a GitHub token of its maker's own, for this repository, with **Contents: Read and
+write**. The first time a handout is shown, Instructor view says how to make one and asks for it.
+It is kept in that browser only, encrypted with the class password, and never in the repository.
+If that browser's data is cleared, it is asked for again, so keep a copy in a password manager.
+**Forget my GitHub key here**, in Instructor view, removes it. The class's copy changes only from
+the live site.
 
 Two older files are still here: [class.json](class.json), from **Share with the class** as it
 was until 13 November 2026, which uploaded every handout to this repository by hand, and a
@@ -59,6 +52,6 @@ password is not asked again there. **Lock**, on the Handouts page, forgets it.
 
 **To change the password**, run `python3 make-lock.py` here. It asks for the new password
 twice and writes a new salt and fingerprint into `lock.js`; then raise `lock.js?v=` in
-`../index.html` and `../teaching/class-screen/index.html`, and tell the class. Then make the
-key in `class-share.js` again, as above, and show each handout to the class again: the old
-copy and the old key were encrypted with the old password.
+`../index.html` and `../teaching/class-screen/index.html`, and tell the class. Then show each
+handout to the class again, and paste the GitHub key again when asked: both were encrypted
+with the old password.
