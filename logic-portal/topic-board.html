@@ -127,6 +127,11 @@
   #details .sxrow { display: flex; flex-wrap: wrap; gap: 0.3rem 0.6rem; align-items: baseline; font-size: 0.82rem; margin: 0.15rem 0 0.35rem; }
   #details .sxrow b { font-weight: 600; color: var(--accent); min-width: 2.6rem; }
   #details .sxnow { font-size: 0.86rem; margin: 0 0 0.4rem; }
+  /* a passage card opened to its passage in full: wider, and above the cards it covers until it is closed */
+  .card.k-passage.open { width: 340px; z-index: 3; box-shadow: 0 3px 14px rgba(60, 40, 10, 0.25); }
+  .card.k-passage .pl { display: block; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.08em; color: var(--accent); margin: 0.3rem 0 0.05rem; }
+  .card .more { display: block; margin-top: 0.15rem; padding: 0; border: 0; background: none; color: var(--faded); font: inherit; font-size: 0.75rem; text-decoration: underline; cursor: pointer; }
+  .card .more:hover { color: var(--accent); }
   .card.k-problem { width: 260px; background: #fff7f1; border-color: #d6b19c; border-left-color: var(--prob); font-size: 0.88rem; line-height: 1.25; }
   .card .tag { display: block; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.09em; color: var(--prob); margin-bottom: 0.15rem; }
   .card.k-note { width: 190px; background: var(--note); border-color: #e6d58a; font-size: 0.9rem; line-height: 1.25; transform: rotate(-0.6deg); }
@@ -722,6 +727,7 @@ let focus = null;      // { id, hops }
 let query = '';
 let ppQuery = '';      // what is being looked for among the topic's passages, under Passages
 let ppOpen = new Set(); // the topic's passages opened under Passages, to be read there in full, by id
+let cardOpen = new Set(); // passage cards opened on the board, to be read there in full, by card id; never saved
 let cam = { x: 40, y: 30, k: 1 };
 let size = {};         // card id → { w, h }, as last drawn
 let side = 'details';
@@ -2155,6 +2161,24 @@ function pastedTable(cd) {
 }
 const cutNote = T => T.was.rows > TABLE_MAX.rows || T.was.cols > TABLE_MAX.cols ? ' It had ' + plural(T.was.cols, 'column') + ' and ' + plural(T.was.rows, 'row') + ': a table holds ' + TABLE_MAX.cols + ' and ' + TABLE_MAX.rows + ' at most, so the rest was left out.' : '';
 
+// A passage card can be opened, to read its passage on the board in full: one longer than the card
+// shows, or kept as some of its words, which are then followed by the passage they are from.
+// A card that quotes a stretch has a quote for each passage it runs over, and opens to all of them.
+const openQuotes = it => it.st ? it.quotes || [] : (it.quotes || []).slice(0, 1);
+function canOpenCard(it) {
+  const qs = openQuotes(it); if (!qs.length || !qs[0].q) return false;
+  const some = q => !!(q.kept && q.q !== q.kept);
+  return qs.some(q => some(q) && q.full) || qs.reduce((n, q) => n + String(some(q) ? q.kept : q.q).length, 0) + 3 * (qs.length - 1) > 240;
+}
+const isOpenCard = it => it.kind === 'passage' && cardOpen.has(it.id) && canOpenCard(it);
+function cardWhole(it) {
+  const qs = openQuotes(it), only = qs.some(q => q.kept && q.q !== q.kept), para = ' <span class="para" title="A new paragraph in the text">¶</span> ';
+  const all = '<div class="pq">“' + qs.map((q, k) => markText(String(q.q), layerOn('annotations') ? placeOn(it, k).spans : [], layerOn('parallels') ? parsOn(it, k).spans : [])).join(para) + '”</div>';
+  return only ? '<span class="pl">The words you kept</span><div class="pq">“' + qs.map(q => esc(q.kept || q.q)).join(para) + '”</div>' +
+    (qs.every(q => q.full) ? '<span class="pl">' + (qs.length > 1 ? 'The passages, in full' : 'The passage, in full') + '</span>' + all : '') : all;
+}
+function toggleCard(id) { if (cardOpen.has(id)) cardOpen.delete(id); else cardOpen.add(id); renderBoard(); }
+
 /* ── Render: the board ────────────────────────────────────────────────────── */
 function cardHtml(it) {
   const m = model(it.model), col = m ? m.color : '#b8a88a';
@@ -2164,7 +2188,9 @@ function cardHtml(it) {
   if (it.kind === 'table') return '<div class="card k-table" data-id="' + esc(it.id) + '">' + (it.label ? '<span class="tcap">' + esc(it.label) + '</span>' : '') + tableHtml(it) +
     (ro() ? '' : colW(it).map((w, i) => '<span class="tcol" data-tcol="' + i + '" title="Drag to widen this column"></span>').join('') + '<span class="bgrip" title="Drag to widen the table"></span><span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
   if (it.kind === 'passage') {
-    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 && q0.q ? '<div class="pq">“' + excerpt(it, 240) + '”</div>' : '') +
+    const op = isOpenCard(it);
+    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 && q0.q ? (op ? cardWhole(it) : '<div class="pq">“' + excerpt(it, 240) + '”</div>') : '') +
+      (canOpenCard(it) ? '<button type="button" class="more" data-cardopen="' + esc(it.id) + '" aria-expanded="' + op + '">' + (op ? '▴ less' : '▾ read it all here') + '</button>' : '') +
       '<span class="pc">' + esc((it.st && it.st.cite) || (q0 && q0.cite) || it.cite || it.ref || '') + (it.st && !it.st.whole ? '<i class="pof">' + esc(stretchOfWhat(it.st)) + '</i>' : '') + '</span>' +
       (it.slost ? '<span class="flag">these words are no longer where they were kept</span>' : '') +
       (it.off ? '<span class="flag">' + (it.off === 'gone' ? (SHM ? 'taken out of the topic' : 'no longer in My topics') : 'no longer under this topic') + '</span>' : '') +
@@ -2182,7 +2208,7 @@ function cardHtml(it) {
   inner += inMark(it.id) + (it.kind === 'passage' ? alsoChip(it) : '');
   const lc = it.kind === 'link' && it.lk ? (it.lk.state !== 'ok' ? ' gone' : '') : '';
   const pw = parSel && it.kind === 'passage' && layerOn('parallels') && parsOn(it, 0).spans.some(x => x.p.id === parSel) ? parColor(parById(parSel)) : '';   // turned to the chosen parallel's words
-  return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + (it.slost ? ' slost' : '') + lc + (pw ? ' pwin' : '') + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : it.kind === 'link' && it.lk && it.lk.color ? esc(it.lk.color) : '') + (pw ? ';--pw:' + pw : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+  return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + (it.slost ? ' slost' : '') + (isOpenCard(it) ? ' open' : '') + lc + (pw ? ' pwin' : '') + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : it.kind === 'link' && it.lk && it.lk.color ? esc(it.lk.color) : '') + (pw ? ';--pw:' + pw : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
 }
 function renderCards() {
   hydrate(); placeUnplaced();
@@ -3751,6 +3777,8 @@ $('stage').addEventListener('pointerdown', e => {
   const t = e.target;
   if (t.isContentEditable || t.closest('.pill-edit')) return;   // a caret or a selection in what is being edited
   if (editing) commitEditing();
+  const more = t.closest('[data-cardopen]');   // a card opened to its passage in full, or closed: neither selected nor moved
+  if (more && !mode && !spaceDown && (tool === 'move' || tool === 'select')) { toggleCard(more.dataset.cardopen); return; }
   const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame'), th = t.closest('.annt');
   const tcolEl = t.closest('.tcol'), cellEl = t.closest('.k-table [data-cell]'), chipEl = t.closest('.k-table .tp');
   const pk = t.closest('.part'), pch = t.closest('.pchip');   // a parallel's knot, or its chip on a card: chosen, not moved
@@ -4073,7 +4101,8 @@ function quickCard(kind, text, at, modelId) {
   if (!text) editInPlace(id, true);
 }
 const quickNote = (text, at, modelId) => { if (String(text || '').trim()) quickCard('note', text, at, modelId); };
-$('stage').addEventListener('dblclick', e => { if (lastType === 'mouse' && tool === 'move' && !e.target.closest('.float') && !e.target.isContentEditable && !e.target.closest('.pill-edit')) doubleAt(e.clientX, e.clientY); });
+$('cards').addEventListener('click', e => { const b = e.target.closest('[data-cardopen]'); if (b && e.detail === 0) toggleCard(b.dataset.cardopen); });   // from the keyboard
+$('stage').addEventListener('dblclick', e => { if (lastType === 'mouse' && tool === 'move' && !e.target.closest('.float') && !e.target.closest('[data-cardopen]') && !e.target.isContentEditable && !e.target.closest('.pill-edit')) doubleAt(e.clientX, e.clientY); });
 $('chooser').addEventListener('keydown', e => {
   if (e.target.id !== 'qnote') return;
   if (e.key === 'Escape') { $('chooser').classList.remove('show'); return; }

@@ -281,6 +281,9 @@ reader's topic rather than the seminar's one board.
 - **Click a card** to read its passage in full in the side, with the words you kept, if you kept
   only some, and **your note on it**, which is the same note as in the list: write it in either.
   The passage opens in the portal beside the board at the same time, under **Reading**.
+  **▾ read it all here**, on a card whose passage is longer than it shows, opens the card on the
+  board to the passage in full, above the cards it covers; **▴ less** closes it. An opened card
+  is not saved as opened.
 - **Change what a card quotes.** A passage is whatever the transcription made one paragraph,
   from a line to six pages, so a card can quote less of it, or more. **Change what it quotes**,
   in a passage card's side, shows the passage between the ones before and after it: select the
