@@ -155,6 +155,23 @@
   #side .tabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
   #details { flex: 1; overflow-y: auto; padding: 0.8rem 1rem 2rem; }
   #reading { flex: 1; display: none; flex-direction: column; min-height: 0; }
+  /* the topic's passages, waiting to be put on the board one at a time */
+  #passages { flex: 1; overflow-y: auto; padding: 0.8rem 1rem 2rem; display: none; }
+  #passages h2 { font-family: 'Cinzel', serif; font-size: 1rem; color: var(--accent); margin: 0 0 0.15rem; font-weight: 600; letter-spacing: 0.02em; }
+  #passages .sub { color: var(--faded); font-style: italic; margin: 0 0 0.5rem; font-size: 0.92rem; }
+  #passages .k { display: block; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); margin: 0.9rem 0 0.3rem; }
+  #passages .empty { color: var(--faded); font-style: italic; font-size: 0.92rem; }
+  #passages .pp { background: #fff; border: 1px solid var(--line-soft); border-left: 4px solid var(--line); border-radius: 6px; padding: 0.35rem 0.55rem 0.4rem; margin: 0 0 0.45rem; cursor: grab; }
+  #passages .pp:hover { border-color: var(--accent-light); }
+  #passages .pp.dragging { opacity: 0.5; }
+  #passages .pp .pc { font-size: 0.84rem; color: var(--accent); font-weight: 600; }
+  #passages .pp .pc span { color: var(--faded); font-weight: 400; }
+  #passages .pp .pw { font-style: italic; font-size: 0.9rem; line-height: 1.25; margin: 0.15rem 0 0.3rem; }
+  #passages .pp .row { display: flex; gap: 0.6rem; align-items: center; }
+  #passages .rel { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid var(--line-soft); border-radius: 6px; padding: 0.2rem 0.5rem; margin: 0.2rem 0; cursor: pointer; font-size: 0.88rem; color: var(--accent); }
+  #passages .rel:hover { border-color: var(--accent-light); }
+  #side .tabs button b.n { display: inline-block; min-width: 1.1rem; margin-left: 0.25rem; padding: 0 0.3rem; border-radius: 999px; background: var(--accent); color: var(--parchment); font-family: 'EB Garamond', serif; font-size: 0.75rem; letter-spacing: 0; font-weight: 400; }
+  #stage.dropping { outline: 3px dashed var(--accent-light); outline-offset: -6px; }
   #reading.on { display: flex; }
   #reading .bar { display: flex; justify-content: space-between; padding: 0.3rem 0.8rem; font-size: 0.82rem; color: var(--faded); border-bottom: 1px solid var(--parchment-dark); }
   #reading .bar a { color: var(--accent); }
@@ -340,6 +357,7 @@
     <button type="button" class="btn k-note" data-add="note" title="Anything, as on a whiteboard">Note</button>
     <button type="button" class="btn k-problem" data-add="problem" title="A question the topic raises, in your words: draw arrows to it from the passages that may answer it">Question</button>
     <button type="button" class="btn" data-add="model" title="A group: a named frame for cards, which move with it">Group</button>
+    <button type="button" class="btn" id="addp" title="The topic’s passages: put them on the board one at a time">Passage…</button>
   </span>
   <span class="grp"><span class="lbl">View</span>
     <select class="vsel" id="vsel" aria-label="View"></select>
@@ -390,8 +408,9 @@
     <div id="toast" class="float"></div>
   </div>
   <aside id="side">
-    <div class="tabs"><button type="button" id="tdet" class="on">On the board</button><button type="button" id="tread">Reading</button><button type="button" class="hide" id="tside" title="Put the side away, for more board">»</button></div>
+    <div class="tabs"><button type="button" id="tdet" class="on">On the board</button><button type="button" id="tpass" title="The topic’s passages, to put on the board one at a time">Passages</button><button type="button" id="tread">Reading</button><button type="button" class="hide" id="tside" title="Put the side away, for more board">»</button></div>
     <div id="details"></div>
+    <div id="passages"></div>
     <div id="reading"><div class="bar"><span>The Logic Portal</span><a id="full" href="index.html" target="_blank" rel="noopener">open it full size ↗</a></div><iframe id="portal" title="The Logic Portal" src="index.html"></iframe></div>
   </aside>
 </div>
@@ -403,9 +422,10 @@
 <script>
 /* ── Data ─────────────────────────────────────────────────────────────────── */
 /* ─────────────────────────────────────────────────────────────────────────────
-   A topic's board. Each topic in My topics (topics.js) can have one: its passages are cards
-   on it, which come and go with the topic, and around them whatever the reader adds, notes,
-   questions, groups, boxes, arrows, drawing and annotations. It is the reader's alone.
+   A topic's board. Each topic in My topics (topics.js) can have one. The topic's passages wait
+   under Passages, in the side, and the reader puts them on the board one at a time, as cards;
+   around them goes whatever the reader adds, notes, questions, groups, boxes, arrows, drawing
+   and annotations. Nothing comes onto the board by itself. It is the reader's alone.
 
    It is kept in My topics' own store, in this browser's localStorage, beside the topics, so
    that it goes wherever they go: Save to file, and the locked file on GitHub when Keep on
@@ -427,7 +447,6 @@ const TOPICS = 'kantlab-topics-v1';               // My topics' store (topics.js
 const TOPICS_GH = 'kantlab-topics-github';        // set while My topics keeps a copy on GitHub in this browser
 const BASE = { models: [], items: [], arrows: [], views: [] };
 const TYPES = ['develops', 'contradicts', 'qualifies', 'same as', 'cf.'];
-const COLS = 4, COLW = 275, ROWH = 215;           // where a topic's passages are laid out at first
 const BIG = 2e6;                                  // past this many characters the store has, the page warns
 const PALETTE = ['#5c6e3a', '#8b5e3c', '#3b5068', '#6b4e7a', '#3f6b63', '#9a6a1e', '#7a3b3b', '#5a5a5a'];
 const LAYERS = [
@@ -580,33 +599,45 @@ function underTopic() {
   });
 }
 const passageCard = (x, fresh) => Object.assign({ id: 'p-' + x.id, kind: 'passage', mt: x.id, ref: x.ref, cite: x.cite || '', model: null, label: '', quotes: [{ ref: x.ref, cite: x.cite || '' }], date: today() }, fresh ? { fresh: true } : {});
-// A board made from the topic: its passages in rows, in the order arranged in My topics.
+// A new board is empty: the topic's passages wait under Passages, in the side, to be put on it one at a time.
 function layOut() {
-  const b = cleanBoard({ models: [], items: [], arrows: [], views: [{ id: 'v-1', name: 'The board', pos: {}, hidden: [], layers: {}, ink: [] }], photos: [] });
-  underTopic().forEach((x, k) => { const c = passageCard(x); b.items.push(c); b.views[0].pos[c.id] = [(k % COLS) * COLW, Math.floor(k / COLS) * ROWH]; });
-  return b;
+  return cleanBoard({ models: [], items: [], arrows: [], views: [{ id: 'v-1', name: 'The board', pos: {}, hidden: [], layers: {}, ink: [] }], photos: [] });
 }
-// Every passage under the topic has its card. One put under it since comes onto the board in a row
-// of its own beneath the rest, marked new. A card whose passage has gone from My topics takes the
-// passage again if it is kept again. Returns whether anything changed.
+// Nothing comes onto the board by itself. The one thing done here: a card whose passage has gone from
+// My topics takes the passage again if it is kept again. Returns whether anything changed.
 function syncCards() {
   const b = realB(); if (!topic || !b) return false;
   let changed = false;
-  const v = b.views.find(w => w.id === viewId) || b.views[0];
-  const at = id => v.pos[id] || b.views.map(w => w.pos[id]).find(Boolean);
-  const ps = b.items.map(i => at(i.id)).filter(Boolean);
-  const x0 = ps.length ? Math.min(...ps.map(p => p[0])) : 0, y0 = ps.length ? Math.max(...ps.map(p => p[1])) + ROWH + 40 : 0;
-  let n = 0;
   underTopic().forEach(x => {
     if (b.items.some(i => i.kind === 'passage' && i.mt === x.id)) return;
     const orphan = b.items.find(i => i.kind === 'passage' && !itemOf(i.mt) && i.ref === x.ref);
-    if (orphan) { orphan.mt = x.id; orphan.cite = x.cite || orphan.cite; changed = true; return; }
-    const c = passageCard(x, true);
-    if (b.items.some(i => i.id === c.id)) c.id = uid('p');
-    b.items.push(c); v.pos[c.id] = [x0 + (n % COLS) * COLW, y0 + Math.floor(n / COLS) * ROWH]; n++;
-    changed = true;
+    if (orphan) { orphan.mt = x.id; orphan.cite = x.cite || orphan.cite; changed = true; }
   });
   return changed;
+}
+// The topic's passages not yet on this board, in the order arranged in My topics.
+const waiting = () => underTopic().filter(x => !B.items.some(i => i.kind === 'passage' && i.mt === x.id));
+// Put one of the topic's passages on the board: where it was dropped, or else in the middle of the view,
+// a little below the last one put there, so that several in a row don't hide one another.
+let lastPut = null;
+function putPassage(mt, at) {
+  if (ro()) { toast(roWhy()); return; }
+  const x = itemOf(mt); if (!x || !Array.isArray(x.topics) || !x.topics.includes(TID)) return;
+  if (B.items.some(i => i.kind === 'passage' && i.mt === mt)) { toast('It is on the board already.'); return; }
+  if (!at) {
+    const c = centre(), near = lastPut && Date.now() - lastPut.t < 120000 && Math.hypot(lastPut.at[0] - c[0], lastPut.at[1] - c[1]) < 600;
+    at = near ? [lastPut.at[0] + 30, lastPut.at[1] + 40] : [c[0] - 45, c[1] - 40];
+  }
+  let id;
+  change(() => {
+    const card = passageCard(x);
+    if (B.items.some(i => i.id === card.id)) card.id = uid('p');
+    id = card.id;
+    B.items.push(card); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
+    showLayer('passage');
+  });
+  lastPut = { at, t: Date.now() };
+  sel = { kind: 'card', ids: [id] }; form = null; render(); showCard(id);
 }
 // The portal in the side, once its texts are in: where a passage's words are read from.
 function portalReady() {
@@ -752,7 +783,7 @@ function takeIn() {
   afterRemote(); renderHead(); renderAround();
 }
 function renderAround() {
-  hydrate(); renderTools(); renderLayers(); renderBoard();
+  hydrate(); renderTools(); renderLayers(); renderBoard(); renderPassages();
   if (!form || form.kind === 'annotate') { if (selInSide() || noteFocused()) sideStale = true; else renderSide(); }   // words being selected, or a note being written, in the side are not lost
   else if (form.kind === 'annotations' && $('annlist')) $('annlist').innerHTML = annListAll();
   applyCam();
@@ -1079,7 +1110,7 @@ function banner() {
   else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
   b.innerHTML = h; b.classList.toggle('show', !!h);
 }
-function render() { hydrate(); renderTools(); renderLayers(); renderBoard(); renderSide(); applyCam(); }
+function render() { hydrate(); renderTools(); renderLayers(); renderBoard(); renderSide(); renderPassages(); applyCam(); }
 let toastT;
 function toast(s) { const t = $('toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3800); }
 const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); };
@@ -1101,7 +1132,7 @@ function sideIntro() {
   const n = B.items.filter(i => i.kind === 'passage').length, gh = (() => { try { return !!localStorage.getItem(TOPICS_GH); } catch (e) { return false; } })();
   return '<div class="intro"><h2>' + esc(topic ? topic.name : 'A topic’s board') + '</h2><p class="sub">The board of a topic in My topics</p>' +
     (topic ? '<span class="k">The topic, in your words</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
-    '<p>Every passage under the topic is a card here, and comes onto the board by itself when you put it under the topic, anywhere in the portal: in the portal beside the board too, with <b>☆ Topic</b>. Click a card to read its passage in full, here or in the portal.</p>' +
+    '<p>The topic’s passages wait under <b>Passages</b>, in the side. Put them on the board one at a time, with <b>+ On the board</b> or by dragging one onto it. A passage you put under the topic later, anywhere in the portal, joins them there; one taken off the board goes back. Click a card to read its passage in full, here or in the portal.</p>' +
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
@@ -1124,7 +1155,7 @@ function sideIntro() {
 function cardButtons(it, arr) {
   let h = '<span class="k">Arrows</span>' + (arr.length ? arr.map(relBtn).join('') : '<p class="empty">None yet.</p>');
   if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="edit">' + (it.kind === 'passage' ? 'Give it a heading' : 'Edit') + '</button><button type="button" class="btn" data-act="linkfrom">+ Arrow from here</button><button type="button" class="btn" data-act="focus">Focus</button></div>' +
-    '<div class="row"><button type="button" class="linkish" data-act="offview">Take it off this view</button><button type="button" class="linkish" data-act="delete">' + (it.kind === 'passage' && !it.off ? 'Take it off the board and the topic' : 'Delete it') + '</button></div>';
+    '<div class="row"><button type="button" class="linkish" data-act="offview">Take it off this view</button><button type="button" class="linkish" data-act="delete">' + (it.kind === 'passage' ? 'Take it off the board' : 'Delete it') + '</button></div>';
   else h += '<div class="row"><button type="button" class="btn" data-act="focus">Focus</button></div>';
   return h;
 }
@@ -1328,7 +1359,30 @@ function keepFields(fn) {
   sels.forEach((q, i) => { const el = D.querySelector(q); if (el && vals[i] != null && !el.readOnly && (q !== '[data-type]' || [...el.options].some(o => o.value === vals[i]))) el.value = vals[i]; });
   const o = D.querySelector('[data-other]'), t = D.querySelector('[data-type]'); if (o && t) o.style.display = t.value === '__other' ? '' : 'none';
 }
-function showSide(which) { side = which; $('tdet').classList.toggle('on', which === 'details'); $('tread').classList.toggle('on', which === 'reading'); $('details').style.display = which === 'details' ? '' : 'none'; $('reading').classList.toggle('on', which === 'reading'); }
+function showSide(which) {
+  side = which;
+  $('tdet').classList.toggle('on', which === 'details'); $('tpass').classList.toggle('on', which === 'passages'); $('tread').classList.toggle('on', which === 'reading');
+  $('details').style.display = which === 'details' ? '' : 'none'; $('passages').style.display = which === 'passages' ? 'block' : 'none'; $('reading').classList.toggle('on', which === 'reading');
+  if (which === 'passages') renderPassages();
+}
+// The topic's passages: those waiting to go on the board, then those on it.
+function renderPassages() {
+  const w = waiting(), n = w.length;
+  $('tpass').innerHTML = 'Passages' + (n ? '<b class="n">' + n + '</b>' : '');
+  $('addp').textContent = n ? 'Passage… (' + n + ')' : 'Passage…';
+  if (side !== 'passages') return;
+  const on = B.items.filter(i => i.kind === 'passage' && i.kx && Array.isArray(i.kx.topics) && i.kx.topics.includes(TID));
+  const words = x => { const t = String(x.excerpt || x.words || '').replace(/\s+/g, ' ').trim(); return t.length > 160 ? t.slice(0, 159) + '…' : t; };
+  const P = $('passages'), top = P.scrollTop;
+  P.innerHTML = '<h2>The topic’s passages</h2><p class="sub">' + (topic ? esc(underTopic().length + (underTopic().length === 1 ? ' passage' : ' passages') + ' under “' + topic.name + '”') : '') + '</p>' +
+    (!topic ? '' : n ? '<p style="font-size:0.9rem;margin:0 0 0.6rem">Put them on the board one at a time: press <b>+ On the board</b>, or drag one onto the board where you want it.</p>' +
+      w.map(x => '<div class="pp" draggable="' + (ro() ? 'false' : 'true') + '" data-pp="' + esc(x.id) + '"><div class="pc">' + esc(x.cite || x.ref) + (x.work ? ' <span>· ' + esc(x.work) + '</span>' : '') + '</div>' +
+        '<div class="pw"' + (x.en ? ' lang="en"' : '') + '>“' + esc(words(x)) + '”</div><div class="row">' + (ro() ? '' : '<button type="button" class="btn solid" data-ppadd="' + esc(x.id) + '">+ On the board</button>') +
+        '<button type="button" class="linkish" data-ppread="' + esc(x.id) + '">read it beside the board</button></div></div>').join('')
+      : '<p class="empty">' + (underTopic().length ? 'All of them are on the board.' : 'None yet. In the portal, press ☆ Topic on a passage and tick “' + esc(topic.name) + '”: it waits here.') + '</p>') +
+    (on.length ? '<span class="k">On the board</span>' + on.map(it => '<button type="button" class="rel" data-ppshow="' + esc(it.id) + '">' + esc(cardTitle(it)) + '</button>').join('') : '');
+  P.scrollTop = top;
+}
 function read(href) { $('portal').src = href; $('full').href = href; document.body.classList.remove('sideclosed'); showSide('reading'); }
 
 /* ── Actions ──────────────────────────────────────────────────────────────── */
@@ -1402,23 +1456,23 @@ function saveModel(D) {
 // Deleting a passage's card takes the passage off the topic too, since every passage under the topic has its card.
 function delAsk(ids) {
   const its = ids.map(item).filter(Boolean), n = its.filter(it => it.kind === 'passage' && !it.off).length;
-  return (its.length > 1 ? 'Delete these ' + its.length + ' cards, and their arrows, from every view?' : 'Delete this card, and its arrows, from every view?') +
-    (n ? '\n\n' + (n === 1 ? (its.length > 1 ? 'One passage among them is' : 'Its passage is') : n + ' of their passages are') + ' taken off “' + (topic ? topic.name : '') + '” too, and ' + (n === 1 ? 'stays' : 'stay') + ' in My topics.' : '');
+  return (its.length > 1 ? 'Take these ' + its.length + ' cards, and their arrows, off the board, from every view?' : 'Take this card, and its arrows, off the board, from every view?') +
+    (n ? '\n\n' + (n === 1 ? (its.length > 1 ? 'The passage among them stays' : 'Its passage stays') : 'Their ' + n + ' passages stay') + ' under “' + (topic ? topic.name : '') + '”, among the passages to put on the board.' : '');
 }
 function removeCards(ids) {
   if (ro()) { toast(roWhy()); return; }
   const set = new Set(ids);
-  const off = ids.map(item).filter(it => it && it.kind === 'passage' && !it.off).map(it => it.mt);
+  const back = ids.map(item).filter(it => it && it.kind === 'passage' && !it.off).length;
   undoStack.push(JSON.stringify(B)); if (undoStack.length > 80) undoStack.shift();
   redoStack = [];
   B.items = B.items.filter(it => !set.has(it.id));
   const goneA = B.arrows.filter(a => set.has(a.from) || set.has(a.to)).map(a => a.id);
   B.arrows = B.arrows.filter(a => !goneA.includes(a.id));
   B.views.forEach(v => { ids.forEach(id => delete v.pos[id]); v.hidden = (v.hidden || []).filter(x => !set.has(x)); });
-  save(off.length ? d => off.forEach(mt => { const x = d.items.find(y => y && y.id === mt); if (x && Array.isArray(x.topics)) { x.topics = x.topics.filter(t => t !== TID); x.at = now(); } }) : null);
+  save();
   if (focus && set.has(focus.id)) focus = null;
   sel = { kind: null, ids: [] }; render();
-  if (off.length) toast((off.length === 1 ? 'Its passage is' : off.length + ' passages are') + ' off “' + (topic ? topic.name : '') + '” now, and still in My topics.');
+  if (back) toast((back === 1 ? 'Its passage is' : back + ' passages are') + ' back under Passages, in the side. Undo (⌘Z) puts ' + (back === 1 ? 'it' : 'them') + ' back on the board.');
 }
 const photoList = () => photos;
 const photoN = p => p.n || (p.board ? { items: p.board.items.length, arrows: p.board.arrows.length, views: p.board.views.length } : { items: 0, arrows: 0, views: 0 });
@@ -2174,6 +2228,28 @@ $('back').addEventListener('click', noteNow);
 $('tside').addEventListener('click', () => document.body.classList.add('sideclosed'));
 $('sideopen').addEventListener('click', () => document.body.classList.remove('sideclosed'));
 $('tdet').addEventListener('click', () => showSide('details'));
+$('tpass').addEventListener('click', () => showSide('passages'));
+$('addp').addEventListener('click', () => { document.body.classList.remove('sideclosed'); showSide('passages'); });
+$('passages').addEventListener('click', e => {
+  const a = e.target.closest('[data-ppadd]'); if (a) { putPassage(a.dataset.ppadd); return; }
+  const r = e.target.closest('[data-ppread]'); if (r) { const x = itemOf(r.dataset.ppread), h = x && portalHref(x); if (h) read(h); return; }
+  const s = e.target.closest('[data-ppshow]'); if (s) { select('card', [s.dataset.ppshow]); showCard(s.dataset.ppshow); }
+});
+const PP_TYPE = 'application/x-kantlab-topic-passage';
+$('passages').addEventListener('dragstart', e => {
+  const p = e.target.closest && e.target.closest('.pp'); if (!p || ro()) return;
+  e.dataTransfer.setData(PP_TYPE, p.dataset.pp); e.dataTransfer.setData('text/plain', p.querySelector('.pc').textContent);
+  e.dataTransfer.effectAllowed = 'copy'; p.classList.add('dragging');
+});
+$('passages').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); });
+$('stage').addEventListener('dragover', e => { if (![...(e.dataTransfer.types || [])].includes(PP_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); });
+$('stage').addEventListener('dragleave', e => { if (e.target === $('stage')) $('stage').classList.remove('dropping'); });
+$('stage').addEventListener('drop', e => {
+  const mt = e.dataTransfer.getData(PP_TYPE); $('stage').classList.remove('dropping'); if (!mt) return;
+  e.preventDefault();
+  const [wx, wy] = toWorld(e.clientX, e.clientY);
+  putPassage(mt, [wx - 120, wy - 25]);
+});
 $('tread').addEventListener('click', () => { if (!$('portal').getAttribute('src')) read(PORTAL); else showSide('reading'); });
 $('details').addEventListener('click', e => {
   const D = $('details');
@@ -2352,6 +2428,7 @@ $('annbar').innerHTML = ANN_KINDS.map(k => '<button type="button" class="ak-' + 
 renderPens();
 renderHead();
 render();
+if (topic && !lost && waiting().length && !B.items.some(i => i.kind === 'passage')) showSide('passages');
 showLost();
 watchPortal();
 // Cards are measured once the page is laid out, and again when its fonts arrive, since they change every card's size.

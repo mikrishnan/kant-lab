@@ -231,18 +231,22 @@ The page's **☆ Topic on passages** switch turns the buttons off again, and you
   Unsorted: none of them goes.
 
 **A board for a topic.** Beside a topic's name is **▦ Make a board**, and once it has one, **▦
-Board**. It opens [the topic's board](topic-board.html), in the same tab: the topic's passages
-as cards, laid out at first in the order you arranged them, to move about, join with arrows and
-annotate, with the portal beside it. **← Passages**, at its top left, brings you back to the list.
-It is the board of the study [the kinds of nothing](studies/kinds-of-nothing/README.md#the-board),
-made the portal's own, for one reader's topic rather than the seminar's one board.
+Board**. It opens [the topic's board](topic-board.html), in the same tab, with the portal beside
+it: a board to put the topic's passages on as cards, move about, join with arrows and annotate.
+**← Passages**, at its top left, brings you back to the list. It is the board of the study [the
+kinds of nothing](studies/kinds-of-nothing/README.md#the-board), made the portal's own, for one
+reader's topic rather than the seminar's one board.
 
-- **Its cards follow the topic.** A passage you put under the topic, anywhere in the portal, the
-  portal beside the board included, comes onto the board by itself, marked *new*. One you take
-  off the topic in the list keeps its card, drawn dashed and marked *no longer under this
-  topic*, with **Put it back under the topic** and **Take it off the board**, so that its arrows
-  are not lost without your saying so. Deleting a passage's card on the board takes the passage
-  off the topic too; it stays in My topics.
+- **You put the passages on it, one at a time.** A new board is empty. The topic's passages
+  wait under **Passages**, a tab in the side (or **Passage…** among the tools), in the order you
+  arranged them, with a count of those still waiting. Press **+ On the board**, or drag one onto
+  the board where you want it. A passage you put under the topic later, anywhere in the portal,
+  the portal beside the board included, joins them there; nothing comes onto the board by
+  itself. **Take it off the board**, on a passage's card, sends it back to Passages; it stays
+  under the topic.
+- **A passage you take off the topic** in the list keeps its card, drawn dashed and marked *no
+  longer under this topic*, with **Put it back under the topic** and **Take it off the board**,
+  so that its arrows are not lost without your saying so.
 - **Around them,** whatever you add: **Notes**, **Questions** (what the topic asks, in your
   words), **Groups** (a named frame whose cards move with it), boxes, arrows named on the spot
   (*develops*, *contradicts*, *qualifies*, *same as*, *cf.*, *answers?* to a question, or a word
