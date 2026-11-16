@@ -1205,7 +1205,9 @@ const ADAPT = {
         if (!b.text || b.kind === 'rule' || b.kind === 'note') return;
         let cite = 'AA ' + vol + ':' + b.aa + (b.aaEnd && b.aaEnd !== b.aa ? '–' + b.aaEnd : '');
         if (paraOf[b.id]) cite = '§ ' + paraOf[b.id] + ', ' + cite;
-        addPassage(T, { id: b.id, cite, aa: b.aa, aaEnd: b.aaEnd, vol, text: b.text, sec, para: paraOf[b.id] || null });
+        // where each AA page begins inside the paragraph, [offset, page], so that some of its words can be cited by their own page
+        const pages = (b.pages || []).filter(x => x && x.i >= 0 && x.i <= b.text.length && x.p != null).map(x => [x.i, x.p]);
+        addPassage(T, { id: b.id, cite, aa: b.aa, aaEnd: b.aaEnd, vol, text: b.text, sec, para: paraOf[b.id] || null, pages: pages.length ? pages : null });
       });
     });
   },
@@ -3783,6 +3785,109 @@ function chunkedMarked(p, spans) {
   return br.length ? richText(p.text, spans.map(z => [z[0], z[1], z[2] ? 'on' : 'hit']), br.map(at => ({ at, html: BRK }))) : marked(p.text, 0, p.text.length, spans);
 }
 
+/* A STRETCH of one text, as My topics keeps it and a topic's board quotes it: from an offset in one
+   passage to an offset in the same passage or a later one of the same text. Its words and its pages
+   are the text's; only where it starts and ends is the reader's. A Reflexion is a note of its own,
+   with its own phase and siglum, so a stretch never runs from one into the next. */
+const STRETCH_MAX = 40;   // the passages one stretch may cover
+const canStretch = (i, j) => !!(P[i] && P[j] && P[i].t === P[j].t && (i === j || TEXTS[P[i].t].shape !== 'refl') && Math.abs(j - i) < STRETCH_MAX);
+// A passage's pages, as [[offset, page]] from its start, with what goes before them in a citation.
+function pageMarks(p) {
+  const T = TEXTS[p.t];
+  if (T.shape === 'logik' && p.aa != null) return { pre: 'AA ' + p.vol + ':', at: [[0, String(p.aa)]].concat((p.pages || []).map(x => [x[0], String(x[1])])) };
+  if (T.shape !== 'passages') return null;
+  // a page the print's own pagination was read uncertainly on keeps its query, as the passage's citation does
+  const qy = new Set(((T.meta && T.meta.query) || []).map(String));
+  if (p.edl && p.edPg != null) return { pre: p.edl + ' ', at: [[0, String(p.edPg) + (qy.has(String(p.edPg)) ? '?' : '')]].concat((p.pbm || []).map(([o, l]) => [o, String(l).slice(p.edl.length + 1)])) };
+  if (p.aa != null && !p.edl) return { pre: 'AA ' + p.vol + ':', at: [[0, String(p.aa)]].concat((p.pbm || []).map(([o, l]) => [o, String(l)])) };
+  return null;
+}
+// The page a position stands on; for the end of a stretch, the page its last character is on.
+function pageAt(m, off, end) { let l = m.at[0][1]; m.at.forEach(([o, n]) => { if (end ? o < off : o <= off) l = n; }); return l; }
+// The citation of the stretch from (i, a) to (j, b): its own pages where the text has them, else the passages'.
+function stretchCite(i, a, j, b) {
+  const p = P[i], q = P[j], T = TEXTS[p.t];
+  if (i === j && a <= 0 && b >= p.text.length) return p.cite;
+  if (T.shape === 'meier' || T.shape === 'metaphysica') return i === j ? p.cite : '§§ ' + p.para + '–' + q.para;
+  const m = pageMarks(p), n = pageMarks(q);
+  if (!m || !n || m.pre !== n.pre) return i === j ? p.cite : p.cite + ' – ' + q.cite;
+  const s = pageAt(m, a, false), e = pageAt(n, b, true);
+  const par = p.para != null ? '§ ' + p.para + (q.para != null && q.para !== p.para ? '–' + q.para : '') + ', ' : '';
+  return par + m.pre + s + (e !== s ? '–' + e : '');
+}
+/* The stretch from [address, offset] to [address, offset]: its words (a passage break as a line break),
+   its citation, and its part in each passage it covers. null if it no longer reads in these texts. */
+function stretchOf(from, to) {
+  if (!Array.isArray(from) || !Array.isArray(to)) return null;
+  const i = BYID.get(from[0]), j = BYID.get(to[0]);
+  if (i == null || j == null || j < i || !canStretch(i, j)) return null;
+  const parts = [];
+  for (let k = i; k <= j; k++) {
+    const L = P[k].text.length, a = k === i ? Math.max(0, Math.min(L, +from[1] || 0)) : 0, b = k === j ? Math.max(0, Math.min(L, +to[1] || 0)) : L;
+    if (b < a || (b === a && i !== j)) continue;
+    parts.push({ ref: TEXTS[P[k].t].key + ':' + P[k].id, i: k, a, b, whole: a === 0 && b === L, text: P[k].text.slice(a, b), cite: stretchCite(k, a, k, b) });
+  }
+  if (!parts.some(x => x.b > x.a)) return null;
+  const f = parts[0], l = parts[parts.length - 1];
+  return { text: parts.map(x => x.text).join('\n'), cite: stretchCite(f.i, f.a, l.i, l.b), parts, from: [f.ref, f.a], to: [l.ref, l.b],
+    whole: parts.length === 1 && f.whole, of: parts.length === 1 && !f.whole ? P[f.i].cite : '' };
+}
+/* Where words kept in My topics stand now. A stretch that still gives its words stands where it was. If it
+   doesn't (a text extracted again can move them), the words are looked for in the passages round where they
+   were: found once, or once best matching the words kept either side of them (pre, suf), they are there.
+   Words kept before stretches were, with no span, are looked for in their own passage, spacing aside, and
+   taken only if they are there once. null where they aren't found: the copy kept is then all there is. */
+const PLACED = new Map();
+const squeeze = t => String(t).replace(/[^\S\n]+/g, ' ').trim();
+function placeWords(ref, words, span) {
+  if (!words) return null;
+  const key = ref + '\u0000' + words + '\u0000' + JSON.stringify(span || null);
+  if (PLACED.has(key)) return PLACED.get(key);
+  let out = null;
+  const st0 = span ? stretchOf(span.from, span.to) : null;
+  if (st0 && st0.text === words) out = { st: st0, moved: false };
+  else {
+    const k0 = BYID.get(span ? span.from[0] : ref);
+    if (k0 != null) {
+      const T = TEXTS[P[k0].t], lines = String(words).split('\n').length - 1;
+      const lo = span ? Math.max(T.first, k0 - 3) : k0, hi = span ? Math.min(T.last, k0 + 3 + lines) : k0;
+      let hay = '';
+      const at = [];   // for each character of hay: [passage, offset], or null for a passage break
+      for (let k = lo; k <= hi; k++) {
+        if (k > lo) { hay += '\n'; at.push(null); }
+        const t = P[k].text;
+        for (let o = 0; o < t.length; o++) {
+          if (/\s/.test(t[o])) { if (hay.endsWith(' ') || hay.endsWith('\n') || !hay.length) continue; hay += ' '; } else hay += t[o];
+          at.push([k, o]);
+        }
+      }
+      const w = squeeze(words), hits = [];
+      if (w) for (let x = hay.indexOf(w); x >= 0; x = hay.indexOf(w, x + 1)) hits.push(x);
+      let best = hits.length === 1 ? hits[0] : -1;
+      if (hits.length > 1 && span && (span.pre || span.suf)) {
+        const pre = squeeze(span.pre || ''), suf = squeeze(span.suf || '');
+        const fit = x => { let n = 0; for (let k = 1; k <= pre.length && hay[x - k] === pre[pre.length - k]; k++) n++; for (let k = 0; k < suf.length && hay[x + w.length + k] === suf[k]; k++) n++; return n; };
+        const sc = hits.map(fit), top = Math.max(...sc);
+        if (sc.filter(v => v === top).length === 1 && top > 0) best = hits[sc.indexOf(top)];
+      }
+      if (best >= 0 && at[best] && at[best + w.length - 1]) {
+        const a = at[best], b = at[best + w.length - 1], key2 = k => TEXTS[P[k].t].key + ':' + P[k].id;
+        const st = stretchOf([key2(a[0]), a[1]], [key2(b[0]), b[1] + 1]);
+        if (st) out = { st, moved: !!span, found: !span };
+      }
+    }
+  }
+  PLACED.set(key, out);
+  return out;
+}
+// The words either side of a stretch, kept with it so that it can be found again: as annotations keep theirs.
+function stretchContext(st, n) {
+  const f = st.parts[0], l = st.parts[st.parts.length - 1];
+  return { pre: P[f.i].text.slice(Math.max(0, f.a - n), f.a), suf: P[l.i].text.slice(l.b, l.b + n) };
+}
+// The places a lecture paragraph is drawn broken at, as offsets: the pieces ☆ Topic can keep on their own.
+const pieceBreaks = i => P[i] ? chunkBreaks(P[i], []) : [];
+
 /* ═══ THE STUDY VIEW: a textbook with Kant's notes beside it, as the Meier and Baumgarten
    Readers had it ═══ */
 const isStudyText = T => T && (T.shape === 'meier' || T.shape === 'metaphysica');
@@ -5301,7 +5406,8 @@ function focusFromText(k, box) {
 
 /* Exposed for checking the page from the console. */
 window.PORTAL = { S, P, TEXTS, LAYERS, DOCS, CONC_REV, ANNOT, FT, runQuery: () => runQuery(), parseQuery, normWord, placeOf, parallelsFor, findInText,
-  BYID, SITE_PORTAL, trFor, trState, trEntry, trStyleFor, openRead };   // the last six for handout-tray.js
+  BYID, SITE_PORTAL, trFor, trState, trEntry, trStyleFor, openRead,   // the last six for handout-tray.js
+  stretchOf, stretchCite, canStretch, sentenceStarts, pieceBreaks, placeWords, stretchContext, STRETCH_MAX };   // for My topics and the topics' boards
 
 boot();
 })();
@@ -5309,6 +5415,6 @@ boot();
 <script src="handouts/lock.js?v=2026-11-08a"></script>
 <script src="handouts/class-share.js?v=2026-11-16b"></script>
 <script src="handout-tray.js?v=2026-11-16d"></script>
-<script src="topics.js?v=2026-11-16c"></script>
+<script src="topics.js?v=2026-11-16d"></script>
 </body>
 </html>

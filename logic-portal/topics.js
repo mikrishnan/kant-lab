@@ -57,6 +57,7 @@ const KEY = 'kantlab-topics-v1';               // the topics themselves
 const BASE_KEY = 'kantlab-topics-base';        // the copy as it last stood on GitHub, to tell who changed what
 const MODE_KEY = 'kantlab-topics-mode';        // 'on', or absent for off
 const FILED_KEY = 'kantlab-topics-filed';      // when they were last saved to a file
+const EXT_KEY = 'kantlab-topics-extent';       // 'piece' when ☆ Topic last kept the part of a passage in view
 const GH_KEY = 'kantlab-topics-github';        // { login, at } while GitHub is on in this browser
 const TOKEN_KEY = 'kantlab-topics-token';      // in sessionStorage, or in localStorage with "remember"
 const QUEUE_TOKEN_KEY = 'kantlab-queue-token'; // the queue's, offered if it is here
@@ -112,6 +113,17 @@ const blank = () => ({ v: 1, topics: [], items: [], gone: {}, alias: {}, boards:
 const clone = o => JSON.parse(JSON.stringify(o));
 const isObj = x => !!x && typeof x === 'object' && !Array.isArray(x);
 const withId = a => Array.isArray(a) ? a.filter(x => isObj(x) && typeof x.id === 'string') : [];
+/* A passage's words kept on their own can be a STRETCH of its text, or of several passages in a row of one
+   text: span: { from: [address, offset], to: [address, offset], pre, suf }, beside the words themselves in
+   excerpt (a passage break among them as a line break) and cite, their own pages. The portal reads them and
+   finds them again (PORTAL.stretchOf, placeWords). Words kept before there were stretches have no span: the
+   portal looks for them in their passage. A passage kept whole has neither. */
+const spanOk = s => isObj(s) && [s.from, s.to].every(x => Array.isArray(x) && typeof x[0] === 'string' && Number.isFinite(+x[1]));
+const placed = it => it && it.excerpt && !it.en && ready() && PT.placeWords ? PT.placeWords(it.ref, it.excerpt, it.span || null) : null;
+const spanOf = st => Object.assign({ from: st.from.slice(), to: st.to.slice() }, PT.stretchContext ? PT.stretchContext(st, 32) : {});
+const paraHtml = s => esc(s).replace(/\n/g, ' <span class="mtpara" title="A new paragraph in the text">¶</span> ');
+// A stretch in the passages it covers, the words kept lit.
+const litHtml = st => st.parts.map(x => { const t = P[x.i].text; return esc(t.slice(0, x.a)) + '<mark class="mtlit">' + esc(t.slice(x.a, x.b)) + '</mark>' + esc(t.slice(x.b)); }).join(' <span class="mtpara">¶</span> ');
 function cleanBoard(b) {
   if (!isObj(b) || !Array.isArray(b.items)) return null;
   const out = Object.assign({}, b);
@@ -132,9 +144,11 @@ function clean(d) {
   });
   d.items.forEach(x => {
     if (!x || typeof x.id !== 'string' || typeof x.ref !== 'string') return;
-    out.items.push({ id: x.id, ref: x.ref, topics: Array.isArray(x.topics) ? [...new Set(x.topics.filter(t => typeof t === 'string'))] : [],
+    const o = { id: x.id, ref: x.ref, topics: Array.isArray(x.topics) ? [...new Set(x.topics.filter(t => typeof t === 'string'))] : [],
       cite: str(x.cite), work: str(x.work), date: str(x.date), words: str(x.words), excerpt: typeof x.excerpt === 'string' && x.excerpt ? x.excerpt : null,
-      en: !!x.en, note: str(x.note), added: str(x.added) || str(x.at), at: str(x.at) || str(x.added) });
+      en: !!x.en, note: str(x.note), added: str(x.added) || str(x.at), at: str(x.at) || str(x.added) };
+    if (o.excerpt && !o.en && spanOk(x.span)) o.span = { from: [x.span.from[0], +x.span.from[1]], to: [x.span.to[0], +x.span.to[1]], pre: str(x.span.pre).slice(0, 64), suf: str(x.span.suf).slice(0, 64) };
+    out.items.push(o);
   });
   [['gone', out.gone], ['alias', out.alias]].forEach(([k, o]) => {
     if (d[k] && typeof d[k] === 'object') Object.keys(d[k]).forEach(id => { if (typeof d[k][id] === 'string') o[id] = d[k][id]; });
@@ -196,14 +210,21 @@ const topicOf = id => DB.topics.find(t => t.id === id);
 const itemOf = id => DB.items.find(x => x.id === id);
 const wholeOf = ref => DB.items.find(x => x.ref === ref && !x.excerpt);
 const keptAt = ref => DB.items.filter(x => x.ref === ref);
+// Words kept that stand in a passage: kept from it, or a stretch that runs over it.
+function partsAt(ref) {
+  const k = idxOf(ref);
+  return DB.items.filter(x => x.excerpt && (x.ref === ref || (k != null && x.span && (() => { const a = idxOf(x.span.from[0]), b = idxOf(x.span.to[0]); return a != null && b != null && a <= k && k <= b; })())));
+}
 const countIn = id => DB.items.filter(x => x.topics.includes(id)).length;
 const sortedTopics = () => DB.topics.slice().sort((a, b) => a.name.localeCompare(b.name, 'de', { sensitivity: 'base' }));
 const topicNames = x => x.topics.map(id => topicOf(id)).filter(Boolean).map(t => t.name).sort((a, b) => a.localeCompare(b, 'de'));
 
-function itemFor(i, excerpt, en) {
+function itemFor(i, excerpt, en, st) {
   const p = P[i], T = TEXTS[p.t], t = now();
-  return { id: 'i-' + uid(), ref: refOf(i), topics: [], cite: p.cite || '', work: T.short || T.title || T.key, date: p.dateLabel || T.date || '',
-    words: clip(flat(p.text), 300), excerpt: excerpt || null, en: !!en, note: '', added: t, at: t };
+  const it = { id: 'i-' + uid(), ref: st ? st.from[0] : refOf(i), topics: [], cite: st ? st.cite : p.cite || '', work: T.short || T.title || T.key, date: p.dateLabel || T.date || '',
+    words: clip(flat(p.text), 300), excerpt: st ? st.text : excerpt || null, en: !!en, note: '', added: t, at: t };
+  if (st && !en) it.span = spanOf(st);
+  return it;
 }
 function newTopic(name) {
   const n = flat(name).slice(0, 120);
@@ -660,6 +681,9 @@ css.textContent = `
   #mtpage .mtwords { margin: 0.4rem 0 0.35rem; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
   #mtpage .mtwords.ex { border-left: 3px solid var(--hl-strong); padding-left: 0.6rem; }
   #mtpage .mtlost { color: #9a3b1e; font-size: 0.85rem; font-style: italic; margin: 0 0 0.35rem; }
+  #mtpage .mtpara { color: var(--accent-light); font-size: 0.85em; }
+  #mtpage mark.mtlit { background: var(--hl); color: inherit; }
+  #mtpick .ext { margin: 0 0 0.45rem; padding: 0 0 0.4rem; border-bottom: 1px solid var(--line); }
   #mtpage .mtchips { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; margin: 0.35rem 0 0.45rem; }
   #mtpage .mtchip { display: inline-flex; align-items: baseline; border: 1px solid var(--accent-light); border-radius: 999px; background: var(--paper); font-size: 0.84rem; }
   #mtpage .mtchip button { background: none; border: none; font: inherit; color: var(--accent); cursor: pointer; padding: 0 0.15rem 0 0.6rem; }
@@ -747,7 +771,12 @@ function marks() {
 }
 function labelFor(ref) {
   const x = wholeOf(ref);
-  if (!x) return { text: '☆ Topic', on: false, title: 'Keep this passage under a topic of your own' };
+  if (!x) {
+    const ps = partsAt(ref), names = [...new Set([].concat(...ps.map(topicNames)))].sort((a, b) => a.localeCompare(b, 'de'));
+    if (ps.length) return { text: '◐ ' + (names.length === 0 ? 'Unsorted' : names.length === 1 ? clip(names[0], 22) : names.length + ' topics'), on: false,
+      title: 'Some of its words are kept' + (names.length ? ', under ' + names.join(', ') : ', under no topic yet') + '. Click to keep the whole passage, or the part of it in view.' };
+    return { text: '☆ Topic', on: false, title: 'Keep this passage under a topic of your own' };
+  }
   const names = topicNames(x);
   return { text: '★ ' + (names.length === 0 ? 'Unsorted' : names.length === 1 ? clip(names[0], 22) : names.length + ' topics'), on: true,
     title: names.length ? 'Kept under ' + names.join(', ') + '. Click to change.' : 'Kept, under no topic yet. Click to give it one.' };
@@ -765,12 +794,28 @@ document.addEventListener('mouseover', e => {
   const box = e.target.closest && e.target.closest(HOVER);
   if (!box || box.closest('#mtpage, #hpage')) { if (hovEl) { clearTimeout(hideT); hideT = setTimeout(hideHover, 300); } return; }
   clearTimeout(hideT);
+  hovY = e.clientY;
   if (box === hovEl) { placeHover(); return; }
   const d = box.dataset, i = +(d.open != null ? d.open : d.fp != null ? d.fp : d.note);
   if (!P[i]) return;
-  hovEl = box; hovI = i;
+  hovEl = box; hovI = i; hovPiece = 0;
   placeHover();
 });
+/* A lecture paragraph the portal draws in pieces gets ☆ Topic beside the piece under the pointer, so that
+   the piece can be kept on its own. */
+let hovY = null, hovPiece = 0;
+const piecesIn = el => { const t = el && el.querySelector && el.querySelector('.fpt'); return t ? [...t.querySelectorAll('.fbrk')] : []; };
+function pieceUnder(el, y) {
+  const br = piecesIn(el);
+  let j = 0;
+  br.forEach((b, n) => { if (y != null && b.getBoundingClientRect().top <= y) j = n + 1; });
+  return { j, top: j ? br[j - 1].getBoundingClientRect().bottom : null };
+}
+document.addEventListener('mousemove', e => {
+  if (!hovEl || !mode || !hovEl.contains(e.target)) return;
+  hovY = e.clientY;
+  if (piecesIn(hovEl).length && pieceUnder(hovEl, hovY).j !== hovPiece) placeHover();
+}, { passive: true });
 function placeHover() {
   if (!hovEl || hovI == null || !P[hovI]) return;
   const r = hovEl.getBoundingClientRect(), l = labelFor(refOf(hovI));
@@ -778,7 +823,8 @@ function placeHover() {
   // A long passage that starts above its pane keeps the button at the top of what shows of it.
   const sc = hovEl.closest('#left, #railbody'), bar = sc && sc.querySelector('.readbar');
   const floor = Math.max(52, sc ? sc.getBoundingClientRect().top + 4 : 0, bar && bar.getBoundingClientRect().bottom > 0 ? bar.getBoundingClientRect().bottom + 4 : 0);
-  const top = Math.max(r.top + 4, floor);
+  const pc = pieceUnder(hovEl, hovY); hovPiece = pc.j;
+  const top = Math.max(pc.top != null ? pc.top + 2 : r.top + 4, floor);
   if (top > r.bottom - 18 || top > window.innerHeight - 24) { hov.hidden = true; return; }
   hov.hidden = false;
   hov.style.top = top + 'px';
@@ -798,9 +844,37 @@ document.addEventListener('scroll', e => {
 hov.addEventListener('click', e => {
   e.stopPropagation();
   if (hovI == null) return;
-  if (!pk.hidden && pick && pick.i === hovI && !pick.excerpt) { closePicker(); return; }
-  openPicker({ i: hovI }, hov);
+  if (!pk.hidden && pick && pick.anchor === hov && pick.i0 === hovI) { closePicker(); return; }
+  openPicker({ i: hovI, choices: choicesFor(hovI, hovEl, hovPiece) }, hov);
 });
+/* What ☆ Topic can keep: the whole passage, and where the portal draws it in pieces, the piece in view, or
+   where it closes up a run of short passages, the run. A piece's edges are the portal's (even lengths cut
+   at sentence starts); the words and pages are the text's. */
+function choicesFor(i, el, j) {
+  const p = P[i], ref = refOf(i), out = [{ key: 'whole', label: 'the whole passage', cite: p.cite }];
+  if (!el || !PT.stretchOf || !el.matches || !el.matches('.fp[data-fp]')) return out;
+  const br = piecesIn(el);
+  if (br.length) {
+    const root = el.querySelector('.fpt'), offs = br.map(b => offsetIn(root, p.text, b, 0));
+    const cuts = offs.every(o => o != null) ? offs : PT.pieceBreaks(i);
+    let a = j ? cuts[j - 1] : 0, b = j < cuts.length ? cuts[j] : p.text.length;
+    if (a == null || b == null) return out;
+    while (b > a && /\s/.test(p.text[b - 1])) b--;
+    const st = PT.stretchOf([ref, a], [ref, b]);
+    if (st && !st.whole) out.push({ key: 'piece', label: 'only this part', cite: st.cite, st, i });
+  } else if (el.classList.contains('short')) {
+    const next = (x, d) => { const y = d < 0 ? x.previousElementSibling : x.nextElementSibling; return y && y.matches('.fp.short[data-fp]') && +y.dataset.fp === +x.dataset.fp + d ? y : null; };
+    let f = el, l = el, y;
+    while ((y = next(f, -1))) f = y;
+    while ((y = next(l, 1))) l = y;
+    const a = +f.dataset.fp, b = +l.dataset.fp;
+    if (b > a && PT.canStretch(a, b)) {
+      const st = PT.stretchOf([refOf(a), 0], [refOf(b), P[b].text.length]);
+      if (st) out.push({ key: 'piece', label: 'these ' + (b - a + 1) + ' short passages together', cite: st.cite, st, i: a });
+    }
+  }
+  return out;
+}
 
 /* The Connections tab's row of actions, or the passage's date line on the other tabs, gets
    ☆ Topic too. */
@@ -841,17 +915,53 @@ function passageAt(n) {
   return null;
 }
 const inEnglish = n => { const x = nodeEl(n), l = x && x.closest && x.closest('[lang]'); return !!(l && l !== document.documentElement && l.lang === 'en'); };
+/* Where a point of a selection stands in passage i's words, counted in its text as the portal has it: the
+   text drawn in root, less what the page adds to it (page numbers, glosses, notes on misprints). null
+   if what is drawn is not the passage's text, so that nothing is kept from a guess. */
+const ADDED = '.pbm, .gloss, .misnote, .fbrk';
+function offsetIn(root, text, node, off) {
+  if (!root) return null;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: t => { const c = t.parentElement && t.parentElement.closest(ADDED); return c && root.contains(c) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; } });
+  const pt = document.createRange();
+  try { pt.setStart(node, off); } catch (e) { return null; }
+  let n = 0, at = null, all = '';
+  for (let t = w.nextNode(); t; t = w.nextNode()) {
+    if (at == null) { if (t === node) at = n + Math.min(off, t.data.length); else if (pt.comparePoint(t, 0) > 0) at = n; }
+    all += t.data; n += t.data.length;
+  }
+  if (all !== text) return null;
+  return at == null ? n : at;
+}
+// The element that holds passage i's words where node is: in a full text, or the passage open on the right.
+function wordsRoot(node, i) {
+  const x = nodeEl(node);
+  if (!x || !x.closest) return null;
+  const fp = x.closest('.fp[data-fp]');
+  if (fp) return +fp.dataset.fp === i ? fp.querySelector('.fpt') : null;
+  return x.closest('#railbody') && S.sel === i ? document.querySelector('#railbody .ptext') : null;
+}
+// Words selected from passage a to passage b of one text, as a stretch; null where that can't be told exactly.
+function stretchOfRange(r, a, b) {
+  if (!PT.stretchOf || a == null || b == null || b < a || !PT.canStretch(a, b)) return null;
+  let x = offsetIn(wordsRoot(r.startContainer, a), P[a].text, r.startContainer, r.startOffset);
+  let y = offsetIn(wordsRoot(r.endContainer, b), P[b].text, r.endContainer, r.endOffset);
+  if (x == null || y == null) return null;
+  while (x < P[a].text.length && /\s/.test(P[a].text[x])) x++;
+  while (y > 0 && /\s/.test(P[b].text[y - 1])) y--;
+  return PT.stretchOf([refOf(a), x], [refOf(b), y]);
+}
 document.addEventListener('mouseup', e => {
   if (!mode || e.target === sb || covered() || pk.contains(e.target)) return;
   setTimeout(() => {
     const sel = window.getSelection();
     const t = sel && sel.rangeCount ? flat(String(sel)) : '';
     if (t.length < 2) { sb.hidden = true; return; }
-    const a = passageAt(sel.anchorNode), b = passageAt(sel.focusNode);
+    const rg = sel.getRangeAt(0), a = passageAt(rg.startContainer), b = passageAt(rg.endContainer);
     if (a == null || !P[a]) { sb.hidden = true; return; }
-    if (b !== a || inEnglish(sel.anchorNode) !== inEnglish(sel.focusNode)) { sb.textContent = 'Select within one passage to keep its words'; sb._i = null; }
-    else { sb.textContent = '☆ Keep these words'; sb._i = a; sb._en = inEnglish(sel.anchorNode); sb._text = t; }
-    const r = sel.getRangeAt(0).getBoundingClientRect();
+    const en = inEnglish(rg.startContainer), st = !en && !inEnglish(rg.endContainer) ? stretchOfRange(rg, a, b) : null;
+    if (!st && (b !== a || en !== inEnglish(rg.endContainer))) { sb.textContent = 'Select within one passage, or across passages in a row of one text'; sb._i = null; }
+    else { sb.textContent = '☆ Keep these words'; sb._i = st ? st.parts[0].i : a; sb._en = en; sb._text = st ? st.text : t; sb._st = st; }
+    const r = rg.getBoundingClientRect();
     sb.hidden = false;
     let top = r.top > 44 ? r.bottom + 8 : r.bottom + 44;
     const hs = $('hsel');
@@ -863,17 +973,28 @@ document.addEventListener('mouseup', e => {
 });
 sb.addEventListener('click', () => {
   if (sb._i == null) { sb.hidden = true; return; }
-  openPicker({ i: sb._i, excerpt: sb._text, en: sb._en, fixed: true }, sb);
+  openPicker({ i: sb._i, excerpt: sb._text, en: sb._en, st: sb._st || null, fixed: true }, sb);
   sb.hidden = true;
 });
 
 /* The picker: your topics, ticked where the passage stands under them, and a line for a new
    one. The first tick keeps the passage; unticking the last leaves it kept, under no topic,
    except when it was kept just now in this picker and has no note, when it goes again. */
-let pick = null;   // { i, id, excerpt, en, fixed, anchor, made }
-const pickItem = () => pick.id ? itemOf(pick.id) : pick.excerpt ? null : (pick.i != null && P[pick.i] ? wholeOf(refOf(pick.i)) : null);
+let pick = null;   // { i, i0, id, excerpt, en, st, choices, ext, fixed, anchor, made }
+// Words already kept are found again, so that the same words are not kept twice.
+const pickItem = () => pick.id ? itemOf(pick.id) : pick.excerpt
+  ? DB.items.find(x => x.excerpt === pick.excerpt && !!x.en === !!pick.en && x.ref === (pick.st ? pick.st.from[0] : refOf(pick.i))) || null
+  : (pick.i != null && P[pick.i] ? wholeOf(refOf(pick.i)) : null);
+// The whole passage, or the piece of it in view: which one the picker keeps.
+function useChoice(key) {
+  const c = (pick.choices || []).find(x => x.key === key) || pick.choices[0];
+  pick.ext = c.key; pick.st = c.st || null; pick.excerpt = c.st ? c.st.text : null; pick.i = c.i != null ? c.i : pick.i0;
+  pick.id = null; pick.made = false;
+}
 function openPicker(p, anchor) {
-  pick = Object.assign({ i: null, id: null, excerpt: null, en: false, fixed: false, made: false }, p, { anchor });
+  pick = Object.assign({ i: null, id: null, excerpt: null, en: false, st: null, choices: null, ext: 'whole', fixed: false, made: false }, p, { anchor });
+  pick.i0 = pick.i;
+  if (pick.choices && pick.choices.length > 1 && get(localStorage, EXT_KEY) === 'piece') useChoice('piece');
   drawPicker();
   pk.hidden = false;
   placePicker();
@@ -889,9 +1010,11 @@ function placePicker() {
 }
 function drawPicker() {
   const it = pickItem(), on = new Set(it ? it.topics : []), list = sortedTopics();
-  const cite = it ? it.cite : pick.i != null && P[pick.i] ? P[pick.i].cite : '';
-  pk.innerHTML = '<div class="t">' + (pick.excerpt || (it && it.excerpt) ? 'Keep these words under' : 'Keep this passage under') + '</div>' +
-    '<div class="c">' + esc(cite) + (pick.excerpt ? ' · “' + esc(clip(pick.excerpt, 60)) + '”' : '') + '</div>' +
+  const cite = it ? it.cite : pick.st ? pick.st.cite : pick.i != null && P[pick.i] ? P[pick.i].cite : '';
+  const ch = pick.choices && pick.choices.length > 1 ? pick.choices : null;
+  pk.innerHTML = (ch ? '<div class="ext"><div class="t">Keep</div>' + ch.map(c => '<label><input type="radio" name="mtext" data-mtext="' + c.key + '"' + (c.key === pick.ext ? ' checked' : '') + '> ' + esc(c.label) + ' <span>' + esc(c.cite) + '</span></label>').join('') + '</div>' : '') +
+    '<div class="t">' + (pick.excerpt || (it && it.excerpt) ? 'Keep these words under' : 'Keep this passage under') + '</div>' +
+    '<div class="c">' + esc(cite) + (pick.excerpt ? ' · “' + esc(clip(flat(pick.excerpt), 60)) + '”' : '') + '</div>' +
     list.map(t => '<label><input type="checkbox" data-mtt="' + esc(t.id) + '"' + (on.has(t.id) ? ' checked' : '') + '> ' + esc(t.name) + ' <span>' + countIn(t.id) + '</span></label>').join('') +
     '<input type="text" placeholder="' + (list.length ? 'A new topic, then Enter' : 'Name your first topic, then Enter') + '" spellcheck="false" maxlength="120">' +
     '<div class="acts">' +
@@ -903,7 +1026,7 @@ function ensureItem() {
   let it = pickItem();
   if (it) return it;
   if (pick.i == null || !P[pick.i]) return null;
-  it = itemFor(pick.i, pick.excerpt, pick.en);
+  it = itemFor(pick.i, pick.excerpt, pick.en, pick.st);
   DB.items.push(it);
   pick.id = it.id; pick.made = true;
   return it;
@@ -920,6 +1043,13 @@ function setTopic(tid, on) {
   if (!page.hidden) render();
 }
 pk.addEventListener('mousedown', e => { if (!e.target.closest('input')) e.preventDefault(); });
+pk.addEventListener('change', e => {
+  const r = e.target.closest('input[data-mtext]');
+  if (!r || !pick) return;
+  useChoice(r.dataset.mtext);
+  put(localStorage, EXT_KEY, pick.ext === 'piece' ? 'piece' : null);   // the next ☆ Topic offers the same first
+  drawPicker(); placePicker();
+});
 pk.addEventListener('change', e => {
   const c = e.target.closest('input[type=checkbox][data-mtt]');
   if (!c || !pick) return;
@@ -1050,19 +1180,22 @@ function renderMain() {
 }
 function cardHtml(it, canMove, k, n) {
   const i = idxOf(it.ref), live = i != null && !!P[i];
-  const showWhole = live && !it.excerpt && whole.has(it.id);
-  const words = showWhole ? P[i].text : it.excerpt || it.words;
-  const more = live && !it.excerpt && flat(P[i].text).length > flat(it.words).length + 3;
+  const pw = it.excerpt && !it.en ? placed(it) : null, st = pw && pw.st;   // kept words, where they stand now
+  const showWhole = live && whole.has(it.id) && (!it.excerpt || !!st);
+  const words = showWhole ? (st ? litHtml(st) : esc(P[i].text)) : paraHtml(it.excerpt || it.words);
+  const more = live && (it.excerpt ? !!st && !st.whole : flat(P[i].text).length > flat(it.words).length + 3);
+  const lostAt = ready() && live && it.span && !st;
   const chips = it.topics.map(id => topicOf(id)).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name, 'de'))
     .map(t => '<span class="mtchip"><button type="button" data-mta="view" data-mtt="' + esc(t.id) + '" title="Open this topic">' + esc(t.name) + '</button><button type="button" data-mta="untopic" data-mtt="' + esc(t.id) + '" title="Take it off this topic">×</button></span>').join('');
   return '<div class="mtcard" data-mti="' + esc(it.id) + '">' +
-    '<div class="mtch"><a class="mtcite" href="#" data-mta="go" title="Read it where it stands">' + esc(it.cite || it.ref) + '</a>' +
+    '<div class="mtch"><a class="mtcite" href="#" data-mta="go" title="Read it where it stands">' + esc((st && st.cite) || it.cite || it.ref) + '</a>' +
       '<span class="mtwork">' + esc([it.work, it.date].filter(Boolean).join(' · ')) + '</span>' +
-      (it.excerpt ? '<span class="mttag" title="Only these words of the passage were kept">' + (it.en ? 'words of its English' : 'words kept') + '</span>' : '') +
+      (it.excerpt ? '<span class="mttag" title="' + (st && st.parts.length > 1 ? 'Words kept across ' + st.parts.length + ' passages in a row: where they start and end is yours' : 'Only these words of the passage were kept') + '">' + (it.en ? 'words of its English' : st && st.parts.length > 1 ? st.parts.length + ' passages' : 'words kept') + '</span>' : '') +
       '<span class="mtbtns">' + (canMove ? '<button type="button" data-mta="up" title="Move up"' + (k === 0 ? ' disabled' : '') + '>↑</button><button type="button" data-mta="down" title="Move down"' + (k === n - 1 ? ' disabled' : '') + '>↓</button>' : '') +
       '<button type="button" data-mta="del" title="Remove from My topics">✕</button></span></div>' +
-    '<div class="mtwords' + (it.excerpt ? ' ex' : '') + '"' + (it.en ? ' lang="en"' : '') + '>' + esc(words) + '</div>' +
-    (more ? '<button type="button" class="mtlink" data-mta="whole">' + (showWhole ? '▴ only its opening words' : '▾ the whole passage') + '</button>' : '') +
+    '<div class="mtwords' + (it.excerpt && !showWhole ? ' ex' : '') + '"' + (it.en ? ' lang="en"' : '') + '>' + words + '</div>' +
+    (more ? '<button type="button" class="mtlink" data-mta="whole">' + (showWhole ? (it.excerpt ? '▴ only the words kept' : '▴ only its opening words') : (it.excerpt ? '▾ where they stand' : '▾ the whole passage')) + '</button>' : '') +
+    (lostAt ? '<p class="mtlost">These words are no longer where they were kept in the text. Above is the copy kept with them.</p>' : '') +
     (ready() && !live ? '<p class="mtlost">This address no longer opens in the portal. The words above are the copy kept when it was saved.</p>' : '') +
     '<div class="mtchips">' + chips + '<button type="button" class="mtaddt" data-mta="pick">+ topic</button></div>' +
     '<textarea class="mtinote" rows="1" placeholder="Your note">' + esc(it.note) + '</textarea></div>';
@@ -1245,7 +1378,8 @@ function goRead(it) {
   closePage();
   const T = TEXTS[P[k].t];
   if (PT.openRead) {
-    if (!['meier', 'metaphysica', 'refl'].includes(T.shape)) { S.sel = k; S.quote = null; }
+    const pw = placed(it);   // kept words are lit where they stand
+    if (!['meier', 'metaphysica', 'refl'].includes(T.shape)) { S.sel = k; S.quote = pw && pw.st && !pw.st.whole ? pw.st.parts[0].text : null; }
     PT.openRead(T.key, k);
   } else location.hash = 'p=' + encodeURIComponent(it.ref) + '&rt=conn';
 }
