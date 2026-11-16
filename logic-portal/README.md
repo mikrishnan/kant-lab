@@ -427,7 +427,13 @@ type on the room's screen.
   of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
   are Jesus's machine translations, made for the Meier–Kant comparison; neither
   translator translated these texts, and the pane says so under every one. There is English
-  for Meier, the Reflexionen on Meier, the three lectures and Jäsche, not yet for Baumgarten.
+  for Meier and Baumgarten, the Reflexionen on both, the lectures and Jäsche, Kant's works in
+  AA I and II, and both editions of the first Critique. The Groundwork and the Critique of Practical
+  Reason have instead T. K. Abbott's published translations, and the Critique of Judgment (both
+  the 1790 text and AA V's) J. H. Bernard's: the translators' own, out of copyright, cut to the
+  portal's passages by matching paragraphs, shown whichever style is chosen and labelled as such.
+  Every passage has English; the few the translators did not translate (title-page lines, the
+  1790 contents and list of misprints) have a machine translation, and their note says so.
   Each text's translation loads only when it is first wanted.
 - **Report a text error.** Every passage has a link, under its citation at the top of the
   right-hand pane (among the passage's actions in Connections), that opens the repository's *Text error*
