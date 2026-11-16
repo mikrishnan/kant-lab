@@ -479,7 +479,10 @@ function englishLater(it, i, tries) {
   save();
   if (!page.hidden) render();
 }
-const has = i => passagesOf(own()).some(x => x.kind === 'passage' && refsOf(x).includes(refOf(i)));
+// Is the passage in this browser's open handout on its own, as a whole passage? Inside a joined passage
+// does not count: it can be added again, on its own, beside it (joinedIn says where it is joined).
+const has = i => passagesOf(own()).some(x => x.kind === 'passage' && !x.parts && x.ref === refOf(i));
+const joinedIn = i => passagesOf(own()).find(x => x.parts && refsOf(x).includes(refOf(i))) || null;
 
 /* ── Joining passages ──────────────────────────────────────────────────────
    Passages that follow one another in a text, which the portal divides but the handout's
@@ -597,7 +600,9 @@ function add(i, excerpt, fromEn) {
   save();
   if (!it.en) fillSoon();
   if (!page.hidden) { render(); const card = page.querySelector('.hcard[data-id="' + it.id + '"]'); if (card) card.scrollIntoView({ block: 'nearest' }); }
-  toast((excerpt ? 'Excerpt added ' : 'Added ') + (n ? 'under “' + noteName(n) + '”' : sec ? 'to the end of “' + sectionName(sec) + '”' : 'to “' + h.name + '”'), [
+  const jn = !excerpt && joinedIn(i);
+  toast((excerpt ? 'Excerpt added ' : jn ? 'Added on its own ' : 'Added ') + (n ? 'under “' + noteName(n) + '”' : sec ? 'to the end of “' + sectionName(sec) + '”' : 'to “' + h.name + '”') +
+    (jn ? '. It stays in the joined passage, ' + jn.cite + ', as well.' : ''), [
     ['Undo', () => { const k = list.indexOf(it); if (k >= 0) { list.splice(k, 1); save(); } }],
     ['Label it', () => openPage(it.id)],
   ]);
@@ -613,7 +618,7 @@ function addTo(i, target) {
   else if (target.section) sec = h.items.find(x => x.kind === 'heading' && x.id === target.section) || null;
   const where = sec ? '“' + sectionName(sec) + '”' + (made ? ', a new heading' : '') : 'the end of “' + h.name + '”';
   const dropMade = () => { if (made && sectionEnd(h, h.items.indexOf(made)) === h.items.indexOf(made) + 1) h.items.splice(h.items.indexOf(made), 1); };
-  const there = h.items.find(x => x.kind === 'passage' && refsOf(x).includes(refOf(i)));
+  const there = h.items.find(x => x.kind === 'passage' && !x.parts && x.ref === refOf(i));   // on its own: a joined passage is never moved for one of its parts
   if (there) {
     const from = h.items.indexOf(there);
     h.items.splice(from, 1);
@@ -629,7 +634,8 @@ function addTo(i, target) {
   save();
   if (!it.en) fillSoon();
   if (!page.hidden) { render(); const card = page.querySelector('.hcard[data-id="' + it.id + '"]'); if (card) card.scrollIntoView({ block: 'nearest' }); }
-  toast('Added to ' + where + '.', [
+  const jn = joinedIn(i);
+  toast((jn && jn !== it ? 'Added on its own to ' + where + '. It stays in the joined passage, ' + jn.cite + ', as well.' : 'Added to ' + where + '.'), [
     ['Undo', () => { const k = h.items.indexOf(it); if (k >= 0) { h.items.splice(k, 1); dropMade(); save(); if (!page.hidden) render(); } }],
     ['Label it', () => openPage(it.id)],
   ]);
@@ -954,11 +960,11 @@ const closeMenu = () => { hmenu.hidden = true; menuI = null; };
 function openMenu(i, anchor) {
   if (i == null || !P[i] || classView) return;
   toOwn();
-  const h = cur(), inn = has(i), top = h.items.some(x => x.kind === 'passage' && refsOf(x).includes(refOf(i)));
+  const h = cur(), inn = has(i), top = h.items.some(x => x.kind === 'passage' && !x.parts && x.ref === refOf(i)), jn = !inn && joinedIn(i);
   const c = collecting(), sec = !c && collectingSection();
   menuI = i;
   const heads = h.items.filter(x => x.kind === 'heading');
-  hmenu.innerHTML = '<div class="t">' + (inn ? (top ? 'Move it, in “' : 'It is under a note in “') : 'Add it to “') + esc(clip(h.name, 34)) + '”</div>' +
+  hmenu.innerHTML = '<div class="t">' + (inn ? (top ? 'Move it, in “' : 'It is under a note in “') : jn ? 'It is joined with others. Add it again, on its own, to “' : 'Add it to “') + esc(clip(h.name, 34)) + '”</div>' +
     (inn && !top ? '' :
       heads.map(x => '<button type="button" data-to="' + esc(x.id) + '"' + (sec && sec.id === x.id ? ' class="here"' : '') + '>→ ' + esc(clip(sectionName(x), 40)) + '</button>').join('') +
       (heads.length ? '<hr>' : '') +
@@ -1083,7 +1089,7 @@ function placeHover() {
   hov.textContent = inn ? '✓ In handout' : '+ Handout';
   hov.classList.toggle('in', inn);
   const sec = !c && collectingSection();
-  hov.title = inn ? 'Already in “' + own().name + '”. Click to open it.' : c ? 'Add this passage under “' + noteName(c) + '”' : sec ? 'Add this passage to the end of “' + sectionName(sec) + '”' : 'Add this passage to “' + own().name + '”';
+  hov.title = inn ? 'Already in “' + own().name + '”. Click to open it.' : joinedIn(hovI) ? 'In “' + own().name + '” as part of a joined passage, ' + joinedIn(hovI).cite + '. Click to add it again, on its own.' : c ? 'Add this passage under “' + noteName(c) + '”' : sec ? 'Add this passage to the end of “' + sectionName(sec) + '”' : 'Add this passage to “' + own().name + '”';
   // A long passage that starts above the pane keeps its button at the top of what shows of it,
   // below the pane's own bar (the full text's title and contents, say).
   const sc = hovEl.closest('#left, #railbody'), bar = sc && sc.querySelector('.readbar');
@@ -1545,6 +1551,29 @@ function copyPassage(h, key, v) {
     touched = null; save(); render();
   }]]);
 }
+/* A joined passage's parts, one at a time, in the handout again on their own: "Use one on its own…"
+   puts the one chosen just after the joined passage, as a whole passage, as it was when it was
+   added, without the label, note or marks it had then. The joined passage stays as it is. From the
+   portal, + Handout and ▾ do the same for a passage that is in the handout only inside a joined one. */
+function partMenu(it) {
+  return '<label class="hcopysel hpartsel" title="Put one of the joined passages in this handout again, on its own, just after this one; the joined passage keeps it too">' +
+    '<select data-f="partalone" aria-label="Use one of the joined passages on its own"><option value="">Use one on its own…</option>' +
+    it.parts.map((p, k) => '<option value="' + k + '">' + esc(p.cite) + ' · ' + esc(clip(flat(p.text), 44)) + '</option>').join('') + '</select></label>';
+}
+function partAlone(h, key, k) {
+  const a = at(h, key), it = a.it, p = it && it.parts && it.parts[+k];
+  if (!p) return;
+  const c = JSON.parse(JSON.stringify(p));
+  ['marks', 'link', 'parts', 'refs'].forEach(f => delete c[f]);
+  Object.assign(c, { id: uid(), kind: 'passage', label: '', note: '', added: new Date().toISOString() });
+  a.list.splice(a.i + 1, 0, c);
+  save(); render();
+  if (!c.en) fillSoon();
+  const card = page.querySelector('.hcard[data-id="' + c.id + '"]');
+  if (card) card.scrollIntoView({ block: 'center' });
+  toast(c.cite + ' is in the handout again, on its own, just after the joined passage, which keeps it too. Drag it, or use ↑ ↓ and Under, to put it where you want it.', [
+    ['Undo', () => { const j = a.list.indexOf(c); if (j >= 0) { a.list.splice(j, 1); save(); render(); } }]]);
+}
 function passCard(it, key, h, parent, len) {
   const i = +String(key).split('.').pop();
   const live = PT.BYID ? PT.BYID.has(it.ref) : true;
@@ -1571,7 +1600,7 @@ function passCard(it, key, h, parent, len) {
     '<div class="hfoot">' + (live ? '<button type="button" class="linkish" data-h="go" title="Its paragraph in the reader, whatever has been changed here">' + (it.parts ? 'Read it where it stands, from the first part ›' : 'Read it where it stands ›') + '</button>'
       : '<span class="muted">This passage is no longer in the portal; its words are kept here.</span>') +
     (joinNx ? '<button type="button" class="linkish" data-h="join" title="Make this passage and the one below it one passage of the handout (the portal keeps them apart)">Join with the next passage ↓</button>' : '') +
-    (it.parts ? '<button type="button" class="linkish" data-h="split" title="Back into the passages it was joined from">Split into its ' + it.parts.length + ' passages</button>' : '') +
+    (it.parts ? '<button type="button" class="linkish" data-h="split" title="Back into the passages it was joined from">Split into its ' + it.parts.length + ' passages</button>' + partMenu(it) : '') +
     (cuts ? '<button type="button" class="linkish" data-h="uncut" title="Students see […] where words are left out; this gives them the passage whole again">Put back all that was left out (' + cuts + ')</button>' : '') +
     copyMenu(h) +
     (places > 1 ? '<button type="button" class="linkish" data-h="unlink" title="Keep this one, but let what you change in it stay here, and not change its other place">Make separate</button>' : '') +
@@ -1757,7 +1786,7 @@ page.addEventListener('input', e => {
   const h = cur();
   if (e.target.classList.contains('hname')) { h.name = e.target.value; save(); const on = page.querySelector('aside .hl.on'); if (on && on.firstChild) on.firstChild.textContent = h.name || 'Untitled handout'; return; }
   const f = e.target.dataset.f, c = e.target.closest('[data-key]');
-  if (!f || !c || f === 'under' || f === 'moveto' || f === 'copyto') return;
+  if (!f || !c || f === 'under' || f === 'moveto' || f === 'copyto' || f === 'partalone') return;
   at(h, c.dataset.key).it[f] = e.target.value;
   if (e.target.tagName === 'TEXTAREA') grow(e.target);
   if (e.target.classList.contains('nlab')) e.target.size = Math.max(4, e.target.value.length + 1);
@@ -1782,6 +1811,7 @@ page.addEventListener('change', e => {
   if (f === 'under') reparent(cur(), c.dataset.key, e.target.value);
   if (f === 'moveto' && e.target.value) moveNote(cur(), +c.dataset.key, e.target.value);
   if (f === 'copyto' && e.target.value) copyPassage(cur(), c.dataset.key, e.target.value);
+  if (f === 'partalone' && e.target.value !== '') partAlone(cur(), c.dataset.key, e.target.value);
 });
 picker.addEventListener('change', () => {
   const f = picker.files && picker.files[0];
