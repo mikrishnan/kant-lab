@@ -244,15 +244,15 @@ it: a board to put the topic's passages on as cards, move about, join with arrow
 kinds of nothing](studies/kinds-of-nothing/README.md#the-board), made the portal's own, for one
 reader's topic rather than the seminar's one board.
 
-- **You put the passages on it, one at a time.** A new board is empty. The topic's passages
-  wait under **Passages**, a tab in the side (or **Passage…** among the tools), in the order you
+- **You put the passages on it, one at a time.** A new board is empty. The topic's passages wait
+  under **Passages**, a tab in the side (or **Passage…** among the tools), in the order you
   arranged them, with a count of those still waiting. Press **+ On the board**, or drag one onto
-  the board where you want it. **▾ read it all here**, on a passage waiting, opens its words in
-  full where it stands in the list (and, for words you kept, the passage they are from); **▴
-  less** closes it again. A passage you put under the topic later, anywhere in the portal,
-  the portal beside the board included, joins them there; nothing comes onto the board by
-  itself. **Take it off the board**, on a passage's card, sends it back to Passages; it stays
-  under the topic.
+  the board where you want it; dropped inside a group's frame, it goes into that group. **▾ read
+  it all here**, on a passage waiting, opens its words in full where it stands in the list (and,
+  for words you kept, the passage they are from); **▴ less** closes it again. A passage you put
+  under the topic later, anywhere in the portal, the portal beside the board included, joins
+  them there; nothing comes onto the board by itself. **Take it off the board**, on a passage's
+  card, sends it back to Passages; it stays under the topic.
 - **Find among them**, at the top of Passages, narrows both lists, those waiting and those on
   the board, to the passages with every word you type: in the citation, the work, the passage's
   words in full or your note on it, with case, accents and ß left out of account. The words are
@@ -295,7 +295,8 @@ reader's topic rather than the seminar's one board.
   other topics too asks first: change it under all of them, or keep a copy for this topic
   alone. The words and pages stay the text's; only where a stretch starts and ends is yours. A
   stretch never runs from one Reflexion into the next, nor over more than 40 passages, and words
-  kept from the English stay as they are.
+  kept from the English stay as they are. On a shared board a card shows the stretch it was
+  shared with, but what it quotes can't yet be changed there.
 - **Annotate** some of a passage's words, or the whole of it, as on the study's board:
   *Problem*, *Relevant to…*, *Interpretation*, *Comment*, with replies and *resolved*. An
   annotation belongs to the passage, not the board, so it shows on every one of your boards
@@ -372,6 +373,60 @@ began as a copy of the study's `board.html` and now goes its own way: an improve
 reaches the other only by asking for it. Both read the portal only through `window.PORTAL`, as
 the handout tray does, the board in the portal beside it. Where the GitHub copy goes is set at its top (`GH`): to give the topics a
 repository of their own, change `repo` there, and give everyone's token that repository.
+
+### Sharing a board
+
+A topic's board can be shared with others in the seminar, for them to look at or to work on
+with you. GitHub, not the page, decides who may do which: each shared board is a private
+repository of its own in the seminar's organisation, and GitHub lets in only the people it is
+shared with, refusing a reader's save itself.
+
+- **Share.** On the topic's board, press **Share…** (beside *Export*). Name each person by their
+  GitHub username, as *can look* or *can work on it*: the list suggests the members of
+  `kant-lab-seminar`, and only members can be named. **Share** makes a private repository,
+  `kant-lab-seminar/board-<topic>-<four letters>`, for that board alone, copies the topic's
+  passages and the board into it, and lets in the people named. From then on the board is saved
+  there, and everyone who has it sees the others' changes within a few seconds. Cards, arrows,
+  annotations and passages added are signed with their author's GitHub name. The topic is marked
+  *shared* in My topics, which keeps a copy of the board too.
+- **What stays yours.** Your notes on the passages, and your annotations, are not copied in.
+  On a shared board each passage has a **note on the board**, which everyone sees, signed, and
+  beneath it **your own note**, your note in My topics, if you keep the passage there. An
+  annotation made with **only me** ticked stays in My topics and is not put on the board.
+- **Who has it…**, where *Share…* was, says who has the board. Change a person's role, add
+  someone, or take someone off: each takes effect at once. **Stop sharing…** brings the board
+  back into My topics, with everything done on it and the passages others added, takes everyone
+  off, and archives the repository, which keeps its history, read only. Nothing here ever
+  deletes a repository.
+- **A board shared with you** is listed in My topics under **Shared with me**, with whose it is;
+  its address, `topic-board.html#s=<repository>`, also opens it. A reader sees it live, marked
+  *Look only*. A collaborator works on it as on a board of their own, and adds passages to its
+  topic with **+ The passage open beside the board**, in its *Passages* panel, or with **☆ Topic**
+  anywhere in the portal, which lists the shared boards you may change. A passage given to one
+  waits in that board's *Passages* panel. **take it out of the topic** removes one not yet on the
+  board.
+- **Links** on a shared board to boards of yours that are not shared show the others only *a board
+  not shared with you*, and keep no copy of their names.
+- **The organisation's owners can always see every repository in it.** A shared board is private
+  from the rest of the seminar, not from them.
+
+**Setting it up, once (the organisation's owner).** Until this is done, every member of
+`kant-lab-seminar` can read every repository in it, shared boards included.
+
+1. *Teams* → *New team*: **Kant Lab**, with every member of the seminar in it. Then `queues` →
+   *Settings* → *Collaborators and teams* → add *Kant Lab* with **Write**, so that the queue and
+   everyone's topics file go on as now.
+2. *Settings* → *Member privileges* → *Base permissions* → **No permission**. From then on a member
+   sees a repository only if they, or a team of theirs, have been given it. Leave *members can
+   create private repositories* on. Do the team first, so that nobody loses `queues` in between.
+
+**Everyone's token, once.** A board shared with you opens with the token My topics keeps (*Keep on
+GitHub*), and a board page asks for one if this browser has none. It must reach the shared
+boards' repositories: on GitHub, *Settings* → *Developer settings* → *Fine-grained tokens* → your
+token → *Edit* → *Repository access* → **All repositories**, still with *kant-lab-seminar* as its
+owner, and *Contents: Read and write* as now. To share a board of your own, add **Administration:
+Read and write** as well: the page makes the board's repository and lets people into it with that.
+The token still goes only to `https://api.github.com`.
 
 ## Studies
 

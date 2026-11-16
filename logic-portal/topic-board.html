@@ -79,6 +79,7 @@
   #ink .ar.computer .pill text { fill: var(--faded); font-style: italic; }
   #ink .frame rect.f { stroke-width: 2; }
   #ink .frame.sel rect.f { stroke-width: 3.5; }
+  #ink .frame.drop rect.f { stroke-width: 3.5; fill-opacity: 0.14; }   /* a passage dragged from Passages is over it */
   #ink .marq { fill: rgba(139, 94, 60, 0.08); stroke: var(--accent-light); stroke-dasharray: 5 4; }
   #ink #ghost { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
   .dim { opacity: 0.14; }
@@ -340,6 +341,24 @@
   .lockcard { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 30px rgba(60, 40, 10, 0.18); padding: 1.2rem 1.4rem 1.1rem; width: 27rem; max-width: 100%; }
   .lockcard h2 { font-family: 'Cinzel', serif; font-weight: 600; color: var(--accent); font-size: 1.15rem; margin: 0 0 0.3rem; letter-spacing: 0.02em; }
   .lockcard p { margin: 0.3rem 0 0.6rem; font-size: 0.95rem; }
+  .lockcard.wide { width: 35rem; }
+  .lockcard #shtok, .lockcard #tokin { width: 100%; }
+  .lockcard label.f { display: block; font-size: 0.88rem; color: var(--faded); margin: 0.6rem 0 0.2rem; }
+  .lockcard input[type=text], .lockcard input[type=password] { border: 1px solid var(--line); border-radius: 6px; padding: 0.3rem 0.5rem; background: #fff; font-size: 0.95rem; }
+  .lockcard select { border: 1px solid var(--line); border-radius: 6px; background: #fff; padding: 0.2rem 0.3rem; }
+  .lockcard .k { display: block; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); margin: 0.9rem 0 0.3rem; }
+  .lockcard .prow { display: flex; gap: 0.5rem; align-items: center; margin: 0.3rem 0; }
+  .lockcard .prow b { flex: 1; color: var(--accent); font-weight: 600; }
+  .lockcard .prow input { flex: 1; }
+  .lockcard .row { display: flex; gap: 0.7rem; align-items: center; flex-wrap: wrap; margin-top: 0.9rem; }
+  .lockcard .chk { display: flex; gap: 0.4rem; align-items: center; font-size: 0.9rem; margin: 0.5rem 0; }
+  .lockcard .empty { color: var(--faded); font-style: italic; font-size: 0.92rem; }
+  .lockcard .warn { color: var(--prob); font-size: 0.9rem; }
+  .lockcard .ok { color: #3f6b2a; font-size: 0.9rem; }
+  .lockcard code { font-size: 0.85rem; background: var(--parchment-dark); padding: 0 0.3rem; border-radius: 3px; }
+  .tools.ro [data-add], .tools.ro #addp, .tools.ro #addl, .tools.ro #snap, .tools.ro #import { display: none; }
+  #details .onlyme { margin-left: 0.4rem; border: 1px dashed var(--faded); border-radius: 999px; padding: 0 0.4rem; font-size: 0.72rem; color: var(--faded); }
+  #details .onlyc { display: flex; gap: 0.35rem; align-items: center; font-size: 0.84rem; color: var(--faded); margin: 0.3rem 0 0; }
 
   /* editing in place, on the board itself */
   .card [contenteditable="true"], .card [contenteditable="plaintext-only"] { -webkit-user-select: text; user-select: text; cursor: text; outline: 2px solid #d9a441; outline-offset: 2px; border-radius: 3px; background: #fffdf3; min-width: 2.5rem; display: inline-block; }
@@ -479,6 +498,7 @@
   </span>
   <span class="grp"><span id="sync"></span></span>
   <span class="grp">
+    <button type="button" class="btn" id="sharebtn" title="Share this board with others in the seminar, to look at or to work on" hidden>Share…</button>
     <button type="button" class="linkish" id="export">Export</button>
     <button type="button" class="linkish" id="import">Import</button>
     <input type="file" id="file" accept=".json,application/json" hidden>
@@ -518,6 +538,7 @@
 <datalist id="arrowtypes"><option value="develops"><option value="contradicts"><option value="qualifies"><option value="same as"><option value="answers?"><option value="cf."></datalist>
 <div id="annbar" class="annbar" role="toolbar" aria-label="Annotate these words"></div>
 <div id="lock" class="lock" role="dialog" aria-modal="true" aria-labelledby="lockh"><div class="lockcard"><h2 id="lockh"></h2><div id="lockbody"></div></div></div>
+<div id="sharedlg" class="lock" role="dialog" aria-modal="true" aria-labelledby="shareh"><div class="lockcard wide"><h2 id="shareh"></h2><div id="sharebody"></div></div></div>
 
 <script>
 /* ── Data ─────────────────────────────────────────────────────────────────── */
@@ -547,7 +568,15 @@ const TOPICS = 'kantlab-topics-v1';               // My topics' store (topics.js
 const TOPICS_GH = 'kantlab-topics-github';        // set while My topics keeps a copy on GitHub in this browser
 const BASE = { models: [], items: [], arrows: [], views: [] };
 const TYPES = ['develops', 'contradicts', 'qualifies', 'same as', 'cf.'];
-const BIG = 2e6;                                  // past this many characters the store has, the page warns
+const BIG = 2e6;
+const API = 'https://api.github.com';             // the only place a token is ever sent
+const ORG = 'kant-lab-seminar';                   // a shared board is a private repository of the seminar's organisation
+const TOKEN_KEY = 'kantlab-topics-token';         // My topics' token (topics.js): sessionStorage, or localStorage if remembered
+const QUEUE_TOKEN_KEY = 'kantlab-queue-token';    // the queue's, if that is the one this browser has
+const SHARED_CACHE = 'kantlab-shared-board:';     // + the repository: this device's last copy of a shared board
+const SHARED_LIST = 'kantlab-shared-boards';      // the shared boards this browser knows of, for My topics' list
+const TOKEN_HOWTO = 'https://github.com/mikrishnan/kant-lab/blob/main/logic-portal/README.md#sharing-a-board';
+const POLL_MS = 5000, SAVE_MS = 2500;                                  // past this many characters the store has, the page warns
 const PALETTE = ['#5c6e3a', '#8b5e3c', '#3b5068', '#6b4e7a', '#3f6b63', '#9a6a1e', '#7a3b3b', '#5a5a5a'];
 const LAYERS = [
   { key: 'frames', label: 'Groups, as frames', mark: 'sq' },
@@ -590,6 +619,11 @@ let seenA = '[]';      // the annotations likewise
 let lost = '';         // why nothing can be saved: 'unreadable' (My topics would not read), 'gone' (the topic is not in it)
 let FW = null;         // the portal in the side, once its texts are in
 let pendingStore = false;   // the store changed during a drag or an edit: taken in when it ends
+let SHM = false;       // a shared board: kept in a repository of its own, not in My topics
+let SH = null;         // its state: { repo, token, login, role: owner | collab | reader | archived, owner, sha, etag, base, status, … }
+let SP = [];           // its passages
+let SG = {};           // the passages taken out of it: { id: when }
+let STOPIC = null;     // its topic, as its file has it: { id, name, note }
 let viewId;            // the view shown
 let live = null;       // while a photograph is shown, the board it stands in for
 let undoStack = [], redoStack = [];
@@ -622,7 +656,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&a
 const clone = o => JSON.parse(JSON.stringify(o));
 const uid = p => p + '-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const today = () => new Date().toISOString().slice(0, 10);
-const me = () => '';    // the board is its reader's alone: nothing on it is signed
+const me = () => SHM && SH && SH.login ? SH.login : '';    // your own board is yours alone, and nothing on it is signed; a shared one is signed
 const now = () => new Date().toISOString();
 const isObj = x => !!x && typeof x === 'object' && !Array.isArray(x);
 // Keys in one order all the way down, so that two copies of the same board compare equal.
@@ -633,8 +667,10 @@ const view = () => B.views.find(v => v.id === viewId) || B.views[0];
 const item = id => B.items.find(i => i.id === id);
 const arrow = id => B.arrows.find(a => a.id === id);
 const model = id => B.models.find(m => m.id === id);
-const ro = () => !!live || !!lost;
-const roWhy = () => live ? 'This is a photograph. Bring it back to change it.' : lost === 'unreadable' ? 'My topics would not read in this browser, so nothing here is saved.' : 'This topic is not in My topics in this browser, so nothing here is saved.';
+const ro = () => !!live || !!lost || (SHM && (!SH || !SH.ready || SH.role === 'reader' || SH.role === 'archived'));
+const roWhy = () => live ? 'This is a photograph. Bring it back to change it.' : lost === 'noaccess' ? 'This board is not shared with you, or no longer exists.' :
+  SHM && SH && SH.role === 'archived' ? 'This board is no longer shared: it can be looked at, not changed.' : SHM && SH && SH.role === 'reader' ? 'You can look at this board: @' + SH.owner + ' has not given you write access.' :
+  SHM && (!SH || !SH.ready) ? 'The shared board is still opening.' : lost === 'unreadable' ? 'My topics would not read in this browser, so nothing here is saved.' : 'This topic is not in My topics in this browser, so nothing here is saved.';
 const layersOf = () => Object.assign({}, view().layers || {}, (prefs.layers || {})[viewId] || {});
 const layerOn = k => layersOf()[k] !== false;
 function showLayer(k, on) { prefs.layers = prefs.layers || {}; prefs.layers[viewId] = Object.assign(layersOf(), { [k]: on !== false }); savePrefs(); }
@@ -701,8 +737,11 @@ function setKept(nb) {   // a board read or merged: its photographs apart, the a
   if (live) live.board = nb; else B = nb;
 }
 // The topic's passages, as My topics keeps them: those under it, in the order arranged there.
-const itemOf = id => DB && DB.items.find(x => x && x.id === id);
+const storeItem = id => DB && DB.items.find(x => x && x.id === id);
+const itemOf = id => SHM ? SP.find(x => x && x.id === id) : storeItem(id);
+const inTopic = x => SHM ? true : !!x && Array.isArray(x.topics) && x.topics.includes(TID);
 function underTopic() {
+  if (SHM) return SP.slice().sort((a, b) => String(a.added).localeCompare(String(b.added)));
   if (!DB || !topic) return [];
   const pos = new Map((topic.order || []).map((id, k) => [id, k]));
   return DB.items.filter(x => x && Array.isArray(x.topics) && x.topics.includes(TID)).sort((a, b) => {
@@ -730,23 +769,26 @@ function syncCards() {
 // The topic's passages not yet on this board, in the order arranged in My topics.
 const waiting = () => underTopic().filter(x => !B.items.some(i => i.kind === 'passage' && i.mt === x.id));
 // Put one of the topic's passages on the board: where it was dropped, or else in the middle of the view,
-// a little below the last one put there, so that several in a row don't hide one another.
+// a little below the last one put there, so that several in a row don't hide one another. Dropped into
+// a group's frame, g, it goes into that group.
 let lastPut = null;
-function putPassage(mt, at) {
+function putPassage(mt, at, g) {
   if (ro()) { toast(roWhy()); return; }
-  const x = itemOf(mt); if (!x || !Array.isArray(x.topics) || !x.topics.includes(TID)) return;
+  const x = itemOf(mt); if (!x || !inTopic(x)) return;
   if (B.items.some(i => i.kind === 'passage' && i.mt === mt)) { toast('It is on the board already.'); return; }
   if (!at) at = nextSpot();
   let id;
   change(() => {
     const card = passageCard(x);
     if (B.items.some(i => i.id === card.id)) card.id = uid('p');
+    if (g && model(g.id)) card.model = g.id;
     id = card.id;
     B.items.push(card); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
     showLayer('passage');
   });
   lastPut = { at, t: Date.now() };
   sel = { kind: 'card', ids: [id] }; form = null; render(); showCard(id);
+  if (g && model(g.id)) toast('Put into ' + g.title + '. Undo with ⌘Z.');
 }
 /* ── Links to other boards ────────────────────────────────────────────────────
    A link card stands on this board for another topic, or for one card or group on that topic's board:
@@ -762,7 +804,7 @@ const cap1 = s => s ? s[0].toUpperCase() + s.slice(1) : s;
 // A card on any of the reader's boards, in a line: what it is, its title, its words.
 function aboutCard(c) {
   if (!c) return null;
-  if (c.kind === 'passage') { const x = itemOf(c.mt); return { what: 'a passage', title: c.label || (x && x.cite) || c.cite || c.ref || 'a passage', words: x ? (x.excerpt || x.words || '') : '', ref: (x && x.ref) || c.ref, work: x ? x.work || '' : '' }; }
+  if (c.kind === 'passage') { const x = storeItem(c.mt); return { what: 'a passage', title: c.label || (x && x.cite) || c.cite || c.ref || 'a passage', words: x ? (x.excerpt || x.words || '') : '', ref: (x && x.ref) || c.ref, work: x ? x.work || '' : '' }; }
   if (c.kind === 'note') return { what: 'a note', title: shortly(c.text, 60) || 'a note', words: c.text || '' };
   if (c.kind === 'problem') return { what: 'a question', title: shortly(c.text, 60) || 'a question', words: c.text || '' };
   if (c.kind === 'box') return { what: 'a box', title: c.label ? 'Box: ' + c.label : 'a box', words: '' };
@@ -773,7 +815,7 @@ function aboutCard(c) {
 function linkOf(it) {
   const to = it.to || {}, cp = it.copy || {}, t = DB ? realTopic(DB, to.t || '') : to.t || '';
   const T = DB && DB.topics.find(x => x && x.id === t);
-  if (!T) return { state: 'topic-gone', t, title: cp.title || cp.topic || 'a topic', topic: cp.topic || '', what: cp.what || '' };
+  if (!T) return SHM && !mineTopic() ? { state: 'private', t, title: '', topic: '', what: '' } : { state: 'topic-gone', t, title: cp.title || cp.topic || 'a topic', topic: cp.topic || '', what: cp.what || '' };
   const b = boardOf(t);
   if (!to.item) {
     const n = DB.items.filter(x => x && Array.isArray(x.topics) && x.topics.includes(t)).length;
@@ -818,6 +860,17 @@ function alsoChip(it) {
   const ks = LX && it.mt ? LX.also.get(it.mt) || [] : [];
   return ks.length ? '<span class="also" title="The same passage stands on the board of ' + esc(ks.map(x => topicName(x.t)).join(', ')) + '. The page found it; it is not a link you made.">also on ' + esc(ks.length === 1 ? topicName(ks[0].t) : ks.length + ' boards') + '</span>' : '';
 }
+// On a shared board, the passage open in the portal beside it, added to the topic's passages.
+function addFromPortal() {
+  if (!writable()) { toast(roWhy()); return; }
+  const w = portalReady(); if (!w) { toast('The portal beside the board is still loading its texts.'); return; }
+  const S = w.PORTAL.S, i = S.sel != null ? S.sel : S.readAt, p = i != null ? w.PORTAL.P[i] : null;
+  if (!p) { toast('Open a passage in the portal beside the board first: click it there, under Reading.'); showSide('reading'); return; }
+  const T = w.PORTAL.TEXTS[p.t], ref = T.key + ':' + p.id;
+  if (SP.some(x => x.ref === ref && !x.excerpt)) { toast('It is among the topic’s passages already.'); return; }
+  SP.push(sharedPassage({ ref, cite: p.cite || '', work: T.short || T.title || T.key, date: p.dateLabel || T.date || '', words: String(p.text || '').replace(/\s+/g, ' ').trim().slice(0, 299) }));
+  scheduleShared(); render(); toast('Added: ' + (p.cite || ref) + '. It waits under Passages, for anyone to put on the board.');
+}
 // Where the next card put on the board goes: the middle of the view, or a little below the last one put there.
 function nextSpot() {
   const c = centre(), near = lastPut && Date.now() - lastPut.t < 120000 && Math.hypot(lastPut.at[0] - c[0], lastPut.at[1] - c[1]) < 600;
@@ -837,7 +890,8 @@ function makeLink(t, item, at) {
   let id;
   change(() => {
     id = uid('l');
-    B.items.push({ id, kind: 'link', to: { t, item }, copy: { topic: L.topic, title: L.title, what: L.what }, label: '', model: null, quotes: [], date: today() });
+    // on a shared board a link to a board of yours keeps no copy of its name, which the others would see
+    B.items.push(Object.assign({ id, kind: 'link', to: { t, item }, copy: SHM ? { what: L.what } : { topic: L.topic, title: L.title, what: L.what }, label: '', model: null, quotes: [], date: today() }, me() ? { by: me() } : {}));
     view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
     showLayer('link');
   });
@@ -851,7 +905,7 @@ function parseBoardAddr(s) {
   return t ? { t, item: u.get('at') || null } : null;
 }
 function copyLink(item) {
-  const url = new URL(boardAddr(TID, item), location.href).href;
+  const url = new URL(SHM ? 'topic-board.html#s=' + encodeURIComponent(SH.repo) + (item ? '&at=' + encodeURIComponent(item) : '') : boardAddr(TID, item), location.href).href;
   const ok = () => toast('Copied a link to ' + (item ? 'it' : 'this board') + '. Paste it on another board (⌘V), or into “Relevant to…”.');
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, () => prompt('Copy this link:', url)); else prompt('Copy this link:', url);
 }
@@ -884,14 +938,14 @@ function fullText(ref) {
   try { const i = FW.PORTAL.BYID.get(ref), p = i != null ? FW.PORTAL.P[i] : null; return p ? String(p.text || '') : null; } catch (e) { return null; }
 }
 // The portal's reading of stretches, once its texts are in (index.html: stretchOf, placeWords, sentenceStarts).
-function SP() { return FW && FW.PORTAL && FW.PORTAL.stretchOf ? FW.PORTAL : null; }
+function STX() { return FW && FW.PORTAL && FW.PORTAL.stretchOf ? FW.PORTAL : null; }
 // Each passage card's words and standing, worked out afresh and never saved.
 function hydrate() {
   [B].concat(live ? [live.board] : []).forEach(b => (b.items || []).forEach(it => {
     if (it.kind === 'link') { hide(it, 'lk', linkOf(it)); return; }
     if (it.kind !== 'passage') return;
     if (!Array.isArray(it.quotes) || !it.quotes.length) it.quotes = [{ ref: it.ref, cite: it.cite || '' }];
-    const x = itemOf(it.mt), X = SP();
+    const x = itemOf(it.mt), X = STX();
     // words kept on their own: where they stand now, one quote for each passage they run over
     const pw = X && x && x.excerpt && !x.en ? X.placeWords(x.ref, x.excerpt, x.span || null) : null, st = pw && pw.st;
     hide(it, 'st', st || null);
@@ -900,13 +954,13 @@ function hydrate() {
     if (st) it.quotes.forEach((q, k) => { const p = st.parts[k]; q.cite = p.cite; hide(q, 'q', X.P[p.i].text); hide(q, 'full', true); hide(q, 'kept', p.whole ? '' : p.text); hide(q, 'ka', p.a); hide(q, 'kb', p.b); });
     else {
       if (X && x && !x.excerpt && it.quotes.length > 1) it.quotes = it.quotes.slice(0, 1);   // a stretch made whole again
-      const q = it.quotes[0], full = fullText(q.ref || it.ref);
+      const q = it.quotes[0], full = fullText((x && x.ref) || q.ref || it.ref);
       hide(q, 'q', full != null ? full : x ? (x.excerpt || x.words || '') : '');
       hide(q, 'full', full != null);
       hide(q, 'kept', x && x.excerpt ? x.excerpt : '');
       hide(q, 'ka', null); hide(q, 'kb', null);
     }
-    hide(it, 'off', !x ? 'gone' : !x.topics.includes(TID) ? 'off' : '');
+    hide(it, 'off', !x ? 'gone' : !inTopic(x) ? 'off' : '');
     hide(it, 'kx', x || null);
   }));
   linkIndex();
@@ -959,6 +1013,7 @@ function writeOut(d, fn) {
 }
 let bigWarned = false, saveFailed = false;
 function save(fn) {
+  if (SHM) return saveShared(fn);
   if (ro() && !fn) return false;
   if (lost) return false;
   const d = readStore();
@@ -984,7 +1039,7 @@ const othersOf = x => x && Array.isArray(x.topics) ? x.topics.filter(t => t !== 
 // The stretch a passage card quotes now: the words kept, or the whole of its passage. null where it can't be
 // changed here: the portal still loading, words kept from the English, or words no longer where they were kept.
 function stretchNow(it) {
-  const X = SP(); if (!X || !it || it.kind !== 'passage') return null;
+  const X = STX(); if (!X || !it || it.kind !== 'passage') return null;
   if (it.st) return it.st;
   const x = itemOf(it.mt); if (!x || x.excerpt) return null;
   const i = X.BYID.get(x.ref);
@@ -1017,7 +1072,7 @@ function setEdges(X, from, to) {
 }
 // The edges moved a sentence, or a passage, at a time.
 function moveEdge(k) {
-  const X = SP(), st = X && X.stretchOf(form.from, form.to); if (!st) return;
+  const X = STX(), st = X && X.stretchOf(form.from, form.to); if (!st) return;
   const f = st.parts[0], l = st.parts[st.parts.length - 1], T = X.TEXTS[X.P[f.i].t];
   const E = edgesIn(X, Math.max(T.first, f.i - 1), Math.min(T.last, l.i + 1)), K = p => posKey(X, p), A = K(form.from), Z = K(form.to);
   let from = form.from, to = form.to, c;
@@ -1032,7 +1087,7 @@ function moveEdge(k) {
 }
 // A sentence mark clicked: the nearer edge moves to it, or, while splitting, the second card begins there.
 function atMark(r, o) {
-  const X = SP(); if (!X || X.BYID.get(r) == null) return;
+  const X = STX(); if (!X || X.BYID.get(r) == null) return;
   const K = p => posKey(X, p), p = K([r, o]), A = K(form.from), Z = K(form.to);
   if (form.cutting) { if (p > A && p < Z) { form.cut = [r, o]; form.ask = false; renderSide(); } return; }
   const e = [r, back0(X.P[X.BYID.get(r)].text, o)];
@@ -1051,7 +1106,7 @@ function pointAt(X, node, off) {
   return [r, g.toString().length];
 }
 function pickStretch() {
-  const X = SP(), s = getSelection();
+  const X = STX(), s = getSelection();
   if (!X || !form || form.kind !== 'stretch' || form.cutting || !s || !s.rangeCount || s.isCollapsed) return;
   const g = s.getRangeAt(0), a = pointAt(X, g.startContainer, g.startOffset), b = pointAt(X, g.endContainer, g.endOffset);
   if (!a || !b) return;
@@ -1089,7 +1144,7 @@ function scopeAsk(x, what, many) {
     '<p class="by">Only here keeps a copy of it for this topic alone, with your note, and leaves it as it is under the others.</p></div>';
 }
 function sideStretchForm() {
-  const it = item(form.id), X = SP(), st = X && it ? X.stretchOf(form.from, form.to) : null, x = it && itemOf(it.mt);
+  const it = item(form.id), X = STX(), st = X && it ? X.stretchOf(form.from, form.to) : null, x = it && itemOf(it.mt);
   let h = '<h2>' + (form.cutting ? 'Split the card in two' : 'Change what it quotes') + '</h2><p class="sub">' + esc(it ? cardTitle(it) : '') + '</p>';
   if (!st || !x) return h + '<p class="by">' + (X ? 'That stretch no longer reads in the text.' : 'The portal beside the board is still loading its texts. Try again in a moment.') + '</p><div class="row"><button type="button" class="linkish" data-act="cancel">Back</button></div>';
   const f = st.parts[0], l = st.parts[st.parts.length - 1], T = X.TEXTS[X.P[f.i].t];
@@ -1114,7 +1169,7 @@ function sideStretchForm() {
 }
 // The card quotes the stretch the form has; under all the passage's topics, or as a copy for this one alone.
 function saveStretch(scope) {
-  const it = item(form.id), X = SP(), st = X && it ? X.stretchOf(form.from, form.to) : null, x = it && itemOf(it.mt);
+  const it = item(form.id), X = STX(), st = X && it ? X.stretchOf(form.from, form.to) : null, x = it && itemOf(it.mt);
   if (!st || !x) return;
   const cur = stretchNow(it);
   if (cur && cur.from.join('\u0000') === st.from.join('\u0000') && cur.to.join('\u0000') === st.to.join('\u0000')) { form = null; renderSide(); return; }
@@ -1132,7 +1187,7 @@ function saveStretch(scope) {
   toast('The card now quotes ' + st.cite + (st.whole ? ', the whole passage' : '') + '. ⌘Z undoes it.');
 }
 function doSplit(scope) {
-  const it = item(form.id), X = SP(), x = it && itemOf(it.mt), sp = X && form.cut ? splitAt(X, form.cut) : null;
+  const it = item(form.id), X = STX(), x = it && itemOf(it.mt), sp = X && form.cut ? splitAt(X, form.cut) : null;
   if (!sp || !x) return;
   if (!scope && othersOf(x).length) { form.ask = true; renderSide(); return; }
   const here = scope === 'here', n1 = here ? uid('i') : x.id, n2 = uid('i'), moved = Object.keys(form.ar).filter(id => form.ar[id] === 2);
@@ -1159,7 +1214,7 @@ function doSplit(scope) {
 }
 // Cards that can be joined into one: passage cards of one text, the passages between them coming in whole.
 function joinPlan(ids) {
-  const X = SP(), cs = ids.map(item);
+  const X = STX(), cs = ids.map(item);
   if (!X || cs.length < 2 || cs.some(c => !c || c.kind !== 'passage')) return null;
   const sts = cs.map(stretchNow);
   if (sts.some(s => !s)) return { why: 'One of them can’t be joined: its passage has gone from My topics, its words were kept from the English, or they are no longer where they were kept.' };
@@ -1178,7 +1233,7 @@ function sideJoinAsk() {
   return '<h2>Join into one card</h2><p class="sub">' + esc(J.st.cite) + '</p>' + scopeAsk(x, 'join', true) + '<div class="row"><button type="button" class="linkish" data-act="cancel">Cancel</button></div>';
 }
 function doJoin(ids, scope) {
-  const J = joinPlan(ids), X = SP(); if (!J || !J.st) return;
+  const J = joinPlan(ids), X = STX(); if (!J || !J.st) return;
   const first = J.first, x = itemOf(first.mt), restX = J.rest.map(c => itemOf(c.mt)).filter(Boolean), restIds = new Set(J.rest.map(c => c.id));
   if (!x) return;
   if (!scope && othersOf(x).length) { form = { kind: 'join', ids: ids.slice() }; renderSide(); return; }
@@ -1259,7 +1314,7 @@ function afterSwap() {
 }
 // A passage's note, its topics, or the topic's own note: changed in My topics' store itself, where the list reads them.
 function setPassage(mt, fn) { return save(d => { const x = d.items.find(y => y && y.id === mt); if (x) { fn(x); x.at = now(); } }); }
-function setTopic(fn) { return save(d => { const t = d.topics.find(y => y && y.id === TID); if (t) { fn(t); t.at = now(); } }); }
+function setTopic(fn) { if (SHM) { if (writable()) { fn(STOPIC); scheduleShared(); } return true; } return save(d => { const t = d.topics.find(y => y && y.id === TID); if (t) { fn(t); t.at = now(); } }); }
 // Three copies of the board: as last read or written here (base), as here (mine), as the store has it now (theirs).
 // What only one side changed, that side's version stands; where both changed it, mine does.
 function merge3(base, mine, theirs) {
@@ -1295,6 +1350,7 @@ function merge3(base, mine, theirs) {
 function takeIn() {
   if (drag || editing) { pendingStore = true; return; }   // taken in when the drag or the edit ends
   pendingStore = false;
+  if (SHM) { takeInShared(); return; }
   const d = readStore(); if (!d) return;
   const was = lost, before = keyOf(kept());
   fold(d);
@@ -1319,6 +1375,274 @@ function afterRemote() {
   if (live && !photos.some(p => p.id === live.photo)) back();
   // An annotation's card may go while it is being written: it still belongs on the passage. What it edits or answers may not.
   if (form && form.kind === 'annotate' && ((form.id && !annById(form.id)) || (form.re && !annById(form.re)))) { form = null; toast('What you were writing on was deleted meanwhile.'); }
+}
+/* ── A shared board ───────────────────────────────────────────────────────────
+   Shared, a topic's board leaves My topics for a private repository of its own in the seminar's
+   organisation, kant-lab-seminar/board-…, so that GitHub itself decides, board by board, who may
+   read it (a reader) and who may change it (a collaborator). Its one file, board.json, holds the
+   owner, the topic's name and note, its passages (address, citation, the words kept, who added each,
+   and a note on the board, signed), gone (the passages taken out), the board in its usual shape, and
+   the annotations made on it, signed. The page reads it with the reader's own token, the one My
+   topics keeps, asks every few seconds whether anyone has saved, merges two saves as the study's
+   board does, and saves a moment after each change. What is the reader's own stays in My topics:
+   their notes on the passages, and the annotations they mark "only me". The owner's My topics keeps
+   a copy of the board as well, marked shared, so that nothing is lost if the repository is. */
+const repoPath = () => '/repos/' + ORG + '/' + encodeURIComponent(SH.repo);
+function getToken() {
+  for (const st of [sessionStorage, localStorage]) for (const k of [TOKEN_KEY, QUEUE_TOKEN_KEY]) { try { const v = st.getItem(k); if (v) return v; } catch (e) { /* none here */ } }
+  return '';
+}
+const b64e = str => { const u = new TextEncoder().encode(str); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+const b64d = s => new TextDecoder().decode(Uint8Array.from(atob(String(s).replace(/\s/g, '')), c => c.charCodeAt(0)));
+async function gh(method, path, body, extra, token) {
+  const headers = Object.assign({ Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + (token || SH.token) }, extra || {});
+  if (body) headers['Content-Type'] = 'application/json';
+  let r;
+  try { r = await fetch(API + path, { method, headers, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' }); }
+  catch (e) { return { ok: false, status: 0, data: null }; }
+  let data = null;
+  if (r.status !== 204 && r.status !== 304) { try { data = await r.json(); } catch (e) { data = null; } }
+  return { ok: r.ok, status: r.status, data, etag: r.headers.get('ETag') };
+}
+function ghMsg(r) {
+  if (!r || r.status === 0) return 'GitHub can’t be reached; the board is kept here meanwhile';
+  const m = r.data && r.data.message ? ' (' + r.data.message + ')' : '';
+  if (r.status === 401) return 'GitHub no longer accepts your token';
+  if (r.status === 403) return 'your token isn’t allowed to do that' + m;
+  if (r.status === 404) return 'GitHub doesn’t show you that board';
+  if (r.status === -1) return 'the board’s file would not read';
+  return 'GitHub answered ' + r.status + m;
+}
+// The file, one passage, card, arrow, view or annotation to a line, so that GitHub's history reads change by change.
+function fileText(f) {
+  const L = (k, a) => JSON.stringify(k) + ':[\n' + (a || []).map(x => JSON.stringify(x)).join(',\n') + '\n]';
+  const b = f.board || {};
+  const head = { kind: 'kantlab-shared-board', v: 1, owner: f.owner, topic: f.topic, savedBy: f.savedBy || '', savedAt: f.savedAt || '' };
+  return JSON.stringify(head).slice(0, -1) + ',\n' + L('passages', f.passages) + ',\n"gone":' + JSON.stringify(f.gone || {}) + ',\n"board":{\n' +
+    ['models', 'items', 'arrows', 'views', 'photos'].map(k => L(k, b[k])).join(',\n') + ',\n"removed":' + JSON.stringify(b.removed || []) + '},\n' + L('annotations', f.annotations) + '}\n';
+}
+function cleanFile(d) {
+  if (!isObj(d) || d.kind !== 'kantlab-shared-board' || !isObj(d.board)) return null;
+  const b = cleanBoard(d.board); if (!b) return null;
+  delete b.shared;
+  const t = isObj(d.topic) ? d.topic : {};
+  return { owner: String(d.owner || ''), topic: { id: String(t.id || ''), name: String(t.name || ''), note: String(t.note || '') },
+    passages: (Array.isArray(d.passages) ? d.passages : []).filter(p => isObj(p) && typeof p.id === 'string' && typeof p.ref === 'string'),
+    gone: isObj(d.gone) ? d.gone : {}, board: b, annotations: (Array.isArray(d.annotations) ? d.annotations : []).filter(a => isObj(a) && typeof a.id === 'string'),
+    savedBy: String(d.savedBy || ''), savedAt: String(d.savedAt || '') };
+}
+// The file as it stands here now, without what only you see.
+function fileNow() {
+  const b = kept(); delete b.shared;
+  return { owner: SH.owner, topic: { id: STOPIC.id, name: STOPIC.name, note: STOPIC.note || '' }, passages: SP, gone: SG, board: b, annotations: (realB().annotations || []).filter(a => !a.only) };
+}
+const fileKey = f => keyOf({ topic: f.topic, passages: f.passages, gone: f.gone, board: f.board, annotations: f.annotations });
+async function readFile() {
+  const r = await gh('GET', repoPath() + '/contents/board.json', null, SH.etag ? { 'If-None-Match': SH.etag } : null);
+  if (r.status === 304) return { same: true };
+  if (!r.ok) return { err: r };
+  let content = r.data && r.data.content;
+  if (!content && r.data && r.data.sha) { const b = await gh('GET', repoPath() + '/git/blobs/' + r.data.sha); if (!b.ok) return { err: b }; content = b.data.content; }   // past 1 MB
+  let f = null; try { f = cleanFile(JSON.parse(b64d(content))); } catch (e) { f = null; }
+  return f ? { file: f, sha: r.data.sha, etag: r.etag } : { err: { status: -1 } };
+}
+function cacheShared() { try { localStorage.setItem(SHARED_CACHE + SH.repo, JSON.stringify({ file: SH.base, sha: SH.sha, role: SH.role, login: SH.login })); } catch (e) { /* the file on GitHub is the copy that counts */ } }
+// The annotations only you see: My topics', on a shared board marked so, and kept out of its file.
+function privateAnns() { const d = DB || readStore(); return (d && Array.isArray(d.annotations) ? d.annotations : []).filter(a => isObj(a) && typeof a.id === 'string').map(a => Object.assign(clone(a), { only: true })); }
+// A file read, shown here, with what only you see beside it.
+function applyFile(f) {
+  STOPIC = clone(f.topic); SH.owner = f.owner; topic = STOPIC;
+  SP = clone(f.passages); SG = clone(f.gone);
+  const b = clone(f.board); photos = b.photos || []; delete b.photos; b.removed = b.removed || [];
+  b.annotations = clone(f.annotations).concat(privateAnns());
+  if (live) { live.board = b; B.annotations = b.annotations; } else B = b;
+}
+// Three copies of the file: as last read or saved here (base), as here (mine), as on GitHub now (theirs).
+function mergeFile(base, mine, theirs) {
+  const L = (b, m, t) => merge3({ annotations: deep(b || []) }, { annotations: deep(m || []) }, { annotations: deep(t || []) }).annotations;
+  const board = keyOf(mine.board) === keyOf(base.board) ? theirs.board : merge3(deep(base.board), deep(mine.board), deep(theirs.board));
+  const gone = Object.assign({}, theirs.gone, mine.gone);
+  return { owner: theirs.owner || mine.owner, topic: keyOf(mine.topic) === keyOf(base.topic) ? theirs.topic : mine.topic,
+    passages: L(base.passages, mine.passages, theirs.passages).filter(p => !gone[p.id]), gone, board: cleanBoard(board), annotations: L(base.annotations, mine.annotations, theirs.annotations),
+    savedBy: theirs.savedBy, savedAt: theirs.savedAt };
+}
+function incomingFile(f, sha, etag) {
+  if (drag || editing) { SH.waiting = { f, sha, etag }; pendingStore = true; return; }   // taken in when the drag or the edit ends
+  const mine = fileNow(), changed = !!SH.base && fileKey(mine) !== fileKey(SH.base);
+  applyFile(changed ? mergeFile(SH.base, mine, f) : f);
+  SH.base = clone(f); SH.sha = sha; if (etag) SH.etag = etag;
+  undoStack = []; redoStack = [];   // undo reaches back only to the last change from someone else
+  cacheShared();
+  if (SH.role === 'owner') ownerCopy();
+  afterRemote(); renderHead(); renderAround();
+  if (changed) scheduleShared();
+  else if (f.savedBy && f.savedBy !== SH.login) toast('@' + f.savedBy + ' changed the board.');
+}
+const writable = () => SHM && SH && SH.ready && (SH.role === 'owner' || SH.role === 'collab');
+function scheduleShared() {
+  if (!writable()) return;
+  SH.status = 'unsaved'; renderSync();
+  clearTimeout(SH.timer); SH.timer = setTimeout(() => pushShared(0), SAVE_MS);
+}
+async function pushShared(tries) {
+  if (!writable()) return;
+  if (SH.pushing) { SH.again = true; return; }
+  const snap = fileNow();
+  if (SH.base && fileKey(snap) === fileKey(SH.base)) { SH.status = 'saved'; renderSync(); return; }
+  SH.pushing = true; SH.status = 'saving'; renderSync();
+  const full = Object.assign(clone(snap), { savedBy: SH.login, savedAt: now() });
+  const r = await gh('PUT', repoPath() + '/contents/board.json', { message: 'Board: saved by @' + SH.login + ', from the Logic Portal', content: b64e(fileText(full)), sha: SH.sha });
+  SH.pushing = false;
+  if (r.ok) {
+    SH.base = clone(full); SH.sha = r.data.content.sha; SH.etag = null; SH.status = 'saved'; SH.err = null; cacheShared(); renderSync();
+    if (SH.again) { SH.again = false; scheduleShared(); }
+    return;
+  }
+  if ((r.status === 409 || r.status === 422) && tries < 4) {   // someone else saved first: theirs and mine, merged, then saved
+    SH.etag = null;
+    const got = await readFile();
+    if (got.file) { incomingFile(got.file, got.sha, got.etag); clearTimeout(SH.timer); return pushShared(tries + 1); }
+  }
+  SH.status = 'error'; SH.err = r; renderSync();
+  if (r.status === 403 || r.status === 404) roleCheck();
+}
+// Whether anyone else has saved: every few seconds while the page is in view. An unchanged answer costs GitHub nothing.
+async function checkShared() {
+  if (!SH || !SH.ready || SH.pushing || document.visibilityState !== 'visible') return;
+  SH.n = (SH.n || 0) + 1; if (SH.n % 12 === 0) roleCheck();   // about once a minute: taken off it, or the board archived, shows without a save
+  const got = await readFile();
+  if (got.same) return;
+  if (got.err) { if (got.err.status === 403 || got.err.status === 404) roleCheck(); else { SH.status = 'error'; SH.err = got.err; renderSync(); } return; }
+  SH.etag = got.etag;
+  if (got.sha !== SH.sha) incomingFile(got.file, got.sha, got.etag);
+}
+// What GitHub lets you do with the board now: taken off it, made a reader, or the board archived.
+async function roleCheck() {
+  const rp = await gh('GET', repoPath());
+  if (rp.status === 404) { lost = 'noaccess'; SH.ready = false; clearInterval(SH.poll); render(); return; }
+  if (!rp.ok) return;
+  const p = rp.data.permissions || {}, was = SH.role;
+  SH.role = rp.data.archived ? 'archived' : !p.push ? 'reader' : SH.owner === SH.login ? 'owner' : 'collab';
+  if (SH.role !== was) { toast(SH.role === 'archived' ? 'This board is no longer shared: it can be looked at, not changed.' : SH.role === 'reader' ? 'You can now look at this board, not change it.' : 'You can work on this board.'); cacheShared(); render(); }
+}
+async function connectShared() {
+  SH.status = 'connecting'; renderSync();
+  if (!SH.login) { const u = await gh('GET', '/user'); if (!u.ok) return failShared(u); SH.login = u.data.login; }
+  const rp = await gh('GET', repoPath()); if (!rp.ok) return failShared(rp);
+  SH.etag = null;
+  const got = await readFile(); if (got.err) return failShared(got.err);
+  const p = rp.data.permissions || {};
+  SH.role = rp.data.archived ? 'archived' : !p.push ? 'reader' : got.file.owner === SH.login ? 'owner' : 'collab';
+  const mine = SH.base ? fileNow() : null, changed = SH.base && SH.sha === got.sha && mine && fileKey(mine) !== fileKey(SH.base);
+  SH.sha = got.sha; SH.etag = got.etag; SH.base = clone(got.file);
+  applyFile(got.file);
+  SH.ready = true; SH.status = 'saved'; SH.err = null; lost = '';
+  if (SH.role === 'owner' && !mineTopic()) { const k = ownTopicFor(SH.repo); if (k) TID = k; }
+  cacheShared(); rememberShared();
+  if (SH.role === 'owner') { ownerSync(); ownerCopy(); }
+  renderHead(); render(); settle();
+  if (changed) scheduleShared();
+  clearInterval(SH.poll); SH.poll = setInterval(checkShared, POLL_MS);
+}
+function failShared(r) {
+  SH.status = 'error'; SH.err = r;
+  if (r.status === 404) lost = 'noaccess';
+  if (r.status === 401) askToken('GitHub no longer accepts that token. Give a new one.');
+  render();
+}
+// The topic in your own My topics that this shared board is the board of, if you are its owner.
+const mineTopic = () => !!(DB && DB.topics.some(t => t && t.id === TID));
+function ownTopicFor(repo) {
+  if (!DB || !isObj(DB.boards)) return '';
+  return Object.keys(DB.boards).find(k => { const b = DB.boards[k]; return b && isObj(b.shared) && b.shared.repo === repo && !b.shared.stopped && DB.topics.some(t => t && t.id === k); }) || '';
+}
+// The owner's passages put under the topic in My topics since come into the shared board's passages;
+// the topic's name, as renamed there, too. Nothing taken out of the shared topic comes back.
+function ownerSync() {
+  if (!writable() || SH.role !== 'owner' || !mineTopic()) return;
+  let n = 0;
+  DB.items.filter(x => x && Array.isArray(x.topics) && x.topics.includes(TID)).forEach(x => {
+    if (SP.some(p => p.id === x.id || (p.ref === x.ref && (p.excerpt || '') === (x.excerpt || ''))) || SG[x.id]) return;
+    SP.push(sharedPassage(x)); n++;
+  });
+  const t = DB.topics.find(y => y && y.id === TID);
+  if (t && t.name !== STOPIC.name) { STOPIC.name = t.name; n++; }
+  if (n) { scheduleShared(); renderPassages(); renderHead(); }
+}
+const sharedPassage = x => Object.assign({ id: x.id || uid('s'), ref: x.ref, cite: x.cite || '', work: x.work || '', date: x.date || '', words: x.words || '', excerpt: x.excerpt || null, en: !!x.en, by: SH ? SH.login : '', added: now(), note: '' },
+  x.excerpt && isObj(x.span) ? { span: clone(x.span) } : {});   // a stretch keeps where it stands
+// The owner's copy, in My topics: the board as shared, marked so. It goes into the owner's file, and GitHub, with the topics.
+function ownerCopy() {
+  if (SH.role !== 'owner' || !mineTopic()) return;
+  const d = readStore(); if (!d) return;
+  d.boards = isObj(d.boards) ? d.boards : {};
+  const was = d.boards[TID], b = clone(kept());
+  b.shared = Object.assign({}, was && isObj(was.shared) ? was.shared : {}, { repo: SH.repo });
+  d.boards[TID] = Object.assign(b, { at: now() });
+  try { localStorage.setItem(TOPICS, JSON.stringify(d)); DB = d; } catch (e) { /* the shared board itself is saved */ }
+}
+// Saving, on a shared board: what only you see goes to My topics, the rest to the board's file.
+function saveShared(fn) {
+  const d = readStore();
+  if (d) {
+    if (fn) fn(d);
+    const priv = (realB().annotations || []).filter(a => a.only).map(a => { const c = clone(a); delete c.only; return c; });
+    const ids = new Set(priv.map(a => a.id)), was = JSON.parse(seenA), wasIds = new Set(was.map(a => a && a.id));
+    d.gone = isObj(d.gone) ? d.gone : {};
+    was.forEach(a => { if (a && !ids.has(a.id)) d.gone[a.id] = now(); });   // deleted here, so that no other copy brings it back
+    const since = (Array.isArray(d.annotations) ? d.annotations : []).filter(a => a && !wasIds.has(a.id) && !ids.has(a.id));   // made elsewhere meanwhile
+    d.annotations = since.concat(priv);
+    if (SH.role === 'owner' && mineTopic()) { d.boards = isObj(d.boards) ? d.boards : {}; const b = clone(kept()); b.shared = Object.assign({}, isObj(d.boards[TID] && d.boards[TID].shared) ? d.boards[TID].shared : {}, { repo: SH.repo }); d.boards[TID] = Object.assign(b, { at: now() }); }
+    try { localStorage.setItem(TOPICS, JSON.stringify(d)); DB = d; seenA = JSON.stringify(d.annotations); }
+    catch (e) { toast('This browser would not keep what only you see. The shared board itself is saved.'); }
+    if (since.length) realB().annotations = (realB().annotations || []).concat(since.map(a => Object.assign(clone(a), { only: true })));
+  }
+  scheduleShared();
+  return true;
+}
+// The store changed (another tab, or the portal beside the board): what only you see, as My topics now has it.
+function takeInShared() {
+  if (SH.waiting && !drag && !editing) { const w = SH.waiting; SH.waiting = null; pendingStore = false; incomingFile(w.f, w.sha, w.etag); }
+  const d = readStore(); if (!d) return;
+  DB = d;
+  const st = Array.isArray(d.annotations) ? d.annotations : [], ta = JSON.stringify(st);
+  if (ta !== seenA) { realB().annotations = (realB().annotations || []).filter(a => !a.only).concat(st.map(a => Object.assign(clone(a), { only: true }))); seenA = ta; }
+  if (SH.role === 'owner') ownerSync();
+  afterRemote(); renderAround();
+}
+// Shared boards you have opened, for My topics' list: kept beside those GitHub shows it.
+function rememberShared() {
+  let c = null; try { c = JSON.parse(localStorage.getItem(SHARED_LIST) || 'null'); } catch (e) { c = null; }
+  if (!c || !Array.isArray(c.list)) c = { at: '', list: [] };
+  const e = { repo: SH.repo, topic: STOPIC.name, owner: SH.owner, push: SH.role === 'owner' || SH.role === 'collab', archived: SH.role === 'archived' };
+  c.list = c.list.filter(x => x && x.repo !== SH.repo).concat([e]);
+  try { localStorage.setItem(SHARED_LIST, JSON.stringify(c)); } catch (x) { /* only a list */ }
+}
+// A token, asked for when there is none: My topics' own, which reaches the organisation's repositories.
+function askToken(why) {
+  $('lockh').textContent = 'A board shared on GitHub';
+  $('lockbody').innerHTML = '<p>' + esc(why || 'This board is kept in a private repository of the seminar’s, kant-lab-seminar. To open it, give your GitHub token: the one My topics or the queue uses, made to reach all of the organisation’s repositories.') + '</p>' +
+    '<form id="tokform"><input type="password" id="tokin" placeholder="github_pat_…" autocomplete="off" spellcheck="false" style="width:100%"><label class="chk"><input type="checkbox" id="tokrem"> remember on this computer</label>' +
+    '<div class="row"><button type="submit" class="btn solid">Open the board</button><a class="linkish" href="' + esc(TOKEN_HOWTO) + '" target="_blank" rel="noopener">making a token ↗</a></div><p class="warn" id="tokerr"></p></form>';
+  $('lock').classList.add('show');
+  $('tokform').addEventListener('submit', e => {
+    e.preventDefault();
+    const t = $('tokin').value.trim(); if (!t) { $('tokerr').textContent = 'Paste the token.'; return; }
+    try { if ($('tokrem').checked) { localStorage.setItem(TOKEN_KEY, t); sessionStorage.removeItem(TOKEN_KEY); } else sessionStorage.setItem(TOKEN_KEY, t); } catch (x) { /* used for now anyway */ }
+    SH.token = t; SH.login = ''; $('lock').classList.remove('show'); connectShared();
+  });
+}
+function startShared(repo, d) {
+  SHM = true; SH = { repo, token: getToken(), status: 'connecting', login: '', role: '' };
+  seenA = JSON.stringify(d && Array.isArray(d.annotations) ? d.annotations : []);
+  if (!TID) TID = ownTopicFor(repo) || 'shared:' + repo;
+  STOPIC = { id: TID, name: '', note: '' }; topic = STOPIC;
+  B = cleanBoard(clone(BASE)); B.annotations = privateAnns();
+  let c = null; try { c = JSON.parse(localStorage.getItem(SHARED_CACHE + repo) || 'null'); } catch (e) { c = null; }
+  if (c && c.file) { SH.role = c.role || ''; SH.login = c.login || ''; SH.base = c.file; SH.sha = c.sha; applyFile(c.file); }
+  loadPrefs();
+  viewId = B.views.some(v => v.id === prefs.viewId) ? prefs.viewId : B.views[0].id;
+  if (!SH.token) setTimeout(() => askToken(), 0); else setTimeout(connectShared, 0);
 }
 /* ── Builders: where things stand ─────────────────────────────────────────── */
 // A card's place in this view; failing that, in the first view that has it; failing that, beside the rest.
@@ -1638,7 +1962,7 @@ function cardHtml(it) {
     inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 && q0.q ? '<div class="pq">“' + excerpt(it, 240) + '”</div>' : '') +
       '<span class="pc">' + esc((it.st && it.st.cite) || (q0 && q0.cite) || it.cite || it.ref || '') + (it.st && !it.st.whole ? '<i class="pof">' + esc(stretchOfWhat(it.st)) + '</i>' : '') + '</span>' +
       (it.slost ? '<span class="flag">these words are no longer where they were kept</span>' : '') +
-      (it.off ? '<span class="flag">' + (it.off === 'gone' ? 'no longer in My topics' : 'no longer under this topic') + '</span>' : '') +
+      (it.off ? '<span class="flag">' + (it.off === 'gone' ? (SHM ? 'taken out of the topic' : 'no longer in My topics') : 'no longer under this topic') + '</span>' : '') +
       (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it);
   } else if (it.kind === 'link') {
     const L = it.lk || linkOf(it), gone = L.state !== 'ok';
@@ -1646,9 +1970,9 @@ function cardHtml(it) {
       (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') +
       '<span class="lti">' + esc(L.whole ? L.count + (L.count === 1 ? ' passage' : ' passages') : L.title) + '</span>' +
       (!gone && L.words ? '<div class="lw">' + (L.whole ? '' : '“') + esc(shortly(L.words, L.whole ? 120 : 150)) + (L.whole ? '' : '”') + '</div>' : '') +
-      (gone ? '<span class="flag">' + (L.state === 'topic-gone' ? 'that topic is no longer in My topics' : 'no longer on that board') + '</span>' : '');
+      (gone ? '<span class="flag">' + (L.state === 'private' ? 'a board not shared with you' : L.state === 'topic-gone' ? 'that topic is no longer in My topics' : 'no longer on that board') + '</span>' : '');
   } else {
-    inner = '<span class="tag">' + (it.kind === 'problem' ? 'Question' : 'Note') + '</span><span class="txt">' + esc(it.text) + '</span>' + annDots(it);
+    inner = '<span class="tag">' + (it.kind === 'problem' ? 'Question' : 'Note') + '</span><span class="txt">' + esc(it.text) + '</span>' + annDots(it) + (SHM && it.by ? '<span class="who">@' + esc(it.by) + '</span>' : '');
   }
   inner += inMark(it.id) + (it.kind === 'passage' ? alsoChip(it) : '');
   const lc = it.kind === 'link' && it.lk ? (it.lk.state !== 'ok' ? ' gone' : '') : '';
@@ -1785,6 +2109,8 @@ function renderTools() {
   $('annsb').textContent = 'Annotations' + (na ? ' (' + na + ')' : '');
   renderSync();
   $('stage').classList.toggle('readonly', ro());
+  document.querySelector('.tools').classList.toggle('ro', ro());
+  const sb = $('sharebtn'); if (sb) { sb.hidden = SHM ? !(SH && SH.ready && SH.role === 'owner') : !topic || !!lost || !!live; sb.textContent = SHM ? 'Who has it…' : 'Share…'; }
   const n = query ? B.items.filter(it => shown(it) && matches(it)).length : null;
   $('found').textContent = n == null ? '' : n + ' found';
   banner();
@@ -1828,7 +2154,7 @@ function sideIntro() {
   const n = B.items.filter(i => i.kind === 'passage').length, gh = (() => { try { return !!localStorage.getItem(TOPICS_GH); } catch (e) { return false; } })();
   return '<div class="intro"><h2>' + esc(topic ? topic.name : 'A topic’s board') + '</h2><p class="sub">The board of a topic in My topics</p>' +
     boardsAround() + (topic ? '<span class="k">The topic, in your words</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
-    '<p>The topic’s passages wait under <b>Passages</b>, in the side. Put them on the board one at a time, with <b>+ On the board</b> or by dragging one onto it. A passage you put under the topic later, anywhere in the portal, joins them there; one taken off the board goes back. Click a card to read its passage in full, here or in the portal.</p>' +
+    '<p>The topic’s passages wait under <b>Passages</b>, in the side. Put them on the board one at a time, with <b>+ On the board</b> or by dragging one onto it, or into a group’s frame. A passage you put under the topic later, anywhere in the portal, joins them there; one taken off the board goes back. Click a card to read its passage in full, here or in the portal.</p>' +
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
@@ -1838,7 +2164,7 @@ function sideIntro() {
     '<li><b>Edit in place</b>: double-click any card, arrow or group name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
     '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag one out; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
     '<li><b>Tables</b>: press <i>Table</i>, choose its columns and rows on the grid, and whether its first row or its first column are headings. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next, and in the last cell adds a row. Drag a passage from <b>Passages</b> onto a cell to put it there. Paste a table from Word or a spreadsheet onto the board, and copy one back with <kbd>⌘C</kbd>.</li>' +
-    '<li><b>Groups</b> are frames around their cards. Grab any bare part of a frame to move the whole group; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into a frame to put it in that group.</li>' +
+    '<li><b>Groups</b> are frames around their cards. Grab any bare part of a frame to move the whole group; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into a frame, or a passage from <b>Passages</b>, to put it in that group.</li>' +
     '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
     '<li><b>On an iPad</b>: a finger moves cards, groups and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>' +
     '<span class="k">Its dimensions</span><ul>' +
@@ -1847,7 +2173,8 @@ function sideIntro() {
     '<li><b>Depth</b>: zoom out and a card is its citation; zoom in and its words show.</li>' +
     '<li><b>Focus</b>: select a card and press <kbd>F</kbd> to see only what is joined to it.</li>' +
     '<li><b>Time</b>: <i>Photograph the board</i> keeps it as it is now. Come back to any photograph later, or bring it back.</li></ul>' +
-    '<span class="k">Where it is kept</span><p>With your topics, in this browser, and nobody else sees it. <i>Save to file</i>, in My topics, saves it with them' + (gh ? ', and it goes to GitHub with them, locked with your passphrase, through the portal beside the board' : '; with <i>Keep on GitHub</i> on, it goes there with them, locked') + '. <i>Export</i>, above, saves this board alone.</p>' +
+    (SHM ? '<span class="k">Where it is kept</span><p>In <code>' + esc(ORG + '/' + SH.repo) + '</code>, a private repository: GitHub lets in only the people it is shared with' + (SH.owner ? ', by @' + esc(SH.owner) : '') + '. Your own notes on its passages, and annotations marked only me, stay in My topics.</p>' : '') +
+    (SHM ? '' : '<span class="k">Where it is kept</span><p>With your topics, in this browser, and nobody else sees it. <i>Save to file</i>, in My topics, saves it with them' + (gh ? ', and it goes to GitHub with them, locked with your passphrase, through the portal beside the board' : '; with <i>Keep on GitHub</i> on, it goes there with them, locked') + '. <i>Export</i>, above, saves this board alone.</p>') +
     '<p style="font-size:0.85rem;color:var(--faded)">' + n + (n === 1 ? ' passage · ' : ' passages · ') + B.items.length + ' cards · ' + B.arrows.length + ' arrows · ' + B.views.length + (B.views.length === 1 ? ' view' : ' views') + ' · ' + photoList().length + (photoList().length === 1 ? ' photograph' : ' photographs') + '</p></div>';
 }
 function cardButtons(it, arr) {
@@ -1861,7 +2188,7 @@ function sidePassage(it, m, arr) {
   const q = it.quotes[0] || {}, x = it.kx;
   let h = '<h2>' + esc(it.label || q.cite || it.cite || 'A passage') + '</h2><p class="sub">' + mchip(m) + esc([it.label ? q.cite : '', x ? x.work : '', x ? x.date : ''].filter(Boolean).join(' · ')) + '</p>';
   if (it.off) h += '<div class="offnote">' + (it.off === 'gone'
-    ? 'This passage is no longer in My topics. Its card keeps its place, its arrows and its annotations until you take it off the board. Keep the passage again, with ☆ Topic, and it comes back to this card.'
+    ? (SHM ? 'This passage was taken out of the shared topic. Its card keeps its place and its arrows until it is taken off the board.' : 'This passage is no longer in My topics. Its card keeps its place, its arrows and its annotations until you take it off the board. Keep the passage again, with ☆ Topic, and it comes back to this card.')
     : 'This passage is no longer under “' + esc(topic ? topic.name : '') + '”. Its card stays, with its arrows, until you put it back or take it off the board.') +
     (ro() ? '' : '<div class="row">' + (it.off === 'off' ? '<button type="button" class="btn solid" data-act="putback">Put it back under the topic</button>' : '') + '<button type="button" class="linkish" data-act="offboard">Take it off the board</button></div>') + '</div>';
   const st = it.st, sn = !ro() ? stretchNow(it) : null;
@@ -1874,10 +2201,16 @@ function sidePassage(it, m, arr) {
     h += '<span class="k">' + (q.full ? 'The passage, in full' : 'The passage') + '</span>' + quoteHtml(q, 0, false, it);
   }
   if (it.slost) h += '<p class="ocr">These words are no longer where they were kept in the text: it may have been extracted again since. The card keeps the copy My topics kept with them, and what it quotes can’t be changed here.</p>';
-  if (sn && !lost) h += '<div class="row"><button type="button" class="btn" data-act="stretch" title="Trim it to the words you want, or take in more">Change what it quotes</button><button type="button" class="btn" data-act="splitit">Split it in two…</button></div>';
+  if (sn && !lost && !SHM) h += '<div class="row"><button type="button" class="btn" data-act="stretch" title="Trim it to the words you want, or take in more">Change what it quotes</button><button type="button" class="btn" data-act="splitit">Split it in two…</button></div>';
   if (!q.full) h += '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal. The words are the copy My topics kept when the passage was saved.' : 'The portal beside the board is still loading its texts, so these are the words My topics kept. The passage in full, and its annotations, follow in a moment.') + '</p>';
   else if (!ro()) h += '<p class="by">Select some of its words to annotate them.</p>';
-  if (x) h += '<span class="k">Your note on it</span><textarea class="mtnote" data-mtnote="' + esc(x.id) + '" placeholder="The same note as in My topics: write it here or there"' + (lost ? ' readonly' : '') + '>' + esc(x.note || '') + '</textarea>';
+  if (x && SHM) {
+    const mine = DB && DB.items.find(y => y && y.ref === x.ref && (y.excerpt || '') === (x.excerpt || ''));
+    h += '<span class="k">The note on the board</span><textarea class="mtnote" data-sharednote="' + esc(x.id) + '" placeholder="' + (writable() ? 'A note everyone on this board sees' : 'No note on the board') + '"' + (writable() ? '' : ' readonly') + '>' + esc(x.note || '') + '</textarea>' +
+      (x.noteBy ? '<p class="by">@' + esc(x.noteBy) + (x.noteAt ? ' · ' + esc(fmtDate(x.noteAt)) : '') + '</p>' : '') +
+      '<span class="k">Your own note</span>' + (mine ? '<textarea class="mtnote" data-mtnote="' + esc(mine.id) + '" placeholder="Only you see it: it is your note on the passage in My topics">' + esc(mine.note || '') + '</textarea>' : '<p class="by">Keep the passage in My topics (☆ Topic) to write a note only you see.</p>') +
+      (x.by ? '<p class="by">Added to the topic by @' + esc(x.by) + '</p>' : '');
+  } else if (x) h += '<span class="k">Your note on it</span><textarea class="mtnote" data-mtnote="' + esc(x.id) + '" placeholder="The same note as in My topics: write it here or there"' + (lost ? ' readonly' : '') + '>' + esc(x.note || '') + '</textarea>';
   const ks = (LX && it.mt && LX.also.get(it.mt)) || [];
   if (ks.length) h += '<div class="alsobox"><b>Also on the boards of</b> ' + ks.map(x => '<button type="button" class="linkish" data-goboard="' + esc(x.t + '|' + x.id) + '">' + esc(topicName(x.t)) + '</button>').join(', ') + '<p class="by">The page found the same passage there: it is not a link you made.</p></div>';
   return h + linkedFromHtml(it.id) + cardButtons(it, arr);
@@ -1946,7 +2279,7 @@ function pickSize(b) {
 const gridAt = e => { if (!form || form.kind !== 'table') return null; const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.closest ? el.closest('[data-tgrid] button') : null; };
 function sideCards(ids) {
   const its = ids.map(item).filter(Boolean);
-  const J = !ro() && its.length > 1 && its.every(c => c.kind === 'passage') ? joinPlan(ids) : null;
+  const J = !ro() && !SHM && its.length > 1 && its.every(c => c.kind === 'passage') ? joinPlan(ids) : null;   // on a shared board, not yet: its passages are kept apart from My topics
   const join = !J ? '' : '<span class="k">Join them</span>' + (J.st
     ? '<p class="by" style="margin-top:0">One card, quoting ' + esc(J.st.cite) + (J.between.length ? ', with ' + (J.between.length === 1 ? 'the passage' : 'the passages') + ' between them that no card quotes (' + esc(J.between.join(', ')) + ')' : '') + '. It keeps the first card’s place, group and heading, the arrows of all of them, and every note.</p><div class="row" style="margin-top:0"><button type="button" class="btn solid" data-act="join">Join into one card</button></div>'
     : '<p class="by" style="margin-top:0">' + esc(J.why) + ' A group keeps them together instead.</p>');
@@ -1988,7 +2321,8 @@ function boardsAround() {
 function sideLink(it, m, arr) {
   const L = it.lk || linkOf(it);
   let h = '<h2>' + esc(it.label || (L.whole ? L.topic : L.title)) + '</h2><p class="sub">' + mchip(m) + '↗ ' + esc(L.topic || 'another topic') + ' · ' + esc(L.whole ? 'the whole topic' : (L.what || 'a card') + ' on its board') + '</p>';
-  if (L.state === 'topic-gone') h += '<div class="offnote">The topic this pointed to is no longer in My topics. The card keeps what it was: “' + esc(L.title) + '”.</div>';
+  if (L.state === 'private') h += '<div class="offnote">This points to a board of @' + esc(SH.owner) + '’s that is not shared with you.</div>';
+  else if (L.state === 'topic-gone') h += '<div class="offnote">The topic this pointed to is no longer in My topics. The card keeps what it was: “' + esc(L.title) + '”.</div>';
   else if (L.state === 'item-gone') h += '<div class="offnote">That is no longer on the board of “' + esc(L.topic) + '”. The card keeps what it was: “' + esc(L.title) + '”.<div class="row"><button type="button" class="btn" data-act="followlink">Open that board</button></div></div>';
   else {
     if (L.whole) h += (L.words ? '<span class="k">The topic, in your words</span><div class="stmt">' + esc(L.words) + '</div>' : '') + '<p class="by">' + L.count + (L.count === 1 ? ' passage' : ' passages') + (L.b ? ' · ' + (L.b.items || []).length + ' cards on its board' : ' · no board yet') + '</p>';
@@ -2037,6 +2371,109 @@ function renderBoards() {
   }
   P.innerHTML = h; P.scrollTop = top;
 }
+/* ── Sharing a board: the owner's dialog ──────────────────────────────────────
+   Share makes the board's repository (private, in the organisation), puts the board and the topic's
+   passages in it, and gives each person named GitHub's read or write on it. Shared, the same dialog
+   says who has it, changes a role, adds or takes off a person at once, and stops sharing: the board
+   comes back into the owner's My topics, everyone else is taken off, and the repository is archived,
+   read only, with its history. The page never deletes a repository. */
+let shareSt = null;   // { token, login, people: [{ login, role: read | write }], members, busy, err, msg }
+const slug = s => String(s || 'topic').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'topic';
+const okLogin = s => /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(s);
+async function setPersonOn(repo, login, role, T) {   // GitHub's read or write on the board's repository
+  const r = await gh('PUT', '/repos/' + ORG + '/' + encodeURIComponent(repo) + '/collaborators/' + encodeURIComponent(login), { permission: role === 'write' ? 'push' : 'pull' }, null, T);
+  return r.ok ? '' : cap1(ghMsg(r));
+}
+async function openShare() {
+  if (SHM && SH.role !== 'owner') { toast('Only @' + SH.owner + ', who shared it, can change who has it.'); return; }
+  if (!SHM && (ro() || !topic)) { toast(roWhy()); return; }
+  shareSt = { token: SHM ? SH.token : getToken(), login: SHM ? SH.login : '', people: [], members: [], busy: false, err: '', msg: '' };
+  $('sharedlg').classList.add('show'); drawShare();
+  if (shareSt.token) shareLoad();
+}
+async function shareLoad() {
+  const s = shareSt, T = s.token;
+  if (!s.login) { const u = await gh('GET', '/user', null, null, T); if (!u.ok) { s.err = cap1(ghMsg(u)) + '.'; drawShare(); return; } s.login = u.data.login; }
+  const m = await gh('GET', '/orgs/' + ORG + '/members?per_page=100', null, null, T);
+  if (m.ok && Array.isArray(m.data)) s.members = m.data.map(x => x.login).filter(l => l !== s.login).sort();
+  if (SHM) {
+    const c = await gh('GET', repoPath() + '/collaborators?affiliation=direct&per_page=100', null, null, T);
+    if (c.ok && Array.isArray(c.data)) s.people = c.data.filter(x => x.login !== s.login && x.login !== SH.owner).map(x => ({ login: x.login, role: x.permissions && x.permissions.push ? 'write' : 'read' }));
+  }
+  if (shareSt === s) drawShare();
+}
+function drawShare() {
+  const s = shareSt; if (!s) return;
+  const dis = s.busy ? ' disabled' : '';
+  const roleSel = (v, attr) => '<select ' + attr + dis + '><option value="read"' + (v === 'read' ? ' selected' : '') + '>can look</option><option value="write"' + (v === 'write' ? ' selected' : '') + '>can work on it</option></select>';
+  $('shareh').textContent = SHM ? 'Who has this board' : 'Share this board';
+  $('sharebody').innerHTML =
+    (SHM ? '<p>Shared as <code>' + esc(ORG + '/' + SH.repo) + '</code>, a private repository. GitHub lets nobody in but the people below, you, and the organisation’s owners. A change here takes effect at once.</p>'
+      : '<p>Sharing makes a private repository in <code>' + esc(ORG) + '</code> for this board alone, copies in the topic’s passages and the board, and lets in the people you name, and nobody else but the organisation’s owners. Your notes on the passages, and your annotations, stay in My topics.</p>') +
+    (s.token ? '' : '<label class="f" for="shtok">Your GitHub token: it must reach all of kant-lab-seminar’s repositories, with <i>Administration: Read and write</i> to make one</label><input type="password" id="shtok" autocomplete="off" spellcheck="false">') +
+    '<span class="k">People</span>' + (s.people.length ? s.people.map((p, i) => '<div class="prow"><b>@' + esc(p.login) + '</b>' + roleSel(p.role, 'data-prole="' + i + '"') + '<button type="button" class="linkish" data-pdel="' + i + '"' + dis + '>take off</button></div>').join('')
+      : '<p class="empty">' + (SHM ? 'Nobody but you yet.' : 'Nobody yet. Add someone below, or share it with nobody for now and add people later.') + '</p>') +
+    '<div class="prow"><input type="text" data-pnew list="orgmembers" placeholder="a GitHub username, from the seminar" spellcheck="false" autocapitalize="off" autocomplete="off">' + roleSel('write', 'data-pnewrole') + '<button type="button" class="btn" data-padd' + dis + '>Add</button></div>' +
+    '<datalist id="orgmembers">' + s.members.map(l => '<option value="' + esc(l) + '">').join('') + '</datalist>' +
+    '<div class="row">' + (SHM ? '<button type="button" class="btn" data-shstop' + dis + '>Stop sharing…</button>' : '<button type="button" class="btn solid" data-shgo' + dis + '>Share</button>') + '<button type="button" class="linkish" data-shx>Close</button></div>' +
+    (s.msg ? '<p class="ok">' + esc(s.msg) + '</p>' : '') + (s.err ? '<p class="warn">' + esc(s.err) + '</p>' : '');
+}
+function shareFail(r, why) { const s = shareSt; if (!s) return; s.busy = false; s.msg = ''; s.err = why || cap1(ghMsg(r)) + '.'; drawShare(); }
+async function doShare() {
+  const s = shareSt; if (!s.token) { s.err = 'Give your GitHub token.'; drawShare(); return; }
+  s.busy = true; s.err = ''; s.msg = 'Making the board’s repository…'; drawShare();
+  if (!s.login) { const u = await gh('GET', '/user', null, null, s.token); if (!u.ok) return shareFail(u); s.login = u.data.login; }
+  const name = 'board-' + slug(topic.name) + '-' + Math.random().toString(36).slice(2, 6);
+  const r = await gh('POST', '/orgs/' + ORG + '/repos', { name, private: true, description: topic.name + ' · a topic’s board shared by @' + s.login + ' (Kant Lab Logic Portal)', has_issues: false, has_projects: false, has_wiki: false }, null, s.token);
+  if (!r.ok) return shareFail(r, r.status === 403 || r.status === 404 ? 'Your token can’t make repositories in ' + ORG + '. It needs Administration: Read and write, and access to all of the organisation’s repositories: the portal’s README, under Sharing a board, says how.' : '');
+  const b = clone(kept()); delete b.shared;
+  const file = { owner: s.login, topic: { id: TID, name: topic.name, note: topic.note || '' }, passages: underTopic().map(x => Object.assign(sharedPassage(x), { by: s.login, added: x.added || now() })), gone: {}, board: b, annotations: [], savedBy: s.login, savedAt: now() };
+  s.msg = 'Putting the board in it…'; drawShare();
+  let w = null;
+  for (let k = 0; k < 4; k++) {   // a repository just made can take a moment to take its first file
+    w = await gh('PUT', '/repos/' + ORG + '/' + name + '/contents/board.json', { message: 'The board of “' + topic.name + '”, shared by @' + s.login + ' from the Logic Portal', content: b64e(fileText(file)) }, null, s.token);
+    if (w.ok || (w.status !== 404 && w.status !== 409 && w.status !== 422)) break;
+    await new Promise(res => setTimeout(res, 1200));
+  }
+  if (!w.ok) return shareFail(w, 'The repository ' + ORG + '/' + name + ' was made, but the board could not be put in it: ' + ghMsg(w) + '.');
+  const failed = [];
+  for (const p of s.people) { const er = await setPersonOn(name, p.login, p.role, s.token); if (er) failed.push('@' + p.login + ': ' + er); }
+  // from now on the board is the shared one; My topics keeps a copy, marked so
+  B.shared = { repo: name, by: s.login, at: now() }; save();
+  try { localStorage.setItem(SHARED_CACHE + name, JSON.stringify({ file: cleanFile(Object.assign({ kind: 'kantlab-shared-board' }, file)), sha: w.data.content.sha, role: 'owner', login: s.login })); } catch (x) { /* it is read from GitHub */ }
+  s.busy = false; s.msg = 'Shared.' + (failed.length ? ' GitHub would not let in ' + failed.join('; ') + '. Add them again from Who has it.' : ' Opening it…');
+  drawShare();
+  setTimeout(() => location.reload(), failed.length ? 6000 : 900);
+}
+async function stopSharing() {
+  const s = shareSt;
+  if (!mineTopic()) { s.err = 'Its topic isn’t in My topics in this browser, so the board has nowhere to come back to. Open it from the computer you shared it from.'; drawShare(); return; }
+  if (!confirm('Stop sharing this board?\n\nIt comes back into My topics, with everything done on it and the passages others added. Everyone else loses it, and its repository is archived: read only, with its history.')) return;
+  s.busy = true; s.err = ''; s.msg = 'Bringing the board back into My topics…'; drawShare();
+  const d = readStore(); if (!d) return shareFail(null, 'My topics would not read in this browser, so the board can’t come back into it. Nothing was changed.');
+  const ids = new Set(d.items.map(x => x && x.id));
+  SP.forEach(p => {
+    const same = d.items.find(x => x && x.ref === p.ref && (x.excerpt || '') === (p.excerpt || ''));
+    const remap = to => B.items.forEach(c => { if (c.kind === 'passage' && c.mt === p.id) c.mt = to; });
+    if (same) { if (!same.topics.includes(TID)) { same.topics.push(TID); same.at = now(); } if (same.id !== p.id) remap(same.id); return; }
+    let id = p.id; if (ids.has(id)) { id = uid('i'); remap(id); }
+    ids.add(id);
+    d.items.push(Object.assign({ id, ref: p.ref, topics: [TID], cite: p.cite || '', work: p.work || '', date: p.date || '', words: p.words || '', excerpt: p.excerpt || null, en: !!p.en, note: '', added: p.added || now(), at: now() }, p.excerpt && isObj(p.span) ? { span: clone(p.span) } : {}));
+  });
+  const b = clone(kept()); b.shared = { repo: SH.repo, by: SH.login, at: now(), stopped: now() };
+  d.boards = isObj(d.boards) ? d.boards : {}; d.boards[TID] = Object.assign(b, { at: now() });
+  const have = new Set((d.annotations || []).map(a => a && a.id));
+  d.annotations = (Array.isArray(d.annotations) ? d.annotations : []).concat(fileNow().annotations.filter(a => !have.has(a.id)));   // the board's annotations, now on your passages
+  try { localStorage.setItem(TOPICS, JSON.stringify(d)); } catch (e) { return shareFail(null, 'This browser would not keep the board, so sharing goes on. Export the board, so nothing is lost.'); }
+  s.msg = 'Taking everyone off, and archiving the repository…'; drawShare();
+  const c = await gh('GET', repoPath() + '/collaborators?affiliation=direct&per_page=100', null, null, s.token);
+  if (c.ok && Array.isArray(c.data)) for (const x of c.data) if (x.login !== SH.login) await gh('DELETE', repoPath() + '/collaborators/' + encodeURIComponent(x.login), null, null, s.token);
+  const a = await gh('PATCH', repoPath(), { archived: true }, null, s.token);
+  try { localStorage.removeItem(SHARED_CACHE + SH.repo); } catch (e) { /* fine */ }
+  s.busy = false; s.msg = a.ok ? 'No longer shared. The board is yours alone again.' : 'The board is back in My topics, but GitHub would not archive the repository: ' + ghMsg(a) + '.';
+  drawShare();
+  setTimeout(() => { location.href = new URL(boardAddr(TID), location.href).href; location.reload(); }, a.ok ? 1200 : 6000);
+}
 /* ── Annotations, in the side: beneath each passage, and all of them in one list ── */
 const whoHtml = a => (a.by ? '@' + esc(a.by) + ' · ' : '') + esc(a.date ? fmtDate(a.date) : '') + (a.edited ? ' · edited' + (a.editedBy ? ' by @' + esc(a.editedBy) : '') : '');
 function toHtml(to) {
@@ -2056,7 +2493,7 @@ function annEntries(P, it, qi) {
 function annEntryHtml(x) {
   const a = x.a, reps = annIndex().replies.get(a.id) || [], w = !ro(), mine = o => !o.by || o.by === me();
   let h = '<div class="ann-e ak-' + esc(a.kind) + (x.placed ? ' placed' : '') + (x.lost ? ' lost' : '') + (a.kind === 'problem' && a.resolved ? ' done' : '') + '" data-annid="' + esc(a.id) + '">' +
-    '<div class="ah"><span class="kl">' + esc(annKind(a.kind).label) + '</span>' + (x.whole ? '<span class="on">the passage as a whole</span>' : '<span class="ex">“' + esc(short(a.on.exact, 110)) + '”</span>') + '</div>';
+    '<div class="ah"><span class="kl">' + esc(annKind(a.kind).label) + '</span>' + (a.only && SHM ? '<span class="onlyme">only you</span>' : '') + (x.whole ? '<span class="on">the passage as a whole</span>' : '<span class="ex">“' + esc(short(a.on.exact, 110)) + '”</span>') + '</div>';
   if (x.placed) h += '<div class="pg">Placed by the page: these words were not found with the same words around them, or stand here more than once, so it is put at the nearest match.</div>';
   if (x.lost) h += '<div class="pg">These words are no longer in this passage, so it is placed nowhere in it.</div>';
   if (composing() && form.id === a.id) h += composerHtml();
@@ -2084,6 +2521,7 @@ function composerHtml() {
     '<div class="by" style="margin-top:0.2rem">' + (f.to && f.to.card ? 'the card <b>' + esc(nameOf(f.to.card)) + '</b> <button type="button" class="linkish" data-annunpick>not that card</button>' : '<button type="button" class="linkish" data-act="annpick">or click a card on the board</button>') + '</div>' : '';
   return '<div class="anncomp ak-' + (reply ? 'reply' : esc(f.ann)) + '" data-fkey="' + esc(f.key) + '">' + kinds + on + to +
     '<textarea data-ann-text rows="2" placeholder="' + esc(reply ? 'Your reply' : K.hint) + '">' + esc(f.text0 || '') + '</textarea>' +
+    (SHM && !reply && !f.id ? '<label class="chk onlyc"><input type="checkbox" data-ann-only> only me: kept in My topics, not on the shared board</label>' : '') +
     '<div class="row" style="margin-top:0.35rem"><button type="button" class="btn solid" data-act="annsave">' + (f.id ? 'Save' : reply ? 'Reply' : 'Keep it') + '</button><button type="button" class="linkish" data-act="anncancel">Cancel</button><span class="by" style="margin:0">Enter keeps it · ⇧Enter a new line · Esc leaves it</span></div><p class="warn" data-err></p></div>';
 }
 function sideAnnAlone() {
@@ -2266,7 +2704,7 @@ function renderPassages() {
   $('tpass').innerHTML = 'Passages' + (n ? '<b class="n">' + n + '</b>' : '');
   $('addp').textContent = n ? 'Passage… (' + n + ')' : 'Passage…';
   if (side !== 'passages') return;
-  const all = underTopic().length, on = B.items.filter(i => i.kind === 'passage' && i.kx && Array.isArray(i.kx.topics) && i.kx.topics.includes(TID));
+  const all = underTopic().length, on = B.items.filter(i => i.kind === 'passage' && i.kx && inTopic(i.kx));
   const words = x => { const t = String(x.excerpt || x.words || '').replace(/\s+/g, ' ').trim(); return t.length > 160 ? t.slice(0, 159) + '…' : t; };
   // A passage waiting can be opened, to be read in full: one longer than its row shows, or kept as some of its words.
   const whole = x => { const f = fullText(x.ref); return f != null ? f : x.words || ''; };
@@ -2283,14 +2721,14 @@ function renderPassages() {
   $('pphead').innerHTML = '<h2>The topic’s passages</h2><p class="sub">' + (topic ? esc(all + (all === 1 ? ' passage' : ' passages') + ' under “' + topic.name + '”') : '') + '</p>';
   $('ppbar').hidden = !topic || !all;
   $('ppfound').textContent = q.length ? (fw.length + fo.length) + ' found' : '';
-  $('pplist').innerHTML = (!topic ? '' : n ? '<p style="font-size:0.9rem;margin:0 0 0.6rem">Put them on the board one at a time: press <b>+ On the board</b>, or drag one onto the board where you want it.</p>' +
+  $('pplist').innerHTML = (SHM && writable() ? '<div class="row" style="margin:0 0 0.6rem"><button type="button" class="btn" data-ppportal title="Add to the topic the passage open in the portal beside the board, under Reading">+ The passage open beside the board</button></div>' : '') + (!topic ? '' : n ? '<p style="font-size:0.9rem;margin:0 0 0.6rem">Put them on the board one at a time: press <b>+ On the board</b>, or drag one onto the board where you want it, or into a group.</p>' +
       (q.length && !FW ? '<p class="pin">Until the portal beside the board has its texts in, only each passage’s opening words are looked in.</p>' : '') +
       fw.map(([x, where]) => '<div class="pp" draggable="' + (ro() ? 'false' : 'true') + '" data-pp="' + esc(x.id) + '"><div class="pc">' + marked(x.cite || x.ref, q) + (x.work ? ' <span>· ' + marked(x.work, q) + '</span>' : '') + '</div>' +
         body(x) + where + '<div class="row">' + (ro() ? '' : '<button type="button" class="btn solid" data-ppadd="' + esc(x.id) + '">+ On the board</button>') +
         (canOpen(x) ? '<button type="button" class="linkish" data-ppopen="' + esc(x.id) + '" aria-expanded="' + isOpen(x) + '">' + (isOpen(x) ? '▴ less' : '▾ read it all here') + '</button>' : '') +
-        '<button type="button" class="linkish" data-ppread="' + esc(x.id) + '">read it beside the board</button></div></div>').join('') +
+        '<button type="button" class="linkish" data-ppread="' + esc(x.id) + '">read it beside the board</button>' + (SHM && writable() ? '<button type="button" class="linkish" data-ppout="' + esc(x.id) + '">take it out of the topic</button>' : '') + (SHM && x.by ? '<span class="by">@' + esc(x.by) + '</span>' : '') + '</div></div>').join('') +
       (q.length && !fw.length ? '<p class="empty">' + (n === 1 ? 'The passage waiting does not have' : 'None of the ' + n + ' waiting has') + ' “' + esc(ppQuery.trim()) + '”.</p>' : '')
-      : '<p class="empty">' + (all ? 'All of them are on the board.' : 'None yet. In the portal, press ☆ Topic on a passage and tick “' + esc(topic.name) + '”: it waits here.') + '</p>') +
+      : '<p class="empty">' + (all ? 'All of them are on the board.' : (SHM ? 'None yet. Open a passage in the portal beside the board, under Reading, and press + The passage open beside the board; or press ☆ Topic on a passage anywhere in the portal, where shared boards are listed too.' : 'None yet. In the portal, press ☆ Topic on a passage and tick “' + esc(topic.name) + '”: it waits here.')) + '</p>') +
     (fo.length ? '<span class="k">On the board</span>' + fo.map(([it, where]) => '<button type="button" class="rel" data-ppshow="' + esc(it.id) + '">' + marked(cardTitle(it), q) + where + '</button>').join('')
       : q.length && on.length ? '<span class="k">On the board</span><p class="empty">' + (on.length === 1 ? 'The passage on the board does not have it.' : 'None of the ' + on.length + ' on the board has it.') + '</p>' : '');
   P.scrollTop = top;
@@ -2322,6 +2760,7 @@ function saveCard(D) {
     } else {
       id = uid(kind[0]);
       const n = { id, kind, model: mdl, quotes: [], date: today() };
+      if (me()) n.by = me();
       if (kind === 'problem' || kind === 'note') n.text = text.trim(); else n.label = (label || '').trim();
       B.items.push(n);
       const at = form.at || centre(); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
@@ -2649,6 +3088,7 @@ async function saveAnn() {
     if (!to) return err('Say what it is relevant to: a word, R 3990, a portal address, or a card on the board.');
   }
   if (!text && (f.re || f.ann !== 'relevant')) return err(f.re ? 'Write the reply.' : 'Say it in your words.');
+  const only = SHM && !f.id && (f.re ? !!(annById(f.re) || {}).only : !!(D.querySelector('.anncomp [data-ann-only]') || {}).checked);
   if (form !== f) return;   // closed while a Reflexion was fetched
   const at = new Date().toISOString(); let id = f.id;
   change(() => {
@@ -2659,7 +3099,8 @@ async function saveAnn() {
       if (a.kind !== 'reply') { a.kind = f.ann; if (to) a.to = to; else delete a.to; }
     } else {
       id = uid('n');
-      B.annotations.push(f.re ? { id, kind: 'reply', re: f.re, text, date: at, at } : Object.assign({ id, kind: f.ann, on: clone(f.on) }, to ? { to } : {}, { text, date: at, at }));
+      const sign = Object.assign(me() ? { by: me() } : {}, only ? { only: true } : {});
+      B.annotations.push(Object.assign(f.re ? { id, kind: 'reply', re: f.re, text, date: at, at } : Object.assign({ id, kind: f.ann, on: clone(f.on) }, to ? { to } : {}, { text, date: at, at }), sign));
     }
   });
   form = null; if (item(f.card)) sel = { kind: 'card', ids: [f.card] };
@@ -3177,6 +3618,7 @@ function quickCard(kind, text, at, modelId) {
   change(() => {
     id = uid(kind[0]);
     const n = { id, kind, model: modelId || null, quotes: [], date: today() };
+    if (me()) n.by = me();
     if (kind === 'box') n.label = text; else n.text = text;
     B.items.push(n); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
   });
@@ -3284,7 +3726,9 @@ $('palette').addEventListener('click', e => {
 });
 // The store changed elsewhere: another tab of the portal, the portal beside the board, GitHub's copy arriving through it.
 window.addEventListener('storage', e => { if (e.key === TOPICS || e.key == null) takeIn(); });
-window.addEventListener('hashchange', () => { if ((new URLSearchParams(location.hash.slice(1)).get('t') || '') !== TID) location.reload(); });
+const boardId = h => { const u = new URLSearchParams(String(h).slice(1)); return u.get('s') ? 's:' + u.get('s') : 't:' + (u.get('t') || ''); };
+const BOARD0 = boardId(location.hash);
+window.addEventListener('hashchange', () => { if (boardId(location.hash) !== BOARD0) location.reload(); });
 // A passage's note, and the topic's, are written where My topics keeps them, a moment after typing stops.
 let noteT = 0, noteFn = null;
 function noteSoon(fn) { clearTimeout(noteT); noteFn = fn; noteT = setTimeout(() => { noteFn = null; fn(); }, 500); }
@@ -3293,6 +3737,7 @@ $('details').addEventListener('input', e => {
   const t = e.target;
   if (t.matches('[data-tnew]') && form && form.kind === 'table') { const k = t.dataset.tnew, v = clampN(t.value, 0, TABLE_MAX[k]); if (v) { form[k] = v; tableFormSync(); } return; }
   if (t.matches('textarea[data-mtnote]')) { const mt = t.dataset.mtnote, v = t.value; noteSoon(() => setPassage(mt, x => { x.note = v; })); }
+  else if (t.matches('textarea[data-sharednote]')) { const id = t.dataset.sharednote, v = t.value; noteSoon(() => { const p = SP.find(q => q.id === id); if (p && writable()) { p.note = v; p.noteBy = me(); p.noteAt = now(); scheduleShared(); } }); }
   else if (t.matches('textarea[data-mttopic]')) { const v = t.value; noteSoon(() => setTopic(x => { x.note = v; })); }
 });
 $('details').addEventListener('focusout', e => {
@@ -3341,6 +3786,52 @@ $('tside').addEventListener('click', () => document.body.classList.add('sideclos
 $('sideopen').addEventListener('click', () => document.body.classList.remove('sideclosed'));
 $('tdet').addEventListener('click', () => showSide('details'));
 $('tpass').addEventListener('click', () => showSide('passages'));
+// Sharing: the owner's dialog.
+$('sharebtn').addEventListener('click', openShare);
+$('sharedlg').addEventListener('click', async e => {
+  const s = shareSt; if (!s) return;
+  const t = e.target, tok = $('shtok');
+  if (t.closest('[data-shx]')) { $('sharedlg').classList.remove('show'); shareSt = null; return; }
+  if (tok && tok.value.trim()) { s.token = tok.value.trim(); try { sessionStorage.setItem(TOKEN_KEY, s.token); } catch (x) { /* used for now */ } }
+  if (t.closest('[data-padd]')) {
+    const login = String($('sharebody').querySelector('[data-pnew]').value || '').trim().replace(/^@/, ''), role = $('sharebody').querySelector('[data-pnewrole]').value;
+    s.err = ''; s.msg = '';
+    if (!okLogin(login)) { s.err = 'Give a GitHub username.'; drawShare(); return; }
+    if (s.login && login.toLowerCase() === s.login.toLowerCase()) { s.err = 'That is you.'; drawShare(); return; }
+    if (s.people.some(p => p.login.toLowerCase() === login.toLowerCase())) { s.err = '@' + login + ' is there already.'; drawShare(); return; }
+    if (!s.token) { s.err = 'Give your GitHub token first.'; drawShare(); return; }
+    s.busy = true; drawShare();
+    const mem = await gh('GET', '/orgs/' + ORG + '/members/' + encodeURIComponent(login), null, null, s.token);
+    if (mem.status !== 204) { s.busy = false; s.err = '@' + login + ' isn’t a member of ' + ORG + '. Boards are shared within the seminar: invite them to the organisation first.'; drawShare(); return; }
+    if (SHM) { const er = await setPersonOn(SH.repo, login, role, s.token); if (er) { s.busy = false; s.err = er; drawShare(); return; } s.msg = '@' + login + (role === 'write' ? ' can work on it now.' : ' can look at it now.'); }
+    s.people.push({ login, role }); s.busy = false; drawShare();
+    return;
+  }
+  const del = t.closest('[data-pdel]');
+  if (del) {
+    const p = s.people[+del.dataset.pdel]; if (!p) return;
+    if (SHM) {
+      s.busy = true; drawShare();
+      const r = await gh('DELETE', repoPath() + '/collaborators/' + encodeURIComponent(p.login), null, null, s.token);
+      s.busy = false;
+      if (!r.ok && r.status !== 404) { s.err = cap1(ghMsg(r)) + '.'; drawShare(); return; }
+      s.msg = '@' + p.login + ' is off the board now.';
+    }
+    s.people.splice(+del.dataset.pdel, 1); drawShare();
+    return;
+  }
+  if (t.closest('[data-shgo]')) { doShare(); return; }
+  if (t.closest('[data-shstop]')) stopSharing();
+});
+$('sharedlg').addEventListener('change', async e => {
+  const s = shareSt, sel = e.target.closest('[data-prole]'); if (!s || !sel) return;
+  const p = s.people[+sel.dataset.prole]; if (!p) return;
+  p.role = sel.value;
+  if (SHM) { s.busy = true; drawShare(); const er = await setPersonOn(SH.repo, p.login, p.role, s.token); s.busy = false; s.err = er; s.msg = er ? '' : '@' + p.login + (p.role === 'write' ? ' can work on it now.' : ' can look at it now.'); drawShare(); }
+});
+$('sharedlg').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { $('sharedlg').classList.remove('show'); shareSt = null; } });
+document.addEventListener('visibilitychange', () => { if (SHM && document.visibilityState === 'visible') checkShared(); });
+
 $('tbrd').addEventListener('click', () => showSide('boards'));
 $('addl').addEventListener('click', () => { document.body.classList.remove('sideclosed'); showSide('boards'); });
 $('boards').addEventListener('change', e => { if (e.target.matches('[data-brdt]')) { brdT = e.target.value; brdQ = ''; renderBoards(); } });
@@ -3367,6 +3858,9 @@ $('boards').addEventListener('dragend', e => { const p = e.target.closest && e.t
 
 $('addp').addEventListener('click', () => { document.body.classList.remove('sideclosed'); showSide('passages'); });
 $('passages').addEventListener('click', e => {
+  if (e.target.closest('[data-ppportal]')) { addFromPortal(); return; }
+  const po = e.target.closest('[data-ppout]');
+  if (po) { if (writable() && confirm('Take this passage out of the shared topic? A card it has on the board stays, marked.')) { SG[po.dataset.ppout] = now(); SP = SP.filter(p => p.id !== po.dataset.ppout); scheduleShared(); render(); } return; }
   const a = e.target.closest('[data-ppadd]'); if (a) { putPassage(a.dataset.ppadd); return; }
   const o = e.target.closest('[data-ppopen]');
   if (o) {   // open a passage to read it in full, or close it again; closed, its row is brought back into view
@@ -3400,15 +3894,27 @@ function dropCell(e) {
   if (td) td.classList.add('tdrop');
   return td;
 }
-$('passages').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); dropCell(null); });
-$('stage').addEventListener('dragover', e => { const ty = [...(e.dataTransfer.types || [])]; if (!ty.includes(PP_TYPE) && !ty.includes(BL_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); dropCell(ty.includes(PP_TYPE) ? e : null); });
-$('stage').addEventListener('dragleave', e => { if (e.target === $('stage')) { $('stage').classList.remove('dropping'); dropCell(null); } });
+// The group a passage is being dragged into, lit, its name and its frame: dropped inside the frame, the
+// passage goes into that group. Of frames one inside another, the smallest round the point.
+function dropGroup(e) {
+  let g = null;
+  if (e && layerOn('frames')) {
+    const [wx, wy] = toWorld(e.clientX, e.clientY); let a = Infinity;
+    B.models.forEach(m => { const f = frameOf(m); if (inside(f, wx, wy) && f.w * f.h < a) { g = m; a = f.w * f.h; } });
+  }
+  $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = g && t.dataset.model === g.id ? '3px solid var(--ink)' : '');
+  $('ink').querySelectorAll('.frame').forEach(f => f.classList.toggle('drop', !!g && f.dataset.model === g.id));
+  return g;
+}
+$('passages').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); dropCell(null); dropGroup(null); });
+$('stage').addEventListener('dragover', e => { const ty = [...(e.dataTransfer.types || [])]; if (!ty.includes(PP_TYPE) && !ty.includes(BL_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); const td = dropCell(ty.includes(PP_TYPE) ? e : null); dropGroup(ty.includes(PP_TYPE) && !td ? e : null); });
+$('stage').addEventListener('dragleave', e => { if (e.target === $('stage')) { $('stage').classList.remove('dropping'); dropCell(null); dropGroup(null); } });
 $('stage').addEventListener('drop', e => {
-  const mt = e.dataTransfer.getData(PP_TYPE), bl = e.dataTransfer.getData(BL_TYPE), td = mt ? dropCell(e) : null; $('stage').classList.remove('dropping'); dropCell(null); if (!mt && !bl) return;
+  const mt = e.dataTransfer.getData(PP_TYPE), bl = e.dataTransfer.getData(BL_TYPE), td = mt ? dropCell(e) : null, g = mt && !td ? dropGroup(e) : null; $('stage').classList.remove('dropping'); dropCell(null); dropGroup(null); if (!mt && !bl) return;
   e.preventDefault();
   if (td) { const [r, c] = td.dataset.cell.split(',').map(Number); putInCell(td.closest('.card').dataset.id, r, c, mt); return; }
   const [wx, wy] = toWorld(e.clientX, e.clientY);
-  if (mt) putPassage(mt, [wx - 120, wy - 25]);
+  if (mt) putPassage(mt, [wx - 120, wy - 25], g);
   else { const [t, i] = bl.split('|'); makeLink(t, i || null, [wx - 115, wy - 25]); }
 });
 $('tread').addEventListener('click', () => { if (!$('portal').getAttribute('src')) read(PORTAL); else showSide('reading'); });
@@ -3440,6 +3946,7 @@ $('details').addEventListener('click', e => {
   const smk = e.target.closest('.sm[data-sr]'); if (smk && form && form.kind === 'stretch' && getSelection().isCollapsed) { atMark(smk.dataset.sr, +smk.dataset.so); return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, id = sel.ids[0];
+  if (['stretch', 'splitit', 'join', 'joinall', 'joinhere', 'sxsave', 'sxsplit', 'sxall', 'sxhere'].includes(act) && SHM) { toast('What a card quotes can be changed on your own boards; on a shared one, not yet.'); return; }
   if (act === 'stretch' || act === 'splitit') {
     const s0 = stretchNow(item(id));
     if (!s0) { toast('The portal beside the board is still loading its texts. Try again in a moment.'); return; }
@@ -3509,6 +4016,13 @@ document.addEventListener('keyup', e => { if (e.key === ' ') { spaceDown = false
 window.addEventListener('blur', () => { spaceDown = false; $('stage').classList.remove('spacepan'); });
 /* ── Init ─────────────────────────────────────────────────────────────────── */
 function renderHead() {
+  if (SHM) {
+    const nm = STOPIC && STOPIC.name, back = 'index.html#mt=' + (mineTopic() ? encodeURIComponent(TID) : 'shared');
+    $('tname').textContent = (nm || 'A shared board') + (SH.owner && SH.owner !== SH.login ? ' · shared by @' + SH.owner : ' · shared');
+    document.title = (nm ? nm + ' · ' : '') + 'a shared board · Kant Lab';
+    $('back').href = back; $('mtlink').href = back;
+    return;
+  }
   const name = topic ? topic.name : '';
   $('tname').textContent = name || 'a topic not in My topics here';
   document.title = (name ? name + ' · ' : '') + 'its board · My topics · Kant Lab';
@@ -3518,6 +4032,21 @@ function renderHead() {
 // Where the board stands: saved with the topics here, and, with GitHub on, what the portal beside it says of GitHub.
 function renderSync() {
   const el = $('sync'); if (!el) return;
+  if (SHM) {
+    const st = SH.status, role = SH.role;
+    let cls = 'busy', h = 'Opening the shared board…';
+    if (lost === 'noaccess') { cls = 'bad'; h = 'Not shared with you'; }
+    else if (!SH.ready && st === 'error') { cls = 'bad'; h = 'Can’t open it: ' + ghMsg(SH.err); }
+    else if (!SH.ready) { cls = 'busy'; }
+    else if (role === 'archived') { cls = 'bad'; h = 'No longer shared · look only'; }
+    else if (role === 'reader') { cls = 'saved'; h = 'Look only · shared by @' + SH.owner; }
+    else if (st === 'error') { cls = 'bad'; h = 'Shared · not saved yet: ' + ghMsg(SH.err); }
+    else if (st === 'saving' || st === 'unsaved') h = 'Shared · saving…';
+    else { cls = 'saved'; h = 'Shared · saved'; }
+    el.className = cls; el.innerHTML = '<i></i>' + esc(h);
+    el.title = 'Kept in ' + ORG + '/' + SH.repo + ', a private repository: GitHub lets in only the people it is shared with. Everyone’s changes arrive within a few seconds.';
+    return;
+  }
   let gh = false; try { gh = !!localStorage.getItem(TOPICS_GH); } catch (e) { gh = false; }
   if (lost || saveFailed) { el.className = 'bad'; el.innerHTML = '<i></i>Not saved'; el.title = lost ? roWhy() : 'This browser would not keep the last change. Export the board, so nothing is lost.'; return; }
   let st = '';
@@ -3591,7 +4120,10 @@ function showLost() {
   $('lockx').addEventListener('click', () => $('lock').classList.remove('show'));
 }
 function start() {
-  const d = readStore();
+  const d = readStore(), s = new URLSearchParams(location.hash.slice(1)).get('s') || '';
+  let repo = s;
+  if (!repo && d && TID) { const k = realTopic(d, TID), b = isObj(d.boards) ? d.boards[k] : null; if (b && isObj(b.shared) && b.shared.repo && !b.shared.stopped) { repo = b.shared.repo; TID = k; } }
+  if (repo) { DB = d || null; startShared(repo, d); return; }
   if (!d) { lost = 'unreadable'; B = cleanBoard(clone(BASE)); B.annotations = []; viewId = B.views[0].id; loadPrefs(); return; }
   DB = d;
   const k = realTopic(d, TID);

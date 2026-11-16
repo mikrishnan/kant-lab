@@ -396,6 +396,8 @@ function mergeBoard(o, a, b) {
   const later = (b.at || '') > (a.at || '') ? b : a, other = later === a ? b : a;
   const m = cleanBoard(clone(merge3(o ? deep(o) : {}, deep(later), deep(other))));
   m.at = later.at;
+  const sh = [a.shared, b.shared].filter(isObj).sort((x, y) => String(y.at || '').localeCompare(String(x.at || '')))[0];
+  if (sh) m.shared = sh;
   return m;
 }
 // Annotations: one per id, the one changed later standing, and none that was deleted after it.
@@ -556,7 +558,7 @@ async function sync() {
     if (locked) {
       gh.key = null; gh.prev = null; dropKey(gh.login);
       gh.state = 'locked'; gh.why = locked;
-    } else { gh.state = 'ok'; gh.at = now(); gh.why = ''; noteOn(); }
+    } else { gh.state = 'ok'; gh.at = now(); gh.why = ''; noteOn(); refreshShared(); }   // and, GitHub reached, the boards shared with you
   } catch (e) {
     gh.state = e.status === 0 ? 'offline' : 'error'; gh.msg = messageFor(e); gh.err = e.status;
   } finally {
@@ -657,6 +659,12 @@ css.textContent = `
   #mtpage .mtwrap { max-width: 52rem; }
   #mtpage .mthead { display: flex; gap: 0.8rem; align-items: baseline; }
   #mtpage .mtbrd { flex: none; background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  #mtpage .mtshh { font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--accent); margin: 0.2rem 0 0.25rem 0.3rem; }
+  #mtpage .mtsh span, #mtpick .mtpshb span { color: var(--faded); font-size: 0.8rem; }
+  #mtpage .mtshtag { font-size: 0.72rem; color: #3f6b2a; font-style: italic; }
+  #mtpick .mtpsh { margin-top: 0.6rem; }
+  #mtpick .mtpshb { display: block; width: 100%; text-align: left; background: none; border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.15rem 0.45rem; margin: 0.2rem 0; font: inherit; font-size: 0.9rem; color: var(--accent); cursor: pointer; }
+  #mtpick .mtpshb:hover { background: var(--parchment); }
   #mtpage .mtbrd:hover { background: var(--accent-light); border-color: var(--accent-light); }
   #mtpage .mtlinked { margin: 0.15rem 0 0.45rem; font-size: 0.88rem; color: var(--faded); }
   #mtpage .mtlinked button { background: none; border: none; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
@@ -992,6 +1000,7 @@ function useChoice(key) {
   pick.id = null; pick.made = false;
 }
 function openPicker(p, anchor) {
+  refreshShared();
   pick = Object.assign({ i: null, id: null, excerpt: null, en: false, st: null, choices: null, ext: 'whole', fixed: false, made: false }, p, { anchor });
   pick.i0 = pick.i;
   if (pick.choices && pick.choices.length > 1 && get(localStorage, EXT_KEY) === 'piece') useChoice('piece');
@@ -1020,7 +1029,8 @@ function drawPicker() {
     '<div class="acts">' +
       (it ? '' : '<button type="button" data-mta="keep">Keep it, under no topic</button>') +
       (it ? '<button type="button" data-mta="remove">Remove from My topics</button>' : '') +
-      '<button type="button" data-mta="open">Open My topics</button></div>';
+      '<button type="button" data-mta="open">Open My topics</button></div>' +
+    (() => { const sh = sharedList().filter(x => x.push && !x.archived); return sh.length ? '<div class="t mtpsh">Add to a board shared with me</div>' + sh.map(x => '<button type="button" class="mtpshb" data-mta="toshared" data-mtr="' + esc(x.repo) + '">+ ' + esc(x.topic) + ' <span>@' + esc(x.owner) + '</span></button>').join('') : ''; })();
 }
 function ensureItem() {
   let it = pickItem();
@@ -1077,6 +1087,7 @@ pk.addEventListener('click', e => {
   if (!b || !pick) return;
   const a = b.dataset.mta;
   if (a === 'open') { closePicker(); openPage(); return; }
+  if (a === 'toshared') { addToShared(b.dataset.mtr); return; }
   if (a === 'keep') { if (ensureItem()) { pick.made = false; save(); toast('Kept, under no topic yet. It is under Unsorted in My topics.'); } closePicker(); if (!page.hidden) render(); return; }
   if (a === 'remove') {
     const it = pickItem();
@@ -1090,6 +1101,72 @@ pk.addEventListener('click', e => {
 document.addEventListener('mousedown', e => {
   if (!pk.hidden && !pk.contains(e.target) && !(pick && pick.anchor && pick.anchor.contains(e.target)) && e.target !== hov) closePicker();
 }, true);
+
+/* ── Boards shared with you ───────────────────────────────────────────────────
+   A topic's board can be shared (topic-board.html): it is then a private repository of its own in
+   the organisation, kant-lab-seminar/board-…, and GitHub lets in only those it is shared with.
+   Those shared with you are listed under Shared with me, as GitHub shows them to your token, with
+   any this browser has opened beside them. ☆ Topic offers the ones you may change, and a passage
+   given to one is added to that board's passages, where it waits to be put on the board. */
+const ORG = 'kant-lab-seminar';
+const SHARED_LIST = 'kantlab-shared-boards';   // { at, list: [{ repo, topic, owner, push, archived }] }, as topic-board.html keeps it too
+let sharedAt = 0;
+function sharedList() {
+  let c = null; try { c = JSON.parse(get(localStorage, SHARED_LIST) || 'null'); } catch (e) { c = null; }
+  const mine = new Set(Object.keys(DB.boards).map(k => DB.boards[k] && DB.boards[k].shared && DB.boards[k].shared.repo).filter(Boolean));
+  return (c && Array.isArray(c.list) ? c.list : []).filter(x => x && x.repo && !mine.has(x.repo) && (!gh.login || x.owner !== gh.login));
+}
+async function refreshShared() {
+  if (!ghReady() || Date.now() - sharedAt < 60000) return;
+  sharedAt = Date.now();
+  let r; try { r = await api('GET', '/user/repos?affiliation=collaborator,organization_member&per_page=100&sort=updated'); } catch (e) { return; }
+  if (!r.ok || !Array.isArray(r.data)) return;
+  const list = r.data.filter(x => x && x.owner && x.owner.login === ORG && /^board-/.test(x.name)).map(x => {
+    const m = /^(.*) · a topic’s board shared by @([A-Za-z0-9-]+)/.exec(x.description || '');
+    return { repo: x.name, topic: m ? m[1] : x.name, owner: m ? m[2] : '', push: !!(x.permissions && x.permissions.push), archived: !!x.archived };
+  });
+  put(localStorage, SHARED_LIST, JSON.stringify({ at: now(), list }));
+  if (!page.hidden) renderAside();
+  if (pick && !pk.hidden) drawPicker();
+}
+function openShared(repo) {
+  const url = new URL('topic-board.html#s=' + encodeURIComponent(repo), location.href).href;
+  try { (window.top || window).location.href = url; } catch (x) { location.href = url; }
+}
+// The file of a shared board, one passage, card, arrow, view or annotation to a line, as topic-board.html writes it.
+function sharedText(f) {
+  const L = (k, a) => JSON.stringify(k) + ':[\n' + (a || []).map(x => JSON.stringify(x)).join(',\n') + '\n]';
+  const b = f.board || {};
+  const head = { kind: 'kantlab-shared-board', v: 1, owner: f.owner, topic: f.topic, savedBy: f.savedBy || '', savedAt: f.savedAt || '' };
+  return JSON.stringify(head).slice(0, -1) + ',\n' + L('passages', f.passages) + ',\n"gone":' + JSON.stringify(f.gone || {}) + ',\n"board":{\n' +
+    ['models', 'items', 'arrows', 'views', 'photos'].map(k => L(k, b[k])).join(',\n') + ',\n"removed":' + JSON.stringify(b.removed || []) + '},\n' + L('annotations', f.annotations) + '}\n';
+}
+// A passage given to a board shared with you: added to its passages, unless it is there already.
+async function addToShared(repo) {
+  const s = sharedList().find(x => x.repo === repo); if (!s || !pick) return;
+  const x = pickItem() || (pick.i != null && P[pick.i] ? itemFor(pick.i, pick.excerpt, pick.en) : null);
+  closePicker();
+  if (!x) return;
+  if (!ghReady()) { toast('Turn on Keep on GitHub in My topics, or open the board itself, to add to a shared board.'); return; }
+  const path = '/repos/' + ORG + '/' + encodeURIComponent(repo) + '/contents/board.json';
+  try {
+    for (let tries = 0; tries < 4; tries++) {
+      const r = await api('GET', path);
+      if (!r.ok) { toast('That shared board could not be read: ' + messageFor(apiError(r)) + '.'); return; }
+      let content = r.data.content;
+      if (!content && r.data.sha) { const b = await api('GET', '/repos/' + ORG + '/' + encodeURIComponent(repo) + '/git/blobs/' + r.data.sha); if (!b.ok) { toast('That shared board could not be read.'); return; } content = b.data.content; }
+      let f = null; try { f = JSON.parse(b64decode(content)); } catch (e) { f = null; }
+      if (!f || f.kind !== 'kantlab-shared-board') { toast('That shared board’s file would not read.'); return; }
+      if ((f.passages || []).some(p => p.ref === x.ref && (p.excerpt || '') === (x.excerpt || ''))) { toast('It is among the passages of “' + s.topic + '” already.'); return; }
+      f.passages = (f.passages || []).concat([{ id: 's-' + uid(), ref: x.ref, cite: x.cite, work: x.work, date: x.date, words: x.words, excerpt: x.excerpt || null, en: !!x.en, by: gh.login, added: now(), note: '' }]);
+      f.savedBy = gh.login; f.savedAt = now();
+      const w = await api('PUT', path, { message: 'Board: a passage added by @' + gh.login + ', from the Logic Portal', content: b64encode(sharedText(f)), sha: r.data.sha });
+      if (w.ok) { toast('Added to the passages of “' + s.topic + '”, shared by @' + s.owner + '. It waits there to be put on the board.'); return; }
+      if (w.status !== 409 && w.status !== 422) { toast('GitHub would not add it: ' + messageFor(apiError(w)) + '.'); return; }
+    }
+    toast('Someone else was saving that board just then. Try again in a moment.');
+  } catch (e) { toast(cap(messageFor(e)) + '.'); }
+}
 
 /* ── The My topics page ──────────────────────────────────────────────────── */
 const page = el('div', 'mtpage');
@@ -1109,7 +1186,7 @@ let also = '';             // only the passages also under this topic
 let sortBy = 'arranged';   // 'arranged' (a topic as you have arranged it), 'text', or 'newest'
 const whole = new Set();   // passages shown whole, not just their opening words
 
-function openPage() { closePicker(); hideHover(); sb.hidden = true; page.hidden = false; render(); }
+function openPage() { closePicker(); hideHover(); sb.hidden = true; page.hidden = false; render(); refreshShared(); }
 function closePage() {
   page.hidden = true; page.querySelector('.mtmenu').hidden = true;
   if (/^#mt=[^&]*$/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
@@ -1136,14 +1213,17 @@ function render() {
   page.querySelector('.mtmodein').checked = mode;
   renderAside(); renderMain(); renderStatus(); drawMenu();
 }
+const isShared = id => { const b = DB.boards[id]; return !!(b && isObj(b.shared) && b.shared.repo && !b.shared.stopped); };
 function renderAside() {
   const un = DB.items.filter(x => !x.topics.length).length;
   const btn = (id, label, n, cls) => '<button type="button" class="mtopic' + (cls ? ' ' + cls : '') + (view === id ? ' on' : '') + '" data-mta="view" data-mtt="' + esc(id) + '">' + label + ' <span>' + n + '</span></button>';
   page.querySelector('aside').innerHTML =
     btn('all', 'All passages', DB.items.length, 'mtall') + '<hr>' +
-    sortedTopics().map(t => btn(t.id, esc(t.name), countIn(t.id))).join('') +
+    sortedTopics().map(t => btn(t.id, esc(t.name) + (isShared(t.id) ? ' <i class="mtshtag">shared</i>' : ''), countIn(t.id))).join('') +
     (un || view === 'unsorted' ? btn('unsorted', '<i>Unsorted</i>', un) : '') +
     '<input type="text" class="mtnewt" placeholder="+ New topic, then Enter" spellcheck="false" maxlength="120">' +
+    (sharedList().length ? '<hr><div class="mtshh">Shared with me</div>' + sharedList().sort((a, b) => a.topic.localeCompare(b.topic, 'de')).map(x =>
+      '<button type="button" class="mtopic mtsh" data-mta="openshared" data-mtr="' + esc(x.repo) + '" title="' + esc(x.archived ? 'No longer shared: look only' : x.push ? 'You can work on it' : 'You can look at it') + '">' + esc(x.topic) + ' <span>@' + esc(x.owner || '?') + (x.archived ? ' · ended' : x.push ? '' : ' · look') + '</span></button>').join('') : '') +
     (DB.topics.length ? '' : '<p class="mthint">A topic works like a label: one passage can stand under several, with one note of yours.</p>');
 }
 function listFor() {
@@ -1163,7 +1243,7 @@ function renderMain() {
   const others = sortedTopics().filter(x => x.id !== view);
   const head = t
     ? '<div class="mthead"><input type="text" class="mtname" value="' + esc(t.name) + '" maxlength="120" title="Rename this topic" spellcheck="false">' +
-      '<button type="button" class="btn mtbrd" data-mta="board" title="' + (DB.boards[t.id] ? 'This topic’s board: its passages as cards, to lay out, join with arrows and annotate' : 'Make a board for this topic: its passages as cards, to lay out, join with arrows and annotate') + '">▦ ' + (DB.boards[t.id] ? 'Board' : 'Make a board') + '</button>' +
+      '<button type="button" class="btn mtbrd" data-mta="board" title="' + (DB.boards[t.id] ? 'This topic’s board: its passages as cards, to lay out, join with arrows and annotate' : 'Make a board for this topic: its passages as cards, to lay out, join with arrows and annotate') + '">▦ ' + (isShared(t.id) ? 'Board · shared' : DB.boards[t.id] ? 'Board' : 'Make a board') + '</button>' +
       '<button type="button" class="mtlink" data-mta="deltopic">Delete this topic</button></div>' + linkedWith(t.id) +
       '<textarea class="mttnote" rows="2" placeholder="What this topic is for: a question, a hunch, what to look for next. Only you see it.">' + esc(t.note) + '</textarea>'
     : '<div class="mthead"><h2>' + (view === 'unsorted' ? 'Unsorted' : 'All passages') + '</h2></div>' +
@@ -1285,6 +1365,7 @@ page.addEventListener('click', e => {
     if (c && !c.disabled) c.focus();
     return;
   }
+  if (a === 'openshared') { openShared(b.dataset.mtr); return; }
   if (a === 'board') {
     const t = topicOf(view);
     if (!t) return;
