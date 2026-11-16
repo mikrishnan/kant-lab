@@ -9,8 +9,9 @@
    browser's Print, or as plain text in the Handout tool's markup.
 
    Everything is kept in this browser's localStorage, under one key, and nothing is sent
-   anywhere: the repository is public, and a handout is its maker's own. "Save to file"
-   writes the lot to a .json file, and "Open file" reads one back.
+   anywhere, but a handout its maker shows to the class (The class's copy, below): the
+   repository is public, and a handout is its maker's own. "Save to file" writes the lot to a
+   .json file, and "Open file" reads one back.
 
    Each passage keeps its portal address ('textKey:id') beside its words, so that it opens
    where it stands in the reader, and a later handout builder can bring
@@ -80,13 +81,24 @@ function load() {
 }
 let DB = load();
 let touched = null;   // the linked passage being changed, whose copies follow it when it is saved (syncLinked)
-const cur = () => DB.handouts.find(h => h.id === DB.current) || DB.handouts[0];
+// The handouts shown to the class (the class's copy, below), read only; `viewing` is the id of the
+// one open, or null when one of this browser's own is open.
+let CLASSH = [], viewing = null;
+const CS = window.KANTLAB_CLASS_SHARE || null;   // handouts/class-share.js: where the class's copy is kept
+const SHARE_HERE = !!CS && location.hostname === CS.site && window === window.top;   // changed from the live site only, never from the class screen's copy
+const BOARD_LINK = 'studies/kinds-of-nothing/board.html';   // opened once, it leaves the board's token in this browser
+let CLASS_SHA = null, CLASS_ETAG = null, classTok, classUsed = '', classKeyMade = false, classBusy = null, classT = 0, classPoll = 0;
+// classSt.st: 'idle' | 'loading' | 'ok' | 'none' (nothing shown) | 'nokey' (no token here) | 'err', with msg
+let classSt = { st: 'idle', msg: '' }, sendSt = { st: '', msg: '', ids: [] };
+const own = () => DB.handouts.find(h => h.id === DB.current) || DB.handouts[0];
+const cur = () => (viewing && CLASSH.find(h => h.id === viewing)) || own();
 function save() {
   syncLinked();
   try { localStorage.setItem(KEY, JSON.stringify(DB)); }
   catch (e) { toast('This browser would not keep the change (its storage is full or switched off). Use Save to file.'); }
   marks();
   backupSoon();
+  classSoon();
 }
 
 /* Backups to a file, when the portal is served from this computer by
@@ -242,10 +254,10 @@ function syncLinked() {
   touched = null;
   if (it) DB.handouts.forEach(h => linkedOf(h, it).forEach(x => copyInto(x, it)));
 }
-const collecting = () => { const c = DB.collect; return c && c.h === cur().id ? findNote(cur(), c.note) : null; };
+const collecting = () => { const c = DB.collect; return c && c.h === own().id ? findNote(own(), c.note) : null; };
 // Or a section: "Add passages here" on a heading sends new passages to the end of its section,
 // in the order they are added ({ h, section: the heading's id } in DB.collect).
-const collectingSection = () => { const c = DB.collect; return c && c.h === cur().id && c.section ? cur().items.find(x => x.kind === 'heading' && x.id === c.section) || null : null; };
+const collectingSection = () => { const c = DB.collect; return c && c.h === own().id && c.section ? own().items.find(x => x.kind === 'heading' && x.id === c.section) || null : null; };
 // The end of the section the heading at k opens: the place of the next heading, or the handout's end.
 function sectionEnd(h, k) { let e = k + 1; while (e < h.items.length && h.items[e].kind !== 'heading') e++; return e; }
 
@@ -468,7 +480,7 @@ function englishLater(it, i, tries) {
   save();
   if (!page.hidden) render();
 }
-const has = i => passagesOf(cur()).some(x => x.kind === 'passage' && refsOf(x).includes(refOf(i)));
+const has = i => passagesOf(own()).some(x => x.kind === 'passage' && refsOf(x).includes(refOf(i)));
 
 /* ── Joining passages ──────────────────────────────────────────────────────
    Passages that follow one another in a text, which the portal divides but the handout's
@@ -572,7 +584,10 @@ function partsHtml(it, partTag) {
     partTag(p) + esc(p.text)).join('\n\n');
 }
 
+// Adding from the portal while a handout shown to the class is open goes to this browser's own.
+function toOwn() { if (!viewing) return; viewing = null; if (!page.hidden) render(); }
 function add(i, excerpt, fromEn) {
+  toOwn();
   const h = cur(), n = collecting(), sec = !n && collectingSection();
   if (!excerpt && has(i)) { toast('Already in “' + h.name + '”.', [['Open it', () => openPage()]]); return; }
   const it = itemFor(i, excerpt, fromEn);
@@ -592,6 +607,7 @@ function add(i, excerpt, fromEn) {
 // Sent to a chosen place, from the ▾ beside "+ Handout": the end of a section, a new heading at the
 // handout's end, or the end of the handout. A passage already in the handout, at its top level, moves there.
 function addTo(i, target) {
+  toOwn();
   const h = cur();
   let sec = null, made = null;
   if (target.newHeading != null) { made = { id: uid(), kind: 'heading', text: target.newHeading }; h.items.push(made); sec = made; }
@@ -837,6 +853,19 @@ css.textContent = `
   #hmkbar button { background: none; border: none; font: inherit; font-size: 0.85rem; color: var(--accent); cursor: pointer; padding: 0.1rem 0.5rem; border-radius: 999px; white-space: nowrap; }
   #hmkbar button:hover { background: var(--parchment-dark); }
   #hpage aside .hback { margin-top: 1.2rem; line-height: 1.35; }
+  #hpage aside .hgrp { font-family: 'Cinzel', serif; font-size: 0.74rem; letter-spacing: 0.06em; color: var(--faded); margin: 0.9rem 0 0.35rem 0.2rem; }
+  #hpage aside .hgrp:first-child { margin-top: 0; }
+  #hpage aside .hl.cls.on .n::after { content: none; }
+  #hpage aside .hl .hshown { color: var(--accent); }
+  #hpage aside .hclass-st { margin: 0.2rem 0.3rem 0.6rem; line-height: 1.35; }
+  #hpage aside .hclass { margin-top: 1.2rem; border-top: 1px solid var(--line); padding-top: 0.75rem; line-height: 1.35; }
+  #hpage aside .hclass b.cz { display: block; color: var(--accent); font-size: 0.82rem; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
+  #hpage aside .hclass p { margin: 0.3rem 0; }
+  #hpage aside .hclass .btn { white-space: normal; text-align: left; }
+  #hpage aside .hclass .ok, #hpage aside .hclass-st.ok { color: #3f6b3a; }
+  #hpage aside .hclass .bad, #hpage aside .hclass-st.bad { color: #9a3b1e; }
+  #hpage aside .hclass-key { padding: 0.45rem 0.55rem; border: 1px dashed var(--accent-light); border-radius: 6px; background: var(--card); }
+  #hpage .hro-note { margin: 0.2rem 0 0.8rem; padding: 0.45rem 0.7rem; border-left: 3px solid var(--accent-light); background: var(--card); color: var(--faded); font-size: 0.92rem; }
   #hpage aside .hback.ok { color: #3f6b3a; }
   #hpage aside .hback.bad { color: #9a3b1e; }
   .hcard .hkids { margin: 0.6rem 0 0.2rem 2.2rem; padding-left: 0.9rem; border-left: 2px solid var(--accent-light); }
@@ -918,7 +947,8 @@ document.body.append(hov, hmore, hmenu, sb, tst);
 let menuI = null;
 const closeMenu = () => { hmenu.hidden = true; menuI = null; };
 function openMenu(i, anchor) {
-  if (i == null || !P[i] || locked()) return;
+  if (i == null || !P[i] || classView) return;
+  toOwn();
   const h = cur(), inn = has(i), top = h.items.some(x => x.kind === 'passage' && refsOf(x).includes(refOf(i)));
   const c = collecting(), sec = !c && collectingSection();
   menuI = i;
@@ -1048,7 +1078,7 @@ function placeHover() {
   hov.textContent = inn ? '✓ In handout' : '+ Handout';
   hov.classList.toggle('in', inn);
   const sec = !c && collectingSection();
-  hov.title = inn ? 'Already in “' + cur().name + '”. Click to open it.' : c ? 'Add this passage under “' + noteName(c) + '”' : sec ? 'Add this passage to the end of “' + sectionName(sec) + '”' : 'Add this passage to “' + cur().name + '”';
+  hov.title = inn ? 'Already in “' + own().name + '”. Click to open it.' : c ? 'Add this passage under “' + noteName(c) + '”' : sec ? 'Add this passage to the end of “' + sectionName(sec) + '”' : 'Add this passage to “' + own().name + '”';
   // A long passage that starts above the pane keeps its button at the top of what shows of it,
   // below the pane's own bar (the full text's title and contents, say).
   const sc = hovEl.closest('#left, #railbody'), bar = sc && sc.querySelector('.readbar');
@@ -1072,7 +1102,7 @@ function railLabel(b) {
   const i = S.sel;
   if (i == null || !P[i]) return;
   const inn = has(i), c = collecting(), sec = !c && collectingSection();
-  b.textContent = inn ? '✓ In “' + clip(cur().name, 26) + '”' : c ? '+ Add under “' + clip(noteName(c), 22) + '”' : sec ? '+ Add to “' + clip(sectionName(sec), 22) + '”' : '+ Add to handout';
+  b.textContent = inn ? '✓ In “' + clip(own().name, 26) + '”' : c ? '+ Add under “' + clip(noteName(c), 22) + '”' : sec ? '+ Add to “' + clip(sectionName(sec), 22) + '”' : '+ Add to handout';
   b.classList.toggle('on', inn);
 }
 function railButton() {
@@ -1167,7 +1197,7 @@ document.body.appendChild(page);
 const picker = page.querySelector('input[type=file]');
 
 let classView = true;     // Class view, whenever the page opens: the words left out shown as …, and nothing to change
-const locked = () => classView;   // nothing on the page may change the handout; Instructor view is for that
+const locked = () => classView || viewing != null;   // nothing on the page may change the handout; Instructor view is for that, and only for this browser's own
 /* Side by side: the Handouts page as a column on the right, the portal still in use on the left,
    so that passages can be added, and words selected, with the handout in view. The choice and the
    column's width are remembered in this browser. */
@@ -1205,6 +1235,7 @@ document.addEventListener('mouseup', () => {
 });
 function openPage(focusId) {
   hideHover(); sb.hidden = true; tst.hidden = true; page.hidden = false; dockPlace(); render();
+  classLoad();
   if (!focusId) return;
   const c = page.querySelector('.hcard[data-id="' + focusId + '"]');
   if (!c) return;
@@ -1222,30 +1253,39 @@ function render() {
   const db = page.querySelector('.hdockbtn'), cb = page.querySelector('[data-h="close"]');
   if (db) { db.textContent = docked ? '⤢ Full page' : '⇆ Side by side'; db.title = docked ? 'Let the handout fill the window again' : 'Work with the portal on the left and this handout on the right'; }
   if (cb) cb.textContent = docked ? '✕ Close' : '← Back to the portal';
-  const lk = classView;
+  const lk = locked(), ro = viewing != null;
   page.classList.toggle('hro', lk);
+  page.classList.toggle('hclassro', ro);
   page.classList.toggle('hcv', classView);
   document.body.classList.toggle('hclassview', classView);
   const es = page.querySelector('.henall');
   if (es) es.checked = showEn;
   page.querySelectorAll('.hview').forEach(b => { const on = (b.dataset.h === 'classview') === classView; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
-  page.querySelector('aside').innerHTML = DB.handouts.map(x =>
-      '<button type="button" class="hl' + (x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
-      '<span class="n">' + plural(countOf(x), 'passage') + '</span></button>').join('') +
-    (lk ? backupHtml() : '<button type="button" class="btn hnew" data-h="new">+ New handout</button>' + trashHtml(h) + backupHtml());
+  // The class's handouts first, those not this browser's own; then this browser's own, unless it has
+  // nothing of its own and the class has something to read.
+  const cls = classOthers(), ownShown = !cls.length || !isEmpty() || !classView;
+  page.querySelector('aside').innerHTML =
+    (cls.length || /loading|nokey|err/.test(classSt.st) ? '<div class="hgrp">Shown to the class</div>' + cls.map(x =>
+      '<button type="button" class="hl cls' + (viewing === x.id ? ' on' : '') + '" data-cpick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
+      '<span class="n">' + plural(countOf(x), 'passage') + ' · to read</span></button>').join('') + classStHtml() + (ownShown ? '<div class="hgrp">In this browser</div>' : '') : '') +
+    (ownShown ? DB.handouts.map(x =>
+      '<button type="button" class="hl' + (!ro && x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
+      '<span class="n">' + plural(countOf(x), 'passage') + (classHas(x.id) ? ' · <span class="hshown">shown to the class</span>' : '') + '</span></button>').join('') : '') +
+    (classView ? (ownShown ? backupHtml() : '') : '<button type="button" class="btn hnew" data-h="new">+ New handout</button>' + classHtml(h) + (ro ? '' : trashHtml(h)) + backupHtml());
   const n = h.items.length, over = viewOf(h), heads = h.items.filter(x => x.kind === 'heading');
   page.querySelector('.hwrap').innerHTML =
     '<input class="hname" value="' + esc(h.name) + '" placeholder="Untitled handout" aria-label="Name of this handout" spellcheck="false"' + (lk ? ' readonly' : '') + '>' +
+    (ro ? '<p class="hro-note">Shown to the class' + (h.sent ? ', as it stood on ' + esc(whenOf(h.sent)) : '') + '. You can read it, open its passages where they stand and export it; only its maker changes it.</p>' : '') +
     '<div class="hrow">' +
     (lk ? '' : '<button type="button" class="btn" data-h="note" title="A note: what you want to say, with passages under it">+ Note</button>' +
     '<button type="button" class="btn" data-h="heading">+ Heading</button>') +
     (heads.some(x => !isFolded(x)) ? '<button type="button" class="linkish" data-h="foldall" title="Fold every section away, to see just the headings">Fold all sections</button>' : '') +
     (notesOf(h).some(x => !noteFolded(x)) ? '<button type="button" class="linkish" data-h="foldnotes" title="Fold every note to its first line">Fold all notes</button>' : '') +
     (heads.some(isFolded) || notesOf(h).some(noteFolded) ? '<button type="button" class="linkish" data-h="unfoldall" title="Open every section and note">Open all</button>' : '') +
-    '<span class="spacer"></span><button type="button" class="linkish hdel" data-h="delete">Delete this handout</button></div>' +
-    '<p class="hhint muted small">' + (c ? 'Passages you add go under the note “' + esc(noteName(c)) + '”.'
+    '<span class="spacer"></span>' + (ro ? '' : '<button type="button" class="linkish hdel" data-h="delete">Delete this handout</button>') + '</div>' +
+    (ro ? '' : '<p class="hhint muted small">' + (c ? 'Passages you add go under the note “' + esc(noteName(c)) + '”.'
       : collectingSection() ? 'Passages you add go to the end of the section “' + esc(sectionName(collectingSection())) + '”.'
-      : 'Passages you add from the portal go to the end of this handout. To send them to a section, press its <b>Add passages here</b>.') + '</p>' +
+      : 'Passages you add from the portal go to the end of this handout. To send them to a section, press its <b>Add passages here</b>.') + '</p>') +
     (n ? h.items.map((it, k) => over[k] ? '' : cardFor(it, String(k), h)).join('') :
       '<div class="hempty">Nothing here yet. Press <b>+ Note</b> to write the point you want to make. ' +
       'Or, in the portal, point at a passage and press <b>+ Handout</b>, or select some of its words and press <b>+ Add excerpt to handout</b>.</div>');
@@ -1593,7 +1633,9 @@ function reparent(h, key, noteId) {
 page.addEventListener('click', e => {
   e.stopPropagation();   // the portal's handlers are not for this page
   const pick = e.target.closest('[data-pick]');
-  if (pick) { DB.current = pick.dataset.pick; save(); render(); return; }
+  if (pick) { viewing = null; DB.current = pick.dataset.pick; save(); render(); return; }
+  const cpick = e.target.closest('[data-cpick]');
+  if (cpick) { viewing = cpick.dataset.cpick; render(); page.querySelector('main').scrollTop = 0; return; }
   const tr = e.target.closest('[data-tr]');
   if (tr && !locked()) { const h = cur(); putBack(h, trashOf(h)[+tr.dataset.tr]); return; }
   const b = e.target.closest('[data-h]');
@@ -1607,11 +1649,16 @@ page.addEventListener('click', e => {
     case 'dock': return setDock(!docked);
     case 'classview': if (!classView) { classView = true; render(); toast('Class view: what is left out shows as …, and nothing can be added or changed.'); } return;
     case 'instructorview': if (classView) { classView = false; render(); toast('Instructor view: make and change handouts. What is left out is struck through.'); } return;
-    case 'lock': { if (LOCK) LOCK.forget().then(() => { setMode(false, true); closePage(); toast('Locked. The class password will be asked for before the handouts open again.'); }); return; }
-    case 'new': { const x = blank('Untitled handout'); DB.handouts.push(x); DB.current = x.id; save(); render(); const i = page.querySelector('.hname'); i.focus(); i.select(); return; }
+    case 'lock': { if (LOCK) LOCK.forget().then(() => { classForget(); setMode(false, true); closePage(); toast('Locked. The class password will be asked for before the handouts open again.'); }); return; }
+    case 'showclass': return classShow(h);
+    case 'stopclass': return classStop(h);
+    case 'classretry': return classSync(true);
+    case 'new': { viewing = null; const x = blank('Untitled handout'); DB.handouts.push(x); DB.current = x.id; save(); render(); const i = page.querySelector('.hname'); i.focus(); i.select(); return; }
     case 'delete': {
-      const n = countOf(h);
-      if (!confirm('Delete “' + h.name + '”' + (n ? ' and its ' + plural(n, 'passage') : '') + '? This cannot be undone, except from a saved file.')) return;
+      const n = countOf(h), shown = classHas(h.id);
+      if (!confirm('Delete “' + h.name + '”' + (n ? ' and its ' + plural(n, 'passage') : '') + '? This cannot be undone, except from a saved file.' +
+        (shown ? ' It is shown to the class, and will be taken away from them too.' : ''))) return;
+      if (shown) classWrite(list => list.filter(x => x.id !== h.id), 'Handouts: “' + h.name + '” no longer shown to the class', [h.id]);
       DB.handouts = DB.handouts.filter(x => x.id !== h.id);
       if (!DB.handouts.length) DB.handouts.push(blank('My handout'));
       DB.current = DB.handouts[0].id; save(); render(); return;
@@ -2237,8 +2284,247 @@ page.addEventListener('click', e => {
   if (w && window.getSelection().isCollapsed) { const t = w.closest('.hcard').querySelector('[data-mnt="' + w.dataset.mk + '"]'); if (t) t.focus(); }
 });
 
-/* What Class view lets a click do: read, fold, open where it stands, export, and switch views. */
-const RO_OK = new Set(['close', 'dock', 'classview', 'instructorview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'save', 'bkdir', 'bkresume']);
+/* What Class view lets a click do: read, fold, open where it stands, export, and switch views;
+   and, in Instructor view with a handout shown to the class open, a new handout of one's own, or
+   no longer showing it. */
+const RO_OK = new Set(['close', 'dock', 'classview', 'instructorview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'save', 'bkdir', 'bkresume', 'new', 'stopclass', 'classretry']);
+
+/* ── The class's copy ─────────────────────────────────────────────────────
+   "Show this handout to the class", in Instructor view, puts a copy of it where everyone with
+   the class password finds it, on their own Handouts page under "Shown to the class": to read,
+   open where it stands and export, not to change. Whatever its maker changes afterwards is sent
+   on by itself, a few seconds later; "Stop showing it" takes it away again. The copy is each
+   handout as it stands on the Handouts page, its words left out, English and notes included, but
+   without its maker's margin notes (marks of kind 'mn') or its trash, as in the exports.
+
+   Where it is kept: handouts/class-share.js (KANTLAB_CLASS_SHARE). One file, holding every handout
+   shown, encrypted with the class password (lock.js), in the seminar's private board repository,
+   reached through GitHub's API with the board's token, which can touch that repository and
+   nothing else, and is sent nowhere but api.github.com. The token comes from that file's `key`
+   (the token, encrypted with the class password), or else from the board itself, in a browser
+   that has opened it (localStorage 'kantlab-board-token', which board.html keeps).
+   Every change reads the file afresh and changes only the handouts it is about, so that two
+   browsers showing different handouts never undo each other. Only the live site changes it. */
+const CLASS_SENT = 'kantlab-handouts-class-sent';   // { [handout id]: what this browser last sent of it (sigOf) }
+const API = 'https://api.github.com';
+function sigOf(s) { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return (x >>> 0).toString(36); }
+function forClass(h) {
+  const x = JSON.parse(JSON.stringify(h));
+  delete x.trash; delete x.published; delete x.sent;
+  const strip = it => { if (it.marks) it.marks = it.marks.filter(m => m.k !== 'mn'); };
+  x.items.forEach(it => { if (it.kind === 'note') kids(it).forEach(strip); else strip(it); });
+  return x;
+}
+function sigFor(x) { return sigOf(JSON.stringify(Object.assign({}, x, { sent: undefined }))); }
+function classHas(id) { return CLASSH.some(x => x.id === id); }
+function classOthers() { return CLASSH.filter(x => !DB.handouts.some(y => y.id === x.id)); }
+function whenOf(iso) { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString('en-GB', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }); }
+function sentOf() { try { return JSON.parse(localStorage.getItem(CLASS_SENT) || '{}') || {}; } catch (e) { return {}; } }
+function sentMark(id, sig) { const m = sentOf(); if (sig) m[id] = sig; else delete m[id]; try { localStorage.setItem(CLASS_SENT, JSON.stringify(m)); } catch (e) { /* only the next visit's check is lost */ } }
+function classForget() { CLASSH = []; viewing = null; CLASS_SHA = CLASS_ETAG = null; classTok = undefined; classUsed = ''; classSt = { st: 'idle', msg: '' }; sendSt = { st: '', msg: '', ids: [] }; }
+
+/* GitHub, as board.html reaches it: UTF-8 through base64, and a request that tells what came back. */
+function b64enc(str) { const u = new TextEncoder().encode(str); let b = ''; for (let i = 0; i < u.length; i += 0x8000) b += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(b); }
+function b64dec(b64) { const b = atob(String(b64).replace(/\s/g, '')), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return new TextDecoder().decode(u); }
+async function gh(method, path, tok, opts) {
+  const o = opts || {}, headers = { Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + tok };
+  if (o.body) headers['Content-Type'] = 'application/json';
+  if (o.etag) headers['If-None-Match'] = o.etag;
+  let r;
+  try { r = await fetch(API + path, { method, headers, body: o.body ? JSON.stringify(o.body) : undefined, cache: 'no-store' }); }
+  catch (e) { return { status: 0, ok: false, data: null }; }
+  let data = null;
+  if (r.status !== 304) { try { data = await r.json(); } catch (e) { data = null; } }
+  return { status: r.status, ok: r.ok, data, etag: r.headers.get('ETag') };
+}
+const csPath = p => '/repos/' + encodeURIComponent(CS.owner) + '/' + encodeURIComponent(CS.repo) + '/contents/' + p.split('/').map(encodeURIComponent).join('/');
+const boardTok = () => { try { return localStorage.getItem('kantlab-board-token') || sessionStorage.getItem('kantlab-board-token') || ''; } catch (e) { return ''; } };
+// The tokens to try, the one that worked last first: the class password's, then the board's own.
+async function classToks() {
+  if (classTok === undefined) {
+    classTok = '';
+    if (CS && CS.key && LOCK && LOCK.key()) { try { const d = await LOCK.open(CS.key); if (d && d.kind === 'kantlab-class-token' && d.token) classTok = String(d.token); } catch (e) { /* made for another password, or not yet */ } }
+  }
+  const a = [classUsed, classTok, boardTok()].filter(Boolean);
+  return a.filter((t, j) => a.indexOf(t) === j);
+}
+// A request with each token in turn, until one is accepted. null when there is none to try.
+async function ghAny(method, path, opts) {
+  const toks = await classToks();
+  let r = null;
+  for (const t of toks) {
+    r = await gh(method, path, t, opts);
+    if (r.status !== 401) { if (r.status) classUsed = t; return Object.assign(r, { tok: t }); }
+  }
+  return r;
+}
+function ghWhy(r) {
+  if (!r) return 'nokey';
+  if (r.status === 0) return 'GitHub can’t be reached from here just now.';
+  if (r.status === 401) return 'GitHub no longer accepts the key to the class’s copy: the board’s token has expired. It is renewed at the board’s setup page.';
+  if (r.status === 403) return 'GitHub would not let this key change the class’s copy (' + esc((r.data && r.data.message) || '403') + ').';
+  return 'GitHub answered ' + r.status + (r.data && r.data.message ? ': “' + esc(r.data.message) + '”' : '') + '.';
+}
+// The file as it stands: { list, sha } (list null if there is no file), or { err }
+async function classFetch(etag) {
+  const r = await ghAny('GET', csPath(CS.path) + '?ref=' + encodeURIComponent(CS.branch), { etag });
+  if (!r || (!r.ok && r.status !== 304 && r.status !== 404)) return { err: ghWhy(r) };
+  if (r.status === 304) return { same: true };
+  if (r.status === 404) return { list: null, sha: null, etag: null };
+  let text = r.data.content ? b64dec(r.data.content) : null;
+  if (text == null) {   // over a megabyte: GitHub sends it apart
+    const b = await gh('GET', '/repos/' + encodeURIComponent(CS.owner) + '/' + encodeURIComponent(CS.repo) + '/git/blobs/' + r.data.sha, r.tok);
+    if (!b.ok) return { err: ghWhy(b) };
+    text = b64dec(b.data.content);
+  }
+  let d = null;
+  try { d = JSON.parse(text); if (LOCK.isLocked(d)) d = await LOCK.open(d); } catch (e) { d = null; }
+  const list = d && d.kind === 'kantlab-class-handouts' && Array.isArray(d.handouts) ? d.handouts.filter(x => x && x.id && Array.isArray(x.items)) : null;
+  return { list, unreadable: !list, sha: r.data.sha, etag: r.etag };
+}
+function classTake(list) {
+  CLASSH = list || [];
+  if (viewing && !classHas(viewing)) viewing = null;
+}
+// Read the class's copy, or see whether it has changed. On the first reading, someone with nothing
+// of their own is shown the class's first handout.
+async function classLoad() {
+  if (!CS || !LOCK || !LOCK.key()) return;
+  if (classBusy) return classBusy;
+  const first = classSt.st !== 'ok' && classSt.st !== 'none';
+  if (classSt.st === 'idle') { classSt = { st: 'loading', msg: 'Fetching the class’s handouts…' }; if (!page.hidden) render(); }
+  classBusy = (async () => {
+    const was = JSON.stringify(CLASSH), wasV = viewing, f = await classFetch(first ? null : CLASS_ETAG);
+    if (f.same) return;
+    if (f.err === 'nokey') classSt = { st: 'nokey', msg: '' };
+    else if (f.err) classSt = { st: 'err', msg: f.err };
+    else if (f.unreadable) classSt = { st: 'err', msg: 'The class’s copy is locked with another class password.' };
+    else {
+      classTake(f.list); CLASS_SHA = f.sha; CLASS_ETAG = f.etag;
+      classSt = { st: f.list && f.list.length ? 'ok' : 'none', msg: '' };
+      if (first && !viewing && isEmpty() && classOthers().length) viewing = classOthers()[0].id;
+      if (first) classCatchUp();
+    }
+    if (!page.hidden && (first || JSON.stringify(CLASSH) !== was || viewing !== wasV || classSt.st !== 'ok')) { const m = page.querySelector('main'), top = m ? m.scrollTop : 0; render(); if (m) m.scrollTop = top; }
+  })().finally(() => { classBusy = null; });
+  return classBusy;
+}
+// Change the class's copy: read it afresh, change it (fn: list → list), and write it back,
+// again if someone else wrote in between.
+async function classWrite(fn, message, ids) {
+  if (!SHARE_HERE) { toast('The class’s copy is changed only from the live site, ' + CS.site + '.'); return false; }
+  while (classBusy) await classBusy.catch(() => {});
+  let ok = false;
+  classBusy = (async () => {
+    const id = ids || [];
+    sendSt = { st: 'sending', msg: '', ids: id }; if (!page.hidden) render();
+    for (let tries = 0; tries < 4; tries++) {
+      const f = await classFetch(null);
+      if (f.err) { sendSt = { st: f.err === 'nokey' ? 'nokey' : 'err', msg: f.err === 'nokey' ? '' : f.err, ids: id }; return; }
+      const list = fn((f.list || []).slice());
+      const now = new Date().toISOString();
+      const text = await LOCK.seal(JSON.stringify({ kind: 'kantlab-class-handouts', v: 1, at: now, handouts: list }));
+      const body = { message, content: b64enc(text), branch: CS.branch };
+      if (f.sha) body.sha = f.sha;
+      const r = await ghAny('PUT', csPath(CS.path), { body });
+      if (r && r.ok) {
+        CLASS_SHA = r.data && r.data.content && r.data.content.sha; CLASS_ETAG = null;
+        classTake(list); classSt = { st: list.length ? 'ok' : 'none', msg: '' };
+        list.forEach(x => sentMark(x.id, sigFor(x)));
+        sendSt = { st: 'ok', msg: '', ids: id }; ok = true;
+        if (r.tok !== classTok) await classKey(r.tok);
+        return;
+      }
+      if (r && (r.status === 409 || r.status === 422)) continue;   // written in between: read it again
+      sendSt = { st: 'err', msg: ghWhy(r), ids: id }; return;
+    }
+    sendSt = { st: 'err', msg: 'The class’s copy kept changing under this one. Try again.', ids: id };
+  })().finally(() => { classBusy = null; if (!page.hidden) render(); });
+  await classBusy;
+  return ok;
+}
+/* The key in class-share.js, made the first time the board's own token is what reached the class's
+   copy (or once that key stops working): the token, encrypted with the class password, written to
+   the board repository as handouts/class-key.json, for its contents to go into class-share.js. */
+async function classKey(tok) {
+  if (classKeyMade || !tok) return;
+  classKeyMade = true;
+  try {
+    const text = await LOCK.seal(JSON.stringify({ kind: 'kantlab-class-token', v: 1, token: tok, made: new Date().toISOString() }));
+    const p = csPath(CS.keyPath), was = await gh('GET', p + '?ref=' + encodeURIComponent(CS.branch), tok);
+    const body = { message: 'Handouts: the class password’s key to the class’s copy', content: b64enc(text), branch: CS.branch };
+    if (was.ok && was.data && was.data.sha) body.sha = was.data.sha;
+    await gh('PUT', p, tok, { body });
+  } catch (e) { classKeyMade = false; }
+}
+// Each shown handout of this browser's own whose copy is behind it: sent on (force: whatever differs).
+function classSoon() {
+  if (!SHARE_HERE || !CLASSH.length) return;
+  clearTimeout(classT);
+  classT = setTimeout(() => classSync(false), (CS.saveSeconds || 4) * 1000);
+}
+function classBehind() { return DB.handouts.filter(h => { const c = CLASSH.find(x => x.id === h.id); return c && sigFor(forClass(h)) !== sigFor(c); }); }
+async function classSync(force) {
+  const hs = classBehind();
+  if (!hs.length) { if (force) classLoad(); return; }
+  const by = new Map(hs.map(h => [h.id, h])), now = new Date().toISOString();
+  await classWrite(list => list.map(x => by.has(x.id) ? Object.assign(forClass(by.get(x.id)), { sent: now }) : x),
+    'Handouts: ' + hs.map(h => '“' + h.name + '”').join(', ') + ' changed', hs.map(h => h.id));
+}
+// On the first reading in a browser that sent a handout: what it changed and could not send yet
+// (it closed too soon, or was offline) goes now, unless the class's copy was changed elsewhere since.
+function classCatchUp() {
+  if (!SHARE_HERE) return;
+  const m = sentOf(), hs = classBehind().filter(h => { const c = CLASSH.find(x => x.id === h.id); return m[h.id] === sigFor(c); });
+  if (hs.length) classSync(false);
+}
+async function classShow(h) {
+  if (!h || viewing) return;
+  if (!countOf(h)) { toast('There is nothing in “' + h.name + '” to show yet.'); return; }
+  const now = new Date().toISOString(), was = classHas(h.id);
+  const ok = await classWrite(list => { const x = Object.assign(forClass(h), { sent: now }), k = list.findIndex(y => y.id === h.id); if (k >= 0) list[k] = x; else list.push(x); return list; },
+    'Handouts: “' + h.name + '” shown to the class', [h.id]);
+  if (ok) toast(was ? 'Sent to the class as it stands now.' : 'Shown to the class: everyone with the class password finds “' + h.name + '” on their Handouts page. What you change is sent on by itself, a few seconds later.');
+}
+async function classStop(h) {
+  if (!h || !classHas(h.id)) return;
+  if (!confirm('Stop showing “' + h.name + '” to the class? ' + (viewing ? 'It goes from everyone’s Handouts page.' : 'It stays here, in your handouts; it goes only from the class’s Handouts pages.'))) return;
+  const ok = await classWrite(list => list.filter(x => x.id !== h.id), 'Handouts: “' + h.name + '” no longer shown to the class', [h.id]);
+  if (ok) { sentMark(h.id, null); toast('“' + h.name + '” is no longer shown to the class.'); }
+}
+// Under "Shown to the class", in the list: how the class's copy stands, when there is something to say.
+function classStHtml() {
+  if (classSt.st === 'loading') return '<p class="hclass-st muted small">' + esc(classSt.msg) + '</p>';
+  if (classSt.st === 'nokey') return '<p class="hclass-st small">The class’s handouts can’t be fetched on this computer yet. Open <a href="' + BOARD_LINK + '" target="_blank" rel="noopener">the seminar’s board</a> once, with its password, then come back.</p>';
+  if (classSt.st === 'err') return '<p class="hclass-st small bad">' + classSt.msg + ' <button type="button" class="linkish" data-h="classretry">Try again</button></p>';
+  return '';
+}
+// In Instructor view: the open handout and the class.
+function classHtml(h) {
+  if (!CS) return '';
+  const shown = classHas(h.id), behind = shown && !viewing && classBehind().includes(h), mine = sendSt.ids.includes(h.id);
+  const c = shown && CLASSH.find(x => x.id === h.id);
+  let st = '';
+  if (mine && sendSt.st === 'sending') st = '<p class="small muted">Sending…</p>';
+  else if (mine && sendSt.st === 'nokey') st = '<p class="small bad">This computer has no key to the class’s copy yet. Open <a href="' + BOARD_LINK + '" target="_blank" rel="noopener">the seminar’s board</a> once, with its password, then press again.</p>';
+  else if (mine && sendSt.st === 'err') st = '<p class="small bad">Not sent. ' + sendSt.msg + ' <button type="button" class="linkish" data-h="classretry">Try again</button></p>';
+  else if (behind) st = '<p class="small muted">Changed since it was last sent. <button type="button" class="linkish" data-h="classretry">Send now</button></p>';
+  else if (shown) st = '<p class="small ok">✓ The class sees it as it is now' + (c && c.sent ? ', sent ' + esc(whenOf(c.sent)) : '') + '.</p>';
+  let body;
+  if (!SHARE_HERE) body = '<p class="small muted">Shown to the class from the live site only, ' + esc(CS.site) + '.</p>';
+  else if (viewing) body = '<p class="small muted">Shown to the class from another browser.</p>' + st + '<button type="button" class="linkish" data-h="stopclass">Stop showing it</button>';
+  else if (shown) body = '<p class="small">Shown to the class: everyone with the class password finds it on their Handouts page, to read.</p>' + st +
+    '<button type="button" class="linkish" data-h="stopclass">Stop showing it</button>' +
+    (classKeyMade ? '<p class="small hclass-key">Students who have opened the board on their own computer can read it now. For everyone else, the site needs the class password’s key, once: it is in the board’s repository as <i>' + esc(CS.keyPath) + '</i>, and goes into the portal’s <i>handouts/class-share.js</i>.</p>' : '');
+  else body = '<button type="button" class="btn solid" data-h="showclass" title="Everyone with the class password finds it on their Handouts page, to read; what you change is sent on by itself">Show this handout to the class</button>' + st;
+  return '<div class="hclass"><b class="cz">The class</b>' + body + '</div>';
+}
+// While the page is open, the class's copy is asked after every so often, and when the page comes back into view.
+function classWatch() {
+  clearInterval(classPoll);
+  classPoll = setInterval(() => { if (!page.hidden && document.visibilityState === 'visible') classLoad(); }, Math.max(10, (CS && CS.pollSeconds) || 20) * 1000);
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !page.hidden) classLoad(); });
 const ready = () => new Promise(res => { const t = () => ($('loading') && !$('loading').hidden ? setTimeout(t, 250) : res()); t(); });
 
 /* ── Exports ─────────────────────────────────────────────────────────────── */
@@ -2435,12 +2721,13 @@ function zip(files, type) {
 }
 
 /* For checking from the console, as window.PORTAL is for the portal. */
-window.HANDOUTS = { get db() { return DB; }, toText: () => toText(cur()), docx: () => docxBlob(cur()), open: openPage };
+window.HANDOUTS = { get db() { return DB; }, get shown() { return CLASSH; }, toText: () => toText(cur()), docx: () => docxBlob(cur()), open: openPage };
 
 document.body.classList.toggle('hmode', mode);
 document.body.classList.toggle('hclassview', classView);
 document.body.classList.toggle('hnomenu', !$('moremenu'));
 if (LOCK) LOCK.remembered().then(k => { if (k && modeWas) setMode(true, true); });   // no Modes menu: the Handouts button is the switch
+if (CS) classWatch();
 // The English that handouts' passages lack, fetched once the portal's texts are in: in the portal's
 // own window, not in the copy of it the class screen reads from, so that two never write at once.
 if (window === window.top && DB.handouts.some(h => enMode(h) && passagesOf(h).some(x => enWanted(h, x) && !x.en))) ready().then(fillSoon);

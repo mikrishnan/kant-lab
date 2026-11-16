@@ -179,8 +179,17 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   Reading, folding, exports and **Read it where it stands** stay. **Instructor view** is for
   making and changing handouts. For the room's screen in large type, one passage after another,
   there is still the [class screen](teaching/class-screen/), among the teaching tools.
+- **Show a handout to the class.** In Instructor view, **Show this handout to the class** puts
+  a copy of it where everyone with the class password finds it, on their own Handouts page under
+  **Shown to the class**: to read, fold, export and open where it stands, but not to change.
+  What you change afterwards follows by itself a few seconds later, and an open Handouts page
+  picks it up within half a minute. **Stop showing it** takes it away again, and so does deleting
+  the handout. Your margin notes and your trash stay out of the class's copy, as they stay out
+  of the exports. It works from the live site only. [handouts/README.md](handouts/README.md)
+  says where the copy is kept.
 
-Your handouts are kept in your own browser on your own computer, and nowhere else. The repository and the site never see them. **Save to file** writes them all to one `.json`
+Your handouts are kept in your own browser on your own computer. Nothing of them leaves it except
+a handout you show to the class. **Save to file** writes them all to one `.json`
 file, to keep or to open in another browser with **Open file**. Clearing the browser's
 site data deletes them.
 
