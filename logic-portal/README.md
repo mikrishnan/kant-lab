@@ -237,15 +237,15 @@ it: a board to put the topic's passages on as cards, move about, join with arrow
 kinds of nothing](studies/kinds-of-nothing/README.md#the-board), made the portal's own, for one
 reader's topic rather than the seminar's one board.
 
-- **You put the passages on it, one at a time.** A new board is empty. The topic's passages
-  wait under **Passages**, a tab in the side (or **Passage…** among the tools), in the order you
+- **You put the passages on it, one at a time.** A new board is empty. The topic's passages wait
+  under **Passages**, a tab in the side (or **Passage…** among the tools), in the order you
   arranged them, with a count of those still waiting. Press **+ On the board**, or drag one onto
-  the board where you want it. **▾ read it all here**, on a passage waiting, opens its words in
-  full where it stands in the list (and, for words you kept, the passage they are from); **▴
-  less** closes it again. A passage you put under the topic later, anywhere in the portal,
-  the portal beside the board included, joins them there; nothing comes onto the board by
-  itself. **Take it off the board**, on a passage's card, sends it back to Passages; it stays
-  under the topic.
+  the board where you want it; dropped inside a group's frame, it goes into that group. **▾ read
+  it all here**, on a passage waiting, opens its words in full where it stands in the list (and,
+  for words you kept, the passage they are from); **▴ less** closes it again. A passage you put
+  under the topic later, anywhere in the portal, the portal beside the board included, joins
+  them there; nothing comes onto the board by itself. **Take it off the board**, on a passage's
+  card, sends it back to Passages; it stays under the topic.
 - **Find among them**, at the top of Passages, narrows both lists, those waiting and those on
   the board, to the passages with every word you type: in the citation, the work, the passage's
   words in full or your note on it, with case, accents and ß left out of account. The words are

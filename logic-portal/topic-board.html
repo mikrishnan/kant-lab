@@ -79,6 +79,7 @@
   #ink .ar.computer .pill text { fill: var(--faded); font-style: italic; }
   #ink .frame rect.f { stroke-width: 2; }
   #ink .frame.sel rect.f { stroke-width: 3.5; }
+  #ink .frame.drop rect.f { stroke-width: 3.5; fill-opacity: 0.14; }   /* a passage dragged from Passages is over it */
   #ink .marq { fill: rgba(139, 94, 60, 0.08); stroke: var(--accent-light); stroke-dasharray: 5 4; }
   #ink #ghost { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
   .dim { opacity: 0.14; }
@@ -749,9 +750,10 @@ function syncCards() {
 // The topic's passages not yet on this board, in the order arranged in My topics.
 const waiting = () => underTopic().filter(x => !B.items.some(i => i.kind === 'passage' && i.mt === x.id));
 // Put one of the topic's passages on the board: where it was dropped, or else in the middle of the view,
-// a little below the last one put there, so that several in a row don't hide one another.
+// a little below the last one put there, so that several in a row don't hide one another. Dropped into
+// a group's frame, g, it goes into that group.
 let lastPut = null;
-function putPassage(mt, at) {
+function putPassage(mt, at, g) {
   if (ro()) { toast(roWhy()); return; }
   const x = itemOf(mt); if (!x || !inTopic(x)) return;
   if (B.items.some(i => i.kind === 'passage' && i.mt === mt)) { toast('It is on the board already.'); return; }
@@ -760,12 +762,14 @@ function putPassage(mt, at) {
   change(() => {
     const card = passageCard(x);
     if (B.items.some(i => i.id === card.id)) card.id = uid('p');
+    if (g && model(g.id)) card.model = g.id;
     id = card.id;
     B.items.push(card); view().pos[id] = [Math.round(at[0]), Math.round(at[1])];
     showLayer('passage');
   });
   lastPut = { at, t: Date.now() };
   sel = { kind: 'card', ids: [id] }; form = null; render(); showCard(id);
+  if (g && model(g.id)) toast('Put into ' + g.title + '. Undo with ⌘Z.');
 }
 /* ── Links to other boards ────────────────────────────────────────────────────
    A link card stands on this board for another topic, or for one card or group on that topic's board:
@@ -1823,7 +1827,7 @@ function sideIntro() {
   const n = B.items.filter(i => i.kind === 'passage').length, gh = (() => { try { return !!localStorage.getItem(TOPICS_GH); } catch (e) { return false; } })();
   return '<div class="intro"><h2>' + esc(topic ? topic.name : 'A topic’s board') + '</h2><p class="sub">The board of a topic in My topics</p>' +
     boardsAround() + (topic ? '<span class="k">The topic, in your words</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
-    '<p>The topic’s passages wait under <b>Passages</b>, in the side. Put them on the board one at a time, with <b>+ On the board</b> or by dragging one onto it. A passage you put under the topic later, anywhere in the portal, joins them there; one taken off the board goes back. Click a card to read its passage in full, here or in the portal.</p>' +
+    '<p>The topic’s passages wait under <b>Passages</b>, in the side. Put them on the board one at a time, with <b>+ On the board</b> or by dragging one onto it, or into a group’s frame. A passage you put under the topic later, anywhere in the portal, joins them there; one taken off the board goes back. Click a card to read its passage in full, here or in the portal.</p>' +
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
@@ -1833,7 +1837,7 @@ function sideIntro() {
     '<li><b>Edit in place</b>: double-click any card, arrow or group name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
     '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag one out; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
     '<li><b>Tables</b>: press <i>Table</i>, choose its columns and rows on the grid, and whether its first row or its first column are headings. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next, and in the last cell adds a row. Drag a passage from <b>Passages</b> onto a cell to put it there. Paste a table from Word or a spreadsheet onto the board, and copy one back with <kbd>⌘C</kbd>.</li>' +
-    '<li><b>Groups</b> are frames around their cards. Grab any bare part of a frame to move the whole group; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into a frame to put it in that group.</li>' +
+    '<li><b>Groups</b> are frames around their cards. Grab any bare part of a frame to move the whole group; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into a frame, or a passage from <b>Passages</b>, to put it in that group.</li>' +
     '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
     '<li><b>On an iPad</b>: a finger moves cards, groups and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>' +
     '<span class="k">Its dimensions</span><ul>' +
@@ -2377,7 +2381,7 @@ function renderPassages() {
   $('pphead').innerHTML = '<h2>The topic’s passages</h2><p class="sub">' + (topic ? esc(all + (all === 1 ? ' passage' : ' passages') + ' under “' + topic.name + '”') : '') + '</p>';
   $('ppbar').hidden = !topic || !all;
   $('ppfound').textContent = q.length ? (fw.length + fo.length) + ' found' : '';
-  $('pplist').innerHTML = (SHM && writable() ? '<div class="row" style="margin:0 0 0.6rem"><button type="button" class="btn" data-ppportal title="Add to the topic the passage open in the portal beside the board, under Reading">+ The passage open beside the board</button></div>' : '') + (!topic ? '' : n ? '<p style="font-size:0.9rem;margin:0 0 0.6rem">Put them on the board one at a time: press <b>+ On the board</b>, or drag one onto the board where you want it.</p>' +
+  $('pplist').innerHTML = (SHM && writable() ? '<div class="row" style="margin:0 0 0.6rem"><button type="button" class="btn" data-ppportal title="Add to the topic the passage open in the portal beside the board, under Reading">+ The passage open beside the board</button></div>' : '') + (!topic ? '' : n ? '<p style="font-size:0.9rem;margin:0 0 0.6rem">Put them on the board one at a time: press <b>+ On the board</b>, or drag one onto the board where you want it, or into a group.</p>' +
       (q.length && !FW ? '<p class="pin">Until the portal beside the board has its texts in, only each passage’s opening words are looked in.</p>' : '') +
       fw.map(([x, where]) => '<div class="pp" draggable="' + (ro() ? 'false' : 'true') + '" data-pp="' + esc(x.id) + '"><div class="pc">' + marked(x.cite || x.ref, q) + (x.work ? ' <span>· ' + marked(x.work, q) + '</span>' : '') + '</div>' +
         body(x) + where + '<div class="row">' + (ro() ? '' : '<button type="button" class="btn solid" data-ppadd="' + esc(x.id) + '">+ On the board</button>') +
@@ -3549,15 +3553,27 @@ function dropCell(e) {
   if (td) td.classList.add('tdrop');
   return td;
 }
-$('passages').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); dropCell(null); });
-$('stage').addEventListener('dragover', e => { const ty = [...(e.dataTransfer.types || [])]; if (!ty.includes(PP_TYPE) && !ty.includes(BL_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); dropCell(ty.includes(PP_TYPE) ? e : null); });
-$('stage').addEventListener('dragleave', e => { if (e.target === $('stage')) { $('stage').classList.remove('dropping'); dropCell(null); } });
+// The group a passage is being dragged into, lit, its name and its frame: dropped inside the frame, the
+// passage goes into that group. Of frames one inside another, the smallest round the point.
+function dropGroup(e) {
+  let g = null;
+  if (e && layerOn('frames')) {
+    const [wx, wy] = toWorld(e.clientX, e.clientY); let a = Infinity;
+    B.models.forEach(m => { const f = frameOf(m); if (inside(f, wx, wy) && f.w * f.h < a) { g = m; a = f.w * f.h; } });
+  }
+  $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = g && t.dataset.model === g.id ? '3px solid var(--ink)' : '');
+  $('ink').querySelectorAll('.frame').forEach(f => f.classList.toggle('drop', !!g && f.dataset.model === g.id));
+  return g;
+}
+$('passages').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); dropCell(null); dropGroup(null); });
+$('stage').addEventListener('dragover', e => { const ty = [...(e.dataTransfer.types || [])]; if (!ty.includes(PP_TYPE) && !ty.includes(BL_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); const td = dropCell(ty.includes(PP_TYPE) ? e : null); dropGroup(ty.includes(PP_TYPE) && !td ? e : null); });
+$('stage').addEventListener('dragleave', e => { if (e.target === $('stage')) { $('stage').classList.remove('dropping'); dropCell(null); dropGroup(null); } });
 $('stage').addEventListener('drop', e => {
-  const mt = e.dataTransfer.getData(PP_TYPE), bl = e.dataTransfer.getData(BL_TYPE), td = mt ? dropCell(e) : null; $('stage').classList.remove('dropping'); dropCell(null); if (!mt && !bl) return;
+  const mt = e.dataTransfer.getData(PP_TYPE), bl = e.dataTransfer.getData(BL_TYPE), td = mt ? dropCell(e) : null, g = mt && !td ? dropGroup(e) : null; $('stage').classList.remove('dropping'); dropCell(null); dropGroup(null); if (!mt && !bl) return;
   e.preventDefault();
   if (td) { const [r, c] = td.dataset.cell.split(',').map(Number); putInCell(td.closest('.card').dataset.id, r, c, mt); return; }
   const [wx, wy] = toWorld(e.clientX, e.clientY);
-  if (mt) putPassage(mt, [wx - 120, wy - 25]);
+  if (mt) putPassage(mt, [wx - 120, wy - 25], g);
   else { const [t, i] = bl.split('|'); makeLink(t, i || null, [wx - 115, wy - 25]); }
 });
 $('tread').addEventListener('click', () => { if (!$('portal').getAttribute('src')) read(PORTAL); else showSide('reading'); });
