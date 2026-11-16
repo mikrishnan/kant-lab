@@ -124,7 +124,10 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   of the handout, cited across both (*AA 1:392–394*, *A 50–52 / B 74–76*); the portal's own texts
   are not changed. Each part keeps its citation as a small marker in the text, which opens that
   part where it stands in the reader; **Read it where it stands** goes to the first. **Split** gives the passages
-  back as they were. Students see a joined passage as one, with the same markers.
+  back as they were. Students see a joined passage as one, with the same markers. To use one of
+  its passages again elsewhere in the handout, on its own, choose it under **Use one on its own…**
+  beneath the joined passage, or press **+ Handout** or **▾** on it in the portal: it comes in
+  whole, as a passage of its own, and the joined passage keeps it too.
 - **Say what you want to say.** **+ Note** adds a note: your setup, a claim, how some
   passages bear on each other, a question for students. **+ Note in this section**, on a
   section heading, adds one at the top of that section, just under its heading, and a note
