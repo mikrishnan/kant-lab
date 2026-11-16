@@ -7,6 +7,36 @@ corrects it in their own words.
 Each entry: the date, who asked (GitHub username), what was asked for, what it showed,
 whether it helped, and what it got wrong or could not do.
 
+## 16 November 2026: annotating passages on the board
+
+*A draft, to be corrected by nikolasland in their own words.*
+
+- **Asked for:** while the seminar uses the board, a way to annotate passages live: to flag
+  problems, to mark what a passage, or a word in it, is relevant to, to note a possible
+  interpretation, and to comment.
+- **What there is:**
+  - **Annotating.** Select some of a passage's words in the side, or take the passage whole,
+    and choose *Problem*, *Relevant to…*, *Interpretation* or *Comment*. *Relevant to* takes
+    a word, another card, a Reflexion by number or a portal address. Every annotation is
+    signed, and anyone can reply; a problem can be marked resolved.
+  - **On the passage, not the card.** An annotation shows on every card where its passage
+    stands, by the passage's address and the words it was made on, and outlives the card.
+  - **Live.** Annotations are saved with the shared board, so they reach everyone's screen
+    within seconds. Two people annotating the same passage at once both keep theirs.
+  - **On the board.** A card carries a dot for each annotation, the annotated words are lit
+    in its excerpt, and *Relevant to* a card draws a dotted thread between the two, in a layer
+    each device can turn off. *Find on the board* searches annotations too.
+  - **The list.** *Annotations*, in the tools, lists them all, and downloads them.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:**
+  - annotations are on the board's passages, not in the portal's own reading pane;
+  - live means seconds: nobody sees an annotation as it is typed;
+  - a passage card shows only its first 320 characters, so annotations further in show as a
+    dot on the card and lit in the side;
+  - a whole room annotating flat out can reach the shared key's limit of about 500 saves an
+    hour; the page then waits, and nothing is lost.
+
 ## 13 November 2026: one board for everyone
 
 *A draft, to be corrected by mikrishnan in their own words.*

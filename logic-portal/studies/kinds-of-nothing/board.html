@@ -279,6 +279,51 @@
   #world.far .card.k-box .blab { font-size: 1.5rem; }
   #stage.tool-box, #stage.tool-box .card { cursor: crosshair; }
   @media (pointer: coarse) { .card .bgrip { width: 30px; height: 30px; } }
+  /* annotations: words of a passage marked by the seminar. Each kind's colour is --kc, set from ANN_KINDS. */
+  mark.ann { color: inherit; background: color-mix(in srgb, var(--kc) 15%, transparent); border-bottom: 2px solid var(--kc); border-radius: 2px; padding: 0 1px; cursor: pointer; }
+  mark.ann.many { background: color-mix(in srgb, var(--kc) 28%, transparent); }
+  mark.ann.placed { border-bottom-style: dashed; }
+  mark.ann.done { background: transparent; border-bottom: 1.5px dotted var(--kc); }
+  .card mark.ann { cursor: inherit; }
+  #world.far .card mark.ann { background: none; border-bottom-width: 0; }
+  .card .anns { display: flex; flex-wrap: wrap; gap: 0.15rem 0.5rem; font-size: 0.72rem; color: var(--faded); margin-top: 0.25rem; font-style: normal; }
+  .card .anns i { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--kc); margin-right: 0.15rem; vertical-align: -0.05rem; }
+  .card .anns i.hollow { background: transparent; box-shadow: inset 0 0 0 1.5px var(--kc); }
+  #world.far .card .anns { font-size: 1.05rem; }
+  #ink .annt { pointer-events: auto; cursor: pointer; }
+  #ink .annt path.hit { fill: none; stroke: transparent; stroke-width: 14; }
+  #ink .annt path.v { fill: none; stroke: #2f5d8a; stroke-width: 1.8; stroke-dasharray: 1 5; stroke-linecap: round; }
+  #ink .annt.dim { opacity: 0.1; }
+  .annbar { position: fixed; z-index: 40; display: none; gap: 0.25rem; padding: 0.25rem; background: #fff; border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 2px 12px rgba(60, 40, 10, 0.2); }
+  .annbar.show { display: flex; }
+  .annbar button { border: 1.5px solid var(--kc); color: var(--kc); background: #fff; border-radius: 999px; padding: 0.05rem 0.65rem; cursor: pointer; font-size: 0.86rem; white-space: nowrap; }
+  .annbar button:hover { background: var(--kc); color: #fff; }
+  @media (pointer: coarse) { .annbar button { padding: 0.35rem 0.8rem; font-size: 0.95rem; } }
+  #details .q .c button[data-annwhole] { color: var(--faded); }
+  #details .anns-l { margin-top: 0.35rem; }
+  #details .ann-e { border-left: 3px solid var(--kc); background: var(--panel); border-radius: 0 6px 6px 0; padding: 0.2rem 0.5rem 0.3rem; margin: 0.3rem 0 0 0.3rem; font-size: 0.88rem; font-style: normal; }
+  #details .ann-e.placed, #details .ann-e.lost { border-left-style: dashed; }
+  #details .ann-e.done > .ah, #details .ann-e.done > .at { opacity: 0.6; }
+  #details .ann-e.flash { box-shadow: 0 0 0 3px #d9a441; }
+  #details .ann-e .kl { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.09em; color: var(--kc); margin-right: 0.35rem; }
+  #details .ann-e .ex { font-style: italic; }
+  #details .ann-e .on { color: var(--faded); font-style: italic; }
+  #details .ann-e .pg { font-size: 0.78rem; color: var(--faded); font-style: italic; }
+  #details .ann-e .at { white-space: pre-wrap; margin-top: 0.1rem; }
+  #details .ann-e .to { margin-top: 0.1rem; color: var(--faded); }
+  #details .ann-e .to .tw { border: 1px solid var(--kc); color: var(--kc); background: #fff; border-radius: 999px; padding: 0 0.5rem; cursor: pointer; font-size: 0.85rem; font-style: italic; }
+  #details .ann-e .am { display: flex; flex-wrap: wrap; gap: 0.1rem 0.55rem; font-size: 0.78rem; color: var(--faded); margin-top: 0.15rem; }
+  #details .ann-e .am button, #details .ann-e .ah button.linkish, #details .ann-e .to button.linkish { background: none; border: 0; padding: 0; color: var(--accent-light); text-decoration: underline; cursor: pointer; font-size: inherit; }
+  #details .ann-r { margin: 0.3rem 0 0 0.4rem; padding-left: 0.5rem; border-left: 1px solid var(--line-soft); }
+  #details .anncomp { border: 1.5px solid var(--kc); border-radius: 8px; background: #fff; padding: 0.35rem 0.55rem 0.45rem; margin: 0.35rem 0 0.2rem 0.3rem; font-style: normal; font-size: 0.92rem; }
+  #details .anncomp .akinds { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.3rem; }
+  #details .anncomp .akinds button { border: 1px solid var(--kc); color: var(--kc); background: #fff; border-radius: 999px; padding: 0 0.55rem; cursor: pointer; font-size: 0.82rem; }
+  #details .anncomp .akinds button.on { background: var(--kc); color: #fff; }
+  #details .anncomp .aon { margin: 0 0 0.2rem; font-size: 0.86rem; color: var(--faded); }
+  #details .anncomp textarea { min-height: 3.2rem; margin-top: 0.25rem; }
+  #details .anncomp label.f { margin-top: 0.2rem; }
+  #details .annf { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.3rem 0 0.5rem; }
+  #details .annf select { width: auto; flex: 1; min-width: 6rem; }
 </style>
 </head>
 <body>
@@ -313,6 +358,9 @@
     <button type="button" class="linkish" id="photos">Photographs</button>
   </span>
   <span class="grp">
+    <button type="button" class="btn" id="annsb" title="Every annotation on the board: problems, what passages are relevant to, interpretations and comments">Annotations</button>
+  </span>
+  <span class="grp">
     <button type="button" class="btn" id="reqs" title="What should the board do differently? Note it here: everyone’s notes are kept together for the end of the session">Ask for a change</button>
   </span>
   <span class="grp"><span id="sync"></span></span>
@@ -325,7 +373,7 @@
 <div class="wrap">
   <div id="stage">
     <div id="world">
-      <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
+      <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="gann"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
       <div id="cards"></div>
       <svg id="drawn" xmlns="http://www.w3.org/2000/svg"><g id="gdraw"></g><path id="wet" d=""></path></svg>
     </div>
@@ -385,6 +433,8 @@
   </div>
 </div>
 
+<div id="annbar" class="annbar" role="toolbar" aria-label="Annotate these words"></div>
+
 <!-- Bump ?v= when either file changes, so that browsers fetch it afresh rather than from their cache. -->
 <script src="board.js?v=2026-11-13c"></script>
 <script src="board-shared.js?v=2026-11-13c"></script>
@@ -406,11 +456,20 @@ const LAYERS = [
   { key: 'computer', label: 'Same label (the computer’s)', color: '#9a8f7a', dash: '2 4' },
   { key: 'drawing', label: 'Drawing', color: '#b03a2e' },
   { key: 'box', label: 'Boxes', mark: 'sq' },
+  { key: 'annotations', label: 'Annotations, and what they join', color: '#2f5d8a', dash: '2 4' },
 ];
 const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', computer: '#9a8f7a', passage: '#5c3d1e', note: '#5c3d1e' };
 const DASH = { problem: '7 4', computer: '2 4' };
 const FAR = 0.55, NEAR = 1.3;
 const PENS = ['#1a1208', '#8b5e3c', '#b03a2e', '#2f5d8a', '#5c6e3a'];
+// What can be said about a passage, or some of its words. A new kind is one more line here.
+const ANN_KINDS = [
+  { key: 'problem', label: 'Problem', color: '#8a3b12', hint: 'What is wrong or puzzling here: an OCR slip, a reading that does not fit, a clash with another passage' },
+  { key: 'relevant', label: 'Relevant to…', color: '#2f5d8a', hint: 'Why, in a few words (optional)' },
+  { key: 'interpretation', label: 'Interpretation', color: '#5c6e3a', hint: 'A possible reading, in your words' },
+  { key: 'comment', label: 'Comment', color: '#9a6a1e', hint: 'Anything else' },
+];
+const ANN_CTX = 32;   // the characters kept either side of the words annotated, so that they can be found again
 const SH = typeof STUDY_BOARD_SHARED !== 'undefined' ? STUDY_BOARD_SHARED : null;
 const SHARED_ON = !!(SH && SH.key);                   // the one shared board is set up
 const API = 'https://api.github.com';                 // the only place the token is ever sent
@@ -444,6 +503,9 @@ let prefs = {};        // this device's camera, layers and view, kept apart from
 let migrate = null;    // a board of this device's own from before the board was shared: { old, n }
 let expiring = null;
 let editing = null;    // something being edited in place: { el, finish }   // days until the board's key expires, while that is being shown
+let annPick = null;    // words selected in a passage in the side, for the annotation bar: { card, qi, start, end, rect }
+let sideStale = false; // someone else saved while words were being selected in the side: redraw it once the selection ends
+let AX = null;         // the annotations, indexed by passage (see annIndex)
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
@@ -493,9 +555,10 @@ function hashOf(s) { const i = String(s || '').indexOf('#'); if (i < 0) return '
 // unless it was deleted here.
 function merge(into, base) {
   const gone = new Set(into.removed || []);
-  ['models', 'items', 'arrows'].forEach(k => {
+  ['models', 'items', 'arrows', 'annotations'].forEach(k => {
+    into[k] = into[k] || [];
     const have = new Set(into[k].map(x => x.id));
-    base[k].forEach(x => { if (!have.has(x.id) && !gone.has(x.id)) into[k].push(clone(x)); });
+    (base[k] || []).forEach(x => { if (x && !have.has(x.id) && !gone.has(x.id)) into[k].push(clone(x)); });
   });
   const haveV = new Set(into.views.map(v => v.id));
   base.views.forEach(bv => {
@@ -552,7 +615,7 @@ function afterSwap() {
 // The file, one card, arrow or view to a line, so that GitHub's history shows each change.
 function boardText(b, by, at) {
   const head = { kind: 'kantlab-board', v: 1, study: 'kinds-of-nothing', savedBy: by || '', savedAt: at || '' };
-  const LISTS = ['models', 'items', 'arrows', 'views', 'photos', 'requests'];
+  const LISTS = ['models', 'items', 'arrows', 'views', 'photos', 'requests', 'annotations'];
   const list = k => JSON.stringify(k) + ':[\n' + (b[k] || []).map(x => JSON.stringify(x)).join(',\n') + '\n]';
   const rest = Object.keys(b).filter(k => !LISTS.includes(k) && k !== 'removed').map(k => JSON.stringify(k) + ':' + JSON.stringify(b[k]));
   return JSON.stringify(head).slice(0, -1) + ',\n' + LISTS.map(list).join(',\n') + ',\n"removed":' + JSON.stringify(b.removed || []) + (rest.length ? ',\n' + rest.join(',\n') : '') + '}\n';
@@ -562,7 +625,7 @@ function cleanBoard(d) {
   if (!d || typeof d !== 'object' || Array.isArray(d) || !Array.isArray(d.items)) return null;
   const out = {};
   Object.keys(d).forEach(k => { if (!['kind', 'v', 'study', 'savedBy', 'savedAt'].includes(k)) out[k] = d[k]; });
-  ['models', 'items', 'arrows', 'views', 'photos', 'requests'].forEach(k => { out[k] = Array.isArray(out[k]) ? out[k].filter(x => x && typeof x === 'object' && typeof x.id === 'string') : []; });
+  ['models', 'items', 'arrows', 'views', 'photos', 'requests', 'annotations'].forEach(k => { out[k] = Array.isArray(out[k]) ? out[k].filter(x => x && typeof x === 'object' && typeof x.id === 'string') : []; });
   out.removed = Array.isArray(out.removed) ? out.removed.filter(x => typeof x === 'string') : [];
   out.views.forEach(v => { if (!v.pos || typeof v.pos !== 'object') v.pos = {}; if (!Array.isArray(v.hidden)) v.hidden = []; if (!Array.isArray(v.ink)) v.ink = []; });
   if (!out.views.length) out.views.push({ id: 'v-1', name: 'The board', pos: {}, hidden: [], ink: [] });
@@ -590,7 +653,7 @@ function merge3(base, mine, theirs) {
     return v;
   };
   const out = Object.assign({}, theirs);
-  ['models', 'items', 'arrows', 'photos', 'requests'].forEach(k => { out[k] = list(base[k] || [], mine[k] || [], theirs[k] || []); });
+  ['models', 'items', 'arrows', 'photos', 'requests', 'annotations'].forEach(k => { out[k] = list(base[k] || [], mine[k] || [], theirs[k] || []); });
   out.views = list(base.views, mine.views, theirs.views, view3);
   out.removed = [...new Set([...(theirs.removed || []), ...(mine.removed || [])])];
   const have = new Set(out.items.map(i => i.id));
@@ -609,7 +672,7 @@ function summary(b, m) {
     const w = n => n + ' ' + word + (n > 1 ? 's' : '');
     if (add) parts.push('+' + w(add)); if (del) parts.push('−' + w(del)); if (ed) parts.push(w(ed) + ' edited');
   };
-  count('items', 'card'); count('arrows', 'arrow'); count('models', 'model'); count('views', 'view'); count('photos', 'photograph'); count('requests', 'request');
+  count('items', 'card'); count('arrows', 'arrow'); count('models', 'model'); count('views', 'view'); count('photos', 'photograph'); count('requests', 'request'); count('annotations', 'annotation');
   return parts.join(', ') || 'changes';
 }
 const getToken = () => { try { return localStorage.getItem(TOKEN) || sessionStorage.getItem(TOKEN) || ''; } catch (e) { return ''; } };
@@ -752,13 +815,21 @@ function incoming(theirs, sha, by) {
   if (mine) scheduleSave();
   if (by && by !== me()) toast('@' + by + ' changed the board.');
 }
-function renderAround() { renderTools(); renderLayers(); renderBoard(); if (!form) renderSide(); else if (form.kind === 'requests' && $('reqlist')) $('reqlist').innerHTML = reqListHtml(); applyCam(); }
+function renderAround() {
+  renderTools(); renderLayers(); renderBoard();
+  if (!form || form.kind === 'annotate') { if (selInSide()) sideStale = true; else renderSide(); }   // words being selected in the side are not lost to someone else's save; what is being typed is kept
+  else if (form.kind === 'requests' && $('reqlist')) $('reqlist').innerHTML = reqListHtml();
+  else if (form.kind === 'annotations' && $('annlist')) $('annlist').innerHTML = annListAll();
+  applyCam();
+}
 function afterRemote() {
   if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
   sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : model(id));
   if (!sel.ids.length) sel.kind = null;
   if (focus && !item(focus.id)) focus = null;
-  if (form && form.id && !(form.kind === 'arrow' ? arrow(form.id) : form.kind === 'model' ? model(form.id) : form.kind === 'photos' ? true : item(form.id))) form = null;
+  if (form && form.id && form.kind !== 'annotate' && !(form.kind === 'arrow' ? arrow(form.id) : form.kind === 'model' ? model(form.id) : form.kind === 'photos' ? true : item(form.id))) form = null;
+  // An annotation's card may go while it is being written: it still belongs on the passage. What it edits or answers may not.
+  if (form && form.kind === 'annotate' && ((form.id && !annById(form.id)) || (form.re && !annById(form.re)))) { form = null; toast('What you were writing on was deleted meanwhile.'); }
 }
 let pollTimer = null;
 function poll() {
@@ -920,8 +991,111 @@ function neighbourhood() {
 }
 function matches(it) {
   if (!query) return true;
-  const hay = [it.label, it.sub, it.text, it.by].concat((it.quotes || []).map(q => q.q + ' ' + q.cite)).join(' ').toLowerCase();
+  const hay = [it.label, it.sub, it.text, it.by].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it)).join(' ').toLowerCase();
   return query.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w));
+}
+
+/* ── Builders: annotations ────────────────────────────────────────────────────
+   An annotation belongs to a passage, not to a card. It names the passage by its address in
+   the portal (the ref, or hash, its quote carries) and keeps the words it was made on verbatim,
+   with a few either side. So it shows wherever that passage stands on the board, found again by
+   its words. One the page could not find again with the same words around it is drawn dashed,
+   as the page's own placing; one whose words have gone from the passage is placed nowhere, and
+   says so. A passage pasted with no address is known by its card alone. */
+const annKind = k => ANN_KINDS.find(x => x.key === k) || { key: k, label: k === 'reply' ? 'Reply' : String(k || ''), color: '#8b5e3c', hint: '' };
+const qAddr = q => (q && (q.ref || q.hash)) || '';
+const short = (s, n) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+function annIndex() {
+  const list = B.annotations || [];
+  if (AX && AX.src === list && AX.n === list.length) return AX;
+  const byAddr = new Map(), byCard = new Map(), replies = new Map(), byId = new Map();
+  const put = (m, k, a) => { if (!m.has(k)) m.set(k, []); m.get(k).push(a); };
+  list.forEach(a => {
+    if (!a || typeof a.id !== 'string') return;
+    byId.set(a.id, a);
+    if (a.kind === 'reply') { if (a.re) put(replies, a.re, a); return; }
+    if (!a.on || typeof a.on !== 'object') return;
+    const k = a.on.ref || a.on.hash;
+    if (k) put(byAddr, k, a); else if (a.on.card) put(byCard, a.on.card, a);
+  });
+  replies.forEach(rs => rs.sort((x, y) => String(x.date).localeCompare(String(y.date))));
+  return (AX = { src: list, n: list.length, byAddr, byCard, replies, byId });
+}
+const annById = id => annIndex().byId.get(id);
+// Where the words annotated stand in this passage's text: { s, e, placed }, placed when the page had to judge
+// where (the words around them differ, or they stand there more than once). null when they are not in it.
+function findWords(t, on) {
+  const ex = String(on.exact), pre = String(on.prefix || ''), suf = String(on.suffix || ''), hits = [];
+  for (let i = t.indexOf(ex); i >= 0; i = t.indexOf(ex, i + 1)) hits.push(i);
+  if (!hits.length) return null;
+  const fit = i => {   // how much of the context agrees, and whether all of it does (as far as the passage goes)
+    let n = 0, k = 1, j = 0;
+    for (; k <= pre.length && i - k >= 0 && t[i - k] === pre[pre.length - k]; k++) n++;
+    const e = i + ex.length;
+    for (; j < suf.length && e + j < t.length && t[e + j] === suf[j]; j++) n++;
+    return { i, n, ok: (k > pre.length || i - k < 0) && (j >= suf.length || e + j >= t.length) };
+  };
+  const scored = hits.map(fit), best = Math.max(...scored.map(x => x.n)), top = scored.filter(x => x.n === best);
+  const at = top.find(x => x.i === on.start) || top[0];
+  return { s: at.i, e: at.i + ex.length, placed: !(at.ok && top.length === 1) };
+}
+// The annotations on one passage of a card: on some of its words (spans), on the whole of it, and those
+// made here whose words it no longer has (lost).
+function placeOn(it, qi) {
+  const q = it && (it.quotes || [])[qi], out = { spans: [], whole: [], lost: [] };
+  if (!q || !q.q) return out;
+  const X = annIndex(), k = qAddr(q);
+  const cands = (k ? X.byAddr.get(k) || [] : []).concat((X.byCard.get(it.id) || []).filter(a => (+a.on.qi || 0) === qi));
+  cands.forEach(a => {
+    if (!a.on.exact) { out.whole.push(a); return; }
+    const f = findWords(q.q, a.on);
+    if (f) out.spans.push({ s: f.s, e: f.e, placed: f.placed, a });
+    else if (a.on.card === it.id && (+a.on.qi || 0) === qi) out.lost.push(a);
+  });
+  out.spans.sort((x, y) => String(x.a.date).localeCompare(String(y.a.date)));
+  return out;
+}
+function annsOfCard(it) {
+  const seen = new Map();
+  (it.quotes || []).forEach((q, i) => { const P = placeOn(it, i); P.spans.map(x => x.a).concat(P.whole, P.lost).forEach(a => seen.set(a.id, a)); });
+  return [...seen.values()];
+}
+// Every annotation's places on the board: id → [{ card, qi }].
+function annPlaces() {
+  const W = new Map(), add = (id, card, qi) => { if (!W.has(id)) W.set(id, []); W.get(id).push({ card, qi }); };
+  B.items.forEach(it => (it.quotes || []).forEach((q, i) => { const P = placeOn(it, i); P.spans.forEach(x => add(x.a.id, it.id, i)); P.whole.concat(P.lost).forEach(a => add(a.id, it.id, i)); }));
+  return W;
+}
+const annHay = it => annsOfCard(it).map(a => [a.text, a.by, a.to && (a.to.word || a.to.cite)].concat((annIndex().replies.get(a.id) || []).map(r => r.text + ' ' + r.by)).join(' ')).join(' ');
+// A passage's words, the annotated ones marked; spans are { s, e, placed, a }. The latest made shows its colour.
+function markText(t, spans) {
+  if (!spans.length) return esc(t);
+  const cuts = new Set([0, t.length]);
+  spans.forEach(x => { cuts.add(Math.max(0, Math.min(t.length, x.s))); cuts.add(Math.max(0, Math.min(t.length, x.e))); });
+  const pts = [...cuts].sort((a, b) => a - b);
+  let h = '';
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1], seg = t.slice(a, b), on = spans.filter(x => x.s <= a && x.e >= b);
+    if (!on.length) { h += esc(seg); continue; }
+    const top = on[on.length - 1].a, done = on.every(x => x.a.kind === 'problem' && x.a.resolved);
+    h += '<mark class="ann ak-' + esc(top.kind) + (on.some(x => x.placed) ? ' placed' : '') + (done ? ' done' : '') + (on.length > 1 ? ' many' : '') + '" data-ann="' + esc(on.map(x => x.a.id).join(' ')) + '">' + esc(seg) + '</mark>';
+  }
+  return h;
+}
+// The first words of a card's passage, as the card shows them, with what is annotated in them lit.
+function excerpt(it, n) {
+  const t = String(it.quotes[0].q || ''), cut = t.length > n, s = cut ? t.slice(0, n - 1) : t;
+  const spans = layerOn('annotations') ? placeOn(it, 0).spans.filter(x => x.s < s.length).map(x => Object.assign({}, x, { e: Math.min(x.e, s.length) })) : [];
+  return markText(s, spans) + (cut ? '…' : '');
+}
+// A dot on the card for each annotation on its passages, by kind; a resolved problem's is hollow.
+function annDots(it) {
+  if (!layerOn('annotations')) return '';
+  const as = annsOfCard(it); if (!as.length) return '';
+  const n = {}; as.forEach(a => { const k = a.kind === 'problem' && a.resolved ? 'resolved' : a.kind; n[k] = (n[k] || 0) + 1; });
+  return '<span class="anns" title="' + as.length + (as.length === 1 ? ' annotation: click the card to read it' : ' annotations: click the card to read them') + '">' +
+    ANN_KINDS.filter(K => n[K.key]).map(K => '<span class="ak-' + K.key + '"><i></i>' + n[K.key] + '</span>').join('') +
+    (n.resolved ? '<span class="ak-problem"><i class="hollow"></i>' + n.resolved + ' resolved</span>' : '') + '</span>';
 }
 
 /* ── Render: the board ────────────────────────────────────────────────────── */
@@ -936,12 +1110,12 @@ function cardHtml(it) {
   if (it.kind === 'part') {
     inner = '<span class="lab' + (isLat(it.label) ? ' lat' : '') + '">' + esc(it.label) + '</span>' + (it.sub ? '<span class="sub">' + esc(it.sub) + '</span>' : '') +
       (it.quotes.length ? '<span class="count">' + it.quotes.length + (it.quotes.length === 1 ? ' passage' : ' passages') + '</span>' : '') +
-      (q0 ? '<div class="nearq">“' + esc(q0.q.length > 230 ? q0.q.slice(0, 229) + '…' : q0.q) + '” <span>' + esc(q0.cite) + '</span></div>' : '') + unchecked + mine +
+      (q0 ? '<div class="nearq">“' + excerpt(it, 230) + '” <span>' + esc(q0.cite) + '</span></div>' : '') + unchecked + annDots(it) + mine +
       (it.kantLabel != null && it.kantLabel !== it.label ? '<span class="who">Kant: ' + esc(it.kantLabel) + (it.editedBy ? ' · renamed by @' + esc(it.editedBy) : '') + '</span>' : '');
   } else if (it.kind === 'passage') {
-    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 ? '<div class="pq">“' + esc(q0.q.length > 320 ? q0.q.slice(0, 319) + '…' : q0.q) + '”</div><span class="pc">' + esc(q0.cite) + '</span>' : '') + unchecked + mine;
+    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 ? '<div class="pq">“' + excerpt(it, 320) + '”</div><span class="pc">' + esc(q0.cite) + '</span>' : '') + unchecked + annDots(it) + mine;
   } else {
-    inner = '<span class="tag">' + (it.kind === 'problem' ? 'Problem' : 'Note') + '</span><span class="txt">' + esc(it.text) + '</span>' + (it.quotes && it.quotes.length ? '<span class="count">' + it.quotes.length + (it.quotes.length === 1 ? ' passage' : ' passages') + '</span>' : '') + unchecked + mine;
+    inner = '<span class="tag">' + (it.kind === 'problem' ? 'Problem' : 'Note') + '</span><span class="txt">' + esc(it.text) + '</span>' + (it.quotes && it.quotes.length ? '<span class="count">' + it.quotes.length + (it.quotes.length === 1 ? ' passage' : ' passages') + '</span>' : '') + unchecked + annDots(it) + mine;
   }
   return '<div class="card k-' + it.kind + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'part' || it.kind === 'passage' ? esc(col) : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
 }
@@ -1020,7 +1194,25 @@ function renderInk(nb) {
       (label ? '<g class="pill"><rect x="' + (c.mx - lw / 2) + '" y="' + (c.my - 10) + '" width="' + lw + '" height="20" rx="10" stroke="' + col + '"' + (a.layer === 'computer' ? ' stroke-dasharray="2 3"' : '') + '/><text x="' + c.mx + '" y="' + (c.my + 4.5) + '" text-anchor="middle">' + esc(label) + '</text></g>' : '') + '</g>';
   });
   $('garrows').innerHTML = h;
+  renderThreads(nb);
   renderDrawn();
+}
+// "Relevant to" a card on the board: a dotted thread between the two cards, in the annotations' layer.
+// Not an arrow: it makes no claim about the models.
+function renderThreads(nb) {
+  let h = '';
+  const ts = layerOn('annotations') ? (B.annotations || []).filter(a => a && a.kind === 'relevant' && a.on && a.to && a.to.card && shown(item(a.to.card))) : [];
+  if (ts.length) {
+    const W = annPlaces();
+    ts.forEach(a => {
+      const at = (W.get(a.id) || []).map(x => x.card).filter(c => shown(item(c))), from = at.includes(a.on.card) ? a.on.card : at[0];
+      if (!from || from === a.to.card) return;
+      const c = curve({ from, to: a.to.card, layer: 'annotation' }); if (!c) return;
+      const dim = nb ? !(nb.has(from) && nb.has(a.to.card)) : false;
+      h += '<g class="annt' + (dim ? ' dim' : '') + '" data-annid="' + esc(a.id) + '"><title>' + esc('Relevant to ' + nameOf(a.to.card) + (a.text ? ': ' + a.text : '') + (a.by ? ' (@' + a.by + ')' : '')) + '</title><path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '"/></g>';
+    });
+  }
+  $('gann').innerHTML = h;
 }
 // A stroke, smoothed through the midpoints of what the pen passed over.
 function strokeD(pts) {
@@ -1042,7 +1234,7 @@ function applyCam() {
 }
 function renderBoard() { renderCards(); const nb = lit(); renderInk(nb); }
 function renderLayers() {
-  const count = k => k === 'drawing' ? (view().ink || []).length : k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
+  const count = k => k === 'annotations' ? (B.annotations || []).filter(a => a && a.kind !== 'reply').length : k === 'drawing' ? (view().ink || []).length : k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
     k === 'problem' ? B.items.filter(i => i.kind === 'problem').length : B.items.filter(i => i.kind === k).length;
   const closed = $('layers').classList.contains('closed');
   $('layers').innerHTML = '<span class="ttl">Layers <button type="button" class="linkish" data-fold style="float:right;margin-left:1rem">' + (closed ? 'show' : 'hide') + '</button></span>' + LAYERS.map(L =>
@@ -1054,6 +1246,8 @@ function renderTools() {
   $('photos').textContent = 'Photographs' + (photoList().length ? ' (' + photoList().length + ')' : '');
   const nr = (curBoard().requests || []).filter(r => !r.done).length;
   $('reqs').textContent = 'Ask for a change' + (nr ? ' (' + nr + ')' : '');
+  const na = (B.annotations || []).filter(a => a && a.kind !== 'reply').length;
+  $('annsb').textContent = 'Annotations' + (na ? ' (' + na + ')' : '');
   renderSync();
   $('stage').classList.toggle('readonly', ro());
   const n = query ? B.items.filter(it => shown(it) && matches(it)).length : null;
@@ -1066,7 +1260,7 @@ function banner() {
   if (live) { const p = live.entry || photoList().find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
   else if (expiring != null) h = '<span>' + (expiring > 0 ? 'The board’s key expires on <b>' + esc(expiryDay()) + '</b>, in ' + expiring + (expiring === 1 ? ' day' : ' days') + '. After that nobody can open the board' : 'The board’s key has expired, so nobody can open the board') + ' until a new token is made and locked in at board.html#setup (the study’s README, <i>The board</i>, says how).</span><button type="button" class="btn" data-b="x-ok">Understood</button>';
   else if (migrate) h = '<span>This device has a board of its own from before the board was shared, with ' + migrate.n + ' things the shared board does not have.</span><button type="button" class="btn solid" data-b="m-add">Add them to the shared board</button><button type="button" class="btn" data-b="m-leave">Leave them</button>';
-  else if (mode) h = '<span>Click the card the arrow goes to.</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
+  else if (mode) h = '<span>' + (mode.annTo ? 'Click the card these words are relevant to.' : 'Click the card the arrow goes to.') + '</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
   else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(nameOf(offer.from)) + '</b> to <b>' + esc(nameOf(offer.to)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
   else if (offer && offer.kind === 'lasso') { const one = offer.ids.length === 1; h = '<span>You drew round ' + offer.ids.length + (one ? ' card' : ' cards') + '.</span><button type="button" class="btn solid" data-b="o-select">Select ' + (one ? 'it' : 'them') + '</button><button type="button" class="btn" data-b="o-model">Make ' + (one ? 'it' : 'them') + ' a model</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>'; }
   else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
@@ -1078,12 +1272,15 @@ function toast(s) { const t = $('toast'); t.textContent = s; t.classList.add('sh
 const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); };
 
 /* ── Render: the side ─────────────────────────────────────────────────────── */
-function quoteHtml(q, i, removable) {
-  const href = portalHref(q);
-  return '<div class="q">' + (q.q ? '<span class="t">“' + esc(q.q) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
+// A passage in the side. Given its card (it), its words can be selected and annotated, and its annotations are shown.
+function quoteHtml(q, i, removable, it) {
+  const href = portalHref(q), P = it && q.q ? placeOn(it, i) : null;
+  return '<div class="q">' + (q.q ? '<span class="t">“' + (P ? '<span data-qt="' + i + '" data-qcard="' + esc(it.id) + '">' + markText(q.q, P.spans) + '</span>' : esc(q.q)) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
     (href ? '<button type="button" data-read="' + esc(href) + '">read it beside the board</button><a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : '') +
     (q.pasted ? '<span class="chk">pasted, not yet checked against the portal</span>' : '') +
-    (removable ? '<button type="button" class="x" data-unq="' + i + '" title="Take this passage off the card">✕</button>' : '') + '</div></div>';
+    (removable ? '<button type="button" class="x" data-unq="' + i + '" title="Take this passage off the card">✕</button>' : '') +
+    (P && !ro() ? '<button type="button" data-annwhole="' + i + '" data-qcard="' + esc(it.id) + '" title="Annotate this passage as a whole. To annotate some of its words, select them.">annotate</button>' : '') + '</div>' +
+    (P ? annEntries(P, it, i) : '') + '</div>';
 }
 const signedHtml = x => '<p class="by">@' + esc(x.by) + (x.date ? ' · ' + esc(x.date) : '') + (x.editedBy ? ' · edited by @' + esc(x.editedBy) + (x.edited ? ' · ' + esc(x.edited) : '') : '') + '</p>';
 function sign(x, by) { if (!x.by) { x.by = by; x.date = today(); } else if (x.by !== by) { x.editedBy = by; x.edited = today(); } }
@@ -1096,6 +1293,7 @@ function sideIntro() {
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card. Inside a model it is a division; to a problem, <i>answers?</i>; otherwise type its name on the spot: <i>kept, renamed, split into, merged from, dropped, new</i>, or your own. Its claim and passages can be added under <i>Edit</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a part, passage, problem or box.</li>' +
     '<li><b>Ask for a change</b> (in the tools above): note what the board should do differently. Everyone’s requests are kept together for the end of the session.</li>' +
+    '<li><b>Annotate a passage</b>: click a card, select some of its passage’s words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. Everyone sees it within seconds, wherever that passage stands on the board, and can reply. <i>Annotations</i>, in the tools above, lists them all.</li>' +
     '<li><b>A Reflexion by its number</b>: double-click the board, type <i>R 3990</i>, and press Enter. Its words come from the portal, with citation and phase.</li>' +
     '<li><b>Edit in place</b>: double-click any card, arrow or model name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
     '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag out a division; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
@@ -1121,7 +1319,7 @@ function sideCard(it) {
   if (it.src === 'labels') h += '<p class="by">A part built from Kant’s own label; the passages are cut from the portal’s text, verbatim.</p>';
   if (it.kantLabel != null && it.kantLabel !== it.label) h += '<p class="warn">Kant’s own label is <i>' + esc(it.kantLabel) + '</i>; renamed here' + (it.editedBy ? ' by @' + esc(it.editedBy) : '') + '.</p>';
   h += '<span class="k">' + (it.kind === 'part' ? 'In Kant’s words' : it.kind === 'problem' ? 'The passages it shows in' : 'Passages') + '</span>' +
-    ((it.quotes || []).length ? it.quotes.map((q, i) => quoteHtml(q, i)).join('') : '<p class="empty">None yet.</p>');
+    ((it.quotes || []).length ? it.quotes.map((q, i) => quoteHtml(q, i, false, it)).join('') + (ro() ? '' : '<p class="by">Select some of a passage’s words to annotate them.</p>') : '<p class="empty">None yet.</p>');
   if (m && m.ocr && it.kind === 'part') h += '<p class="warn">The portal’s text of AA II is OCR: these quotations keep its slips.</p>';
   h += '<span class="k">Arrows</span>' + (arr.length ? arr.map(relBtn).join('') : '<p class="empty">None yet.</p>');
   if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="edit">Edit</button><button type="button" class="btn" data-act="linkfrom">+ Arrow from here</button><button type="button" class="btn" data-act="focus">Focus</button></div>' +
@@ -1182,6 +1380,109 @@ function downloadRequests() {
     (rs.length ? rs.map(r => '- [' + (r.done ? 'x' : ' ') + '] ' + r.text.replace(/\n+/g, ' ') + ' (' + (r.by ? '@' + r.by + ', ' : '') + fmtDate(r.date) + ')').join('\n') : '(none yet)') + '\n';
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); a.download = 'board-requests-' + today() + '.md';
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+/* ── Annotations, in the side: beneath each passage, and all of them in one list ── */
+const whoHtml = a => (a.by ? '@' + esc(a.by) + ' · ' : '') + esc(a.date ? fmtDate(a.date) : '') + (a.edited ? ' · edited' + (a.editedBy ? ' by @' + esc(a.editedBy) : '') : '');
+function toHtml(to) {
+  if (to.word) return '<button type="button" class="tw" data-annword="' + esc(to.word) + '" title="Light every card that has these words, on it or in its annotations">' + esc(to.word) + '</button>';
+  if (to.card) return item(to.card) ? '<button type="button" class="linkish" data-card="' + esc(to.card) + '">' + esc(nameOf(to.card)) + '</button>' : '<i>a card no longer on the board</i>';
+  const href = portalHref(to);
+  return href ? '<button type="button" class="linkish" data-read="' + esc(href) + '">' + esc(to.cite || 'the passage') + '</button> <a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : esc(to.cite || '');
+}
+const composing = () => form && form.kind === 'annotate';
+function annEntries(P, it, qi) {
+  const here = composing() && form.card === it.id && form.qi === qi && !form.id && !form.re;
+  const xs = P.spans.slice().sort((x, y) => x.s - y.s).map(x => ({ a: x.a, placed: x.placed })).concat(P.whole.map(a => ({ a, whole: true })), P.lost.map(a => ({ a, lost: true })));
+  if (!xs.length && !here) return '';
+  return '<div class="anns-l">' + xs.map(annEntryHtml).join('') + (here ? composerHtml() : '') + '</div>';
+}
+function annEntryHtml(x) {
+  const a = x.a, reps = annIndex().replies.get(a.id) || [], w = !ro(), mine = o => !o.by || o.by === me();
+  let h = '<div class="ann-e ak-' + esc(a.kind) + (x.placed ? ' placed' : '') + (x.lost ? ' lost' : '') + (a.kind === 'problem' && a.resolved ? ' done' : '') + '" data-annid="' + esc(a.id) + '">' +
+    '<div class="ah"><span class="kl">' + esc(annKind(a.kind).label) + '</span>' + (x.whole ? '<span class="on">the passage as a whole</span>' : '<span class="ex">“' + esc(short(a.on.exact, 110)) + '”</span>') + '</div>';
+  if (x.placed) h += '<div class="pg">Placed by the page: these words were not found with the same words around them, or stand here more than once, so it is put at the nearest match.</div>';
+  if (x.lost) h += '<div class="pg">These words are no longer in this passage, so it is placed nowhere in it.</div>';
+  if (composing() && form.id === a.id) h += composerHtml();
+  else {
+    if (a.to) h += '<div class="to">→ ' + toHtml(a.to) + '</div>';
+    if (a.text) h += '<div class="at">' + esc(a.text) + '</div>';
+    h += '<div class="am"><span>' + whoHtml(a) + '</span>' + (a.kind === 'problem' && a.resolved ? '<span>resolved' + (a.resolved.by ? ' by @' + esc(a.resolved.by) : '') + '</span>' : '') +
+      (w ? '<button type="button" data-annreply="' + esc(a.id) + '">reply</button>' + (a.kind === 'problem' ? '<button type="button" data-annres="' + esc(a.id) + '">' + (a.resolved ? 'reopen it' : 'mark it resolved') + '</button>' : '') +
+        (mine(a) ? '<button type="button" data-annedit="' + esc(a.id) + '">edit</button><button type="button" data-anndel="' + esc(a.id) + '">delete</button>' : '') : '') + '</div>';
+  }
+  reps.forEach(r => {
+    h += composing() && form.id === r.id ? '<div class="ann-r">' + composerHtml() + '</div>' :
+      '<div class="ann-r" data-annid="' + esc(r.id) + '"><div class="at">' + esc(r.text) + '</div><div class="am"><span>' + whoHtml(r) + '</span>' +
+      (w && mine(r) ? '<button type="button" data-annedit="' + esc(r.id) + '">edit</button><button type="button" data-anndel="' + esc(r.id) + '">delete</button>' : '') + '</div></div>';
+  });
+  if (composing() && form.re === a.id && !form.id) h += '<div class="ann-r">' + composerHtml() + '</div>';
+  return h + '</div>';
+}
+// The box an annotation is written in. Enter keeps it, ⇧Enter is a new line, Esc leaves it.
+function composerHtml() {
+  const f = form, reply = !!f.re, K = annKind(f.ann);
+  const kinds = reply ? '' : '<div class="akinds">' + ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + (k.key === f.ann ? ' on' : '') + '" data-annkind="' + k.key + '">' + esc(k.label) + '</button>').join('') + '</div>';
+  const on = '<p class="aon">' + (reply ? (f.id ? 'Your reply' : 'A reply to @' + esc((annById(f.re) || {}).by || '')) : f.on && f.on.exact ? 'On “<i>' + esc(short(f.on.exact, 120)) + '</i>”' : 'On the passage as a whole') + '</p>';
+  const to = !reply && f.ann === 'relevant' ? '<label class="f">Relevant to</label><input type="text" data-ann-to value="' + esc(f.to0 || '') + '" placeholder="a word, R 3990, or a portal address" spellcheck="false">' +
+    '<div class="by" style="margin-top:0.2rem">' + (f.to && f.to.card ? 'the card <b>' + esc(nameOf(f.to.card)) + '</b> <button type="button" class="linkish" data-annunpick>not that card</button>' : '<button type="button" class="linkish" data-act="annpick">or click a card on the board</button>') + '</div>' : '';
+  return '<div class="anncomp ak-' + (reply ? 'reply' : esc(f.ann)) + '" data-fkey="' + esc(f.key) + '">' + kinds + on + to +
+    '<textarea data-ann-text rows="2" placeholder="' + esc(reply ? 'Your reply' : K.hint) + '">' + esc(f.text0 || '') + '</textarea>' + (me() ? '' : signField()) +
+    '<div class="row" style="margin-top:0.35rem"><button type="button" class="btn solid" data-act="annsave">' + (f.id ? 'Save' : reply ? 'Reply' : 'Keep it') + '</button><button type="button" class="linkish" data-act="anncancel">Cancel</button><span class="by" style="margin:0">Enter keeps it · ⇧Enter a new line · Esc leaves it</span></div><p class="warn" data-err></p></div>';
+}
+function sideAnnAlone() {
+  return '<h2>An annotation</h2><p class="sub">' + esc((form.on && form.on.cite) || '') + '</p><p class="warn">Its card has gone from the board meanwhile. What you write is still kept on the passage.</p>' + composerHtml();
+}
+function sideAnnotations() {
+  const f = form.f || {}, people = [...new Set((B.annotations || []).map(a => a && a.by).filter(Boolean))].sort();
+  const opt = (v, t, cur) => '<option value="' + esc(v) + '"' + (v === (cur || '') ? ' selected' : '') + '>' + esc(t) + '</option>';
+  return '<h2>Annotations</h2><p class="sub">What the seminar has said about the board’s passages, newest first. To add one, click a card and select some of its passage’s words.</p>' +
+    '<div class="annf"><select data-annf="kind" aria-label="Kind">' + opt('', 'every kind', f.kind) + ANN_KINDS.map(k => opt(k.key, k.label, f.kind)).join('') + '</select>' +
+    '<select data-annf="by" aria-label="Who">' + opt('', 'by anyone', f.by) + people.map(p => opt(p, '@' + p, f.by)).join('') + '</select>' +
+    '<select data-annf="st" aria-label="Problems">' + opt('', 'open or resolved', f.st) + opt('open', 'open problems', f.st) + opt('resolved', 'resolved problems', f.st) + '</select></div>' +
+    '<div id="annlist">' + annListAll() + '</div>' +
+    '<div class="row"><button type="button" class="linkish" data-act="dlann">Download them as a list</button><button type="button" class="linkish" data-act="cancel">Close</button></div>';
+}
+function annListAll() {
+  const f = (form && form.f) || {}, X = annIndex(), W = annPlaces();
+  let as = (B.annotations || []).filter(a => a && a.kind !== 'reply' && a.on);
+  if (f.kind) as = as.filter(a => a.kind === f.kind);
+  if (f.by) as = as.filter(a => a.by === f.by || (X.replies.get(a.id) || []).some(r => r.by === f.by));
+  if (f.st) as = as.filter(a => a.kind === 'problem' && !!a.resolved === (f.st === 'resolved'));
+  as = as.slice().sort((x, y) => String(y.date).localeCompare(String(x.date)));
+  if (!as.length) return '<p class="empty">' + (f.kind || f.by || f.st ? 'None of these.' : 'None yet.') + '</p>';
+  return as.map(a => {
+    const n = (X.replies.get(a.id) || []).length;
+    return '<div class="ann-e ak-' + esc(a.kind) + (a.kind === 'problem' && a.resolved ? ' done' : '') + '" data-annid="' + esc(a.id) + '"><div class="ah"><span class="kl">' + esc(annKind(a.kind).label) + '</span>' +
+      (W.has(a.id) ? '<button type="button" class="linkish" data-annopen="' + esc(a.id) + '">' + esc(a.on.cite || 'the passage') + '</button>' : esc(a.on.cite || 'a passage') + ' <span class="pg">· not on the board now</span>') + '</div>' +
+      (a.on.exact ? '<div class="ex">“' + esc(short(a.on.exact, 140)) + '”</div>' : '<div class="on">the passage as a whole</div>') +
+      (a.to ? '<div class="to">→ ' + toHtml(a.to) + '</div>' : '') + (a.text ? '<div class="at">' + esc(a.text) + '</div>' : '') +
+      '<div class="am"><span>' + whoHtml(a) + '</span>' + (n ? '<span>' + n + (n === 1 ? ' reply' : ' replies') + '</span>' : '') + (a.kind === 'problem' && a.resolved ? '<span>resolved' + (a.resolved.by ? ' by @' + esc(a.resolved.by) : '') + '</span>' : '') + '</div></div>';
+  }).join('');
+}
+function downloadAnns() {
+  const X = annIndex(), all = (B.annotations || []).filter(a => a && a.kind !== 'reply' && a.on), groups = new Map();
+  all.forEach(a => { const k = a.on.cite || a.on.ref || a.on.hash || 'A passage'; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(a); });
+  const one = x => String(x || '').replace(/\s*\n+\s*/g, ' ');
+  const line = a => '- **' + annKind(a.kind).label.replace('…', '') + '** ' + (a.on.exact ? 'on “' + one(a.on.exact) + '”' : 'on the passage as a whole') +
+    (a.to ? ', relevant to ' + (a.to.word ? '*' + one(a.to.word) + '*' : a.to.card ? one(nameOf(a.to.card)) : one(a.to.cite)) : '') + (a.text ? ': ' + one(a.text) : '') +
+    ' (' + (a.by ? '@' + a.by + ', ' : '') + fmtDate(a.date) + (a.resolved ? '; resolved' + (a.resolved.by ? ' by @' + a.resolved.by : '') : '') + ')' +
+    (X.replies.get(a.id) || []).map(r => '\n  - ' + one(r.text) + ' (' + (r.by ? '@' + r.by + ', ' : '') + fmtDate(r.date) + ')').join('');
+  const md = '# Annotations on the board\n\nThe kinds of nothing, the shared board: annotations as of ' + fmtDate(new Date().toISOString()) + '.\n' +
+    (all.length ? [...groups].map(([k, as]) => '\n## ' + one(k) + '\n\n' + as.map(line).join('\n')).join('\n') : '\n(none yet)') + '\n';
+  const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); el.download = 'board-annotations-' + today() + '.md';
+  document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(el.href), 2000);
+}
+// Redraw the side without losing what is being typed into an annotation, or where the caret was.
+function keepComposer(fn) {
+  const D = $('details'), c = D.querySelector('.anncomp'), same = !!(c && form && c.dataset.fkey === form.key);
+  const F = ['[data-ann-text]', '[data-ann-to]', '[data-me]'], act = document.activeElement;
+  const vals = same ? F.map(q => { const el = c.querySelector(q); return el ? el.value : null; }) : [];
+  const foc = same && act && c.contains(act) ? F.find(q => act.matches(q)) : null, ss = foc ? [act.selectionStart, act.selectionEnd] : null, top = D.scrollTop;
+  fn();
+  const n = D.querySelector('.anncomp'); if (!n || !same) return;
+  F.forEach((q, i) => { const el = n.querySelector(q); if (el && vals[i] != null) el.value = vals[i]; });
+  if (foc) { const el = n.querySelector(foc); if (el) { el.focus({ preventScroll: true }); try { el.setSelectionRange(ss[0], ss[1]); } catch (x) { /* fine */ } } }
+  D.scrollTop = top;
 }
 function sidePhotos() {
   return '<h2>Photographs</h2><p class="sub">The board as it stood, kept to come back to</p>' +
@@ -1245,7 +1546,8 @@ function sideModelForm() {
 function renderSide() {
   const D = $('details');
   if (form) document.body.classList.remove('sideclosed');
-  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'requests' ? sideRequests() : sideCardForm(); return; }
+  if (composing()) { keepComposer(() => { const it = item(form.card); D.innerHTML = it ? sideCard(it) : sideAnnAlone(); }); return; }
+  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'requests' ? sideRequests() : form.kind === 'annotations' ? sideAnnotations() : sideCardForm(); return; }
   if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
   else if (sel.kind === 'card' && item(sel.ids[0])) D.innerHTML = sideCard(item(sel.ids[0]));
   else if (sel.kind === 'arrow' && arrow(sel.ids[0])) D.innerHTML = sideArrow(arrow(sel.ids[0]));
@@ -1414,10 +1716,155 @@ async function restore() {
   B = live.board; viewId = live.viewId; live = null;
   render();
   if (!(await photograph('Before bringing back “' + (p ? p.name : '') + '”', true)) && !confirm('The board as it is now could not be photographed first. Bring the photograph back anyway?')) return;
-  change(() => { const ph = B.photos, rq = B.requests; B = clone(keep); if (SHARED_ON) B.photos = ph; B.requests = rq || []; });
+  change(() => { const ph = B.photos, rq = B.requests, an = B.annotations; B = clone(keep); if (SHARED_ON) B.photos = ph; B.requests = rq || []; B.annotations = an || []; });
   toast('Brought back. The board as it was is in Photographs.');
   sel = { kind: null, ids: [] }; render();
 }
+/* ── Annotating: words selected in the side, then a kind, then a few words of one's own ── */
+const selInSide = () => { try { const s = getSelection(); return !!(s && s.rangeCount && !s.isCollapsed && $('details').contains(s.getRangeAt(0).commonAncestorContainer)); } catch (e) { return false; } };
+// The words selected in one passage in the side, as characters of its text.
+function readPick() {
+  const s = getSelection(); if (!s || !s.rangeCount || s.isCollapsed) return null;
+  const r = s.getRangeAt(0), els = [...$('details').querySelectorAll('[data-qt]')].filter(el => r.intersectsNode(el));
+  if (els.length !== 1) return null;
+  const el = els[0], full = document.createRange(); full.selectNodeContents(el);
+  const c = r.cloneRange();
+  if (c.compareBoundaryPoints(Range.START_TO_START, full) < 0) c.setStart(full.startContainer, full.startOffset);
+  if (c.compareBoundaryPoints(Range.END_TO_END, full) > 0) c.setEnd(full.endContainer, full.endOffset);
+  const pre = document.createRange(); pre.selectNodeContents(el); pre.setEnd(c.startContainer, c.startOffset);
+  const it = item(el.dataset.qcard), qi = +el.dataset.qt, q = it && (it.quotes || [])[qi]; if (!q || !q.q) return null;
+  const t = q.q; let start = pre.toString().length, end = start + c.toString().length;
+  while (start < end && /\s/.test(t[start])) start++;
+  while (end > start && /\s/.test(t[end - 1])) end--;
+  if (end <= start) return null;
+  return { card: it.id, qi, start, end, rect: c.getBoundingClientRect() };
+}
+function hideBar() { annPick = null; $('annbar').classList.remove('show'); }
+function showBar() {
+  const b = $('annbar');
+  annPick = ro() ? null : readPick();
+  if (!annPick) { b.classList.remove('show'); if (sideStale && !selInSide()) { sideStale = false; renderSide(); } return; }
+  b.classList.add('show');
+  const r = annPick.rect, bw = b.offsetWidth, bh = b.offsetHeight;
+  // above the words with a mouse; below them with a finger, clear of the iPad's own menu above them
+  let top = selTouch ? r.bottom + 8 : r.top - bh - 8;
+  if (top < 8) top = r.bottom + 8;
+  if (top + bh > innerHeight - 8) top = Math.max(8, r.top - bh - 8);
+  b.style.left = Math.max(8, Math.min(innerWidth - bw - 8, r.left + r.width / 2 - bw / 2)) + 'px'; b.style.top = top + 'px';
+}
+function focusComposer() {
+  setTimeout(() => {
+    const c = $('details').querySelector('.anncomp'); if (!c) return;
+    const el = (form && form.ann === 'relevant' && !form.re && !(form.to && form.to.card) && c.querySelector('[data-ann-to]')) || c.querySelector('[data-ann-text]');
+    if (!el) return;
+    el.focus({ preventScroll: true }); try { el.setSelectionRange(el.value.length, el.value.length); } catch (x) { /* fine */ }
+    intoSide(c);
+  }, 20);
+}
+// A new annotation on a card's passage: on the words chosen (range), or on the whole of it.
+function startAnn(kind, card, qi, range) {
+  if (ro()) { toast(roWhy()); return; }
+  const it = item(card), q = it && (it.quotes || [])[qi]; if (!q || !q.q) return;
+  const on = { card, qi, cite: q.cite || '' };
+  if (q.ref) on.ref = q.ref; else if (q.hash) on.hash = q.hash;
+  if (range) { const t = q.q; Object.assign(on, { exact: t.slice(range.start, range.end), prefix: t.slice(Math.max(0, range.start - ANN_CTX), range.start), suffix: t.slice(range.end, range.end + ANN_CTX), start: range.start }); }
+  form = { kind: 'annotate', key: uid('f'), card, qi, ann: kind, on };
+  hideBar(); try { getSelection().removeAllRanges(); } catch (x) { /* fine */ }
+  sel = { kind: 'card', ids: [card] }; showSide('details'); render(); focusComposer();
+}
+const sideCardId = () => composing() ? form.card : sel.kind === 'card' ? sel.ids[0] : null;
+function replyTo(id) { if (ro() || !annById(id)) return; form = { kind: 'annotate', key: uid('f'), card: sideCardId(), re: id, ann: 'reply' }; renderSide(); focusComposer(); }
+function editAnn(id) {
+  const a = annById(id); if (ro() || !a) return;
+  const to0 = !a.to || a.to.card ? '' : a.to.word ? a.to.word : a.to.hash ? a.to.hash : /^refl-.*:r(\d+)$/.test(a.to.ref || '') ? 'R ' + a.to.ref.replace(/^.*:r/, '') : a.to.cite || '';
+  form = { kind: 'annotate', key: uid('f'), card: sideCardId(), id, re: a.kind === 'reply' ? a.re : undefined, ann: a.kind, on: a.on, to: a.to && a.to.card ? clone(a.to) : null, text0: a.text || '', to0 };
+  renderSide(); focusComposer();
+}
+// What a passage is relevant to, as typed: a Reflexion by number, a portal address, or else a word.
+function hashCite(h) {
+  const p = new URLSearchParams(h.slice(1)), g = k => p.get(k) || '';
+  if (g('refl')) return 'Refl. ' + g('refl');
+  if (g('aa')) return 'AA ' + g('aa');
+  if (g('read')) return g('read') + (g('at') ? ' ' + g('at') : '');
+  if (g('q')) return 'the search “' + g('q') + '”';
+  return h;
+}
+async function readTo(v) {
+  const n = reflNumber(v);
+  if (n) {
+    toast('Fetching Refl. ' + n + '…');
+    let q = null; try { q = await reflexion(n); } catch (x) { q = null; }
+    if (!q) throw new Error('The portal has no Refl. ' + n + '.');
+    return { ref: q.ref, cite: q.cite.replace(/ · phase .*$/, '') };
+  }
+  const h = hashOf(v);
+  return h ? { hash: h, cite: hashCite(h) } : { word: v };
+}
+async function saveAnn() {
+  const D = $('details'), f = form; if (!composing()) return;
+  const err = t => { const e = D.querySelector('.anncomp [data-err]'); if (e) e.textContent = t; };
+  const text = ((D.querySelector('.anncomp [data-ann-text]') || {}).value || '').trim();
+  const by = readSigned(D); if (!by) return err('Sign with your GitHub username.');
+  let to = null;
+  if (!f.re && f.ann === 'relevant') {
+    const v = ((D.querySelector('.anncomp [data-ann-to]') || {}).value || '').trim();
+    if (v) { try { to = await readTo(v); } catch (x) { return err(x.message); } } else to = f.to || null;
+    if (!to) return err('Say what it is relevant to: a word, R 3990, a portal address, or a card on the board.');
+  }
+  if (!text && (f.re || f.ann !== 'relevant')) return err(f.re ? 'Write the reply.' : 'Say it in your words.');
+  if (form !== f) return;   // closed while a Reflexion was fetched
+  const at = new Date().toISOString(); let id = f.id;
+  change(() => {
+    B.annotations = B.annotations || [];
+    if (f.id) {
+      const a = B.annotations.find(x => x.id === f.id); if (!a) return;
+      a.text = text; a.edited = at; if (a.by && a.by !== by) a.editedBy = by;
+      if (a.kind !== 'reply') { a.kind = f.ann; if (to) a.to = to; else delete a.to; }
+    } else {
+      id = uid('n');
+      B.annotations.push(f.re ? { id, kind: 'reply', re: f.re, text, by, date: at } : Object.assign({ id, kind: f.ann, on: clone(f.on) }, to ? { to } : {}, { text, by, date: at }));
+    }
+  });
+  form = null; if (item(f.card)) sel = { kind: 'card', ids: [f.card] };
+  refreshAnns(id);
+}
+function refreshAnns(id) { renderTools(); renderLayers(); renderBoard(); renderSide(); applyCam(); if (id) flashAnn(id); }
+function resolveAnn(id) {
+  if (ro()) return;
+  change(() => { const a = (B.annotations || []).find(x => x.id === id); if (!a) return; if (a.resolved) delete a.resolved; else a.resolved = Object.assign({ date: new Date().toISOString() }, me() ? { by: me() } : {}); });
+  refreshAnns(id);
+}
+function delAnn(id) {
+  const a = annById(id); if (ro() || !a) return;
+  const n = (annIndex().replies.get(id) || []).length;
+  if (!confirm(n ? 'Delete this annotation, and the ' + n + (n === 1 ? ' reply' : ' replies') + ' to it?' : a.kind === 'reply' ? 'Delete this reply?' : 'Delete this annotation?')) return;
+  change(() => { B.annotations = (B.annotations || []).filter(x => x.id !== id && x.re !== id); });
+  if (composing() && (form.id === id || form.re === id)) form = null;
+  refreshAnns();
+}
+// Scroll the side, and only the side, so that el is in sight.
+function intoSide(el) {
+  const D = $('details'), r = el.getBoundingClientRect(), d = D.getBoundingClientRect();
+  if (r.top < d.top) D.scrollTop += r.top - d.top - 8; else if (r.bottom > d.bottom) D.scrollTop += Math.min(r.bottom - d.bottom + 8, r.top - d.top - 8);
+}
+function flashAnn(id) {
+  const el = [...$('details').querySelectorAll('[data-annid]')].find(x => x.dataset.annid === id); if (!el) return;
+  intoSide(el); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1500);
+}
+// Bring a card into sight on the board, if it is out of it.
+function showCard(id) {
+  const r = rect(id); if (!r || !shown(item(id))) return;
+  const s = $('stage').getBoundingClientRect(), x = r.x * cam.k + cam.x, y = r.y * cam.k + cam.y;
+  if (x > 0 && y > 0 && x + r.w * cam.k < s.width && y + r.h * cam.k < s.height) return;
+  cam.x = s.width / 2 - (r.x + r.w / 2) * cam.k; cam.y = s.height / 2 - (r.y + r.h / 2) * cam.k; applyCam(); keepCam();
+}
+function openAnn(id) {
+  const a = annById(id); if (!a) return;
+  const root = a.kind === 'reply' ? annById(a.re) || a : a, at = annPlaces().get(root.id) || [], w = at.find(x => shown(item(x.card))) || at[0];
+  if (!w) { toast('Its passage is not on the board now.'); return; }
+  select('card', [w.card]); showCard(w.card); flashAnn(id);
+}
+function findWord(w) { $('search').value = w; query = w; renderTools(); lit(); renderInk(neighbourhood()); toast('Lit: every card with “' + w + '”, on it or in its annotations.'); }
 function newView() {
   if (ro()) return;
   const name = prompt('A name for the new view. It starts as a copy of this one, and changes to it leave this one as it is.', 'A view of my own');
@@ -1581,8 +2028,8 @@ $('stage').addEventListener('pointerdown', e => {
   const t = e.target;
   if (t.isContentEditable || t.closest('.pill-edit')) return;   // a caret or a selection in what is being edited
   if (editing) commitEditing();
-  const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame');
-  const bare = !knob && !card && !tab && !grip && !ar;
+  const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame'), th = t.closest('.annt');
+  const bare = !knob && !card && !tab && !grip && !ar && !th;
   const [wx, wy] = toWorld(e.clientX, e.clientY);
   if (spaceDown) drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
   else if (tool === 'erase' && !ro()) { drag = { what: 'erase', changed: false }; eraseAt(wx, wy, drag); }
@@ -1593,6 +2040,11 @@ $('stage').addEventListener('pointerdown', e => {
   else if (knob && !ro()) { drag = { what: 'link', from: card.dataset.id, sx: e.clientX, sy: e.clientY }; $('stage').classList.add('linking'); }
   else if (card) {
     const id = card.dataset.id;
+    if (mode && mode.annTo) {   // the card an annotation's words are relevant to
+      mode = null; if (composing()) form.to = { card: id };
+      render(); const ti = $('details').querySelector('.anncomp [data-ann-to]'); if (ti) ti.value = '';
+      focusComposer(); return;
+    }
     if (mode) { const from = mode.linkFrom; mode = null; if (id !== from) makeArrow(from, id); else render(); return; }
     if (e.shiftKey || tool === 'select') { const ids = sel.kind === 'card' ? sel.ids.slice() : []; const i = ids.indexOf(id); if (i >= 0) ids.splice(i, 1); else ids.push(id); select(ids.length ? 'card' : null, ids); return; }
     const wasSel = sel.kind === 'card' && sel.ids.length === 1 && sel.ids[0] === id;
@@ -1604,6 +2056,7 @@ $('stage').addEventListener('pointerdown', e => {
   }
   else if (grip && !ro()) { select('model', [grip.dataset.grip]); drag = spreadDrag(grip.dataset.grip, e); }
   else if (tab) { select('model', [tab.dataset.model]); drag = modelDrag(tab.dataset.model, e); }
+  else if (th) { if (mode) return; openAnn(th.dataset.annid); return; }
   else if (ar) { if (mode) return; select('arrow', [ar.dataset.arrow]); return; }
   else if (e.shiftKey) drag = { what: 'marq', wx, wy };
   else if (fr && !mode) { select('model', [fr.dataset.model]); drag = modelDrag(fr.dataset.model, e); }
@@ -1992,6 +2445,22 @@ $('snap').addEventListener('click', () => {
 $('reqs').addEventListener('click', () => { form = { kind: 'requests' }; document.body.classList.remove('sideclosed'); showSide('details'); renderSide(); const t = $('details').querySelector('[data-req]'); if (t) t.focus(); });
 $('details').addEventListener('keydown', e => { if (e.target.matches('[data-req]') && e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); addRequest(); } });
 $('photos').addEventListener('click', () => { form = { kind: 'photos' }; showSide('details'); renderSide(); });
+$('annsb').addEventListener('click', () => { form = { kind: 'annotations', f: {} }; document.body.classList.remove('sideclosed'); showSide('details'); renderSide(); });
+// The annotation bar: it appears by words selected in a passage in the side, mouse or finger.
+let selT = null, selecting = false, selTouch = false, barDown = 0;
+document.addEventListener('selectionchange', () => { clearTimeout(selT); selT = setTimeout(() => { if (!selecting && Date.now() - barDown > 600) showBar(); }, 150); });
+$('details').addEventListener('pointerdown', e => { selTouch = e.pointerType !== 'mouse'; if (!selTouch) selecting = true; });
+document.addEventListener('pointerup', () => { if (selecting) { selecting = false; setTimeout(showBar, 0); } });
+$('details').addEventListener('keyup', e => { if (e.shiftKey && !e.target.closest('input, textarea')) showBar(); });
+$('details').addEventListener('scroll', () => { if ($('annbar').classList.contains('show')) showBar(); });
+$('annbar').addEventListener('pointerdown', e => { e.preventDefault(); barDown = Date.now(); });
+$('annbar').addEventListener('mousedown', e => e.preventDefault());
+$('annbar').addEventListener('click', e => { const b = e.target.closest('[data-annk]'); if (b && annPick) startAnn(b.dataset.annk, annPick.card, annPick.qi, annPick); });
+$('details').addEventListener('keydown', e => {
+  if (!e.target.closest('.anncomp')) return;
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); saveAnn(); }
+  else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); form = null; renderSide(); }
+});
 function setTool(t) {
   tool = t;
   document.querySelectorAll('#palette [data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
@@ -2063,8 +2532,22 @@ $('details').addEventListener('click', e => {
   if (rqd) { const rid = rqd.dataset.reqdone; change(() => { const r = (B.requests || []).find(x => x.id === rid); if (!r) return; r.done = !r.done; if (r.done && me()) r.doneBy = me(); if (!r.done) delete r.doneBy; }); $('reqlist').innerHTML = reqListHtml(); renderTools(); return; }
   const rqx = e.target.closest('[data-reqdel]');
   if (rqx) { const rid = rqx.dataset.reqdel; if (confirm('Delete this request?')) { change(() => { B.requests = (B.requests || []).filter(x => x.id !== rid); }); $('reqlist').innerHTML = reqListHtml(); renderTools(); } return; }
+  const mk = e.target.closest('mark[data-ann]'); if (mk && getSelection().isCollapsed) { flashAnn(mk.dataset.ann.split(' ').pop()); return; }
+  const aw = e.target.closest('[data-annwhole]'); if (aw) { startAnn('comment', aw.dataset.qcard, +aw.dataset.annwhole, null); return; }
+  const ak = e.target.closest('[data-annkind]'); if (ak && composing()) { form.ann = ak.dataset.annkind; renderSide(); focusComposer(); return; }
+  const arp = e.target.closest('[data-annreply]'); if (arp) { replyTo(arp.dataset.annreply); return; }
+  const aed = e.target.closest('[data-annedit]'); if (aed) { editAnn(aed.dataset.annedit); return; }
+  const adl = e.target.closest('[data-anndel]'); if (adl) { delAnn(adl.dataset.anndel); return; }
+  const ars = e.target.closest('[data-annres]'); if (ars) { resolveAnn(ars.dataset.annres); return; }
+  const awd = e.target.closest('[data-annword]'); if (awd) { findWord(awd.dataset.annword); return; }
+  const aop = e.target.closest('[data-annopen]'); if (aop) { openAnn(aop.dataset.annopen); return; }
+  const aun = e.target.closest('[data-annunpick]'); if (aun && composing()) { form.to = null; renderSide(); focusComposer(); return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, id = sel.ids[0];
+  if (act === 'annsave') { saveAnn(); return; }
+  if (act === 'anncancel') { form = null; renderSide(); return; }
+  if (act === 'annpick') { mode = { annTo: true }; banner(); return; }
+  if (act === 'dlann') { downloadAnns(); return; }
   if (act === 'cancel') { form = null; renderSide(); return; }
   if (act === 'addreq') { addRequest(); return; }
   if (act === 'dlreq') { downloadRequests(); return; }
@@ -2088,13 +2571,14 @@ $('details').addEventListener('click', e => {
     if (!confirm(SHARED_ON ? 'Set the board back to the study’s own, for everyone? This board is photographed first.' : 'Set the board back to the study’s own? This board is photographed first.')) return;
     photograph('Before starting again', true).then(ok => {
       if (!ok && !confirm('The board could not be photographed first. Start again anyway?')) return;
-      change(() => { const ph = B.photos, rq = B.requests; B = clone(BASE); B.removed = []; if (SHARED_ON) { B = cleanBoard(B); B.photos = ph || []; } B.requests = rq || []; });
+      change(() => { const ph = B.photos, rq = B.requests, an = B.annotations; B = clone(BASE); B.removed = []; if (SHARED_ON) { B = cleanBoard(B); B.photos = ph || []; } B.requests = rq || []; B.annotations = an || []; });
       viewId = B.views[0].id; form = null; sel = { kind: null, ids: [] }; render(); fit(); toast('The study’s board. The one before is in Photographs.');
     });
     return;
   }
 });
 $('details').addEventListener('change', e => {
+  if (e.target.matches('[data-annf]') && form && form.kind === 'annotations') { form.f = form.f || {}; form.f[e.target.dataset.annf] = e.target.value; $('annlist').innerHTML = annListAll(); return; }
   if (e.target.matches('[data-type]')) { const o = $('details').querySelector('[data-other]'); o.style.display = e.target.value === '__other' ? '' : 'none'; if (e.target.value === '__other') o.focus(); }
 });
 document.addEventListener('keydown', e => {
@@ -2103,6 +2587,7 @@ document.addEventListener('keydown', e => {
   if (typing) return;
   if (e.key === ' ') { e.preventDefault(); if (!spaceDown) { spaceDown = true; $('stage').classList.add('spacepan'); } return; }
   if (!e.metaKey && !e.ctrlKey && !e.altKey) { const t = { v: 'move', s: 'select', p: 'pen', e: 'erase', b: 'box' }[e.key.toLowerCase()]; if (t) { setTool(t); return; } }
+  if (e.key === 'Escape' && $('annbar').classList.contains('show')) { hideBar(); try { getSelection().removeAllRanges(); } catch (x) { /* fine */ } return; }
   if (e.key === 'Escape') { if (mode) mode = null; else if (offer) offer = null; else if (tool !== 'move') setTool('move'); else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && sel.kind && !ro()) {
     e.preventDefault();
@@ -2128,7 +2613,7 @@ $('file').addEventListener('change', () => {
     if (!d || d.kind !== 'kantlab-board' || !d.board || !Array.isArray(d.board.items)) throw new Error('shape');
     const before = { m: B.models.length, i: B.items.length, a: B.arrows.length, v: B.views.length };
     // Someone else's board: what is new comes in beside yours; nothing of yours is overwritten.
-    change(() => { merge(B, { models: d.board.models || [], items: d.board.items, arrows: d.board.arrows || [], views: d.board.views || [] }); });
+    change(() => { merge(B, { models: d.board.models || [], items: d.board.items, arrows: d.board.arrows || [], views: d.board.views || [], annotations: d.board.annotations || [] }); });
     if (!SHARED_ON) { const have = new Set(photos.map(p => p.id)); (d.photos || []).forEach(p => { if (p.board && !have.has(p.id)) photos.push(p); }); save(); }
     render();
     toast('Added ' + (B.items.length - before.i) + ' cards, ' + (B.arrows.length - before.a) + ' arrows, ' + (B.models.length - before.m) + ' models and ' + (B.views.length - before.v) + ' views. Nothing already on the board was changed.');
@@ -2148,6 +2633,9 @@ if (SHARED_ON) {
   load();
   if (prefs.viewId && B.views.some(v => v.id === prefs.viewId)) viewId = prefs.viewId;
 }
+// Each kind of annotation's colour, as --kc, and the bar that offers them.
+document.head.insertAdjacentHTML('beforeend', '<style>' + ANN_KINDS.map(k => '.ak-' + k.key + ' { --kc: ' + k.color + '; }').join(' ') + ' .ak-reply { --kc: #8b5e3c; }</style>');
+$('annbar').innerHTML = ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + '" data-annk="' + k.key + '" title="' + esc(k.key === 'relevant' ? 'What these words bear on: a word, a card on the board, R 3990, or a portal address' : k.hint) + '">' + esc(k.label) + '</button>').join('');
 renderPens();
 render();
 if (SHARED_ON && getToken()) connect(getToken());
