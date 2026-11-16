@@ -381,8 +381,8 @@ function merge3(base, mine, theirs) {
   const out = Object.assign({}, theirs);
   ['models', 'items', 'arrows', 'photos'].forEach(k => { out[k] = list(base[k] || [], mine[k] || [], theirs[k] || []); });
   out.views = list(base.views, mine.views, theirs.views, view3);
-  const have = new Set(out.items.map(i => i.id));
-  out.arrows = out.arrows.filter(a => have.has(a.from) && have.has(a.to));   // an arrow whose card has gone goes too
+  const have = new Set(out.items.map(i => i.id).concat(out.models.map(m => m.id)));   // an arrow can go to a group, as to a card
+  out.arrows = out.arrows.filter(a => have.has(a.from) && have.has(a.to));   // an arrow whose card or group has gone goes too
   if (!out.views.length) out.views = (theirs.views || []).length ? theirs.views : mine.views || [];
   return out;
 }
