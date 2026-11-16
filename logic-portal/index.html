@@ -1261,8 +1261,8 @@ const ADAPT = {
   },
   /* Kant's published works (published/) bring their pages along: an AA volume its AA pages,
      the Critique the pages of its own edition (T.cite, 'A' or 'B'), with the other edition's pages
-     beside them where the matching found the same words, and B also AA III's. A work cited by its
-     own pages that numbers its §§ (the Critique of Judgment) puts the § before the page. */
+     beside them where the matching found the same words, and B also AA III's. A work that numbers
+     its §§ (the Critiques of Practical Reason and of Judgment) puts the § before the page. */
   passages(T, D) {
     const M = D.meta || {}, vol = M.volume || T.vol, ed = T.cite || null;
     const oT = M.otherFrom && PORTAL_TEXTS.find(x => x.key === M.otherFrom), oed = oT ? oT.cite : '';
@@ -1284,6 +1284,7 @@ const ADAPT = {
         pbm = (x.pb || []).map(([o, n]) => [o, 'p. ' + n]);
       } else if (x.aa != null) {
         cite = 'AA ' + vol + ':' + span(x.aa, x.aaEnd);
+        if (x.par != null) { cite = '§ ' + x.par + ', ' + cite; T.hasPara = true; }
         pbm = (x.pb || []).map(([o, n]) => [o, String(n)]);
       }
       addPassage(T, { id: x.id, cite, aa: x.aa != null ? x.aa : null, aaEnd, vol: ed ? (M.volume || null) : vol, text: x.text,
@@ -4395,7 +4396,7 @@ function jumpHint(T) {
   if (T.shape === 'refl') return 'Go to Refl. no. or §';
   if (T.cite) return T.hasPara ? 'Go to § or page (§ 59, A 254, A xi)' : 'Go to A or B page (A 51, B xvi)';
   if (T.layer === 'tradition') return T.key === 'wolff-dl' ? 'Go to page, or Cap. 5 § 2' : 'Go to § or page';
-  return T.key === 'jaesche' ? 'Go to § or AA page' : 'Go to AA page';
+  return T.key === 'jaesche' || T.hasPara ? 'Go to § or AA page' : 'Go to AA page';
 }
 /* The jump box could not go where it was asked: say why beside it, until the next try. */
 function jumpMiss(box, msg) {

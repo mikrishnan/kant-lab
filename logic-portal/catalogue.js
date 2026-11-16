@@ -54,12 +54,14 @@
                                    the two (meta.otherFrom names that text); not in either print
                     aa, aapb       beside B's pages, AA III's own
                     fix            words an OCR text's extractor repaired: [[offset, the OCR's reading]]
-                    par            the § a passage stands in, where the work numbers its §§ and is
-                                   cited by its own pages (the KU): cited "§ 59, A 251"
+                    par            the § a passage stands in, where the work numbers its §§ (the
+                                   KpV, the KU): cited "§ 59, A 251" or "§ 59, AA 5:351"
                     scan           the page image's number in the viewer meta.scan names
                     sic, supplied  in the KU, the misprints the DTA corrected ([[offset, the print's
                                    reading]]) and the letters it supplied ([[offset, length]])
-                    gap            what the transcription left out where the passage stands ('table')
+                    gap            what the transcription left out where the passage stands ('table');
+                                   ours, where the Kant Lab transcribed it from the page image
+                    orig, origpb   in AA V, the pages of the edition AA follows, from its margin
                   meta.query lists pages read uncertainly, which are shown with a query. A page
                   label in brackets ([xi], [1]) is a number the print does not show.
    ───────────────────────────────────────────────────────────────────────────── */
@@ -168,9 +170,9 @@ const PORTAL_TEXTS = [
     credit: 'Alex' },
 
   // Kant's published works. Where each text comes from, its licence and how clean it is:
-  // published/README.md. AA I, the Critique's A edition and the Critique of Judgment's are clean
-  // texts; AA II and the B edition are OCR of the old Academy edition, repaired by rule: check
-  // quotations against the page image.
+  // published/README.md. AA I, the Critique's A edition, the Critique of Judgment's and AA V's two
+  // Critiques are clean texts; AA II, the B edition and the Groundwork are OCR of the old Academy
+  // edition, repaired by rule: check quotations against the page image.
   { key: 'aa01', title: 'Kant, Schriften 1747–1756 (AA I)', short: 'AA I', layer: 'published',
     date: '1747–1756', year: 1747, vol: 1, shape: 'passages',
     file: 'published/kant-aa01.js', global: 'KANT_AA01',
@@ -203,8 +205,31 @@ const PORTAL_TEXTS = [
     date: '1790', year: 1790, cite: 'A', shape: 'passages',
     file: 'published/kant-ku-a.js', global: 'KANT_KU_A',
     source: 'The 1790 print (Berlin und Libau: Lagarde und Friederich) as the Deutsches Textarchiv transcribed it (double-keyed), cited by § and A page, with a link to the DTA’s image of each page; not yet by AA V’s pages. CC BY-SA 4.0',
-    accuracy: { label: 'Clean text: typed twice and compared (Deutsches Textarchiv)', how: 'Keyed twice by the Deutsches Textarchiv and the two compared. Proofread here word for word against the print’s page images on four pages (A v, xx, 180 and 400; 762 words): one word differs, a turned letter in the print (uud) that the DTA gives as und. The DTA corrected nine misprints (the print’s reading is kept in the data) and left the table on A lvi untranscribed, which the text marks.' },
+    accuracy: { label: 'Clean text: typed twice and compared (Deutsches Textarchiv)', how: 'Keyed twice by the Deutsches Textarchiv and the two compared. Proofread here word for word against the print’s page images on four pages (A v, xx, 180 and 400; 762 words): one word differs, a turned letter in the print (uud) that the DTA gives as und. The DTA corrected nine misprints (the print’s reading is kept in the data) and left the table on A lvi untranscribed; it is transcribed here from the page image, and says so in its text. AA V’s text of the KU, with AA’s pages, is the next entry but one.' },
     credit: 'mikrishnan (import of the DTA’s TEI)' },
+
+  { key: 'gms', title: 'Grundlegung zur Metaphysik der Sitten (AA IV, OCR)', short: 'GMS (OCR)', layer: 'published',
+    date: '1785', year: 1785, vol: 4, shape: 'passages',
+    file: 'published/kant-gms-aa04-ocr.js', global: 'KANT_GMS',
+    source: 'AA 4:385–463 (1903/1911), read by OCR from the Internet Archive’s scan with UB Mannheim’s Fraktur model, spelling repaired by rule: about 99% of words agree with the Bonner Kant-Korpus. No proofread transcription may be put in a public repository. Check quotations against the page image',
+    accuracy: { ocr: true, words: 99, how: 'Measured on every page against the Bonner Kant-Korpus’s text of AA IV, with spelling differences set aside: 98.8% of words agree over 77 pages, none under 96%. Read by Tesseract with the frak2021 model, which reads these pages far better than the Internet Archive’s own OCR (97.0% by the same measure). The commonest faults left are AA’s letter-spaced words, split or run together. Each repaired word keeps the OCR’s reading in the data.' },
+    credit: 'mikrishnan (OCR import)' },
+
+  // AA V, the old Academy edition's text of the second and third Critiques, as Project Gutenberg's
+  // volunteers transcribed and proofread it: cited by AA page, with every page marked.
+  { key: 'kpv-aa', title: 'Kritik der praktischen Vernunft (AA V)', short: 'KpV (AA V)', layer: 'published',
+    date: '1788', year: 1788, vol: 5, shape: 'passages',
+    file: 'published/kant-kpv-aa05.js', global: 'KANT_KPV_AA',
+    source: 'AA 5:1–163 (1908/1913), whose text follows the first edition of 1788, as Project Gutenberg’s volunteers (Distributed Proofreaders) transcribed and proofread it; cited by § and AA page, each page linked to the Internet Archive’s scan of AA V. Public domain',
+    accuracy: { label: 'Clean text: a proofread transcription of AA V (Project Gutenberg)', how: 'Transcribed and proofread by Distributed Proofreaders for Project Gutenberg (EBook #49543), with every AA page break marked. The transcribers corrected four misprints and listed them; the data keeps AA’s reading. The original edition’s pages, which AA V prints in its margin, are kept in the data.' },
+    credit: 'mikrishnan (import of Project Gutenberg’s transcription)' },
+
+  { key: 'ku-aa', title: 'Kritik der Urteilskraft (AA V)', short: 'KU (AA V)', layer: 'published',
+    date: '1790 (AA V follows the 2nd ed., 1793)', year: 1790, vol: 5, shape: 'passages',
+    file: 'published/kant-ku-aa05.js', global: 'KANT_KU_AA',
+    source: 'AA 5:165–485 (1908/1913), whose text follows the second edition of 1793, as Project Gutenberg’s volunteers (Distributed Proofreaders) transcribed and proofread it; cited by § and AA page, each page linked to the Internet Archive’s scan of AA V. Public domain',
+    accuracy: { label: 'Clean text: a proofread transcription of AA V (Project Gutenberg)', how: 'Transcribed and proofread by Distributed Proofreaders for Project Gutenberg (EBook #55925), with every AA page break marked. The transcribers corrected thirteen misprints and listed them; the data keeps AA’s reading. The second edition’s pages, which AA V prints in its margin, are kept in the data.' },
+    credit: 'mikrishnan (import of Project Gutenberg’s transcription)' },
   // Christian Wolff's German Logic, the school logic Meier and Baumgarten wrote from: read off
   // Munich's scan of the 1754 print by OCR, four readings of each page merged by vote, and not
   // corrected. Cited by the print's own chapter, § and page. See wolff/README.md before quoting.

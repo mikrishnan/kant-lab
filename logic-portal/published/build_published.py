@@ -705,7 +705,15 @@ KU_ITEM = 'kant_urtheilskraft_1790'
 # of the contents and keeps the § it stands in.
 KU_REMARK = re.compile(r'^Anmerkung\.?(?:\s+[IVX]+\.)?$')
 FOOTMARK = re.compile(r'\s*[*†]+\)')
-KU_TABLE_NOTE = '[A table stands here in the print, which the Deutsches Textarchiv did not transcribe: see the page image.]'
+# The table on A lvi, printed sideways, which the DTA leaves empty (<table><row><cell/></row></table>).
+# Transcribed for the Kant Lab from the DTA's image of the page (image 62, at 1600 pixels), as the
+# print has it, spelling and stops included; its words agree with AA V's table (AA 5:198), which
+# Project Gutenberg's transcribers read independently. The first line says so in the text itself.
+KU_TABLE_NOTE = '[Table transcribed here from the page image; the Deutsches Textarchiv does not transcribe it.]'
+KU_TABLE = [('Gesammte Vermögen des Gemüths', 'Erkenntnisvermögen', 'Principien a priori', 'Anwendung auf'),
+            ('Erkenntnisvermögen', 'Verstand', 'Gesetzmäßigkeit', 'Natur'),
+            ('Gefühl der Lust und Unlust', 'Urtheilskraft', 'Zweckmäßigkeit.', 'Kunst'),
+            ('Begehrungsvermögen.', 'Vernunft', 'Endzweck.', 'Freyheit.')]
 
 
 def ku_pages(body):
@@ -777,8 +785,12 @@ class KUEdition(DTAEdition):
             self.flush()
             self.cur_block = Block('p', self.cur)
             self.cur_block.text(KU_TABLE_NOTE)
+            for row in KU_TABLE:
+                self.cur_block.parts.append(('nl', None))
+                self.cur_block.text(' | '.join(row))
             self.flush()
             self.out[-1]['gap'] = 'table'
+            self.out[-1]['ours'] = 'The table is the Kant Lab’s transcription from the page image (the DTA’s image 62), not the DTA’s'
             return
         super().walk(el, block, note)
 
@@ -859,7 +871,8 @@ def build_ku_a(src, outdir):
    hyphens rejoined; the DTA's corrections (<corr>) taken for its misprints, the print's reading
    kept in `sic`; the letters the DTA supplied (<supplied>) taken, and marked in `supplied`;
    running heads, catchwords and signatures left out; split paragraphs and footnotes joined; the
-   table on A lvi, which the DTA leaves empty, marked (`gap`). Spelling, punctuation and the A
+   table on A lvi, which the DTA leaves empty, transcribed from the page image and marked as
+   such in its text and in `gap`, `ours`. Spelling, punctuation and the A
    pages (pg, pgEnd, pb; Roman for the front matter, a counted number in brackets) are the
    print's. `par`: the § a passage stands in, from the § headings. `scan`: the DTA's page image. */"""
     write_js(os.path.join(outdir, 'kant-ku-a.js'), head, 'KANT_KU_A', {'meta': meta, 'passages': ps})
@@ -893,6 +906,519 @@ def build_ku_a(src, outdir):
           '; line-end hyphens supplied, gone with the rejoin:', e.rejoined or 'none', '; misplaced:', e.bad_marks or 'none')
     print('  gaps marked:', [(p['id'], p['pg'], p['gap']) for p in ps if 'gap' in p] or 'none')
     print('  passages without a scan:', [p['id'] for p in ps if 'scan' not in p] or 'none')
+    return ps
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AA V (1908; printing of 1913): the Critique of Practical Reason and the Critique of Judgment as
+# the old Academy edition prints them, from Project Gutenberg's transcriptions (Distributed
+# Proofreaders: proofread, not OCR), which mark every AA page break (<span class="pb"
+# id="Pg197">), AA's line numbers (span.ln, left out) and the pages of the original edition AA
+# gives in its margin (span.opn). Public domain.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Headings that are only remarks inside a § ("Anmerkung.", "Anmerkung II.", "Folgerung."): they
+# open no line of the contents and keep the § they stand in.
+AA_REMARK = re.compile(r'^(?:Anmerkung|Folgerung)\.?(?:\s+[IVX]+\.?)?$')
+AA_PARA = re.compile(r'^§\s*\.?\s*(\d+)\b')
+NOTE_MARK = re.compile(r'\s*\[\d+\]')
+
+
+class PGVolume:
+    """Walks a Project Gutenberg HTML transcription of an AA volume into blocks of running text,
+    keeping AA's pages (pb) and the original edition's (as Block 'aa' marks, kept as `orig`)."""
+
+    HEADS = {'h1', 'h2', 'h3', 'h4', 'h5', 'h6'}
+
+    def __init__(self, first_page):
+        from html.parser import HTMLParser
+        vol = self
+
+        class P(HTMLParser):
+            def handle_starttag(self, tag, attrs):
+                vol.start(tag, dict(attrs))
+
+            def handle_startendtag(self, tag, attrs):
+                vol.start(tag, dict(attrs))
+                vol.end(tag)
+
+            def handle_endtag(self, tag):
+                vol.end(tag)
+
+            def handle_data(self, data):
+                vol.data(data)
+
+        self.parser = P(convert_charrefs=True)
+        self.page = first_page
+        self.blocks = []            # (kind, Block, [note numbers])
+        self.cur, self.notes = None, []
+        self.stack = []             # open elements: (tag, what) — what: None, 'skip', 'opn', 'block', 'line', 'cell'
+        self.capture = None         # text of a margin page being read
+        self.cells = 0
+
+    def feed(self, html):
+        self.parser.feed(html)
+        self.parser.close()
+        self.close_block()
+
+    def open_block(self, kind):
+        self.close_block()
+        self.cur = Block(kind, self.page)
+
+    def close_block(self):
+        if self.cur is not None:
+            self.blocks.append((self.cur.kind, self.cur, self.notes))
+        self.cur, self.notes = None, []
+
+    def skipping(self):
+        return any(w == 'skip' for t, w in self.stack)
+
+    def start(self, tag, a):
+        cls = (a.get('class') or '').split()
+        what = None
+        if tag in ('br', 'hr', 'img', 'col', 'meta', 'link', 'input'):
+            if tag == 'br' and self.cur is not None and not self.skipping():
+                self.cur.parts.append(('nl', None))
+            return
+        if self.skipping():
+            what = 'skip'
+        elif tag == 'span' and 'pb' in cls:
+            n = int(re.sub(r'\D', '', a.get('id', '')) or 0)
+            if self.cur is not None and n != self.page:
+                if self.cur.kind == 'head':
+                    # the transcription sets the mark after a heading's first word, but a heading
+                    # is never split over a page: it begins on the page marked
+                    self.cur.page = n
+                else:
+                    self.cur.pb(n)
+            self.page = n
+            what = 'skip'
+        elif tag == 'span' and 'opn' in cls:
+            what, self.capture = 'opn', ''
+        elif (tag == 'span' and cls and cls[0] in ('ln', 'tocpag')) or 'hidden' in cls or 'covernote' in cls:
+            what = 'skip'
+        elif tag == 'a' and 'fnanchor' in cls:
+            n = int(re.sub(r'\D', '', a.get('href', '')) or 0)
+            if self.cur is not None:
+                self.cur.text('[%d]' % n)
+                self.notes.append((n, self.page))
+            what = 'skip'
+        elif tag in self.HEADS or (tag == 'p' and any(c.startswith('ph') for c in cls)):
+            self.open_block('head')
+            what = 'block'
+        elif tag == 'p':
+            self.open_block('p')
+            what = 'block'
+        elif tag in ('ul', 'table') or (tag == 'div' and 'stanza' in ' '.join(cls)):
+            self.open_block('p')
+            self.cells = 0
+            what = 'block'
+        elif tag in ('li', 'tr') or (tag == 'div' and 'verse' in cls):
+            if self.cur is not None and self.cur.parts:
+                self.cur.parts.append(('nl', None))
+            self.cells = 0
+            what = 'line'
+        elif tag == 'td':
+            if self.cur is not None and self.cells:
+                self.cur.text(' | ')
+            self.cells += 1
+            what = 'cell'
+        self.stack.append((tag, what))
+
+    def end(self, tag):
+        if tag in ('br', 'hr', 'img', 'col', 'meta', 'link', 'input'):
+            return
+        while self.stack:
+            t, what = self.stack.pop()
+            if what == 'opn':
+                lab = self.capture.strip()
+                self.capture = None
+                if lab and self.cur is not None:
+                    self.cur.parts.append(('aa', lab))
+            if what == 'block':
+                self.close_block()
+            if t == tag:
+                break
+
+    def data(self, s):
+        if self.capture is not None and self.stack and self.stack[-1][1] == 'opn':
+            self.capture += s
+            return
+        if self.skipping() or self.cur is None:
+            return
+        self.cur.text(s)
+
+
+def pg_notes(html):
+    """{note number: text} from the transcription's FUSSNOTEN, AA's line numbers left out."""
+    out = {}
+    i = html.find('FUSSNOTEN')
+    if i < 0:
+        return out
+    for m in re.finditer(r'id="Footnote_(\d+)"[^>]*>\[\d+\]</a>(.*?)(?=<div class="footnote">|<hr|\*\*\* END|</body>)', html[i:], flags=re.S):
+        t = re.sub(r'<span class="(?:ln|pb|opn)"[^>]*>.*?</span>', '', m.group(2), flags=re.S)
+        t = re.sub(r'<[^>]+>', ' ', t)
+        import html as H
+        out[int(m.group(1))] = re.sub(r'\s+', ' ', H.unescape(t)).strip()
+    return out
+
+
+def pg_changes(html):
+    """The transcribers' corrections listed under ÄNDERUNGEN IM TEXT: [(page, AA's reading, the
+    correction)]; a page 'n. 28' is their footnote 28."""
+    i = html.find('ÄNDERUNGEN IM TEXT')
+    if i < 0:
+        return []
+    rows = re.findall(r'<tr>(.*?)</tr>', html[i:html.find('</table>', i)], flags=re.S)
+    out = []
+    for r in rows:
+        cells = [re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', c)).strip() for c in re.findall(r'<td[^>]*>(.*?)</td>', r, flags=re.S)]
+        if len(cells) == 3 and cells[0] and cells[0] != 'Seite':
+            out.append(tuple(cells))
+    return out
+
+
+def build_aa05(src, work, outdir, aa05_xml=None):
+    """work: 'kpv' or 'ku'. The work runs from its title heading to the editors' Anmerkungen. With
+    aa05_xml (the Internet Archive's OCR of its AA V scan), each AA page is linked to its scan,
+    found from the running heads as for AA II."""
+    cfg = {'kpv': ('Kritik der praktischen Vernunft', 'kpv-aa', 'KANT_KPV_AA', 'kant-kpv-aa05.js'),
+           'ku': ('Kritik der Urtheilskraft', 'ku-aa', 'KANT_KU_AA', 'kant-ku-aa05.js')}[work]
+    title, prefix, glob, fname = cfg
+    html = open(src, encoding='utf-8').read()
+    m = re.search(r'<h2[^>]*>\s*(?:<em[^>]*>)?\s*Kritik\s*(?:</em>)?\s*(?:<br\s*/?>)?\s*<span class="pb" id="Pg(\d+)">', html)
+    end = html.find('<h2>Anmerkungen')
+    if not m or end < 0:
+        raise SystemExit('AA V: the work\'s title or the editors\' Anmerkungen not found in ' + src)
+    vol = PGVolume(int(m.group(1)))
+    vol.feed(html[m.start():end])
+    notes = pg_notes(html)
+    ps, sec, par, n, placed = [], '', None, 0, set()
+
+    def add(kind, text, start, endp, pbs, b, notepage=None):
+        nonlocal n
+        n += 1
+        p = {'id': prefix + '-' + str(n).zfill(4), 'kind': kind, 'sec': sec or 'Title page'}
+        if par is not None:
+            p['par'] = par
+        p.update({'aa': start, 'aaEnd': endp, 'pb': pbs, 'text': text})
+        if b is not None:
+            orig = list(getattr(b, 'aas', []))
+            if getattr(b, 'aa_start', None) is not None:
+                p['orig'] = b.aa_start
+            if orig:
+                p['origpb'] = orig
+        ps.append(p)
+
+    for kind, b, ns in vol.blocks:
+        text, start, endp, pbs, trailing = b.finish()
+        if not text:
+            continue
+        if kind == 'head':
+            flat = NOTE_MARK.sub('', text.replace('\n', ' ')).strip()
+            mp = AA_PARA.match(flat)
+            if mp:
+                par, sec = int(mp.group(1)), clean_head(flat, 90)
+            elif not AA_REMARK.match(flat):
+                par, sec = None, clean_head(flat, 90)
+        add(kind, text, start, endp, pbs, b)
+        for k, pg in ns:
+            if k in notes:
+                add('note', '[%d] %s' % (k, notes[k]), pg, pg, [], None)
+                placed.add(k)
+    # the transcribers' corrections: the correction stays, AA's own reading goes in `sic` where the
+    # corrected word stands once on its page; all of them are listed in meta.changes
+    changes = pg_changes(html)
+    unmatched, ambiguous = [], []
+    for page, orig, corr in changes:
+        note = re.match(r'n\.\s*(\d+)', page)
+        cands = [p for p in ps if (p['kind'] == 'note' and p['text'].startswith('[%s]' % note.group(1)))] if note else \
+                [p for p in ps if p['kind'] != 'note' and p['aa'] <= int(page) <= p['aaEnd']]
+        rx = re.compile(r'(?<!\w)' + re.escape(corr.rstrip('-')) + r'(?!\w)')
+        hits = [(p, mm.start()) for p in cands for mm in rx.finditer(p['text'])]
+        if len(hits) == 1:
+            hits[0][0].setdefault('sic', []).append([hits[0][1], orig])
+        elif hits:
+            ambiguous.append((page, orig, corr, len(hits)))
+        else:
+            unmatched.append((page, orig, corr))
+    page_fix = None
+    if work == 'ku':
+        # The transcription sets its first page mark, [166], inside the title; the AA V scan has the
+        # title page on 165 (leaf 182, at the offset of 17 every running head confirms) and 166
+        # blank, as the volume's contents put the work at 165–485.
+        for p in ps:
+            if p['aa'] != 166 or p['pb']:
+                break
+            p['aa'] = p['aaEnd'] = 165
+        page_fix = 'The transcription marks the title page 166; the AA V scan has it on 165 (166 is blank), and it is put there'
+    for p in ps:
+        if p['aaEnd'] == p['aa']:
+            del p['aaEnd']
+        if not p['pb']:
+            del p['pb']
+    meta = {'work': title + ' (AA V)', 'volume': 5,
+            'edition': 'The old Academy edition, AA V (1908; printing of 1913), as Project Gutenberg’s volunteers transcribed and proofread it',
+            'source': 'Project Gutenberg EBook #' + {'kpv': '49543', 'ku': '55925'}[work] + ' (https://www.gutenberg.org/ebooks/' + {'kpv': '49543', 'ku': '55925'}[work] + '), produced by Jana Srna, Norbert H. Langkau and the Online Distributed Proofreading Team',
+            'licence': 'Public domain (the 1908/1913 printing and its transcription); this extraction is offered under CC0',
+            'basis': {'kpv': 'the first edition, Riga 1788', 'ku': 'the second edition, Berlin 1793'}[work],
+            'origNote': 'orig, origpb: the pages of ' + {'kpv': 'the first edition (1788), A', 'ku': 'the second edition (1793), B'}[work] + ', on which AA V bases its text, as AA V prints them in its margin (“Die Zahlen an den Seiten geben die Originalpaginirung der dem Text zu Grunde gelegten Ausgaben (1788 und 1793) wieder”) and the transcription gives them',
+            'noteNote': 'Footnote marks are the transcription’s numbers in brackets ([3]), not the marks AA prints; a footnote is placed after the paragraph that refers to it, on the page of the reference',
+            'changes': [{'page': pg, 'aa': o, 'corrected': c} for pg, o, c in changes],
+            'changesNote': 'The misprints the transcribers corrected (their list): the correction is in the text; where the corrected word stands once on its page, the passage’s `sic` gives AA’s reading at its place'}
+    if page_fix:
+        meta['pageFix'] = page_fix
+    if aa05_xml:
+        leaves = ocr_leaves(aa05_xml)
+        smap = scan_map(leaf_pages(leaves), 485)
+        lo, hi = ps[0]['aa'], max(p.get('aaEnd', p['aa']) for p in ps)
+        meta['scan'] = {'item': 'gesammelteschrif0005kant', 'url': 'https://archive.org/details/{item}/page/n{n}/mode/1up',
+                        'leaf': {k: v for k, v in smap.items() if lo <= k <= hi}}
+        print('  AA pages linked to the AA V scan:', len(meta['scan']['leaf']), 'of', hi - lo + 1)
+    head = """/* """ + title + """, as the old Academy edition prints it (AA V, 1908; printing of 1913), for the
+   Logic Portal. GENERATED by logic-portal/published/build_published.py from Project Gutenberg's
+   transcription (Distributed Proofreaders), which marks every AA page. Do not edit by hand.
+
+   A PROOFREAD TRANSCRIPTION, NOT OCR. AA's pages (aa, aaEnd, pb) are the transcription's page
+   marks; AA's line numbers are left out; the original edition's pages in AA's margin are kept
+   in orig/origpb. Footnotes follow the paragraph that refers to them, marked [n] by the
+   transcription's numbering. The transcribers corrected a few misprints: the correction is in the
+   text, AA's reading in `sic`. AA's editorial introduction and apparatus are not included.
+
+   LICENCE: public domain; the extraction is CC0. */"""
+    write_js(os.path.join(outdir, fname), head, glob, {'meta': meta, 'passages': ps})
+    words = sum(len(re.findall(r'[^\W\d_]+', p['text'])) for p in ps)
+    print(title, '(AA V):', len(ps), 'passages,', words, 'words;', dict(collections.Counter(p['kind'] for p in ps)))
+    print('  AA pages:', ps[0]['aa'], 'to', max(p.get('aaEnd', p['aa']) for p in ps))
+    pars = [int(AA_PARA.match(p['text']).group(1)) for p in ps if p['kind'] == 'head' and AA_PARA.match(p['text'])]
+    print('  §§ headed:', len(pars), (min(pars), max(pars)) if pars else '', '; out of order:', [b for a, b in zip(pars, pars[1:]) if b <= a] or 'none')
+    anchored = sorted(k for kind, b, ns in vol.blocks for k, pg in ns)
+    print('  footnotes:', len(placed), 'placed of', len(anchored), 'referred to;', 'not found:', [k for k in anchored if k not in notes] or 'none')
+    print('  margin pages kept:', sum(len(p.get('origpb', [])) + (1 if 'orig' in p else 0) for p in ps))
+    print('  transcribers\' corrections:', len(changes), '; placed with AA\'s reading:', sum(len(p.get('sic', [])) for p in ps),
+          '; word on its page more than once (in meta.changes only):', ambiguous or 'none', '; not found:', unmatched or 'none')
+    seq = sorted({p['aa'] for p in ps} | {n for p in ps for o, n in p.get('pb', [])})
+    print('  AA pages with no mark (blank pages):', sorted(set(range(seq[0], seq[-1] + 1)) - set(seq)) or 'none')
+    return ps
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# The Groundwork of the Metaphysics of Morals as AA IV prints it (1903; printing of 1911), read by
+# the Internet Archive's OCR of its scan, as AA II is: no proofread transcription of it may be
+# put in a public repository. AA 4:385–463.
+# ─────────────────────────────────────────────────────────────────────────────
+
+GMS_FIRST, GMS_LAST = 385, 463
+
+
+def tesseract_leaf(path):
+    """One page read by Tesseract (its TSV output) in the shape ocr_leaves gives: (W, H, lines)."""
+    import csv
+    W = H = 0
+    lines = collections.OrderedDict()
+    with open(path, encoding='utf-8') as f:
+        for r in csv.DictReader(f, delimiter='\t', quoting=csv.QUOTE_NONE):
+            if r['level'] == '1':
+                W, H = int(r['width']), int(r['height'])
+            if r['level'] != '5' or not (r['text'] or '').strip():
+                continue
+            x0, top = int(r['left']), int(r['top'])
+            lines.setdefault((r['block_num'], r['par_num'], r['line_num']), []).append(
+                (r['text'], x0, top, x0 + int(r['width']), top + int(r['height'])))
+    ls = [ocr_line(ws) for ws in lines.values()]
+    ls.sort(key=lambda l: l['top'])
+    return W, H, ls
+
+
+# The title page's one misreading the repairs cannot reach (Fraktur S read as H).
+GMS_TITLE_FIX = {'Hitten': 'Sitten'}
+SENT_END = ('.', '?', '!', ':')
+
+
+def gms_merge(p, q, kind, sep):
+    """p and q as one passage: q's page marks and repairs moved along by p's length, q's own first
+    page marked where it begins if p ends on an earlier one."""
+    a = p['text'].rstrip()
+    if sep == '' and a.endswith(('-', '⸗')):
+        a = a[:-1]
+    elif sep == '':
+        sep = ' '
+    off = len(a) + len(sep)
+    r = dict(p)
+    r['kind'], r['text'] = kind, a + sep + q['text']
+    pb = list(p.get('pb', []))
+    if q['aa'] > (p.get('aaEnd') or p['aa']):
+        pb.append([off, q['aa']])
+    pb += [[o + off, n] for o, n in q.get('pb', [])]
+    r['pb'] = pb
+    r['aaEnd'] = max(p.get('aaEnd') or p['aa'], q.get('aaEnd') or q['aa'])
+    fx = [x for x in p.get('fix', []) if x[0] < len(a)] + [[o + off, w] for o, w in q.get('fix', [])]
+    if fx:
+        r['fix'] = fx
+    return r
+
+
+def gms_tidy(ps):
+    """Headings and paragraphs the passage maker cut wrongly, put back together from the OCR's own
+    lines: a heading's lines split off from it (centred lines of different lengths), a word of a
+    heading left at the end of the paragraph before it (Eintheilung), a paragraph's first line
+    taken for a heading, a paragraph cut after its first line. Nothing is added or dropped."""
+    out = list(ps)
+    changed = True
+    while changed:
+        changed = False
+        for i in range(len(out) - 1):
+            p, q = out[i], out[i + 1]
+            if 'note' in (p['kind'], q['kind']) or 'title' in (p['kind'], q['kind']):
+                continue
+            same = q['aa'] == (p.get('aaEnd') or p['aa'])
+            if not same:
+                continue
+            pt, qt = p['text'].rstrip(), q['text'].lstrip()
+            short_q = len(qt) < 80 and '\n' not in qt
+            if q['kind'] == 'head' and qt[:1].islower():
+                tail = re.search(r'(?<=[.?!])\s+(?:\d{1,2}\s+)?([^.?!]{2,40})$', pt)
+                if p['kind'] == 'p' and len(pt) > 200 and tail:
+                    # a heading's first word left at the paragraph's end: it goes to the heading
+                    head = dict(q)
+                    head['text'] = tail.group(1) + '\n' + qt
+                    head['fix'] = [[o + len(tail.group(1)) + 1, w] for o, w in q.get('fix', [])]
+                    p2 = dict(p)
+                    p2['text'] = pt[:tail.start()]
+                    p2['fix'] = [x for x in p.get('fix', []) if x[0] < tail.start()]
+                    for d in (p2, head):
+                        if not d['fix']:
+                            del d['fix']
+                    out[i:i + 2] = [p2, head]
+                else:
+                    heading = p['kind'] == 'head' or (len(pt) < 80 and not pt.endswith(SENT_END) and not re.match(r'^\d+\.', pt))
+                    out[i:i + 2] = [gms_merge(p, q, 'head' if heading else p['kind'], '\n' if heading else '')]
+                changed = True
+                break
+            if p['kind'] == 'head' and not pt.endswith(SENT_END):
+                if q['kind'] == 'head' or short_q:
+                    out[i:i + 2] = [gms_merge(p, q, 'head', '\n')]
+                else:
+                    out[i:i + 2] = [gms_merge(p, q, 'p', ' ')]      # a paragraph's first line
+                changed = True
+                break
+            if p['kind'] == 'p' and q['kind'] == 'p' and len(pt) < 80 and not pt.endswith(SENT_END + (';', ',')) and qt[:1].islower():
+                out[i:i + 2] = [gms_merge(p, q, 'p', '')]
+                changed = True
+                break
+    for p in out:
+        p.setdefault('pb', [])
+        p.setdefault('aaEnd', p['aa'])
+    return out
+
+
+def build_gms(aa04_xml, outdir, tsv_dir=None):
+    """With tsv_dir (Tesseract's readings of the scan's pages, t_frak2021_<leaf>.tsv), those take the
+    place of the Internet Archive's OCR for the Groundwork's leaves; the Archive's still gives the
+    AA page of every leaf, from its running heads."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    repo = os.path.normpath(os.path.join(here, '..', '..'))
+    agreement = {}
+    if os.path.exists(os.path.join(here, 'ocr-agreement.json')):
+        with open(os.path.join(here, 'ocr-agreement.json'), encoding='utf-8') as f:
+            agreement = json.load(f)
+    # the word list the OCR is repaired against, as for AA II, with AA V's two Critiques, which
+    # are proofread and in the same Academy spelling as AA IV
+    core_files = [os.path.join(here, x) for x in ('kant-aa01.js', 'kant-krv-a.js', 'kant-kpv-aa05.js', 'kant-ku-aa05.js')] + \
+        [os.path.join(repo, x) for x in ('Individuals/Alex Li/logik-jasche-9.js', 'Individuals/Jesus-La-Paz/meier-auszug-data.js', 'data/metaphysica-17.js')]
+    wide_files = core_files + [os.path.join(repo, x) for x in (
+        'data/reflexionen-16-meier.js', 'data/reflexionen-17-18-baumgarten.js', 'data/logik-blomberg-24.js',
+        'data/logik-wiener-24.js', 'data/logik-busolt-24.js')]
+    core, wide = lexicon(core_files), lexicon(wide_files)
+    cache = {}
+    leaves = ocr_leaves(aa04_xml)
+    pages = leaf_pages(leaves)
+    reread = []
+    if tsv_dir:
+        for k, pg in enumerate(pages):
+            f = os.path.join(tsv_dir, 't_frak2021_%d.tsv' % k)
+            if pg and GMS_FIRST <= pg <= GMS_LAST and os.path.exists(f):
+                leaves[k] = tesseract_leaf(f)
+                reread.append(pg)
+        missing = sorted(set(range(GMS_FIRST, GMS_LAST + 1)) - set(reread))
+        if missing:
+            raise SystemExit('Groundwork: no Tesseract reading for AA pages ' + str(missing))
+    vol = OCRVolume(leaves, pages, GMS_FIRST, GMS_LAST, [GMS_FIRST])
+    vol.col_q = 0.5                    # line numbers read into the lines: see column()
+    vol.note_rx = r'^[*„"“]+\)'        # this OCR reads Kant's *) as „) as often as not
+    ps = []
+    for b in vol.passages():
+        text, start, end, pbs, trail = finish_ocr(b)
+        if not text:
+            continue
+        cuts = sorted(set([0, len(text)] + [o for o, n in pbs]))
+        new, fixes, omap = '', [], {}
+        for a, z in zip(cuts, cuts[1:]):
+            seg, f = repair_text(text[a:z], wide, cache, core)
+            omap[a] = len(new)
+            fixes += [[len(new) + o, w] for o, w in f]
+            new += seg
+        omap[len(text)] = len(new)
+        p = {'id': 'gms-' + str(len(ps) + 1).zfill(4), 'kind': b.kind, 'sec': '', 'aa': start, 'aaEnd': end,
+             'pb': [[omap[o], n] for o, n in pbs], 'text': new}
+        if fixes:
+            p['fix'] = fixes
+        ps.append(p)
+    ps = gms_tidy(ps)
+    # the title page, from its own lines (the passage maker keeps only some of a title page's lines);
+    # the one word the repairs cannot reach is corrected here, and kept in `fix` as the others are
+    if tsv_dir:
+        k = pages.index(GMS_FIRST)
+        W, H, lines = leaves[k]
+        tl = [' '.join(w[0] for w in l['w']) for l in lines if l['top'] < 0.85 * H]
+        text = '\n'.join(ocr_letters(t) for t in tl if re.search(r'[^\W\d_]{2,}', t))
+        fixes = []
+        for wrong, right in GMS_TITLE_FIX.items():
+            k2 = text.find(wrong)
+            if k2 >= 0:
+                text = text[:k2] + right + text[k2 + len(wrong):]
+                fixes.append([k2, wrong])
+        ps[0] = {'id': ps[0]['id'], 'kind': 'title', 'sec': '', 'aa': GMS_FIRST, 'aaEnd': GMS_FIRST, 'pb': [], 'text': text}
+        if fixes:
+            ps[0]['fix'] = fixes
+    for i, p in enumerate(ps):
+        p['id'] = 'gms-' + str(i + 1).zfill(4)
+    # the contents lines: the Vorrede and the three Abschnitte, as their headings print them
+    sec = 'Title page'
+    for p in ps:
+        if p['kind'] == 'head' and re.search(r'Vorrede|Abschnitt', p['text']):
+            sec = clean_head(p['text'].replace('\n', ' '), 90)
+        p['sec'] = sec
+        if p['aaEnd'] == p['aa']:
+            del p['aaEnd']
+        if not p['pb']:
+            del p['pb']
+    how = ('read by Tesseract 5 with UB Mannheim’s Fraktur model frak2021 from the Internet Archive’s scan gesammelteschrif0004kant'
+           if tsv_dir else 'read by the Internet Archive’s OCR of its scan gesammelteschrif0004kant')
+    meta = {'work': 'Grundlegung zur Metaphysik der Sitten (AA IV)', 'volume': 4,
+            'edition': 'The old Academy edition, AA IV (1903; printing of 1911), ' + how + '; spelling repaired by rule (see fix)',
+            'source': 'https://archive.org/details/gesammelteschrif0004kant' + (' (page images; OCR by this extractor)' if tsv_dir else ' (tesseract OCR by the Internet Archive)'),
+            'licence': 'Public domain: the 1903/1911 printing and Kant’s text are out of copyright; this extraction is offered under CC0',
+            'scan': {'item': 'gesammelteschrif0004kant', 'url': 'https://archive.org/details/{item}/page/n{n}/mode/1up',
+                     'leaf': scan_map(pages, GMS_LAST)}}
+    if agreement.get('gms'):
+        meta['agreement'] = agreement['gms']
+    head = """/* The Groundwork of the Metaphysics of Morals (1785), as the old Academy edition prints it (AA IV,
+   1903/1911), for the Logic Portal. GENERATED by logic-portal/published/build_published.py from an
+   OCR of the Internet Archive's AA IV scan (Fraktur; see meta.edition). Do not edit by hand.
+
+   THIS IS OCR, REPAIRED BY RULE, NOT A CLEAN TEXT. Check quotations against the page image
+   (meta.scan: page/n<leaf>, the leaf for each AA page in meta.scan.leaf). meta.agreement: how many
+   of each page's words agree with an independent transcription. Each passage's `fix` lists the
+   words the extractor changed, [offset, the OCR's reading].
+
+   LICENCE: public domain (the 1903/1911 printing); the extraction is CC0. */"""
+    write_js(os.path.join(outdir, 'kant-gms-aa04-ocr.js'), head, 'KANT_GMS', {'meta': meta, 'passages': ps})
+    words = sum(len(re.findall(r'[^\W\d_]+', p['text'])) for p in ps)
+    print('Grundlegung (AA IV, OCR):', len(ps), 'passages,', words, 'words;', dict(collections.Counter(p['kind'] for p in ps)))
+    print('  AA pages:', ps[0]['aa'], 'to', max(p.get('aaEnd', p['aa']) for p in ps), '; missing:', vol.report.get('missing') or 'none')
+    print('  contents lines:', sorted({p['sec'] for p in ps}, key=lambda s: [q['sec'] for q in ps].index(s)))
+    print('  repaired words:', sum(len(p.get('fix', [])) for p in ps))
     return ps
 
 
@@ -1014,8 +1540,10 @@ EDITORIAL = re.compile(r'^[\dlI!D]{0,2}\)\s*A\s?[!¹²1l?]?\s?:')
 MARGIN_JUNK = re.compile(r'^[\divxlIOoSsBb»«>\[\]|!.,:;—\-–=•\'"]{1,4}$')
 
 
-def column(lines, W):
-    """The text column's left and right edges on a page, from its long lines."""
+def column(lines, W, q=0.25):
+    """The text column's left and right edges on a page, from its long lines: the q-th and
+    (1 - q)-th of their starts and ends. AA IV's OCR often takes AA's line numbers into a line, so
+    its starts are taken at the median (q = 0.5) instead."""
     starts, ends = [], []
     for l in lines:
         ws = l['w']
@@ -1029,7 +1557,7 @@ def column(lines, W):
         return 0, W
     starts.sort()
     ends.sort()
-    return starts[len(starts) // 4], ends[(3 * len(ends)) // 4]
+    return starts[int(len(starts) * q)], ends[min(len(ends) - 1, int(len(ends) * (1 - q)))]
 
 
 class OCRVolume:
@@ -1048,7 +1576,7 @@ class OCRVolume:
         W, H, lines = self.leaves[k]
         if not lines:
             return [], []
-        L, R = column(lines, W)
+        L, R = column(lines, W, getattr(self, 'col_q', 0.25))
         body, notes = [], []
         hs = sorted(l['h'] for l in lines if len(l['w']) >= 4) or [1]
         hmed = hs[len(hs) // 2]
@@ -1080,7 +1608,7 @@ class OCRVolume:
                 continue                      # a line with no word in it: the OCR's noise
             small = l['h'] < 0.84 * hmed and l['top'] > 0.45 * H
             if not in_notes and (small and re.match(r'^\*+\)?|^\d{1,2}\)', text) or
-                                 l['top'] > 0.45 * H and re.match(r'^\*+\)', text) or
+                                 l['top'] > 0.45 * H and re.match(getattr(self, 'note_rx', r'^\*+\)'), text) or
                                  self.drop_numbered_notes and l['top'] > 0.4 * H and EDITORIAL.match(text)):
                 in_notes = True               # Kant's footnotes open on *) (or 1) where numbered)
             if in_notes:
@@ -1762,6 +2290,10 @@ if __name__ == '__main__':
         build_all(*sys.argv[2:7])
     elif cmd == 'ku':
         build_ku_a(sys.argv[2], sys.argv[3])
+    elif cmd == 'aa05':
+        build_aa05(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5] if len(sys.argv) > 5 else None)
+    elif cmd == 'gms':
+        build_gms(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else None)
     elif cmd == 'krv-a-test':
         ps = build_krv_a(sys.argv[2], None)
         json.dump(ps, open(sys.argv[3], 'w', encoding='utf-8'), ensure_ascii=False)
