@@ -108,6 +108,14 @@ README's *The board* describes it for a human.
 - **Testing never writes to the shared board.** Use a scratch copy of the page whose
   `fetch` answers from the browser's storage in place of GitHub, on a test origin such as
   127.0.0.1, and delete the copy and that storage afterwards.
+- **Annotations** are `annotations` in `board.json`, one entry each, beside the cards, so that
+  two people annotating one passage at once both keep theirs. An annotation belongs to the
+  passage, not the card: `on` holds the passage's portal address (`ref` or `hash`) and the
+  words it was made on, verbatim (`exact`, with `prefix` and `suffix`); `card` is only where
+  it was made. Deleting a card deletes none, and bringing back a photograph or starting again
+  leaves them as they are, as it does the requests. One the page places by its own judgement
+  (`findWords()`) is drawn dashed, and one whose words have gone is placed nowhere: never
+  re-anchor one by a fuzzier guess.
 - `board.js` stays the study's starting board, and what the page shows anyone without the
   password. Fold the shared board into it only when asked.
 

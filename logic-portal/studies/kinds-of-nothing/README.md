@@ -96,6 +96,26 @@ asking Claude. Each device keeps its own camera, layers and view, so moving abou
 switching layers changes nobody else's screen. *lock*, beside the status, forgets the key on
 that device. Without the password the page shows the study's starting board, read only.
 
+### Annotating a passage
+
+Click a card, and its passages open in the side, in full. Select some of a passage's words
+and a small bar appears by them: **Problem** (an OCR slip, a reading that does not fit, a
+clash with another passage), **Relevant to…** (a word, another card on the board, a
+Reflexion by number such as *R 3990*, or a portal address), **Interpretation** (a possible
+reading, in your words) or **Comment**. Choose one, type, and press Enter. For the passage as
+a whole, press *annotate* beside its citation instead.
+
+The words light up in that kind's colour for everyone within a few seconds, and the card
+carries a dot for each annotation. Anyone can reply, and mark a problem resolved; only the
+one who made an annotation can edit or delete it. An annotation belongs to the passage, not
+the card: it shows on every card where that Reflexion or § stands, deleting a card deletes
+none, and bringing back a photograph leaves them as they are. Where the page could not find
+the words again with the same words around them, it draws the annotation dashed, as its own
+placing; where the words have gone from the passage, it says so and places it nowhere.
+*Annotations*, in the tools, lists them all, by kind, by person, open or resolved, and
+downloads them as a list. A word something is marked relevant to can be typed into *Find on
+the board*, which then lights every passage marked relevant to it.
+
 ### Asking for a change to the board, in class
 
 One person drives, on their own laptop, while the rest of the room says what it wants:
