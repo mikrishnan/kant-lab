@@ -259,6 +259,18 @@ reader's topic rather than the seminar's one board.
   (*develops*, *contradicts*, *qualifies*, *same as*, *cf.*, *answers?* to a question, or a word
   of your own), drawing with a pen or an Apple Pencil, views, layers, **Focus** and **Find on the
   board**.
+- **Tables.** Press **Table** and choose how many columns and rows on a small grid, or type the
+  numbers (12 and 40 at most), and whether the first row, the first column, both or neither are
+  headings; both can be changed later without losing a word. Type in a cell where it stands:
+  **Tab** goes on to the next, and in the last cell adds a row. A cell can hold the topic's
+  passages beside its words: drag one onto it from **Passages**, or choose it in the side, and
+  click it to read it beside the board. A passage in a cell stays under Passages, to go on the
+  board as a card as well. Rows and columns are inserted and deleted where you last clicked; a
+  column's edge widens it, the corner the whole table. **⌘C** or **Copy the table** copies it for
+  Word or a spreadsheet, each passage as its citation and a link to it in the portal. A table
+  copied from Word, a spreadsheet or a web page and pasted on the board becomes a table, with
+  headings only where it marked them; pasted into a cell being typed in, it fills the cells from
+  there on.
 - **Click a card** to read its passage in full in the side, with the words you kept, if you kept
   only some, and **your note on it**, which is the same note as in the list: write it in either.
   The passage opens in the portal beside the board at the same time, under **Reading**.
