@@ -111,7 +111,7 @@ const DEVICE = (() => {
 })();
 const isEmpty = () => DB.handouts.every(h => !h.items.length && !(h.trash || []).length);
 const backupBody = () => JSON.stringify(Object.assign({ device: DEVICE }, DB));
-function backupSoon() { if (!LOCAL) return; clearTimeout(backupT); backupT = setTimeout(backupNow, 1200); }
+function backupSoon() { dirSoon(); if (!LOCAL) return; clearTimeout(backupT); backupT = setTimeout(backupNow, 1200); }
 async function backupNow() {
   if (isEmpty()) return;
   try {
@@ -128,7 +128,76 @@ function backupMark() {
   const b = page && page.querySelector('.hback');
   if (b) b.outerHTML = backupHtml();
 }
+/* Backups to a folder on this computer, wherever the portal is served, the live site included:
+   chosen once (Back up to a folder…), and from then on a second or so after every change the
+   handouts are written there by themselves, as handouts-latest.json, with a dated copy at most
+   every ten minutes, in Save to file's own format, so that Open file reads any of them back.
+   Clearing the browser's data cannot reach them. An empty tray never writes over a backup.
+   Chrome and Edge only (the File System Access API); the folder is remembered in this browser's
+   IndexedDB, and Chrome may ask, on a new visit, to allow it again (Resume backups). */
+const CAN_DIR = typeof window.showDirectoryPicker === 'function';
+let dirH = null, dirState = CAN_DIR ? 'none' : 'unavailable', dirAt = '', dirT = 0, dirSnap = 0, dirWarned = false;
+function idb(mode, fn) {
+  return new Promise((res, rej) => {
+    const rq = indexedDB.open('kantlab-handout-backups', 1);
+    rq.onupgradeneeded = () => rq.result.createObjectStore('handles');
+    rq.onerror = () => rej(rq.error);
+    rq.onsuccess = () => { try { const tx = rq.result.transaction('handles', mode), st = tx.objectStore('handles'), r = fn(st); tx.oncomplete = () => res(r && r.result); tx.onerror = tx.onabort = () => rej(tx.error); } catch (e) { rej(e); } };
+  });
+}
+const stamp = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + ' ' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
+const savedText = () => JSON.stringify({ kind: 'kantlab-handouts', v: 1, saved: new Date().toISOString(), handouts: DB.handouts }, null, 1);
+async function writeOne(name, text) { const fh = await dirH.getFileHandle(name, { create: true }), w = await fh.createWritable(); await w.write(text); await w.close(); }
+function dirSoon() { if (dirH && dirState === 'on') { clearTimeout(dirT); dirT = setTimeout(dirNow, 1500); } }
+async function dirNow() {
+  if (!dirH || dirState !== 'on' || isEmpty()) return;
+  try {
+    const text = savedText(), now = new Date();
+    await writeOne('handouts-latest.json', text);
+    if (Date.now() - dirSnap >= 10 * 60 * 1000) { await writeOne('handouts-' + stamp(now) + '.json', text); dirSnap = Date.now(); }
+    dirAt = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  } catch (e) {
+    dirState = e && e.name === 'NotAllowedError' ? 'paused' : 'failed';
+    if (!dirWarned) { dirWarned = true; toast(dirState === 'paused' ? 'Backups to your folder are paused. Open Handouts and press Resume backups.' : 'Your handouts could not be backed up to your folder. Use Save to file to keep a copy.'); }
+  }
+  backupMark();
+}
+async function chooseDir() {
+  try {
+    const h = await window.showDirectoryPicker({ id: 'kantlab-handouts', mode: 'readwrite', startIn: 'documents' });
+    dirH = h; dirState = 'on'; dirSnap = 0;
+    try { await idb('readwrite', st => st.put(h, 'dir')); } catch (e) { /* remembered for this visit only */ }
+    await dirNow();
+    if (dirState === 'on') toast('Backing up to “' + h.name + '”, by itself after every change.');
+  } catch (e) { if (e && e.name !== 'AbortError') toast('That folder could not be used for backups.'); }
+  backupMark();
+}
+async function resumeDir() {
+  if (!dirH) return chooseDir();
+  try { const p = await dirH.requestPermission({ mode: 'readwrite' }); dirState = p === 'granted' ? 'on' : 'paused'; } catch (e) { dirState = 'paused'; }
+  if (dirState === 'on') { dirSnap = 0; await dirNow(); }
+  backupMark();
+}
+if (CAN_DIR) (async () => {
+  try {
+    const h = await idb('readonly', st => st.get('dir'));
+    if (!h) return;
+    dirH = h;
+    const p = await h.queryPermission({ mode: 'readwrite' });
+    dirState = p === 'granted' ? 'on' : 'paused';
+    if (dirState === 'on') await dirNow();
+  } catch (e) { /* no folder chosen yet */ }
+  backupMark();
+})();
+function dirHtml() {
+  const nm = dirH ? '“' + esc(dirH.name) + '”' : '';
+  if (dirState === 'on') return '<p class="hback small ok">✓ ' + (dirAt ? 'Backed up to the folder ' + nm + ' at ' + esc(dirAt) : 'Backing up to the folder ' + nm) + ', by itself after every change. <button type="button" class="linkish" data-h="bkdir">Change folder</button></p>';
+  if (dirState === 'paused') return '<p class="hback small bad">⚠ Backups to ' + nm + ' are paused until you allow them again. <button type="button" class="btn" data-h="bkresume">Resume backups</button></p>';
+  if (dirState === 'failed') return '<p class="hback small bad">⚠ The last backup to ' + nm + ' failed. Use Save to file. <button type="button" class="linkish" data-h="bkdir">Choose another folder</button></p>';
+  return '<p class="hback small bad">⚠ Kept only in this browser, where clearing its data would lose it. <button type="button" class="btn" data-h="bkdir">Back up to a folder…</button> and every change is saved there by itself.</p>';
+}
 function backupHtml() {
+  if (CAN_DIR && !(LOCAL && backup.ok && dirState === 'none')) return dirHtml();   // the folder, unless this computer's backup server is already keeping copies
   if (!LOCAL) return '<p class="hback muted small">Kept in this browser on this computer, and nowhere else. Save to file to keep a copy or move it.</p>';
   if (backup.ok) return '<p class="hback small ok">✓ Backed up to a file on this computer at ' + esc(backup.at) + ', in <i>Kant Lab/Handout backups</i>.</p>';
   if (backup.ok === false) return '<p class="hback small bad">⚠ Not backed up to a file. Use <b>Save to file</b> to keep a copy.</p>';
@@ -249,6 +318,18 @@ function reflDateOf(x) {
 function adickesOf(it) {
   const ds = [...new Set(partsOf(it).filter(isRefl).map(reflDateOf).filter(Boolean))];
   return ds.length ? 'Adickes: ' + ds.join('; ') : '';
+}
+// A lecture transcript's date, as the portal's catalogue gives it for the transcript ("ca. 1771",
+// "1782/83"), read when shown, so that a correction there reaches every handout.
+const textByRef = ref => { const k = String(ref || '').split(':')[0], all = Array.isArray(TEXTS) ? TEXTS : Object.values(TEXTS); return all.find(T => T && T.key === k) || null; };
+function lectureDateOf(x) { const T = textByRef(x.ref); return T && T.layer === 'lecture' && T.date ? T.date : ''; }
+// When a passage was written, beside its citation: Adickes' dating for a Reflexion, the year of the
+// lectures for a transcript; nothing for the rest, whose citation or title already says.
+function datingOf(it) {
+  const out = [], ad = adickesOf(it), lec = [...new Set(partsOf(it).map(lectureDateOf).filter(Boolean))];
+  if (ad) out.push(ad);
+  if (lec.length) out.push('lectures of ' + lec.join('; '));
+  return out.join(' · ');
 }
 
 /* ── English mode ────────────────────────────────────────────────────────
@@ -1434,7 +1515,7 @@ function passCard(it, key, h, parent, len) {
   return '<div class="hcard ' + (parent ? 'child' : 'top') + '" data-key="' + key + '" data-id="' + esc(it.id) + '"><div class="hcite">' + GRIP +
     '<span class="w"><b>' + esc(byline(it).author) + '</b>, <i>' + esc(byline(it).work) + '</i>, ' +
       (live ? '<button type="button" class="hgo" data-h="go" title="Read it where it stands, in its text">' + esc(it.cite) + '</button>' : esc(it.cite)) +
-      (adickesOf(it) ? '<span class="hdate" title="Adickes’ dating of the note: his phase as printed, and the years his chronology (AA XIV) gives it">' + esc(adickesOf(it)) + '</span>' : '') + tag + linked + '</span>' +
+      (datingOf(it) ? '<span class="hdate" title="When it was written: for a Reflexion, Adickes’ dating (his phase as printed, and the years his chronology in AA XIV gives it); for a lecture transcript, the year of the lectures">' + esc(datingOf(it)) + '</span>' : '') + tag + linked + '</span>' +
     '<span class="hbtns">' + moveBtns(i, len) + '</span></div>' +
     '<input class="hlab" data-f="label" value="' + esc(it.label || '') + '" placeholder="Label (optional), e.g. Against X" spellcheck="false">' +
     duoCard(h, it, '<div class="htext" data-mf="text"' + (it.from === 'english' ? ' lang="en"' : ' lang="de"') + '>' + (it.from === 'english' ? rich(it.text)
@@ -1521,6 +1602,8 @@ page.addEventListener('click', e => {
   const h = cur(), c = b.closest('[data-key]'), key = c ? c.dataset.key : null;
   switch (b.dataset.h) {
     case 'close': return closePage();
+    case 'bkdir': return chooseDir();
+    case 'bkresume': return resumeDir();
     case 'dock': return setDock(!docked);
     case 'classview': if (!classView) { classView = true; render(); toast('Class view: what is left out shows as …, and nothing can be added or changed.'); } return;
     case 'instructorview': if (classView) { classView = false; render(); toast('Instructor view: make and change handouts. What is left out is struck through.'); } return;
@@ -2155,7 +2238,7 @@ page.addEventListener('click', e => {
 });
 
 /* What Class view lets a click do: read, fold, open where it stands, export, and switch views. */
-const RO_OK = new Set(['close', 'dock', 'classview', 'instructorview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'save']);
+const RO_OK = new Set(['close', 'dock', 'classview', 'instructorview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'save', 'bkdir', 'bkresume']);
 const ready = () => new Promise(res => { const t = () => ($('loading') && !$('loading').hidden ? setTimeout(t, 250) : res()); t(); });
 
 /* ── Exports ─────────────────────────────────────────────────────────────── */
@@ -2169,7 +2252,7 @@ function download(blob, name) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
   toast('Saved “' + name + '” to your Downloads folder.');
 }
-const citeLine = it => byline(it).work + ', ' + it.cite + (adickesOf(it) ? ' · ' + adickesOf(it) : '') + (it.from === 'english' ? '; English: machine translation' : '');
+const citeLine = it => byline(it).work + ', ' + it.cite + (datingOf(it) ? ' · ' + datingOf(it) : '') + (it.from === 'english' ? '; English: machine translation' : '');
 
 /* The Handout tool's markup (FORMAT.md in the Handout tool): a title, # headings, a note as
    its paragraphs, and each passage as  > Author: "words" (work, cite), its label in italics
@@ -2219,7 +2302,7 @@ function exportPdf(h) {
   const pass = it => '<div class="item">' + (flat(it.label) ? '<div class="lab">' + esc(it.label) + '</div>' : '') +
     '<div class="q" data-pi="' + (its.push(it) - 1) + '" data-mf="text">' + (it.from === 'english' ? rich(it.text) : esc(it.text)) + '</div>' +
     (enShown(h, it) ? '<div class="en" data-pi="' + (its.length - 1) + '" data-mf="en">' + rich(it.en) + '</div>' : '') +
-    '<div class="c">' + esc(byline(it).author) + ', <i>' + esc(byline(it).work) + '</i>, ' + esc(it.cite) + (adickesOf(it) ? ' · ' + esc(adickesOf(it)) : '') +
+    '<div class="c">' + esc(byline(it).author) + ', <i>' + esc(byline(it).work) + '</i>, ' + esc(it.cite) + (datingOf(it) ? ' · ' + esc(datingOf(it)) : '') +
     (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : '') + '</div>' +
     (flat(it.note) ? '<p class="pn">' + esc(it.note) + '</p>' : '') + '</div>';
   box.innerHTML = '<h1>' + esc(h.name) + '</h1>' + h.items.map(it => {
@@ -2278,7 +2361,7 @@ function docxBlob(h) {
     if (it.parts) paras(cutOut(it.text, marksOf(it, 'text'))).forEach(t => B.push(para('Passage', markedRuns(t, false, marksOf(it, 'text')))));   // a joined passage, part by part
     else B.push(para('Passage', markedRuns(cutOut(it.text, marksOf(it, 'text')), it.from === 'english', marksOf(it, 'text'))));
     if (enShown(h, it)) B.push(para('PassageEnglish', markedRuns(cutOut(it.en, marksOf(it, 'en')), true, marksOf(it, 'en'))));
-    B.push(para('Citation', runs(byline(it).author + ', ') + runs(byline(it).work, false, '<w:i/>') + runs(', ' + it.cite + (adickesOf(it) ? ' · ' + adickesOf(it) : '') +
+    B.push(para('Citation', runs(byline(it).author + ', ') + runs(byline(it).work, false, '<w:i/>') + runs(', ' + it.cite + (datingOf(it) ? ' · ' + datingOf(it) : '') +
       (it.from === 'english' || enShown(h, it) ? ' · English: machine translation' : ''))));
     paras(it.note).forEach(n => B.push(para('PassageNote', runs(n))));
   };
