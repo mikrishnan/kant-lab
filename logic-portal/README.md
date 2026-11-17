@@ -344,7 +344,10 @@ reader's topic rather than the seminar's one board.
 - **Annotate** some of a passage's words, or the whole of it, as on the study's board:
   *Problem*, *Relevant to…*, *Interpretation*, *Comment*, with replies and *resolved*. An
   annotation belongs to the passage, not the board, so it shows on every one of your boards
-  where that passage stands.
+  where that passage stands. *Relevant to…* can name a card on the board, or one cell of a
+  table: click it while you write, and a dotted thread joins the words to it. The cell keeps
+  the link as rows and columns are added or deleted round it. A card's side, or a cell's,
+  lists under *Relevant to it* every annotation that names it.
 - **Parallels: words that answer one another.** When several passages say the same thing, select
   the words in one of them and choose **Parallel…** in the bar by them: name it (the words are
   offered), and, if you like, say what kind of correspondence it is (*same words*, *same term*,

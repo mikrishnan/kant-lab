@@ -473,6 +473,8 @@
   #ink .annt path.hit { fill: none; stroke: transparent; stroke-width: 14; }
   #ink .annt path.v { fill: none; stroke: #2f5d8a; stroke-width: 1.8; stroke-dasharray: 1 5; stroke-linecap: round; }
   #ink .annt.dim { opacity: 0.1; }
+  #ink .annt.gone path.v { stroke-opacity: 0.45; }   /* its cell no longer in the table: drawn to the table as a whole */
+  #drawn .annt path.v { stroke: #2f5d8a; stroke-dasharray: 1 5; stroke-linecap: round; }   /* over the table, to the cell */
   .annbar { position: fixed; z-index: 40; display: none; gap: 0.25rem; padding: 0.25rem; background: #fff; border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 2px 12px rgba(60, 40, 10, 0.2); }
   .annbar.show { display: flex; }
   .annbar button { border: 1.5px solid var(--kc); color: var(--kc); background: #fff; border-radius: 999px; padding: 0.05rem 0.65rem; cursor: pointer; font-size: 0.86rem; white-space: nowrap; }
@@ -490,6 +492,9 @@
   #details .ann-e .pg { font-size: 0.78rem; color: var(--faded); font-style: italic; }
   #details .ann-e .at { white-space: pre-wrap; margin-top: 0.1rem; }
   #details .ann-e .to { margin-top: 0.1rem; color: var(--faded); }
+  #details .ann-e .to { display: flex; align-items: baseline; column-gap: 0.25rem; }   /* a long name, a cell's, wraps beside its arrow */
+  #details .ann-e .to > * { min-width: 0; }
+  #details .ann-e .to > button.linkish { text-align: left; flex: 0 1 auto; }
   #details .ann-e .to .tw { border: 1px solid var(--kc); color: var(--kc); background: #fff; border-radius: 999px; padding: 0 0.5rem; cursor: pointer; font-size: 0.85rem; font-style: italic; }
   #details .ann-e .am { display: flex; flex-wrap: wrap; gap: 0.1rem 0.55rem; font-size: 0.78rem; color: var(--faded); margin-top: 0.15rem; }
   #details .ann-e .am button, #details .ann-e .ah button.linkish, #details .ann-e .to button.linkish { background: none; border: 0; padding: 0; color: var(--accent-light); text-decoration: underline; cursor: pointer; font-size: inherit; }
@@ -650,7 +655,7 @@
     <div id="world">
       <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="gann"></g><g id="gpar"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
       <div id="cards"></div>
-      <svg id="drawn" xmlns="http://www.w3.org/2000/svg"><defs id="cdefs"></defs><g id="gcell"></g><g id="gdraw"></g><path id="wet" d=""></path></svg>
+      <svg id="drawn" xmlns="http://www.w3.org/2000/svg"><defs id="cdefs"></defs><g id="gcellann"></g><g id="gcell"></g><g id="gdraw"></g><path id="wet" d=""></path></svg>
     </div>
     <div id="compare" class="float" role="region" aria-label="Passages compared side by side" hidden></div>
     <div id="palette" class="float" role="toolbar" aria-label="Tools">
@@ -853,6 +858,23 @@ function endName(id, cell) {
   if (!cell || it.kind !== 'table') return nameOf(id);
   const rc = Array.isArray(cell) ? cell : cellRC(it, cell);
   return nameOf(id) + ', ' + (rc ? cellName(it, rc[0], rc[1]) : 'a cell no longer in it');
+}
+// What an annotation's "Relevant to" names, as words: a word, a card or one cell of a table as they stand now,
+// or else the name kept with it, for a card no longer on this board.
+// The cell's name as kept with the link, without its table's, which is named beside it.
+function keptCell(to) { const n = nameOf(to.card) + ', ', c = String(to.cite || ''); return c.startsWith(n) ? c.slice(n.length) : c; }
+function toText(to) {
+  if (!to) return '';
+  if (to.word) return to.word;
+  if (to.card && item(to.card)) return endName(to.card, to.cell || to.rc || null);
+  return to.cite || '';
+}
+// The annotations "Relevant to" a card, newest first: with cell, to that cell of it; without, to the card as a
+// whole, and to any cell of it no longer in it, since those are drawn to the table as a whole.
+function relevantTo(id, cell) {
+  const it = item(id), there = c => !!(it && it.kind === 'table' && cellRC(it, c));
+  return (B.annotations || []).filter(a => a && a.kind === 'relevant' && a.on && a.to && a.to.card === id && (cell ? a.to.cell === cell : !a.to.cell || !there(a.to.cell)))
+    .sort((x, y) => String(y.date).localeCompare(String(x.date)));
 }
 const endMatches = id => { const it = item(id); if (it) return matches(it); const m = model(id); return !query || (!!m && query.toLowerCase().split(/\s+/).filter(Boolean).every(w => (m.title + ' ' + (m.name || '')).toLowerCase().includes(w))); };
 function cardTitle(it) {
@@ -2063,7 +2085,7 @@ function annPlaces() {
   B.items.forEach(it => (it.quotes || []).forEach((q, i) => { const P = placeOn(it, i); P.spans.filter(x => inKept(q, x)).forEach(x => add(x.a.id, it.id, i)); P.whole.concat(P.lost).forEach(a => add(a.id, it.id, i)); }));
   return W;
 }
-const annHay = it => annsOfCard(it).map(a => [a.text, a.by, a.to && (a.to.word || a.to.cite)].concat((annIndex().replies.get(a.id) || []).map(r => r.text + ' ' + r.by)).join(' ')).join(' ');
+const annHay = it => annsOfCard(it).map(a => [a.text, a.by, a.to && toText(a.to)].concat((annIndex().replies.get(a.id) || []).map(r => r.text + ' ' + r.by)).join(' ')).join(' ');
 // A passage's words, the annotated ones marked; spans are { s, e, placed, a }. The latest made shows its colour.
 // ps are the places of parallels in it, { s, e, placed, a, p }: tinted in the parallel's colour, its letter after
 // them (drawn by CSS, so that it is no part of the words selected).
@@ -2263,6 +2285,16 @@ const dropArrows = as => { if (!as.length) return; const k = new Set(as.map(a =>
 // What deleting some cells takes with them, for the question asked first: '' if nothing.
 function cellsLoss(cells, as) {
   return [hasWords(cells) ? (cells.some(c => (c.pars || []).length) ? 'words, passages or parallels' : 'words or passages') : '', as.length ? (as.length === 1 ? 'an arrow' : plural(as.length, 'arrow')) + ' drawn to or from ' + (cells.length === 1 ? 'it' : 'its cells') : ''].filter(Boolean).join(', and ');
+}
+// The annotations relevant to cells about to be deleted, for the question asked first: '' if none. They are not
+// deleted with the cells: they belong to their passages, and are then relevant to the table as a whole.
+function cellAnnsNote(id, cells, inWhat) {
+  const ids = new Set(cells.map(c => c.id).filter(Boolean));
+  const as = ids.size ? (B.annotations || []).filter(a => a && a.kind === 'relevant' && a.to && a.to.card === id && ids.has(a.to.cell)) : [];
+  if (!as.length) return '';
+  const nc = new Set(as.map(a => a.to.cell)).size;
+  return (as.length === 1 ? 'An annotation is' : as.length + ' annotations are') + ' relevant to ' + (nc === 1 ? 'a cell' : nc + ' cells') + ' in ' + inWhat + ': ' +
+    (as.length === 1 ? 'it stays, and will' : 'they stay, and will') + ' then be relevant to the table as a whole.';
 }
 // The cells as a grid: every row as long as the longest, nothing cut, never less than one cell.
 function grid(it) {
@@ -2618,19 +2650,27 @@ function renderParallels(nb) {
 // "Relevant to" a card on the board: a dotted thread between the two cards, in the annotations' layer.
 // Not an arrow: it makes no claim about the models.
 function renderThreads(nb) {
-  let h = '';
+  let h = '', o = '';
   const ts = layerOn('annotations') ? (B.annotations || []).filter(a => a && a.kind === 'relevant' && a.on && a.to && a.to.card && shown(item(a.to.card))) : [];
   if (ts.length) {
     const W = annPlaces();
     ts.forEach(a => {
       const at = (W.get(a.id) || []).map(x => x.card).filter(c => shown(item(c))), from = at.includes(a.on.card) ? a.on.card : at[0];
       if (!from || from === a.to.card) return;
-      const c = curve({ from, to: a.to.card, layer: 'annotation' }); if (!c) return;
+      // to one cell of a table, kept by the cell's id; to the table as a whole if that cell is no longer in it
+      const it = item(a.to.card), cid = a.to.cell && it.kind === 'table' ? a.to.cell : null, gone = !!cid && !cellRC(it, cid);
+      const c = curve({ from, to: a.to.card, toCell: gone ? null : cid, layer: 'annotation' }); if (!c) return;
       const dim = nb ? !(nb.has(from) && nb.has(a.to.card)) : false;
-      h += '<g class="annt' + (dim ? ' dim' : '') + '" data-annid="' + esc(a.id) + '"><title>' + esc('Relevant to ' + nameOf(a.to.card) + (a.text ? ': ' + a.text : '') + (a.by ? ' (@' + a.by + ')' : '')) + '</title><path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '"/></g>';
+      h += '<g class="annt' + (dim ? ' dim' : '') + (gone ? ' gone' : '') + '" data-annid="' + esc(a.id) + '"><title>' + esc('Relevant to ' + toText(a.to) + (gone ? ' (drawn to the table as a whole)' : '') + (a.text ? ': ' + a.text : '') + (a.by ? ' (@' + a.by + ')' : '')) + '</title><path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '"/></g>';
+      // the end at a cell lies under its table: over the table, and only there, the thread is drawn again, as an arrow's is
+      if (!c.Z.card) return;
+      const R = c.Z.card, cp = 'ca-' + a.id, faint = sel.kind === 'card' && sel.ids.includes(a.to.card);
+      o += '<clipPath id="' + esc(cp) + '"><rect x="' + R.x + '" y="' + R.y + '" width="' + R.w + '" height="' + R.h + '"/></clipPath>' +
+        '<g class="annt cin' + (dim ? ' dim' : '') + (faint ? ' faint' : '') + '"><path class="v" d="' + c.d + '" clip-path="url(#' + esc(cp) + ')"/></g>';
     });
   }
   $('gann').innerHTML = h;
+  $('gcellann').innerHTML = o;
 }
 // A stroke, smoothed through the midpoints of what the pen passed over.
 function strokeD(pts) {
@@ -2679,7 +2719,7 @@ function banner() {
   if (live) { const p = live.entry || photoList().find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
   else if (lost) h = '<span>' + esc(roWhy()) + '</span><a class="btn" href="index.html#mt=' + esc(encodeURIComponent(TID)) + '">Back to My topics</a>';
   else if (mode && mode.parTo) { const p = parById(mode.parTo); h = '<span>Click the cell of a table to put <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p ? p.label : '', 40)) + '</b> in.</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>'; }
-  else if (mode) h = '<span>' + (mode.annTo ? 'Click the card these words are relevant to.' : 'Click the card, the cell of a table or the group the arrow from <b>' + esc(endName(mode.linkFrom, mode.fromRC)) + '</b> goes to.') + '</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
+  else if (mode) h = '<span>' + (mode.annTo ? 'Click the card, or the cell of a table, these words are relevant to.' : 'Click the card, the cell of a table or the group the arrow from <b>' + esc(endName(mode.linkFrom, mode.fromRC)) + '</b> goes to.') + '</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
   else if (hand && parById(hand)) { const p = parById(hand); h = '<span>Holding <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>: select its words in another passage, and press <b>+ (' + esc(parSign(p)) + ')</b> by them.</span><button type="button" class="btn" data-b="nohand">Done (Esc)</button>'; }
   else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(endName(offer.from.id, offer.from.rc)) + '</b> to <b>' + esc(endName(offer.to.id, offer.to.rc)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
   else if (offer && offer.kind === 'lasso') { const one = offer.ids.length === 1; h = '<span>You drew round ' + offer.ids.length + (one ? ' card' : ' cards') + '.</span><button type="button" class="btn solid" data-b="o-select">Select ' + (one ? 'it' : 'them') + '</button><button type="button" class="btn" data-b="o-model">Make ' + (one ? 'it' : 'them') + ' a group</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>'; }
@@ -2721,7 +2761,7 @@ function sideIntro() {
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, to a group’s frame, or to one cell of a table, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
-    '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
+    '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. <i>Relevant to…</i> can name a card on the board, or one cell of a table: click it. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
     '<li><b>Parallels</b>: when words in several passages answer one another, select them in one passage and choose <i>Parallel…</i>. The parallel is then in hand: select its words in the next passage and press <b>+ (a)</b> in the bar. Its words are tinted in its colour, with its letter, on every card; a thread runs from each of its cards to its knot; pointing at its words lights them everywhere; click a chip or a knot to show only it. Beneath a passage here, <i>Parallels</i> lists the words elsewhere that answer to its own. Select two to four cards and <i>Compare them side by side</i>.</li>' +
     '<li><b>Your note</b> on a passage, here in the side, is the note it has in My topics: write it in either.</li>' +
     '<li><b>Link to another topic</b>: under <b>Boards</b>, in the side, choose one of your topics and link to it as a whole, or to a card or group on its board; or press <i>Copy a link to it</i> on a card there, and paste it here (⌘V). Arrows join a link card like any card. The card linked to carries a mark, <b>↖</b>, and lists the links in its side.</li>' +
@@ -2794,7 +2834,7 @@ function sidePassage(it, m, arr) {
   } else if (x) h += '<span class="k">Your note on it</span><textarea class="mtnote" data-mtnote="' + esc(x.id) + '" placeholder="The same note as in My topics: write it here or there"' + (lost ? ' readonly' : '') + '>' + esc(x.note || '') + '</textarea>';
   const ks = (LX && it.mt && LX.also.get(it.mt)) || [];
   if (ks.length) h += '<div class="alsobox"><b>Also on the boards of</b> ' + ks.map(x => '<button type="button" class="linkish" data-goboard="' + esc(x.t + '|' + x.id) + '">' + esc(topicName(x.t)) + '</button>').join(', ') + '<p class="by">The page found the same passage there: it is not a link you made.</p></div>';
-  return h + linkedFromHtml(it.id) + cardButtons(it, arr);
+  return h + relevantHtml(it.id) + linkedFromHtml(it.id) + cardButtons(it, arr);
 }
 function sideCard(it) {
   const m = model(it.model), arr = B.arrows.filter(a => a.from === it.id || a.to === it.id);
@@ -2804,7 +2844,7 @@ function sideCard(it) {
   const title = it.kind === 'box' ? 'A box' + (it.label ? ': ' + it.label : '') : it.kind === 'problem' ? 'A question' : 'A note';
   let h = '<h2>' + esc(title) + '</h2><p class="sub">' + mchip(m) + esc(m ? m.name || '' : '') + '</p>';
   if (it.text) h += '<span class="k">Written on the board</span><div class="stmt' + (it.kind === 'problem' ? ' problem' : '') + '">' + esc(it.text) + '</div>';
-  return h + linkedFromHtml(it.id) + cardButtons(it, arr);
+  return h + relevantHtml(it.id) + linkedFromHtml(it.id) + cardButtons(it, arr);
 }
 function sideTable(it, m, arr) {
   const { rows, cols } = dims(it), h = headOf(it), g = grid(it), at = tcell && tcell.id === it.id && tcell.r < rows && tcell.c < cols ? tcell : null;
@@ -2830,6 +2870,7 @@ function sideTable(it, m, arr) {
     }).join('');
     const ca = cl.id ? arr.filter(a => (a.from === it.id && a.fromCell === cl.id) || (a.to === it.id && a.toCell === cl.id)) : [];
     if (ca.length) s += '<span class="k">Its arrows</span>' + ca.map(relBtn).join('');
+    if (cl.id) s += relevantHtml(it.id, cl.id);
     if (!ro()) {
       const under = underTopic().filter(x => !cl.ps.some(p => p.mt === x.id));
       s += (under.length ? '<select data-tcellp aria-label="Put a passage in this cell"><option value="">Put one of the topic’s passages in this cell…</option>' + under.map(x => '<option value="' + esc(x.id) + '">' + esc((x.cite || x.ref) + (x.work ? ' · ' + x.work : '')) + '</option>').join('') + '</select>' : '') +
@@ -2840,6 +2881,7 @@ function sideTable(it, m, arr) {
         '<span class="lbl">Column</span><span class="b"><button type="button" class="linkish" data-tact="colleft">insert left</button><button type="button" class="linkish" data-tact="colright">insert right</button>' + (cols > 1 ? '<button type="button" class="linkish" data-tact="coldel">delete it</button>' : '') + '</span></div>';
     }
   } else if (!ro()) s += '<p class="by">Click a cell to put a passage in it, to draw an arrow from it, or to add or delete a row or column there. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next.</p>';
+  s += relevantHtml(it.id, null, at ? 'Relevant to the table as a whole' : 'Relevant to it');
   s += '<div class="row"><button type="button" class="btn" data-act="tcopy" title="To paste into Word, a spreadsheet, or onto a board (⌘C does it too)">Copy the table</button></div>';
   return s + cardButtons(it, arr);
 }
@@ -2942,7 +2984,7 @@ function sideLink(it, m, arr) {
     }
     h += '<div class="row"><button type="button" class="btn solid" data-act="followlink">' + (L.whole ? 'Open that board' : 'Open that board at it') + '</button>' + (L.whole ? '<a class="linkish" href="index.html#mt=' + esc(encodeURIComponent(L.t)) + '">its list in My topics</a>' : '') + '</div>';
   }
-  return h + linkedFromHtml(it.id) + cardButtons(it, arr);
+  return h + relevantHtml(it.id) + linkedFromHtml(it.id) + cardButtons(it, arr);
 }
 // Your other topics' boards, to link to: the topic as a whole, or a card or group on its board.
 let brdT = '', brdQ = '';
@@ -3083,7 +3125,15 @@ async function stopSharing() {
 const whoHtml = a => (a.by ? '@' + esc(a.by) + ' · ' : '') + esc(a.date ? fmtDate(a.date) : '') + (a.edited ? ' · edited' + (a.editedBy ? ' by @' + esc(a.editedBy) : '') : '');
 function toHtml(to) {
   if (to.word) return '<button type="button" class="tw" data-annword="' + esc(to.word) + '" title="Light every card that has these words, on it or in its annotations">' + esc(to.word) + '</button>';
-  if (to.card) return item(to.card) ? '<button type="button" class="linkish" data-card="' + esc(to.card) + '">' + esc(nameOf(to.card)) + '</button>' : '<i>a card no longer on the board</i>';
+  if (to.card) {
+    const it = item(to.card);
+    if (!it) return to.t && to.t !== TID && topicName(to.t) ? '<span><button type="button" class="linkish" data-goboard="' + esc(to.t + '|' + to.card) + '">' + esc(to.cite || 'a card') + '</button> ↗ <span class="pg">on the board of “' + esc(topicName(to.t)) + '”</span></span>'
+      : '<i>a card no longer on the board</i>' + (to.cite ? ' <span class="pg">(' + esc(to.cite) + ')</span>' : '');
+    const cid = to.cell && it.kind === 'table' ? to.cell : null;
+    if (cid && cellRC(it, cid)) return '<button type="button" class="linkish" data-endid="' + esc(to.card) + '" data-endcell="' + esc(cid) + '" title="Go to the cell">' + esc(endName(to.card, cid)) + '</button>';
+    return '<button type="button" class="linkish" data-card="' + esc(to.card) + '">' + esc(nameOf(to.card)) + '</button>' +
+      (cid ? ' <span class="pg">· a cell no longer in it' + (to.cite ? ' (' + esc(keptCell(to)) + ', as it was when linked)' : '') + ': drawn to the table as a whole</span>' : '');
+  }
   if (to.board) return '<button type="button" class="linkish" data-goboard="' + esc(to.board.t + '|' + (to.board.item || '')) + '">' + esc(to.cite || 'another board') + '</button> ↗';
   const href = portalHref(to);
   return href ? '<button type="button" class="linkish" data-read="' + esc(href) + '">' + esc(to.cite || 'the passage') + '</button> <a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : esc(to.cite || '');
@@ -3118,12 +3168,21 @@ function annEntryHtml(x) {
   return h + '</div>';
 }
 // The box an annotation is written in. Enter keeps it, ⇧Enter is a new line, Esc leaves it.
+// Under "Relevant to", in the box: the card or the cell of a table clicked on the board, or the way to click one.
+function pickedHtml(to) {
+  if (!(to && to.card)) return '<button type="button" class="linkish" data-act="annpick">or click a card, or a cell of a table, on the board</button>';
+  const it = item(to.card), rc = it && it.kind === 'table' ? to.rc || (to.cell ? cellRC(it, to.cell) : null) : null;
+  if (!it) return 'the card <b>' + esc(to.cite || 'no longer on the board') + '</b> <button type="button" class="linkish" data-annunpick>not that card</button>';
+  if (!to.rc && !to.cell) return 'the card <b>' + esc(nameOf(to.card)) + '</b> <button type="button" class="linkish" data-annunpick>not that card</button>';
+  return 'the cell <b>' + esc(rc ? cellName(it, rc[0], rc[1]) : 'no longer in it' + (to.cite ? ' (' + keptCell(to) + ')' : '')) + '</b> of <b>' + esc(nameOf(to.card)) + '</b> ' +
+    '<button type="button" class="linkish" data-annunpick>not that cell</button> · <button type="button" class="linkish" data-annwholeto>the table as a whole instead</button>';
+}
 function composerHtml() {
   const f = form, reply = !!f.re, K = annKind(f.ann);
   const kinds = reply ? '' : '<div class="akinds">' + ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + (k.key === f.ann ? ' on' : '') + '" data-annkind="' + k.key + '">' + esc(k.label) + '</button>').join('') + '</div>';
   const on = '<p class="aon">' + (reply ? (f.id ? 'Your reply' : 'A reply') : f.on && f.on.exact ? 'On “<i>' + esc(short(f.on.exact, 120)) + '</i>”' : 'On the passage as a whole') + '</p>';
   const to = !reply && f.ann === 'relevant' ? '<label class="f">Relevant to</label><input type="text" data-ann-to value="' + esc(f.to0 || '') + '" placeholder="a word, R 3990, a portal address, or a link to another board" spellcheck="false">' +
-    '<div class="by" style="margin-top:0.2rem">' + (f.to && f.to.card ? 'the card <b>' + esc(nameOf(f.to.card)) + '</b> <button type="button" class="linkish" data-annunpick>not that card</button>' : '<button type="button" class="linkish" data-act="annpick">or click a card on the board</button>') + '</div>' : '';
+    '<div class="by" style="margin-top:0.2rem">' + pickedHtml(f.to) + '</div>' : '';
   return '<div class="anncomp ak-' + (reply ? 'reply' : esc(f.ann)) + '" data-fkey="' + esc(f.key) + '">' + kinds + on + to +
     '<textarea data-ann-text rows="2" placeholder="' + esc(reply ? 'Your reply' : K.hint) + '">' + esc(f.text0 || '') + '</textarea>' +
     (SHM && !reply && !f.id ? '<label class="chk onlyc"><input type="checkbox" data-ann-only> only me: kept in My topics, not on the shared board</label>' : '') +
@@ -3142,6 +3201,16 @@ function sideAnnotations() {
     '<select data-annf="st" aria-label="Problems">' + opt('', 'open or resolved', f.st) + opt('open', 'open problems', f.st) + opt('resolved', 'resolved problems', f.st) + '</select></div>' +
     '<div id="annlist">' + annListAll() + '</div>' +
     '<div class="row"><button type="button" class="linkish" data-act="dlann">Download them as a list</button><button type="button" class="linkish" data-act="cancel">Close</button></div>';
+}
+// "Relevant to it", in a card's side, or a cell's: every annotation that names it, each opening beneath its passage.
+function relevantHtml(id, cell, label) {
+  const as = relevantTo(id, cell); if (!as.length) return '';
+  const W = annPlaces();
+  return '<span class="k">' + esc(label || 'Relevant to it') + '</span>' + as.map(a => '<div class="ann-e ak-relevant' + (a.kind === 'problem' && a.resolved ? ' done' : '') + '"><div class="ah"><span class="kl">' + esc(annKind(a.kind).label) + '</span>' +
+    (W.has(a.id) ? '<button type="button" class="linkish" data-annopen="' + esc(a.id) + '" title="Open it beneath its passage">' + esc(a.on.cite || 'the passage') + '</button>' : esc(a.on.cite || 'a passage') + ' <span class="pg">· not on the board now</span>') + '</div>' +
+    (a.on.exact ? '<div class="ex">“' + esc(short(a.on.exact, 140)) + '”</div>' : '<div class="on">the passage as a whole</div>') +
+    (!cell && a.to.cell ? '<div class="pg">It names a cell no longer in the table' + (a.to.cite ? ' (' + esc(keptCell(a.to)) + ', as it was when linked)' : '') + ', and is drawn to the table as a whole.</div>' : '') +
+    (a.text ? '<div class="at">' + esc(a.text) + '</div>' : '') + '<div class="am"><span>' + whoHtml(a) + '</span></div></div>').join('');
 }
 function annListAll() {
   const f = (form && form.f) || {}, X = annIndex(), W = annPlaces();
@@ -3164,7 +3233,7 @@ function downloadAnns() {
   all.forEach(a => { const k = a.on.cite || a.on.ref || a.on.hash || 'A passage'; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(a); });
   const one = x => String(x || '').replace(/\s*\n+\s*/g, ' ');
   const line = a => '- **' + annKind(a.kind).label.replace('…', '') + '** ' + (a.on.exact ? 'on “' + one(a.on.exact) + '”' : 'on the passage as a whole') +
-    (a.to ? ', relevant to ' + (a.to.word ? '*' + one(a.to.word) + '*' : a.to.card ? one(nameOf(a.to.card)) : one(a.to.cite)) : '') + (a.text ? ': ' + one(a.text) : '') +
+    (a.to ? ', relevant to ' + (a.to.word ? '*' + one(a.to.word) + '*' : a.to.card ? one(toText(a.to) || 'a card no longer on the board') : one(a.to.cite)) : '') + (a.text ? ': ' + one(a.text) : '') +
     ' (' + (a.by ? '@' + a.by + ', ' : '') + fmtDate(a.date) + (a.resolved ? '; resolved' + (a.resolved.by ? ' by @' + a.resolved.by : '') : '') + ')' +
     (X.replies.get(a.id) || []).map(r => '\n  - ' + one(r.text) + ' (' + (r.by ? '@' + r.by + ', ' : '') + fmtDate(r.date) + ')').join('');
   const md = '# Annotations on the board of “' + one(topic ? topic.name : '') + '”\n\nFrom My topics, in the Kant Lab Logic Portal: annotations as of ' + fmtDate(new Date().toISOString()) + '.\n' +
@@ -3572,8 +3641,8 @@ function setShape(id, rows, cols) {
   const going = g.slice(rows).flat().concat(g.slice(0, rows).flatMap(x => x.slice(cols))), what = [], cut = cellArrows(id, going);
   if (rows < d.rows) what.push('the last ' + (d.rows - rows === 1 ? 'row' : plural(d.rows - rows, 'row')));
   if (cols < d.cols) what.push('the last ' + (d.cols - cols === 1 ? 'column' : plural(d.cols - cols, 'column')));
-  const loss = cellsLoss(going, cut).replace(' from its cells', ' from their cells');
-  if (loss && !confirm('Taking off ' + what.join(' and ') + ' takes with ' + (what.length > 1 || rows < d.rows - 1 || cols < d.cols - 1 ? 'them' : 'it') + ' ' + loss + '. Go on? Undo (⌘Z) puts it all back.')) { renderSide(); return; }
+  const loss = cellsLoss(going, cut).replace(' from its cells', ' from their cells'), them = what.length > 1 || rows < d.rows - 1 || cols < d.cols - 1 ? 'them' : 'it', an = cellAnnsNote(id, going, them);
+  if ((loss || an) && !confirm('Taking off ' + what.join(' and ') + (loss ? ' takes with ' + them + ' ' + loss : '') + '.' + (an ? ' ' + an : '') + ' Go on? Undo (⌘Z) puts it all back.')) { renderSide(); return; }
   withTable(id, (g, cw) => {
     dropArrows(cut);
     g.splice(rows); while (g.length < rows) g.push(g[0].map(blank));
@@ -3591,7 +3660,8 @@ function tableAct(act) {
   if (/^row(above|below)$/.test(act) && d.rows >= TABLE_MAX.rows) return toast('A table holds ' + TABLE_MAX.rows + ' rows at most.');
   if (/^col(left|right)$/.test(act) && d.cols >= TABLE_MAX.cols) return toast('A table holds ' + TABLE_MAX.cols + ' columns at most.');
   const going = act === 'rowdel' ? g[r] : act === 'coldel' ? g.map(x => x[c]) : [], cut = cellArrows(id, going), loss = cellsLoss(going, cut);
-  if (loss && !confirm((act === 'rowdel' ? 'Row ' + (r + 1) : 'Column ' + (c + 1)) + ' has ' + loss.replace('words or passages', 'words or passages in it') + '. Delete it' + (cut.length ? ', and ' + (cut.length === 1 ? 'the arrow' : 'the arrows') : '') + '? Undo (⌘Z) brings it back.')) return;
+  const nm = act === 'rowdel' ? 'Row ' + (r + 1) : 'Column ' + (c + 1), an = cellAnnsNote(id, going, loss ? 'it' : nm.toLowerCase());
+  if ((loss || an) && !confirm((loss ? nm + ' has ' + loss.replace('words or passages', 'words or passages in it') + '. ' : '') + (an ? an + ' ' : '') + 'Delete ' + (loss ? 'it' : 'the ' + (act === 'rowdel' ? 'row' : 'column')) + (cut.length ? ', and ' + (cut.length === 1 ? 'the arrow' : 'the arrows') : '') + '? Undo (⌘Z) brings it back.')) return;
   withTable(id, (g, cw) => {
     dropArrows(cut);
     if (act === 'rowabove') g.splice(r, 0, g[0].map(blank));
@@ -3801,7 +3871,7 @@ function barHtml() {
   const h = parById(hand);
   return (h ? '<button type="button" class="pin" data-parin="' + esc(h.id) + '" style="--kc:' + parColor(h) + '" title="Add these words to this parallel">+ (' + esc(parSign(h)) + ') ' + esc(short(h.label, 28)) + '</button>' : '') +
     '<button type="button" data-parnew style="--kc:#5c3d1e" title="These words answer words in other passages: make them a parallel, or add them to one">Parallel…</button><span class="bsep"></span>' +
-    ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + '" data-annk="' + k.key + '" title="' + esc(k.key === 'relevant' ? 'What these words bear on: a word, a card on the board, R 3990, or a portal address' : k.hint) + '">' + esc(k.label) + '</button>').join('');
+    ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + '" data-annk="' + k.key + '" title="' + esc(k.key === 'relevant' ? 'What these words bear on: a word, a card or a cell of a table on the board, R 3990, or a portal address' : k.hint) + '">' + esc(k.label) + '</button>').join('');
 }
 function showBar() {
   const b = $('annbar');
@@ -3976,6 +4046,23 @@ async function readTo(v) {
   const h = hashOf(v);
   return h ? { hash: h, cite: hashCite(h) } : { word: v };
 }
+// A card, or a cell of a table, clicked on the board for "Relevant to": the cell by its id if it has one, else
+// where it stands, to be given an id only when the annotation is kept.
+function pickedTo(id, rc) {
+  const it = item(id), g = rc && it && it.kind === 'table' ? grid(it) : null, cl = g && g[rc[0]] && g[rc[0]][rc[1]];
+  return Object.assign({ card: id }, cl ? (cl.id ? { cell: cl.id } : { rc: rc.slice() }) : {});
+}
+// "Relevant to" a card as it is kept: the card; one cell of it by the cell's own id, given it now if it has none, so
+// that the link keeps to the cell as rows and columns come and go round it; the board; and their name as it stands,
+// for when they are gone, or are seen from another board. Called inside change(). Anything else is kept as it is.
+function keepTo(T) {
+  if (!T || !T.card) return T;
+  const it = item(T.card); if (!it) { const o = clone(T); delete o.rc; return o; }
+  let cid = it.kind === 'table' ? T.cell || (T.rc ? cellKey(T.card, T.rc) : null) : null;
+  const o = Object.assign({ card: T.card }, cid ? { cell: cid } : {}, TID ? { t: TID } : {});
+  o.cite = !cid || cellRC(it, cid) ? endName(T.card, cid) : T.cite || nameOf(T.card);
+  return o;
+}
 async function saveAnn() {
   const D = $('details'), f = form; if (!composing()) return;
   const err = t => { const e = D.querySelector('.anncomp [data-err]'); if (e) e.textContent = t; };
@@ -3984,7 +4071,7 @@ async function saveAnn() {
   if (!f.re && f.ann === 'relevant') {
     const v = ((D.querySelector('.anncomp [data-ann-to]') || {}).value || '').trim();
     if (v) { try { to = await readTo(v); } catch (x) { return err(x.message); } } else to = f.to || null;
-    if (!to) return err('Say what it is relevant to: a word, R 3990, a portal address, or a card on the board.');
+    if (!to) return err('Say what it is relevant to: a word, R 3990, a portal address, or a card or a cell of a table on the board.');
   }
   if (!text && (f.re || f.ann !== 'relevant')) return err(f.re ? 'Write the reply.' : 'Say it in your words.');
   const only = SHM && !f.id && (f.re ? !!(annById(f.re) || {}).only : !!(D.querySelector('.anncomp [data-ann-only]') || {}).checked);
@@ -3995,11 +4082,11 @@ async function saveAnn() {
     if (f.id) {
       const a = B.annotations.find(x => x.id === f.id); if (!a) return;
       a.text = text; a.edited = at; a.at = at;
-      if (a.kind !== 'reply') { a.kind = f.ann; if (to) a.to = to; else delete a.to; }
+      if (a.kind !== 'reply') { a.kind = f.ann; if (to) a.to = keepTo(to); else delete a.to; }
     } else {
       id = uid('n');
       const sign = Object.assign(me() ? { by: me() } : {}, only ? { only: true } : {});
-      B.annotations.push(Object.assign(f.re ? { id, kind: 'reply', re: f.re, text, date: at, at } : Object.assign({ id, kind: f.ann, on: clone(f.on) }, to ? { to } : {}, { text, date: at, at }), sign));
+      B.annotations.push(Object.assign(f.re ? { id, kind: 'reply', re: f.re, text, date: at, at } : Object.assign({ id, kind: f.ann, on: clone(f.on) }, to ? { to: keepTo(to) } : {}, { text, date: at, at }), sign));
     }
   });
   form = null; if (item(f.card)) sel = { kind: 'card', ids: [f.card] };
@@ -4241,7 +4328,7 @@ $('stage').addEventListener('pointerdown', e => {
     const id = card.dataset.id;
     const cellAt = cellEl && card.classList.contains('k-table') ? cellEl.dataset.cell.split(',').map(Number) : null;
     if (mode && mode.annTo) {   // the card an annotation's words are relevant to
-      mode = null; if (composing()) form.to = { card: id };
+      mode = null; markEnd(null); if (composing()) form.to = pickedTo(id, cellAt);
       render(); const ti = $('details').querySelector('.anncomp [data-ann-to]'); if (ti) ti.value = '';
       focusComposer(); return;
     }
@@ -4271,7 +4358,7 @@ $('stage').addEventListener('pointerdown', e => {
 });
 $('stage').addEventListener('pointermove', e => {
   if (touches.has(e.pointerId)) touches.set(e.pointerId, [e.clientX, e.clientY]);
-  if (!drag) { if (mode && mode.linkFrom) { const t = endAt(e.clientX, e.clientY); markEnd(t && !sameEnd({ id: mode.linkFrom, rc: mode.fromRC || null }, t) ? t : null); } else if (mode && mode.parTo) dropCell(e); return; }
+  if (!drag) { if (mode && mode.linkFrom) { const t = endAt(e.clientX, e.clientY); markEnd(t && !sameEnd({ id: mode.linkFrom, rc: mode.fromRC || null }, t) ? t : null); } else if (mode && mode.parTo) dropCell(e); else if (mode && mode.annTo) { const t = endAt(e.clientX, e.clientY); markEnd(t && item(t.id) ? t : null); } return; }
   if (drag.what === 'pinch') {
     if (touches.size < 2) return;
     const [p, q] = [...touches.values()], d = Math.hypot(p[0] - q[0], p[1] - q[1]) || 1, m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
@@ -4853,6 +4940,14 @@ $('details').addEventListener('focusout', e => {
 window.addEventListener('pagehide', noteNow);
 // The new table's grid: swept with a mouse or a finger, its size chosen where the pointer lifts.
 $('details').addEventListener('pointermove', e => { const b = gridAt(e); if (b) { const [r, c] = b.dataset.g.split(',').map(Number); tableFormSync(r + 1, c + 1); } });
+// Pointing at a cell named in the side (an arrow's end, what an annotation is relevant to) lights it on the board.
+$('details').addEventListener('pointerover', e => {
+  if (drag || mode) return;
+  const b = e.target.closest && e.target.closest('[data-endcell]'), c = b && b.dataset.endcell ? cardEl(b.dataset.endid) : null;
+  const td = c && [...c.querySelectorAll('[data-cid]')].find(x => x.dataset.cid === b.dataset.endcell);
+  markEnd(td ? { el: td } : null);
+});
+$('details').addEventListener('pointerleave', () => { if (!mode) markEnd(null); });
 $('details').addEventListener('pointerout', e => { if (e.target.closest && e.target.closest('[data-tgrid]') && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest('[data-tgrid]'))) tableFormSync(); });
 $('details').addEventListener('pointerup', e => { const b = gridAt(e); if (b) pickSize(b); });
 // A table copied: as text and as HTML for Word and spreadsheets, and whole for a board. ⌘C copies the table selected.
@@ -5065,6 +5160,7 @@ $('details').addEventListener('click', e => {
   const awd = e.target.closest('[data-annword]'); if (awd) { findWord(awd.dataset.annword); return; }
   const aop = e.target.closest('[data-annopen]'); if (aop) { openAnn(aop.dataset.annopen); return; }
   const aun = e.target.closest('[data-annunpick]'); if (aun && composing()) { form.to = null; renderSide(); focusComposer(); return; }
+  const awt = e.target.closest('[data-annwholeto]'); if (awt && composing() && form.to) { delete form.to.rc; delete form.to.cell; delete form.to.cite; renderSide(); focusComposer(); return; }
   const gb = e.target.closest('[data-tgrid] button'); if (gb) { if (e.detail === 0) pickSize(gb); return; }   // the keyboard's click; a pointer's is taken on pointerup
   const tac = e.target.closest('[data-tact]'); if (tac) { tableAct(tac.dataset.tact); return; }
   const tpo = e.target.closest('[data-tpout]'); if (tpo && tcell) { takeFromCell(tcell.id, tcell.r, tcell.c, +tpo.dataset.tpout); return; }
