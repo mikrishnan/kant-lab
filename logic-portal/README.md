@@ -266,6 +266,19 @@ reader's topic rather than the seminar's one board.
   (*develops*, *contradicts*, *qualifies*, *same as*, *cf.*, *answers?* to a question, or a word
   of your own), drawing with a pen or an Apple Pencil, views, layers, **Focus** and **Find on the
   board**.
+- **One passage in several groups.** A passage can stand in as many groups as it belongs to, as a
+  card in each: **+ in another group too**, in a passage card's side, puts a second card of it in
+  the group you choose. So does dragging a card into another group's frame with **⌥** held (a
+  plain drag moves it, as before), or dragging the passage from *On the board*, under Passages,
+  into a frame. Its cards are one passage: the same words, the same note and the same
+  annotations, so what you write on one shows on all of them. Each has its own heading, which a
+  second card starts with, and its own arrows, which it starts without. Each card says where the
+  others are, *also in ● Contradiction*, and goes to them when clicked; selecting one outlines
+  the rest. A passage goes into a group once: put it in again and you are taken to the card
+  already there. Taking one card off the board leaves the others; the passage goes back under
+  Passages with its last. **Change what it quotes** on one of its cards changes it on all of
+  them; **Split it in two…** leaves the others quoting the first part; and **Join into one
+  card** makes the passages' other cards cards of the joined one, one to a group.
 - **Tables.** Press **Table** and choose how many columns and rows on a small grid, or type the
   numbers (12 and 40 at most), and whether the first row, the first column, both or neither are
   headings; both can be changed later without losing a word. Type in a cell where it stands:
