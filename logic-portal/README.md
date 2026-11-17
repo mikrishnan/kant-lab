@@ -218,7 +218,14 @@ The page's **☆ Topic on passages** switch turns the buttons off again, and you
   passage with one note. A kept passage's button says where it is: *★ Real opposition*, *★ 3
   topics*.
 - **Keep some of its words.** Select a few words of a passage, in the original or in its
-  English, and press **☆ Keep these words**. They are kept with the passage's address.
+  English, and press **☆ Keep these words**. They are kept with the passage's address. In the
+  original, the selection can run on from one passage into the next ones of the same text, and
+  is kept as one stretch, cited by the pages its words are on: a sentence the transcription cut
+  across several short passages can be kept whole. A lecture paragraph long enough for the
+  portal to draw in pieces gets ☆ Topic beside the piece under the pointer, which offers **only
+  this part** as well as the whole passage; a run of short passages drawn together offers
+  to keep the run as one (*these 5 short passages together*). The picker offers first what you chose last. A passage
+  some of whose words are kept says so: *◐ Real opposition*.
 - **Read them.** The My topics page lists your topics on the left. Each passage shows its
   citation, its opening words (**▾ the whole passage** shows all of it) and a note of your own.
   Click the citation to read it where it stands in the reader. **Also under** shows only the
@@ -269,7 +276,9 @@ reader's topic rather than the seminar's one board.
   others are, *also in ● Contradiction*, and goes to them when clicked; selecting one outlines
   the rest. A passage goes into a group once: put it in again and you are taken to the card
   already there. Taking one card off the board leaves the others; the passage goes back under
-  Passages with its last.
+  Passages with its last. **Change what it quotes** on one of its cards changes it on all of
+  them; **Split it in two…** leaves the others quoting the first part; and **Join into one
+  card** makes the passages' other cards cards of the joined one, one to a group.
 - **Tables.** Press **Table** and choose how many columns and rows on a small grid, or type the
   numbers (12 and 40 at most), and whether the first row, the first column, both or neither are
   headings; both can be changed later without losing a word. Type in a cell where it stands:
@@ -282,9 +291,41 @@ reader's topic rather than the seminar's one board.
   copied from Word, a spreadsheet or a web page and pasted on the board becomes a table, with
   headings only where it marked them; pasted into a cell being typed in, it fills the cells from
   there on.
+- **Arrows from and to one cell.** Each cell of a table has a **→** of its own, beside it when
+  the mouse is over it, or once it is tapped: drag it to a card (a passage, a note, a question,
+  a link to another topic), to another cell of any table, or to a group's frame or name, and
+  the arrow goes from that cell alone. An arrow drawn from any card's **→** goes to the cell it
+  is let go over; let go over the table's name or edge, it goes to the table as a whole, and
+  so does the table's own **→**. What it would go to is lit as you drag. **+ Arrow from this
+  cell**, in the side, does the same with two clicks. Over its table the arrow is drawn again
+  as far as the cell, with a dot where it leaves one, and it is named by the cell's headings,
+  *row “nihil privativum”, column “Wolff”*, or by number. It keeps to its cell when rows and
+  columns are inserted round it; deleting the cell's row or column asks first, and takes its
+  arrows too. **From the table as a whole instead**, in an arrow's side, lets go of the cell.
+  Any arrow can now go to or from a group as well: the group's side lists its arrows, and
+  deleting the group takes them.
 - **Click a card** to read its passage in full in the side, with the words you kept, if you kept
   only some, and **your note on it**, which is the same note as in the list: write it in either.
   The passage opens in the portal beside the board at the same time, under **Reading**.
+  **▾ read it all here**, on a card whose passage is longer than it shows, opens the card on the
+  board to the passage in full, above the cards it covers; **▴ less** closes it. An opened card
+  is not saved as opened.
+- **Change what a card quotes.** A passage is whatever the transcription made one paragraph,
+  from a line to six pages, so a card can quote less of it, or more. **Change what it quotes**,
+  in a passage card's side, shows the passage between the ones before and after it: select the
+  words you want there, or move the start or the end a sentence at a time (‖ marks where the
+  portal finds a sentence beginning; click one to move the nearer edge to it), or take in the
+  passage before or after. The card then cites the pages its words are on, *AA 24:882* rather
+  than *AA 24:880–885*, and says what it is cut from. **Split it in two…** makes two cards of
+  one at the ✂ you choose: your note stays with the first, and each arrow with the card you
+  say. Select cards of passages of one text (⇧-click) and **Join into one card** makes them one,
+  with any passages between them, every note, and a ¶ where the text began a new paragraph.
+  **⌘Z** undoes each, on the board and in My topics together. A passage that stands under
+  other topics too asks first: change it under all of them, or keep a copy for this topic
+  alone. The words and pages stay the text's; only where a stretch starts and ends is yours. A
+  stretch never runs from one Reflexion into the next, nor over more than 40 passages, and words
+  kept from the English stay as they are. On a shared board a card shows the stretch it was
+  shared with, but what it quotes can't yet be changed there.
 - **Annotate** some of a passage's words, or the whole of it, as on the study's board:
   *Problem*, *Relevant to…*, *Interpretation*, *Comment*, with replies and *resolved*. An
   annotation belongs to the passage, not the board, so it shows on every one of your boards

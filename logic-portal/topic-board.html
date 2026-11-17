@@ -108,6 +108,30 @@
   .card.k-passage .ttl { display: block; font-weight: 600; color: var(--accent); font-size: 0.92rem; margin-bottom: 0.1rem; }
   .card.k-passage .pq { font-style: italic; line-height: 1.25; }
   .card.k-passage .pc { display: block; font-size: 0.75rem; color: var(--faded); margin-top: 0.2rem; }
+  .card.k-passage .pc .pof { margin-left: 0.35rem; }
+  .card.k-passage .para, #details .para { font-style: normal; color: var(--accent-light); font-size: 0.85em; }
+  .card.slost { border-style: dashed; }
+  #details .q .t .out { color: var(--faded); opacity: 0.75; }
+  #details .q .t .in { background: var(--note); }
+  #details .sxbox { background: #fff; border: 1px solid var(--line); padding: 0.4rem 0.6rem; max-height: 46vh; overflow: auto; font-size: 0.9rem; line-height: 1.45; margin: 0 0 0.5rem; }
+  #details .sx { margin: 0 0 0.55rem; }
+  #details .sx.far { color: var(--faded); }
+  #details .sx .sc { display: block; font-size: 0.72rem; color: var(--faded); font-style: normal; user-select: none; }
+  #details .sx mark.in { background: var(--note); color: var(--ink); border-radius: 2px; }
+  #details .sx .sm { cursor: pointer; font-style: normal; user-select: none; }   /* drawn by CSS alone, so that the text selected is the passage's */
+  #details .sx .sm::before { content: '‖'; margin: 0 0.12rem 0 0; font-size: 0.72rem; color: var(--accent-light); opacity: 0.55; }
+  #details .sx .sm:hover::before { color: var(--accent); opacity: 1; }
+  #details .sx.cutting .sm::before { content: ''; margin: 0; }
+  #details .sx.cutting .sm.can::before { content: '✂'; margin: 0 0.15rem; color: var(--accent-light); font-size: 0.8rem; opacity: 1; }
+  #details .sx .sm.cut::before { content: '✂'; margin: 0 0.15rem; color: var(--prob); font-size: 0.95rem; opacity: 1; }
+  #details .sxrow { display: flex; flex-wrap: wrap; gap: 0.3rem 0.6rem; align-items: baseline; font-size: 0.82rem; margin: 0.15rem 0 0.35rem; }
+  #details .sxrow b { font-weight: 600; color: var(--accent); min-width: 2.6rem; }
+  #details .sxnow { font-size: 0.86rem; margin: 0 0 0.4rem; }
+  /* a passage card opened to its passage in full: wider, and above the cards it covers until it is closed */
+  .card.k-passage.open { width: 340px; z-index: 3; box-shadow: 0 3px 14px rgba(60, 40, 10, 0.25); }
+  .card.k-passage .pl { display: block; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.08em; color: var(--accent); margin: 0.3rem 0 0.05rem; }
+  .card .more { display: block; margin-top: 0.15rem; padding: 0; border: 0; background: none; color: var(--faded); font: inherit; font-size: 0.75rem; text-decoration: underline; cursor: pointer; }
+  .card .more:hover { color: var(--accent); }
   .card.k-problem { width: 260px; background: #fff7f1; border-color: #d6b19c; border-left-color: var(--prob); font-size: 0.88rem; line-height: 1.25; }
   .card .tag { display: block; font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.09em; color: var(--prob); margin-bottom: 0.15rem; }
   .card.k-note { width: 190px; background: var(--note); border-color: #e6d58a; font-size: 0.9rem; line-height: 1.25; transform: rotate(-0.6deg); }
@@ -392,6 +416,32 @@
   #stage.readonly .tcol { display: none !important; }
   #world.far .card.k-table .tcap { font-size: 1.5rem; }
   @media (pointer: coarse) { .card .tcol { width: 18px; margin-left: -9px; } }
+  /* a cell's own knob, to draw an arrow from that cell alone: shown on the cell under the mouse, and on the cell last clicked */
+  .card.k-table .tw { position: relative; }
+  .card.k-table .ck { position: absolute; right: -0.3rem; top: 50%; width: 16px; height: 16px; margin-top: -8px; border-radius: 50%; background: var(--accent-light); color: #fff; font-size: 10px; line-height: 16px;
+                      text-align: center; font-weight: 400; font-style: normal; cursor: crosshair; display: none; box-shadow: 0 0 0 1.5px #fff; }
+  .card.k-table td:hover > .tw > .ck, .card.k-table th:hover > .tw > .ck, .card.k-table.sel .tsel > .tw > .ck { display: block; }
+  #stage.linking .card.k-table .ck { display: none; }
+  @media (pointer: coarse) {
+    .card.k-table .ck { width: 26px; height: 26px; margin-top: -13px; line-height: 26px; font-size: 14px; }
+    .card.k-table td:hover > .tw > .ck, .card.k-table th:hover > .tw > .ck { display: none; }
+    .card.k-table.sel .tsel > .tw > .ck { display: block; }
+  }
+  /* what an arrow being drawn would go to: a card, a cell of a table, or a group */
+  .card.lto { outline: 3px dashed var(--accent); outline-offset: 2px; }
+  .card.k-table td.lto, .card.k-table th.lto { box-shadow: inset 0 0 0 2px var(--accent); background: color-mix(in srgb, var(--accent-light) 14%, #fff); }
+  #ink .frame.lto rect.f { stroke-width: 4; fill-opacity: 0.14; }
+  .ftab.lto { outline: 2px solid var(--ink); }
+  /* an arrow to or from a cell is drawn again over its table, as far as the table's edge, so that it is seen to reach the cell */
+  #drawn .cin path.v { fill: none; stroke-width: 1.8; opacity: 0.85; }
+  #drawn .cin.sel path.v { stroke-width: 3.2; }
+  #drawn .cin.dim { opacity: 0.08; }
+  #drawn .cin.faint { opacity: 0.3; }   /* its table selected, to be worked in: the cells and their knobs come first */
+  #drawn .cin.faint .pill { pointer-events: none; }
+  #drawn .cin .pill { pointer-events: auto; cursor: pointer; }
+  #drawn .cin .pill rect { fill: #fff; stroke-width: 1.3; }
+  #drawn .cin .pill text { font-family: 'EB Garamond', serif; font-size: 13px; fill: var(--accent); }
+  #drawn .cin.problem .pill text { fill: var(--prob); }
   /* annotations: words of a passage marked by the seminar. Each kind's colour is --kc, set from ANN_KINDS. */
   mark.ann { color: inherit; background: color-mix(in srgb, var(--kc) 15%, transparent); border-bottom: 2px solid var(--kc); border-radius: 2px; padding: 0 1px; cursor: pointer; }
   mark.ann.many { background: color-mix(in srgb, var(--kc) 28%, transparent); }
@@ -584,7 +634,7 @@
     <div id="world">
       <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="gann"></g><g id="gpar"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
       <div id="cards"></div>
-      <svg id="drawn" xmlns="http://www.w3.org/2000/svg"><g id="gdraw"></g><path id="wet" d=""></path></svg>
+      <svg id="drawn" xmlns="http://www.w3.org/2000/svg"><defs id="cdefs"></defs><g id="gcell"></g><g id="gdraw"></g><path id="wet" d=""></path></svg>
     </div>
     <div id="compare" class="float" role="region" aria-label="Passages compared side by side" hidden></div>
     <div id="palette" class="float" role="toolbar" aria-label="Tools">
@@ -639,6 +689,11 @@
    the portal's, read from the portal in the side, or the copy My topics kept until that has
    loaded. Annotations belong to the passage, not the board: they are kept once, beside the
    boards, and show on every board of the reader's where their passage stands.
+
+   An arrow goes from and to a card, a group, or one cell of a table: { from, to } are the
+   card's or group's id, and where an end is a cell, fromCell or toCell is that cell's own id
+   (see Builders: tables), so that a page which does not know cells still reads it as an arrow
+   to the table.
    ───────────────────────────────────────────────────────────────────────────── */
 const PORTAL = 'index.html';
 const TOPICS = 'kantlab-topics-v1';               // My topics' store (topics.js), which the board is kept in
@@ -719,8 +774,11 @@ let focus = null;      // { id, hops }
 let query = '';
 let ppQuery = '';      // what is being looked for among the topic's passages, under Passages
 let ppOpen = new Set(); // the topic's passages opened under Passages, to be read there in full, by id
+let cardOpen = new Set(); // passage cards opened on the board, to be read there in full, by card id; never saved
 let cam = { x: 40, y: 30, k: 1 };
 let size = {};         // card id → { w, h }, as last drawn
+let cbox = {};         // table id → { cell id → { x, y, w, h } }: where each cell an arrow ends at stands in its table, as last drawn
+let ltoEl = null;      // what an arrow being drawn would go to, lit
 let side = 'details';
 let tool = 'move';     // 'move' | 'select' | 'pen' | 'erase'
 let pen = PENS[2];
@@ -768,12 +826,23 @@ function loadPrefs() { try { prefs = JSON.parse(localStorage.getItem(PREFS + TID
 function savePrefs() { try { localStorage.setItem(PREFS + TID, JSON.stringify(prefs)); } catch (e) { /* fine */ } }
 const itemLayer = it => it.kind;
 function shown(it) { if (!it || (view().hidden || []).includes(it.id)) return false; const l = itemLayer(it); return !l || layerOn(l); }
-const arrowShown = a => layerOn(a.layer) && shown(item(a.from)) && shown(item(a.to));
+// An arrow's end is a card, a cell of a table, or a group: a group's is shown while its frame is.
+const endShown = id => { const it = item(id); if (it) return shown(it); const m = model(id); return !!m && layerOn('frames') && !!frameOf(m); };
+const arrowShown = a => layerOn(a.layer) && endShown(a.from) && endShown(a.to);
 function nameOf(id) { const it = item(id); if (!it) return '(gone)'; const m = model(it.model); return cardTitle(it) + (m ? ' (' + m.title + ')' : ''); }
+// An arrow's end by name: cell is a cell's id, or its [row, column] before it has one.
+function endName(id, cell) {
+  const it = item(id);
+  if (!it) { const m = model(id); return m ? 'Group: ' + m.title : '(gone)'; }
+  if (!cell || it.kind !== 'table') return nameOf(id);
+  const rc = Array.isArray(cell) ? cell : cellRC(it, cell);
+  return nameOf(id) + ', ' + (rc ? cellName(it, rc[0], rc[1]) : 'a cell no longer in it');
+}
+const endMatches = id => { const it = item(id); if (it) return matches(it); const m = model(id); return !query || (!!m && query.toLowerCase().split(/\s+/).filter(Boolean).every(w => (m.title + ' ' + (m.name || '')).toLowerCase().includes(w))); };
 function cardTitle(it) {
   if (it.kind === 'box') return 'Box' + (it.label ? ': ' + it.label : '');
   if (it.kind === 'table') { const d = dims(it); return 'Table' + (it.label ? ': ' + it.label : ', ' + d.cols + ' × ' + d.rows); }
-  if (it.kind === 'passage') return it.label || (it.quotes[0] && it.quotes[0].cite) || it.cite || 'a passage';
+  if (it.kind === 'passage') return it.label || (it.st && it.st.cite) || (it.quotes[0] && it.quotes[0].cite) || it.cite || 'a passage';
   if (it.kind === 'link') { const L = it.lk || (DB ? linkOf(it) : null), cp = it.copy || {}; return it.label || (L ? (L.whole ? L.topic : L.topic + ': ' + L.title) : cp.title || 'a link'); }
   const t = String(it.text || ''); return (it.kind === 'problem' ? 'Question: ' : 'Note: ') + (t.length > 50 ? t.slice(0, 49) + '…' : t);
 }
@@ -961,7 +1030,15 @@ function aboutCard(c) {
   if (c.kind === 'problem') return { what: 'a question', title: shortly(c.text, 60) || 'a question', words: c.text || '' };
   if (c.kind === 'box') return { what: 'a box', title: c.label ? 'Box: ' + c.label : 'a box', words: '' };
   if (c.kind === 'link') return { what: 'a link', title: c.label || (c.copy && c.copy.title) || 'a link', words: '' };
+  if (c.kind === 'table') return { what: 'a table', title: c.label ? 'Table: ' + c.label : 'a table', words: tableHay(c) };
   return { what: 'a card', title: c.label || shortly(c.text, 60) || 'a card', words: '' };
+}
+// The other end of an arrow on another of the reader's boards, in a line: a card, a cell of a table, or a group.
+function remoteEnd(b, id, cell) {
+  const o = (b.items || []).find(i => i && i.id === id);
+  if (o) { const rc = cell && o.kind === 'table' ? cellRC(o, cell) : null; return { id, title: aboutCard(o).title + (rc ? ', ' + cellName(o, rc[0], rc[1]) : '') }; }
+  const g = (b.models || []).find(m => m && m.id === id);
+  return g ? { id, title: 'Group: ' + (g.title || '') } : null;
 }
 // What a link points to, as it stands now.
 function linkOf(it) {
@@ -998,8 +1075,8 @@ function linkIndex() {
       if (!c) return;
       if (c.kind === 'link' && c.to && realTopic(DB, c.to.t || '') === TID) {
         const arrows = (b.arrows || []).filter(a => a && (a.from === c.id || a.to === c.id)).map(a => {
-          const o = (b.items || []).find(i => i && i.id === (a.from === c.id ? a.to : a.from));
-          return { type: a.type, out: a.from === c.id, other: o ? o.id : null, title: o ? aboutCard(o).title : '' };
+          const out = a.from === c.id, o = remoteEnd(b, out ? a.to : a.from, out ? a.toCell : a.fromCell);
+          return { type: a.type, out, other: o ? o.id : null, title: o ? o.title : '' };
         });
         add(into, c.to.item || '', { t: rk, card: c, arrows });
         if (!from.has(rk)) from.set(rk, []); from.get(rk).push(c);
@@ -1108,17 +1185,30 @@ function fullText(ref) {
   if (!FW || !ref) return null;
   try { const i = FW.PORTAL.BYID.get(ref), p = i != null ? FW.PORTAL.P[i] : null; return p ? String(p.text || '') : null; } catch (e) { return null; }
 }
+// The portal's reading of stretches, once its texts are in (index.html: stretchOf, placeWords, sentenceStarts).
+function STX() { return FW && FW.PORTAL && FW.PORTAL.stretchOf ? FW.PORTAL : null; }
 // Each passage card's words and standing, worked out afresh and never saved.
 function hydrate() {
   [B].concat(live ? [live.board] : []).forEach(b => (b.items || []).forEach(it => {
     if (it.kind === 'link') { hide(it, 'lk', linkOf(it)); return; }
     if (it.kind !== 'passage') return;
     if (!Array.isArray(it.quotes) || !it.quotes.length) it.quotes = [{ ref: it.ref, cite: it.cite || '' }];
-    const q = it.quotes[0], x = itemOf(it.mt), full = fullText((x && x.ref) || q.ref || it.ref);
+    const x = itemOf(it.mt), X = STX();
+    // words kept on their own: where they stand now, one quote for each passage they run over
+    const pw = X && x && x.excerpt && !x.en ? X.placeWords(x.ref, x.excerpt, x.span || null) : null, st = pw && pw.st;
+    hide(it, 'st', st || null);
+    hide(it, 'slost', !!(X && x && x.span && !st));
+    if (st && it.quotes.map(q => q.ref).join('\u0000') !== st.parts.map(p => p.ref).join('\u0000')) it.quotes = st.parts.map(p => ({ ref: p.ref, cite: p.cite }));
+    if (st) it.quotes.forEach((q, k) => { const p = st.parts[k]; q.cite = p.cite; hide(q, 'q', X.P[p.i].text); hide(q, 'full', true); hide(q, 'kept', p.whole ? '' : p.text); hide(q, 'ka', p.a); hide(q, 'kb', p.b); });
+    else {
+      if (X && x && !x.excerpt && it.quotes.length > 1) it.quotes = it.quotes.slice(0, 1);   // a stretch made whole again
+      const q = it.quotes[0], full = fullText((x && x.ref) || q.ref || it.ref);
+      hide(q, 'q', full != null ? full : x ? (x.excerpt || x.words || '') : '');
+      hide(q, 'full', full != null);
+      hide(q, 'kept', x && x.excerpt ? x.excerpt : '');
+      hide(q, 'ka', null); hide(q, 'kb', null);
+    }
     hide(it, 'off', !x ? 'gone' : !inTopic(x) ? 'off' : '');
-    hide(q, 'q', full != null ? full : x ? (x.excerpt || x.words || '') : '');
-    hide(q, 'full', full != null);
-    hide(q, 'kept', x && x.excerpt ? x.excerpt : '');
     hide(it, 'kx', x || null);
   }));
   linkIndex();
@@ -1180,6 +1270,266 @@ function save(fn) {
   if (lost) { render(); return false; }
   return writeOut(d, fn);
 }
+/* ── Stretches: a card's words trimmed, a card split in two, cards joined ──────
+   A passage card quotes what My topics keeps of its passage: the whole of it, or a stretch, from an offset in
+   one passage to an offset in the same passage or a later one of the same text (its span and excerpt there).
+   In the side a card's stretch can be changed, the card split in two, and cards of passages in a row joined
+   into one. The words and pages are the text's, read from the portal beside the board; only the edges are the
+   reader's. Each is one change to the board and My topics together, and ⌘Z undoes both. A passage that is
+   under other topics too is asked about first: changed under all of them, or copied for this topic alone. */
+const JOIN_SEP = '\n\n— from the next part —\n';
+const stretchOfWhat = st => st.parts.length > 1 ? st.parts.length + ' passages in a row' : st.of ? 'part of ' + st.of : '';
+const refAt = (X, k) => X.TEXTS[X.P[k].t].key + ':' + X.P[k].id;
+const posKey = (X, p) => X.BYID.get(p[0]) * 1e7 + p[1];
+const back0 = (t, o) => { while (o > 0 && /\s/.test(t[o - 1])) o--; return o; };
+const fwd0 = (t, o) => { while (o < t.length && /\s/.test(t[o])) o++; return o; };
+const othersOf = x => x && Array.isArray(x.topics) ? x.topics.filter(t => t !== TID) : [];
+// The stretch a passage card quotes now: the words kept, or the whole of its passage. null where it can't be
+// changed here: the portal still loading, words kept from the English, or words no longer where they were kept.
+function stretchNow(it) {
+  const X = STX(); if (!X || !it || it.kind !== 'passage') return null;
+  if (it.st) return it.st;
+  const x = itemOf(it.mt); if (!x || x.excerpt) return null;
+  const i = X.BYID.get(x.ref);
+  return i == null ? null : X.stretchOf([x.ref, 0], [x.ref, X.P[i].text.length]);
+}
+// What passage x keeps, set to stretch st: its words, their citation and where they stand; the whole passage, none.
+function keepStretch(x, st, X) {
+  const i = X.BYID.get(st.from[0]), w = String(X.P[i].text).replace(/\s+/g, ' ').trim();
+  x.ref = st.from[0]; x.cite = st.cite; x.words = w.length > 300 ? w.slice(0, 299) + '…' : w; x.en = false;
+  if (st.whole) { x.excerpt = null; delete x.span; }
+  else { x.excerpt = st.text; x.span = Object.assign({ from: st.from.slice(), to: st.to.slice() }, X.stretchContext(st, 32)); }
+  x.at = now();
+}
+// Where sentences start and end in passages lo..hi, as positions [address, offset], in order.
+function edgesIn(X, lo, hi) {
+  const S = [], E = [];
+  for (let k = lo; k <= hi; k++) {
+    const t = X.P[k].text, r = refAt(X, k), ss = X.sentenceStarts(t);
+    S.push([r, 0]); ss.forEach(o => S.push([r, o]));
+    ss.forEach(o => E.push([r, back0(t, o)])); E.push([r, t.length]);
+  }
+  return { S, E };
+}
+const tooFar = X => 'A stretch runs over at most ' + X.STRETCH_MAX + ' passages of one text, and never from one Reflexion into the next.';
+function setEdges(X, from, to) {
+  const i = X.BYID.get(from[0]), j = X.BYID.get(to[0]);
+  if (i == null || j == null || !X.canStretch(i, j)) { toast(tooFar(X)); return; }
+  if (posKey(X, to) <= posKey(X, from) || !X.stretchOf(from, to)) return;
+  form.from = from; form.to = to; form.ask = false; renderSide();
+}
+// The edges moved a sentence, or a passage, at a time.
+function moveEdge(k) {
+  const X = STX(), st = X && X.stretchOf(form.from, form.to); if (!st) return;
+  const f = st.parts[0], l = st.parts[st.parts.length - 1], T = X.TEXTS[X.P[f.i].t];
+  const E = edgesIn(X, Math.max(T.first, f.i - 1), Math.min(T.last, l.i + 1)), K = p => posKey(X, p), A = K(form.from), Z = K(form.to);
+  let from = form.from, to = form.to, c;
+  if (k === 's-' && (c = E.S.filter(p => K(p) < A).pop())) from = c;
+  if (k === 's+' && (c = E.S.find(p => K(p) > A && K(p) < Z))) from = c;
+  if (k === 'e+' && (c = E.E.find(p => K(p) > Z))) to = c;
+  if (k === 'e-' && (c = E.E.filter(p => K(p) < Z && K(p) > A).pop())) to = c;
+  if (k === 'p-' && f.i > T.first) from = [refAt(X, f.i - 1), 0];
+  if (k === 'p+' && l.i < T.last) to = [refAt(X, l.i + 1), X.P[l.i + 1].text.length];
+  if (k === 'whole') { from = [f.ref, 0]; to = [l.ref, X.P[l.i].text.length]; }
+  setEdges(X, from, to);
+}
+// A sentence mark clicked: the nearer edge moves to it, or, while splitting, the second card begins there.
+function atMark(r, o) {
+  const X = STX(); if (!X || X.BYID.get(r) == null) return;
+  const K = p => posKey(X, p), p = K([r, o]), A = K(form.from), Z = K(form.to);
+  if (form.cutting) { if (p > A && p < Z) { form.cut = [r, o]; form.ask = false; renderSide(); } return; }
+  const e = [r, back0(X.P[X.BYID.get(r)].text, o)];
+  if (p <= A) setEdges(X, [r, o], form.to);
+  else if (p >= Z) setEdges(X, form.from, e);
+  else if (r === form.from[0] && (r !== form.to[0] || o - form.from[1] <= form.to[1] - o)) setEdges(X, [r, o], form.to);
+  else setEdges(X, form.from, e);
+}
+// Words selected in the text in the side: the stretch becomes them.
+function pointAt(X, node, off) {
+  const x = node && (node.nodeType === 1 ? node : node.parentElement), sx = x && x.closest && x.closest('#details .sx[data-sk]');
+  if (!sx) return null;
+  const k = +sx.dataset.sk, span = sx.querySelector('[data-sxt]'), r = refAt(X, k);
+  if (!span.contains(node)) return [r, span.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING ? X.P[k].text.length : 0];
+  const g = document.createRange(); g.selectNodeContents(span); g.setEnd(node, off);
+  return [r, g.toString().length];
+}
+function pickStretch() {
+  const X = STX(), s = getSelection();
+  if (!X || !form || form.kind !== 'stretch' || form.cutting || !s || !s.rangeCount || s.isCollapsed) return;
+  const g = s.getRangeAt(0), a = pointAt(X, g.startContainer, g.startOffset), b = pointAt(X, g.endContainer, g.endOffset);
+  if (!a || !b) return;
+  a[1] = fwd0(X.P[X.BYID.get(a[0])].text, a[1]); b[1] = back0(X.P[X.BYID.get(b[0])].text, b[1]);
+  s.removeAllRanges();
+  setEdges(X, a, b);
+}
+// One passage in the side's text: its words, the stretch lit, a mark where each sentence starts.
+function stretchPara(X, k, st) {
+  const p = X.P[k], t = p.text, r = refAt(X, k), part = st.parts.find(x => x.i === k), a = part ? part.a : -1, b = part ? part.b : -1;
+  const starts = X.sentenceStarts(t), cuts = new Set([0, t.length].concat(starts));
+  if (part) { cuts.add(a); cuts.add(b); }
+  const pts = [...cuts].sort((x, y) => x - y), mk = new Set(starts);
+  const mark = (o, can) => '<i class="sm' + (can ? ' can' : '') + (form.cut && form.cut[0] === r && form.cut[1] === o ? ' cut' : '') + '" data-sr="' + esc(r) + '" data-so="' + o + '" title="' + (form.cutting ? (can ? 'The second card begins here' : '') : 'Move the nearer edge here') + '"></i>';
+  let h = '';
+  for (let n = 0; n < pts.length - 1; n++) {
+    const x = pts[n], y = pts[n + 1], seg = esc(t.slice(x, y));
+    if (mk.has(x)) h += mark(x, !!part && x > a && x < b);
+    h += part && x >= a && y <= b ? '<mark class="in">' + seg + '</mark>' : seg;
+  }
+  const lead = form.cutting && part && k > st.parts[0].i ? mark(0, true) : '';   // a new passage inside the stretch: a place to split as well
+  return '<div class="sx' + (part ? '' : ' far') + (form.cutting ? ' cutting' : '') + '" data-sk="' + k + '"><span class="sc">' + esc(p.cite) + (part ? '' : ' · not quoted') + '</span>' + lead + '<span data-sxt="' + k + '">' + h + '</span></div>';
+}
+// Where the first card ends and the second begins, for a split at cut.
+function splitAt(X, cut) {
+  const k = X.BYID.get(cut[0]); if (k == null) return null;
+  const t = X.P[k].text, end = cut[1] > 0 ? [cut[0], back0(t, cut[1])] : k > 0 ? [refAt(X, k - 1), X.P[k - 1].text.length] : null;
+  const one = end && X.stretchOf(form.from, end), two = X.stretchOf([cut[0], fwd0(t, cut[1])], form.to);
+  return one && two ? { one, two } : null;
+}
+function scopeAsk(x, what, many) {
+  const names = othersOf(x).map(topicName).filter(Boolean);
+  return '<div class="offnote">' + (many ? 'The first of these passages' : 'This passage') + ' is also under ' + esc(names.join(', ') || 'another topic') + '.' +
+    '<div class="row"><button type="button" class="btn solid" data-act="' + what + 'all">Change it under all of them</button><button type="button" class="btn" data-act="' + what + 'here">Only under “' + esc(topic ? topic.name : '') + '”</button></div>' +
+    '<p class="by">Only here keeps a copy of it for this topic alone, with your note, and leaves it as it is under the others.</p></div>';
+}
+function sideStretchForm() {
+  const it = item(form.id), X = STX(), st = X && it ? X.stretchOf(form.from, form.to) : null, x = it && itemOf(it.mt);
+  let h = '<h2>' + (form.cutting ? 'Split the card in two' : 'Change what it quotes') + '</h2><p class="sub">' + esc(it ? cardTitle(it) : '') + '</p>';
+  if (!st || !x) return h + '<p class="by">' + (X ? 'That stretch no longer reads in the text.' : 'The portal beside the board is still loading its texts. Try again in a moment.') + '</p><div class="row"><button type="button" class="linkish" data-act="cancel">Back</button></div>';
+  const f = st.parts[0], l = st.parts[st.parts.length - 1], T = X.TEXTS[X.P[f.i].t];
+  h += '<p class="sxnow"><b>' + esc(st.cite) + '</b>' + (stretchOfWhat(st) ? ' · ' + esc(stretchOfWhat(st)) : st.whole ? ' · the whole passage' : '') + '</p>';
+  h += '<p class="by">' + (form.cutting ? 'Click ✂ where the second card should begin: between two sentences, or where a new passage starts.' : 'Select the words you want in the text below, or move an edge a sentence at a time. ‖ marks where a sentence starts: click one to move the nearer edge to it.') + '</p><div class="sxbox">';
+  for (let k = Math.max(T.first, f.i - 1); k <= Math.min(T.last, l.i + 1); k++) h += stretchPara(X, k, st);
+  h += '</div>';
+  if (!form.cutting) {
+    h += '<div class="sxrow"><b>Start</b><button type="button" class="linkish" data-sx="s-">◂ a sentence earlier</button><button type="button" class="linkish" data-sx="s+">a sentence later ▸</button><button type="button" class="linkish" data-sx="p-">take in the passage before</button></div>' +
+      '<div class="sxrow"><b>End</b><button type="button" class="linkish" data-sx="e-">◂ a sentence earlier</button><button type="button" class="linkish" data-sx="e+">a sentence later ▸</button><button type="button" class="linkish" data-sx="p+">take in the passage after</button></div>' +
+      (st.whole ? '' : '<div class="sxrow"><button type="button" class="linkish" data-sx="whole">' + (st.parts.length > 1 ? 'the whole passages again' : 'the whole passage again') + '</button></div>');
+    const tw = twinsOf(it); if (tw.length) h += '<p class="by">The passage’s ' + (tw.length === 1 ? 'other card' : tw.length + ' other cards') + ', ' + esc(placesSaid(tw)) + ', ' + (tw.length === 1 ? 'quotes' : 'quote') + ' what this one does.</p>';
+    h += form.ask ? scopeAsk(x, 'sx') : '<div class="row"><button type="button" class="btn solid" data-act="sxsave">Save</button><button type="button" class="btn" data-act="sxcut">Split it in two…</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div>';
+    return h;
+  }
+  const sp = form.cut ? splitAt(X, form.cut) : null, arr = B.arrows.filter(a => a.from === it.id || a.to === it.id);
+  if (sp) {
+    h += '<p class="sxnow">First card: <b>' + esc(sp.one.cite) + '</b> · second: <b>' + esc(sp.two.cite) + '</b></p><p class="by">Your note stays with the first; the second waits for one of its own. The annotations go with the words they are on.' + (twinsOf(it).length ? ' The passage’s ' + (twinsOf(it).length === 1 ? 'other card' : twinsOf(it).length + ' other cards') + ', ' + esc(placesSaid(twinsOf(it))) + ', ' + (twinsOf(it).length === 1 ? 'quotes' : 'quote') + ' the first.' : '') + '</p>';
+    if (arr.length) h += '<span class="k">Which card each arrow stays with</span>' + arr.map(a => '<div class="sxrow"><span style="flex:1">' + esc(a.type) + ': ' + esc(endName(a.from, a.fromCell)) + ' → ' + esc(endName(a.to, a.toCell)) + '</span><label><input type="radio" name="sxa-' + esc(a.id) + '" data-sxa="' + esc(a.id) + '" value="1"' + (form.ar[a.id] !== 2 ? ' checked' : '') + '> first</label><label><input type="radio" name="sxa-' + esc(a.id) + '" data-sxa="' + esc(a.id) + '" value="2"' + (form.ar[a.id] === 2 ? ' checked' : '') + '> second</label></div>').join('');
+  } else h += '<p class="by">No place chosen yet.</p>';
+  h += form.ask && sp ? scopeAsk(x, 'sx') : '<div class="row">' + (sp ? '<button type="button" class="btn solid" data-act="sxsplit">Split</button>' : '') + '<button type="button" class="linkish" data-act="sxtrim">Back to what it quotes</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div>';
+  return h;
+}
+// The card quotes the stretch the form has; under all the passage's topics, or as a copy for this one alone.
+function saveStretch(scope) {
+  const it = item(form.id), X = STX(), st = X && it ? X.stretchOf(form.from, form.to) : null, x = it && itemOf(it.mt);
+  if (!st || !x) return;
+  const cur = stretchNow(it);
+  if (cur && cur.from.join('\u0000') === st.from.join('\u0000') && cur.to.join('\u0000') === st.to.join('\u0000')) { form = null; renderSide(); return; }
+  if (!scope && othersOf(x).length) { form.ask = true; renderSide(); return; }
+  const here = scope === 'here', nid = here ? uid('i') : x.id, tw = twinsOf(it);   // its other cards quote it too
+  changeBoth(here ? [x.id, nid] : [x.id], () => { [it].concat(tw).forEach(c => { c.mt = nid; c.ref = st.from[0]; c.cite = st.cite; }); }, d => {
+    const y = d.items.find(z => z && z.id === x.id); if (!y) return;
+    if (!here) { keepStretch(y, st, X); return; }
+    const n = Object.assign(clone(y), { id: nid, topics: [TID], added: now() });
+    keepStretch(n, st, X); d.items.push(n);
+    y.topics = y.topics.filter(t => t !== TID); y.at = now();
+    const t = d.topics.find(z => z && z.id === TID); if (t && Array.isArray(t.order)) { t.order = t.order.map(id => id === x.id ? nid : id); t.at = now(); }
+  });
+  form = null; render();
+  toast((tw.length ? 'Its ' + (tw.length + 1) + ' cards now quote ' : 'The card now quotes ') + st.cite + (st.whole ? ', the whole passage' : '') + '. ⌘Z undoes it.');
+}
+function doSplit(scope) {
+  const it = item(form.id), X = STX(), x = it && itemOf(it.mt), sp = X && form.cut ? splitAt(X, form.cut) : null;
+  if (!sp || !x) return;
+  if (!scope && othersOf(x).length) { form.ask = true; renderSide(); return; }
+  const here = scope === 'here', n1 = here ? uid('i') : x.id, n2 = uid('i'), moved = Object.keys(form.ar).filter(id => form.ar[id] === 2), tw = twinsOf(it);
+  let cid = null;
+  changeBoth(here ? [x.id, n1, n2] : [x.id, n2], () => {
+    [it].concat(tw).forEach(c => { c.mt = n1; c.ref = sp.one.from[0]; c.cite = sp.one.cite; });   // its other cards keep the first part
+    const card = Object.assign(passageCard({ id: n2, ref: sp.two.from[0], cite: sp.two.cite }), { model: it.model || null });
+    if (B.items.some(c => c.id === card.id)) card.id = uid('p');
+    cid = card.id; B.items.push(card);
+    const p = view().pos[it.id] || nextSpot(), w = (size[it.id] && size[it.id].w) || 250;
+    view().pos[cid] = [Math.round(p[0] + w + 40), Math.round(p[1])];
+    B.arrows.forEach(a => { if (!moved.includes(a.id)) return; if (a.from === it.id) a.from = cid; if (a.to === it.id) a.to = cid; });
+  }, d => {
+    const y = d.items.find(z => z && z.id === x.id); if (!y) return;
+    let one = y;
+    if (here) { one = Object.assign(clone(y), { id: n1, topics: [TID], added: now() }); d.items.push(one); y.topics = y.topics.filter(z => z !== TID); y.at = now(); }
+    keepStretch(one, sp.one, X);
+    const two = Object.assign(clone(one), { id: n2, note: '', added: now() }); keepStretch(two, sp.two, X); d.items.push(two);
+    const t = d.topics.find(z => z && z.id === TID);
+    if (t) { const o = (Array.isArray(t.order) ? t.order : []).map(id => id === x.id ? n1 : id), k = o.indexOf(n1); if (k >= 0) o.splice(k + 1, 0, n2); t.order = o; t.at = now(); }
+  });
+  form = null; sel = { kind: 'card', ids: [it.id, cid] }; render();
+  toast('Split in two: ' + sp.one.cite + ' and ' + sp.two.cite + '.' + (tw.length ? ' The passage’s ' + (tw.length === 1 ? 'other card quotes' : tw.length + ' other cards quote') + ' the first.' : '') + ' ⌘Z undoes it.');
+}
+// Cards that can be joined into one: passage cards of one text, the passages between them coming in whole.
+function joinPlan(ids) {
+  const X = STX(), cs = ids.map(item);
+  if (!X || cs.length < 2 || cs.some(c => !c || c.kind !== 'passage')) return null;
+  const sts = cs.map(stretchNow);
+  if (sts.some(s => !s)) return { why: 'One of them can’t be joined: its passage has gone from My topics, its words were kept from the English, or they are no longer where they were kept.' };
+  const K = p => posKey(X, p), t0 = X.P[X.BYID.get(sts[0].from[0])].t;
+  if (sts.some(s => X.P[X.BYID.get(s.from[0])].t !== t0)) return { why: 'Only cards of passages of one text can be joined.' };
+  const order = cs.map((c, n) => ({ c, s: sts[n] })).sort((a, b) => K(a.s.from) - K(b.s.from));
+  const from = order[0].s.from, to = order.reduce((m, o) => K(o.s.to) > K(m) ? o.s.to : m, order[0].s.to);
+  if (!X.canStretch(X.BYID.get(from[0]), X.BYID.get(to[0]))) return { why: X.TEXTS[X.P[X.BYID.get(from[0])].t].shape === 'refl' ? 'A Reflexion is a note of its own, so two can’t be joined.' : 'They are more than ' + X.STRETCH_MAX + ' passages apart.' };
+  const st = X.stretchOf(from, to); if (!st) return null;
+  const touched = k => sts.some(s => X.BYID.get(s.from[0]) <= k && k <= X.BYID.get(s.to[0]));
+  return { st, first: order[0].c, rest: order.slice(1).map(o => o.c), between: st.parts.filter(p => !touched(p.i)).map(p => X.P[p.i].cite) };
+}
+function sideJoinAsk() {
+  const J = joinPlan(form.ids || []), x = J && J.first ? itemOf(J.first.mt) : null;
+  if (!J || !J.st || !x) return '<h2>Join into one card</h2><p class="by">They can no longer be joined.</p><div class="row"><button type="button" class="linkish" data-act="cancel">Back</button></div>';
+  return '<h2>Join into one card</h2><p class="sub">' + esc(J.st.cite) + '</p>' + scopeAsk(x, 'join', true) + '<div class="row"><button type="button" class="linkish" data-act="cancel">Cancel</button></div>';
+}
+function doJoin(ids, scope) {
+  const J = joinPlan(ids), X = STX(); if (!J || !J.st) return;
+  const first = J.first, x = itemOf(first.mt), mts = new Set([first.mt].concat(J.rest.map(c => c.mt)));
+  const restX = [...mts].filter(m => m !== first.mt).map(itemOf).filter(Boolean);   // two cards of one passage are one passage
+  if (!x) return;
+  if (!scope && othersOf(x).length) { form = { kind: 'join', ids: ids.slice() }; renderSide(); return; }
+  const here = scope === 'here', nid = here ? uid('i') : x.id;
+  let dropped = 0, tw = 0, mg = 0;
+  changeBoth([x.id].concat(here ? [nid] : [], restX.map(y => y.id)), () => {
+    // the cards joined go into the first; the passages' other cards, not selected, become cards of the joined
+    // passage where they stand, but one to a group: one in a group that has a card of it already goes into that
+    const into = new Map(J.rest.map(c => [c.id, first.id])), held = new Map(groupOf(first) ? [[groupOf(first), first]] : []);
+    B.items.forEach(c => {
+      if (c.kind !== 'passage' || c === first || into.has(c.id) || !mts.has(c.mt)) return;
+      const g = groupOf(c), k = g && held.get(g);
+      if (k) { into.set(c.id, k.id); mg++; return; }
+      c.mt = nid; c.ref = J.st.from[0]; c.cite = J.st.cite; tw++;
+      if (g) held.set(g, c);
+    });
+    first.mt = nid; first.ref = J.st.from[0]; first.cite = J.st.cite;
+    B.arrows = B.arrows.filter(a => {
+      const was = a.from === a.to;   // between two cells of one table: it joins a card to itself already
+      if (into.has(a.from)) a.from = into.get(a.from);
+      if (into.has(a.to)) a.to = into.get(a.to);
+      if (a.from === a.to && !was) { dropped++; return false; }
+      return true;
+    });
+    B.items = B.items.filter(c => !into.has(c.id));
+    B.views.forEach(v => { into.forEach((_, id) => delete v.pos[id]); v.hidden = (v.hidden || []).filter(id => !into.has(id)); });
+  }, d => {
+    const y = d.items.find(z => z && z.id === x.id); if (!y) return;
+    const notes = [y.note].concat(restX.map(r => { const z = d.items.find(q => q && q.id === r.id); return z ? z.note : ''; })).filter(Boolean);
+    let to = y;
+    if (here) { to = Object.assign(clone(y), { id: nid, topics: [TID], added: now() }); d.items.push(to); y.topics = y.topics.filter(t => t !== TID); y.at = now(); }
+    keepStretch(to, J.st, X); to.note = notes.join(JOIN_SEP);
+    d.gone = isObj(d.gone) ? d.gone : {};
+    restX.forEach(r => {
+      const k = d.items.findIndex(q => q && q.id === r.id); if (k < 0) return;
+      const z = d.items[k]; z.topics = z.topics.filter(t => t !== TID);
+      if (!z.topics.length) { d.items.splice(k, 1); d.gone[z.id] = now(); } else z.at = now();   // its note is on the card it was joined to
+    });
+    const t = d.topics.find(z => z && z.id === TID);
+    if (t && Array.isArray(t.order)) { t.order = t.order.map(id => id === x.id ? nid : id).filter(id => !restX.some(r => r.id === id)); t.at = now(); }
+  });
+  form = null; sel = { kind: 'card', ids: [first.id] }; render();
+  toast('Joined into one card, ' + J.st.cite + '.' + (dropped ? ' ' + (dropped === 1 ? 'The arrow' : dropped + ' arrows') + ' between them went, as ' + (dropped === 1 ? 'it' : 'they') + ' would point from the card to itself.' : '') +
+    (tw ? (tw === 1 ? ' Their other card on the board quotes it too.' : ' Their ' + tw + ' other cards on the board quote it too.') : '') +
+    (mg ? (mg === 1 ? ' One more, in a group that had a card of it already, went into that card.' : ' ' + mg + ' more, in groups that had a card of it already, went into those cards.') : '') + ' ⌘Z undoes it.');
+}
 // Every change goes through here: undo keeps the board as it was.
 function change(fn) {
   if (ro()) { toast(roWhy()); return false; }
@@ -1188,8 +1538,36 @@ function change(fn) {
   fn();
   save(); return true;
 }
-function undo() { if (ro() || !undoStack.length) return; redoStack.push(JSON.stringify(B)); B = JSON.parse(undoStack.pop()); afterSwap(); }
-function redo() { if (ro() || !redoStack.length) return; undoStack.push(JSON.stringify(B)); B = JSON.parse(redoStack.pop()); afterSwap(); }
+function undo() { if (ro() || !undoStack.length) return; swapIn(undoStack, redoStack); }
+function redo() { if (ro() || !redoStack.length) return; swapIn(redoStack, undoStack); }
+// Undo's copy of the board, or for a change to My topics as well (a stretch changed, a card split, cards
+// joined), the board with the passages it touched as they were (null for one the change made) and the topic's order.
+function snapWith(mts) { return JSON.stringify({ withTopics: 1, b: B, items: mts.map(id => [id, itemOf(id) ? clone(itemOf(id)) : null]), order: topic ? (topic.order || []).slice() : [] }); }
+function swapIn(from, to) {
+  const e = JSON.parse(from.pop());
+  if (!e || e.withTopics !== 1) { to.push(JSON.stringify(B)); B = e; afterSwap(); return; }
+  to.push(snapWith(e.items.map(p => p[0])));
+  B = e.b;
+  save(d => {
+    d.gone = isObj(d.gone) ? d.gone : {};
+    e.items.forEach(([id, was]) => {
+      const k = d.items.findIndex(z => z && z.id === id);
+      if (was) { const w = Object.assign(clone(was), { at: now() }); delete d.gone[id]; if (k >= 0) d.items[k] = w; else d.items.push(w); }
+      else if (k >= 0) { d.items.splice(k, 1); d.gone[id] = now(); }
+    });
+    const t = d.topics.find(y => y && y.id === TID);
+    if (t) { t.order = e.order; t.at = now(); }
+  });
+  afterSwap();
+}
+// A change to the board and to the passages mts in My topics together, undone together.
+function changeBoth(mts, boardFn, storeFn) {
+  if (ro()) { toast(roWhy()); return false; }
+  undoStack.push(snapWith(mts)); if (undoStack.length > 80) undoStack.shift();
+  redoStack = [];
+  boardFn();
+  return save(storeFn);
+}
 function afterSwap() {
   if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
   sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : sel.kind === 'par' ? parById(id) : model(id));
@@ -1232,8 +1610,8 @@ function merge3(base, mine, theirs) {
   if (!mine.views && !theirs.views) return out;
   out.views = list(base.views, mine.views, theirs.views, view3);
   out.removed = [...new Set([...(theirs.removed || []), ...(mine.removed || [])])];
-  const have = new Set((out.items || []).map(i => i.id));
-  out.arrows = (out.arrows || []).filter(a => have.has(a.from) && have.has(a.to));   // an arrow whose card has gone goes too
+  const have = new Set((out.items || []).map(i => i.id).concat((out.models || []).map(m => m.id)));
+  out.arrows = (out.arrows || []).filter(a => have.has(a.from) && have.has(a.to));   // an arrow whose card or group has gone goes too
   if (!out.views.length) out.views = (theirs.views || []).length ? theirs.views : mine.views;
   return out;
 }
@@ -1462,7 +1840,8 @@ function ownerSync() {
   if (t && t.name !== STOPIC.name) { STOPIC.name = t.name; n++; }
   if (n) { scheduleShared(); renderPassages(); renderHead(); }
 }
-const sharedPassage = x => ({ id: x.id || uid('s'), ref: x.ref, cite: x.cite || '', work: x.work || '', date: x.date || '', words: x.words || '', excerpt: x.excerpt || null, en: !!x.en, by: SH ? SH.login : '', added: now(), note: '' });
+const sharedPassage = x => Object.assign({ id: x.id || uid('s'), ref: x.ref, cite: x.cite || '', work: x.work || '', date: x.date || '', words: x.words || '', excerpt: x.excerpt || null, en: !!x.en, by: SH ? SH.login : '', added: now(), note: '' },
+  x.excerpt && isObj(x.span) ? { span: clone(x.span) } : {});   // a stretch keeps where it stands
 // The owner's copy, in My topics: the board as shared, marked so. It goes into the owner's file, and GitHub, with the topics.
 function ownerCopy() {
   if (SH.role !== 'owner' || !mineTopic()) return;
@@ -1655,15 +2034,17 @@ function placeOn(it, qi) {
   out.spans.sort((x, y) => String(x.a.date).localeCompare(String(y.a.date)));
   return out;
 }
+// On a card that quotes a stretch, only the annotations on its words count as the card's.
+const inKept = (q, x) => q.ka == null || (x.e > q.ka && x.s < q.kb);
 function annsOfCard(it) {
   const seen = new Map();
-  (it.quotes || []).forEach((q, i) => { const P = placeOn(it, i); P.spans.map(x => x.a).concat(P.whole, P.lost).forEach(a => seen.set(a.id, a)); });
+  (it.quotes || []).forEach((q, i) => { const P = placeOn(it, i); P.spans.filter(x => inKept(q, x)).map(x => x.a).concat(P.whole, P.lost).forEach(a => seen.set(a.id, a)); });
   return [...seen.values()];
 }
 // Every annotation's places on the board: id → [{ card, qi }].
 function annPlaces() {
   const W = new Map(), add = (id, card, qi) => { if (!W.has(id)) W.set(id, []); W.get(id).push({ card, qi }); };
-  B.items.forEach(it => (it.quotes || []).forEach((q, i) => { const P = placeOn(it, i); P.spans.forEach(x => add(x.a.id, it.id, i)); P.whole.concat(P.lost).forEach(a => add(a.id, it.id, i)); }));
+  B.items.forEach(it => (it.quotes || []).forEach((q, i) => { const P = placeOn(it, i); P.spans.filter(x => inKept(q, x)).forEach(x => add(x.a.id, it.id, i)); P.whole.concat(P.lost).forEach(a => add(a.id, it.id, i)); }));
   return W;
 }
 const annHay = it => annsOfCard(it).map(a => [a.text, a.by, a.to && (a.to.word || a.to.cite)].concat((annIndex().replies.get(a.id) || []).map(r => r.text + ' ' + r.by)).join(' ')).join(' ');
@@ -1697,6 +2078,18 @@ function markText(t, spans, ps) {
 // For a passage of which only some words were kept, the words kept.
 // With a parallel chosen that has words in it, those words, from a little before them.
 function excerpt(it, n) {
+  if (it.st && it.quotes.length === it.st.parts.length) {   // a stretch: its words, from each passage it runs over
+    let h = '', left = n;
+    it.st.parts.forEach((p, k) => {
+      if (left <= 0) return;
+      if (k) h += ' <span class="para" title="A new paragraph in the text">¶</span> ';
+      const cut = p.text.length > left, s = cut ? p.text.slice(0, Math.max(0, left - 1)) : p.text;
+      const sh = xs => xs.filter(x => x.e > p.a && x.s < p.a + s.length).map(x => Object.assign({}, x, { s: Math.max(0, x.s - p.a), e: Math.min(s.length, x.e - p.a) }));
+      h += markText(s, layerOn('annotations') ? sh(placeOn(it, k).spans) : [], layerOn('parallels') ? sh(parsOn(it, k).spans) : []) + (cut ? '…' : '');
+      left -= p.text.length + 3;
+    });
+    return h;
+  }
   const q = it.quotes[0], only = !!(q.kept && q.q !== q.kept);
   const P = layerOn('parallels') ? parsOn(it, 0).spans : [], fx = parSel && q.q ? P.find(x => x.p.id === parSel) : null;
   if (fx) {
@@ -1798,10 +2191,44 @@ const parHay = it => parsOfCard(it).map(p => [p.label, p.type, p.text].join(' ')
    out of My topics, as a passage card does; its citation is always the passage's own. The
    numbers of rows and columns are the shape of cells and are never kept beside it. head says
    whether the first row and the first column are headings, and cw is each column's width on
-   the board; the height follows the words. Nothing in a table is filled in by the page. */
+   the board; the height follows the words. Nothing in a table is filled in by the page.
+   A cell an arrow has been drawn to or from has an id of its own as well, { t, ps, id }, given
+   it then, so that the arrow keeps to the cell as rows and columns are inserted and deleted
+   round it. Deleting the cell's row or column takes its arrows with it. */
 const blank = () => ({ t: '', ps: [] });
-const cellOf = x => typeof x === 'string' ? { t: x, ps: [] } : isObj(x) ? { t: typeof x.t === 'string' ? x.t : '', ps: Array.isArray(x.ps) ? x.ps.filter(p => isObj(p) && (p.mt || p.ref)) : [] } : blank();
-const packCell = c => c.ps.length ? { t: c.t, ps: c.ps } : c.t;
+const cellOf = x => typeof x === 'string' ? { t: x, ps: [] } : isObj(x) ? Object.assign({ t: typeof x.t === 'string' ? x.t : '', ps: Array.isArray(x.ps) ? x.ps.filter(p => isObj(p) && (p.mt || p.ref)) : [] }, typeof x.id === 'string' && x.id ? { id: x.id } : {}) : blank();
+const packCell = c => c.ps.length || c.id ? Object.assign({ t: c.t, ps: c.ps }, c.id ? { id: c.id } : {}) : c.t;
+// Where the cell with this id stands in the table now, [row, column], or null if it is no longer in it.
+function cellRC(it, cid) {
+  const rows = it && Array.isArray(it.cells) ? it.cells : [];
+  for (let r = 0; r < rows.length; r++) { const row = Array.isArray(rows[r]) ? rows[r] : [rows[r]]; for (let c = 0; c < row.length; c++) if (isObj(row[c]) && row[c].id === cid) return [r, c]; }
+  return null;
+}
+// A cell's own id, given it the first time an arrow is drawn to or from it. Called inside change().
+function cellKey(id, rc) {
+  const it = item(id); if (!it || it.kind !== 'table' || !rc) return null;
+  const g = grid(it), cl = g[rc[0]] && g[rc[0]][rc[1]]; if (!cl) return null;
+  if (!cl.id) { cl.id = uid('c'); it.cells = g.map(r => r.map(packCell)); }
+  return cl.id;
+}
+// A cell as one would point to it: by its row's and its column's headings, where the table has them, else by number.
+function cellName(it, r, c) {
+  const g = grid(it), h = headOf(it), q = s => '“' + shortly(s, 32) + '”';
+  if (!g[r] || !g[r][c]) return 'a cell no longer in it';
+  if (isHead(h, r, c)) return g[r][c].t.trim() ? 'the heading ' + q(g[r][c].t) : h.top && r === 0 ? 'the heading of column ' + (c + 1) : 'the heading of row ' + (r + 1);
+  const rh = h.left ? g[r][0].t.trim() : '', ch = h.top ? g[0][c].t.trim() : '';
+  return (rh ? 'row ' + q(rh) : 'row ' + (r + 1)) + ', ' + (ch ? 'column ' + q(ch) : 'column ' + (c + 1));
+}
+// The arrows to or from some of a table's cells, as a row or a column is about to be deleted with them.
+function cellArrows(id, cells) {
+  const ids = new Set(cells.map(c => c.id).filter(Boolean));
+  return ids.size ? B.arrows.filter(a => (a.from === id && ids.has(a.fromCell)) || (a.to === id && ids.has(a.toCell))) : [];
+}
+const dropArrows = as => { if (!as.length) return; const k = new Set(as.map(a => a.id)); B.arrows = B.arrows.filter(a => !k.has(a.id)); };
+// What deleting some cells takes with them, for the question asked first: '' if nothing.
+function cellsLoss(cells, as) {
+  return [hasWords(cells) ? 'words or passages' : '', as.length ? (as.length === 1 ? 'an arrow' : plural(as.length, 'arrow')) + ' drawn to or from ' + (cells.length === 1 ? 'it' : 'its cells') : ''].filter(Boolean).join(', and ');
+}
 // The cells as a grid: every row as long as the longest, nothing cut, never less than one cell.
 function grid(it) {
   const rows = (Array.isArray(it.cells) ? it.cells : []).map(r => (Array.isArray(r) ? r : [r]).map(cellOf));
@@ -1842,15 +2269,31 @@ function tableHtml(it) {
     g.map((row, r) => '<tr>' + row.map((c, k) => {
       const th = isHead(h, r, k), tag = th ? 'th' : 'td';
       const cls = [th && h.top && h.left && !r && !k ? 'corner' : '', at && at.r === r && at.c === k ? 'tsel' : ''].filter(Boolean).join(' ');
-      return '<' + tag + (th ? ' scope="' + (h.top && r === 0 ? 'col' : 'row') + '"' : '') + (cls ? ' class="' + cls + '"' : '') + ' data-cell="' + r + ',' + k + '"><span class="tt">' + esc(c.t) + '</span>' +
+      return '<' + tag + (th ? ' scope="' + (h.top && r === 0 ? 'col' : 'row') + '"' : '') + (cls ? ' class="' + cls + '"' : '') + ' data-cell="' + r + ',' + k + '"' + (c.id ? ' data-cid="' + esc(c.id) + '"' : '') + '><div class="tw"><span class="tt">' + esc(c.t) + '</span>' +
         (c.ps.length ? '<span class="tps">' + c.ps.map((p, j) => { const P = cellPassage(p); return '<span class="tp' + (P.gone ? ' gone' : '') + '" data-tp="' + j + '" title="' + (P.gone ? 'No longer in My topics: the citation kept when it was put here' : 'Open it beside the board') + '">' + esc(P.cite) + '</span>'; }).join('') + '</span>' : '') +
-        '</' + tag + '>';
+        (ro() ? '' : '<span class="ck" title="Drag to a card, another cell or a group to draw an arrow from this cell">→</span>') + '</div></' + tag + '>';
     }).join('') + '</tr>').join('') + '</table>';
 }
+// Where an element inside a card stands from the card's padding edge, in the board's own units: offsets are untouched by the zoom.
+function offIn(card, x) { let l = 0, t = 0; for (let n = x; n && n !== card; n = n.offsetParent) { l += n.offsetLeft; t += n.offsetTop; } return [l, t]; }
 // The handles that widen a column stand on the right edge of each, the table's full height.
 function placeTcols(el) {
   const tb = el.querySelector('table'), row = tb && tb.rows[0]; if (!row) return;
-  el.querySelectorAll('.tcol').forEach(h => { const td = row.cells[+h.dataset.tcol]; if (!td) return; h.style.left = (tb.offsetLeft + td.offsetLeft + td.offsetWidth) + 'px'; h.style.top = tb.offsetTop + 'px'; h.style.height = tb.offsetHeight + 'px'; });
+  const [, top] = offIn(el, tb);
+  el.querySelectorAll('.tcol').forEach(h => { const td = row.cells[+h.dataset.tcol]; if (!td) return; h.style.left = (offIn(el, td)[0] + td.offsetWidth) + 'px'; h.style.top = top + 'px'; h.style.height = tb.offsetHeight + 'px'; });
+}
+// Where each cell an arrow ends at stands in its table, from the card's top left corner.
+function measureCells(el) {
+  const out = {};
+  el.querySelectorAll('[data-cid]').forEach(td => { const [x, y] = offIn(el, td); out[td.dataset.cid] = { x: x + el.clientLeft, y: y + el.clientTop, w: td.offsetWidth, h: td.offsetHeight }; });
+  cbox[el.dataset.id] = out;
+}
+// Where an arrow's end stands on the board: a card's, a cell's within its table (card: the table's), or a group's frame.
+function endRect(id, cell) {
+  const it = item(id);
+  if (!it) { const m = model(id); return m ? frameOf(m) : null; }
+  const r = rect(id), b = r && cell && (cbox[id] || {})[cell];
+  return b ? { x: r.x + b.x, y: r.y + b.y, w: b.w, h: b.h, card: r } : r;
 }
 function markCell() {
   $('cards').querySelectorAll('.k-table .tsel').forEach(x => x.classList.remove('tsel'));
@@ -1932,17 +2375,38 @@ function pastedTable(cd) {
 }
 const cutNote = T => T.was.rows > TABLE_MAX.rows || T.was.cols > TABLE_MAX.cols ? ' It had ' + plural(T.was.cols, 'column') + ' and ' + plural(T.was.rows, 'row') + ': a table holds ' + TABLE_MAX.cols + ' and ' + TABLE_MAX.rows + ' at most, so the rest was left out.' : '';
 
+// A passage card can be opened, to read its passage on the board in full: one longer than the card
+// shows, or kept as some of its words, which are then followed by the passage they are from.
+// A card that quotes a stretch has a quote for each passage it runs over, and opens to all of them.
+const openQuotes = it => it.st ? it.quotes || [] : (it.quotes || []).slice(0, 1);
+function canOpenCard(it) {
+  const qs = openQuotes(it); if (!qs.length || !qs[0].q) return false;
+  const some = q => !!(q.kept && q.q !== q.kept);
+  return qs.some(q => some(q) && q.full) || qs.reduce((n, q) => n + String(some(q) ? q.kept : q.q).length, 0) + 3 * (qs.length - 1) > 240;
+}
+const isOpenCard = it => it.kind === 'passage' && cardOpen.has(it.id) && canOpenCard(it);
+function cardWhole(it) {
+  const qs = openQuotes(it), only = qs.some(q => q.kept && q.q !== q.kept), para = ' <span class="para" title="A new paragraph in the text">¶</span> ';
+  const all = '<div class="pq">“' + qs.map((q, k) => markText(String(q.q), layerOn('annotations') ? placeOn(it, k).spans : [], layerOn('parallels') ? parsOn(it, k).spans : [])).join(para) + '”</div>';
+  return only ? '<span class="pl">The words you kept</span><div class="pq">“' + qs.map(q => esc(q.kept || q.q)).join(para) + '”</div>' +
+    (qs.every(q => q.full) ? '<span class="pl">' + (qs.length > 1 ? 'The passages, in full' : 'The passage, in full') + '</span>' + all : '') : all;
+}
+function toggleCard(id) { if (cardOpen.has(id)) cardOpen.delete(id); else cardOpen.add(id); renderBoard(); }
+
 /* ── Render: the board ────────────────────────────────────────────────────── */
 function cardHtml(it) {
   const m = model(it.model), col = m ? m.color : '#b8a88a';
   const q0 = (it.quotes || [])[0];
   let inner = '';
-  if (it.kind === 'box') return '<div class="card k-box" data-id="' + esc(it.id) + '" style="width:' + (+it.w || 280) + 'px;height:' + (+it.h || 180) + 'px"><span class="blab">' + esc(it.label || '') + '</span>' + (ro() ? '' : '<span class="bgrip" title="Drag to resize"></span><span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+  if (it.kind === 'box') return '<div class="card k-box" data-id="' + esc(it.id) + '" style="width:' + (+it.w || 280) + 'px;height:' + (+it.h || 180) + 'px"><span class="blab">' + esc(it.label || '') + '</span>' + (ro() ? '' : '<span class="bgrip" title="Drag to resize"></span><span class="knob" title="Drag to another card, a cell of a table or a group to draw an arrow">→</span>') + '</div>';
   if (it.kind === 'table') return '<div class="card k-table" data-id="' + esc(it.id) + '">' + (it.label ? '<span class="tcap">' + esc(it.label) + '</span>' : '') + tableHtml(it) +
-    (ro() ? '' : colW(it).map((w, i) => '<span class="tcol" data-tcol="' + i + '" title="Drag to widen this column"></span>').join('') + '<span class="bgrip" title="Drag to widen the table"></span><span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+    (ro() ? '' : colW(it).map((w, i) => '<span class="tcol" data-tcol="' + i + '" title="Drag to widen this column"></span>').join('') + '<span class="bgrip" title="Drag to widen the table"></span><span class="knob" title="Drag to another card, a cell or a group to draw an arrow from the whole table. Each cell has a → of its own.">→</span>') + '</div>';
   if (it.kind === 'passage') {
-    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 && q0.q ? '<div class="pq">“' + excerpt(it, 240) + '”</div>' : '') +
-      '<span class="pc">' + esc((q0 && q0.cite) || it.cite || it.ref || '') + '</span>' +
+    const op = isOpenCard(it);
+    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 && q0.q ? (op ? cardWhole(it) : '<div class="pq">“' + excerpt(it, 240) + '”</div>') : '') +
+      (canOpenCard(it) ? '<button type="button" class="more" data-cardopen="' + esc(it.id) + '" aria-expanded="' + op + '">' + (op ? '▴ less' : '▾ read it all here') + '</button>' : '') +
+      '<span class="pc">' + esc((it.st && it.st.cite) || (q0 && q0.cite) || it.cite || it.ref || '') + (it.st && !it.st.whole ? '<i class="pof">' + esc(stretchOfWhat(it.st)) + '</i>' : '') + '</span>' +
+      (it.slost ? '<span class="flag">these words are no longer where they were kept</span>' : '') +
       (it.off ? '<span class="flag">' + (it.off === 'gone' ? (SHM ? 'taken out of the topic' : 'no longer in My topics') : 'no longer under this topic') + '</span>' : '') +
       (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it) + parChips(it);
   } else if (it.kind === 'link') {
@@ -1958,7 +2422,7 @@ function cardHtml(it) {
   inner += inMark(it.id) + (it.kind === 'passage' ? twinChip(it) + alsoChip(it) : '');
   const lc = it.kind === 'link' && it.lk ? (it.lk.state !== 'ok' ? ' gone' : '') : '';
   const pw = parSel && it.kind === 'passage' && layerOn('parallels') && parsOn(it, 0).spans.some(x => x.p.id === parSel) ? parColor(parById(parSel)) : '';   // turned to the chosen parallel's words
-  return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + lc + (pw ? ' pwin' : '') + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : it.kind === 'link' && it.lk && it.lk.color ? esc(it.lk.color) : '') + (pw ? ';--pw:' + pw : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card to draw an arrow">→</span>') + '</div>';
+  return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + (it.slost ? ' slost' : '') + (isOpenCard(it) ? ' open' : '') + lc + (pw ? ' pwin' : '') + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : it.kind === 'link' && it.lk && it.lk.color ? esc(it.lk.color) : '') + (pw ? ';--pw:' + pw : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card, a cell of a table or a group to draw an arrow">→</span>') + '</div>';
 }
 function renderCards() {
   hydrate(); placeUnplaced();
@@ -1968,7 +2432,8 @@ function renderCards() {
   const grips = layerOn('frames') && !ro() ? B.models.map(m => '<div class="fgrip" data-grip="' + esc(m.id) + '" style="background:' + esc(m.color) + '" title="Drag to spread its cards apart, or to pull them together">⤡</div>').join('') : '';
   if (editing && $('cards').contains(editing.el)) { commitEditing(); return; }   // what is being typed is kept first; keeping it draws the board again
   $('cards').innerHTML = tabs + grips + vis.map(cardHtml).join('');
-  $('cards').querySelectorAll('.card.k-table').forEach(placeTcols);
+  cbox = {};
+  $('cards').querySelectorAll('.card.k-table').forEach(el => { placeTcols(el); measureCells(el); });
   size = {};
   $('cards').querySelectorAll('.card').forEach(el => { size[el.dataset.id] = { w: el.offsetWidth, h: el.offsetHeight }; });
   placeCards();
@@ -1998,24 +2463,25 @@ function lit() {
   });
   return nb;
 }
+// An arrow's line: from and to a card, a cell of a table, or a group's frame. A and Z are where its ends stand.
 function curve(a) {
-  const A = rect(a.from), Z = rect(a.to);
+  const A = endRect(a.from, a.fromCell), Z = endRect(a.to, a.toCell);
   if (!A || !Z) return null;
   if (a.layer === 'division') {
     const x1 = A.x + A.w / 2, y1 = A.y + A.h, x2 = Z.x + Z.w / 2, y2 = Z.y, m = Math.max(24, (y2 - y1) / 2);
-    return { d: 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + (y1 + m) + ' ' + x2 + ',' + (y2 - m) + ' ' + x2 + ',' + y2, mx: (x1 + x2) / 2, my: (y1 + y2) / 2 };
+    return { d: 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + (y1 + m) + ' ' + x2 + ',' + (y2 - m) + ' ' + x2 + ',' + y2, mx: (x1 + x2) / 2, my: (y1 + y2) / 2, A, Z, p1: [x1, y1] };
   }
   const ax = A.x + A.w / 2, ay = A.y + A.h / 2, zx = Z.x + Z.w / 2, zy = Z.y + Z.h / 2, dx = zx - ax, dy = zy - ay;
-  // nearly level and far apart: leave from beneath and hang below what lies between
-  if (Math.abs(dy) < 70 && Math.abs(dx) > 300) {
+  // nearly level and far apart: leave from beneath and hang below what lies between (but not from a cell, through the cells beneath it)
+  if (Math.abs(dy) < 70 && Math.abs(dx) > 300 && !A.card && !Z.card) {
     const x1 = ax, y1 = A.y + A.h, x2 = zx, y2 = Z.y + Z.h, sag = Math.max(y1, y2) + 60 + 0.07 * Math.abs(dx);
-    return { d: 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + sag + ' ' + x2 + ',' + sag + ' ' + x2 + ',' + y2, mx: (x1 + x2) / 2, my: 0.25 * (y1 + y2) / 2 + 0.75 * sag };
+    return { d: 'M' + x1 + ',' + y1 + ' C' + x1 + ',' + sag + ' ' + x2 + ',' + sag + ' ' + x2 + ',' + y2, mx: (x1 + x2) / 2, my: 0.25 * (y1 + y2) / 2 + 0.75 * sag, A, Z, p1: [x1, y1] };
   }
   const edgePt = (R, ux, uy) => { const hx = R.w / 2 + 3, hy = R.h / 2 + 3, t = Math.min(ux ? hx / Math.abs(ux) : 1e9, uy ? hy / Math.abs(uy) : 1e9); return [R.x + R.w / 2 + ux * t, R.y + R.h / 2 + uy * t]; };
   const L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L;
   const [x1, y1] = edgePt(A, ux, uy), [x2, y2] = edgePt(Z, -ux, -uy);
   const bend = Math.min(60, 0.12 * L), cx = (x1 + x2) / 2 - uy * bend, cy = (y1 + y2) / 2 + ux * bend;
-  return { d: 'M' + x1 + ',' + y1 + ' Q' + cx + ',' + cy + ' ' + x2 + ',' + y2, mx: 0.25 * x1 + 0.5 * cx + 0.25 * x2, my: 0.25 * y1 + 0.5 * cy + 0.25 * y2 };
+  return { d: 'M' + x1 + ',' + y1 + ' Q' + cx + ',' + cy + ' ' + x2 + ',' + y2, mx: 0.25 * x1 + 0.5 * cx + 0.25 * x2, my: 0.25 * y1 + 0.5 * cy + 0.25 * y2, A, Z, p1: [x1, y1] };
 }
 function renderInk(nb) {
   // markers, one per colour
@@ -2028,18 +2494,26 @@ function renderInk(nb) {
       (r.empty ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h - 22) + '" text-anchor="middle" font-size="13" font-style="italic" fill="#7a6a52">drop cards here</text>' : '') + '</g>';
   });
   $('gframes').innerHTML = f;
-  let h = '';
+  let h = '', o = '', clips = '';
   const pc = parCards();
   B.arrows.filter(arrowShown).forEach(a => {
     const c = curve(a); if (!c) return;
     const col = INK[a.layer] || INK.hypothesis, on = sel.kind === 'arrow' && sel.ids.includes(a.id);
-    const dim = nb ? !(nb.has(a.from) && nb.has(a.to)) : query ? !(matches(item(a.from)) && matches(item(a.to))) : pc ? !(pc.has(a.from) && pc.has(a.to)) : false;
+    const dim = nb ? !(nb.has(a.from) && nb.has(a.to)) : query ? !(endMatches(a.from) && endMatches(a.to)) : pc ? !(pc.has(a.from) && pc.has(a.to)) : false;
     const label = a.layer === 'division' ? '' : a.type, lw = label.length * 6.7 + 18;
-    h += '<g class="ar ' + esc(a.layer) + (on ? ' sel' : '') + (dim ? ' dim' : '') + '" data-arrow="' + esc(a.id) + '">' +
-      '<path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '" stroke="' + col + '"' + (DASH[a.layer] ? ' stroke-dasharray="' + DASH[a.layer] + '"' : '') + ' marker-end="url(#ah-' + esc(a.layer in INK ? a.layer : 'hypothesis') + ')"/>' +
-      (label ? '<g class="pill"><rect x="' + (c.mx - lw / 2) + '" y="' + (c.my - 10) + '" width="' + lw + '" height="20" rx="10" stroke="' + col + '"' + (a.layer === 'computer' ? ' stroke-dasharray="2 3"' : '') + '/><text x="' + c.mx + '" y="' + (c.my + 4.5) + '" text-anchor="middle">' + esc(label) + '</text></g>' : '') + '</g>';
+    const cls = esc(a.layer) + (on ? ' sel' : '') + (dim ? ' dim' : ''), dash = DASH[a.layer] ? ' stroke-dasharray="' + DASH[a.layer] + '"' : '', head = ' marker-end="url(#ah-' + esc(a.layer in INK ? a.layer : 'hypothesis') + ')"';
+    const pill = label ? '<g class="pill"><rect x="' + (c.mx - lw / 2) + '" y="' + (c.my - 10) + '" width="' + lw + '" height="20" rx="10" stroke="' + col + '"' + (a.layer === 'computer' ? ' stroke-dasharray="2 3"' : '') + '/><text x="' + c.mx + '" y="' + (c.my + 4.5) + '" text-anchor="middle">' + esc(label) + '</text></g>' : '';
+    h += '<g class="ar ' + cls + '" data-arrow="' + esc(a.id) + '">' + '<path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '" stroke="' + col + '"' + dash + head + '/>' + pill + '</g>';
+    // An end at a cell lies under its table: over the table, and only there, the line is drawn again to the cell,
+    // with a dot where it leaves one, and its name too if that falls on the table.
+    const ts = [c.A.card, c.Z.card].filter(Boolean); if (!ts.length) return;
+    const cid = 'cc-' + a.id, onT = ts.some(r => inside(r, c.mx, c.my)), faint = sel.kind === 'card' && !on && [a.fromCell && a.from, a.toCell && a.to].some(t => t && sel.ids.includes(t));
+    clips += '<clipPath id="' + esc(cid) + '">' + ts.map(r => '<rect x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '"/>').join('') + '</clipPath>';
+    o += '<g class="ar cin ' + cls + (faint ? ' faint' : '') + '" data-arrow="' + esc(a.id) + '"><path class="v" d="' + c.d + '" stroke="' + col + '"' + dash + head + ' clip-path="url(#' + esc(cid) + ')"/>' +
+      (c.A.card ? '<circle cx="' + c.p1[0] + '" cy="' + c.p1[1] + '" r="3.2" fill="' + col + '"/>' : '') + (onT ? pill : '') + '</g>';
   });
   $('garrows').innerHTML = h;
+  $('cdefs').innerHTML = clips; $('gcell').innerHTML = o;
   renderThreads(nb);
   renderParallels(nb);
   renderDrawn();
@@ -2136,9 +2610,9 @@ function banner() {
   b.classList.remove('photo');
   if (live) { const p = live.entry || photoList().find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
   else if (lost) h = '<span>' + esc(roWhy()) + '</span><a class="btn" href="index.html#mt=' + esc(encodeURIComponent(TID)) + '">Back to My topics</a>';
-  else if (mode) h = '<span>' + (mode.annTo ? 'Click the card these words are relevant to.' : 'Click the card the arrow goes to.') + '</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
+  else if (mode) h = '<span>' + (mode.annTo ? 'Click the card these words are relevant to.' : 'Click the card, the cell of a table or the group the arrow from <b>' + esc(endName(mode.linkFrom, mode.fromRC)) + '</b> goes to.') + '</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
   else if (hand && parById(hand)) { const p = parById(hand); h = '<span>Holding <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>: select its words in another passage, and press <b>+ (' + esc(parSign(p)) + ')</b> by them.</span><button type="button" class="btn" data-b="nohand">Done (Esc)</button>'; }
-  else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(nameOf(offer.from)) + '</b> to <b>' + esc(nameOf(offer.to)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
+  else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(endName(offer.from.id, offer.from.rc)) + '</b> to <b>' + esc(endName(offer.to.id, offer.to.rc)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
   else if (offer && offer.kind === 'lasso') { const one = offer.ids.length === 1; h = '<span>You drew round ' + offer.ids.length + (one ? ' card' : ' cards') + '.</span><button type="button" class="btn solid" data-b="o-select">Select ' + (one ? 'it' : 'them') + '</button><button type="button" class="btn" data-b="o-model">Make ' + (one ? 'it' : 'them') + ' a group</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>'; }
   else if (parSel && parById(parSel)) { const p = parById(parSel), n = (parPlaces().get(p.id) || []).length; h = '<span>Showing <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>' + (layerOn('parallels') ? ', its words on each of its ' + n + (n === 1 ? ' card' : ' cards') : ' (the Parallels layer is hidden)') + '</span>' + (n >= 2 && !compare ? '<button type="button" class="btn" data-b="parcompare">Compare its passages</button>' : '') + '<button type="button" class="btn" data-b="noparsel">Show everything (Esc)</button>'; }
   else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
@@ -2153,14 +2627,22 @@ const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLo
 // A passage in the side. Given its card (it), its words can be selected and annotated, and its annotations are shown.
 function quoteHtml(q, i, removable, it) {
   const href = portalHref(q), P = it && q.q ? placeOn(it, i) : null;
-  return '<div class="q">' + (q.q ? '<span class="t">“' + (P ? '<span data-qt="' + i + '" data-qcard="' + esc(it.id) + '">' + markText(q.q, P.spans, parsOn(it, i).spans) + '</span>' : esc(q.q)) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
+  return '<div class="q">' + (q.q ? '<span class="t">“' + (P ? '<span data-qt="' + i + '" data-qcard="' + esc(it.id) + '">' + litText(q, P.spans, parsOn(it, i).spans) + '</span>' : esc(q.q)) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
     (href ? '<button type="button" data-read="' + esc(href) + '">read it beside the board</button><a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : '') +
     (q.pasted ? '<span class="chk">pasted, not yet checked against the portal</span>' : '') +
     (removable ? '<button type="button" class="x" data-unq="' + i + '" title="Take this passage off the card">✕</button>' : '') +
     (P && !ro() && q.full !== false ? '<button type="button" data-annwhole="' + i + '" data-qcard="' + esc(it.id) + '" title="Annotate this passage as a whole. To annotate some of its words, select them.">annotate</button>' : '') + '</div>' +
     (P ? annEntries(P, it, i) + parApparatus(it, i) : '') + '</div>';
 }
-function relBtn(a) { return '<button type="button" class="rel" data-arrow="' + esc(a.id) + '"><b>' + esc(a.type) + '</b>: ' + esc(nameOf(a.from)) + ' → ' + esc(nameOf(a.to)) + '</button>'; }
+// A passage's words with the annotated ones marked, and the words a card quotes of it lit, the rest faint.
+function litText(q, spans, ps) {
+  ps = ps || [];
+  if (q.ka == null || (q.ka <= 0 && q.kb >= q.q.length)) return markText(q.q, spans, ps);
+  const cut = (a, b) => xs => xs.filter(x => x.e > a && x.s < b).map(x => Object.assign({}, x, { s: Math.max(0, x.s - a), e: Math.min(b - a, x.e - a) }));
+  const seg = (a, b) => markText(q.q.slice(a, b), cut(a, b)(spans), cut(a, b)(ps));
+  return '<span class="out">' + seg(0, q.ka) + '</span><span class="in">' + seg(q.ka, q.kb) + '</span><span class="out">' + seg(q.kb, q.q.length) + '</span>';
+}
+function relBtn(a) { return '<button type="button" class="rel" data-arrow="' + esc(a.id) + '"><b>' + esc(a.type) + '</b>: ' + esc(endName(a.from, a.fromCell)) + ' → ' + esc(endName(a.to, a.toCell)) + '</button>'; }
 const mchip = m => m ? '<span class="mchip" style="background:' + esc(m.color) + '">' + esc(m.title) + '</span>' : '';
 function sideIntro() {
   const n = B.items.filter(i => i.kind === 'passage').length, gh = (() => { try { return !!localStorage.getItem(TOPICS_GH); } catch (e) { return false; } })();
@@ -2168,7 +2650,7 @@ function sideIntro() {
     boardsAround() + (topic ? '<span class="k">The topic, in your words</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
     '<p>The topic’s passages wait under <b>Passages</b>, in the side. Put them on the board one at a time, with <b>+ On the board</b> or by dragging one onto it, or into a group’s frame. A passage you put under the topic later, anywhere in the portal, joins them there; one taken off the board goes back. Click a card to read its passage in full, here or in the portal.</p>' +
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
-    '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
+    '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, to a group’s frame, or to one cell of a table, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
     '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
     '<li><b>Parallels</b>: when words in several passages answer one another, select them in one passage and choose <i>Parallel…</i>. The parallel is then in hand: select its words in the next passage and press <b>+ (a)</b> in the bar. Its words are tinted in its colour, with its letter, on every card; a thread runs from each of its cards to its knot; pointing at its words lights them everywhere; click a chip or a knot to show only it. Beneath a passage here, <i>Parallels</i> lists the words elsewhere that answer to its own. Select two to four cards and <i>Compare them side by side</i>.</li>' +
@@ -2176,7 +2658,7 @@ function sideIntro() {
     '<li><b>Link to another topic</b>: under <b>Boards</b>, in the side, choose one of your topics and link to it as a whole, or to a card or group on its board; or press <i>Copy a link to it</i> on a card there, and paste it here (⌘V). Arrows join a link card like any card. The card linked to carries a mark, <b>↖</b>, and lists the links in its side.</li>' +
     '<li><b>Edit in place</b>: double-click any card, arrow or group name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
     '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag one out; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
-    '<li><b>Tables</b>: press <i>Table</i>, choose its columns and rows on the grid, and whether its first row or its first column are headings. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next, and in the last cell adds a row. Drag a passage from <b>Passages</b> onto a cell to put it there. Paste a table from Word or a spreadsheet onto the board, and copy one back with <kbd>⌘C</kbd>.</li>' +
+    '<li><b>Tables</b>: press <i>Table</i>, choose its columns and rows on the grid, and whether its first row or its first column are headings. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next, and in the last cell adds a row. Drag a passage from <b>Passages</b> onto a cell to put it there. Each cell has a <b>→</b> of its own, beside it when the mouse is over it (or once it is tapped): drag it to a card, another cell, or a group, to draw an arrow from that cell alone. Paste a table from Word or a spreadsheet onto the board, and copy one back with <kbd>⌘C</kbd>.</li>' +
     '<li><b>Groups</b> are frames around their cards. Grab any bare part of a frame to move the whole group; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into a frame, or a passage from <b>Passages</b>, to put it in that group.</li>' +
     '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
     '<li><b>On an iPad</b>: a finger moves cards, groups and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>' +
@@ -2192,7 +2674,7 @@ function sideIntro() {
 }
 function cardButtons(it, arr) {
   let h = '<span class="k">Arrows</span>' + (arr.length ? arr.map(relBtn).join('') : '<p class="empty">None yet.</p>');
-  if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="edit">' + (it.kind === 'passage' || it.kind === 'link' ? 'Give it a heading' : 'Edit') + '</button><button type="button" class="btn" data-act="linkfrom">+ Arrow from here</button><button type="button" class="btn" data-act="focus">Focus</button></div>' +
+  if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="edit">' + (it.kind === 'passage' || it.kind === 'link' ? 'Give it a heading' : 'Edit') + '</button><button type="button" class="btn" data-act="linkfrom">' + (it.kind === 'table' ? '+ Arrow from the whole table' : '+ Arrow from here') + '</button><button type="button" class="btn" data-act="focus">Focus</button></div>' +
     '<div class="row"><button type="button" class="linkish" data-act="offview">Take it off this view</button><button type="button" class="linkish" data-act="delete">' + (it.kind === 'passage' ? 'Take it off the board' : 'Delete it') + '</button><button type="button" class="linkish" data-act="copylink">Copy a link to it</button></div>';
   else h += '<div class="row"><button type="button" class="btn" data-act="focus">Focus</button></div>';
   return h;
@@ -2221,8 +2703,17 @@ function sidePassage(it, m, arr) {
     ? (SHM ? 'This passage was taken out of the shared topic. Its card keeps its place and its arrows until it is taken off the board.' : 'This passage is no longer in My topics. Its card keeps its place, its arrows and its annotations until you take it off the board. Keep the passage again, with ☆ Topic, and it comes back to this card.')
     : 'This passage is no longer under “' + esc(topic ? topic.name : '') + '”. Its card stays, with its arrows, until you put it back or take it off the board.') +
     (ro() ? '' : '<div class="row">' + (it.off === 'off' ? '<button type="button" class="btn solid" data-act="putback">Put it back under the topic</button>' : '') + '<button type="button" class="linkish" data-act="offboard">Take it off the board</button></div>') + '</div>';
-  if (q.kept && q.full) h += '<span class="k">The words you kept</span><div class="kept">“' + esc(q.kept) + '”</div>';
-  h += '<span class="k">' + (q.full ? 'The passage, in full' : 'The passage') + '</span>' + quoteHtml(q, 0, false, it);
+  const st = it.st, sn = !ro() ? stretchNow(it) : null;
+  if (st && !st.whole) {
+    h += '<span class="k">The words this card quotes</span><div class="kept">“' + st.parts.map(p => esc(p.text)).join(' <span class="para" title="A new paragraph in the text">¶</span> ') + '”' +
+      '<p class="by" style="font-style:normal;margin:0.2rem 0 0">' + esc(st.cite) + (stretchOfWhat(st) ? ' · ' + esc(stretchOfWhat(st)) : '') + '. Where it starts and ends is yours; its words and pages are the text’s.</p></div>';
+    h += '<span class="k">' + (st.parts.length > 1 ? 'The passages it is cut from, in full' : 'The passage it is cut from, in full') + '</span>' + it.quotes.map((qq, k) => quoteHtml(qq, k, false, it)).join('');
+  } else {
+    if (q.kept && q.full) h += '<span class="k">The words you kept</span><div class="kept">“' + esc(q.kept) + '”</div>';
+    h += '<span class="k">' + (q.full ? 'The passage, in full' : 'The passage') + '</span>' + quoteHtml(q, 0, false, it);
+  }
+  if (it.slost) h += '<p class="ocr">These words are no longer where they were kept in the text: it may have been extracted again since. The card keeps the copy My topics kept with them, and what it quotes can’t be changed here.</p>';
+  if (sn && !lost && !SHM) h += '<div class="row"><button type="button" class="btn" data-act="stretch" title="Trim it to the words you want, or take in more">Change what it quotes</button><button type="button" class="btn" data-act="splitit">Split it in two…</button></div>';
   if (!q.full) h += '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal. The words are the copy My topics kept when the passage was saved.' : 'The portal beside the board is still loading its texts, so these are the words My topics kept. The passage in full, and its annotations, follow in a moment.') + '</p>';
   else if (!ro()) h += '<p class="by">Select some of its words to annotate them, or to make them a <i>Parallel…</i> with words in other passages.</p>';
   if (x && SHM) {
@@ -2258,14 +2749,17 @@ function sideTable(it, m, arr) {
     s += '<span class="k">Row ' + (at.r + 1) + ', column ' + (at.c + 1) + ': the cell last clicked</span>' +
       (cl.t ? '<div class="stmt">' + esc(cl.t) + '</div>' : '<p class="empty">No words in it' + (ro() ? '' : ': double-click it on the board to type') + '.</p>') +
       cl.ps.map((p, j) => { const P = cellPassage(p); return '<div class="tcellp">' + (P.href ? '<button type="button" class="rel" data-read="' + esc(P.href) + '" title="Read it beside the board">' + esc(P.cite) + '</button>' : '<span class="rel">' + esc(P.cite) + '</span>') + (ro() ? '' : '<button type="button" class="linkish" data-tpout="' + j + '">take it out</button>') + '</div>' + (P.gone ? '<p class="ocr">No longer in My topics: the citation is the one kept when it was put here.</p>' : ''); }).join('');
+    const ca = cl.id ? arr.filter(a => (a.from === it.id && a.fromCell === cl.id) || (a.to === it.id && a.toCell === cl.id)) : [];
+    if (ca.length) s += '<span class="k">Its arrows</span>' + ca.map(relBtn).join('');
     if (!ro()) {
       const under = underTopic().filter(x => !cl.ps.some(p => p.mt === x.id));
       s += (under.length ? '<select data-tcellp aria-label="Put a passage in this cell"><option value="">Put one of the topic’s passages in this cell…</option>' + under.map(x => '<option value="' + esc(x.id) + '">' + esc((x.cite || x.ref) + (x.work ? ' · ' + x.work : '')) + '</option>').join('') + '</select>' : '') +
         '<p class="by">Or drag one onto the cell from <b>Passages</b>, in the side.</p>' +
+        '<div class="row" style="margin-top:0.5rem"><button type="button" class="btn" data-act="linkfromcell" title="Then click the card, the cell or the group it goes to">+ Arrow from this cell</button><span class="by" style="margin:0">or drag from its <b>→</b> on the board</span></div>' +
         '<div class="tacts"><span class="lbl">Row</span><span class="b"><button type="button" class="linkish" data-tact="rowabove">insert above</button><button type="button" class="linkish" data-tact="rowbelow">insert below</button>' + (rows > 1 ? '<button type="button" class="linkish" data-tact="rowdel">delete it</button>' : '') + '</span>' +
         '<span class="lbl">Column</span><span class="b"><button type="button" class="linkish" data-tact="colleft">insert left</button><button type="button" class="linkish" data-tact="colright">insert right</button>' + (cols > 1 ? '<button type="button" class="linkish" data-tact="coldel">delete it</button>' : '') + '</span></div>';
     }
-  } else if (!ro()) s += '<p class="by">Click a cell to put a passage in it, or to add or delete a row or column there. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next.</p>';
+  } else if (!ro()) s += '<p class="by">Click a cell to put a passage in it, to draw an arrow from it, or to add or delete a row or column there. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next.</p>';
   s += '<div class="row"><button type="button" class="btn" data-act="tcopy" title="To paste into Word, a spreadsheet, or onto a board (⌘C does it too)">Copy the table</button></div>';
   return s + cardButtons(it, arr);
 }
@@ -2300,7 +2794,12 @@ function pickSize(b) {
 const gridAt = e => { if (!form || form.kind !== 'table') return null; const el = document.elementFromPoint(e.clientX, e.clientY); return el && el.closest ? el.closest('[data-tgrid] button') : null; };
 function sideCards(ids) {
   const its = ids.map(item).filter(Boolean), np = new Set(its.filter(it => it.kind === 'passage').map(it => it.mt || it.id)).size;   // a passage with two cards selected counts once
-  return '<h2>' + its.length + ' cards</h2><p class="sub">' + its.map(it => esc(cardTitle(it))).join(' · ') + '</p>' +
+  const J = !ro() && !SHM && its.length > 1 && its.every(c => c.kind === 'passage') ? joinPlan(ids) : null;   // on a shared board, not yet: its passages are kept apart from My topics
+  const nt = J && J.st ? B.items.filter(c => c.kind === 'passage' && !ids.includes(c.id) && its.some(s => s.mt === c.mt)).length : 0;   // their cards not selected
+  const join = !J ? '' : '<span class="k">Join them</span>' + (J.st
+    ? '<p class="by" style="margin-top:0">One card, quoting ' + esc(J.st.cite) + (J.between.length ? ', with ' + (J.between.length === 1 ? 'the passage' : 'the passages') + ' between them that no card quotes (' + esc(J.between.join(', ')) + ')' : '') + '. It keeps the first card’s place, group and heading, the arrows of all of them, and every note.' + (nt ? (nt === 1 ? ' Their other card on the board becomes a card of it too.' : ' Their ' + nt + ' other cards on the board become cards of it too, one to a group.') : '') + '</p><div class="row" style="margin-top:0"><button type="button" class="btn solid" data-act="join">Join into one card</button></div>'
+    : '<p class="by" style="margin-top:0">' + esc(J.why) + ' A group keeps them together instead.</p>');
+  return '<h2>' + its.length + ' cards</h2><p class="sub">' + its.map(it => esc(cardTitle(it))).join(' · ') + '</p>' + join +
     (np >= 2 ? '<div class="row" style="margin-top:0.2rem"><button type="button" class="btn solid" data-act="compare">' + (np > CMP_MAX ? 'Compare the first ' + CMP_MAX + ' side by side' : 'Compare them side by side') + '</button></div>' +
       (np > CMP_MAX ? '<p class="by">Compare sets ' + CMP_MAX + ' passages side by side at most.</p>' : '') : '') +
     (ro() ? '' : '<span class="k">Make a group</span><div class="row" style="margin-top:0"><button type="button" class="btn solid" data-act="newmodel">Make these a group of their own</button></div>' +
@@ -2308,13 +2807,18 @@ function sideCards(ids) {
     '<div class="row"><button type="button" class="linkish" data-act="offview">Take them off this view</button><button type="button" class="linkish" data-act="delete">Delete them</button></div>');
 }
 function sideArrow(a) {
-  let h = '<h2>' + esc(a.type) + '</h2><p class="sub"><button type="button" class="linkish" data-card="' + esc(a.from) + '">' + esc(nameOf(a.from)) + '</button> → <button type="button" class="linkish" data-card="' + esc(a.to) + '">' + esc(nameOf(a.to)) + '</button></p>';
+  const end = k => '<button type="button" class="linkish" data-endid="' + esc(a[k]) + '" data-endcell="' + esc(a[k + 'Cell'] || '') + '">' + esc(endName(a[k], a[k + 'Cell'])) + '</button>';
+  let h = '<h2>' + esc(a.type) + '</h2><p class="sub">' + end('from') + ' → ' + end('to') + '</p>';
+  const whole = ['from', 'to'].filter(k => a[k + 'Cell'] && !ro());
+  if (whole.length) h += '<p class="by">' + whole.map(k => '<button type="button" class="linkish" data-act="wholeend" data-end="' + k + '">' + (k === 'from' ? 'From' : 'To') + ' the table as a whole instead of the cell</button>').join(' · ') + '</p>';
   if (a.text) h += '<span class="k">' + (a.layer === 'problem' ? 'How it may answer the question' : 'In your words') + '</span><div class="stmt">' + esc(a.text) + '</div>';
   if (!ro()) h += '<div class="row"><button type="button" class="btn solid" data-act="editarrow">Edit</button><button type="button" class="linkish" data-act="delarrow">Delete it</button></div>';
   return h;
 }
 function sideModel(m) {
-  return sideModel0(m) + '<div class="row"><button type="button" class="linkish" data-act="copylink">Copy a link to this group</button></div>' + linkedFromHtml(m.id);
+  const arr = B.arrows.filter(a => a.from === m.id || a.to === m.id);
+  return sideModel0(m) + '<span class="k">Arrows</span>' + (arr.length ? arr.map(relBtn).join('') : '<p class="empty">None yet.</p>') +
+    '<div class="row">' + (ro() ? '' : '<button type="button" class="btn" data-act="linkfrom">+ Arrow from this group</button>') + '<button type="button" class="linkish" data-act="copylink">Copy a link to this group</button></div>' + linkedFromHtml(m.id);
 }
 function sideModel0(m) {
   const its = B.items.filter(i => i.model === m.id);
@@ -2354,7 +2858,7 @@ function sideLink(it, m, arr) {
     } else if (L.words) h += '<span class="k">Written on that board</span><div class="stmt' + (L.card && L.card.kind === 'problem' ? ' problem' : '') + '">' + esc(L.words) + '</div>';
     if (!L.whole && L.b) {
       const id = it.to.item, ar = (L.b.arrows || []).filter(a => a && (a.from === id || a.to === id));
-      if (ar.length) h += '<span class="k">Its arrows on that board</span>' + ar.map(a => { const o = (L.b.items || []).find(i => i && i.id === (a.from === id ? a.to : a.from)), ot = o ? aboutCard(o).title : '(gone)'; return '<div class="lrow">' + (a.from === id ? 'it <b>' + esc(a.type) + '</b> → ' + esc(ot) : esc(ot) + ' <b>' + esc(a.type) + '</b> → it') + '</div>'; }).join('');
+      if (ar.length) h += '<span class="k">Its arrows on that board</span>' + ar.map(a => { const o = a.from === id ? remoteEnd(L.b, a.to, a.toCell) : remoteEnd(L.b, a.from, a.fromCell), ot = o ? o.title : '(gone)'; return '<div class="lrow">' + (a.from === id ? 'it <b>' + esc(a.type) + '</b> → ' + esc(ot) : esc(ot) + ' <b>' + esc(a.type) + '</b> → it') + '</div>'; }).join('');
     }
     h += '<div class="row"><button type="button" class="btn solid" data-act="followlink">' + (L.whole ? 'Open that board' : 'Open that board at it') + '</button>' + (L.whole ? '<a class="linkish" href="index.html#mt=' + esc(encodeURIComponent(L.t)) + '">its list in My topics</a>' : '') + '</div>';
   }
@@ -2479,7 +2983,7 @@ async function stopSharing() {
     if (same) { if (!same.topics.includes(TID)) { same.topics.push(TID); same.at = now(); } if (same.id !== p.id) remap(same.id); return; }
     let id = p.id; if (ids.has(id)) { id = uid('i'); remap(id); }
     ids.add(id);
-    d.items.push({ id, ref: p.ref, topics: [TID], cite: p.cite || '', work: p.work || '', date: p.date || '', words: p.words || '', excerpt: p.excerpt || null, en: !!p.en, note: '', added: p.added || now(), at: now() });
+    d.items.push(Object.assign({ id, ref: p.ref, topics: [TID], cite: p.cite || '', work: p.work || '', date: p.date || '', words: p.words || '', excerpt: p.excerpt || null, en: !!p.en, note: '', added: p.added || now(), at: now() }, p.excerpt && isObj(p.span) ? { span: clone(p.span) } : {}));
   });
   const b = clone(kept()); b.shared = { repo: SH.repo, by: SH.login, at: now(), stopped: now() };
   d.boards = isObj(d.boards) ? d.boards : {}; d.boards[TID] = Object.assign(b, { at: now() });
@@ -2712,7 +3216,7 @@ function sideArrowForm() {
   const Z = item(to), toQ = Z && Z.kind === 'problem';
   const types = toQ ? ['answers?'].concat(TYPES) : TYPES.concat(['answers?']);
   const cur = a ? a.type : types[0], other = cur && !types.includes(cur);
-  return '<h2>' + (a ? 'Edit the arrow' : 'A new arrow') + '</h2><p class="sub">' + esc(nameOf(from)) + ' → ' + esc(nameOf(to)) + ' <button type="button" class="linkish" data-act="swap">turn it round</button></p>' +
+  return '<h2>' + (a ? 'Edit the arrow' : 'A new arrow') + '</h2><p class="sub">' + esc(endName(from, form.fromCell)) + ' → ' + esc(endName(to, form.toCell)) + ' <button type="button" class="linkish" data-act="swap">turn it round</button></p>' +
     '<label class="f">What it says</label><select data-type>' + types.map(t => '<option' + (t === cur ? ' selected' : '') + '>' + esc(t) + '</option>').join('') + '<option value="__other"' + (other ? ' selected' : '') + '>a word of my own…</option></select>' +
     '<input type="text" data-other placeholder="name the relation" value="' + esc(other ? cur : '') + '" style="margin-top:0.3rem;' + (other ? '' : 'display:none') + '">' +
     '<label class="f">In your words (optional)</label><textarea data-text placeholder="e.g. what the later passage takes back from the earlier, and why">' + esc(a ? a.text || '' : '') + '</textarea>' +
@@ -2731,7 +3235,7 @@ function renderSide() {
   if (form) document.body.classList.remove('sideclosed');
   if (composing()) { keepComposer(() => { const it = item(form.card); D.innerHTML = it ? sideCard(it) : sideAnnAlone(); }); return; }
   if (form && form.kind === 'parnew') { keepParForm(() => { D.innerHTML = sideParNew(); }); return; }
-  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'annotations' ? sideAnnotations() : form.kind === 'parallels' ? sideParallels() : form.kind === 'table' ? sideTableForm() : sideCardForm(); tableFormSync(); return; }
+  if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'annotations' ? sideAnnotations() : form.kind === 'parallels' ? sideParallels() : form.kind === 'table' ? sideTableForm() : form.kind === 'stretch' ? sideStretchForm() : form.kind === 'join' ? sideJoinAsk() : sideCardForm(); tableFormSync(); return; }
   if (sel.kind === 'par' && parById(sel.ids[0])) D.innerHTML = sideParallel(parById(sel.ids[0]));
   else if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
   else if (sel.kind === 'card' && item(sel.ids[0])) D.innerHTML = sideCard(item(sel.ids[0]));
@@ -2896,8 +3400,9 @@ function saveArrow(D) {
   let id = form.id; const stroke = form.fromStroke;
   change(() => {
     if (stroke) { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== stroke); }
-    if (old) Object.assign(old, { from: form.from, to: form.to, type, layer, text });
-    else { id = uid('a'); B.arrows.push({ id, from: form.from, to: form.to, type, layer, text, date: today() }); showLayer(layer); }
+    const cells = x => { ['from', 'to'].forEach(k => { if (form[k + 'Cell']) x[k + 'Cell'] = form[k + 'Cell']; else delete x[k + 'Cell']; }); return x; };
+    if (old) cells(Object.assign(old, { from: form.from, to: form.to, type, layer, text }));
+    else { id = uid('a'); B.arrows.push(cells({ id, from: form.from, to: form.to, type, layer, text, date: today() })); showLayer(layer); }
   });
   form = null; sel = { kind: 'arrow', ids: [id] }; render();
 }
@@ -2977,11 +3482,13 @@ function setShape(id, rows, cols) {
   const d = dims(it), g = grid(it);
   rows = clampN(rows, d.rows, TABLE_MAX.rows); cols = clampN(cols, d.cols, TABLE_MAX.cols);
   if (rows === d.rows && cols === d.cols) { renderSide(); return; }
-  const going = g.slice(rows).flat().concat(g.slice(0, rows).flatMap(x => x.slice(cols))), what = [];
+  const going = g.slice(rows).flat().concat(g.slice(0, rows).flatMap(x => x.slice(cols))), what = [], cut = cellArrows(id, going);
   if (rows < d.rows) what.push('the last ' + (d.rows - rows === 1 ? 'row' : plural(d.rows - rows, 'row')));
   if (cols < d.cols) what.push('the last ' + (d.cols - cols === 1 ? 'column' : plural(d.cols - cols, 'column')));
-  if (hasWords(going) && !confirm('Taking off ' + what.join(' and ') + ' takes words or passages with ' + (what.length > 1 || rows < d.rows - 1 || cols < d.cols - 1 ? 'them' : 'it') + '. Go on? Undo (⌘Z) puts it all back.')) { renderSide(); return; }
+  const loss = cellsLoss(going, cut).replace(' from its cells', ' from their cells');
+  if (loss && !confirm('Taking off ' + what.join(' and ') + ' takes with ' + (what.length > 1 || rows < d.rows - 1 || cols < d.cols - 1 ? 'them' : 'it') + ' ' + loss + '. Go on? Undo (⌘Z) puts it all back.')) { renderSide(); return; }
   withTable(id, (g, cw) => {
+    dropArrows(cut);
     g.splice(rows); while (g.length < rows) g.push(g[0].map(blank));
     g.forEach(x => { x.splice(cols); while (x.length < cols) x.push(blank()); });
     cw.splice(cols); while (cw.length < cols) cw.push(TABLE_CW);
@@ -2996,9 +3503,10 @@ function tableAct(act) {
   if (r >= d.rows || c >= d.cols) return;
   if (/^row(above|below)$/.test(act) && d.rows >= TABLE_MAX.rows) return toast('A table holds ' + TABLE_MAX.rows + ' rows at most.');
   if (/^col(left|right)$/.test(act) && d.cols >= TABLE_MAX.cols) return toast('A table holds ' + TABLE_MAX.cols + ' columns at most.');
-  if (act === 'rowdel' && hasWords(g[r]) && !confirm('Row ' + (r + 1) + ' has words or passages in it. Delete it? Undo (⌘Z) brings it back.')) return;
-  if (act === 'coldel' && hasWords(g.map(x => x[c])) && !confirm('Column ' + (c + 1) + ' has words or passages in it. Delete it? Undo (⌘Z) brings it back.')) return;
+  const going = act === 'rowdel' ? g[r] : act === 'coldel' ? g.map(x => x[c]) : [], cut = cellArrows(id, going), loss = cellsLoss(going, cut);
+  if (loss && !confirm((act === 'rowdel' ? 'Row ' + (r + 1) : 'Column ' + (c + 1)) + ' has ' + loss.replace('words or passages', 'words or passages in it') + '. Delete it' + (cut.length ? ', and ' + (cut.length === 1 ? 'the arrow' : 'the arrows') : '') + '? Undo (⌘Z) brings it back.')) return;
   withTable(id, (g, cw) => {
+    dropArrows(cut);
     if (act === 'rowabove') g.splice(r, 0, g[0].map(blank));
     else if (act === 'rowbelow') g.splice(r + 1, 0, g[0].map(blank));
     else if (act === 'rowdel' && g.length > 1) g.splice(r, 1);
@@ -3040,7 +3548,7 @@ function fillFrom(id, r, c, cells, T) {
       if (R >= TABLE_MAX.rows || C >= TABLE_MAX.cols) { cut = true; return; }
       while (g.length <= R) g.push(g[0].map(blank));
       while (g[0].length <= C) { g.forEach(x => x.push(blank())); cw.push(TABLE_CW); }
-      g[R][C] = cellOf(v);
+      const keep = g[R][C].id; g[R][C] = cellOf(v); delete g[R][C].id; if (keep) g[R][C].id = keep;   // the cell's arrows stay with it
     }));
   });
   render();
@@ -3499,11 +4007,16 @@ function finishStroke(raw) {
   if (inM) st.model = inM.id;   // drawn inside a model's frame, it moves and spreads with the model
   change(() => { const v = view(); v.ink = v.ink || []; v.ink.push(st); showLayer('drawing'); });
   // What the stroke may mean: from one card to another, an arrow; round some cards, a selection.
-  const onCard = p => { const it = B.items.filter(shown).find(i => inside(rect(i.id), p[0], p[1])); return it ? it.id : null; };
+  const onCard = p => {   // the card the point is on, topmost, and the cell of a table it is in
+    const s = $('stage').getBoundingClientRect(), el = document.elementFromPoint(s.left + cam.x + p[0] * cam.k, s.top + cam.y + p[1] * cam.k), c = el && el.closest ? el.closest('.card') : null;
+    const it = c && item(c.dataset.id) ? item(c.dataset.id) : B.items.filter(shown).find(i => inside(rect(i.id), p[0], p[1])); if (!it) return null;
+    const td = c && c.dataset.id === it.id && it.kind === 'table' ? el.closest('[data-cell]') : null;
+    return { id: it.id, rc: td ? td.dataset.cell.split(',').map(Number) : null };
+  };
   const a = onCard(pts[0]), z = onCard(pts[pts.length - 1]);
   const len = pts.reduce((L, p, i) => i ? L + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0, 0);
   const gap = Math.hypot(pts[0][0] - pts[pts.length - 1][0], pts[0][1] - pts[pts.length - 1][1]);
-  if (a && z && a !== z) offer = { kind: 'arrow', from: a, to: z, stroke: st.id };
+  if (a && z && !sameEnd(a, z)) offer = { kind: 'arrow', from: a, to: z, stroke: st.id };
   else if (len * cam.k > 120 && gap < Math.max(50 / cam.k, len * 0.2)) {
     const ids = B.items.filter(shown).filter(i => { const r = rect(i.id); return r && inPoly(r.x + r.w / 2, r.y + r.h / 2, pts); }).map(i => i.id);
     if (ids.length) offer = { kind: 'lasso', ids, stroke: st.id };
@@ -3536,8 +4049,10 @@ $('stage').addEventListener('pointerdown', e => {
   const t = e.target;
   if (t.isContentEditable || t.closest('.pill-edit')) return;   // a caret or a selection in what is being edited
   if (editing) commitEditing();
+  const more = t.closest('[data-cardopen]');   // a card opened to its passage in full, or closed: neither selected nor moved
+  if (more && !mode && !spaceDown && (tool === 'move' || tool === 'select')) { toggleCard(more.dataset.cardopen); return; }
   const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame'), th = t.closest('.annt');
-  const tcolEl = t.closest('.tcol'), cellEl = t.closest('.k-table [data-cell]'), chipEl = t.closest('.k-table .tp');
+  const tcolEl = t.closest('.tcol'), cellEl = t.closest('.k-table [data-cell]'), chipEl = t.closest('.k-table .tp'), ckEl = t.closest('.k-table .ck');
   const pk = t.closest('.part'), pch = t.closest('.pchip');   // a parallel's knot, or its chip on a card: chosen, not moved
   if ((pk || pch) && !mode && !spaceDown && tool !== 'pen' && tool !== 'erase') { choosePar(pk ? pk.dataset.par : pch.dataset.pchip); return; }
   const twc = t.closest('.twin');   // a passage's mark of its other cards: to the next of them
@@ -3547,22 +4062,23 @@ $('stage').addEventListener('pointerdown', e => {
   if (spaceDown) drag = { what: 'pan', sx: e.clientX, sy: e.clientY, cx: cam.x, cy: cam.y, moved: false };
   else if (tool === 'erase' && !ro()) { drag = { what: 'erase', changed: false }; eraseAt(wx, wy, drag); }
   else if (draws(e, bare)) drag = { what: 'ink', pts: [[wx, wy]], pen: e.pointerType === 'pen' };
-  else if (tool === 'box' && !ro() && !knob && !bgrip) drag = { what: 'boxdraw', wx, wy, sx: e.clientX, sy: e.clientY };
+  else if (tool === 'box' && !ro() && !knob && !bgrip && !ckEl) drag = { what: 'boxdraw', wx, wy, sx: e.clientX, sy: e.clientY };
   else if (bgrip && !ro()) { const id = bgrip.closest('.card').dataset.id, it = item(id); select('card', [id]); drag = it.kind === 'table' ? { what: 'tablesize', id, sx: e.clientX, sy: e.clientY, cw0: colW(it), moved: false } : { what: 'boxsize', id, sx: e.clientX, sy: e.clientY, w0: +it.w || 280, h0: +it.h || 180, moved: false }; }
   else if (tcolEl && !ro()) { const id = tcolEl.closest('.card').dataset.id, k = +tcolEl.dataset.tcol; if (!(sel.kind === 'card' && sel.ids.length === 1 && sel.ids[0] === id)) select('card', [id]); drag = { what: 'colsize', id, col: k, sx: e.clientX, sy: e.clientY, w0: colW(item(id))[k], moved: false }; }
   else if (tool === 'select' && !card) drag = { what: 'marq', wx, wy };
+  else if (ckEl && cellEl && !ro()) { drag = { what: 'link', from: card.dataset.id, rc: cellEl.dataset.cell.split(',').map(Number), o: [wx, wy], sx: e.clientX, sy: e.clientY }; $('stage').classList.add('linking'); }   // from one cell of a table
   else if (knob && !ro()) { drag = { what: 'link', from: card.dataset.id, sx: e.clientX, sy: e.clientY }; $('stage').classList.add('linking'); }
   else if (card) {
     const id = card.dataset.id;
+    const cellAt = cellEl && card.classList.contains('k-table') ? cellEl.dataset.cell.split(',').map(Number) : null;
     if (mode && mode.annTo) {   // the card an annotation's words are relevant to
       mode = null; if (composing()) form.to = { card: id };
       render(); const ti = $('details').querySelector('.anncomp [data-ann-to]'); if (ti) ti.value = '';
       focusComposer(); return;
     }
-    if (mode) { const from = mode.linkFrom; mode = null; if (id !== from) makeArrow(from, id); else render(); return; }
+    if (mode) { const A = { id: mode.linkFrom, rc: mode.fromRC || null }, Z = { id, rc: cellAt }; mode = null; markEnd(null); if (!sameEnd(A, Z)) makeArrow(A, Z); else render(); return; }
     if (e.shiftKey || tool === 'select') { const ids = sel.kind === 'card' ? sel.ids.slice() : []; const i = ids.indexOf(id); if (i >= 0) ids.splice(i, 1); else ids.push(id); select(ids.length ? 'card' : null, ids); return; }
     const wasSel = sel.kind === 'card' && sel.ids.length === 1 && sel.ids[0] === id;
-    const cellAt = cellEl && card.classList.contains('k-table') ? cellEl.dataset.cell.split(',').map(Number) : null;
     if (cellAt) tcell = { id, r: cellAt[0], c: cellAt[1] };
     if (!(sel.kind === 'card' && sel.ids.includes(id))) select('card', [id]);
     else if (cellAt) { markCell(); if (sel.ids.length === 1 && !form) renderSide(); }
@@ -3571,6 +4087,7 @@ $('stage').addEventListener('pointerdown', e => {
     sel.ids.forEach(x => { const b = item(x); if (!b || b.kind !== 'box') return; const r = rect(x); B.items.filter(shown).forEach(o => { if (o.id === x || ids.includes(o.id)) return; const q = rect(o.id); if (q && inside(r, q.x + q.w / 2, q.y + q.h / 2)) ids.push(o.id); }); });
     drag = { what: 'cards', ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false, wasSel, clicked: id, cell: cellAt, chip: cellAt && chipEl ? +chipEl.dataset.tp : null };
   }
+  else if (mode && mode.linkFrom && (tab || fr)) { const A = { id: mode.linkFrom, rc: mode.fromRC || null }, Z = { id: (tab || fr).dataset.model, rc: null }; mode = null; markEnd(null); if (!sameEnd(A, Z)) makeArrow(A, Z); else render(); return; }   // to a group
   else if (grip && !ro()) { select('model', [grip.dataset.grip]); drag = spreadDrag(grip.dataset.grip, e); }
   else if (tab) { select('model', [tab.dataset.model]); drag = modelDrag(tab.dataset.model, e); }
   else if (th) { if (mode) return; openAnn(th.dataset.annid); return; }
@@ -3584,7 +4101,7 @@ $('stage').addEventListener('pointerdown', e => {
 });
 $('stage').addEventListener('pointermove', e => {
   if (touches.has(e.pointerId)) touches.set(e.pointerId, [e.clientX, e.clientY]);
-  if (!drag) return;
+  if (!drag) { if (mode && mode.linkFrom) { const t = endAt(e.clientX, e.clientY); markEnd(t && !sameEnd({ id: mode.linkFrom, rc: mode.fromRC || null }, t) ? t : null); } return; }
   if (drag.what === 'pinch') {
     if (touches.size < 2) return;
     const [p, q] = [...touches.values()], d = Math.hypot(p[0] - q[0], p[1] - q[1]) || 1, m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
@@ -3632,8 +4149,9 @@ $('stage').addEventListener('pointermove', e => {
   }
   if (drag.what === 'erase') { const [wx, wy] = toWorld(e.clientX, e.clientY); eraseAt(wx, wy, drag); return; }
   if (drag.what === 'link') {
-    const it = rect(drag.from), [wx, wy] = toWorld(e.clientX, e.clientY);
-    $('ghost').setAttribute('d', 'M' + (it.x + it.w) + ',' + (it.y + it.h / 2) + ' L' + wx + ',' + wy);
+    const it = rect(drag.from), [wx, wy] = toWorld(e.clientX, e.clientY), o = drag.o || [it.x + it.w, it.y + it.h / 2], t = endAt(e.clientX, e.clientY);
+    $('ghost').setAttribute('d', 'M' + o[0] + ',' + o[1] + ' L' + wx + ',' + wy);
+    markEnd(t && !sameEnd({ id: drag.from, rc: drag.rc || null }, t) ? t : null);
     return;
   }
   if (drag.what === 'boxsize') {
@@ -3652,7 +4170,7 @@ $('stage').addEventListener('pointermove', e => {
     if (drag.what === 'colsize') { const cw = colW(it); cw[drag.col] = Math.max(TABLE_MINW, Math.round(drag.w0 + dx)); it.cw = cw; }
     else { const W0 = drag.cw0.reduce((a, b) => a + b, 0), f = Math.max(0.1, (W0 + dx) / W0); it.cw = drag.cw0.map(w => Math.max(TABLE_MINW, Math.round(w * f))); }
     const el = cardEl(drag.id), tb = el && el.querySelector('table');
-    if (tb) { const cw = colW(it); tb.style.width = cw.reduce((a, b) => a + b, 0) + 'px'; tb.querySelectorAll('col').forEach((c, i) => { c.style.width = cw[i] + 'px'; }); placeTcols(el); size[drag.id] = { w: el.offsetWidth, h: el.offsetHeight }; }
+    if (tb) { const cw = colW(it); tb.style.width = cw.reduce((a, b) => a + b, 0) + 'px'; tb.querySelectorAll('col').forEach((c, i) => { c.style.width = cw[i] + 'px'; }); placeTcols(el); measureCells(el); size[drag.id] = { w: el.offsetWidth, h: el.offsetHeight }; }
     renderInk(neighbourhood()); return;
   }
   if (drag.what === 'marq' || drag.what === 'boxdraw') {
@@ -3718,11 +4236,11 @@ function pointerEnd(e, cancelled) {
   }
   if (d.what === 'erase') { if (d.changed) save(); render(); return; }
   if (d.what === 'link') {
-    $('ghost').setAttribute('d', '');
+    $('ghost').setAttribute('d', ''); markEnd(null);
     if (cancelled) return;
-    const el = document.elementFromPoint(e.clientX, e.clientY), card = el && el.closest('.card');
-    if (card && card.dataset.id !== d.from) makeArrow(d.from, card.dataset.id);
-    else if (Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) < 4) { mode = { linkFrom: d.from }; render(); }
+    const A = { id: d.from, rc: d.rc || null }, Z = endAt(e.clientX, e.clientY);
+    if (Z && !sameEnd(A, Z)) makeArrow(A, Z);
+    else if (Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) < 4) { mode = { linkFrom: d.from, fromRC: A.rc }; render(); }
     return;
   }
   if (d.what === 'marq') {
@@ -3742,7 +4260,7 @@ $('stage').addEventListener('pointercancel', e => afterPointer(e, true));
 // Double-click (or double tap): a card opens to be edited; the board offers something to put there.
 function doubleAt(cx, cy) {
   const under = document.elementFromPoint(cx, cy);
-  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob, .tcol, .tp, .pchip, .part') || under.isContentEditable || under.closest('.pill-edit')) return;
+  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob, .ck, .tcol, .tp, .pchip, .part') || under.isContentEditable || under.closest('.pill-edit')) return;
   const card = under.closest('.card');
   const cl = card && card.classList.contains('k-table') && under.closest('[data-cell]');
   if (cl) { const [r, c] = cl.dataset.cell.split(',').map(Number); editCell(card.dataset.id, r, c); return; }
@@ -3830,16 +4348,42 @@ function editArrowLabel(id) {
   inp.addEventListener('blur', () => finish(true));
   inp.focus(); inp.select();
 }
-// An arrow made at once: to a question, "answers?"; otherwise it is named on the spot.
+// An arrow's end, as it is being drawn: { id, rc }, a card's or group's id, and for one cell of a table its [row, column].
+const asEnd = x => typeof x === 'string' ? { id: x, rc: null } : x;
+// Two ends are the same unless they are two cells, or a card and another: a table's cell does not point to its own table.
+const sameEnd = (A, Z) => A.id === Z.id && !(A.rc && Z.rc && (A.rc[0] !== Z.rc[0] || A.rc[1] !== Z.rc[1]));
+// What an arrow being drawn would go to, under the pointer: a card, a cell of a table, or a group's frame or name.
+function endAt(cx, cy) {
+  const el = document.elementFromPoint(cx, cy); if (!el || !el.closest || el.closest('.float')) return null;
+  const card = el.closest('.card');
+  if (card) { const td = card.classList.contains('k-table') ? el.closest('[data-cell]') : null; return { id: card.dataset.id, rc: td ? td.dataset.cell.split(',').map(Number) : null, el: td || card }; }
+  const g = el.closest('.ftab, .frame, .fgrip'), mid = g && (g.dataset.model || g.dataset.grip); if (!mid || !model(mid)) return null;
+  const fr = [...$('gframes').querySelectorAll('.frame')].find(x => x.dataset.model === mid);
+  return { id: mid, rc: null, el: fr || g };
+}
+function markEnd(t) { const el = t ? t.el : null; if (el === ltoEl) return; if (ltoEl) ltoEl.classList.remove('lto'); ltoEl = el; if (el) el.classList.add('lto'); }
+// From the side: an arrow's end opened where it is, a cell in its table, a group by its frame.
+function goEnd(id, cell) {
+  const it = item(id);
+  if (!it) { if (model(id)) select('model', [id]); return; }
+  const rc = cell && it.kind === 'table' ? cellRC(it, cell) : null;
+  if (rc) tcell = { id, r: rc[0], c: rc[1] };
+  select('card', [id]); showCard(id);
+}
+// An arrow made at once, between two ends: to a question, "answers?"; otherwise it is named on the spot.
+// A cell it goes from or to is given an id of its own, if it has none yet, in the same change.
 function makeArrow(from, to, stroke) {
-  const A = item(from), Z = item(to);
-  if (ro() || !A || !Z || from === to) { render(); return; }
-  const type = Z.kind === 'problem' ? 'answers?' : '?';
+  const A = asEnd(from), Z = asEnd(to), zi = item(Z.id);
+  if (ro() || !(item(A.id) || model(A.id)) || !(zi || model(Z.id)) || sameEnd(A, Z)) { render(); return; }
+  const type = zi && zi.kind === 'problem' ? 'answers?' : '?';
   const layer = type === 'answers?' ? 'problem' : 'hypothesis';
   let id;
   change(() => {
     id = uid('a');
-    const a = { id, from, to, type, layer, text: '', evidence: [], date: today() };
+    const a = { id, from: A.id, to: Z.id, type, layer, text: '', evidence: [], date: today() };
+    const fc = A.rc && cellKey(A.id, A.rc), tc = Z.rc && cellKey(Z.id, Z.rc);
+    if (fc) a.fromCell = fc;
+    if (tc) a.toCell = tc;
     if (me()) a.by = me();
     B.arrows.push(a);
     if (stroke) { const v = view(); v.ink = (v.ink || []).filter(st => st.id !== stroke); }
@@ -3875,7 +4419,8 @@ function quickCard(kind, text, at, modelId) {
   if (!text) editInPlace(id, true);
 }
 const quickNote = (text, at, modelId) => { if (String(text || '').trim()) quickCard('note', text, at, modelId); };
-$('stage').addEventListener('dblclick', e => { if (lastType === 'mouse' && tool === 'move' && !e.target.closest('.float') && !e.target.isContentEditable && !e.target.closest('.pill-edit')) doubleAt(e.clientX, e.clientY); });
+$('cards').addEventListener('click', e => { const b = e.target.closest('[data-cardopen]'); if (b && e.detail === 0) toggleCard(b.dataset.cardopen); });   // from the keyboard
+$('stage').addEventListener('dblclick', e => { if (lastType === 'mouse' && tool === 'move' && !e.target.closest('.float') && !e.target.closest('[data-cardopen]') && !e.target.isContentEditable && !e.target.closest('.pill-edit')) doubleAt(e.clientX, e.clientY); });
 $('chooser').addEventListener('keydown', e => {
   if (e.target.id !== 'qnote') return;
   if (e.key === 'Escape') { $('chooser').classList.remove('show'); return; }
@@ -4056,6 +4601,7 @@ let selT = null, selecting = false, selTouch = false, barDown = 0;
 document.addEventListener('selectionchange', () => { clearTimeout(selT); selT = setTimeout(() => { if (!selecting && Date.now() - barDown > 600) showBar(); }, 150); });
 $('details').addEventListener('pointerdown', e => { selTouch = e.pointerType !== 'mouse'; if (!selTouch) selecting = true; });
 document.addEventListener('pointerup', () => { if (selecting) { selecting = false; setTimeout(showBar, 0); } });
+$('details').addEventListener('pointerup', () => { if (form && form.kind === 'stretch' && !form.cutting) setTimeout(pickStretch, 0); });   // words selected in the text of Change what it quotes
 $('details').addEventListener('keyup', e => { if (e.shiftKey && !e.target.closest('input, textarea')) showBar(); });
 $('details').addEventListener('scroll', () => { if ($('annbar').classList.contains('show')) showBar(); });
 $('annbar').addEventListener('pointerdown', e => { e.preventDefault(); barDown = Date.now(); });
@@ -4301,6 +4847,7 @@ $('details').addEventListener('click', e => {
   const ra = e.target.closest('[data-arrow]'); if (ra) { select('arrow', [ra.dataset.arrow]); return; }
   const rc = e.target.closest('[data-card]'); if (rc) { select('card', [rc.dataset.card]); return; }
   const gc = e.target.closest('[data-gocard]'); if (gc) { goCard(gc.dataset.gocard); return; }
+  const re = e.target.closest('[data-endid]'); if (re) { goEnd(re.dataset.endid, re.dataset.endcell || null); return; }
   const lk = e.target.closest('[data-look]'); if (lk) { look(lk.dataset.look); return; }
   const up = e.target.closest('[data-unphoto]'); if (up) {
     if (!confirm('Delete this photograph? It cannot be brought back.')) return;
@@ -4327,8 +4874,23 @@ $('details').addEventListener('click', e => {
   const gb = e.target.closest('[data-tgrid] button'); if (gb) { if (e.detail === 0) pickSize(gb); return; }   // the keyboard's click; a pointer's is taken on pointerup
   const tac = e.target.closest('[data-tact]'); if (tac) { tableAct(tac.dataset.tact); return; }
   const tpo = e.target.closest('[data-tpout]'); if (tpo && tcell) { takeFromCell(tcell.id, tcell.r, tcell.c, +tpo.dataset.tpout); return; }
+  const sxb = e.target.closest('[data-sx]'); if (sxb && form && form.kind === 'stretch') { moveEdge(sxb.dataset.sx); return; }
+  const smk = e.target.closest('.sm[data-sr]'); if (smk && form && form.kind === 'stretch' && getSelection().isCollapsed) { atMark(smk.dataset.sr, +smk.dataset.so); return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, id = sel.ids[0];
+  if (['stretch', 'splitit', 'join', 'joinall', 'joinhere', 'sxsave', 'sxsplit', 'sxall', 'sxhere'].includes(act) && SHM) { toast('What a card quotes can be changed on your own boards; on a shared one, not yet.'); return; }
+  if (act === 'stretch' || act === 'splitit') {
+    const s0 = stretchNow(item(id));
+    if (!s0) { toast('The portal beside the board is still loading its texts. Try again in a moment.'); return; }
+    form = { kind: 'stretch', id, from: s0.from.slice(), to: s0.to.slice(), cutting: act === 'splitit', cut: null, ar: {}, ask: false }; renderSide(); return;
+  }
+  if (act === 'sxsave') { saveStretch(null); return; }
+  if (act === 'sxsplit') { doSplit(null); return; }
+  if (act === 'sxall' || act === 'sxhere') { const sc = act === 'sxall' ? 'all' : 'here'; if (form && form.cutting) doSplit(sc); else saveStretch(sc); return; }
+  if (act === 'sxcut') { form.cutting = true; form.cut = null; form.ask = false; renderSide(); return; }
+  if (act === 'sxtrim') { form.cutting = false; form.ask = false; renderSide(); return; }
+  if (act === 'join') { doJoin(sel.ids.slice(), null); return; }
+  if (act === 'joinall' || act === 'joinhere') { doJoin(form.ids || [], act === 'joinall' ? 'all' : 'here'); return; }
   if (act === 'annsave') { saveAnn(); return; }
   if (act === 'anncancel') { form = null; renderSide(); return; }
   if (act === 'annpick') { mode = { annTo: true }; banner(); return; }
@@ -4353,9 +4915,10 @@ $('details').addEventListener('click', e => {
   if (act === 'tcopy') { copyOut(item(id)); return; }
   if (act === 'savearrow') return saveArrow(D);
   if (act === 'savemodel') return saveModel(D);
-  if (act === 'swap') { const t = form.from; form.from = form.to; form.to = t; keepFields(renderSide); return; }
+  if (act === 'swap') { const t = form.from, tc = form.fromCell; form.from = form.to; form.to = t; form.fromCell = form.toCell; form.toCell = tc; keepFields(renderSide); return; }
   if (act === 'edit') { form = { kind: 'card', id, quotes: clone(item(id).quotes || []) }; renderSide(); return; }
   if (act === 'linkfrom') { mode = { linkFrom: id }; render(); return; }
+  if (act === 'linkfromcell') { if (tcell && item(tcell.id)) { mode = { linkFrom: tcell.id, fromRC: [tcell.r, tcell.c] }; render(); } return; }
   if (act === 'focus') { focus = { id, hops: 1 }; render(); return; }
   if (act === 'offview') { const ids = sel.ids.slice(); change(() => { const v = view(); v.hidden = (v.hidden || []).concat(ids); }); toast('Taken off this view; it is still on the others. “this view…” puts it back.'); select(null, []); return; }
   if (act === 'delete') { if (confirm(delAsk(sel.ids))) removeCards(sel.ids.slice()); return; }
@@ -4378,14 +4941,16 @@ $('details').addEventListener('click', e => {
       (there ? '; ' + (there === 1 ? 'one was' : there + ' were') + ' in it already' : '') + (rest ? '. ' + (rest === 1 ? 'The other card stays' : 'The ' + rest + ' other cards stay') + ' where ' + (rest === 1 ? 'it is' : 'they are') + ': only a passage can stand in two groups' : '') + (made.length ? '. Undo with ⌘Z.' : '.'));
     return;
   }
-  if (act === 'editarrow') { const a = arrow(id); form = { kind: 'arrow', id, from: a.from, to: a.to }; renderSide(); return; }
+  if (act === 'editarrow') { const a = arrow(id); form = { kind: 'arrow', id, from: a.from, to: a.to, fromCell: a.fromCell, toCell: a.toCell }; renderSide(); return; }
+  if (act === 'wholeend') { const k = b.dataset.end; change(() => { const a = arrow(id); if (a) delete a[k + 'Cell']; }); render(); return; }
   if (act === 'delarrow') { if (confirm('Delete this arrow?')) { change(() => { B.arrows = B.arrows.filter(a => a.id !== id); if (BASE.arrows.some(a => a.id === id)) B.removed.push(id); }); select(null, []); } return; }
   if (act === 'editmodel') { form = { kind: 'model', id }; renderSide(); return; }
   if (act === 'selmodel') { select('card', B.items.filter(i => i.model === id && shown(i)).map(i => i.id)); return; }
-  if (act === 'delmodel') { const dup = B.items.filter(i => i.model === id && twinsOf(i).length).length; if (confirm('Delete this group? Its cards stay on the board, in no group.' + (dup ? '\n\n' + (dup === 1 ? 'One of them is a passage that has another card on the board as well. It stays too, outside any group: take it off afterwards if you no longer want it.' : dup + ' of them are passages that have other cards on the board as well. They stay too, outside any group: take them off afterwards if you no longer want them.') : ''))) { change(() => { B.items.forEach(i => { if (i.model === id) i.model = null; }); B.models = B.models.filter(m => m.id !== id); if (BASE.models.some(m => m.id === id)) B.removed.push(id); }); select(null, []); } return; }
+  if (act === 'delmodel') { const na = B.arrows.filter(a => a.from === id || a.to === id).length, dup = B.items.filter(i => i.model === id && twinsOf(i).length).length; if (confirm('Delete this group? Its cards stay on the board, in no group.' + (na ? ' ' + (na === 1 ? 'The arrow drawn to or from it goes' : 'The ' + na + ' arrows drawn to or from it go') + ' with it.' : '') + (dup ? '\n\n' + (dup === 1 ? 'One of them is a passage that has another card on the board as well. It stays too, outside any group: take it off afterwards if you no longer want it.' : dup + ' of them are passages that have other cards on the board as well. They stay too, outside any group: take them off afterwards if you no longer want them.') : ''))) { change(() => { B.items.forEach(i => { if (i.model === id) i.model = null; }); B.models = B.models.filter(m => m.id !== id); B.arrows = B.arrows.filter(a => a.from !== id && a.to !== id); if (BASE.models.some(m => m.id === id)) B.removed.push(id); }); select(null, []); } return; }
 });
 $('details').addEventListener('change', e => {
   if (e.target.matches('[data-alsoin]') && sel.kind === 'card') { const it = item(sel.ids[0]), g = model(e.target.value); if (it && g) alsoIn(it, g); return; }
+  if (e.target.matches('[data-sxa]') && form && form.kind === 'stretch') { form.ar[e.target.dataset.sxa] = +e.target.value; return; }
   if (e.target.matches('[data-pf]') && sel.kind === 'par') { setParField(sel.ids[0], e.target.dataset.pf, e.target.value); return; }
   if (e.target.matches('[data-plnote]')) { setPlaceNote(e.target.dataset.plnote, e.target.value); return; }
   if (e.target.matches('[data-annf]') && form && form.kind === 'annotations') { form.f = form.f || {}; form.f[e.target.dataset.annf] = e.target.value; $('annlist').innerHTML = annListAll(); return; }
