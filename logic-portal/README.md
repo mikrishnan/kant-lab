@@ -375,12 +375,42 @@ reader's topic rather than the seminar's one board.
   its passages, so it shows on every one of your boards where they stand. It is what you said:
   the page never adds words to one, nor joins two because they share words. Words it had to find
   again, because the passage now has them elsewhere or twice, are outlined dashed.
+- **Echoes: stretches that answer one another, two at a time.** A parallel suits a term that
+  comes back; an echo suits an idea, a stretch of argument or a whole section that comes back in
+  another passage. Select the stretch, as long as you like, across the passages of a card that
+  runs on if need be, and choose **Echo…** in the bar, or press **Echo… the whole of it** beneath
+  a passage in the side. The stretch is then in hand. Select the stretch that answers it in
+  another passage and press **+ echoes …**, and say how close the two are (*close*, *partial*,
+  *loose*, or *checked: not alike*), and if you like what kind of echo it is (*same argument*,
+  *abridged*, *same steps, another order*…), in what respect, which draws on which, and a note.
+  The first stretch stays in hand, so the next stretch you choose answers it too. An echo joins
+  two stretches only: saying that A answers B and that B answers C says nothing of A and C, and
+  nothing is drawn between them. **Hold this stretch**, on an echo's end, holds that very
+  stretch, so that what else answers it is said of the same words. On the board, a strip down a
+  card's right edge marks where its stretches fall, and a ribbon joins the two stretches of each
+  echo, as wide as they are and paler the looser the echo; a pair found not alike is listed but
+  never drawn. Wherever a passage shows in full, in the side, in Compare or on a card opened, a
+  bracket in its margin marks each stretch, with a tick where it starts and where it ends.
+  Beneath a passage in the side, **Echoes** lists the stretches elsewhere that answer its own.
+  Click a ribbon, strip or bracket and the echo is **chosen**: the board dims round its two
+  cards and the side shows it, to change how close it is, its kind, respects, direction, note
+  and colour, to **Compare the two** or to delete it. **Echoes**, among the tools, lists them all,
+  downloads them as a list, and sets every stretch against every other in a matrix: shaded where
+  you made an echo, ≠ where you found two not alike, blank where nothing is said. Tick **show the
+  page's chains** and a dashed dot marks two stretches joined only through a third: the page's
+  finding, not yours. Click a blank cell, or such a dot, to judge the pair. A stretch's
+  **neighbourhood** shows the stretches you said answer it round it, and beyond them, grey and
+  dashed, those they answer in turn. Like a parallel, an echo belongs to its passages, is kept
+  with your annotations, and shows on every one of your boards where both stand. A stretch the
+  page had to find again is bracketed dashed.
 - **Compare.** Select two to four passage cards and press **Compare them side by side**, or
-  **Compare its passages** on a parallel. The passages stand in full in columns over the board,
-  and in the gutter between two columns a band in each parallel's colour joins its words in the
-  one to its words in the other: bands that cross show the same points made in another order.
-  Click a band, or a parallel's words, and the columns move until its words stand level. Words
-  selected in a column can be annotated or made a parallel as in the side. **‹ ›** reorder the
+  **Compare its passages** on a parallel, or **Compare the two** on an echo. The passages stand in
+  full in columns over the board, each passage of a card that runs on, and in the gutter between
+  two columns a band in each parallel's colour joins its words in the one to its words in the
+  other, and a broader ribbon joins the two stretches of each echo: bands that cross show the same
+  points made in another order. Click a band, or a parallel's words, and the columns move until
+  its words stand level; a ribbon or a bracket does the same for an echo. Words selected in a
+  column can be annotated or made a parallel or an echo as in the side. **‹ ›** reorder the
   columns, **✕** takes one out, and **Back to the board** (Esc) closes it. Nothing about Compare
   is saved.
 - **Link to another topic.** A link card stands on one board for another of your topics, as a

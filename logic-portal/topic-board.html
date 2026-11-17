@@ -567,6 +567,64 @@
   #details .pinline { display: flex; gap: 0.5rem; align-items: flex-end; }
   #details .pinline > div { flex: 1; }
   #details .pinline input[data-pf="sign"] { width: 4rem; }
+  /* echoes: a stretch that answers a stretch elsewhere, two at a time. Each echo's colour is --pc, one of PAR_COLORS; how
+     close it is, --op. Its stretches are bracketed in the margin wherever a passage shows in full, marked down a closed
+     card's right edge, and joined on the board and in Compare by a ribbon. Dashed is kept for what the page placed. */
+  #details .q.eb, .card .pq.eb, #compare .ct.eb { position: relative; padding-left: calc(0.55rem + var(--ebn, 1) * 6px + 2px); }
+  .card .pq.eb { padding-left: calc(var(--ebn, 1) * 6px + 5px); }
+  #compare .ct.eb { padding-left: calc(var(--ebn, 1) * 6px + 6px); }
+  .ebr { position: absolute; width: 3px; background: var(--pc); border-radius: 1px; cursor: pointer; font-style: normal; }
+  .ebr.s::before, .ebr.e::after { content: ''; position: absolute; left: 0; width: 7px; height: 2px; background: var(--pc); }
+  .ebr.s::before { top: 0; } .ebr.e::after { bottom: 0; }
+  .ebr.placed { background: none; border-left: 2px dashed var(--pc); width: 0; }
+  .ebr.on { box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px var(--pc); }
+  .ebr.dim { opacity: 0.25; }
+  .ebr.ehov { box-shadow: 0 0 0 2px #d9a441; }
+  .ech.ehov { background: rgba(217, 164, 65, 0.16); }
+  .card .estrip { position: absolute; right: 2px; top: 6px; bottom: 6px; width: 5px; pointer-events: none; }
+  .card .estrip i { position: absolute; left: 0; width: 5px; min-height: 4px; border-radius: 2px; background: var(--pc); pointer-events: auto; cursor: pointer; }
+  .card .estrip i.placed { background: none; border: 1.5px dashed var(--pc); width: 2px; }
+  .card .estrip i.dim { opacity: 0.25; }
+  .card .estrip i.on, .card .estrip i.ehov { box-shadow: 0 0 0 1.5px #fff, 0 0 0 3px #d9a441; }
+  #world.far .card .estrip { width: 9px; right: 1px; } #world.far .card .estrip i { width: 9px; }
+  #ink .erib { fill: var(--pc); fill-opacity: var(--op, 0.3); stroke: var(--pc); stroke-opacity: calc(var(--op, 0.3) + 0.25); stroke-width: 1; pointer-events: visiblePainted; cursor: pointer; }
+  #ink .erib.on { fill-opacity: calc(var(--op, 0.3) + 0.2); stroke-width: 2; }
+  #ink .erib.ehov { stroke: #d9a441; stroke-width: 2.5; stroke-opacity: 1; }
+  #ink .erib.dim { fill-opacity: 0.04; stroke-opacity: 0.1; }
+  #compare .cecho { fill: var(--pc); fill-opacity: var(--op, 0.3); stroke: var(--pc); stroke-opacity: 0.45; stroke-width: 0.8; pointer-events: auto; cursor: pointer; }
+  #compare .cecho.on, #compare .cecho.ehov { fill-opacity: calc(var(--op, 0.3) + 0.25); stroke-opacity: 0.9; }
+  #compare .cecho.off { fill-opacity: 0.06; stroke-opacity: 0.15; }
+  .esw { display: inline-block; width: 0.9rem; height: 0.9rem; margin-right: 0.35rem; border: 0; border-radius: 3px; background: var(--pc); color: #fff; font: 600 0.7rem/0.9rem 'EB Garamond', Georgia, serif; text-align: center; vertical-align: -0.1rem; padding: 0; cursor: pointer; flex: none; }
+  .esw.big { width: 1.2rem; height: 1.2rem; line-height: 1.2rem; font-size: 0.85rem; }
+  #details .ech-e .pact { display: flex; gap: 0.6rem; font-size: 0.8rem; margin-top: 0.1rem; }
+  #details .eand { text-align: center; font-style: italic; color: var(--faded); font-size: 0.85rem; margin: -0.1rem 0; }
+  #details .edeg { display: flex; flex-wrap: wrap; gap: 0.3rem 0.7rem; margin: 0.15rem 0 0.2rem; font-size: 0.9rem; }
+  #details .edeg label { display: flex; align-items: center; gap: 0.25rem; cursor: pointer; }
+  #details .edeg label.un { color: #8a2b1c; }
+  #details .emxw { overflow-x: auto; margin: 0.3rem 0; }
+  #details table.emx { border-collapse: collapse; font-size: 0.72rem; }
+  #details .emx th { color: var(--faded); font-weight: 600; padding: 0 0.15rem; text-align: center; min-width: 1.2rem; }
+  #details .emx td { width: 1.25rem; height: 1.25rem; border: 1px solid var(--line-soft); background: #fff; text-align: center; padding: 0; cursor: pointer; }
+  #details .emx td.d { background: #e8dfcb; cursor: default; }
+  #details .emx td.e { background: color-mix(in srgb, var(--pc) calc(var(--op) * 100%), #fff); }
+  #details .emx td.un { color: #8a2b1c; font-size: 0.9rem; }
+  #details .emx td.ch { outline: 1px dashed #9a8f7a; outline-offset: -3px; color: #9a8f7a; font-weight: 600; }
+  #details .emx td.ns:hover, #details .emx td.ch:hover { background: #f6efdd; }
+  #details .emxl { font-size: 0.82rem; margin: 0.3rem 0; } #details .emxl b { display: inline-block; min-width: 1.2rem; color: var(--faded); }
+  #details .emxl .w, #details .nrow .w { font-style: italic; color: var(--faded); }
+  #details svg.eneigh { width: 100%; max-width: 340px; display: block; margin: 0.3rem auto; }
+  #details svg.eneigh .nec { stroke: var(--pc); stroke-opacity: 0.8; }
+  #details svg.eneigh .nun { stroke: #8a2b1c; stroke-dasharray: 1 3; stroke-linecap: round; }
+  #details svg.eneigh .nch { stroke: #9a8f7a; stroke-width: 1.3; stroke-dasharray: 4 3; }
+  #details svg.eneigh .nn { cursor: pointer; }
+  #details svg.eneigh .nn circle { fill: #fff; stroke: var(--accent); stroke-width: 1.6; }
+  #details svg.eneigh .nn.c0 circle { fill: #efe3c8; }
+  #details svg.eneigh .nn.c2 circle { stroke: #9a8f7a; stroke-dasharray: 3 2; }
+  #details svg.eneigh .nn text { font: 600 10px 'EB Garamond', Georgia, serif; fill: var(--accent); pointer-events: none; }
+  #details svg.eneigh .nn.c2 text { fill: #9a8f7a; }
+  #details .nrow { font-size: 0.86rem; margin: 0.25rem 0; } #details .nrow b { display: inline-block; min-width: 1.2rem; color: var(--faded); }
+  #details .nrow .prow { display: inline-flex; margin: 0 0.25rem 0 0; padding: 0.05rem 0.4rem; font-size: 0.8rem; }
+  #details .nrow.inf { color: #7a6a52; }
   /* Compare: two to four passages side by side over the board, bands between the words of each parallel */
   #compare { left: 10px; top: 10px; right: 10px; bottom: 10px; z-index: 4; display: flex; flex-direction: column; padding: 0; font-size: 1rem; background: var(--panel); user-select: text; -webkit-user-select: text; cursor: auto; }
   #compare[hidden] { display: none; }
@@ -649,6 +707,7 @@
   <span class="grp">
     <button type="button" class="btn" id="annsb" title="Every annotation on the board: problems, what passages are relevant to, interpretations and comments">Annotations</button>
     <button type="button" class="btn" id="parsb" title="Every parallel on the board: words in several passages that answer one another">Parallels</button>
+    <button type="button" class="btn" id="echosb" title="Every echo on the board: stretches, two at a time, that answer one another; and what is and isn’t said between them">Echoes</button>
   </span>
   <span class="grp"><span id="sync"></span></span>
   <span class="grp">
@@ -661,7 +720,7 @@
 <div class="wrap">
   <div id="stage">
     <div id="world">
-      <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="gann"></g><g id="gpar"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
+      <svg id="ink" xmlns="http://www.w3.org/2000/svg"><defs id="defs"></defs><g id="gframes"></g><g id="gecho"></g><g id="gann"></g><g id="gpar"></g><g id="garrows"></g><path id="ghost" d=""></path><rect id="marq" class="marq" width="0" height="0" style="display:none"></rect></svg>
       <div id="cards"></div>
       <svg id="drawn" xmlns="http://www.w3.org/2000/svg"><defs id="cdefs"></defs><g id="gcellann"></g><g id="gcell"></g><g id="gdraw"></g><path id="wet" d=""></path></svg>
     </div>
@@ -692,6 +751,7 @@
 
 <datalist id="arrowtypes"><option value="develops"><option value="contradicts"><option value="qualifies"><option value="same as"><option value="answers?"><option value="cf."></datalist>
 <datalist id="partypes"></datalist>
+<datalist id="echotypes"></datalist>
 <div id="annbar" class="annbar" role="toolbar" aria-label="Annotate these words, or make them a parallel"></div>
 <div id="lock" class="lock" role="dialog" aria-modal="true" aria-labelledby="lockh"><div class="lockcard"><h2 id="lockh"></h2><div id="lockbody"></div></div></div>
 <div id="sharedlg" class="lock" role="dialog" aria-modal="true" aria-labelledby="shareh"><div class="lockcard wide"><h2 id="shareh"></h2><div id="sharebody"></div></div></div>
@@ -751,6 +811,7 @@ const LAYERS = [
   { key: 'table', label: 'Tables', mark: 'sq' },
   { key: 'annotations', label: 'Annotations, and what they join', color: '#2f5d8a', dash: '2 4' },
   { key: 'parallels', label: 'Parallels, through their knots', color: '#3b5068' },
+  { key: 'echoes', label: 'Echoes, as ribbons', color: '#6b4e7a' },
 ];
 const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', computer: '#9a8f7a', passage: '#5c3d1e', note: '#5c3d1e' };
 const DASH = { problem: '7 4', computer: '2 4' };
@@ -774,7 +835,16 @@ const ANN_CTX = 32;   // the characters kept either side of the words annotated,
 const PAR_TYPES = ['same words', 'same term', 'translation', 'paraphrase', 'example', 'contrast', 'cf.'];
 const PAR_COLORS = ['#3b5068', '#9a6a1e', '#6b4e7a', '#3f6b63', '#5c6e3a', '#7a3b3b', '#8b5e3c', '#5a5a5a'];
 const PAR_WIN = 80;
+const ACCENT_INK = '#6b4e7a';   // the colour of an echo's buttons, before it has a colour of its own
 const CMP_MAX = 4;
+// Echoes: a stretch that answers a stretch elsewhere, two at a time. How close, in the order offered (unlike: looked at
+// and found not to answer, which is listed but never drawn as a connection); the kinds offered (any word of one's own
+// will do); the characters kept at each edge of a stretch to find it again; and the most columns of brackets in a margin.
+const ECHO_DEG = [{ key: 'close', label: 'close', op: 0.36 }, { key: 'partial', label: 'partial', op: 0.22 }, { key: 'loose', label: 'loose', op: 0.11 }, { key: 'unlike', label: 'checked: not alike', op: 0 }];
+const ECHO_TYPES = ['same argument', 'same steps, another order', 'abridged', 'expanded', 'same conclusion, other grounds', 'same example', 'same shape, other matter', 'answers or objects to', 'cf.'];
+const ECHO_EDGE = 40;
+const ECHO_COLS = 4;
+const ECHO_MAX = 30;   // the most stretches the matrix sets against one another
 const PREFS = 'kantlab-topic-board-prefs-v1:';      // + the topic: this device's own camera, layers and view, kept apart from the board
 
 /* ── State ────────────────────────────────────────────────────────────────── */
@@ -826,6 +896,10 @@ let compare = null;    // Compare, while it is open: { ids: the passage cards si
 let cmpStale = false;  // the store changed while words were being selected in Compare: drawn again once that ends
 let hovPar = '';       // the parallel pointed at, lit wherever its words stand
 let copyTable = null;  // a table being copied by its button in the side
+let ehand = null;      // the stretch in hand, for an echo: one end as an echo keeps it, offered first by words selected, until put down
+let echoSel = null;    // the echo chosen, by id: its ribbon and brackets strong, the rest faint, until Esc
+let hovEcho = '';      // the echo pointed at, lit wherever its stretches stand
+let echoChains = false; // the matrix shows the page's chains through a middle stretch: never saved
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
@@ -1623,7 +1697,7 @@ function changeBoth(mts, boardFn, storeFn) {
 }
 function afterSwap() {
   if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
-  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : sel.kind === 'par' ? parById(id) : model(id));
+  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : sel.kind === 'par' ? parById(id) : sel.kind === 'echo' ? echoById(id) : model(id));
   if (!sel.ids.length) sel.kind = null;
   if (focus && !item(focus.id)) focus = null;
   parsGone();
@@ -1632,6 +1706,7 @@ function afterSwap() {
 function parsGone() {
   if (hand && !parById(hand)) hand = null;
   if (parSel && !parById(parSel)) parSel = null;
+  if (echoSel && !echoById(echoSel)) echoSel = null;
   if (compare) compare.ids = compare.ids.filter(id => item(id) && item(id).kind === 'passage');
 }
 // A passage's note, its topics, or the topic's own note: changed in My topics' store itself, where the list reads them.
@@ -1683,15 +1758,15 @@ function takeIn() {
 }
 function renderAround() {
   hydrate(); renderTools(); renderLayers(); renderBoard(); renderPassages(); renderBoards();
-  if (!form || form.kind === 'annotate' || form.kind === 'parnew' || form.kind === 'parallels') { if (selInSide() || noteFocused()) sideStale = true; else renderSide(); }   // words being selected, or a note being written, in the side are not lost
+  if (!form || form.kind === 'annotate' || form.kind === 'parnew' || form.kind === 'parallels' || form.kind === 'echonew' || form.kind === 'echoes' || form.kind === 'eneigh') { if (selInSide() || noteFocused()) sideStale = true; else renderSide(); }   // words being selected, or a note being written, in the side are not lost
   else if (form.kind === 'annotations' && $('annlist')) $('annlist').innerHTML = annListAll();
   renderCompare();
   applyCam();
 }
-const noteFocused = () => { const a = document.activeElement; return !!(a && a.matches && a.matches('#details textarea.mtnote, #details [data-pf], #details [data-plnote], #details [data-pn]')); };
+const noteFocused = () => { const a = document.activeElement; return !!(a && a.matches && a.matches('#details textarea.mtnote, #details [data-pf], #details [data-plnote], #details [data-pn], #details [data-ef], #details [data-en]')); };
 function afterRemote() {
   if (!B.views.some(v => v.id === viewId)) viewId = B.views[0].id;
-  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : sel.kind === 'par' ? parById(id) : model(id));
+  sel.ids = sel.ids.filter(id => sel.kind === 'card' ? item(id) : sel.kind === 'arrow' ? arrow(id) : sel.kind === 'par' ? parById(id) : sel.kind === 'echo' ? echoById(id) : model(id));
   if (!sel.ids.length) sel.kind = null;
   if (focus && !item(focus.id)) focus = null;
   parsGone();
@@ -2012,7 +2087,7 @@ function neighbourhood() {
 }
 function matches(it) {
   if (!query) return true;
-  const hay = [it.label, it.sub, it.text, it.by, it.copy && it.copy.title, it.copy && it.copy.topic, it.lk && it.lk.title, it.lk && it.lk.topic].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it), parHay(it), it.kind === 'table' ? tableHay(it) : '').join(' ').toLowerCase();
+  const hay = [it.label, it.sub, it.text, it.by, it.copy && it.copy.title, it.copy && it.copy.topic, it.lk && it.lk.title, it.lk && it.lk.topic].concat((it.quotes || []).map(q => q.q + ' ' + q.cite), annHay(it), parHay(it), echoHay(it), it.kind === 'table' ? tableHay(it) : '').join(' ').toLowerCase();
   return query.toLowerCase().split(/\s+/).filter(Boolean).every(w => hay.includes(w));
 }
 
@@ -2030,7 +2105,7 @@ function annIndex() {
   const list = B.annotations || [];
   if (AX && AX.src === list && AX.n === list.length) return AX;
   const byAddr = new Map(), byCard = new Map(), replies = new Map(), byId = new Map();
-  const pars = [], placesByAddr = new Map(), placesByCard = new Map(), placesOf = new Map();
+  const pars = [], placesByAddr = new Map(), placesByCard = new Map(), placesOf = new Map(), echoes = [], echoByAddr = new Map();
   const put = (m, k, a) => { if (!m.has(k)) m.set(k, []); m.get(k).push(a); };
   list.forEach(a => {
     if (!a || typeof a.id !== 'string') return;
@@ -2038,6 +2113,8 @@ function annIndex() {
     if (a.kind === 'reply') { if (a.re) put(replies, a.re, a); return; }
     // a parallel, and its places: kept under place, not on, so that a page from before parallels passes them by
     if (a.kind === 'parallel') { pars.push(a); return; }
+    // an echo: two ends, each a stretch named by the passages it runs over; kept under a and b, not on, for the same reason
+    if (a.kind === 'echo') { if (okEnd(a.a) && okEnd(a.b)) { echoes.push(a); ['a', 'b'].forEach(sd => new Set(a[sd].refs).forEach(r => put(echoByAddr, r, { ec: a, side: sd }))); } return; }
     if (a.kind === 'place') {
       const pl = a.place; if (typeof a.re !== 'string' || !pl || typeof pl !== 'object' || typeof pl.exact !== 'string' || !pl.exact) return;
       put(placesOf, a.re, a);
@@ -2051,7 +2128,8 @@ function annIndex() {
   replies.forEach(rs => rs.sort((x, y) => String(x.date).localeCompare(String(y.date))));
   placesOf.forEach(ps => ps.sort((x, y) => String(x.date).localeCompare(String(y.date))));
   pars.sort(bySign);
-  return (AX = { src: list, n: list.length, byAddr, byCard, replies, byId, pars, placesByAddr, placesByCard, placesOf });
+  echoes.sort((x, y) => String(x.date).localeCompare(String(y.date)));
+  return (AX = { src: list, n: list.length, byAddr, byCard, replies, byId, pars, placesByAddr, placesByCard, placesOf, echoes, echoByAddr });
 }
 const annById = id => annIndex().byId.get(id);
 // Where the words annotated stand in this passage's text: { s, e, placed }, placed when the page had to judge
@@ -2103,12 +2181,13 @@ function annPlaces() {
 const annHay = it => annsOfCard(it).map(a => [a.text, a.by, a.to && toText(a.to)].concat((annIndex().replies.get(a.id) || []).map(r => r.text + ' ' + r.by)).join(' ')).join(' ');
 // A passage's words, the annotated ones marked; spans are { s, e, placed, a }. The latest made shows its colour.
 // ps are the places of parallels in it, { s, e, placed, a, p }: tinted in the parallel's colour, its letter after
-// them (drawn by CSS, so that it is no part of the words selected).
-function markText(t, spans, ps) {
-  ps = ps || [];
-  if (!spans.length && !ps.length) return esc(t);
+// them (drawn by CSS, so that it is no part of the words selected). es are the stretches of echoes in it, { s, e, ec,
+// side }: each piece of them wrapped, unstyled, so that the bracket in the margin can be measured against it.
+function markText(t, spans, ps, es) {
+  ps = ps || []; es = es || [];
+  if (!spans.length && !ps.length && !es.length) return esc(t);
   const cuts = new Set([0, t.length]);
-  spans.concat(ps).forEach(x => { cuts.add(Math.max(0, Math.min(t.length, x.s))); cuts.add(Math.max(0, Math.min(t.length, x.e))); });
+  spans.concat(ps, es).forEach(x => { cuts.add(Math.max(0, Math.min(t.length, x.s))); cuts.add(Math.max(0, Math.min(t.length, x.e))); });
   const pts = [...cuts].sort((a, b) => a - b);
   let h = '';
   for (let i = 0; i < pts.length - 1; i++) {
@@ -2123,6 +2202,8 @@ function markText(t, spans, ps) {
       m = '<span class="par' + (po.some(x => x.placed) ? ' placed' : '') + (ids.length > 1 ? ' many' : '') + (ends.length ? ' pend' : '') + '" style="--pc:' + parColor(top) + '" data-par="' + esc(ids.join(' ')) + '" data-pl="' + esc(po.map(x => x.a.id).join(' ')) + '"' +
         (ends.length ? ' data-sig="' + esc([...new Set(ends.map(x => parSign(x.p)))].join(',')) + '"' : '') + '>' + m + '</span>';
     }
+    const eo = es.filter(x => x.s <= a && x.e >= b);
+    if (eo.length && seg) m = '<span class="ech" data-ech="' + esc([...new Set(eo.map(x => x.ec.id + ':' + x.side))].join(' ')) + '">' + m + '</span>';
     h += m;
   }
   return h;
@@ -2236,6 +2317,147 @@ function parChips(it) {
   return '<span class="pchips">' + ps.map(p => '<button type="button" class="pchip' + (p.id === parSel ? ' on' : '') + (p.id === hand ? ' held' : '') + '" data-pchip="' + esc(p.id) + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '" title="' + esc('(' + parSign(p) + ') ' + p.label + (p.type ? ' · ' + p.type : '') + ': click to show it on the board') + '">' + esc(parSign(p)) + '</button>').join('') + '</span>';
 }
 const parHay = it => parsOfCard(it).map(p => [p.label, p.type, p.text].join(' ')).concat(parsOn(it, 0).spans.map(x => x.a.text || '')).join(' ');
+
+/* ── Builders: echoes ─────────────────────────────────────────────────────────
+   An echo is a pair of stretches that the reader says answer one another: Baumgarten §§ 7–8 and KrV A 290–292,
+   say. Each end, a and b, is a stretch as a passage card keeps one: the passages it runs over (refs, in order),
+   where it starts and ends in them (from and to, [address, offset]), its citation and the card it was made on. It
+   is found again by its first and last words (head, tail) with a few either side (pre, suf), or by all its words
+   (exact) when it is short, so that a long stretch survives a correction in its middle. It is kept with the
+   annotations, once for all the reader's boards, as a parallel is. But it joins two stretches only: A–B and B–C
+   say nothing of A and C, and nothing is drawn as if they did. What the page works out from echoes, a chain
+   through a middle stretch, is grey and dashed and says so. An echo whose degree is unlike says the two were looked
+   at and found not to answer: it is listed and set in the matrix, never drawn as a connection. */
+const okEnd = e => !!e && typeof e === 'object' && Array.isArray(e.refs) && e.refs.length > 0 && e.refs.every(r => typeof r === 'string' && r) && Array.isArray(e.from) && Array.isArray(e.to) &&
+  (typeof e.exact === 'string' ? !!e.exact : typeof e.head === 'string' && typeof e.tail === 'string' && !!e.head && !!e.tail);
+const echoById = id => { const a = id && annById(id); return a && a.kind === 'echo' ? a : null; };
+const echoesAll = () => annIndex().echoes;
+const echoColor = ec => isUnlike(ec) ? '#8a2b1c' : PAR_COLORS.includes(ec && ec.color) ? ec.color : PAR_COLORS[0];   // a pair found not alike, in the problems' red
+const echoDeg = ec => ECHO_DEG.find(d => d.key === (ec && ec.degree)) || ECHO_DEG[0];
+const isUnlike = ec => !!ec && ec.degree === 'unlike';
+const other = sd => sd === 'a' ? 'b' : 'a';
+// A stretch's identity: the very passages and offsets. Two echoes share a stretch only where they share it exactly,
+// as one made by holding an end of the other does; the page never judges two stretches near enough the same.
+const endKey = e => (e.refs || []).join('\u0001') + '|' + (+(e.from || [])[1] || 0) + '|' + (+(e.to || [])[1] || 0);
+const endCite = e => String((e && e.cite) || 'a passage');
+// A stretch in a few words: all of them, or its first and last, cut where a word ends.
+const endWords = (e, n) => {
+  n = n || 90; if (e.exact != null) return short(e.exact, n);
+  const h = String(e.head).replace(/\s+\S*$/, ''), t = String(e.tail).replace(/^\S*\s+/, '');
+  return short(h.length > 12 ? h : e.head, Math.round(n / 2)) + ' … ' + short(t.length > 12 ? t : e.tail, Math.round(n / 2));
+};
+const echoWay = ec => ec.dir === 'b-on-a' ? endCite(ec.b) + ' draws on ' + endCite(ec.a) : ec.dir === 'a-on-b' ? endCite(ec.a) + ' draws on ' + endCite(ec.b) : '';
+const echoName = ec => endCite(ec.a) + ' ↔ ' + endCite(ec.b);
+const echoWhat = ec => [echoDeg(ec).label, ec.type].filter(Boolean).join(' · ');
+// Where an end stands in one passage, the passage at address k with text t: { s, e, first, last, placed }, first and
+// last when its start and its end are in this passage; null when its words are not found.
+function endIn(t, k, e) {
+  const i = e.refs.indexOf(k); if (i < 0) return null;
+  const first = i === 0, last = i === e.refs.length - 1;
+  if (e.exact != null) {
+    if (!first || !last) return null;
+    const f = findWords(t, { exact: e.exact, prefix: e.pre || '', suffix: e.suf || '', start: +e.from[1] || 0 });
+    return f && { s: f.s, e: f.e, first, last, placed: f.placed };
+  }
+  let s = 0, z = t.length, placed = false;
+  if (first) { const f = findWords(t, { exact: e.head, prefix: e.pre || '', suffix: '', start: +e.from[1] || 0 }); if (!f) return null; s = f.s; placed = f.placed; }
+  if (last) { const g = findWords(t, { exact: e.tail, prefix: '', suffix: e.suf || '', start: (+e.to[1] || 0) - e.tail.length }); if (!g) return null; z = g.e; placed = placed || g.placed; }
+  return z > s ? { s, e: z, first, last, placed } : null;
+}
+// The ends of echoes in one passage of a card, as spans { s, e, first, last, placed, ec, side }, and those made on
+// this card whose words its passage no longer has (lost). Worked out once for each card and text.
+let ECACHE = { ax: null, m: new Map() };
+function echoesOn(it, qi) {
+  const q = it && it.kind === 'passage' && (it.quotes || [])[qi], empty = { spans: [], lost: [] };
+  if (!q || !q.q) return empty;
+  const X = annIndex(); if (ECACHE.ax !== X) ECACHE = { ax: X, m: new Map() };
+  const key = it.id + '|' + qi, c = ECACHE.m.get(key); if (c && c.t === q.q && c.full === q.full) return c.r;
+  const k = qAddr(q), out = { spans: [], lost: [] };
+  (k ? X.echoByAddr.get(k) || [] : []).forEach(({ ec, side }) => {
+    const f = endIn(q.q, k, ec[side]);
+    if (f) out.spans.push(Object.assign(f, { ec, side }));
+    else if (q.full !== false && ec[side].card === it.id) out.lost.push({ ec, side, lost: true });
+  });
+  out.spans.sort((x, y) => x.s - y.s || String(x.ec.date).localeCompare(String(y.ec.date)));
+  ECACHE.m.set(key, { t: q.q, full: q.full, r: out });
+  return out;
+}
+// The spans to mark in a passage shown in full: those of echoes, not of one found unlike, while their layer shows.
+const echoSpans = (it, qi) => layerOn('echoes') ? echoesOn(it, qi).spans.filter(x => !isUnlike(x.ec)) : [];
+// How many brackets may stand side by side in a margin: the most stretches over any one place, counted on the words.
+function ebDepth(xs) {
+  const pts = []; xs.forEach(x => { pts.push([x.s, 1]); pts.push([x.e, -1]); });
+  pts.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+  let n = 0, m = 0; pts.forEach(p => { n += p[1]; m = Math.max(m, n); });
+  return Math.max(1, Math.min(ECHO_COLS, m));
+}
+// The ends of echoes in the words a card quotes: { ec, side, parts: [{ qi, s, e, first, last, placed }] }.
+function echoesOfCard(it) {
+  const m = new Map();
+  if (it.kind !== 'passage') return [];
+  openQuotes(it).forEach((q, i) => echoesOn(it, i).spans.filter(x => inKept(q, x)).forEach(x => {
+    const k = x.ec.id + ':' + x.side; if (!m.has(k)) m.set(k, { ec: x.ec, side: x.side, parts: [] });
+    m.get(k).parts.push(Object.assign({ qi: i }, x));
+  }));
+  return [...m.values()];
+}
+// Where along a card's words each end falls, as fractions of them from the start: for the strip down its edge, and
+// the ribbons on the board, which leave the card at those heights.
+function echoStrip(it) {
+  const qs = openQuotes(it), lo = q => q.ka != null ? q.ka : 0, hi = q => q.ka != null ? q.kb : String(q.q || '').length;
+  const L = qs.map(q => Math.max(0, hi(q) - lo(q))), tot = L.reduce((a, b) => a + b, 0) || 1, off = [];
+  L.reduce((acc, n) => { off.push(acc); return acc + n; }, 0);
+  return echoesOfCard(it).map(o => {
+    const ps = o.parts.map(x => { const q = qs[x.qi]; return [off[x.qi] + Math.max(0, Math.min(hi(q), x.s) - lo(q)), off[x.qi] + Math.max(0, Math.min(hi(q), x.e) - lo(q))]; });
+    const f0 = Math.min(...ps.map(p => p[0])) / tot, f1 = Math.max(...ps.map(p => p[1])) / tot;
+    return { ec: o.ec, side: o.side, f0, f1: Math.min(1, Math.max(f1, f0 + 0.05)), placed: o.parts.some(x => x.placed) };
+  }).sort((x, y) => x.f0 - y.f0);
+}
+// Where each echo stands on this board: its id → { a: the cards with its first stretch, b: with its second }.
+function echoPlaces() {
+  const W = new Map();
+  B.items.forEach(it => { if (it.kind !== 'passage') return; echoesOfCard(it).forEach(o => { if (!W.has(o.ec.id)) W.set(o.ec.id, { a: [], b: [] }); const L = W.get(o.ec.id)[o.side]; if (!L.includes(it.id)) L.push(it.id); }); });
+  return W;
+}
+function echoesHere() { const W = echoPlaces(); return echoesAll().filter(ec => W.has(ec.id)); }
+// Where one end stands: on a card here, which shows its words; on a card whose words don't hold it (elsewhere);
+// waiting for the portal's texts; or not on this board at all.
+function endHere(ec, side) {
+  const W = echoPlaces().get(ec.id), cs = W ? W[side].filter(c => shown(item(c))) : [];
+  if (cs.length) return { card: cs.includes(ec[side].card) ? ec[side].card : cs[0] };
+  const e = ec[side], has = it => it.kind === 'passage' && openQuotes(it).some(q => e.refs.includes(qAddr(q)));
+  const there = B.items.filter(has);
+  if (there.some(it => openQuotes(it).some(q => e.refs.includes(qAddr(q)) && q.full === false))) return { waiting: true, card: there[0].id };
+  return there.length ? { elsewhere: true, card: there[0].id } : { away: true };
+}
+const endState = H => H.away ? ' <span class="pg">not on this board</span>' : H.elsewhere ? ' <span class="pg">not in the words its card quotes, or no longer in the passage</span>' : H.waiting ? ' <span class="pg">waiting for the portal’s texts</span>' : '';
+// The cards of the chosen echo, or null when none is chosen.
+function echoCards() {
+  if (!echoSel || !layerOn('echoes')) return null;
+  const W = echoPlaces().get(echoSel); return W ? new Set(W.a.concat(W.b)) : null;
+}
+// The stretches of a list of echoes, each once: key → { key, e: the end as first kept, ecs: [{ ec, side }] }.
+function echoNodes(list) {
+  const N = new Map();
+  list.forEach(ec => ['a', 'b'].forEach(sd => { const k = endKey(ec[sd]); if (!N.has(k)) N.set(k, { key: k, e: ec[sd], ecs: [] }); N.get(k).ecs.push({ ec, side: sd }); }));
+  return N;
+}
+// Stretches in the order of the texts: by passage in the portal, then by where they start; by citation until it loads.
+function nodeOrder(list) {
+  const X = STX(), at = n => { const i = X ? X.BYID.get(n.e.refs[0]) : null; return i != null ? i * 1e7 + (+n.e.from[1] || 0) : 1e15; };
+  return list.slice().sort((x, y) => at(x) - at(y) || endCite(x.e).localeCompare(endCite(y.e)) || x.key.localeCompare(y.key));
+}
+// The echoes said between two stretches, by their keys.
+const echoesBetween = (N, k1, k2) => (N.get(k1) || { ecs: [] }).ecs.filter(x => endKey(x.ec[other(x.side)]) === k2).map(x => x.ec);
+// The page's finding: the stretches through which two are joined by echoes said, where nothing is said between them.
+function chainsThrough(N, k1, k2) {
+  if (echoesBetween(N, k1, k2).length) return [];
+  const near = k => new Set((N.get(k) || { ecs: [] }).ecs.filter(x => !isUnlike(x.ec)).map(x => endKey(x.ec[other(x.side)])));
+  const A = near(k1), Z = near(k2);
+  return [...A].filter(k => k !== k1 && k !== k2 && Z.has(k));
+}
+const echoHay = it => echoesOfCard(it).map(o => [o.ec.type, (o.ec.in || []).join(' '), o.ec.text, endCite(o.ec[other(o.side)])].join(' ')).join(' ');
+function nextEchoColor() { const here = echoesHere(), used = new Set(here.map(e => e.color)); return PAR_COLORS.find(c => !used.has(c)) || PAR_COLORS[here.length % PAR_COLORS.length]; }
 
 /* ── Builders: tables ─────────────────────────────────────────────────────────
    A table keeps its cells a row at a time. A cell is its words, or, once a passage is put in
@@ -2502,7 +2724,8 @@ function canOpenCard(it) {
 const isOpenCard = it => it.kind === 'passage' && cardOpen.has(it.id) && canOpenCard(it);
 function cardWhole(it) {
   const qs = openQuotes(it), only = qs.some(q => q.kept && q.q !== q.kept), para = ' <span class="para" title="A new paragraph in the text">¶</span> ';
-  const all = '<div class="pq">“' + qs.map((q, k) => markText(String(q.q), layerOn('annotations') ? placeOn(it, k).spans : [], layerOn('parallels') ? parsOn(it, k).spans : [])).join(para) + '”</div>';
+  const E = qs.map((q, k) => echoSpans(it, k)), en = E.reduce((n, x) => n + x.length, 0);
+  const all = '<div class="pq' + (en ? ' eb" data-ebox="' + esc(it.id) + '|0|' + (qs.length - 1) + '" style="--ebn:' + ebDepth(E.flat()) : '') + '">“' + qs.map((q, k) => markText(String(q.q), layerOn('annotations') ? placeOn(it, k).spans : [], layerOn('parallels') ? parsOn(it, k).spans : [], E[k])).join(para) + '”</div>';
   return only ? '<span class="pl">The words you kept</span><div class="pq">“' + qs.map(q => esc(q.kept || q.q)).join(para) + '”</div>' +
     (qs.every(q => q.full) ? '<span class="pl">' + (qs.length > 1 ? 'The passages, in full' : 'The passage, in full') + '</span>' + all : '') : all;
 }
@@ -2523,7 +2746,7 @@ function cardHtml(it) {
       '<span class="pc">' + esc((it.st && it.st.cite) || (q0 && q0.cite) || it.cite || it.ref || '') + (it.st && !it.st.whole ? '<i class="pof">' + esc(stretchOfWhat(it.st)) + '</i>' : '') + '</span>' +
       (it.slost ? '<span class="flag">these words are no longer where they were kept</span>' : '') +
       (it.off ? '<span class="flag">' + (it.off === 'gone' ? (SHM ? 'taken out of the topic' : 'no longer in My topics') : 'no longer under this topic') + '</span>' : '') +
-      (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it) + parChips(it);
+      (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it) + parChips(it) + echoStripHtml(it);
   } else if (it.kind === 'link') {
     const L = it.lk || linkOf(it), gone = L.state !== 'ok';
     inner = '<span class="lt">↗ ' + esc(L.topic || 'another topic') + (L.whole ? ' · the whole topic' : L.group ? ' · a group' : '') + '</span>' +
@@ -2552,6 +2775,7 @@ function renderCards() {
   size = {};
   $('cards').querySelectorAll('.card').forEach(el => { size[el.dataset.id] = { w: el.offsetWidth, h: el.offsetHeight }; });
   placeCards();
+  drawBrackets($('cards'));
 }
 function placeCards() {
   $('cards').querySelectorAll('.card').forEach(el => { const p = posOf(el.dataset.id); el.style.left = p[0] + 'px'; el.style.top = p[1] + 'px'; });
@@ -2567,13 +2791,13 @@ function placeCards() {
   });
 }
 function lit() {
-  const nb = neighbourhood(), pc = parCards(), tw = new Set();
+  const nb = neighbourhood(), pc = parCards(), ecs = echoCards(), tw = new Set();
   if (sel.kind === 'card') sel.ids.forEach(id => twinsOf(item(id)).forEach(c => { if (!sel.ids.includes(c.id)) tw.add(c.id); }));   // the same passage's other cards
   $('cards').querySelectorAll('.card').forEach(el => {
     const it = item(el.dataset.id);
     el.classList.toggle('sel', sel.kind === 'card' && sel.ids.includes(it.id));
     el.classList.toggle('twinlit', tw.has(it.id));
-    el.classList.toggle('dim', (nb && !nb.has(it.id)) || !matches(it) || (pc && !pc.has(it.id)));
+    el.classList.toggle('dim', (nb && !nb.has(it.id)) || !matches(it) || (pc && !pc.has(it.id)) || (ecs && !ecs.has(it.id)));
     el.classList.toggle('hit', !!query && matches(it));
   });
   return nb;
@@ -2631,6 +2855,7 @@ function renderInk(nb) {
   $('cdefs').innerHTML = clips; $('gcell').innerHTML = o;
   renderThreads(nb);
   renderParallels(nb);
+  renderEchoes(nb);
   renderDrawn();
 }
 // The cards of the chosen parallel, and the tables with a cell naming it, or null when none is chosen.
@@ -2661,6 +2886,76 @@ function renderParallels(nb) {
     });
   }
   $('gpar').innerHTML = h;
+}
+/* ── Render: echoes on the board, and their brackets wherever a passage shows in full ── */
+// The strip down a passage card's right edge: where along its words each echo's stretch falls.
+function echoStripHtml(it) {
+  if (!layerOn('echoes') || it.kind !== 'passage') return '';
+  const xs = echoStrip(it).filter(x => !isUnlike(x.ec)); if (!xs.length) return '';
+  return '<span class="estrip">' + xs.map(x => '<i class="' + (x.placed ? 'placed' : '') + (x.ec.id === echoSel ? ' on' : '') + (echoSel && x.ec.id !== echoSel ? ' dim' : '') + (x.ec.id === hovEcho ? ' ehov' : '') + '" data-echo="' + esc(x.ec.id) + '" style="top:' + (x.f0 * 100).toFixed(1) + '%;height:' + ((x.f1 - x.f0) * 100).toFixed(1) + '%;--pc:' + echoColor(x.ec) + '" title="' + esc('Echoes ' + endCite(x.ec[other(x.side)]) + ': ' + echoWhat(x.ec) + '. Click to show it.') + '"></i>').join('') + '</span>';
+}
+// Each echo with both stretches on cards in sight: a ribbon from the one to the other, leaving each card at the
+// height of its stretch, as wide as the stretch, paler the looser the echo. Never dashed: dashes are the page's.
+function renderEchoes(nb) {
+  let h = '';
+  if (layerOn('echoes')) {
+    const W = echoPlaces(), strips = new Map(), stripOf = c => { if (!strips.has(c)) strips.set(c, echoStrip(item(c))); return strips.get(c); };
+    echoesAll().forEach(ec => {
+      if (isUnlike(ec)) return;
+      const w = W.get(ec.id); if (!w) return;
+      const pick = sd => { const cs = w[sd].filter(c => shown(item(c)) && rect(c)); return cs.includes(ec[sd].card) ? ec[sd].card : cs[0]; };
+      const ca = pick('a'), cb = pick('b'); if (!ca || !cb || ca === cb) return;
+      const A = rect(ca), Z = rect(cb), sa = stripOf(ca).find(x => x.ec.id === ec.id && x.side === 'a'), sb = stripOf(cb).find(x => x.ec.id === ec.id && x.side === 'b');
+      if (!A || !Z || !sa || !sb) return;
+      const y = (R, f) => R.y + 6 + f * Math.max(0, R.h - 12);
+      let a1 = y(A, sa.f0), a2 = y(A, sa.f1), b1 = y(Z, sb.f0), b2 = y(Z, sb.f1);
+      if (a2 - a1 < 4) a2 = a1 + 4; if (b2 - b1 < 4) b2 = b1 + 4;
+      let x1, x2, c1, c2;
+      if (Z.x >= A.x + A.w + 24) { x1 = A.x + A.w; x2 = Z.x; c1 = c2 = (x1 + x2) / 2; }
+      else if (A.x >= Z.x + Z.w + 24) { x1 = A.x; x2 = Z.x + Z.w; c1 = c2 = (x1 + x2) / 2; }
+      else { x1 = A.x + A.w; x2 = Z.x + Z.w; c1 = c2 = Math.max(x1, x2) + 70; }   // one over the other: out to the right and back
+      const d = 'M' + x1 + ',' + a1 + ' C' + c1 + ',' + a1 + ' ' + c2 + ',' + b1 + ' ' + x2 + ',' + b1 + ' L' + x2 + ',' + b2 + ' C' + c2 + ',' + b2 + ' ' + c1 + ',' + a2 + ' ' + x1 + ',' + a2 + ' Z';
+      const on = ec.id === echoSel, dim = !on && (!!echoSel || !!parSel || (nb && !(nb.has(ca) && nb.has(cb))) || (!!query && !(matches(item(ca)) && matches(item(cb)))));
+      h += '<path class="erib' + (on ? ' on' : '') + (dim ? ' dim' : '') + (ec.id === hovEcho ? ' ehov' : '') + '" data-echo="' + esc(ec.id) + '" d="' + d + '" style="--pc:' + echoColor(ec) + ';--op:' + echoDeg(ec).op + '"><title>' + esc(echoName(ec) + ': ' + echoWhat(ec) + (ec.in && ec.in.length ? ' · in ' + ec.in.join('; ') : '') + (echoWay(ec) ? ' · ' + echoWay(ec) : '')) + '</title></path>';
+    });
+  }
+  $('gecho').innerHTML = h;
+}
+// How far down its box an element stands, in the box's own layout (unscaled, unscrolled).
+function relTop(el, box) { let y = 0, n = el; while (n && n !== box) { y += n.offsetTop; n = n.offsetParent; } return n === box ? y : null; }
+// The brackets in the margin of every passage shown in full in root: a rule beside each echo's stretch, in its colour,
+// with a tick where the stretch starts and where it ends, if those are in this passage. Brackets that overlap stand
+// in columns side by side. Measured from the words once they are drawn.
+function drawBrackets(root) {
+  if (!root) return;
+  root.querySelectorAll('[data-ebox]').forEach(box => {
+    box.querySelectorAll(':scope > .ebr').forEach(x => x.remove());
+    if (!box.getClientRects().length) return;   // not shown: drawn when it is
+    const [cid, qa, qb] = box.dataset.ebox.split('|'), it = item(cid); if (!it) return;
+    const fl = new Map();
+    for (let k = +qa; k <= +qb; k++) echoSpans(it, k).forEach(x => {
+      const id = x.ec.id + ':' + x.side, f = fl.get(id) || { ec: x.ec, side: x.side, first: false, last: false, placed: false };
+      f.first = f.first || x.first; f.last = f.last || x.last; f.placed = f.placed || x.placed; fl.set(id, f);
+    });
+    const ys = new Map();
+    box.querySelectorAll('.ech[data-ech]').forEach(el => {
+      const t = relTop(el, box); if (t == null) return; const b = t + el.offsetHeight;
+      el.dataset.ech.split(' ').forEach(id => { const o = ys.get(id); if (!o) ys.set(id, { t, b }); else { o.t = Math.min(o.t, t); o.b = Math.max(o.b, b); } });
+    });
+    const list = [...ys.entries()].filter(([id]) => fl.has(id)).map(([id, y]) => Object.assign({ id }, y, fl.get(id))).sort((x, y) => x.t - y.t || y.b - x.b);
+    const cols = [];
+    list.forEach(o => { let c = cols.findIndex(e => e < o.t - 1); if (c < 0) { c = cols.length; cols.push(0); } cols[c] = o.b; o.c = Math.min(c, ECHO_COLS - 1); });
+    box.insertAdjacentHTML('beforeend', list.map(o => '<i class="ebr' + (o.first ? ' s' : '') + (o.last ? ' e' : '') + (o.placed ? ' placed' : '') + (o.ec.id === echoSel ? ' on' : '') + (echoSel && o.ec.id !== echoSel ? ' dim' : '') + (o.ec.id === hovEcho ? ' ehov' : '') +
+      '" data-echo="' + esc(o.ec.id) + '" style="top:' + o.t + 'px;height:' + Math.max(6, o.b - o.t) + 'px;left:' + (3 + o.c * 6) + 'px;--pc:' + echoColor(o.ec) + '" title="' + esc('Echoes ' + endCite(o.ec[other(o.side)]) + ': ' + echoWhat(o.ec) + (o.placed ? '. Placed by the page: its words are not quite as they stood when marked.' : '') + '. Click to show it.') + '"></i>').join(''));
+  });
+}
+// Pointing at an echo's ribbon, strip, bracket, entry or words lights it everywhere.
+function hoverEcho(id) {
+  if (id === hovEcho) return; hovEcho = id;
+  document.querySelectorAll('.ehov').forEach(el => el.classList.remove('ehov'));
+  if (!id) return;
+  document.querySelectorAll('[data-echo]').forEach(el => { if (el.dataset.echo === id) el.classList.add('ehov'); });
+  document.querySelectorAll('.ech[data-ech]').forEach(el => { if (el.dataset.ech.split(' ').some(x => x.split(':')[0] === id)) el.classList.add('ehov'); });
 }
 // "Relevant to" a card on the board: a dotted thread between the two cards, in the annotations' layer.
 // Not an arrow: it makes no claim about the models.
@@ -2707,7 +3002,7 @@ function applyCam() {
 }
 function renderBoard() { renderCards(); const nb = lit(); renderInk(nb); }
 function renderLayers() {
-  const count = k => k === 'annotations' ? annHere().length : k === 'parallels' ? parsHere().length : k === 'drawing' ? (view().ink || []).length : k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
+  const count = k => k === 'annotations' ? annHere().length : k === 'parallels' ? parsHere().length : k === 'echoes' ? echoesHere().filter(ec => !isUnlike(ec)).length : k === 'drawing' ? (view().ink || []).length : k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
     k === 'problem' ? B.items.filter(i => i.kind === 'problem').length : B.items.filter(i => i.kind === k).length;
   const closed = $('layers').classList.contains('closed');
   $('layers').innerHTML = '<span class="ttl">Layers <button type="button" class="linkish" data-fold style="float:right;margin-left:1rem">' + (closed ? 'show' : 'hide') + '</button></span>' + LAYERS.map(L =>
@@ -2720,6 +3015,7 @@ function renderTools() {
   const na = annHere().length, np = parsHere().length;
   $('annsb').textContent = 'Annotations' + (na ? ' (' + na + ')' : '');
   $('parsb').textContent = 'Parallels' + (np ? ' (' + np + ')' : '');
+  const ne = echoesHere().length; $('echosb').textContent = 'Echoes' + (ne ? ' (' + ne + ')' : '');
   renderSync();
   $('stage').classList.toggle('readonly', ro());
   document.querySelector('.tools').classList.toggle('ro', ro());
@@ -2735,10 +3031,12 @@ function banner() {
   else if (lost) h = '<span>' + esc(roWhy()) + '</span><a class="btn" href="index.html#mt=' + esc(encodeURIComponent(TID)) + '">Back to My topics</a>';
   else if (mode && mode.parTo) { const p = parById(mode.parTo); h = '<span>Click the cell of a table to put <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p ? p.label : '', 40)) + '</b> in.</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>'; }
   else if (mode) h = '<span>' + (mode.annTo ? 'Click the card, or the cell of a table, these words are relevant to.' : 'Click the card, the cell of a table or the group the arrow from <b>' + esc(endName(mode.linkFrom, mode.fromRC)) + '</b> goes to.') + '</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
+  else if (ehand) h = '<span>Holding <b>' + esc(short(endCite(ehand), 40)) + '</b>, “' + esc(endWords(ehand, 50)) + '”: select what answers it in another passage and press <b>+ echoes</b> by it, or <i>Echo… the whole of it</i> on another card.</span><button type="button" class="btn" data-b="noehand">Done (Esc)</button>';
   else if (hand && parById(hand)) { const p = parById(hand); h = '<span>Holding <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>: select its words in another passage, and press <b>+ (' + esc(parSign(p)) + ')</b> by them.</span><button type="button" class="btn" data-b="nohand">Done (Esc)</button>'; }
   else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(endName(offer.from.id, offer.from.rc)) + '</b> to <b>' + esc(endName(offer.to.id, offer.to.rc)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
   else if (offer && offer.kind === 'lasso') { const one = offer.ids.length === 1; h = '<span>You drew round ' + offer.ids.length + (one ? ' card' : ' cards') + '.</span><button type="button" class="btn solid" data-b="o-select">Select ' + (one ? 'it' : 'them') + '</button><button type="button" class="btn" data-b="o-model">Make ' + (one ? 'it' : 'them') + ' a group</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>'; }
   else if (parSel && parById(parSel)) { const p = parById(parSel), n = (parPlaces().get(p.id) || []).length; h = '<span>Showing <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>' + (layerOn('parallels') ? ', its words on each of its ' + n + (n === 1 ? ' card' : ' cards') : ' (the Parallels layer is hidden)') + '</span>' + (n >= 2 && !compare ? '<button type="button" class="btn" data-b="parcompare">Compare its passages</button>' : '') + '<button type="button" class="btn" data-b="noparsel">Show everything (Esc)</button>'; }
+  else if (echoSel && echoById(echoSel)) { const ec = echoById(echoSel), W = echoPlaces().get(ec.id); h = '<span>Showing the echo <b style="color:' + echoColor(ec) + '">' + esc(short(echoName(ec), 70)) + '</b>' + (layerOn('echoes') ? '' : ' (the Echoes layer is hidden)') + '</span>' + (W && W.a.length && W.b.length && !compare ? '<button type="button" class="btn" data-b="ecompare">Compare the two</button>' : '') + '<button type="button" class="btn" data-b="noechosel">Show everything (Esc)</button>'; }
   else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
   b.innerHTML = h; b.classList.toggle('show', !!h);
 }
@@ -2750,8 +3048,8 @@ const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLo
 /* ── Render: the side ─────────────────────────────────────────────────────── */
 // A passage in the side. Given its card (it), its words can be selected and annotated, and its annotations are shown.
 function quoteHtml(q, i, removable, it) {
-  const href = portalHref(q), P = it && q.q ? placeOn(it, i) : null;
-  return '<div class="q">' + (q.q ? '<span class="t">“' + (P ? '<span data-qt="' + i + '" data-qcard="' + esc(it.id) + '">' + litText(q, P.spans, parsOn(it, i).spans) + '</span>' : esc(q.q)) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
+  const href = portalHref(q), P = it && q.q ? placeOn(it, i) : null, E = P ? echoSpans(it, i) : [];
+  return '<div class="q' + (E.length ? ' eb" data-ebox="' + esc(it.id) + '|' + i + '|' + i + '" style="--ebn:' + ebDepth(E) : '') + '">' + (q.q ? '<span class="t">“' + (P ? '<span data-qt="' + i + '" data-qcard="' + esc(it.id) + '">' + litText(q, P.spans, parsOn(it, i).spans, E) + '</span>' : esc(q.q)) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
     (href ? '<button type="button" data-read="' + esc(href) + '">read it beside the board</button><a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : '') +
     (q.pasted ? '<span class="chk">pasted, not yet checked against the portal</span>' : '') +
     (removable ? '<button type="button" class="x" data-unq="' + i + '" title="Take this passage off the card">✕</button>' : '') +
@@ -2759,11 +3057,11 @@ function quoteHtml(q, i, removable, it) {
     (P ? annEntries(P, it, i) + parApparatus(it, i) : '') + '</div>';
 }
 // A passage's words with the annotated ones marked, and the words a card quotes of it lit, the rest faint.
-function litText(q, spans, ps) {
-  ps = ps || [];
-  if (q.ka == null || (q.ka <= 0 && q.kb >= q.q.length)) return markText(q.q, spans, ps);
+function litText(q, spans, ps, es) {
+  ps = ps || []; es = es || [];
+  if (q.ka == null || (q.ka <= 0 && q.kb >= q.q.length)) return markText(q.q, spans, ps, es);
   const cut = (a, b) => xs => xs.filter(x => x.e > a && x.s < b).map(x => Object.assign({}, x, { s: Math.max(0, x.s - a), e: Math.min(b - a, x.e - a) }));
-  const seg = (a, b) => markText(q.q.slice(a, b), cut(a, b)(spans), cut(a, b)(ps));
+  const seg = (a, b) => markText(q.q.slice(a, b), cut(a, b)(spans), cut(a, b)(ps), cut(a, b)(es));
   return '<span class="out">' + seg(0, q.ka) + '</span><span class="in">' + seg(q.ka, q.kb) + '</span><span class="out">' + seg(q.kb, q.q.length) + '</span>';
 }
 function relBtn(a) { return '<button type="button" class="rel" data-arrow="' + esc(a.id) + '"><b>' + esc(a.type) + '</b>: ' + esc(endName(a.from, a.fromCell)) + ' → ' + esc(endName(a.to, a.toCell)) + '</button>'; }
@@ -2778,6 +3076,7 @@ function sideIntro() {
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
     '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. <i>Relevant to…</i> can name a card on the board, or one cell of a table: click it. It can name another of your topics too: start typing its name and choose it from those offered, or from the list beneath; a topic needs no board for it. That topic lists the annotations relevant to it, in My topics and here in the side of its board. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
     '<li><b>Parallels</b>: when words in several passages answer one another, select them in one passage and choose <i>Parallel…</i>. The parallel is then in hand: select its words in the next passage and press <b>+ (a)</b> in the bar. Its words are tinted in its colour, with its letter, on every card; a thread runs from each of its cards to its knot; pointing at its words lights them everywhere; click a chip or a knot to show only it. Beneath a passage here, <i>Parallels</i> lists the words elsewhere that answer to its own. Select two to four cards and <i>Compare them side by side</i>.</li>' +
+    '<li><b>Echoes</b>: when an idea or a stretch of argument comes back in another passage, select the stretch, across the passages of a card that runs on if need be, and choose <i>Echo…</i> (or <i>Echo… the whole of it</i> beneath a passage in the side). It is in hand: select the stretch that answers it in another passage, press <b>+ echoes</b>, and say how close they are, or that you checked and found them not alike. An echo joins two stretches only: A–B and B–C say nothing of A and C. A ribbon joins its stretches on the board; a bracket marks each in the margin wherever a passage shows in full. <i>Echoes</i>, among the tools, sets every stretch against every other, and can show the page’s chains through a third, dashed, as its finding, not yours.</li>' +
     '<li><b>Your note</b> on a passage, here in the side, is the note it has in My topics: write it in either.</li>' +
     '<li><b>Link to another topic</b>: under <b>Boards</b>, in the side, choose one of your topics and link to it as a whole, or to a card or group on its board; or press <i>Copy a link to it</i> on a card there, and paste it here (⌘V). Arrows join a link card like any card. The card linked to carries a mark, <b>↖</b>, and lists the links in its side.</li>' +
     '<li><b>Edit in place</b>: double-click any card, arrow or group name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
@@ -2836,10 +3135,11 @@ function sidePassage(it, m, arr) {
     if (q.kept && q.full) h += '<span class="k">The words you kept</span><div class="kept">“' + esc(q.kept) + '”</div>';
     h += '<span class="k">' + (q.full ? 'The passage, in full' : 'The passage') + '</span>' + quoteHtml(q, 0, false, it);
   }
+  h += echoApparatus(it) + echoWholeRow(it);
   if (it.slost) h += '<p class="ocr">These words are no longer where they were kept in the text: it may have been extracted again since. The card keeps the copy My topics kept with them, and what it quotes can’t be changed here.</p>';
   if (sn && !lost && !SHM) h += '<div class="row"><button type="button" class="btn" data-act="stretch" title="Trim it to the words you want, or take in more">Change what it quotes</button><button type="button" class="btn" data-act="splitit">Split it in two…</button></div>';
   if (!q.full) h += '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal. The words are the copy My topics kept when the passage was saved.' : 'The portal beside the board is still loading its texts, so these are the words My topics kept. The passage in full, and its annotations, follow in a moment.') + '</p>';
-  else if (!ro()) h += '<p class="by">Select some of its words to annotate them, or to make them a <i>Parallel…</i> with words in other passages.</p>';
+  else if (!ro()) h += '<p class="by">Select some of its words to annotate them, or to make them a <i>Parallel…</i> with words in other passages, or an <i>Echo…</i> of a stretch elsewhere' + (it.st && it.st.parts.length > 1 ? ', over as many of its passages as you like' : '') + '.</p>';
   if (x && SHM) {
     const mine = DB && DB.items.find(y => y && y.ref === x.ref && (y.excerpt || '') === (x.excerpt || ''));
     h += '<span class="k">The note on the board</span><textarea class="mtnote" data-sharednote="' + esc(x.id) + '" placeholder="' + (writable() ? 'A note everyone on this board sees' : 'No note on the board') + '"' + (writable() ? '' : ' readonly') + '>' + esc(x.note || '') + '</textarea>' +
@@ -3396,6 +3696,150 @@ function downloadPars() {
   const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); el.download = 'topic-board-parallels-' + today() + '.md';
   document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(el.href), 2000);
 }
+/* ── Echoes, in the side: beneath a passage, one echo, a new one, all of them, and one stretch's neighbourhood ── */
+// One end, in a line: its citation (its card here, or the portal), its words, and where it stands.
+function endWhere(ec, sd, H) {
+  const e = ec[sd], cite = endCite(e), r0 = e.refs[0], href = portalHref(r0.charAt(0) === '#' ? { hash: r0 } : { ref: r0 });
+  if (H.card && !H.elsewhere && !H.waiting) return '<button type="button" class="linkish" data-pcard="' + esc(H.card) + '" title="Its card on this board">' + esc(cite) + '</button>';
+  return href ? '<button type="button" class="linkish" data-read="' + esc(href) + '" title="Read it beside the board">' + esc(cite) + '</button>' : esc(cite);
+}
+// Beneath a passage: each echo with a stretch in what its card quotes, and the stretch elsewhere that answers.
+function echoApparatus(it) {
+  if (it.kind !== 'passage' || !layerOn('echoes')) return '';
+  const os = echoesOfCard(it), lost = openQuotes(it).flatMap((q, i) => echoesOn(it, i).lost);
+  if (!os.length && !lost.length) return '';
+  const row = (o, gone) => {
+    const ec = o.ec, sd = o.side, os_ = other(sd), H = endHere(ec, os_), un = isUnlike(ec);
+    return '<div class="par-e ech-e' + (un ? ' unlike' : '') + (o.parts && o.parts.some(x => x.placed) ? ' placed' : '') + '" style="--pc:' + echoColor(ec) + '" data-echo="' + esc(ec.id) + '">' +
+      '<div class="ph"><button type="button" class="esw" data-echosel="' + esc(ec.id) + '" title="Show this echo on the board">' + (un ? '≠' : '') + '</button><b>' + esc(echoWhat(ec)) + '</b>' + (ec.in && ec.in.length ? ' <span class="pk">· in ' + esc(ec.in.join('; ')) + '</span>' : '') + '</div>' +
+      '<div class="pon">Here: <span class="w">“' + esc(endWords(ec[sd], 90)) + '”</span>' + (gone ? ' <span class="pg">no longer in this passage</span>' : o.parts.some(x => x.placed) ? ' <span class="pg">placed by the page</span>' : '') + '</div>' +
+      '<div class="po">' + (un ? 'Not alike: ' : 'Answers ') + endWhere(ec, os_, H) + ' <span class="w">“' + esc(endWords(ec[os_], 90)) + '”</span>' + endState(H) + (echoWay(ec) ? ' <span class="pn">· ' + esc(echoWay(ec)) + '</span>' : '') + (ec.text ? ' <span class="pn">· ' + esc(ec.text) + '</span>' : '') + '</div>' +
+      (ro() ? '' : '<div class="pact"><button type="button" class="linkish" data-ehold="' + esc(ec.id) + '|' + sd + '" title="Hold this very stretch, to say what else answers it">hold this stretch</button></div>') + '</div>';
+  };
+  return '<div class="pars-l"><span class="k">Echoes: the stretches elsewhere that answer</span>' + os.map(o => row(o, false)).join('') + lost.map(o => row(o, true)).join('') + '</div>';
+}
+// The buttons beneath a passage in the side: its whole stretch as one end of an echo.
+function echoWholeRow(it) {
+  if (ro() || it.kind !== 'passage' || !openQuotes(it).every(q => q.q && q.full !== false)) return '';
+  return '<div class="row"><button type="button" class="btn" data-act="echowhole" title="' + (ehand ? 'The whole of what this card quotes answers the stretch in hand' : 'The whole of what this card quotes, as one end of an echo') + '">' +
+    (ehand ? '+ echoes ' + esc(short(endCite(ehand), 30)) + ': the whole of it' : 'Echo… the whole of it') + '</button>' + (ehand ? '' : '<span class="by" style="margin:0">or select a stretch of it, and choose <i>Echo…</i></span>') + '</div>';
+}
+const degRadios = (cur, name) => '<div class="edeg">' + ECHO_DEG.map(d => '<label class="' + (d.key === 'unlike' ? 'un' : '') + '"><input type="radio" name="' + name + '" value="' + d.key + '"' + (name === 'endeg' ? ' data-en-deg' : ' data-ef="degree"') + (d.key === cur ? ' checked' : '') + '>' + esc(d.label) + '</label>').join('') + '</div>';
+const respList = () => { const m = new Set(); echoesAll().forEach(ec => (ec.in || []).forEach(r => m.add(r))); return [...m].sort(); };
+const wayOptions = (a, b, cur) => '<option value="">which draws on which: not said</option><option value="b-on-a"' + (cur === 'b-on-a' ? ' selected' : '') + '>' + esc(short(endCite(b), 40)) + ' draws on ' + esc(short(endCite(a), 40)) + '</option><option value="a-on-b"' + (cur === 'a-on-b' ? ' selected' : '') + '>' + esc(short(endCite(a), 40)) + ' draws on ' + esc(short(endCite(b), 40)) + '</option>';
+const endBox = (e, label) => '<div class="plc" style="--pc:' + ACCENT_INK + '"><div><span class="k" style="margin:0">' + label + '</span> ' + esc(endCite(e)) + '</div><div class="ctx">“' + esc(endWords(e, 160)) + '”</div></div>';
+// Two stretches chosen: how close they are, and what else is to be said of them.
+function sideEchoNew() {
+  const f = form, rl = respList(), was = (f.was || []).map(echoById).filter(Boolean);
+  return '<h2>' + (f.judge ? 'Two stretches, to judge' : 'An echo') + '</h2><p class="sub">Two stretches that answer one another, or, having looked, do not. Nothing is said of any third.</p>' +
+    endBox(f.a, 'This') + endBox(f.b, 'and this') +
+    (was.length ? '<p class="warn">Said of these two already: ' + was.map(ec => '<button type="button" class="linkish" data-echosel="' + esc(ec.id) + '">' + esc(echoWhat(ec)) + '</button>').join(', ') + '. A second echo can say something else of them.</p>' : '') +
+    '<div data-eform="new"><label class="f">How close</label>' + degRadios('close', 'endeg') +
+    '<label class="f">What kind (optional)</label><input type="text" data-en="type" list="echotypes" placeholder="same argument, abridged, same steps in another order…">' +
+    '<label class="f">In what respect (optional; several with ;)</label><input type="text" data-en="in" list="echoresp" placeholder="the impossible as the unrepresentable">' +
+    '<datalist id="echoresp">' + rl.map(r => '<option value="' + esc(r) + '">').join('') + '</datalist>' +
+    '<label class="f">Which way (optional)</label><select data-en="dir">' + wayOptions(f.a, f.b, '') + '</select>' +
+    '<label class="f">In your words (optional)</label><textarea data-en="text" rows="2" placeholder="What the two share, and where they part"></textarea>' +
+    (SHM ? '<label class="chk onlyc"><input type="checkbox" data-en-only> only me: kept in My topics, not on the shared board</label>' : '') + '</div>' +
+    '<div class="row"><button type="button" class="btn solid" data-act="echomake">' + (f.judge ? 'Keep the judgement' : 'Make the echo') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button><span class="by" style="margin:0">Enter makes it · Esc leaves it</span></div>' +
+    (f.judge ? '' : '<p class="by">The first stretch stays in hand, so the next stretch you choose answers it too: that makes a second echo with the first, never one with the second.</p>');
+}
+// Redraw the new echo's form without losing what was typed or chosen in it.
+function keepEchoForm(fn) {
+  const D = $('details'), same = D.querySelector('[data-eform="new"]') && form && D.dataset.ekey === form.key;
+  const vals = same ? [...D.querySelectorAll('[data-en]')].map(el => [el.dataset.en, el.value]) : [], deg = same ? (D.querySelector('[data-en-deg]:checked') || {}).value : null;
+  fn(); D.dataset.ekey = form ? form.key : '';
+  vals.forEach(([k, v]) => { const el = D.querySelector('[data-en="' + k + '"]'); if (el) el.value = v; });
+  if (deg) { const el = D.querySelector('[data-en-deg][value="' + deg + '"]'); if (el) el.checked = true; }
+}
+// An echo chosen: its two stretches, and what you said of them.
+function sideEcho(ec) {
+  const w = !ro(), Ha = endHere(ec, 'a'), Hb = endHere(ec, 'b'), un = isUnlike(ec);
+  const end = (sd, H) => '<div class="plc' + (H.away ? ' away' : H.elsewhere ? ' lost' : '') + '" style="--pc:' + echoColor(ec) + '"><div>' + endWhere(ec, sd, H) + endState(H) + '</div><div class="ctx">“' + esc(endWords(ec[sd], 200)) + '”</div>' +
+    '<div class="pact">' + (w ? '<button type="button" class="linkish" data-ehold="' + esc(ec.id) + '|' + sd + '" title="Hold this very stretch, to say what else answers it">hold this stretch</button>' : '') + '<button type="button" class="linkish" data-eneigh="' + esc(endKey(ec[sd])) + '">its neighbourhood</button></div></div>';
+  let h = '<h2 class="parh" style="--pc:' + echoColor(ec) + '"><span class="esw big">' + (un ? '≠' : '') + '</span>' + (un ? 'Checked: not alike' : 'An echo') + '</h2><p class="sub">' + esc(echoWhat(ec)) + (SHM ? (ec.only ? ' · only you see it' : ec.by ? ' · by @' + esc(ec.by) : '') : '') + (ec.date ? ' · ' + esc(fmtDate(ec.date)) : '') + '</p>' +
+    end('a', Ha) + '<div class="eand">' + (un ? 'is not alike' : 'answers') + '</div>' + end('b', Hb);
+  if (w) h += '<div data-eform="edit"><label class="f">How close</label>' + degRadios(ec.degree || 'close', 'efdeg') +
+    '<label class="f">What kind (optional)</label><input type="text" data-ef="type" list="echotypes" value="' + esc(ec.type || '') + '" placeholder="same argument, abridged…">' +
+    '<label class="f">In what respect (optional; several with ;)</label><input type="text" data-ef="in" list="echoresp" value="' + esc((ec.in || []).join('; ')) + '">' +
+    '<datalist id="echoresp">' + respList().map(r => '<option value="' + esc(r) + '">').join('') + '</datalist>' +
+    '<label class="f">Which way</label><select data-ef="dir">' + wayOptions(ec.a, ec.b, ec.dir || '') + '</select>' +
+    '<label class="f">In your words (optional)</label><textarea data-ef="text" rows="2" placeholder="What the two share, and where they part">' + esc(ec.text || '') + '</textarea>' +
+    (un ? '' : '<label class="f">Its colour</label><div class="swatches">' + PAR_COLORS.map((c, i) => '<input type="radio" name="ecol" id="ecol' + i + '" value="' + c + '" data-ef="color"' + (c === echoColor(ec) ? ' checked' : '') + '><label for="ecol' + i + '" style="background:' + c + '"></label>').join('') + '</div>') + '</div>';
+  else h += (ec.in && ec.in.length ? '<span class="k">In what respect</span><div class="stmt">' + esc(ec.in.join('; ')) + '</div>' : '') + (echoWay(ec) ? '<span class="k">Which way</span><div class="stmt">' + esc(echoWay(ec)) + '</div>' : '') + (ec.text ? '<span class="k">In your words</span><div class="stmt">' + esc(ec.text) + '</div>' : '');
+  const both = Ha.card && Hb.card && !Ha.elsewhere && !Hb.elsewhere && Ha.card !== Hb.card;
+  h += '<div class="row">' + (echoSel === ec.id ? '<button type="button" class="btn" data-act="echounshow">Show everything</button>' : (Ha.card || Hb.card) && !un ? '<button type="button" class="btn solid" data-act="echoshow">Show it on the board</button>' : '') +
+    (both ? '<button type="button" class="btn" data-act="ecompare">Compare the two</button>' : '') + '</div>';
+  if (w) h += '<div class="row"><button type="button" class="linkish" data-act="echodel">Delete the echo</button></div>';
+  return h + '<p class="by">An echo is what you said of two stretches: nothing follows from it for any third. It belongs to the passages, so it shows on every one of your boards where both stand.</p>';
+}
+// A stretch named in a data attribute: by an echo it is an end of, and which end, "id|a".
+const nodeRef = n => n.ecs[0].ec.id + '|' + n.ecs[0].side;
+function refKey(r) { const [id, sd] = String(r || '').split('|'), ec = echoById(id); return ec && (sd === 'a' || sd === 'b') ? endKey(ec[sd]) : null; }
+// The echoes on this board, those on your other boards, and the matrix of what is and isn't said.
+function sideEchoes() {
+  const here = echoesHere(), W = echoPlaces(), else_ = echoesAll().filter(ec => !W.has(ec.id));
+  const row = (ec, att) => '<button type="button" class="rel prow" ' + att + '="' + esc(ec.id) + '" data-echo="' + esc(ec.id) + '" style="--pc:' + echoColor(ec) + '"><span class="esw">' + (isUnlike(ec) ? '≠' : '') + '</span><b>' + esc(echoName(ec)) + '</b><span class="pmeta">' + esc(echoWhat(ec)) + '</span></button>';
+  return '<h2>Echoes</h2><p class="sub">Stretches that answer one another, two at a time. To make one, click a card, select a stretch of its passage (across the passages of a card that runs on, if need be), and choose <i>Echo…</i></p>' +
+    (here.length ? here.map(ec => row(ec, 'data-echosel')).join('') : '<p class="empty">None on this board yet.</p>') +
+    (here.length ? echoMatrix(here) : '') +
+    (else_.length ? '<span class="k">' + (SHM ? 'With no stretch on this board' : 'On your other boards') + '</span>' + else_.map(ec => row(ec, 'data-echoview')).join('') : '') +
+    '<div class="row"><button type="button" class="linkish" data-act="dlecho"' + (here.length ? '' : ' disabled') + '>Download them as a list</button><button type="button" class="linkish" data-act="cancel">Close</button></div>';
+}
+// Every stretch against every other: shaded where you said they answer, ≠ where you found them not alike, blank
+// where nothing is said; with the page's chains, a dot where two are joined only through a third.
+function echoMatrix(list) {
+  const N = echoNodes(list), all = nodeOrder([...N.values()]), ns = all.slice(0, ECHO_MAX);
+  let h = '<span class="k">What is and isn’t said</span><div class="emxw"><table class="emx"><tr><th></th>' + ns.map((n, i) => '<th>' + (i + 1) + '</th>').join('') + '</tr>';
+  ns.forEach((n, i) => {
+    h += '<tr><th>' + (i + 1) + '</th>' + ns.map((m, j) => {
+      if (i === j) return '<td class="d"></td>';
+      const es = echoesBetween(N, n.key, m.key), pair = nodeRef(n) + '|' + nodeRef(m), names = esc(endCite(n.e)) + ' and ' + esc(endCite(m.e));
+      if (es.length) {
+        const top = es.find(ec => !isUnlike(ec)) || es[0], t = es.map(echoWhat).join('; ');
+        return isUnlike(top) ? '<td class="un" data-echosel="' + esc(top.id) + '" title="' + names + ': checked, not alike">≠</td>' :
+          '<td class="e" data-echosel="' + esc(top.id) + '" data-echo="' + esc(top.id) + '" style="--pc:' + echoColor(top) + ';--op:' + Math.max(0.25, echoDeg(top).op * 2.4).toFixed(2) + '" title="' + names + ': ' + esc(t) + '"></td>';
+      }
+      const ch = echoChains ? chainsThrough(N, n.key, m.key) : [];
+      if (ch.length) return '<td class="ch" data-epair="' + esc(pair) + '" title="' + names + ': joined only through ' + esc(ch.map(k => ns.findIndex(x => x.key === k) + 1 || endCite(N.get(k).e)).join(', ')) + '. Not said by you: the page found the chain. Click to judge the pair.">·</td>';
+      return '<td class="ns" data-epair="' + esc(pair) + '" title="' + names + ': nothing said. Click to judge the pair."></td>';
+    }).join('') + '</tr>';
+  });
+  h += '</table></div>';
+  if (all.length > ns.length) h += '<p class="by">The first ' + ECHO_MAX + ' of ' + all.length + ' stretches, in the texts’ order.</p>';
+  h += '<label class="chk"><input type="checkbox" data-echains' + (echoChains ? ' checked' : '') + '> show the page’s chains: a dot where two stretches are joined only through a third</label>';
+  h += '<div class="emxl">' + ns.map((n, i) => '<div><b>' + (i + 1) + '</b> <button type="button" class="linkish" data-eneigh="' + esc(nodeRef(n)) + '" title="Its neighbourhood">' + esc(endCite(n.e)) + '</button> <span class="w">“' + esc(endWords(n.e, 70)) + '”</span></div>').join('') + '</div>';
+  return h + '<p class="by">Shaded, darker for closer: an echo you made. ≠: you looked and found them not alike. Blank: nothing said; click it to judge the two. Click a number’s stretch for its neighbourhood.</p>';
+}
+// One stretch's neighbourhood: the stretches you said answer it, around it; beyond them, faint and dashed, those
+// they answer in turn, which the page found and you did not say.
+function sideNeigh() {
+  const k0 = refKey(form.ref), N = echoNodes(echoesAll()), n0 = k0 && N.get(k0);
+  if (!n0) return '<h2>A stretch’s neighbourhood</h2><p class="empty">That stretch is in no echo now.</p><div class="row"><button type="button" class="linkish" data-act="cancel">Close</button></div>';
+  const r1 = new Map(), r2 = new Map();
+  n0.ecs.forEach(x => { const k = endKey(x.ec[other(x.side)]); if (!r1.has(k)) r1.set(k, []); r1.get(k).push(x.ec); });
+  r1.forEach((ecs, k1) => { if (ecs.every(isUnlike)) return; N.get(k1).ecs.forEach(x => { if (isUnlike(x.ec)) return; const k2 = endKey(x.ec[other(x.side)]); if (k2 === k0 || r1.has(k2)) return; if (!r2.has(k2)) r2.set(k2, []); if (!r2.get(k2).includes(k1)) r2.get(k2).push(k1); }); });
+  const k1s = [...r1.keys()], k2s = [...r2.keys()], num = new Map(); k1s.concat(k2s).forEach((k, i) => num.set(k, i + 1));
+  const W = 320, H = 270, cx = W / 2, cy = H / 2, ang = new Map(), pos = new Map([[k0, [cx, cy]]]);
+  k1s.forEach((k, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / k1s.length; ang.set(k, a); pos.set(k, [cx + 78 * Math.cos(a), cy + 78 * Math.sin(a)]); });
+  const used = new Map();
+  k2s.forEach(k => { const v = r2.get(k)[0], a0 = ang.get(v), u = used.get(v) || 0; used.set(v, u + 1); const a = a0 + (u % 2 ? 1 : -1) * Math.ceil(u / 2) * 0.42; pos.set(k, [cx + 124 * Math.cos(a), cy + 112 * Math.sin(a)]); });
+  const P = k => pos.get(k).map(v => v.toFixed(1));
+  let g = '';
+  k2s.forEach(k => r2.get(k).forEach(v => { const [x1, y1] = P(v), [x2, y2] = P(k); g += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" class="nch"/>'; }));
+  k1s.forEach(k => { const ec = r1.get(k).find(e => !isUnlike(e)) || r1.get(k)[0], [x2, y2] = P(k), un = isUnlike(ec);
+    g += '<line x1="' + cx + '" y1="' + cy + '" x2="' + x2 + '" y2="' + y2 + '" class="' + (un ? 'nun' : 'nec') + '" style="--pc:' + echoColor(ec) + ';stroke-width:' + (un ? 1.4 : { close: 3.4, partial: 2.2, loose: 1.3 }[ec.degree] || 3.4) + '"/>'; });
+  const dot = (k, cls) => { const [x, y] = P(k), n = N.get(k); return '<g class="nn ' + cls + '" data-eneigh="' + esc(nodeRef(n)) + '"><title>' + esc(endCite(n.e)) + '</title><circle cx="' + x + '" cy="' + y + '" r="' + (cls === 'c0' ? 13 : 10) + '"/><text x="' + x + '" y="' + (+y + 3.5) + '" text-anchor="middle">' + (cls === 'c0' ? '●' : num.get(k)) + '</text></g>'; };
+  g += k2s.map(k => dot(k, 'c2')).join('') + k1s.map(k => dot(k, 'c1')).join('') + dot(k0, 'c0');
+  let h = '<h2>A stretch’s neighbourhood</h2><p class="sub">' + esc(endCite(n0.e)) + ': “' + esc(endWords(n0.e, 100)) + '”</p>' +
+    '<svg class="eneigh" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="The stretch at the centre, the stretches you said answer it around it, and beyond them, dashed, those they answer in turn">' + g + '</svg>';
+  h += '<span class="k">Said by you</span>' + (k1s.length ? k1s.map(k => '<div class="nrow"><b>' + num.get(k) + '</b> <button type="button" class="linkish" data-eneigh="' + esc(nodeRef(N.get(k))) + '">' + esc(endCite(N.get(k).e)) + '</button> ' +
+    r1.get(k).map(ec => '<button type="button" class="rel prow" data-echosel="' + esc(ec.id) + '" style="--pc:' + echoColor(ec) + '"><span class="esw">' + (isUnlike(ec) ? '≠' : '') + '</span>' + esc(echoWhat(ec)) + '</button>').join('') + '</div>').join('') : '<p class="empty">Nothing.</p>');
+  h += '<span class="k">The page’s finding: joined only through a stretch between</span>' + (k2s.length ? k2s.map(k => '<div class="nrow inf"><b>' + num.get(k) + '</b> ' + esc(endCite(N.get(k).e)) + ' <span class="pg">through ' + r2.get(k).map(v => num.get(v)).join(', ') + ': not said by you</span>' +
+    (ro() ? '' : ' <button type="button" class="linkish" data-epair="' + esc(nodeRef(n0) + '|' + nodeRef(N.get(k))) + '">judge the pair</button>') + '</div>').join('') : '<p class="empty">None: nothing answers what answers it.</p>');
+  return h + '<p class="by">A line from the centre is an echo you made, wider for closer; a red one, a pair you found not alike. A dashed grey line is not a claim: two echoes of yours meet there, and nothing follows from that until you judge the pair.</p>' +
+    '<div class="row"><button type="button" class="linkish" data-act="echolist">All the echoes</button><button type="button" class="linkish" data-act="cancel">Close</button></div>';
+}
 // Words selected: a new parallel, or a place in one already made.
 function sideParNew() {
   const f = form, here = parsHere(), W = parPlaces(), else_ = parsAll().filter(p => !W.has(p.id));
@@ -3466,13 +3910,18 @@ function sideModelForm() {
     '<label class="f">Its colour</label><div class="swatches">' + PALETTE.map((c, i) => '<input type="radio" name="mc" id="mc' + i + '" value="' + c + '"' + (c === col ? ' checked' : '') + '><label for="mc' + i + '" style="background:' + c + '"></label>').join('') + '</div>' +
     '<div class="row"><button type="button" class="btn solid" data-act="savemodel">' + (m ? 'Save' : 'Make the group') + '</button><button type="button" class="linkish" data-act="cancel">Cancel</button></div><p class="warn" data-err></p>';
 }
-function renderSide() {
+function renderSide() { renderSide0(); drawBrackets($('details')); }
+function renderSide0() {
   const D = $('details');
   if (form) document.body.classList.remove('sideclosed');
+  if (form && form.kind === 'echonew') { keepEchoForm(() => { D.innerHTML = sideEchoNew(); }); return; }
+  if (form && form.kind === 'echoes') { D.innerHTML = sideEchoes(); return; }
+  if (form && form.kind === 'eneigh') { D.innerHTML = sideNeigh(); return; }
   if (composing()) { keepComposer(() => { const it = item(form.card); D.innerHTML = it ? sideCard(it) : sideAnnAlone(); }); return; }
   if (form && form.kind === 'parnew') { keepParForm(() => { D.innerHTML = sideParNew(); }); return; }
   if (form) { D.innerHTML = form.kind === 'arrow' ? sideArrowForm() : form.kind === 'model' ? sideModelForm() : form.kind === 'photos' ? sidePhotos() : form.kind === 'annotations' ? sideAnnotations() : form.kind === 'parallels' ? sideParallels() : form.kind === 'table' ? sideTableForm() : form.kind === 'stretch' ? sideStretchForm() : form.kind === 'join' ? sideJoinAsk() : sideCardForm(); tableFormSync(); return; }
   if (sel.kind === 'par' && parById(sel.ids[0])) D.innerHTML = sideParallel(parById(sel.ids[0]));
+  else if (sel.kind === 'echo' && echoById(sel.ids[0])) D.innerHTML = sideEcho(echoById(sel.ids[0]));
   else if (sel.kind === 'card' && sel.ids.length > 1) D.innerHTML = sideCards(sel.ids);
   else if (sel.kind === 'card' && item(sel.ids[0])) D.innerHTML = sideCard(item(sel.ids[0]));
   else if (sel.kind === 'arrow' && arrow(sel.ids[0])) D.innerHTML = sideArrow(arrow(sel.ids[0]));
@@ -3932,6 +4381,7 @@ const selInSide = () => selIn($('details'));
 function readPick() {
   const s = getSelection(); if (!s || !s.rangeCount || s.isCollapsed) return null;
   const r = s.getRangeAt(0), els = [$('details'), $('compare')].flatMap(R => [...R.querySelectorAll('[data-qt]')]).filter(el => r.intersectsNode(el));
+  if (els.length > 1) return readSpan(r, els);
   if (els.length !== 1) return null;
   const el = els[0], full = document.createRange(); full.selectNodeContents(el);
   const c = r.cloneRange();
@@ -3945,12 +4395,29 @@ function readPick() {
   if (end <= start) return null;
   return { card: it.id, qi, start, end, rect: c.getBoundingClientRect() };
 }
+// Words selected over several passages of one card, one after another: only an echo's stretch can run so.
+function readSpan(r, els) {
+  const card = els[0].dataset.qcard; if (!els.every(el => el.dataset.qcard === card)) return null;
+  const qis = els.map(el => +el.dataset.qt); if (qis.some((x, i) => i && x !== qis[i - 1] + 1)) return null;
+  const it = item(card); if (!it || it.kind !== 'passage') return null;
+  const qa = qis[0], qb = qis[qis.length - 1], ta = String((it.quotes[qa] || {}).q || ''), tb = String((it.quotes[qb] || {}).q || '');
+  if (!ta || !tb) return null;
+  const upTo = (el, node, o) => { const p = document.createRange(); p.selectNodeContents(el); p.setEnd(node, o); return p.toString().length; };
+  const f = els[0], l = els[els.length - 1];
+  let start = f.contains(r.startContainer) ? upTo(f, r.startContainer, r.startOffset) : 0, end = l.contains(r.endContainer) ? upTo(l, r.endContainer, r.endOffset) : tb.length;
+  while (start < ta.length && /\s/.test(ta[start])) start++;
+  while (end > 0 && /\s/.test(tb[end - 1])) end--;
+  if (start >= ta.length || end <= 0) return null;
+  return { card, qi: qa, start, qi2: qb, end2: end, multi: true, rect: r.getBoundingClientRect() };
+}
 function hideBar() { annPick = null; $('annbar').classList.remove('show'); }
 // The bar by words selected: the parallel in hand first, if one is, then Parallel…, then the kinds of annotation.
 function barHtml() {
-  const h = parById(hand);
-  return (h ? '<button type="button" class="pin" data-parin="' + esc(h.id) + '" style="--kc:' + parColor(h) + '" title="Add these words to this parallel">+ (' + esc(parSign(h)) + ') ' + esc(short(h.label, 28)) + '</button>' : '') +
-    '<button type="button" data-parnew style="--kc:#5c3d1e" title="These words answer words in other passages: make them a parallel, or add them to one">Parallel…</button><span class="bsep"></span>' +
+  const h = parById(hand), held = ehand ? '<button type="button" class="pin" data-ein style="--kc:' + ACCENT_INK + '" title="These words answer the stretch in hand: make the two an echo">+ echoes ' + esc(short(endCite(ehand), 30)) + '</button>' : '';
+  const echo = '<button type="button" data-enew style="--kc:#6b4e7a" title="This stretch answers a stretch elsewhere: hold it, then choose the stretch that answers it">Echo…</button>';
+  if (annPick && annPick.multi) return held + echo;   // over several passages: an echo's stretch alone can run so
+  return held + (h ? '<button type="button" class="pin" data-parin="' + esc(h.id) + '" style="--kc:' + parColor(h) + '" title="Add these words to this parallel">+ (' + esc(parSign(h)) + ') ' + esc(short(h.label, 28)) + '</button>' : '') +
+    '<button type="button" data-parnew style="--kc:#5c3d1e" title="These words answer words in other passages: make them a parallel, or add them to one">Parallel…</button>' + echo + '<span class="bsep"></span>' +
     ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + '" data-annk="' + k.key + '" title="' + esc(k.key === 'relevant' ? 'What these words bear on: a word, one of your topics, a card or a cell of a table on the board, R 3990, or a portal address' : k.hint) + '">' + esc(k.label) + '</button>').join('');
 }
 function showBar() {
@@ -4053,7 +4520,7 @@ function delPar(id) {
   select(null, []);
 }
 // Choose a parallel: its cards turn to its words, the rest dim, and the side shows it.
-function choosePar(id) { if (!parById(id)) return; parSel = id; select('par', [id]); }
+function choosePar(id) { if (!parById(id)) return; parSel = id; echoSel = null; select('par', [id]); }
 // The words of the new parallel's form, given to a parallel already made instead.
 function addPickTo(pid) {
   const f = form; if (!f || f.kind !== 'parnew') return;
@@ -4063,7 +4530,7 @@ function addPickTo(pid) {
   if (parById(pid) && !ro()) hand = pid;
   render();
 }
-function holdPar(id) { if (!parById(id) || ro()) return; hand = hand === id ? null : id; render(); if (hand) toast('Holding (' + parSign(parById(id)) + '): select its words in another passage, and press + (' + parSign(parById(id)) + ') by them.'); }
+function holdPar(id) { if (!parById(id) || ro()) return; hand = hand === id ? null : id; if (hand) ehand = null; render(); if (hand) toast('Holding (' + parSign(parById(id)) + '): select its words in another passage, and press + (' + parSign(parById(id)) + ') by them.'); }
 // A parallel's name, kind, note, letter or colour, changed in its side; or a place's note.
 function setParField(id, k, v) {
   const p = parById(id); if (!p || ro()) return;
@@ -4390,6 +4857,8 @@ $('stage').addEventListener('pointerdown', e => {
   if (more && !mode && !spaceDown && (tool === 'move' || tool === 'select')) { toggleCard(more.dataset.cardopen); return; }
   const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame'), th = t.closest('.annt');
   const tcolEl = t.closest('.tcol'), cellEl = t.closest('.k-table [data-cell]'), chipEl = t.closest('.k-table .tp'), ckEl = t.closest('.k-table .ck'), tparEl = t.closest('.k-table .tpar');
+  const erb = t.closest('.erib, .estrip i');   // an echo's ribbon, or its mark down a card's edge: chosen, not moved
+  if (erb && !mode && !spaceDown && tool !== 'pen' && tool !== 'erase') { e.preventDefault(); chooseEcho(erb.dataset.echo); return; }
   const pk = t.closest('.part'), pch = t.closest('.pchip');   // a parallel's knot, or its chip on a card: chosen, not moved
   if ((pk || pch) && !mode && !spaceDown && tool !== 'pen' && tool !== 'erase') {
     const pid = pk ? pk.dataset.par : pch.dataset.pchip;
@@ -4803,6 +5272,9 @@ $('banner').addEventListener('click', e => {
   else if (k === 'nolink') { mode = null; render(); }
   else if (k === 'nofocus') { focus = null; render(); }
   else if (k === 'nohand') { hand = null; render(); }
+  else if (k === 'noehand') { ehand = null; render(); }
+  else if (k === 'noechosel') { echoSel = null; render(); }
+  else if (k === 'ecompare' && echoSel) echoCompare(echoSel);
   else if (k === 'noparsel') { parSel = null; render(); }
   else if (k === 'parcompare' && parSel) parCompare(parSel);
   else if (k === 'hop1' || k === 'hop2') { focus.hops = k === 'hop1' ? 1 : 2; render(); }
@@ -4820,6 +5292,135 @@ $('layers').addEventListener('change', e => {
 });
 $('layers').addEventListener('click', e => { if (e.target.closest('[data-fold]')) { $('layers').classList.toggle('closed'); renderLayers(); } });
 
+/* ── Echoes: a stretch selected, then Echo…, then the stretch that answers it, then how close ── */
+// The citation of a stretch of a card, from offset s in its passage qa to offset z in its passage qb: the portal's
+// own, which names the pages the words run over, where it has loaded; else the passages' own citations.
+function stretchCiteOf(it, qa, s, qb, z) {
+  const X = STX(), q1 = it.quotes[qa] || {}, q2 = it.quotes[qb] || {};
+  if (X && X.stretchCite && X.BYID) { const i = X.BYID.get(q1.ref), j = X.BYID.get(q2.ref); if (i != null && j != null) try { const c = X.stretchCite(i, s, j, z); if (c) return String(c); } catch (x) { /* the passages' own, then */ } }
+  return !q2.cite || q1.cite === q2.cite ? q1.cite || '' : (q1.cite || '') + ' – ' + q2.cite;
+}
+// The words chosen, as one end of an echo keeps them: the passages they run over, where they start and end, their
+// citation, and their first and last words with a few either side. pick is { card, qi, start, end }, or over
+// several passages of the card { card, qi, start, qi2, end2 }.
+function endOf(pick) {
+  const it = item(pick.card); if (!it || it.kind !== 'passage') return null;
+  const qa = pick.qi, qb = pick.qi2 != null ? pick.qi2 : pick.qi, s = pick.start, z = pick.qi2 != null ? pick.end2 : pick.end;
+  const qs = it.quotes.slice(qa, qb + 1);
+  if (!qs.length || qs.some(q => !q || !q.q)) return null;
+  const dq = qs.find(q => q.full === false);
+  if (dq) { toast(dq.dead ? 'This address no longer opens in the portal, so its words can’t be one end of an echo.' : 'The portal beside the board is still loading its texts. Try again in a moment, once the passage shows in full.'); return null; }
+  const refs = qs.map(qAddr);
+  if (refs.some(r => !r)) { toast('This passage has no address in the portal, so it can’t be one end of an echo.'); return null; }
+  const t1 = String(qs[0].q), t2 = String(qs[qs.length - 1].q);
+  if (s < 0 || z > t2.length || (qa === qb && z <= s)) return null;
+  const e = { refs, from: [refs[0], s], to: [refs[refs.length - 1], z], cite: stretchCiteOf(it, qa, s, qb, z), card: it.id, pre: t1.slice(Math.max(0, s - ANN_CTX), s), suf: t2.slice(z, z + ANN_CTX) };
+  if (qa === qb && z - s <= 2 * ECHO_EDGE) e.exact = t1.slice(s, z);
+  else {
+    e.head = t1.slice(s, qa === qb ? Math.min(z, s + ECHO_EDGE) : s + ECHO_EDGE);
+    e.tail = t2.slice(qa === qb ? Math.max(s, z - ECHO_EDGE) : Math.max(0, z - ECHO_EDGE), z);
+    if (!e.head.trim() || !e.tail.trim()) { toast('Select from some words to some words: a stretch can’t begin or end on a paragraph’s edge alone.'); return null; }
+  }
+  return e;
+}
+// The whole of what a card quotes, as one end: its words kept, or its passages in full.
+function wholeEnd(it) {
+  const qs = openQuotes(it); if (!qs.length || qs.some(q => !q.q)) return null;
+  const n = qs.length - 1, t0 = String(qs[0].q), tn = String(qs[n].q);
+  let a = qs[0].ka != null ? qs[0].ka : 0, b = qs[n].ka != null ? qs[n].kb : tn.length;
+  while (a < t0.length && /\s/.test(t0[a])) a++;
+  while (b > 0 && /\s/.test(tn[b - 1])) b--;
+  return endOf({ card: it.id, qi: 0, start: a, qi2: n, end2: b });
+}
+// A stretch held: the next stretch chosen makes an echo with it. Holding puts down a parallel in hand.
+function holdEnd(e) {
+  if (ro()) { toast(roWhy()); return; }
+  ehand = e; hand = null; render();
+  toast('Holding ' + short(endCite(e), 50) + ': select what answers it in another passage and press + echoes by it, or Echo… the whole of it on another card. Esc puts it down.');
+}
+function startEcho(pick) { if (ro()) { toast(roWhy()); return; } const e = endOf(pick); if (!e) return; dropPick(); holdEnd(e); }
+// The stretch chosen to answer the one in hand: the form for how close, and what kind.
+function pairWith(e) {
+  if (!ehand || !e) return;
+  if (endKey(e) === endKey(ehand)) { toast('That is the stretch in hand. Choose the stretch that answers it.'); return; }
+  const was = echoesBetween(echoNodes(echoesAll()), endKey(ehand), endKey(e));
+  form = { kind: 'echonew', key: uid('f'), a: clone(ehand), b: e, was: was.map(x => x.id) };
+  dropPick(); document.body.classList.remove('sideclosed'); showSide('details'); render();
+  setTimeout(() => { const el = $('details').querySelector('[data-en-deg]:checked'); if (el) el.focus({ preventScroll: true }); $('details').scrollTop = 0; }, 20);
+}
+function pairPick(pick) { if (ro()) { toast(roWhy()); return; } const e = endOf(pick); if (e) pairWith(e); }
+// Two stretches set against one another from the matrix or a neighbourhood, to be judged: an echo, or not alike.
+function judgePair(k1, k2) {
+  if (ro()) { toast(roWhy()); return; }
+  const N = echoNodes(echoesAll()), n1 = N.get(k1), n2 = N.get(k2); if (!n1 || !n2) return;
+  form = { kind: 'echonew', key: uid('f'), a: clone(n1.e), b: clone(n2.e), was: echoesBetween(N, k1, k2).map(x => x.id), judge: true };
+  render();
+  const ca = cardOfEnd(n1.e), cb = cardOfEnd(n2.e);
+  if (ca && cb && ca !== cb) openCompare([ca, cb]);
+}
+// A card on this board that shows an end's words, the one it was made on first.
+function cardOfEnd(e) {
+  const cs = B.items.filter(it => it.kind === 'passage' && shown(it) && openQuotes(it).some((q, i) => e.refs.includes(qAddr(q)) && echoesOn(it, i).spans.some(x => endKey(x.ec[x.side]) === endKey(e))));
+  const any = cs.length ? cs : B.items.filter(it => it.kind === 'passage' && shown(it) && openQuotes(it).some(q => e.refs.includes(qAddr(q))));
+  return (any.find(it => it.id === e.card) || any[0] || {}).id || null;
+}
+function makeEcho() {
+  const D = $('details'), f = form; if (!f || f.kind !== 'echonew') return;
+  const v = k => ((D.querySelector('[data-en="' + k + '"]') || {}).value || '').trim();
+  const deg = (D.querySelector('[data-en-deg]:checked') || {}).value || 'close', dir = v('dir');
+  const rs = v('in').split(/\s*;\s*/).map(x => x.slice(0, 120)).filter(Boolean).slice(0, 8);
+  const at = now(), id = uid('n');
+  const who = Object.assign(me() ? { by: me() } : {}, SHM && (D.querySelector('[data-en-only]') || {}).checked ? { only: true } : {});
+  const ec = Object.assign({ id, kind: 'echo', degree: ECHO_DEG.some(d => d.key === deg) ? deg : 'close', color: nextEchoColor(), a: clone(f.a), b: clone(f.b) },
+    v('type') ? { type: v('type').slice(0, 60) } : {}, rs.length ? { in: rs } : {}, dir === 'a-on-b' || dir === 'b-on-a' ? { dir } : {}, v('text') ? { text: v('text') } : {}, who, { date: at, at });
+  if (!change(() => { B.annotations = B.annotations || []; B.annotations.push(ec); })) return;
+  const judged = f.judge; form = null;
+  if (!judged) { sel = { kind: 'echo', ids: [id] }; showSide('details'); }
+  else select('echo', [id]);
+  render();
+  toast(ec.degree === 'unlike' ? 'Kept: you checked ' + short(endCite(ec.a), 30) + ' against ' + short(endCite(ec.b), 30) + ' and found them not alike. Undo with ⌘Z.' :
+    'An echo: ' + short(echoName(ec), 70) + '. ' + (ehand && !judged ? 'The first stretch is still in hand, for the next that answers it; Esc puts it down.' : 'Undo with ⌘Z.'));
+}
+// Choose an echo: its ribbon, strips and brackets strong, the rest faint, and the side shows it.
+function chooseEcho(id) { if (!echoById(id)) return; echoSel = id; parSel = null; select('echo', [id]); }
+// An echo's kind, how close, respects, which way, note or colour, changed in its side.
+function setEchoField(id, k, v) {
+  const ec = echoById(id); if (!ec || ro()) return;
+  v = String(v == null ? '' : v).trim();
+  if (k === 'degree' && !ECHO_DEG.some(d => d.key === v)) return;
+  if (k === 'color' && !PAR_COLORS.includes(v)) return;
+  if (k === 'dir' && v && v !== 'a-on-b' && v !== 'b-on-a') return;
+  if (k === 'type') v = v.slice(0, 60);
+  let val = v;
+  if (k === 'in') { val = v.split(/\s*;\s*/).map(x => x.slice(0, 120)).filter(Boolean).slice(0, 8); if ((ec.in || []).join(';') === val.join(';')) return; }
+  else if ((ec[k] || '') === v) return;
+  change(() => { if (k === 'in' ? val.length : v) ec[k] = val; else delete ec[k]; ec.edited = now(); ec.at = ec.edited; });
+  renderTools(); renderLayers(); renderBoard(); renderCompare();
+  if (k === 'degree' || k === 'color' || k === 'dir') renderSide();
+}
+function delEcho(id) {
+  const ec = echoById(id); if (!ec || ro()) return;
+  if (!confirm('Delete the echo ' + echoName(ec) + '? The passages’ words stay as they are. Undo (⌘Z) brings it back.')) return;
+  change(() => { B.annotations = (B.annotations || []).filter(a => a.id !== id); });
+  if (echoSel === id) echoSel = null;
+  select(null, []); toast('Deleted. Undo (⌘Z) brings it back.');
+}
+// Compare the two stretches of an echo, their cards side by side, the ribbon between.
+function echoCompare(id) {
+  const ec = echoById(id); if (!ec) return;
+  const a = cardOfEnd(ec.a), b = cardOfEnd(ec.b);
+  if (!a || !b) { toast('Both its stretches need a card on this board to be compared here.'); return; }
+  if (a === b) { toast('Both its stretches are on one card: open it in the side to read them together.'); return; }
+  openCompare([a, b]);
+}
+function downloadEchoes() {
+  const one = x => String(x || '').replace(/\s*\n+\s*/g, ' '), list = echoesHere();
+  const end = (ec, sd) => { const H = endHere(ec, sd); return '**' + one(endCite(ec[sd])) + '**: “' + one(endWords(ec[sd], 160)) + '”' + (H.away ? ' [not on this board]' : H.elsewhere ? ' [not found in its card]' : ''); };
+  const md = '# Echoes on the board of “' + one(topic ? topic.name : '') + '”\n\nFrom My topics, in the Kant Lab Logic Portal: echoes as of ' + fmtDate(new Date().toISOString()) + '. Each is two stretches you said answer one another; nothing is said of any third.\n' +
+    list.map(ec => '\n## ' + one(echoName(ec)) + '\n\n' + one(echoWhat(ec)) + (ec.in && ec.in.length ? ' · in: ' + one(ec.in.join('; ')) : '') + (echoWay(ec) ? ' · ' + one(echoWay(ec)) : '') + '\n\n- ' + end(ec, 'a') + '\n- ' + end(ec, 'b') + (ec.text ? '\n\n' + one(ec.text) : '')).join('\n') + '\n';
+  const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' })); el.download = 'topic-board-echoes-' + today() + '.md';
+  document.body.appendChild(el); el.click(); el.remove(); setTimeout(() => URL.revokeObjectURL(el.href), 2000);
+}
 /* ── Compare: two to four passages side by side over the board ────────────────
    Each passage in full in a column of its own, its annotations and parallels marked as in the
    side. In the gutter between two columns a band in each parallel's colour joins its words in
@@ -4849,20 +5450,24 @@ function renderCompare() {
   C.querySelectorAll('.cbody').forEach(el => { compare.top[el.dataset.cc] = el.scrollTop; });
   const n = compare.ids.length, add = B.items.filter(it => it.kind === 'passage' && !compare.ids.includes(it.id));
   const col = (id, i) => {
-    const it = item(id), q = it.quotes[0] || {}, an = layerOn('annotations') ? placeOn(it, 0).spans : [];
+    const it = item(id), q = it.quotes[0] || {}, qs = openQuotes(it), E = qs.map((x, k) => echoSpans(it, k)), en = E.reduce((n, x) => n + x.length, 0);
+    const para = ' <span class="para" title="A new paragraph in the text">¶</span> ';
     return '<div class="ccol"><div class="chead"><span class="cc">' + esc(it.label || q.cite || it.cite || 'A passage') + '</span>' +
       (i > 0 ? '<button type="button" data-cmove="' + i + '|-1" title="Move it to the left">‹</button>' : '') + (i < n - 1 ? '<button type="button" data-cmove="' + i + '|1" title="Move it to the right">›</button>' : '') +
       '<button type="button" data-cdrop="' + i + '" title="Take it out of the comparison">✕</button></div>' + (it.label && q.cite ? '<div class="csub">' + esc(q.cite) + '</div>' : '') +
-      '<div class="cbody" data-cc="' + esc(id) + '">' + (q.q ? '<div class="ct" data-qt="0" data-qcard="' + esc(id) + '"' + ((compare.pad || {})[id] ? ' style="padding-top:' + (+compare.pad[id]) + 'px"' : '') + '>' + markText(String(q.q), an, parsOn(it, 0).spans) + '</div>' : '<p class="empty">No words for this passage yet.</p>') +
+      '<div class="cbody" data-cc="' + esc(id) + '">' + (q.q ? '<div class="ct' + (en ? ' eb' : '') + '"' + (en ? ' data-ebox="' + esc(id) + '|0|' + (qs.length - 1) + '"' : '') + ' style="' + (en ? '--ebn:' + ebDepth(E.flat()) + ';' : '') + ((compare.pad || {})[id] ? 'padding-top:' + (+compare.pad[id]) + 'px' : '') + '">' +
+        // a card that runs over several passages shows each of them, its paragraphs marked, so that a stretch over them shows whole
+        qs.map((x, k) => x.q ? '<span data-qt="' + k + '" data-qcard="' + esc(id) + '">' + markText(String(x.q), layerOn('annotations') ? placeOn(it, k).spans : [], parsOn(it, k).spans, E[k]) + '</span>' : '').filter(Boolean).join(para) + '</div>' : '<p class="empty">No words for this passage yet.</p>') +
       (q.full === false ? '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal: these are the words My topics kept.' : 'The portal beside the board is still loading its texts: the passage in full follows in a moment.') + '</p>' : '') + '</div></div>';
   };
-  C.innerHTML = '<div class="cbar"><b>Compare</b><span>' + (n === 1 ? 'One passage: add another to compare it with.' : n + ' passages side by side. A band joins the words of each parallel; click it to bring them level.') + '</span>' +
+  C.innerHTML = '<div class="cbar"><b>Compare</b><span>' + (n === 1 ? 'One passage: add another to compare it with.' : n + ' passages side by side. A band joins the words of each parallel, a ribbon the stretches of each echo; click one to bring them level.') + '</span>' +
     (n < CMP_MAX && add.length ? '<select data-cadd aria-label="Add a passage"><option value="">+ another passage…</option>' + add.map(it => '<option value="' + esc(it.id) + '">' + esc(short(cardTitle(it), 60)) + '</option>').join('') + '</select>' : '') +
     '<button type="button" class="btn" data-cx>Back to the board (Esc)</button></div>' +
     '<div class="ccols">' + compare.ids.map(col).join('<div class="cgut"></div>') + '<svg class="cbands" id="cbands" xmlns="http://www.w3.org/2000/svg"></svg></div>' +
-    (parsHere().length ? '' : '<p class="cnote">Select words in one column and choose <i>Parallel…</i>; then select the words that answer them in the next, and press <b>+ (a)</b>.</p>');
+    (parsHere().length || echoesHere().length ? '' : '<p class="cnote">Select words in one column and choose <i>Parallel…</i>, or a stretch and <i>Echo…</i>; then select what answers them in the next, and press <b>+ (a)</b> or <b>+ echoes</b>.</p>');
   C.hidden = false;
   C.querySelectorAll('.cbody').forEach(el => { const t = compare.top[el.dataset.cc]; if (t) el.scrollTop = t; el.addEventListener('scroll', bandsSoon, { passive: true }); });
+  drawBrackets(C);
   drawBands();
 }
 let bandF = 0;
@@ -4876,15 +5481,21 @@ function drawBands() {
     b.querySelectorAll('.par[data-pl]').forEach(el => [...el.getClientRects()].forEach(r => el.dataset.pl.split(' ').forEach(pl => {
       const o = m.get(pl); if (!o) m.set(pl, { t: r.top, b: r.bottom }); else { o.t = Math.min(o.t, r.top); o.b = Math.max(o.b, r.bottom); }
     })));
-    return { br, m };
+    // and where each echo's stretch stands: its id and end → its top and bottom
+    const em = new Map();
+    b.querySelectorAll('.ech[data-ech]').forEach(el => [...el.getClientRects()].forEach(r => el.dataset.ech.split(' ').forEach(k => {
+      const o = em.get(k); if (!o) em.set(k, { t: r.top, b: r.bottom }); else { o.t = Math.min(o.t, r.top); o.b = Math.max(o.b, r.bottom); }
+    })));
+    return { br, m, em };
   });
-  let h = '';
+  let h = '', e = '';
   for (let i = 0; i + 1 < cols.length; i++) {
     const L = cols[i], R = cols[i + 1];
     L.m.forEach((ly, pa) => { const A = annById(pa), p = A && parById(A.re); if (!p) return;
       R.m.forEach((ry, pb) => { const Z = annById(pb); if (!Z || Z.re !== p.id) return; h += band(L.br, ly, R.br, ry, p, box); }); });
+    L.em.forEach((ly, k) => { const [id, sd] = k.split(':'), ec = echoById(id); if (!ec || isUnlike(ec)) return; const ry = R.em.get(id + ':' + other(sd)); if (ry) e += eband(L.br, ly, R.br, ry, ec, box); });
   }
-  svg.innerHTML = h;
+  svg.innerHTML = e + h;   // the echoes' ribbons beneath the parallels' bands
 }
 function band(lb, ly, rb, ry, p, box) {
   const clip = (y, b) => Math.max(b.top, Math.min(b.bottom, y)), out = ly.b < lb.top || ly.t > lb.bottom || ry.b < rb.top || ry.t > rb.bottom;
@@ -4893,6 +5504,26 @@ function band(lb, ly, rb, ry, p, box) {
   if (a2 - a1 < 3) a2 = a1 + 3; if (b2 - b1 < 3) b2 = b1 + 3;
   const d = 'M' + x1 + ',' + a1 + ' C' + mx + ',' + a1 + ' ' + mx + ',' + b1 + ' ' + x2 + ',' + b1 + ' L' + x2 + ',' + b2 + ' C' + mx + ',' + b2 + ' ' + mx + ',' + a2 + ' ' + x1 + ',' + a2 + ' Z';
   return '<path class="cband' + (out ? ' off' : '') + (p.id === parSel ? ' on' : '') + (p.id === hovPar ? ' phov' : '') + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '" d="' + d + '"><title>' + esc('(' + parSign(p) + ') ' + p.label + (p.type ? ' · ' + p.type : '') + (out ? ': out of sight in a column. Click to bring its words level.' : ': click to bring its words level.')) + '</title></path>';
+}
+// An echo's ribbon across the gutter: as tall as its stretch in each column, paler the looser the echo.
+function eband(lb, ly, rb, ry, ec, box) {
+  const clip = (y, b) => Math.max(b.top, Math.min(b.bottom, y)), out = ly.b < lb.top || ly.t > lb.bottom || ry.b < rb.top || ry.t > rb.bottom;
+  const x1 = lb.right - box.left + 1, x2 = rb.left - box.left - 1, mx = (x1 + x2) / 2;
+  let a1 = clip(ly.t, lb) - box.top, a2 = clip(ly.b, lb) - box.top, b1 = clip(ry.t, rb) - box.top, b2 = clip(ry.b, rb) - box.top;
+  if (a2 - a1 < 3) a2 = a1 + 3; if (b2 - b1 < 3) b2 = b1 + 3;
+  const d = 'M' + x1 + ',' + a1 + ' C' + mx + ',' + a1 + ' ' + mx + ',' + b1 + ' ' + x2 + ',' + b1 + ' L' + x2 + ',' + b2 + ' C' + mx + ',' + b2 + ' ' + mx + ',' + a2 + ' ' + x1 + ',' + a2 + ' Z';
+  return '<path class="cecho' + (out ? ' off' : '') + (ec.id === echoSel ? ' on' : '') + (ec.id === hovEcho ? ' ehov' : '') + '" data-echo="' + esc(ec.id) + '" style="--pc:' + echoColor(ec) + ';--op:' + echoDeg(ec).op + '" d="' + d + '"><title>' + esc(echoName(ec) + ': ' + echoWhat(ec) + (out ? '. Out of sight in a column: click to bring its stretches level.' : '. Click to bring its stretches level.')) + '</title></path>';
+}
+// Bring an echo's two stretches level in Compare, as a parallel's words are brought level.
+function echoLevel(id) {
+  const C = $('compare'); if (!compare || C.hidden) return;
+  compare.pad = {}; C.querySelectorAll('.ct').forEach(el => { el.style.paddingTop = ''; });
+  const cols = [...C.querySelectorAll('.cbody')].map(b => {
+    const el = [...b.querySelectorAll('.ech[data-ech]')].find(x => x.dataset.ech.split(' ').some(k => k.split(':')[0] === id)); if (!el) return null;
+    const br = b.getBoundingClientRect(), cur = el.getBoundingClientRect().top - br.top;
+    return { b, cur, h: br.height, min: cur - (b.scrollHeight - b.clientHeight - b.scrollTop) };
+  }).filter(Boolean);
+  levelCols(cols);
 }
 // Bring a parallel's words level: each column with words of it scrolls, and one too short to scroll far enough
 // is let down by a space above its passage, until the words stand at the same height in every column.
@@ -4904,6 +5535,9 @@ function bringLevel(id) {
     const br = b.getBoundingClientRect(), cur = el.getBoundingClientRect().top - br.top;
     return { b, cur, h: br.height, min: cur - (b.scrollHeight - b.clientHeight - b.scrollTop) };
   }).filter(Boolean);
+  levelCols(cols);
+}
+function levelCols(cols) {
   if (!cols.length) return;
   const T = Math.max(Math.max(...cols.map(c => c.min)), Math.min(Math.max(...cols.map(c => c.cur)), cols[0].h * 0.3));
   cols.forEach(c => {
@@ -4912,13 +5546,14 @@ function bringLevel(id) {
     const up = Math.min(-need, c.b.scrollTop), rest = Math.round(-need - up); c.b.scrollTop -= up;
     if (rest > 0) { compare.pad[c.b.dataset.cc] = rest; c.b.querySelector('.ct').style.paddingTop = rest + 'px'; }
   });
-  bandsSoon();
+  drawBrackets($('compare')); bandsSoon();
 }
 $('compare').addEventListener('click', e => {
   if (e.target.closest('[data-cx]')) { compare = null; render(); return; }
   const mv = e.target.closest('[data-cmove]'); if (mv) { const [i, d] = mv.dataset.cmove.split('|').map(Number), L = compare.ids, j = i + d; if (j >= 0 && j < L.length) { [L[i], L[j]] = [L[j], L[i]]; compare.pad = {}; renderCompare(); } return; }
   const dr = e.target.closest('[data-cdrop]'); if (dr) { compare.ids.splice(+dr.dataset.cdrop, 1); compare.pad = {}; render(); return; }
   const bd = e.target.closest('.cband'); if (bd) { const id = bd.dataset.par; choosePar(id); setTimeout(() => bringLevel(id), 0); return; }
+  const ce = e.target.closest('.cecho, .ebr[data-echo]'); if (ce) { const id = ce.dataset.echo; chooseEcho(id); setTimeout(() => echoLevel(id), 0); return; }
   const mk = e.target.closest('mark[data-ann]'); if (mk && getSelection().isCollapsed) { openAnn(mk.dataset.ann.split(' ').pop()); return; }
   const pw = e.target.closest('.par[data-par]'); if (pw && getSelection().isCollapsed) { const id = pw.dataset.par.split(' ').includes(parSel) ? parSel : pw.dataset.par.split(' ').pop(); choosePar(id); setTimeout(() => bringLevel(id), 0); }
 });
@@ -4926,6 +5561,10 @@ $('compare').addEventListener('change', e => { const a = e.target.closest('[data
 $('compare').addEventListener('pointerdown', e => { selTouch = e.pointerType !== 'mouse'; if (!selTouch) selecting = true; });
 $('compare').addEventListener('scroll', () => { if ($('annbar').classList.contains('show')) showBar(); }, true);
 window.addEventListener('resize', bandsSoon);
+let ebrF = 0;
+const bracketsSoon = () => { if (!ebrF) ebrF = requestAnimationFrame(() => { ebrF = 0; drawBrackets($('details')); drawBrackets($('compare')); }); };
+if (window.ResizeObserver) { const ro_ = new ResizeObserver(bracketsSoon); ro_.observe($('details')); ro_.observe($('compare')); }
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { bracketsSoon(); drawBrackets($('cards')); });
 
 /* ── Wiring: the tools and the side ───────────────────────────────────────── */
 document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => {
@@ -4954,6 +5593,7 @@ $('snap').addEventListener('click', () => {
 $('photos').addEventListener('click', () => { form = { kind: 'photos' }; showSide('details'); renderSide(); });
 $('annsb').addEventListener('click', () => { form = { kind: 'annotations', f: {} }; document.body.classList.remove('sideclosed'); showSide('details'); renderSide(); });
 $('parsb').addEventListener('click', () => { form = { kind: 'parallels' }; document.body.classList.remove('sideclosed'); showSide('details'); renderSide(); });
+$('echosb').addEventListener('click', () => { form = { kind: 'echoes' }; document.body.classList.remove('sideclosed'); showSide('details'); renderSide(); });
 // The annotation bar: it appears by words selected in a passage in the side, mouse or finger.
 let selT = null, selecting = false, selTouch = false, barDown = 0;
 document.addEventListener('selectionchange', () => { clearTimeout(selT); selT = setTimeout(() => { if (!selecting && Date.now() - barDown > 600) showBar(); }, 150); });
@@ -4966,6 +5606,9 @@ $('annbar').addEventListener('pointerdown', e => { e.preventDefault(); barDown =
 $('annbar').addEventListener('mousedown', e => e.preventDefault());
 $('annbar').addEventListener('click', e => {
   if (!annPick) return;
+  if (e.target.closest('[data-ein]')) { pairPick(annPick); return; }
+  if (e.target.closest('[data-enew]')) { startEcho(annPick); return; }
+  if (annPick.multi) return;
   const pi = e.target.closest('[data-parin]'); if (pi) { addPlace(pi.dataset.parin, annPick); return; }
   if (e.target.closest('[data-parnew]')) { startPar(annPick); return; }
   const b = e.target.closest('[data-annk]'); if (b) startAnn(b.dataset.annk, annPick.card, annPick.qi, annPick);
@@ -4976,7 +5619,12 @@ $('details').addEventListener('keydown', e => {
     else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); form = null; renderSide(); }
     return;
   }
-  if (e.target.matches('[data-pf], [data-plnote]') && e.key === 'Enter' && !e.shiftKey && !e.isComposing && !e.target.matches('textarea')) { e.preventDefault(); e.target.blur(); return; }
+  if (form && form.kind === 'echonew' && e.target.closest('[data-eform="new"]')) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && !e.target.matches('select')) { e.preventDefault(); makeEcho(); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); form = null; renderSide(); }
+    return;
+  }
+  if (e.target.matches('[data-pf], [data-plnote], [data-ef]') && e.key === 'Enter' && !e.shiftKey && !e.isComposing && !e.target.matches('textarea')) { e.preventDefault(); e.target.blur(); return; }
   if (!e.target.closest('.anncomp')) return;
   if (e.key === 'Enter' && e.target.matches('button, select')) return;   // a button pressed from the keyboard, one of the topics offered among them
   if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); saveAnn(); }
@@ -5005,6 +5653,7 @@ function hoverPar(id) {
   document.querySelectorAll('.phov').forEach(el => el.classList.remove('phov'));
   if (id) document.querySelectorAll('[data-par]').forEach(el => { if (el.dataset.par.split(' ').includes(id)) el.classList.add('phov'); });
 }
+document.addEventListener('pointerover', e => { if (drag) return; const el = e.target.closest && e.target.closest('[data-echo], .ech[data-ech]'); hoverEcho(!el ? '' : el.dataset.echo || el.dataset.ech.split(' ').map(x => x.split(':')[0]).find(x => x === echoSel) || el.dataset.ech.split(' ').pop().split(':')[0]); });
 document.addEventListener('pointerover', e => { if (drag) return; const el = e.target.closest && e.target.closest('[data-par]'); hoverPar(el ? (el.dataset.par.split(' ').includes(parSel) ? parSel : el.dataset.par.split(' ').pop()) : ''); });
 // The store changed elsewhere: another tab of the portal, the portal beside the board, GitHub's copy arriving through it.
 window.addEventListener('storage', e => { if (e.key === TOPICS || e.key == null) takeIn(); });
@@ -5237,6 +5886,12 @@ $('details').addEventListener('click', e => {
   const mk = e.target.closest('mark[data-ann]'); if (mk && getSelection().isCollapsed) { flashAnn(mk.dataset.ann.split(' ').pop()); return; }
   const pw = e.target.closest('.par[data-par]'); if (pw && getSelection().isCollapsed) { choosePar(pw.dataset.par.split(' ').pop()); return; }
   const ps = e.target.closest('[data-parsel]'); if (ps) { choosePar(ps.dataset.parsel); return; }
+  const ebr = e.target.closest('.ebr[data-echo]'); if (ebr) { chooseEcho(ebr.dataset.echo); return; }
+  const esl = e.target.closest('[data-echosel]'); if (esl) { const ec = echoById(esl.dataset.echosel); if (ec && echoPlaces().has(ec.id) && !isUnlike(ec)) chooseEcho(ec.id); else if (ec) select('echo', [ec.id]); return; }
+  const evw = e.target.closest('[data-echoview]'); if (evw) { select('echo', [evw.dataset.echoview]); return; }
+  const eho = e.target.closest('[data-ehold]'); if (eho) { const [id, sd] = eho.dataset.ehold.split('|'), ec = echoById(id); if (ec && ec[sd]) holdEnd(clone(ec[sd])); return; }
+  const enb = e.target.closest('[data-eneigh]'); if (enb) { form = { kind: 'eneigh', ref: enb.dataset.eneigh }; renderSide(); $('details').scrollTop = 0; return; }
+  const epr = e.target.closest('[data-epair]'); if (epr) { const r = epr.dataset.epair.split('|'), k1 = refKey(r[0] + '|' + r[1]), k2 = refKey(r[2] + '|' + r[3]); if (k1 && k2) judgePair(k1, k2); return; }
   const pv = e.target.closest('[data-parview]'); if (pv) { select('par', [pv.dataset.parview]); return; }
   const ph = e.target.closest('[data-parhold]'); if (ph) { holdPar(ph.dataset.parhold); return; }
   const pt = e.target.closest('[data-parto]'); if (pt) { addPickTo(pt.dataset.parto); return; }
@@ -5281,6 +5936,14 @@ $('details').addEventListener('click', e => {
   if (act === 'dlann') { downloadAnns(); return; }
   if (act === 'dlpar') { downloadPars(); return; }
   if (act === 'parmake') { makePar(); return; }
+  if (act === 'echomake') { makeEcho(); return; }
+  if (act === 'echowhole') { const it = item(id), en = it && wholeEnd(it); if (!en) return; if (ehand) pairWith(en); else holdEnd(en); return; }
+  if (act === 'echoshow') { chooseEcho(id); return; }
+  if (act === 'echounshow') { echoSel = null; render(); return; }
+  if (act === 'ecompare') { echoCompare(id); return; }
+  if (act === 'echodel') { delEcho(id); return; }
+  if (act === 'dlecho') { downloadEchoes(); return; }
+  if (act === 'echolist') { form = { kind: 'echoes' }; renderSide(); return; }
   if (act === 'partoother') { const v = (D.querySelector('[data-parother]') || {}).value; if (v) addPickTo(v); return; }
   if (act === 'parshow') { choosePar(id); return; }
   if (act === 'parunshow') { parSel = null; render(); return; }
@@ -5337,6 +6000,8 @@ $('details').addEventListener('change', e => {
   if (e.target.matches('[data-alsoin]') && sel.kind === 'card') { const it = item(sel.ids[0]), g = model(e.target.value); if (it && g) alsoIn(it, g); return; }
   if (e.target.matches('[data-sxa]') && form && form.kind === 'stretch') { form.ar[e.target.dataset.sxa] = +e.target.value; return; }
   if (e.target.matches('[data-pf]') && sel.kind === 'par') { setParField(sel.ids[0], e.target.dataset.pf, e.target.value); return; }
+  if (e.target.matches('[data-ef]') && sel.kind === 'echo') { setEchoField(sel.ids[0], e.target.dataset.ef, e.target.value); return; }
+  if (e.target.matches('[data-echains]')) { echoChains = e.target.checked; renderSide(); return; }
   if (e.target.matches('[data-plnote]')) { setPlaceNote(e.target.dataset.plnote, e.target.value); return; }
   if (e.target.matches('[data-anntopics]') && composing()) { if (e.target.value) pickTopic(e.target.value); return; }
   if (e.target.matches('[data-annf]') && form && form.kind === 'annotations') { form.f = form.f || {}; form.f[e.target.dataset.annf] = e.target.value; $('annlist').innerHTML = annListAll(); return; }
@@ -5355,12 +6020,13 @@ document.addEventListener('keydown', e => {
   if (e.key === ' ') { e.preventDefault(); if (!spaceDown) { spaceDown = true; $('stage').classList.add('spacepan'); } return; }
   if (!e.metaKey && !e.ctrlKey && !e.altKey) { const t = { v: 'move', s: 'select', p: 'pen', e: 'erase', b: 'box' }[e.key.toLowerCase()]; if (t) { setTool(t); return; } }
   if (e.key === 'Escape' && $('annbar').classList.contains('show')) { hideBar(); try { getSelection().removeAllRanges(); } catch (x) { /* fine */ } return; }
-  if (e.key === 'Escape') { if (mode) mode = null; else if (hand) hand = null; else if (compare) compare = null; else if (offer) offer = null; else if (tool !== 'move') setTool('move'); else if (parSel) parSel = null; else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
+  if (e.key === 'Escape') { if (mode) mode = null; else if (hand) hand = null; else if (ehand) ehand = null; else if (compare) compare = null; else if (offer) offer = null; else if (tool !== 'move') setTool('move'); else if (parSel) parSel = null; else if (echoSel) echoSel = null; else if (focus) focus = null; else if (form) form = null; else sel = { kind: null, ids: [] }; $('chooser').classList.remove('show'); render(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && sel.kind && !ro()) {
     e.preventDefault();
     if (sel.kind === 'card') { if (confirm(delAsk(sel.ids))) removeCards(sel.ids.slice()); }
     else if (sel.kind === 'arrow') { const id = sel.ids[0]; if (confirm('Delete this arrow?')) { change(() => { B.arrows = B.arrows.filter(a => a.id !== id); if (BASE.arrows.some(a => a.id === id)) B.removed.push(id); }); select(null, []); } }
     else if (sel.kind === 'par') delPar(sel.ids[0]);
+    else if (sel.kind === 'echo') delEcho(sel.ids[0]);
     return;
   }
   if ((e.key === 'f' || e.key === 'F') && sel.kind === 'card' && sel.ids.length === 1) { focus = { id: sel.ids[0], hops: focus && focus.id === sel.ids[0] && focus.hops === 1 ? 2 : 1 }; render(); }
@@ -5506,6 +6172,7 @@ start();
 document.head.insertAdjacentHTML('beforeend', '<style>' + ANN_KINDS.map(k => '.ak-' + k.key + ' { --kc: ' + k.color + '; }').join(' ') + ' .ak-reply { --kc: #8b5e3c; }</style>');
 $('annbar').innerHTML = barHtml();
 $('partypes').innerHTML = PAR_TYPES.map(t => '<option value="' + esc(t) + '">').join('');
+$('echotypes').innerHTML = ECHO_TYPES.map(t => '<option value="' + esc(t) + '">').join('');
 renderPens();
 renderHead();
 render();
