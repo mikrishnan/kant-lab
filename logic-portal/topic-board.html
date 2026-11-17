@@ -410,6 +410,22 @@
   .card.k-table .tp.gone { border-style: dashed; color: var(--faded); }
   .card.k-table.sel td.tsel, .card.k-table.sel th.tsel { box-shadow: inset 0 0 0 2px #d9a441; }
   .card.k-table td.tdrop, .card.k-table th.tdrop { background: color-mix(in srgb, #d9a441 30%, #fff); }
+  /* a parallel in a cell: in its colour, its letter and name, or its words in one passage and their citation */
+  .card.k-table .tpars { display: flex; flex-wrap: wrap; gap: 0.15rem; margin-top: 0.15rem; }
+  .card.k-table .tt:empty + .tpars, .card.k-table .tt:empty + .tps + .tpars { margin-top: 0.15rem; }
+  .card.k-table td:has(.tpars) .tt:empty, .card.k-table th:has(.tpars) .tt:empty { min-height: 0; }
+  .card.k-table .tpar { display: inline-block; max-width: 100%; border: 1px solid var(--pc); border-left: 3px solid var(--pc); border-radius: 4px; background: #fff; color: var(--pc); font-size: 0.78rem; font-weight: 400; line-height: 1.25; padding: 0.05rem 0.3rem; cursor: pointer; text-align: left; }
+  .card.k-table .tpar b { font-weight: 600; }
+  .card.k-table .tpar .tpc { display: block; color: var(--faded); font-size: 0.72rem; }
+  .card.k-table .tpar .tpg { display: block; color: var(--faded); font-size: 0.7rem; font-style: italic; }
+  .card.k-table .tpar.gone, .card.k-table .tpar.lostw { border-style: dashed; color: var(--faded); }
+  .card.k-table .tpar.placed i { text-decoration: underline dashed; text-underline-offset: 2px; }
+  .card.k-table .tpar.phov { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #d9a441; }
+  .card.k-table td.tpon, .card.k-table th.tpon { box-shadow: inset 0 0 0 2px var(--pc); background: color-mix(in srgb, var(--pc) 8%, #fff); }
+  #pardrag { position: fixed; z-index: 60; pointer-events: none; display: none; border: 1px solid var(--pc); border-left: 3px solid var(--pc); border-radius: 4px; background: #fff; color: var(--pc); font: 0.85rem/1.3 'EB Garamond', Georgia, serif; padding: 0.1rem 0.4rem; box-shadow: 0 3px 10px rgba(0,0,0,0.18); max-width: 260px; }
+  #details .tcellpar { display: flex; flex-wrap: wrap; gap: 0.2rem 0.5rem; align-items: center; margin: 0.15rem 0 0.35rem; }
+  #details .tcellpar .rel { flex: 1 1 100%; }
+  #details .tcellpar select { flex: 1; min-width: 0; font: inherit; font-size: 0.85rem; }
   .card .tcol { position: absolute; width: 9px; margin-left: -4px; cursor: col-resize; display: none; border-radius: 3px; }
   .card .tcol:hover { background: color-mix(in srgb, var(--accent-light) 35%, transparent); }
   .card.k-table:hover .tcol, .card.k-table.sel .tcol { display: block; }
@@ -581,7 +597,7 @@
   #details .tacts { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.7rem; align-items: baseline; font-size: 0.92rem; margin-top: 0.5rem; }
   #details .tacts .lbl { font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); }
   #details .tacts .b { display: flex; flex-wrap: wrap; gap: 0.2rem 0.7rem; }
-  #details select[data-tcellp] { margin-top: 0.35rem; }
+  #details select[data-tcellp], #details select[data-tcellpar] { margin-top: 0.35rem; }
 </style>
 </head>
 <body>
@@ -2194,10 +2210,29 @@ const parHay = it => parsOfCard(it).map(p => [p.label, p.type, p.text].join(' ')
    the board; the height follows the words. Nothing in a table is filled in by the page.
    A cell an arrow has been drawn to or from has an id of its own as well, { t, ps, id }, given
    it then, so that the arrow keeps to the cell as rows and columns are inserted and deleted
-   round it. Deleting the cell's row or column takes its arrows with it. */
-const blank = () => ({ t: '', ps: [] });
-const cellOf = x => typeof x === 'string' ? { t: x, ps: [] } : isObj(x) ? Object.assign({ t: typeof x.t === 'string' ? x.t : '', ps: Array.isArray(x.ps) ? x.ps.filter(p => isObj(p) && (p.mt || p.ref)) : [] }, typeof x.id === 'string' && x.id ? { id: x.id } : {}) : blank();
-const packCell = c => c.ps.length || c.id ? Object.assign({ t: c.t, ps: c.ps }, c.id ? { id: c.id } : {}) : c.t;
+   round it. Deleting the cell's row or column takes its arrows with it.
+   A cell can name parallels too, { t, ps, pars }: each { par: the parallel's id, sign, label },
+   and, where the reader chose its words in one passage, { place: that place's id, exact, cite }.
+   The chip in the cell reads the parallel and the place afresh each time it is drawn; sign,
+   label, exact and cite are a copy, kept when it was put in, for when the parallel or the place
+   is gone, as a passage in a cell keeps its citation. A field this page does not know is kept
+   as it came, so that a later page's additions to a cell survive this one's edits. */
+const CELL_KEYS = ['t', 'ps', 'pars', 'id'];
+const blank = () => ({ t: '', ps: [], pars: [] });
+function cellOf(x) {
+  if (typeof x === 'string') return { t: x, ps: [], pars: [] };
+  if (!isObj(x)) return blank();
+  const c = {}; Object.keys(x).forEach(k => { if (!CELL_KEYS.includes(k)) c[k] = x[k]; });
+  return Object.assign(c, { t: typeof x.t === 'string' ? x.t : '', ps: Array.isArray(x.ps) ? x.ps.filter(p => isObj(p) && (p.mt || p.ref)) : [],
+    pars: Array.isArray(x.pars) ? x.pars.filter(p => isObj(p) && typeof p.par === 'string' && p.par) : [] }, typeof x.id === 'string' && x.id ? { id: x.id } : {});
+}
+function packCell(c) {
+  const pars = c.pars || [], more = Object.keys(c).some(k => !CELL_KEYS.includes(k));
+  if (!c.ps.length && !pars.length && !c.id && !more) return c.t;
+  const o = { t: c.t, ps: c.ps }; Object.keys(c).forEach(k => { if (k !== 't' && k !== 'ps' && k !== 'pars') o[k] = c[k]; });
+  if (pars.length) o.pars = pars;
+  return o;
+}
 // Where the cell with this id stands in the table now, [row, column], or null if it is no longer in it.
 function cellRC(it, cid) {
   const rows = it && Array.isArray(it.cells) ? it.cells : [];
@@ -2227,7 +2262,7 @@ function cellArrows(id, cells) {
 const dropArrows = as => { if (!as.length) return; const k = new Set(as.map(a => a.id)); B.arrows = B.arrows.filter(a => !k.has(a.id)); };
 // What deleting some cells takes with them, for the question asked first: '' if nothing.
 function cellsLoss(cells, as) {
-  return [hasWords(cells) ? 'words or passages' : '', as.length ? (as.length === 1 ? 'an arrow' : plural(as.length, 'arrow')) + ' drawn to or from ' + (cells.length === 1 ? 'it' : 'its cells') : ''].filter(Boolean).join(', and ');
+  return [hasWords(cells) ? (cells.some(c => (c.pars || []).length) ? 'words, passages or parallels' : 'words or passages') : '', as.length ? (as.length === 1 ? 'an arrow' : plural(as.length, 'arrow')) + ' drawn to or from ' + (cells.length === 1 ? 'it' : 'its cells') : ''].filter(Boolean).join(', and ');
 }
 // The cells as a grid: every row as long as the longest, nothing cut, never less than one cell.
 function grid(it) {
@@ -2242,7 +2277,7 @@ function colW(it) { const n = dims(it).cols, cw = Array.isArray(it.cw) ? it.cw :
 const headOf = it => ({ top: !!(it.head && it.head.top), left: !!(it.head && it.head.left) });
 const isHead = (h, r, c) => (h.top && r === 0) || (h.left && c === 0);
 const clampN = (v, d, max) => { v = Math.round(+v); return v >= 1 ? Math.min(max, v) : d; };
-const hasWords = cs => cs.some(c => c.t.trim() || c.ps.length);
+const hasWords = cs => cs.some(c => c.t.trim() || c.ps.length || (c.pars || []).length);
 const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
 const cardEl = id => [...$('cards').querySelectorAll('.card')].find(c => c.dataset.id === id);
 // A passage in a cell as it stands now: its citation, where it opens, and whether My topics still has it.
@@ -2250,8 +2285,38 @@ function cellPassage(p) {
   const x = p.mt ? itemOf(p.mt) : null, ref = (x && x.ref) || p.ref;
   return { x, cite: (x && x.cite) || p.cite || p.ref || 'a passage', href: ref ? portalHref({ ref }) : null, gone: !x };
 }
-// A cell as text: its words, and its passages' citations.
-function cellText(c) { const cs = c.ps.map(p => cellPassage(p).cite).join('; '); return c.t && cs ? c.t + ' (' + cs + ')' : c.t || cs; }
+// A parallel in a cell as it stands now: the parallel, if this board has it; the place, if the chip quotes the words
+// of one passage, and where those words stand; and what the chip says, from them or from the copy kept in the cell.
+function cellPar(e) {
+  const p = parById(e.par), a = e.place ? annById(e.place) : null, pl = p && a && a.kind === 'place' && a.re === e.par && a.place ? a : null;
+  return { p, pl, H: pl ? placeHere(pl) : null, sign: p ? parSign(p) : String(e.sign || '?').slice(0, 6), label: p ? p.label : String(e.label || 'a parallel'), color: p ? parColor(p) : '#7a6a52',
+    words: e.place ? (pl ? pl.place.exact : String(e.exact || '')) : '', cite: e.place ? String((pl && pl.place.cite) || e.cite || '') : '', gone: !p, lostw: !!e.place && !!p && !pl };
+}
+// A parallel in a cell, in a line: (a) nihil negativum, or (a) “(nihil negativum)” (KrV A 291).
+const cellParLine = e => { const P = cellPar(e); return '(' + P.sign + ') ' + (e.place ? '“' + P.words + '”' + (P.cite ? ' (' + P.cite + ')' : '') : P.label); };
+// Its chip: clicked, the parallel is chosen; where it quotes words, their card is gone to as well.
+function cellParChip(e, j) {
+  const P = cellPar(e), placed = !!(P.H && P.H.placed), lost = !!(P.H && P.H.lost);
+  const note = P.gone ? (SHM ? 'not one of this board’s parallels' : 'deleted') : P.lostw ? 'no longer in the parallel' : lost ? 'its words are no longer in the passage' : placed ? 'placed by the page' : '';
+  const title = P.gone ? (SHM ? 'Not one of this board’s parallels.' : 'This parallel has been deleted.') + ' The letter and name are those kept when it was put here.' :
+    P.lostw ? 'These words are no longer in the parallel: they are as they were when put here. Click to show the parallel.' :
+    (e.place ? 'Show the parallel on the board, and go to these words' : 'Show the parallel on the board') + (placed ? '. The page had to find these words again: they are not quite as they stood when marked.' : '');
+  return '<span class="tpar' + (P.gone ? ' gone' : '') + (P.lostw || lost ? ' lostw' : '') + (placed ? ' placed' : '') + '" data-tpar="' + j + '"' + (P.p ? ' data-par="' + esc(e.par) + '"' : '') + ' style="--pc:' + esc(P.color) + '" title="' + esc(title) + '"><b>(' + esc(P.sign) + ')</b> ' +
+    (e.place ? '<i>“' + esc(short(P.words, 60)) + '”</i>' + (P.cite ? '<span class="tpc">' + esc(P.cite) + '</span>' : '') : esc(short(P.label, 30))) + (note ? '<span class="tpg">' + esc(note) + '</span>' : '') + '</span>';
+}
+// Every cell on this board that names a parallel: { it: the table, r, c, j, e: what the cell keeps }.
+function cellsNaming(pid) {
+  const out = [];
+  B.items.forEach(it => { if (it.kind !== 'table') return; grid(it).forEach((row, r) => row.forEach((cl, c) => cl.pars.forEach((e, j) => { if (e.par === pid) out.push({ it, r, c, j, e }); }))); });
+  return out;
+}
+// The ids of the parallels named in this board's tables.
+function parsInTables() { const s = new Set(); B.items.forEach(it => { if (it.kind === 'table') grid(it).forEach(row => row.forEach(cl => cl.pars.forEach(e => s.add(e.par)))); }); return s; }
+// A cell as text: its words, its passages' citations, and its parallels.
+function cellText(c) {
+  const cs = c.ps.map(p => cellPassage(p).cite).join('; '), base = c.t && cs ? c.t + ' (' + cs + ')' : c.t || cs;
+  return [base].concat((c.pars || []).map(cellParLine)).filter(Boolean).join(' · ');
+}
 const tableHay = it => grid(it).map(r => r.map(cellText).join(' ')).join(' ');
 // Every change to a table goes through here: fn changes its grid and widths in place, and they are kept as cells again.
 function withTable(id, fn) {
@@ -2268,9 +2333,11 @@ function tableHtml(it) {
   return '<table style="width:' + cw.reduce((a, b) => a + b, 0) + 'px"><colgroup>' + cw.map(w => '<col style="width:' + w + 'px">').join('') + '</colgroup>' +
     g.map((row, r) => '<tr>' + row.map((c, k) => {
       const th = isHead(h, r, k), tag = th ? 'th' : 'td';
-      const cls = [th && h.top && h.left && !r && !k ? 'corner' : '', at && at.r === r && at.c === k ? 'tsel' : ''].filter(Boolean).join(' ');
-      return '<' + tag + (th ? ' scope="' + (h.top && r === 0 ? 'col' : 'row') + '"' : '') + (cls ? ' class="' + cls + '"' : '') + ' data-cell="' + r + ',' + k + '"' + (c.id ? ' data-cid="' + esc(c.id) + '"' : '') + '><div class="tw"><span class="tt">' + esc(c.t) + '</span>' +
+      const on = parSel && layerOn('parallels') && c.pars.some(e => e.par === parSel) ? parById(parSel) : null;   // a cell naming the parallel chosen
+      const cls = [th && h.top && h.left && !r && !k ? 'corner' : '', at && at.r === r && at.c === k ? 'tsel' : '', on ? 'tpon' : ''].filter(Boolean).join(' ');
+      return '<' + tag + (th ? ' scope="' + (h.top && r === 0 ? 'col' : 'row') + '"' : '') + (cls ? ' class="' + cls + '"' : '') + (on ? ' style="--pc:' + esc(parColor(on)) + '"' : '') + ' data-cell="' + r + ',' + k + '"' + (c.id ? ' data-cid="' + esc(c.id) + '"' : '') + '><div class="tw"><span class="tt">' + esc(c.t) + '</span>' +
         (c.ps.length ? '<span class="tps">' + c.ps.map((p, j) => { const P = cellPassage(p); return '<span class="tp' + (P.gone ? ' gone' : '') + '" data-tp="' + j + '" title="' + (P.gone ? 'No longer in My topics: the citation kept when it was put here' : 'Open it beside the board') + '">' + esc(P.cite) + '</span>'; }).join('') + '</span>' : '') +
+        (c.pars.length ? '<span class="tpars">' + c.pars.map(cellParChip).join('') + '</span>' : '') +
         (ro() ? '' : '<span class="ck" title="Drag to a card, another cell or a group to draw an arrow from this cell">→</span>') + '</div></' + tag + '>';
     }).join('') + '</tr>').join('') + '</table>';
 }
@@ -2312,7 +2379,7 @@ function tableHTMLOut(it) {
   return '<table>' + (it.label ? '<caption>' + esc(it.label) + '</caption>' : '') + grid(it).map((r, i) => '<tr>' + r.map((c, k) => {
     const tag = isHead(h, i, k) ? 'th' : 'td';
     const ps = c.ps.map(p => { const P = cellPassage(p); return P.href ? '<a href="' + esc(abs(P.href)) + '">' + esc(P.cite) + '</a>' : esc(P.cite); }).join('; ');
-    return '<' + tag + '>' + [esc(c.t).replace(/\n/g, '<br>'), ps].filter(Boolean).join('<br>') + '</' + tag + '>';
+    return '<' + tag + '>' + [esc(c.t).replace(/\n/g, '<br>'), ps].concat(c.pars.map(e => esc(cellParLine(e)))).filter(Boolean).join('<br>') + '</' + tag + '>';
   }).join('') + '</tr>').join('') + '</table>';
 }
 // What was pasted, as a table, if it is one: a board's own table, a table in HTML (Word, a web page, Numbers, Excel,
@@ -2360,7 +2427,8 @@ function pastedTable(cd) {
   if (j) try {
     const o = JSON.parse(j);
     if (o && Array.isArray(o.cells) && o.cells.length) T = {
-      cells: grid({ cells: o.cells }).map(r => r.map(c => packCell({ t: c.t, ps: c.ps.map(p => ({ mt: str(p.mt), ref: str(p.ref), cite: str(p.cite) })) }))),
+      cells: grid({ cells: o.cells }).map(r => r.map(c => packCell({ t: c.t, ps: c.ps.map(p => ({ mt: str(p.mt), ref: str(p.ref), cite: str(p.cite) })),
+        pars: c.pars.map(p => Object.assign({ par: str(p.par), sign: str(p.sign), label: str(p.label) }, p.place ? { place: str(p.place), exact: str(p.exact), cite: str(p.cite) } : {})) }))),
       head: { top: !!(o.head && o.head.top), left: !!(o.head && o.head.left) }, label: str(o.label), cw: Array.isArray(o.cw) ? o.cw.map(Number) : null, whole: true };
   } catch (e) { T = null; }
   if (!T) { const h = cd.getData('text/html'); if (h && /<table/i.test(h)) T = fromHtml(h); }
@@ -2518,8 +2586,8 @@ function renderInk(nb) {
   renderParallels(nb);
   renderDrawn();
 }
-// The cards of the chosen parallel, or null when none is chosen.
-function parCards() { return parSel && layerOn('parallels') ? new Set(parPlaces().get(parSel) || []) : null; }
+// The cards of the chosen parallel, and the tables with a cell naming it, or null when none is chosen.
+function parCards() { return parSel && layerOn('parallels') ? new Set((parPlaces().get(parSel) || []).concat(cellsNaming(parSel).map(x => x.it.id))) : null; }
 // Each parallel with words on two or more cards in sight: a thread from each card to a knot marked with its letter,
 // at the middle of its cards. A knot, not a chain, so that no one place is drawn as answering another more than
 // the rest. Knots of parallels on the very same cards stand side by side, across the line between the first two.
@@ -2610,6 +2678,7 @@ function banner() {
   b.classList.remove('photo');
   if (live) { const p = live.entry || photoList().find(x => x.id === live.photo); b.classList.add('photo'); h = '<span>A photograph: <b>' + esc(p ? p.name : '') + '</b> · ' + esc(p ? fmtDate(p.date) : '') + '</span><button type="button" class="btn solid" data-b="back">Back to the board</button><button type="button" class="btn" data-b="restore">Bring this one back</button>'; }
   else if (lost) h = '<span>' + esc(roWhy()) + '</span><a class="btn" href="index.html#mt=' + esc(encodeURIComponent(TID)) + '">Back to My topics</a>';
+  else if (mode && mode.parTo) { const p = parById(mode.parTo); h = '<span>Click the cell of a table to put <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p ? p.label : '', 40)) + '</b> in.</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>'; }
   else if (mode) h = '<span>' + (mode.annTo ? 'Click the card these words are relevant to.' : 'Click the card, the cell of a table or the group the arrow from <b>' + esc(endName(mode.linkFrom, mode.fromRC)) + '</b> goes to.') + '</span><button type="button" class="btn" data-b="nolink">Stop (Esc)</button>';
   else if (hand && parById(hand)) { const p = parById(hand); h = '<span>Holding <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>: select its words in another passage, and press <b>+ (' + esc(parSign(p)) + ')</b> by them.</span><button type="button" class="btn" data-b="nohand">Done (Esc)</button>'; }
   else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(endName(offer.from.id, offer.from.rc)) + '</b> to <b>' + esc(endName(offer.to.id, offer.to.rc)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
@@ -2658,7 +2727,7 @@ function sideIntro() {
     '<li><b>Link to another topic</b>: under <b>Boards</b>, in the side, choose one of your topics and link to it as a whole, or to a card or group on its board; or press <i>Copy a link to it</i> on a card there, and paste it here (⌘V). Arrows join a link card like any card. The card linked to carries a mark, <b>↖</b>, and lists the links in its side.</li>' +
     '<li><b>Edit in place</b>: double-click any card, arrow or group name (or click a card that is already selected) and type. Enter keeps it, Esc leaves it as it was.</li>' +
     '<li><b>Boxes</b>: choose <i>Box</i> (<kbd>B</kbd>) and drag one out; name it, resize it by its corner, and draw arrows to it. Moving a box moves what is inside it.</li>' +
-    '<li><b>Tables</b>: press <i>Table</i>, choose its columns and rows on the grid, and whether its first row or its first column are headings. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next, and in the last cell adds a row. Drag a passage from <b>Passages</b> onto a cell to put it there. Each cell has a <b>→</b> of its own, beside it when the mouse is over it (or once it is tapped): drag it to a card, another cell, or a group, to draw an arrow from that cell alone. Paste a table from Word or a spreadsheet onto the board, and copy one back with <kbd>⌘C</kbd>.</li>' +
+    '<li><b>Tables</b>: press <i>Table</i>, choose its columns and rows on the grid, and whether its first row or its first column are headings. Double-click a cell to type in it; <kbd>Tab</kbd> goes on to the next, and in the last cell adds a row. Drag a passage from <b>Passages</b> onto a cell to put it there. Each cell has a <b>→</b> of its own, beside it when the mouse is over it (or once it is tapped): drag it to a card, another cell, or a group, to draw an arrow from that cell alone. Paste a table from Word or a spreadsheet onto the board, and copy one back with <kbd>⌘C</kbd>. A cell can hold <b>parallels</b> too: drag a parallel’s chip off a passage card onto the cell, and it brings its words in that passage; drag its knot, or its line under <i>Parallels</i>, and it comes as a whole. Click it in the cell to show the parallel; the parallel’s side lists the cells that name it, under <i>In tables</i>.</li>' +
     '<li><b>Groups</b> are frames around their cards. Grab any bare part of a frame to move the whole group; its corner grip <b>⤡</b> spreads its cards apart or pulls them together. Drop a card into a frame, or a passage from <b>Passages</b>, to put it in that group.</li>' +
     '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
     '<li><b>On an iPad</b>: a finger moves cards, groups and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>' +
@@ -2749,12 +2818,23 @@ function sideTable(it, m, arr) {
     s += '<span class="k">Row ' + (at.r + 1) + ', column ' + (at.c + 1) + ': the cell last clicked</span>' +
       (cl.t ? '<div class="stmt">' + esc(cl.t) + '</div>' : '<p class="empty">No words in it' + (ro() ? '' : ': double-click it on the board to type') + '.</p>') +
       cl.ps.map((p, j) => { const P = cellPassage(p); return '<div class="tcellp">' + (P.href ? '<button type="button" class="rel" data-read="' + esc(P.href) + '" title="Read it beside the board">' + esc(P.cite) + '</button>' : '<span class="rel">' + esc(P.cite) + '</span>') + (ro() ? '' : '<button type="button" class="linkish" data-tpout="' + j + '">take it out</button>') + '</div>' + (P.gone ? '<p class="ocr">No longer in My topics: the citation is the one kept when it was put here.</p>' : ''); }).join('');
+    if (cl.pars.length) s += '<span class="k">Its parallels</span>' + cl.pars.map((e, j) => {
+      const P = cellPar(e), gone = SHM ? 'not one of this board’s parallels' : 'deleted';
+      const head = P.p ? '<button type="button" class="rel prow" data-parsel="' + esc(e.par) + '" data-par="' + esc(e.par) + '" title="Show it on the board"><span class="psw">' + esc(P.sign) + '</span><b>' + esc(P.label) + '</b></button>' :
+        '<span class="rel prow"><span class="psw">' + esc(P.sign) + '</span><b>' + esc(P.label) + '</b>&nbsp;<span class="pg">' + gone + '</span></span>';
+      const what = !ro() && P.p ? '<select data-tparnarrow="' + j + '" aria-label="What its chip stands for"><option value="">the parallel as a whole</option>' +
+          placesOfPar(e.par).map(a => '<option value="' + esc(a.id) + '"' + (e.place === a.id ? ' selected' : '') + '>its words in ' + esc((a.place.cite || 'a passage') + ': “' + short(a.place.exact, 40) + '”') + '</option>').join('') +
+          (P.lostw ? '<option value="' + esc(e.place) + '" selected disabled>“' + esc(short(P.words, 40)) + '”: no longer in it</option>' : '') + '</select>' :
+        e.place ? '<span class="pg">its words in ' + esc(P.cite || 'a passage') + ': “' + esc(short(P.words, 60)) + '”' + (P.lostw ? ', no longer in it' : '') + '</span>' : '';
+      return '<div class="tcellpar" style="--pc:' + esc(P.color) + '">' + head + what + (ro() ? '' : '<button type="button" class="linkish" data-tparout="' + j + '">take it out</button>') + '</div>';
+    }).join('');
     const ca = cl.id ? arr.filter(a => (a.from === it.id && a.fromCell === cl.id) || (a.to === it.id && a.toCell === cl.id)) : [];
     if (ca.length) s += '<span class="k">Its arrows</span>' + ca.map(relBtn).join('');
     if (!ro()) {
       const under = underTopic().filter(x => !cl.ps.some(p => p.mt === x.id));
       s += (under.length ? '<select data-tcellp aria-label="Put a passage in this cell"><option value="">Put one of the topic’s passages in this cell…</option>' + under.map(x => '<option value="' + esc(x.id) + '">' + esc((x.cite || x.ref) + (x.work ? ' · ' + x.work : '')) + '</option>').join('') + '</select>' : '') +
-        '<p class="by">Or drag one onto the cell from <b>Passages</b>, in the side.</p>' +
+        '<p class="by">Or drag one onto the cell from <b>Passages</b>, in the side.</p>' + cellParOptions(cl) +
+        (parsAll().length ? '<p class="by">Or drag a parallel onto the cell: its chip on a passage card, which brings its words there, or its knot.</p>' : '') +
         '<div class="row" style="margin-top:0.5rem"><button type="button" class="btn" data-act="linkfromcell" title="Then click the card, the cell or the group it goes to">+ Arrow from this cell</button><span class="by" style="margin:0">or drag from its <b>→</b> on the board</span></div>' +
         '<div class="tacts"><span class="lbl">Row</span><span class="b"><button type="button" class="linkish" data-tact="rowabove">insert above</button><button type="button" class="linkish" data-tact="rowbelow">insert below</button>' + (rows > 1 ? '<button type="button" class="linkish" data-tact="rowdel">delete it</button>' : '') + '</span>' +
         '<span class="lbl">Column</span><span class="b"><button type="button" class="linkish" data-tact="colleft">insert left</button><button type="button" class="linkish" data-tact="colright">insert right</button>' + (cols > 1 ? '<button type="button" class="linkish" data-tact="coldel">delete it</button>' : '') + '</span></div>';
@@ -3140,13 +3220,20 @@ function sideParallel(p) {
   h += '<div class="row">' + (parSel === p.id ? '<button type="button" class="btn" data-act="parunshow">Show everything</button>' : nCards ? '<button type="button" class="btn solid" data-act="parshow">Show it on the board</button>' : '') +
     (w ? '<button type="button" class="btn" data-act="parhold">' + (hand === p.id ? 'Put it down' : 'Hold it, to add words') + '</button>' : '') +
     (nCards >= 2 ? '<button type="button" class="btn" data-act="parcompare">Compare its passages</button>' : '') + '</div>';
+  const inT = cellsNaming(p.id), canCell = w && !(SHM && p.only) && B.items.some(it => it.kind === 'table');
+  if (inT.length || canCell) h += '<span class="k">In tables</span>' + (inT.length ? inT.map(x => {
+      const P = cellPar(x.e), how = x.e.place ? (P.lostw ? ', words no longer in it' : ', its words in ' + (P.cite || 'a passage')) : ', as a whole';
+      return '<button type="button" class="rel" data-tcellgo="' + esc(x.it.id) + '" data-r="' + x.r + '" data-c="' + x.c + '" title="Go to this cell"><b>' + esc(x.it.label || 'A table') + '</b>: ' + esc(cellName(x.it, x.r, x.c) + how) + '</button>';
+    }).join('') : '<p class="empty">In no cell of a table on this board.</p>') +
+    (canCell ? '<div class="row"><button type="button" class="btn" data-act="parcell" title="Then click the cell">+ Put it in a cell</button><span class="by" style="margin:0">or drag its chip or knot onto the cell</span></div>' : '');
   if (w) h += '<div class="row"><button type="button" class="linkish" data-act="pardel">Delete the parallel</button></div>';
   return h + '<p class="by">A parallel is what you said: the page never adds words to one, nor joins two that share words. It belongs to the passages, so it shows on every one of your boards where they stand.</p>';
 }
 // The parallels on this board, and those on your other boards.
 function sideParallels() {
   const here = parsHere(), W = parPlaces(), else_ = parsAll().filter(p => !W.has(p.id));
-  const row = (p, att) => '<button type="button" class="rel prow" ' + att + '="' + esc(p.id) + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '"><span class="psw">' + esc(parSign(p)) + '</span><b>' + esc(p.label) + '</b>' + (p.type ? '<span class="pk">&nbsp;· ' + esc(p.type) + '</span>' : '') + '<span class="pmeta">' + plural(placesOfPar(p.id).length, 'place') + '</span></button>';
+  const dg = p => ro() || (SHM && p.only) ? '' : ' draggable="true" data-pardrag="' + esc(p.id) + '"';   // dragged onto a cell of a table, it goes in it
+  const row = (p, att) => '<button type="button" class="rel prow" ' + att + '="' + esc(p.id) + '" data-par="' + esc(p.id) + '"' + dg(p) + ' style="--pc:' + parColor(p) + '"><span class="psw">' + esc(parSign(p)) + '</span><b>' + esc(p.label) + '</b>' + (p.type ? '<span class="pk">&nbsp;· ' + esc(p.type) + '</span>' : '') + '<span class="pmeta">' + plural(placesOfPar(p.id).length, 'place') + '</span></button>';
   return '<h2>Parallels</h2><p class="sub">Words in several passages that answer one another. To make one, click a card, select some of its passage’s words, and choose <i>Parallel…</i></p>' +
     (here.length ? here.map(p => row(p, 'data-parsel')).join('') : '<p class="empty">None on this board yet.</p>') +
     (else_.length ? '<span class="k">On your other boards</span>' + else_.map(p => row(p, 'data-parview')).join('') : '') +
@@ -3534,6 +3621,74 @@ function takeFromCell(id, r, c, j) {
   withTable(id, g => { if (g[r] && g[r][c]) g[r][c].ps.splice(j, 1); });
   render();
 }
+// A parallel put in a cell: as a whole, or by its words in one passage (plid, one of its places).
+function putParInCell(id, r, c, pid, plid) {
+  if (ro()) { toast(roWhy()); return; }
+  const p = parById(pid), it = item(id), cl = it && it.kind === 'table' && grid(it)[r] && grid(it)[r][c]; if (!p || !cl) return;
+  if (SHM && p.only) { toast('(' + parSign(p) + ') ' + short(p.label, 40) + ' is yours alone, kept in My topics. A cell on this shared board would show its name to everyone, so only a parallel shared on the board can go in one.'); return; }
+  const a = plid ? annById(plid) : null, pl = a && a.kind === 'place' && a.re === pid && a.place ? a : null;
+  tcell = { id, r, c }; sel = { kind: 'card', ids: [id] }; form = null; showSide('details');
+  if (cl.pars.some(x => x.par === pid && (x.place || '') === (pl ? pl.id : ''))) { render(); toast('It is in that cell already.'); return; }
+  withTable(id, g => { g[r][c].pars.push(Object.assign({ par: pid, sign: parSign(p), label: p.label }, pl ? { place: pl.id, exact: pl.place.exact, cite: pl.place.cite || '' } : {})); });
+  render();
+  toast('(' + parSign(p) + ') ' + short(p.label, 40) + ' is in the cell' + (pl ? ', with its words in ' + (pl.place.cite || 'that passage') + '. In the side it can be made the parallel as a whole.' : '.') + ' Undo with ⌘Z.');
+}
+function takeParFromCell(id, r, c, j) {
+  if (ro()) return;
+  withTable(id, g => { if (g[r] && g[r][c]) g[r][c].pars.splice(j, 1); });
+  render();
+}
+// A parallel in a cell made to quote its words in one passage, or to stand for the parallel as a whole again (plid '').
+function narrowCellPar(id, r, c, j, plid) {
+  if (ro()) return;
+  const it = item(id), cl = it && grid(it)[r] && grid(it)[r][c], e = cl && cl.pars[j]; if (!e) return;
+  const a = plid ? annById(plid) : null, pl = a && a.kind === 'place' && a.re === e.par && a.place ? a : null;
+  if (plid && !pl) { render(); return; }
+  if (cl.pars.some((x, k) => k !== j && x.par === e.par && (x.place || '') === (pl ? pl.id : ''))) { render(); toast('It is in that cell already, ' + (pl ? 'with those words.' : 'as a whole.')); return; }
+  withTable(id, g => {
+    const x = g[r][c].pars[j], p = parById(x.par); delete x.place; delete x.exact; delete x.cite;
+    if (pl) Object.assign(x, { place: pl.id, exact: pl.place.exact, cite: pl.place.cite || '' });
+    if (p) Object.assign(x, { sign: parSign(p), label: p.label });
+  });
+  render();
+}
+// A parallel in a cell clicked: it is chosen, as from its chip on a card, and where the chip quotes words, the board
+// goes to their card, or the portal opens at them beside the board when no card here has them.
+function openCellPar(id, r, c, j) {
+  const it = item(id), cl = it && grid(it)[r] && grid(it)[r][c], e = cl && cl.pars[j]; if (!e) return;
+  const P = cellPar(e);
+  if (!P.p) { toast('(' + P.sign + ') ' + short(P.label, 40) + (SHM ? ' is not one of this board’s parallels' : ' has been deleted') + ': the cell keeps the letter and name it had.'); return; }
+  choosePar(e.par);
+  if (!P.pl || !P.H) return;
+  if (P.H.card && !P.H.lost && shown(item(P.H.card))) { showCard(P.H.card); const el = cardEl(P.H.card); if (el) { el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1500); } }
+  else { const h = portalHref(P.pl.place); if (h) { read(h); toast('Its words in ' + (P.pl.place.cite || 'that passage') + ' are on no card in sight here: the passage is open beside the board.'); } }
+}
+// The parallel being carried to a cell, beside the pointer; null hides it.
+function parGhost(d, e) {
+  let g = $('pardrag');
+  if (!d) { if (g) g.style.display = 'none'; return; }
+  if (!g) { g = document.createElement('div'); g.id = 'pardrag'; document.body.appendChild(g); }
+  const key = d.par + '|' + (d.place || '');
+  if (g.dataset.k !== key) {
+    const p = parById(d.par), a = d.place ? annById(d.place) : null; g.dataset.k = key;
+    g.style.setProperty('--pc', parColor(p));
+    g.innerHTML = '<b>(' + esc(parSign(p)) + ')</b> ' + (a && a.place ? '<i>“' + esc(short(a.place.exact, 50)) + '”</i> · ' + esc(a.place.cite || '') : esc(short(p ? p.label : '', 40)));
+  }
+  g.style.display = 'block'; g.style.left = (e.clientX + 14) + 'px'; g.style.top = (e.clientY + 12) + 'px';
+}
+// To one cell of a table: the table selected, at that cell, and in sight.
+function goCell(id, r, c) { tcell = { id, r, c }; goCard(id); }
+// The parallels that can be put in this cell, for the side: those with words in its passages first, then the rest
+// on this board, then the others. Not one already in it as a whole, nor, on a shared board, one only you can see.
+function cellParOptions(cl) {
+  const X = annIndex(), mine = new Set();
+  cl.ps.forEach(p => { const x = p.mt ? itemOf(p.mt) : null, k = (x && x.ref) || p.ref; if (k) (X.placesByAddr.get(k) || []).forEach(a => mine.add(a.re)); });
+  const ok = p => !(SHM && p.only) && !cl.pars.some(e => e.par === p.id && !e.place), W = parPlaces();
+  const here = parsAll().filter(p => ok(p) && W.has(p.id)), first = here.filter(p => mine.has(p.id)), rest = here.filter(p => !mine.has(p.id)), else_ = parsAll().filter(p => ok(p) && !W.has(p.id));
+  if (!here.length && !else_.length) return '';
+  const o = p => '<option value="' + esc(p.id) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 50)) + '</option>', grp = (l, ps) => ps.length ? '<optgroup label="' + esc(l) + '">' + ps.map(o).join('') + '</optgroup>' : '';
+  return '<select data-tcellpar aria-label="Link a parallel to this cell"><option value="">Link a parallel to this cell…</option>' + grp('With words in this cell’s passages', first) + grp('On this board', rest) + grp(SHM ? 'With no words on this board’s cards' : 'On your other boards', else_) + '</select>';
+}
 function openCellPassage(id, r, c, j) {
   const it = item(id), row = it && grid(it)[r], p = row && row[c] && row[c].ps[j]; if (!p) return;
   const P = cellPassage(p);
@@ -3731,16 +3886,18 @@ function addPlace(pid, pick) {
 }
 function removePlace(id) {
   const a = annById(id); if (!a || a.kind !== 'place' || ro()) return;
-  const p = parById(a.re), last = placesOfPar(a.re).length <= 1;
-  if (last && p && !confirm('These are the last words in (' + parSign(p) + ') ' + p.label + '. Take them out, and the parallel goes with them? Undo (⌘Z) brings it back.')) return;
+  const p = parById(a.re), last = placesOfPar(a.re).length <= 1, nc = cellsNaming(a.re).filter(x => last || x.e.place === id).length;
+  const cells = nc ? ' ' + (nc === 1 ? 'A cell of a table ' + (last ? 'names it: it keeps its letter and name' : 'quotes these words: it keeps them') : plural(nc, 'cell') + ' of tables ' + (last ? 'name it: they keep its letter and name' : 'quote these words: they keep them')) + ', marked as no longer there.' : '';
+  if (last && p && !confirm('These are the last words in (' + parSign(p) + ') ' + p.label + '. Take them out, and the parallel goes with them?' + cells + ' Undo (⌘Z) brings it back.')) return;
+  if (!last && nc && !confirm('Take these words out of (' + parSign(p) + ') ' + p.label + '?' + cells + ' Undo (⌘Z) brings them back.')) return;
   change(() => { B.annotations = (B.annotations || []).filter(x => x.id !== id && !(last && x.id === a.re)); if (p && !last) p.at = now(); });
   if (last) { if (hand === a.re) hand = null; if (parSel === a.re) parSel = null; if (sel.kind === 'par') sel = { kind: null, ids: [] }; }
   render();
 }
 function delPar(id) {
   const p = parById(id); if (!p || ro()) return;
-  const n = placesOfPar(id).length;
-  if (!confirm('Delete the parallel (' + parSign(p) + ') ' + p.label + (n ? ', and the ' + plural(n, 'place') + ' in it' : '') + '? The passages’ words stay as they are. Undo (⌘Z) brings it back.')) return;
+  const n = placesOfPar(id).length, nc = cellsNaming(id).length;
+  if (!confirm('Delete the parallel (' + parSign(p) + ') ' + p.label + (n ? ', and the ' + plural(n, 'place') + ' in it' : '') + '? The passages’ words stay as they are.' + (nc ? ' ' + (nc === 1 ? 'A cell of a table names it: it keeps' : plural(nc, 'cell') + ' of tables name it: they keep') + ' its letter and name, marked as deleted.' : '') + ' Undo (⌘Z) brings it back.')) return;
   change(() => { B.annotations = (B.annotations || []).filter(x => x.id !== id && !(x.kind === 'place' && x.re === id)); });
   if (hand === id) hand = null; if (parSel === id) parSel = null;
   select(null, []);
@@ -3770,7 +3927,11 @@ function setParField(id, k, v) {
   }
   if (k === 'color' && !PAR_COLORS.includes(v)) return;
   if ((p[k] || '') === v) return;
-  change(() => { if (v || k === 'label') p[k] = v; else delete p[k]; p.edited = now(); p.at = p.edited; });
+  change(() => {
+    if (v || k === 'label') p[k] = v; else delete p[k]; p.edited = now(); p.at = p.edited;
+    // the copy of its letter and name kept in this board's cells, for if it is ever gone, kept up with it
+    if (k === 'label' || k === 'sign') B.items.forEach(it => { if (it.kind !== 'table') return; const g = grid(it); let hit = false; g.forEach(row => row.forEach(cl => cl.pars.forEach(e => { if (e.par === id) { e[k] = p[k]; hit = true; } }))); if (hit) it.cells = g.map(row => row.map(packCell)); });
+  });
   if (k === 'sign') AX = null;   // the parallels are listed by their letters
   renderTools(); renderLayers(); renderBoard(); renderCompare();
   if (k === 'label') { const el = $('details').querySelector('[data-parname]'); if (el) el.textContent = v; }
@@ -3959,7 +4120,7 @@ $('zfit').addEventListener('click', fit);
 $('ztidy').addEventListener('click', tidy);
 
 /* ── Wiring: the board ────────────────────────────────────────────────────── */
-let drag = null;   // { what: 'pan' | 'cards' | 'model' | 'spread' | 'link' | 'marq' | 'ink' | 'erase' | 'pinch', pid, … }
+let drag = null;   // { what: 'pan' | 'cards' | 'model' | 'spread' | 'link' | 'par' | 'marq' | 'ink' | 'erase' | 'pinch', pid, … }
 const touches = new Map();   // the fingers on the board: pointerId → [x, y]
 let lastTap = null, lastType = 'mouse';
 function capture(e) { try { $('stage').setPointerCapture(e.pointerId); } catch (x) { /* a pointer already gone */ } }
@@ -4052,9 +4213,17 @@ $('stage').addEventListener('pointerdown', e => {
   const more = t.closest('[data-cardopen]');   // a card opened to its passage in full, or closed: neither selected nor moved
   if (more && !mode && !spaceDown && (tool === 'move' || tool === 'select')) { toggleCard(more.dataset.cardopen); return; }
   const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame'), th = t.closest('.annt');
-  const tcolEl = t.closest('.tcol'), cellEl = t.closest('.k-table [data-cell]'), chipEl = t.closest('.k-table .tp'), ckEl = t.closest('.k-table .ck');
+  const tcolEl = t.closest('.tcol'), cellEl = t.closest('.k-table [data-cell]'), chipEl = t.closest('.k-table .tp'), ckEl = t.closest('.k-table .ck'), tparEl = t.closest('.k-table .tpar');
   const pk = t.closest('.part'), pch = t.closest('.pchip');   // a parallel's knot, or its chip on a card: chosen, not moved
-  if ((pk || pch) && !mode && !spaceDown && tool !== 'pen' && tool !== 'erase') { choosePar(pk ? pk.dataset.par : pch.dataset.pchip); return; }
+  if ((pk || pch) && !mode && !spaceDown && tool !== 'pen' && tool !== 'erase') {
+    const pid = pk ? pk.dataset.par : pch.dataset.pchip;
+    if (ro()) { choosePar(pid); return; }
+    // let go where it was pressed, the parallel is chosen; dragged onto a cell of a table, it goes in the cell,
+    // from a card's chip with its words in that card's passage
+    const pc = pch && pch.closest('.card'), on = pc && item(pc.dataset.id), x = on && on.kind === 'passage' ? parsOn(on, 0).spans.find(z => z.p.id === pid) : null;
+    drag = { what: 'par', par: pid, place: x ? x.a.id : null, sx: e.clientX, sy: e.clientY, moved: false, pid: e.pointerId };
+    capture(e); return;
+  }
   const twc = t.closest('.twin');   // a passage's mark of its other cards: to the next of them
   if (twc && !mode && !spaceDown && tool !== 'pen' && tool !== 'erase') { nextTwin(twc.dataset.twin); return; }
   const bare = !knob && !card && !tab && !grip && !ar && !th && !pk;
@@ -4076,6 +4245,7 @@ $('stage').addEventListener('pointerdown', e => {
       render(); const ti = $('details').querySelector('.anncomp [data-ann-to]'); if (ti) ti.value = '';
       focusComposer(); return;
     }
+    if (mode && mode.parTo) { if (!cellAt) { toast('Click a cell of a table: a parallel goes in a cell, not on a card.'); return; } const pid = mode.parTo; mode = null; putParInCell(id, cellAt[0], cellAt[1], pid, null); return; }
     if (mode) { const A = { id: mode.linkFrom, rc: mode.fromRC || null }, Z = { id, rc: cellAt }; mode = null; markEnd(null); if (!sameEnd(A, Z)) makeArrow(A, Z); else render(); return; }
     if (e.shiftKey || tool === 'select') { const ids = sel.kind === 'card' ? sel.ids.slice() : []; const i = ids.indexOf(id); if (i >= 0) ids.splice(i, 1); else ids.push(id); select(ids.length ? 'card' : null, ids); return; }
     const wasSel = sel.kind === 'card' && sel.ids.length === 1 && sel.ids[0] === id;
@@ -4085,7 +4255,7 @@ $('stage').addEventListener('pointerdown', e => {
     // a box carries what lies inside it
     const ids = sel.ids.slice();
     sel.ids.forEach(x => { const b = item(x); if (!b || b.kind !== 'box') return; const r = rect(x); B.items.filter(shown).forEach(o => { if (o.id === x || ids.includes(o.id)) return; const q = rect(o.id); if (q && inside(r, q.x + q.w / 2, q.y + q.h / 2)) ids.push(o.id); }); });
-    drag = { what: 'cards', ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false, wasSel, clicked: id, cell: cellAt, chip: cellAt && chipEl ? +chipEl.dataset.tp : null };
+    drag = { what: 'cards', ids, sx: e.clientX, sy: e.clientY, start: ids.map(x => (posOf(x) || [0, 0]).slice()), moved: false, wasSel, clicked: id, cell: cellAt, chip: cellAt && chipEl ? +chipEl.dataset.tp : null, tpar: cellAt && tparEl ? +tparEl.dataset.tpar : null };
   }
   else if (mode && mode.linkFrom && (tab || fr)) { const A = { id: mode.linkFrom, rc: mode.fromRC || null }, Z = { id: (tab || fr).dataset.model, rc: null }; mode = null; markEnd(null); if (!sameEnd(A, Z)) makeArrow(A, Z); else render(); return; }   // to a group
   else if (grip && !ro()) { select('model', [grip.dataset.grip]); drag = spreadDrag(grip.dataset.grip, e); }
@@ -4101,7 +4271,7 @@ $('stage').addEventListener('pointerdown', e => {
 });
 $('stage').addEventListener('pointermove', e => {
   if (touches.has(e.pointerId)) touches.set(e.pointerId, [e.clientX, e.clientY]);
-  if (!drag) { if (mode && mode.linkFrom) { const t = endAt(e.clientX, e.clientY); markEnd(t && !sameEnd({ id: mode.linkFrom, rc: mode.fromRC || null }, t) ? t : null); } return; }
+  if (!drag) { if (mode && mode.linkFrom) { const t = endAt(e.clientX, e.clientY); markEnd(t && !sameEnd({ id: mode.linkFrom, rc: mode.fromRC || null }, t) ? t : null); } else if (mode && mode.parTo) dropCell(e); return; }
   if (drag.what === 'pinch') {
     if (touches.size < 2) return;
     const [p, q] = [...touches.values()], d = Math.hypot(p[0] - q[0], p[1] - q[1]) || 1, m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
@@ -4112,6 +4282,10 @@ $('stage').addEventListener('pointermove', e => {
   }
   if (e.pointerId !== drag.pid) return;
   const dx = (e.clientX - (drag.sx || 0)) / cam.k, dy = (e.clientY - (drag.sy || 0)) / cam.k;
+  if (drag.what === 'par') {   // a parallel carried to a cell
+    if (!drag.moved && Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) < 5) return;
+    drag.moved = true; parGhost(drag, e); dropCell(e); return;
+  }
   if (drag.what === 'pan') { cam.x = drag.cx + (e.clientX - drag.sx); cam.y = drag.cy + (e.clientY - drag.sy); if (Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 3) drag.moved = true; applyCam(); return; }
   if (drag.what === 'cards' || drag.what === 'model' || drag.what === 'spread') {
     if (ro()) return;
@@ -4194,6 +4368,13 @@ function pointerEnd(e, cancelled) {
   const d = drag; drag = null;
   $('stage').classList.remove('panning', 'linking', 'copying');
   if (d.what === 'pan') { if (!d.moved && !cancelled && !tapped(e) && !mode && !form && sel.kind) select(null, []); keepCam(); return; }
+  if (d.what === 'par') {
+    parGhost(null); const td = d.moved && !cancelled ? dropCell(e) : null; dropCell(null);
+    if (!d.moved) { if (!cancelled) choosePar(d.par); return; }
+    if (td) { const [r, c] = td.dataset.cell.split(',').map(Number); putParInCell(td.closest('.card').dataset.id, r, c, d.par, d.place); }
+    else if (!cancelled) toast('Let go over a cell of a table to put the parallel in it.');
+    return;
+  }
   if (d.what === 'boxsize' || d.what === 'tablesize' || d.what === 'colsize') { if (d.moved) { save(); render(); } return; }
   if (d.what === 'boxdraw') {
     const m = $('marq'), x = +m.getAttribute('x'), y = +m.getAttribute('y'), w = +m.getAttribute('width'), h = +m.getAttribute('height');
@@ -4208,6 +4389,7 @@ function pointerEnd(e, cancelled) {
     $('cards').querySelectorAll('.ftab').forEach(t => t.style.outline = '');
     if (!d.moved) {
       if (!cancelled && d.what === 'cards' && d.cell && d.chip != null) { openCellPassage(d.clicked, d.cell[0], d.cell[1], d.chip); return; }   // a passage in a cell opens beside the board
+      if (!cancelled && d.what === 'cards' && d.cell && d.tpar != null) { openCellPar(d.clicked, d.cell[0], d.cell[1], d.tpar); return; }   // a parallel in a cell is chosen
       if (!cancelled && !tapped(e) && d.what === 'cards' && d.wasSel) { if (d.cell) editCell(d.clicked, d.cell[0], d.cell[1]); else editInPlace(d.clicked); }
       return;
     }
@@ -4260,7 +4442,7 @@ $('stage').addEventListener('pointercancel', e => afterPointer(e, true));
 // Double-click (or double tap): a card opens to be edited; the board offers something to put there.
 function doubleAt(cx, cy) {
   const under = document.elementFromPoint(cx, cy);
-  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob, .ck, .tcol, .tp, .pchip, .part') || under.isContentEditable || under.closest('.pill-edit')) return;
+  if (ro() || !under || under.closest('.float, .fgrip, .bgrip, .knob, .ck, .tcol, .tp, .tpar, .pchip, .part') || under.isContentEditable || under.closest('.pill-edit')) return;
   const card = under.closest('.card');
   const cl = card && card.classList.contains('k-table') && under.closest('[data-cell]');
   if (cl) { const [r, c] = cl.dataset.cell.split(',').map(Number); editCell(card.dataset.id, r, c); return; }
@@ -4830,9 +5012,21 @@ function dropGroup(e) {
   return g;
 }
 $('passages').addEventListener('dragend', e => { const p = e.target.closest && e.target.closest('.pp, [data-ppon]'); if (p) p.classList.remove('dragging'); $('stage').classList.remove('dropping'); dropCell(null); dropGroup(null); });
-$('stage').addEventListener('dragover', e => { const ty = [...(e.dataTransfer.types || [])]; if (!ty.includes(PP_TYPE) && !ty.includes(BL_TYPE)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); const td = dropCell(ty.includes(PP_TYPE) ? e : null); dropGroup(ty.includes(PP_TYPE) && !td ? e : null); });
+// A parallel dragged from the Parallels list in the side: let go over a cell of a table, it goes in the cell.
+const PAR_TYPE = 'application/x-kantlab-parallel';
+$('details').addEventListener('dragstart', e => {
+  const r = e.target.closest && e.target.closest('[data-pardrag]'); if (!r || ro()) return;
+  e.dataTransfer.setData(PAR_TYPE, r.dataset.pardrag); e.dataTransfer.setData('text/plain', r.textContent); e.dataTransfer.effectAllowed = 'copy';
+});
+$('details').addEventListener('dragend', e => { if (e.target.closest && e.target.closest('[data-pardrag]')) { $('stage').classList.remove('dropping'); dropCell(null); } });
+$('stage').addEventListener('dragover', e => {
+  const ty = [...(e.dataTransfer.types || [])], pp = ty.includes(PP_TYPE), pr = ty.includes(PAR_TYPE); if (!pp && !pr && !ty.includes(BL_TYPE)) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; $('stage').classList.add('dropping'); const td = dropCell(pp || pr ? e : null); dropGroup(pp && !td ? e : null);
+});
 $('stage').addEventListener('dragleave', e => { if (e.target === $('stage')) { $('stage').classList.remove('dropping'); dropCell(null); dropGroup(null); } });
 $('stage').addEventListener('drop', e => {
+  const pid = e.dataTransfer.getData(PAR_TYPE);
+  if (pid) { const td = dropCell(e); $('stage').classList.remove('dropping'); dropCell(null); e.preventDefault(); if (td) { const [r, c] = td.dataset.cell.split(',').map(Number); putParInCell(td.closest('.card').dataset.id, r, c, pid, null); } else toast('Let go over a cell of a table to put the parallel in it.'); return; }
   const mt = e.dataTransfer.getData(PP_TYPE), bl = e.dataTransfer.getData(BL_TYPE), td = mt ? dropCell(e) : null, g = mt && !td ? dropGroup(e) : null; $('stage').classList.remove('dropping'); dropCell(null); dropGroup(null); if (!mt && !bl) return;
   e.preventDefault();
   if (td) { const [r, c] = td.dataset.cell.split(',').map(Number); putInCell(td.closest('.card').dataset.id, r, c, mt); return; }
@@ -4874,6 +5068,8 @@ $('details').addEventListener('click', e => {
   const gb = e.target.closest('[data-tgrid] button'); if (gb) { if (e.detail === 0) pickSize(gb); return; }   // the keyboard's click; a pointer's is taken on pointerup
   const tac = e.target.closest('[data-tact]'); if (tac) { tableAct(tac.dataset.tact); return; }
   const tpo = e.target.closest('[data-tpout]'); if (tpo && tcell) { takeFromCell(tcell.id, tcell.r, tcell.c, +tpo.dataset.tpout); return; }
+  const tpx = e.target.closest('[data-tparout]'); if (tpx && tcell) { takeParFromCell(tcell.id, tcell.r, tcell.c, +tpx.dataset.tparout); return; }
+  const tcg = e.target.closest('[data-tcellgo]'); if (tcg) { goCell(tcg.dataset.tcellgo, +tcg.dataset.r, +tcg.dataset.c); return; }
   const sxb = e.target.closest('[data-sx]'); if (sxb && form && form.kind === 'stretch') { moveEdge(sxb.dataset.sx); return; }
   const smk = e.target.closest('.sm[data-sr]'); if (smk && form && form.kind === 'stretch' && getSelection().isCollapsed) { atMark(smk.dataset.sr, +smk.dataset.so); return; }
   const b = e.target.closest('[data-act]'); if (!b) return;
@@ -4903,6 +5099,7 @@ $('details').addEventListener('click', e => {
   if (act === 'parhold') { holdPar(id); return; }
   if (act === 'parcompare') { parCompare(id); return; }
   if (act === 'pardel') { delPar(id); return; }
+  if (act === 'parcell') { if (parById(id)) { mode = { parTo: id }; render(); } return; }
   if (act === 'compare') { openCompare(sel.ids); return; }
   if (act === 'cancel') { form = null; renderSide(); return; }
   if (act === 'followlink') { const it = item(id); if (it) followLink(it); return; }
@@ -4958,6 +5155,8 @@ $('details').addEventListener('change', e => {
   if (e.target.matches('[data-tshape]') && sel.kind === 'card') { const it = item(sel.ids[0]), d = it && dims(it); if (d) setShape(it.id, e.target.dataset.tshape === 'rows' ? e.target.value : d.rows, e.target.dataset.tshape === 'cols' ? e.target.value : d.cols); return; }
   if (e.target.matches('[data-thead]') && sel.kind === 'card') { const id = sel.ids[0], k = e.target.dataset.thead, on = e.target.checked; change(() => { const it = item(id); if (it) it.head = Object.assign(headOf(it), { [k]: on }); }); render(); return; }
   if (e.target.matches('[data-tcellp]') && tcell) { const mt = e.target.value; if (mt) putInCell(tcell.id, tcell.r, tcell.c, mt); return; }
+  if (e.target.matches('[data-tcellpar]') && tcell) { const pid = e.target.value; if (pid) putParInCell(tcell.id, tcell.r, tcell.c, pid, null); return; }
+  if (e.target.matches('[data-tparnarrow]') && tcell) { narrowCellPar(tcell.id, tcell.r, tcell.c, +e.target.dataset.tparnarrow, e.target.value); return; }
   if (e.target.matches('[data-type]')) { const o = $('details').querySelector('[data-other]'); o.style.display = e.target.value === '__other' ? '' : 'none'; if (e.target.value === '__other') o.focus(); }
 });
 document.addEventListener('keydown', e => {
@@ -5042,7 +5241,7 @@ function addFrom(into, from) {
   return into;
 }
 $('export').addEventListener('click', () => {
-  const ids = new Set(annHere().map(a => a.id)), pids = new Set(parsHere().map(p => p.id));
+  const ids = new Set(annHere().map(a => a.id)), pids = new Set(parsHere().map(p => p.id).concat([...parsInTables()]));
   const data = { kind: 'kantlab-topic-board', v: 1, topic: topic ? topic.name : '', saved: new Date().toISOString(), board: kept(),
     annotations: (B.annotations || []).filter(a => a && (ids.has(a.id) || (a.kind === 'reply' && ids.has(a.re)) || (a.kind === 'parallel' && pids.has(a.id)) || (a.kind === 'place' && pids.has(a.re)))) };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
