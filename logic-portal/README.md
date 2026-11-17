@@ -291,6 +291,21 @@ reader's topic rather than the seminar's one board.
   copied from Word, a spreadsheet or a web page and pasted on the board becomes a table, with
   headings only where it marked them; pasted into a cell being typed in, it fills the cells from
   there on.
+- **Parallels in a cell.** A cell can hold parallels as it holds passages, each a chip in the
+  parallel's colour with its letter and name, *(a) nihil negativum*, or with its words in one
+  passage and their citation, *(a) “(nihil negativum)” · KrV A 291*. Drag a parallel's chip off a
+  passage card onto the cell, and it brings its words in that passage; drag its knot, or its line
+  under **Parallels**, and it comes as a whole. In the side, under the cell last clicked, **Link a
+  parallel to this cell…** does the same, listing first the parallels with words in the cell's
+  own passages, and beside each parallel in the cell a list chooses whether its chip quotes its
+  words in one passage or stands for it as a whole. **+ Put it in a cell**, in a parallel's side,
+  waits for the cell to be clicked. Click a chip in a cell and the parallel is shown on the board,
+  as from its chip on a card; one that quotes words goes to their card as well. While a parallel
+  is shown, the cells that name it are outlined in its colour, and its side lists them under
+  **In tables**. The chip reads the parallel afresh each time, so renaming or re-lettering it
+  changes every cell; a parallel deleted stays in its cells as the letter and name it had, marked
+  so. On a shared board, a parallel only you can see cannot go in a cell, since the cell is
+  everyone's.
 - **Arrows from and to one cell.** Each cell of a table has a **→** of its own, beside it when
   the mouse is over it, or once it is tapped: drag it to a card (a passage, a note, a question,
   a link to another topic), to another cell of any table, or to a group's frame or name, and
