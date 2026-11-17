@@ -348,6 +348,13 @@ reader's topic rather than the seminar's one board.
   table: click it while you write, and a dotted thread joins the words to it. The cell keeps
   the link as rows and columns are added or deleted round it. A card's side, or a cell's,
   lists under *Relevant to it* every annotation that names it.
+  *Relevant to…* can also name **another of your topics**: start typing its name and choose it
+  from those offered, or pick it from the list of them all. The topic needs no board of its own.
+  The annotation shows the topic's name as it is now, and opens its board, making one if it has
+  none yet. The topic lists, in turn, the annotations relevant to it, each with its passage, the
+  words it is on and the board it was made on: in My topics, beneath the topic's note, and in the
+  side of its board when nothing is selected. One that names a card on its board by a link pasted
+  from there shows in that card's side too.
 - **Parallels: words that answer one another.** When several passages say the same thing, select
   the words in one of them and choose **Parallel…** in the bar by them: name it (the words are
   offered), and, if you like, say what kind of correspondence it is (*same words*, *same term*,

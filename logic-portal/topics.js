@@ -669,6 +669,14 @@ css.textContent = `
   #mtpage .mtlinked { margin: 0.15rem 0 0.45rem; font-size: 0.88rem; color: var(--faded); }
   #mtpage .mtlinked button { background: none; border: none; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
   #mtpage .mtlinked span { font-style: italic; }
+  /* the annotations made on boards that are relevant to this topic; the blue is the boards' own for "Relevant to…" */
+  #mtpage .mtpointed { margin: 0 0 0.6rem; font-size: 0.9rem; }
+  #mtpage .mtpointed > b { display: block; font-family: 'Cinzel', serif; font-size: 0.66rem; font-weight: 400; letter-spacing: 0.1em; color: var(--accent); margin: 0.2rem 0 0.25rem; }
+  #mtpage .mtpt { border-left: 3px solid #2f5d8a; background: #fff; border-radius: 0 5px 5px 0; padding: 0.25rem 0.55rem; margin: 0.25rem 0; }
+  #mtpage .mtpt .mtpton { color: var(--faded); font-style: italic; }
+  #mtpage .mtpt .mtptx { white-space: pre-wrap; margin-top: 0.1rem; }
+  #mtpage .mtpt .mtptm { font-size: 0.8rem; color: var(--faded); margin-top: 0.1rem; }
+  #mtpage .mtpointed button { background: none; border: none; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; cursor: pointer; }
   #mtpage .mthead h2, #mtpage .mthead input { flex: 1; margin: 0; font-family: 'EB Garamond', serif; font-size: 1.45rem; font-weight: 600; color: var(--accent); background: transparent; border: none; border-bottom: 1px dashed transparent; padding: 0; min-width: 0; }
   #mtpage .mthead input:hover, #mtpage .mthead input:focus { border-bottom-color: var(--accent-light); outline: none; }
   #mtpage textarea { display: block; width: 100%; font: inherit; background: var(--card); border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.35rem 0.55rem; resize: vertical; min-height: 2.3rem; color: var(--ink); }
@@ -1245,7 +1253,7 @@ function renderMain() {
     ? '<div class="mthead"><input type="text" class="mtname" value="' + esc(t.name) + '" maxlength="120" title="Rename this topic" spellcheck="false">' +
       '<button type="button" class="btn mtbrd" data-mta="board" title="' + (DB.boards[t.id] ? 'This topic’s board: its passages as cards, to lay out, join with arrows and annotate' : 'Make a board for this topic: its passages as cards, to lay out, join with arrows and annotate') + '">▦ ' + (isShared(t.id) ? 'Board · shared' : DB.boards[t.id] ? 'Board' : 'Make a board') + '</button>' +
       '<button type="button" class="mtlink" data-mta="deltopic">Delete this topic</button></div>' + linkedWith(t.id) +
-      '<textarea class="mttnote" rows="2" placeholder="What this topic is for: a question, a hunch, what to look for next. Only you see it.">' + esc(t.note) + '</textarea>'
+      '<textarea class="mttnote" rows="2" placeholder="What this topic is for: a question, a hunch, what to look for next. Only you see it.">' + esc(t.note) + '</textarea>' + pointedHere(t.id)
     : '<div class="mthead"><h2>' + (view === 'unsorted' ? 'Unsorted' : 'All passages') + '</h2></div>' +
       (view === 'unsorted' ? '<p class="mtempty">Passages kept under no topic. Give each one a topic with <b>+ topic</b>.</p>' : '');
   const tools = '<div class="mttools"><span>' + plural(list.length, 'passage') + '</span>' +
@@ -1293,6 +1301,40 @@ function linkedWith(id) {
   if (!n.size) return '';
   return '<p class="mtlinked">Linked with ' + [...n].sort((a, b) => topicOf(a[0]).name.localeCompare(topicOf(b[0]).name, 'de')).map(([k, c]) =>
     '<button type="button" data-mta="view" data-mtt="' + esc(k) + '">' + esc(topicOf(k).name) + '</button>' + (c > 1 ? ' (' + c + ')' : '')).join(', ') + ' <span>· by links on the boards</span></p>';
+}
+/* The annotations on the boards (topic-board.html) that are relevant to a topic: to the topic as a whole, or to a card
+   or group on its board. They are listed here as well as on its board, since a topic needs no board to be pointed at.
+   Worked out afresh each time and never saved: an annotation belongs to the passage it was made on. The newest
+   PT_FEW show at first; the rest wait behind a button, open for the topics in ptAll. */
+const PT_FEW = 3;
+const ptAll = new Set();
+function pointedHere(id) {
+  const real = k => { let x = k, n = 0; while (DB.alias[x] && n++ < 50) x = DB.alias[x]; return x; };
+  const xs = DB.annotations.filter(a => a && a.on && typeof a.on === 'object' && a.to && a.to.board && real(a.to.board.t || '') === id)
+    .sort((x, y) => String(y.date).localeCompare(String(x.date)));
+  if (!xs.length) return '';
+  const shown = ptAll.has(id) ? xs : xs.slice(0, PT_FEW);
+  return '<div class="mtpointed"><b>' + (xs.length === 1 ? 'An annotation relevant to this topic' : xs.length + ' annotations relevant to this topic') + '</b>' + shown.map(a => {
+    const on = a.on, w = annBoard(a, real);
+    return '<div class="mtpt"><div>' + (on.ref ? '<button type="button" data-mta="goref" data-mtr="' + esc(on.ref) + '" title="Read it where it stands">' + esc(on.cite || on.ref) + '</button>' : '<b>' + esc(on.cite || 'A passage') + '</b>') + ' ' +
+        (on.exact ? '<i>“' + esc(clip(flat(on.exact), 110)) + '”</i>' : '<span class="mtpton">the passage as a whole</span>') + '</div>' +
+      (a.to.board.item ? '<div class="mtpton">to a card on its board</div>' : '') +
+      (a.text ? '<div class="mtptx">' + esc(a.text) + '</div>' : '') +
+      '<div class="mtptm">' + esc(dayWords(a.date)) + ' · ' + (w ? '<button type="button" data-mta="boardat" data-mtt="' + esc(w.t) + '" data-mtc="' + esc(w.card) + '">on the board of “' + esc(topicOf(w.t).name) + '”</button>' : 'on none of your boards now') + '</div></div>';
+  }).join('') + (xs.length > PT_FEW ? '<button type="button" data-mta="ptall" data-mtt="' + esc(id) + '">' + (ptAll.has(id) ? '▴ only the newest ' + PT_FEW : '▾ all ' + xs.length) + '</button>' : '') + '</div>';
+}
+// Where an annotation's passage stands: the card it was made on, on whichever board, if that card is still there;
+// else a card of the same passage on any board. null when none of the reader's boards has it.
+function annBoard(a, real) {
+  const on = a.on, k = on.ref || '';
+  let alt = null;
+  for (const bk of Object.keys(DB.boards)) {
+    const t = real(bk), b = DB.boards[bk];
+    if (!topicOf(t) || !b || !Array.isArray(b.items)) continue;
+    if (on.card && b.items.some(c => c && c.id === on.card)) return { t, card: on.card };
+    if (!alt && k) { const c = b.items.find(c => c && c.kind === 'passage' && ((itemOf(c.mt) || {}).ref || c.ref) === k); if (c) alt = { t, card: c.id }; }
+  }
+  return alt;
 }
 function grow(t) { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, 320) + 'px'; }
 
@@ -1366,6 +1408,15 @@ page.addEventListener('click', e => {
     return;
   }
   if (a === 'openshared') { openShared(b.dataset.mtr); return; }
+  if (a === 'goref') { goRead({ ref: b.dataset.mtr }); return; }
+  if (a === 'ptall') { const id = b.dataset.mtt; ptAll.has(id) ? ptAll.delete(id) : ptAll.add(id); renderMain(); return; }
+  if (a === 'boardat') {
+    if (!topicOf(b.dataset.mtt)) return;
+    clearTimeout(noteT); save();
+    const url = new URL('topic-board.html#t=' + encodeURIComponent(b.dataset.mtt) + '&at=' + encodeURIComponent(b.dataset.mtc), location.href).href;
+    try { (window.top || window).location.href = url; } catch (x) { location.href = url; }
+    return;
+  }
   if (a === 'board') {
     const t = topicOf(view);
     if (!t) return;

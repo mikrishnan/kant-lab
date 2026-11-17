@@ -506,6 +506,14 @@
   #details .anncomp .aon { margin: 0 0 0.2rem; font-size: 0.86rem; color: var(--faded); }
   #details .anncomp textarea { min-height: 3.2rem; margin-top: 0.25rem; }
   #details .anncomp label.f { margin-top: 0.2rem; }
+  /* what an annotation is relevant to: one of the reader's topics, offered as it is typed, or chosen from them all */
+  #details .anncomp .annsug { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem; margin-top: 0.25rem; font-size: 0.82rem; color: var(--faded); }
+  #details .anncomp .annsug:empty { display: none; }
+  #details .anncomp .annsug button { border: 1px solid var(--accent-light); color: var(--accent); background: #fff; border-radius: 999px; padding: 0 0.55rem; cursor: pointer; font-size: 0.82rem; }
+  #details .anncomp .annsug button:hover, #details .anncomp .annsug button:focus-visible { background: var(--accent); color: #fff; }
+  #details .anncomp select[data-anntopics] { display: block; width: auto; max-width: 100%; margin-top: 0.25rem; font-size: 0.82rem; padding: 0 0.2rem; }
+  #details .tk { font-family: 'Cinzel', serif; font-size: 0.62rem; letter-spacing: 0.1em; color: var(--accent); }
+  #details .nb { font-size: 0.78rem; font-style: italic; }
   #details .annf { display: flex; gap: 0.4rem; flex-wrap: wrap; margin: 0.3rem 0 0.5rem; }
   #details .annf select { width: auto; flex: 1; min-width: 6rem; }
   /* parallels: words in several passages that answer one another. Each parallel's colour is --pc, one of PAR_COLORS;
@@ -860,13 +868,20 @@ function endName(id, cell) {
   return nameOf(id) + ', ' + (rc ? cellName(it, rc[0], rc[1]) : 'a cell no longer in it');
 }
 // What an annotation's "Relevant to" names, as words: a word, a card or one cell of a table as they stand now,
-// or else the name kept with it, for a card no longer on this board.
+// another of your topics, or a card on its board, by their names now; or else the name kept with it, for a card no
+// longer on this board.
 // The cell's name as kept with the link, without its table's, which is named beside it.
 function keptCell(to) { const n = nameOf(to.card) + ', ', c = String(to.cite || ''); return c.startsWith(n) ? c.slice(n.length) : c; }
 function toText(to) {
   if (!to) return '';
   if (to.word) return to.word;
   if (to.card && item(to.card)) return endName(to.card, to.cell || to.rc || null);
+  if (to.board) {   // another of your topics, or a card on its board: by its name as it is now, where it can be
+    const t = DB ? realTopic(DB, to.board.t || '') : '', n = t ? topicName(t) : '';
+    if (!to.board.item) return n || to.cite || 'another topic';
+    const L = n ? linkOf({ to: to.board }) : null;
+    return L && L.state === 'ok' ? L.topic + ': ' + L.title : to.cite || (n ? 'a card on the board of “' + n + '”' : 'a card on another board');
+  }
   return to.cite || '';
 }
 // The annotations "Relevant to" a card, newest first: with cell, to that cell of it; without, to the card as a
@@ -2756,12 +2771,12 @@ const mchip = m => m ? '<span class="mchip" style="background:' + esc(m.color) +
 function sideIntro() {
   const n = B.items.filter(i => i.kind === 'passage').length, gh = (() => { try { return !!localStorage.getItem(TOPICS_GH); } catch (e) { return false; } })();
   return '<div class="intro"><h2>' + esc(topic ? topic.name : 'A topic’s board') + '</h2><p class="sub">The board of a topic in My topics</p>' +
-    boardsAround() + (topic ? '<span class="k">The topic, in your words</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
+    boardsAround() + pointedHereHtml() + (topic ? '<span class="k">The topic, in your words</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
     '<p>The topic’s passages wait under <b>Passages</b>, in the side. Put them on the board one at a time, with <b>+ On the board</b> or by dragging one onto it, or into a group’s frame. A passage you put under the topic later, anywhere in the portal, joins them there; one taken off the board goes back. Click a card to read its passage in full, here or in the portal.</p>' +
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, to a group’s frame, or to one cell of a table, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
-    '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. <i>Relevant to…</i> can name a card on the board, or one cell of a table: click it. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
+    '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. <i>Relevant to…</i> can name a card on the board, or one cell of a table: click it. It can name another of your topics too: start typing its name and choose it from those offered, or from the list beneath; a topic needs no board for it. That topic lists the annotations relevant to it, in My topics and here in the side of its board. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
     '<li><b>Parallels</b>: when words in several passages answer one another, select them in one passage and choose <i>Parallel…</i>. The parallel is then in hand: select its words in the next passage and press <b>+ (a)</b> in the bar. Its words are tinted in its colour, with its letter, on every card; a thread runs from each of its cards to its knot; pointing at its words lights them everywhere; click a chip or a knot to show only it. Beneath a passage here, <i>Parallels</i> lists the words elsewhere that answer to its own. Select two to four cards and <i>Compare them side by side</i>.</li>' +
     '<li><b>Your note</b> on a passage, here in the side, is the note it has in My topics: write it in either.</li>' +
     '<li><b>Link to another topic</b>: under <b>Boards</b>, in the side, choose one of your topics and link to it as a whole, or to a card or group on its board; or press <i>Copy a link to it</i> on a card there, and paste it here (⌘V). Arrows join a link card like any card. The card linked to carries a mark, <b>↖</b>, and lists the links in its side.</li>' +
@@ -2834,7 +2849,7 @@ function sidePassage(it, m, arr) {
   } else if (x) h += '<span class="k">Your note on it</span><textarea class="mtnote" data-mtnote="' + esc(x.id) + '" placeholder="The same note as in My topics: write it here or there"' + (lost ? ' readonly' : '') + '>' + esc(x.note || '') + '</textarea>';
   const ks = (LX && it.mt && LX.also.get(it.mt)) || [];
   if (ks.length) h += '<div class="alsobox"><b>Also on the boards of</b> ' + ks.map(x => '<button type="button" class="linkish" data-goboard="' + esc(x.t + '|' + x.id) + '">' + esc(topicName(x.t)) + '</button>').join(', ') + '<p class="by">The page found the same passage there: it is not a link you made.</p></div>';
-  return h + relevantHtml(it.id) + linkedFromHtml(it.id) + cardButtons(it, arr);
+  return h + relevantHtml(it.id) + linkedFromHtml(it.id) + pointedAtHtml(it.id) + cardButtons(it, arr);
 }
 function sideCard(it) {
   const m = model(it.model), arr = B.arrows.filter(a => a.from === it.id || a.to === it.id);
@@ -2844,7 +2859,7 @@ function sideCard(it) {
   const title = it.kind === 'box' ? 'A box' + (it.label ? ': ' + it.label : '') : it.kind === 'problem' ? 'A question' : 'A note';
   let h = '<h2>' + esc(title) + '</h2><p class="sub">' + mchip(m) + esc(m ? m.name || '' : '') + '</p>';
   if (it.text) h += '<span class="k">Written on the board</span><div class="stmt' + (it.kind === 'problem' ? ' problem' : '') + '">' + esc(it.text) + '</div>';
-  return h + relevantHtml(it.id) + linkedFromHtml(it.id) + cardButtons(it, arr);
+  return h + relevantHtml(it.id) + linkedFromHtml(it.id) + pointedAtHtml(it.id) + cardButtons(it, arr);
 }
 function sideTable(it, m, arr) {
   const { rows, cols } = dims(it), h = headOf(it), g = grid(it), at = tcell && tcell.id === it.id && tcell.r < rows && tcell.c < cols ? tcell : null;
@@ -2940,7 +2955,7 @@ function sideArrow(a) {
 function sideModel(m) {
   const arr = B.arrows.filter(a => a.from === m.id || a.to === m.id);
   return sideModel0(m) + '<span class="k">Arrows</span>' + (arr.length ? arr.map(relBtn).join('') : '<p class="empty">None yet.</p>') +
-    '<div class="row">' + (ro() ? '' : '<button type="button" class="btn" data-act="linkfrom">+ Arrow from this group</button>') + '<button type="button" class="linkish" data-act="copylink">Copy a link to this group</button></div>' + linkedFromHtml(m.id);
+    '<div class="row">' + (ro() ? '' : '<button type="button" class="btn" data-act="linkfrom">+ Arrow from this group</button>') + '<button type="button" class="linkish" data-act="copylink">Copy a link to this group</button></div>' + linkedFromHtml(m.id) + pointedAtHtml(m.id);
 }
 function sideModel0(m) {
   const its = B.items.filter(i => i.model === m.id);
@@ -2955,6 +2970,44 @@ function linkedFromHtml(id) {
     ' <button type="button" class="linkish" data-goboard="' + esc(x.t + '|' + x.card.id) + '">open there</button>' + (ro() ? '' : ' <button type="button" class="linkish" data-linkback="' + esc(x.t + '|') + '">link back to the topic</button>') + '</div>' +
     x.arrows.map(a => '<div class="lrow">' + (a.out ? 'this <b>' + esc(a.type) + '</b> → ' + esc(a.title) : esc(a.title) + ' <b>' + esc(a.type) + '</b> → this') +
       (ro() || !a.other ? '' : ' <button type="button" class="linkish" data-linkback="' + esc(x.t + '|' + a.other) + '">link back to it</button>') + '</div>').join('') + '</div>').join('');
+}
+/* The annotations that are relevant to this topic: made on a passage, on any of the reader's boards, and pointing
+   here, to the topic as a whole ('') or to one card or group on its board (its id); every one when item is not given.
+   Worked out afresh each time and never saved: an annotation stays with its passage, where it was made. */
+function annsPointingHere(item) {
+  const list = (SHM ? DB && DB.annotations : B.annotations) || [];
+  return list.filter(a => a && a.on && a.to && a.to.board && (DB ? realTopic(DB, a.to.board.t || '') : a.to.board.t) === TID && (item === undefined || (a.to.board.item || '') === item))
+    .sort((x, y) => String(y.date).localeCompare(String(x.date)));
+}
+// Where an annotation's passage stands: the card it was made on, on whichever board, if it is still there;
+// else a card of the same passage, on this board first. null when no board of the reader's has it.
+function annWhere(a) {
+  const on = a.on || {}, k = on.ref || on.hash || '', boards = [[TID, B]];
+  if (DB && isObj(DB.boards)) Object.keys(DB.boards).forEach(bk => { const t = realTopic(DB, bk); if (t !== TID && DB.topics.some(x => x && x.id === t)) boards.push([t, DB.boards[bk]]); });
+  const same = c => c && c.kind === 'passage' && k && ((c.quotes || []).some(q => qAddr(q) === k) || ((storeItem(c.mt) || {}).ref || c.ref) === k);
+  for (const [t, b] of boards) if (b && Array.isArray(b.items) && b.items.some(c => c && c.id === on.card)) return { t, card: on.card, here: t === TID };
+  for (const [t, b] of boards) { const c = b && Array.isArray(b.items) ? b.items.find(same) : null; if (c) return { t, card: c.id, here: t === TID }; }
+  return null;
+}
+// One of them, in the side: the passage and the words it is on, what it says, and the ways to them.
+function pointedHtml(a, target) {
+  const on = a.on, w = annWhere(a), href = portalHref(on), id = a.to.board.item;
+  const at = !target || !id ? '' : item(id) ? '<div class="to">→ <button type="button" class="linkish" data-card="' + esc(id) + '">' + esc(nameOf(id)) + '</button></div>' : model(id) ? '<div class="to">→ the group ' + esc(model(id).title || '') + '</div>' : '<div class="to">→ <i>a card no longer on this board</i></div>';
+  return '<div class="ann-e ak-' + esc(a.kind) + '"><div class="ah"><span class="kl">' + esc(on.cite || 'A passage') + '</span>' + (on.exact ? '<span class="ex">“' + esc(short(on.exact, 110)) + '”</span>' : '<span class="on">the passage as a whole</span>') + '</div>' + at +
+    (a.text ? '<div class="at">' + esc(a.text) + '</div>' : '') +
+    '<div class="am"><span>' + whoHtml(a) + '</span>' +
+      (!w ? '<span>on none of your boards now</span>' : w.here ? '<button type="button" data-card="' + esc(w.card) + '">its card on this board</button>' : '<button type="button" data-goboard="' + esc(w.t + '|' + w.card) + '">on the board of “' + esc(topicName(w.t)) + '”</button>') +
+      (href ? '<button type="button" data-read="' + esc(href) + '">read it beside the board</button>' : '') + '</div></div>';
+}
+function pointedHereHtml() {
+  const xs = annsPointingHere(); if (!xs.length) return '';
+  return '<span class="k">Annotations relevant to this topic</span>' + xs.map(a => pointedHtml(a, true)).join('');
+}
+// Those on one card or group here, by a link to it pasted from this board: apart from Relevant to it, whose
+// annotations named the card by clicking it.
+function pointedAtHtml(id) {
+  const xs = annsPointingHere(id); if (!xs.length) return '';
+  return '<span class="k">Annotations that link to it</span>' + xs.map(a => pointedHtml(a, false)).join('');
 }
 // The boards that link to this one, and those it links to: a way about the reader's topics.
 function boardsAround() {
@@ -2984,7 +3037,7 @@ function sideLink(it, m, arr) {
     }
     h += '<div class="row"><button type="button" class="btn solid" data-act="followlink">' + (L.whole ? 'Open that board' : 'Open that board at it') + '</button>' + (L.whole ? '<a class="linkish" href="index.html#mt=' + esc(encodeURIComponent(L.t)) + '">its list in My topics</a>' : '') + '</div>';
   }
-  return h + relevantHtml(it.id) + linkedFromHtml(it.id) + cardButtons(it, arr);
+  return h + relevantHtml(it.id) + linkedFromHtml(it.id) + pointedAtHtml(it.id) + cardButtons(it, arr);
 }
 // Your other topics' boards, to link to: the topic as a whole, or a card or group on its board.
 let brdT = '', brdQ = '';
@@ -3123,6 +3176,21 @@ async function stopSharing() {
 }
 /* ── Annotations, in the side: beneath each passage, and all of them in one list ── */
 const whoHtml = a => (a.by ? '@' + esc(a.by) + ' · ' : '') + esc(a.date ? fmtDate(a.date) : '') + (a.edited ? ' · edited' + (a.editedBy ? ' by @' + esc(a.editedBy) : '') : '');
+/* An annotation can be relevant to another of the reader's topics, as a whole, whether or not it has a board yet:
+   to: { board: { t, item: null }, cite }, the shape a pasted board address gives. It names the topic by its id and
+   shows its name as it is now; cite is its name when the annotation was made, kept for a copy where the topic is
+   not, and left out on a shared board, whose readers would see the name of a topic of your own. */
+const otherTopics = () => (DB ? DB.topics : []).filter(t => t && t.id && t.id !== TID).sort((a, b) => String(a.name).localeCompare(String(b.name), 'de', { sensitivity: 'base' }));
+const foldName = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').toLowerCase().replace(/\s+/g, ' ').trim();
+const topicTo = t => Object.assign({ board: { t, item: null } }, SHM ? {} : { cite: topicName(t) });
+// The topics whose names have the words typed into "Relevant to", to choose from.
+function topicSugHtml(v) {
+  const q = foldName(v); if (!q) return '';
+  const ws = q.split(' '), starts = t => ws.every(w => (' ' + foldName(t.name)).includes(' ' + w));   // names whose words begin so come first
+  const xs = otherTopics().filter(t => { const n = foldName(t.name); return ws.every(w => n.includes(w)); }).sort((a, b) => starts(b) - starts(a));
+  if (!xs.length) return '';
+  return '<span>a topic of yours:</span>' + xs.slice(0, 6).map(t => '<button type="button" data-anntopic="' + esc(t.id) + '" title="' + esc(boardOf(t.id) ? 'Make it relevant to this topic' : 'Make it relevant to this topic. It has no board yet, and needs none.') + '">' + esc(t.name) + '</button>').join('') + (xs.length > 6 ? '<span>and ' + (xs.length - 6) + ' more: type more of the name</span>' : '');
+}
 function toHtml(to) {
   if (to.word) return '<button type="button" class="tw" data-annword="' + esc(to.word) + '" title="Light every card that has these words, on it or in its annotations">' + esc(to.word) + '</button>';
   if (to.card) {
@@ -3134,7 +3202,13 @@ function toHtml(to) {
     return '<button type="button" class="linkish" data-card="' + esc(to.card) + '">' + esc(nameOf(to.card)) + '</button>' +
       (cid ? ' <span class="pg">· a cell no longer in it' + (to.cite ? ' (' + esc(keptCell(to)) + ', as it was when linked)' : '') + ': drawn to the table as a whole</span>' : '');
   }
-  if (to.board) return '<button type="button" class="linkish" data-goboard="' + esc(to.board.t + '|' + (to.board.item || '')) + '">' + esc(to.cite || 'another board') + '</button> ↗';
+  if (to.board) {
+    const L = DB ? linkOf({ to: to.board }) : null, whole = !to.board.item;
+    if (!L || L.state === 'topic-gone' || L.state === 'private') return (whole ? '<span class="tk">topic</span> ' : '') + '<i>' + (to.cite ? '“' + esc(to.cite) + '”, ' : '') + (whole ? 'a topic' : 'a card on a board') + ' not among your topics in this browser</i>';
+    if (L.state === 'item-gone') return '<button type="button" class="linkish" data-goboard="' + esc(L.t + '|') + '" title="Open the board of “' + esc(L.topic) + '”">' + esc(to.cite || L.title) + '</button> <i>no longer on the board of “' + esc(L.topic) + '”</i>';
+    const tip = !whole ? 'Open the board of “' + L.topic + '” at it' : L.b ? 'Open the board of “' + L.topic + '”' : '“' + L.topic + '” has no board yet: opening it makes one';
+    return (whole ? '<span class="tk">topic</span> ' : '') + '<button type="button" class="linkish" data-goboard="' + esc(L.t + '|' + (to.board.item || '')) + '" title="' + esc(tip) + '">' + esc(toText(to)) + '</button> ↗' + (whole && !L.b ? ' <span class="nb">· no board yet</span>' : '');
+  }
   const href = portalHref(to);
   return href ? '<button type="button" class="linkish" data-read="' + esc(href) + '">' + esc(to.cite || 'the passage') + '</button> <a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : esc(to.cite || '');
 }
@@ -3170,6 +3244,10 @@ function annEntryHtml(x) {
 // The box an annotation is written in. Enter keeps it, ⇧Enter is a new line, Esc leaves it.
 // Under "Relevant to", in the box: the card or the cell of a table clicked on the board, or the way to click one.
 function pickedHtml(to) {
+  if (to && to.board) {   // one of your topics, chosen; or a card on another board, pasted
+    const whole = !to.board.item;
+    return (whole ? 'the topic' : 'on another board,') + ' <b>' + esc(toText(to)) + '</b>' + (whole && DB && !boardOf(realTopic(DB, to.board.t)) ? ' <span class="nb">· no board yet</span>' : '') + ' <button type="button" class="linkish" data-annunpick>not that ' + (whole ? 'topic' : 'card') + '</button>';
+  }
   if (!(to && to.card)) return '<button type="button" class="linkish" data-act="annpick">or click a card, or a cell of a table, on the board</button>';
   const it = item(to.card), rc = it && it.kind === 'table' ? to.rc || (to.cell ? cellRC(it, to.cell) : null) : null;
   if (!it) return 'the card <b>' + esc(to.cite || 'no longer on the board') + '</b> <button type="button" class="linkish" data-annunpick>not that card</button>';
@@ -3181,8 +3259,10 @@ function composerHtml() {
   const f = form, reply = !!f.re, K = annKind(f.ann);
   const kinds = reply ? '' : '<div class="akinds">' + ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + (k.key === f.ann ? ' on' : '') + '" data-annkind="' + k.key + '">' + esc(k.label) + '</button>').join('') + '</div>';
   const on = '<p class="aon">' + (reply ? (f.id ? 'Your reply' : 'A reply') : f.on && f.on.exact ? 'On “<i>' + esc(short(f.on.exact, 120)) + '</i>”' : 'On the passage as a whole') + '</p>';
-  const to = !reply && f.ann === 'relevant' ? '<label class="f">Relevant to</label><input type="text" data-ann-to value="' + esc(f.to0 || '') + '" placeholder="a word, R 3990, a portal address, or a link to another board" spellcheck="false">' +
-    '<div class="by" style="margin-top:0.2rem">' + pickedHtml(f.to) + '</div>' : '';
+  const ts = otherTopics(), topicSel = !f.to && ts.length ? '<select data-anntopics aria-label="One of your topics"><option value="">or one of your topics…</option>' + ts.map(t => '<option value="' + esc(t.id) + '">' + esc(t.name) + (boardOf(t.id) ? '' : ' (no board yet)') + '</option>').join('') + '</select>' : '';
+  const to = !reply && f.ann === 'relevant' ? '<label class="f">Relevant to</label><input type="text" data-ann-to value="' + esc((f.toq != null ? f.toq : f.to0) || '') + '" placeholder="a word, one of your topics, R 3990, or a portal address" spellcheck="false" autocomplete="off">' +
+    '<div class="annsug" data-annsug>' + topicSugHtml((f.toq != null ? f.toq : f.to0) || '') + '</div>' +
+    '<div class="by" style="margin-top:0.2rem">' + pickedHtml(f.to) + topicSel + '</div>' : '';
   return '<div class="anncomp ak-' + (reply ? 'reply' : esc(f.ann)) + '" data-fkey="' + esc(f.key) + '">' + kinds + on + to +
     '<textarea data-ann-text rows="2" placeholder="' + esc(reply ? 'Your reply' : K.hint) + '">' + esc(f.text0 || '') + '</textarea>' +
     (SHM && !reply && !f.id ? '<label class="chk onlyc"><input type="checkbox" data-ann-only> only me: kept in My topics, not on the shared board</label>' : '') +
@@ -3233,7 +3313,7 @@ function downloadAnns() {
   all.forEach(a => { const k = a.on.cite || a.on.ref || a.on.hash || 'A passage'; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(a); });
   const one = x => String(x || '').replace(/\s*\n+\s*/g, ' ');
   const line = a => '- **' + annKind(a.kind).label.replace('…', '') + '** ' + (a.on.exact ? 'on “' + one(a.on.exact) + '”' : 'on the passage as a whole') +
-    (a.to ? ', relevant to ' + (a.to.word ? '*' + one(a.to.word) + '*' : a.to.card ? one(toText(a.to) || 'a card no longer on the board') : one(a.to.cite)) : '') + (a.text ? ': ' + one(a.text) : '') +
+    (a.to ? ', relevant to ' + (a.to.word ? '*' + one(a.to.word) + '*' : a.to.board && !a.to.board.item ? 'the topic “' + one(toText(a.to)) + '”' : a.to.card ? one(toText(a.to) || 'a card no longer on the board') : one(toText(a.to))) : '') + (a.text ? ': ' + one(a.text) : '') +
     ' (' + (a.by ? '@' + a.by + ', ' : '') + fmtDate(a.date) + (a.resolved ? '; resolved' + (a.resolved.by ? ' by @' + a.resolved.by : '') : '') + ')' +
     (X.replies.get(a.id) || []).map(r => '\n  - ' + one(r.text) + ' (' + (r.by ? '@' + r.by + ', ' : '') + fmtDate(r.date) + ')').join('');
   const md = '# Annotations on the board of “' + one(topic ? topic.name : '') + '”\n\nFrom My topics, in the Kant Lab Logic Portal: annotations as of ' + fmtDate(new Date().toISOString()) + '.\n' +
@@ -3871,7 +3951,7 @@ function barHtml() {
   const h = parById(hand);
   return (h ? '<button type="button" class="pin" data-parin="' + esc(h.id) + '" style="--kc:' + parColor(h) + '" title="Add these words to this parallel">+ (' + esc(parSign(h)) + ') ' + esc(short(h.label, 28)) + '</button>' : '') +
     '<button type="button" data-parnew style="--kc:#5c3d1e" title="These words answer words in other passages: make them a parallel, or add them to one">Parallel…</button><span class="bsep"></span>' +
-    ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + '" data-annk="' + k.key + '" title="' + esc(k.key === 'relevant' ? 'What these words bear on: a word, a card or a cell of a table on the board, R 3990, or a portal address' : k.hint) + '">' + esc(k.label) + '</button>').join('');
+    ANN_KINDS.map(k => '<button type="button" class="ak-' + k.key + '" data-annk="' + k.key + '" title="' + esc(k.key === 'relevant' ? 'What these words bear on: a word, one of your topics, a card or a cell of a table on the board, R 3990, or a portal address' : k.hint) + '">' + esc(k.label) + '</button>').join('');
 }
 function showBar() {
   const b = $('annbar');
@@ -3889,7 +3969,7 @@ function showBar() {
 function focusComposer() {
   setTimeout(() => {
     const c = $('details').querySelector('.anncomp'); if (!c) return;
-    const el = (form && form.ann === 'relevant' && !form.re && !(form.to && form.to.card) && c.querySelector('[data-ann-to]')) || c.querySelector('[data-ann-text]');
+    const el = (form && form.ann === 'relevant' && !form.re && !form.to && c.querySelector('[data-ann-to]')) || c.querySelector('[data-ann-text]');
     if (!el) return;
     el.focus({ preventScroll: true }); try { el.setSelectionRange(el.value.length, el.value.length); } catch (x) { /* fine */ }
     intoSide(c);
@@ -4017,8 +4097,9 @@ const sideCardId = () => composing() ? form.card : sel.kind === 'card' ? sel.ids
 function replyTo(id) { if (ro() || !annById(id)) return; form = { kind: 'annotate', key: uid('f'), card: sideCardId(), re: id, ann: 'reply' }; renderSide(); focusComposer(); }
 function editAnn(id) {
   const a = annById(id); if (ro() || !a) return;
-  const to0 = !a.to || a.to.card ? '' : a.to.word ? a.to.word : a.to.hash ? a.to.hash : /^refl-.*:r(\d+)$/.test(a.to.ref || '') ? 'R ' + a.to.ref.replace(/^.*:r/, '') : a.to.cite || '';
-  form = { kind: 'annotate', key: uid('f'), card: sideCardId(), id, re: a.kind === 'reply' ? a.re : undefined, ann: a.kind, on: a.on, to: a.to && a.to.card ? clone(a.to) : null, text0: a.text || '', to0 };
+  const kept = !!(a.to && (a.to.card || a.to.board));   // a card, or a topic, stays chosen: its name typed back would be read as a word
+  const to0 = !a.to || kept ? '' : a.to.word ? a.to.word : a.to.hash ? a.to.hash : /^refl-.*:r(\d+)$/.test(a.to.ref || '') ? 'R ' + a.to.ref.replace(/^.*:r/, '') : a.to.cite || '';
+  form = { kind: 'annotate', key: uid('f'), card: sideCardId(), id, re: a.kind === 'reply' ? a.re : undefined, ann: a.kind, on: a.on, to: kept ? clone(a.to) : null, text0: a.text || '', to0 };
   renderSide(); focusComposer();
 }
 // What a passage is relevant to, as typed: a Reflexion by number, a portal address, or else a word.
@@ -4030,6 +4111,14 @@ function hashCite(h) {
   if (g('q')) return 'the search “' + g('q') + '”';
   return h;
 }
+// One of the reader's topics chosen for "Relevant to", from those offered as it is typed or from the list of them all.
+function pickTopic(t) {
+  if (!composing() || !DB || !DB.topics.some(x => x && x.id === t)) return;
+  form.to = topicTo(t); form.toq = ''; form.to0 = '';
+  renderSide();
+  const ti = $('details').querySelector('.anncomp [data-ann-to]'); if (ti) ti.value = '';
+  focusComposer();
+}
 async function readTo(v) {
   const m = String(v || '').trim().match(/^(?:R|Refl\.?|Reflexion|Reflection)\s*(\d{4,5})\.?$/i);
   if (m) {
@@ -4040,8 +4129,8 @@ async function readTo(v) {
   const ba = parseBoardAddr(v);
   if (ba) {
     const L = linkOf({ to: { t: ba.t, item: ba.item } });
-    if (L.state !== 'ok') throw new Error('That is no longer on its board.');
-    return { board: { t: realTopic(DB, ba.t), item: ba.item }, cite: L.whole ? L.topic : L.topic + ': ' + L.title };
+    if (L.state !== 'ok') throw new Error(L.state === 'item-gone' ? 'That is no longer on its board.' : 'That topic is not among your topics in this browser.');
+    return Object.assign({ board: { t: realTopic(DB, ba.t), item: ba.item } }, SHM ? {} : { cite: L.whole ? L.topic : L.topic + ': ' + L.title });
   }
   const h = hashOf(v);
   return h ? { hash: h, cite: hashCite(h) } : { word: v };
@@ -4071,7 +4160,7 @@ async function saveAnn() {
   if (!f.re && f.ann === 'relevant') {
     const v = ((D.querySelector('.anncomp [data-ann-to]') || {}).value || '').trim();
     if (v) { try { to = await readTo(v); } catch (x) { return err(x.message); } } else to = f.to || null;
-    if (!to) return err('Say what it is relevant to: a word, R 3990, a portal address, or a card or a cell of a table on the board.');
+    if (!to) return err('Say what it is relevant to: a word, one of your topics, R 3990, a portal address, or a card or a cell of a table on the board.');
   }
   if (!text && (f.re || f.ann !== 'relevant')) return err(f.re ? 'Write the reply.' : 'Say it in your words.');
   const only = SHM && !f.id && (f.re ? !!(annById(f.re) || {}).only : !!(D.querySelector('.anncomp [data-ann-only]') || {}).checked);
@@ -4328,7 +4417,7 @@ $('stage').addEventListener('pointerdown', e => {
     const id = card.dataset.id;
     const cellAt = cellEl && card.classList.contains('k-table') ? cellEl.dataset.cell.split(',').map(Number) : null;
     if (mode && mode.annTo) {   // the card an annotation's words are relevant to
-      mode = null; markEnd(null); if (composing()) form.to = pickedTo(id, cellAt);
+      mode = null; markEnd(null); if (composing()) { form.to = pickedTo(id, cellAt); form.toq = ''; }
       render(); const ti = $('details').querySelector('.anncomp [data-ann-to]'); if (ti) ti.value = '';
       focusComposer(); return;
     }
@@ -4889,6 +4978,7 @@ $('details').addEventListener('keydown', e => {
   }
   if (e.target.matches('[data-pf], [data-plnote]') && e.key === 'Enter' && !e.shiftKey && !e.isComposing && !e.target.matches('textarea')) { e.preventDefault(); e.target.blur(); return; }
   if (!e.target.closest('.anncomp')) return;
+  if (e.key === 'Enter' && e.target.matches('button, select')) return;   // a button pressed from the keyboard, one of the topics offered among them
   if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); saveAnn(); }
   else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); form = null; renderSide(); }
 });
@@ -4927,6 +5017,7 @@ function noteSoon(fn) { clearTimeout(noteT); noteFn = fn; noteT = setTimeout(() 
 function noteNow() { if (noteFn) { clearTimeout(noteT); const f = noteFn; noteFn = null; f(); } }
 $('details').addEventListener('input', e => {
   const t = e.target;
+  if (t.matches('[data-ann-to]') && composing()) { form.toq = t.value; const s = t.closest('.anncomp').querySelector('[data-annsug]'); if (s) s.innerHTML = topicSugHtml(t.value); return; }
   if (t.matches('[data-tnew]') && form && form.kind === 'table') { const k = t.dataset.tnew, v = clampN(t.value, 0, TABLE_MAX[k]); if (v) { form[k] = v; tableFormSync(); } return; }
   if (t.matches('textarea[data-mtnote]')) { const mt = t.dataset.mtnote, v = t.value; noteSoon(() => setPassage(mt, x => { x.note = v; })); }
   else if (t.matches('textarea[data-sharednote]')) { const id = t.dataset.sharednote, v = t.value; noteSoon(() => { const p = SP.find(q => q.id === id); if (p && writable()) { p.note = v; p.noteBy = me(); p.noteAt = now(); scheduleShared(); } }); }
@@ -5161,6 +5252,7 @@ $('details').addEventListener('click', e => {
   const aop = e.target.closest('[data-annopen]'); if (aop) { openAnn(aop.dataset.annopen); return; }
   const aun = e.target.closest('[data-annunpick]'); if (aun && composing()) { form.to = null; renderSide(); focusComposer(); return; }
   const awt = e.target.closest('[data-annwholeto]'); if (awt && composing() && form.to) { delete form.to.rc; delete form.to.cell; delete form.to.cite; renderSide(); focusComposer(); return; }
+  const atp = e.target.closest('[data-anntopic]'); if (atp && composing()) { pickTopic(atp.dataset.anntopic); return; }
   const gb = e.target.closest('[data-tgrid] button'); if (gb) { if (e.detail === 0) pickSize(gb); return; }   // the keyboard's click; a pointer's is taken on pointerup
   const tac = e.target.closest('[data-tact]'); if (tac) { tableAct(tac.dataset.tact); return; }
   const tpo = e.target.closest('[data-tpout]'); if (tpo && tcell) { takeFromCell(tcell.id, tcell.r, tcell.c, +tpo.dataset.tpout); return; }
@@ -5246,6 +5338,7 @@ $('details').addEventListener('change', e => {
   if (e.target.matches('[data-sxa]') && form && form.kind === 'stretch') { form.ar[e.target.dataset.sxa] = +e.target.value; return; }
   if (e.target.matches('[data-pf]') && sel.kind === 'par') { setParField(sel.ids[0], e.target.dataset.pf, e.target.value); return; }
   if (e.target.matches('[data-plnote]')) { setPlaceNote(e.target.dataset.plnote, e.target.value); return; }
+  if (e.target.matches('[data-anntopics]') && composing()) { if (e.target.value) pickTopic(e.target.value); return; }
   if (e.target.matches('[data-annf]') && form && form.kind === 'annotations') { form.f = form.f || {}; form.f[e.target.dataset.annf] = e.target.value; $('annlist').innerHTML = annListAll(); return; }
   if (e.target.matches('[data-tnewh]') && form && form.kind === 'table') { form[e.target.dataset.tnewh] = e.target.checked; tableFormSync(); return; }
   if (e.target.matches('[data-tshape]') && sel.kind === 'card') { const it = item(sel.ids[0]), d = it && dims(it); if (d) setShape(it.id, e.target.dataset.tshape === 'rows' ? e.target.value : d.rows, e.target.dataset.tshape === 'cols' ? e.target.value : d.cols); return; }
