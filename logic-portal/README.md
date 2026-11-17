@@ -232,6 +232,12 @@ The page's **☆ Topic on passages** switch turns the buttons off again, and you
   passages under two topics at once, and **Order** puts a topic as you arranged it (↑ ↓), the
   newest first, or by the date of the text. Each topic has a note of its own, for the question
   it is following.
+- **Find among them.** The box above the passages narrows them to those with every word you
+  type: in the citation, the work, the passage's words in full or your note on it, with case,
+  accents and ß left out of account, as on a topic's board. The words are marked where they
+  stand, and one further into the passage than its card shows, or in your note, is given
+  beneath its words, with the words round it. It looks in a topic, in **All passages** or in
+  **Unsorted**, and stays as you go from one to another; **Esc** clears it.
 - **Change your mind.** **×** on a topic's label takes the passage off that topic; a passage
   under no topic is kept, under **Unsorted**. **✕** removes it from My topics, with **Undo**.
   **Delete this topic**, on a topic, puts its passages under their other topics, or under

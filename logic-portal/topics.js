@@ -121,9 +121,9 @@ const withId = a => Array.isArray(a) ? a.filter(x => isObj(x) && typeof x.id ===
 const spanOk = s => isObj(s) && [s.from, s.to].every(x => Array.isArray(x) && typeof x[0] === 'string' && Number.isFinite(+x[1]));
 const placed = it => it && it.excerpt && !it.en && ready() && PT.placeWords ? PT.placeWords(it.ref, it.excerpt, it.span || null) : null;
 const spanOf = st => Object.assign({ from: st.from.slice(), to: st.to.slice() }, PT.stretchContext ? PT.stretchContext(st, 32) : {});
-const paraHtml = s => esc(s).replace(/\n/g, ' <span class="mtpara" title="A new paragraph in the text">¶</span> ');
+const paraHtml = (s, f = esc) => f(s).replace(/\n/g, ' <span class="mtpara" title="A new paragraph in the text">¶</span> ');
 // A stretch in the passages it covers, the words kept lit.
-const litHtml = st => st.parts.map(x => { const t = P[x.i].text; return esc(t.slice(0, x.a)) + '<mark class="mtlit">' + esc(t.slice(x.a, x.b)) + '</mark>' + esc(t.slice(x.b)); }).join(' <span class="mtpara">¶</span> ');
+const litHtml = (st, f = esc) => st.parts.map(x => { const t = P[x.i].text; return f(t.slice(0, x.a)) + '<mark class="mtlit">' + f(t.slice(x.a, x.b)) + '</mark>' + f(t.slice(x.b)); }).join(' <span class="mtpara">¶</span> ');
 function cleanBoard(b) {
   if (!isObj(b) || !Array.isArray(b.items)) return null;
   const out = Object.assign({}, b);
@@ -683,6 +683,12 @@ css.textContent = `
   #mtpage textarea:placeholder-shown { background: transparent; border-style: dashed; }
   #mtpage .mttnote { margin: 0.45rem 0 0; }
   #mtpage .mttools { display: flex; flex-wrap: wrap; gap: 0.3rem 1.1rem; align-items: center; margin: 0.65rem 0 0.9rem; font-size: 0.9rem; color: var(--faded); }
+  #mtpage .mtfind { font: inherit; font-size: 0.92rem; width: 15rem; max-width: 100%; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 0.08rem 0.7rem; }
+  #mtpage .mtfind:focus { outline: none; border-color: var(--accent-light); }
+  /* words found, in the yellow the topics' boards find them in; the kept words stay lit beneath */
+  #mtpage mark.mtf { color: inherit; background: color-mix(in srgb, #d9a441 38%, transparent); border-radius: 2px; padding: 0 1px; }
+  #mtpage .mtin { margin: -0.1rem 0 0.35rem; font-size: 0.86rem; line-height: 1.3; color: var(--faded); }
+  #mtpage .mtin i { margin-right: 0.35rem; }
   #mtpage .mttools select { font: inherit; font-size: 0.9rem; color: var(--accent); background: var(--paper); border: 1px solid var(--line); border-radius: 5px; padding: 0 0.3rem; }
   #mtpage .mtcard { background: var(--card); border: 1px solid var(--line); border-radius: 7px; padding: 0.65rem 0.9rem 0.6rem; margin: 0 0 0.8rem; }
   #mtpage .mtch { display: flex; gap: 0.3rem 0.6rem; align-items: baseline; flex-wrap: wrap; }
@@ -1192,6 +1198,7 @@ document.body.appendChild(fileIn);
 let view = 'all';          // 'all', 'unsorted', or a topic's id
 let also = '';             // only the passages also under this topic
 let sortBy = 'arranged';   // 'arranged' (a topic as you have arranged it), 'text', or 'newest'
+let find = '';             // the words looked for among the passages listed, kept from topic to topic
 const whole = new Set();   // passages shown whole, not just their opening words
 
 function openPage() { closePicker(); hideHover(); sb.hidden = true; page.hidden = false; render(); refreshShared(); }
@@ -1247,7 +1254,6 @@ function renderMain() {
     w.innerHTML = '<div class="mthead"><h2>My topics</h2></div><p class="mtempty">Nothing kept yet. Point at a passage anywhere in the portal, in the search results, a full text or among Kant’s notes, and press <b>☆ Topic</b>. To keep only some of its words, select them and press <b>☆ Keep these words</b>. Your topics are kept in this browser, and nobody else sees them.</p>';
     return;
   }
-  const list = listFor(), canMove = !!t && sortBy === 'arranged' && !also;
   const others = sortedTopics().filter(x => x.id !== view);
   const head = t
     ? '<div class="mthead"><input type="text" class="mtname" value="' + esc(t.name) + '" maxlength="120" title="Rename this topic" spellcheck="false">' +
@@ -1256,32 +1262,106 @@ function renderMain() {
       '<textarea class="mttnote" rows="2" placeholder="What this topic is for: a question, a hunch, what to look for next. Only you see it.">' + esc(t.note) + '</textarea>' + pointedHere(t.id)
     : '<div class="mthead"><h2>' + (view === 'unsorted' ? 'Unsorted' : 'All passages') + '</h2></div>' +
       (view === 'unsorted' ? '<p class="mtempty">Passages kept under no topic. Give each one a topic with <b>+ topic</b>.</p>' : '');
-  const tools = '<div class="mttools"><span>' + plural(list.length, 'passage') + '</span>' +
+  const tools = '<div class="mttools"><input type="search" class="mtfind" value="' + esc(find) + '" placeholder="Find among them" aria-label="Find among the passages listed" title="Only the passages with every word you type, in the citation, the work, the passage in full or your note. Esc clears it." autocomplete="off" spellcheck="false" maxlength="200"><span class="mtcount"></span>' +
     (others.length ? '<label>Also under <select data-mta="also"><option value="">any topic</option>' + others.map(x => '<option value="' + esc(x.id) + '"' + (also === x.id ? ' selected' : '') + '>' + esc(x.name) + '</option>').join('') + '</select></label>' : '') +
     '<label>Order <select data-mta="sort">' +
       (t ? '<option value="arranged"' + (sortBy === 'arranged' ? ' selected' : '') + '>as you arranged them</option>' : '') +
       '<option value="newest"' + (sortBy === 'newest' || (!t && sortBy === 'arranged') ? ' selected' : '') + '>newest kept first</option>' +
       '<option value="text"' + (sortBy === 'text' ? ' selected' : '') + '>by the date of the text</option></select></label></div>';
-  w.innerHTML = head + tools + (list.length ? list.map((x, k) => cardHtml(x, canMove, k, list.length)).join('')
-    : '<p class="mtempty">' + (also ? 'No passage here is under both.' : t ? 'No passages under this topic yet. In the portal, press ☆ Topic on a passage and tick “' + esc(t.name) + '”.' : 'Nothing here.') + '</p>');
+  w.innerHTML = head + tools + '<div class="mtlist"></div>';
   w.querySelectorAll('textarea').forEach(grow);
+  renderList();
 }
-function cardHtml(it, canMove, k, n) {
+// The passages themselves, beneath the tools: those of the view, and with words looked for, only those
+// that have every one. Drawn apart from the rest, so that typing in Find among them keeps its place.
+function renderList() {
+  const box = page.querySelector('.mtlist'), count = page.querySelector('.mtcount');
+  if (!box) return;
+  const t = topicOf(view), all = listFor(), ws = findWords();
+  const canMove = !!t && sortBy === 'arranged' && !also && !ws.length;   // ↑ ↓ move among all of them, so not while some are hidden
+  const cards = all.map((x, k) => cardHtml(x, canMove, k, all.length, ws)).filter(Boolean);
+  if (count) count.textContent = ws.length ? cards.length + ' of ' + plural(all.length, 'passage') : plural(all.length, 'passage');
+  box.innerHTML = !all.length
+    ? '<p class="mtempty">' + (also ? 'No passage here is under both.' : t ? 'No passages under this topic yet. In the portal, press ☆ Topic on a passage and tick “' + esc(t.name) + '”.' : 'Nothing here.') + '</p>'
+    : (ws.length && !ready() ? '<p class="mtin">Until the portal has its texts in, only the words kept with each passage are looked in.</p>' : '') +
+      (cards.length ? cards.join('') : '<p class="mtempty">' + (all.length === 1 ? 'The passage here does not have' : 'None of the ' + all.length + ' passages here has') + ' “' + esc(flat(find)) + '”.</p>');
+  box.querySelectorAll('textarea').forEach(grow);
+}
+/* Finding among the passages listed. Every word looked for must be somewhere in the passage: its citation, its
+   work, its words — in full, wherever they stand now, or the copy kept with it — or your note on it. Case, accents,
+   ß and the long ſ are folded away, as the topics' boards do in finding among a topic's passages, so “gewissheit”
+   finds “Gewißheit”. Each word is marked where the card shows it; one it does not show, further into the passage
+   or in your note, is given beneath the passage's words, with the words round it. */
+const FOLDS = new Map();
+function folded(s) {   // s as it is; the same folded; and where in s each folded character stood
+  s = String(s == null ? '' : s);
+  let r = FOLDS.get(s); if (r) return r;
+  let f = ''; const from = [], to = [];
+  for (let i = 0; i < s.length;) {
+    const c = String.fromCodePoint(s.codePointAt(i));
+    const k = c < '\u0080' ? c.toLowerCase() : c.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ß/g, 'ss').replace(/ſ/g, 's');
+    for (let j = 0; j < k.length; j++) { from.push(i); to.push(i + c.length); }
+    f += k; i += c.length;
+  }
+  if (FOLDS.size > 4000) FOLDS.clear();
+  r = { s, f, from, to }; FOLDS.set(s, r); return r;
+}
+const findWords = () => [...new Set(folded(find).f.split(/\s+/).filter(Boolean))];
+// s, escaped, with the words looked for marked wherever they stand in it. Its line breaks stay as they are.
+function marked(s, ws) {
+  const F = folded(s), hits = [];
+  ws.forEach(w => { for (let k = F.f.indexOf(w); k >= 0; k = F.f.indexOf(w, k + w.length)) hits.push([F.from[k], F.to[k + w.length - 1]]); });
+  hits.sort((a, b) => a[0] - b[0]);
+  let out = '', at = 0;
+  hits.forEach(([a, b]) => { if (b <= at) return; a = Math.max(a, at); out += esc(F.s.slice(at, a)) + '<mark class="mtf">' + esc(F.s.slice(a, b)) + '</mark>'; at = b; });
+  return out + esc(F.s.slice(at));
+}
+// A stretch of s round the first place the folded word w stands in it, cut at spaces.
+function around(s, w) {
+  const F = folded(flat(s)), k = F.f.indexOf(w); if (k < 0) return '';
+  const a = F.from[k], b = F.to[k + w.length - 1];
+  let st = Math.max(0, a - 60), en = Math.min(F.s.length, b + 90);
+  if (st > 0) { const sp = F.s.indexOf(' ', st); if (sp >= 0 && sp < a) st = sp + 1; }
+  if (en < F.s.length) { const sp = F.s.lastIndexOf(' ', en); if (sp > b) en = sp; }
+  return (st > 0 ? '…' : '') + F.s.slice(st, en) + (en < F.s.length ? '…' : '');
+}
+// '' when the card shows every word looked for, null when the passage lacks one, and otherwise, for those it
+// does not show, where they stand: up to two places in each of srcs, [label, words].
+function foundIn(ws, shown, srcs) {
+  const S = shown.map(s => folded(s).f).join('\n'), fs = srcs.map(r => folded(r[1]).f);
+  if (!ws.every(w => S.includes(w) || fs.some(f => f.includes(w)))) return null;
+  let rest = ws.filter(w => !S.includes(w)), out = '';
+  srcs.forEach(([lab, s], j) => {
+    for (let k = 0; k < 2 && rest.length; k++) {
+      const w = rest.find(v => fs[j].includes(v)); if (!w) return;
+      const bit = around(s, w), bf = folded(bit).f;
+      rest = rest.filter(v => v !== w && !bf.includes(v));
+      out += '<div class="mtin"><i>' + lab + '</i>' + marked(bit, ws) + '</div>';
+    }
+  });
+  return out;
+}
+function cardHtml(it, canMove, k, n, ws) {
   const i = idxOf(it.ref), live = i != null && !!P[i];
   const pw = it.excerpt && !it.en ? placed(it) : null, st = pw && pw.st;   // kept words, where they stand now
   const showWhole = live && whole.has(it.id) && (!it.excerpt || !!st);
-  const words = showWhole ? (st ? litHtml(st) : esc(P[i].text)) : paraHtml(it.excerpt || it.words);
+  const full = st ? st.parts.map(x => P[x.i].text).join('\n') : live ? P[i].text : it.words || '';
+  const cite = (st && st.cite) || it.cite || it.ref, work = [it.work, it.date].filter(Boolean).join(' · ');
+  const looking = !!(ws && ws.length), inn = looking ? foundIn(ws, [cite, work, showWhole ? full : it.excerpt || it.words || ''], [['in the passage', full], ['in your note', it.note || '']]) : '';
+  if (inn == null) return '';
+  const f = looking ? s => marked(s, ws) : esc;
+  const words = showWhole ? (st ? litHtml(st, f) : f(P[i].text)) : paraHtml(it.excerpt || it.words, f);
   const more = live && (it.excerpt ? !!st && !st.whole : flat(P[i].text).length > flat(it.words).length + 3);
   const lostAt = ready() && live && it.span && !st;
   const chips = it.topics.map(id => topicOf(id)).filter(Boolean).sort((a, b) => a.name.localeCompare(b.name, 'de'))
     .map(t => '<span class="mtchip"><button type="button" data-mta="view" data-mtt="' + esc(t.id) + '" title="Open this topic">' + esc(t.name) + '</button><button type="button" data-mta="untopic" data-mtt="' + esc(t.id) + '" title="Take it off this topic">×</button></span>').join('');
   return '<div class="mtcard" data-mti="' + esc(it.id) + '">' +
-    '<div class="mtch"><a class="mtcite" href="#" data-mta="go" title="Read it where it stands">' + esc((st && st.cite) || it.cite || it.ref) + '</a>' +
-      '<span class="mtwork">' + esc([it.work, it.date].filter(Boolean).join(' · ')) + '</span>' +
+    '<div class="mtch"><a class="mtcite" href="#" data-mta="go" title="Read it where it stands">' + f(cite) + '</a>' +
+      '<span class="mtwork">' + f(work) + '</span>' +
       (it.excerpt ? '<span class="mttag" title="' + (st && st.parts.length > 1 ? 'Words kept across ' + st.parts.length + ' passages in a row: where they start and end is yours' : 'Only these words of the passage were kept') + '">' + (it.en ? 'words of its English' : st && st.parts.length > 1 ? st.parts.length + ' passages' : 'words kept') + '</span>' : '') +
       '<span class="mtbtns">' + (canMove ? '<button type="button" data-mta="up" title="Move up"' + (k === 0 ? ' disabled' : '') + '>↑</button><button type="button" data-mta="down" title="Move down"' + (k === n - 1 ? ' disabled' : '') + '>↓</button>' : '') +
       '<button type="button" data-mta="del" title="Remove from My topics">✕</button></span></div>' +
-    '<div class="mtwords' + (it.excerpt && !showWhole ? ' ex' : '') + '"' + (it.en ? ' lang="en"' : '') + '>' + words + '</div>' +
+    '<div class="mtwords' + (it.excerpt && !showWhole ? ' ex' : '') + '"' + (it.en ? ' lang="en"' : '') + '>' + words + '</div>' + inn +
     (more ? '<button type="button" class="mtlink" data-mta="whole">' + (showWhole ? (it.excerpt ? '▴ only the words kept' : '▴ only its opening words') : (it.excerpt ? '▾ where they stand' : '▾ the whole passage')) + '</button>' : '') +
     (lostAt ? '<p class="mtlost">These words are no longer where they were kept in the text. Above is the copy kept with them.</p>' : '') +
     (ready() && !live ? '<p class="mtlost">This address no longer opens in the portal. The words above are the copy kept when it was saved.</p>' : '') +
@@ -1468,6 +1548,7 @@ page.addEventListener('change', e => {
 });
 page.addEventListener('input', e => {
   const x = e.target;
+  if (x.classList.contains('mtfind')) { find = x.value; renderList(); return; }
   if (x.tagName !== 'TEXTAREA') return;
   grow(x);
   if (x.classList.contains('mttnote')) { const t = topicOf(view); if (t) { t.note = x.value; t.at = now(); } }
@@ -1482,6 +1563,7 @@ page.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     const m = page.querySelector('.mtmenu');
     if (!m.hidden) m.hidden = true;
+    else if (x.classList.contains('mtfind') && x.value) { e.preventDefault(); x.value = ''; find = ''; renderList(); }
     else if (/^(INPUT|TEXTAREA|SELECT)$/.test(x.tagName)) x.blur();
     else closePage();
     return;
