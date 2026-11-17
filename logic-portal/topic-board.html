@@ -796,6 +796,7 @@ const NEW_REPO_WAIT = 30000;                      // ms: how long a repository j
 const TOKEN_KEY = 'kantlab-topics-token';         // My topics' token (topics.js): sessionStorage, or localStorage if remembered
 const QUEUE_TOKEN_KEY = 'kantlab-queue-token';    // the queue's, if that is the one this browser has
 const SHARED_CACHE = 'kantlab-shared-board:';     // + the repository: this device's last copy of a shared board
+const SHARE_UNFINISHED = 'kantlab-share-unfinished:';   // + the topic: a repository a Share made but put no board in, for the next Share to use
 const SHARED_LIST = 'kantlab-shared-boards';      // the shared boards this browser knows of, for My topics' list
 const TOKEN_HOWTO = 'https://github.com/mikrishnan/kant-lab/blob/main/logic-portal/README.md#sharing-a-board';
 const POLL_MS = 5000, SAVE_MS = 2500;                                  // past this many characters the store has, the page warns
@@ -3419,14 +3420,29 @@ function drawShare() {
     '<div class="row">' + (SHM ? '<button type="button" class="btn" data-shstop' + dis + '>Stop sharing…</button>' : '<button type="button" class="btn solid" data-shgo' + dis + '>Share</button>') + '<button type="button" class="linkish" data-shx>Close</button></div>' +
     (s.msg ? '<p class="ok">' + esc(s.msg) + '</p>' : '') + (s.err ? '<p class="warn">' + esc(s.err) + '</p>' : '');
 }
+function forgetUnfinished() { try { localStorage.removeItem(SHARE_UNFINISHED + TID); } catch (e) { /* nothing kept */ } }
 function shareFail(r, why) { const s = shareSt; if (!s) return; s.busy = false; s.msg = ''; s.err = why || cap1(ghMsg(r)) + '.'; drawShare(); }
 async function doShare() {
   const s = shareSt; if (!s.token) { s.err = 'Give your GitHub token.'; drawShare(); return; }
   s.busy = true; s.err = ''; s.msg = 'Making the board’s repository…'; drawShare();
   if (!s.login) { const u = await gh('GET', '/user', null, null, s.token); if (!u.ok) return shareFail(u); s.login = u.data.login; }
-  const name = 'board-' + slug(topic.name) + '-' + Math.random().toString(36).slice(2, 6);
-  const r = await gh('POST', '/orgs/' + ORG + '/repos', { name, private: true, description: topic.name + ' · a topic’s board shared by @' + s.login + ' (Kant Lab Logic Portal)', has_issues: false, has_projects: false, has_wiki: false }, null, s.token);
-  if (!r.ok) return shareFail(r, r.status === 403 || r.status === 404 ? 'Your token can’t make repositories in ' + ORG + '. It needs Administration: Read and write, and access to all of the organisation’s repositories: the portal’s README, under Sharing a board, says how.' : '');
+  // A Share that made its repository but could not put the board in it is finished in that repository, not in another one.
+  let name = '', reuse = false;
+  const left = (() => { try { return localStorage.getItem(SHARE_UNFINISHED + TID) || ''; } catch (e) { return ''; } })();
+  if (left) {
+    const [lr, lc] = await Promise.all([gh('GET', '/repos/' + ORG + '/' + left, null, null, s.token), gh('GET', '/repos/' + ORG + '/' + left + '/contents/board.json', null, null, s.token)]);
+    if (lr.status === 0 || lc.status === 0) return shareFail(lr.status === 0 ? lr : lc);
+    if (lr.ok && !lr.data.archived && lc.status === 404) { name = left; reuse = true; s.msg = 'Using ' + ORG + '/' + name + ', the repository the last Share made…'; drawShare(); }
+    else if (lr.status === 404) name = left;   // deleted, or out of the token's reach: making it again under its own name tells which
+    else forgetUnfinished();                    // archived, or with a board in it already
+  }
+  if (!reuse) {
+    name = name || 'board-' + slug(topic.name) + '-' + Math.random().toString(36).slice(2, 6);
+    const r = await gh('POST', '/orgs/' + ORG + '/repos', { name, private: true, description: topic.name + ' · a topic’s board shared by @' + s.login + ' (Kant Lab Logic Portal)', has_issues: false, has_projects: false, has_wiki: false }, null, s.token);
+    if (r.status === 422 && name === left) return shareFail(r, 'Your token can’t reach ' + ORG + '/' + name + ', the repository the last Share made, so the board can’t be put in it. On GitHub, set the token’s Repository access to All repositories: the portal’s README, under Sharing a board, says how. Then press Share again: it will use that repository, not make another.');
+    if (!r.ok) return shareFail(r, r.status === 403 || r.status === 404 ? 'Your token can’t make repositories in ' + ORG + '. It needs Administration: Read and write, and access to all of the organisation’s repositories: the portal’s README, under Sharing a board, says how.' : '');
+    try { localStorage.setItem(SHARE_UNFINISHED + TID, name); } catch (e) { /* the next Share makes another */ }
+  }
   const b = clone(kept()); delete b.shared;
   const file = { owner: s.login, topic: { id: TID, name: topic.name, note: topic.note || '' }, passages: underTopic().map(x => Object.assign(sharedPassage(x), { by: s.login, added: x.added || now() })), gone: {}, board: b, annotations: [], savedBy: s.login, savedAt: now() };
   s.msg = 'Putting the board in it…'; drawShare();
@@ -3438,9 +3454,15 @@ async function doShare() {
     if (Date.now() - t0 > 3000 && shareSt === s) { s.msg = 'GitHub is still setting up the repository. Waiting for it, for up to half a minute…'; drawShare(); }
     await new Promise(res => setTimeout(res, pause)); pause = Math.min(pause * 1.5, 5000);
   }
-  if (!w.ok) return shareFail(w, 'The repository ' + ORG + '/' + name + ' was made, but ' + (w.status === 404 || w.status === 409 || w.status === 422
-    ? 'GitHub still wouldn’t take the board in it after half a minute. Press Share to try again: that makes a new repository, and this empty one can be deleted on GitHub. If it happens every time, check that your token’s Repository access is All repositories.'
-    : 'the board could not be put in it: ' + ghMsg(w) + '.'));
+  if (!w.ok) {
+    const again = ' Press Share again: it will use this same repository, not make another.';
+    if (w.status !== 404 && w.status !== 409 && w.status !== 422) return shareFail(w, 'The repository ' + ORG + '/' + name + ' is made, but the board could not be put in it: ' + ghMsg(w) + '.' + again);
+    const seen = await gh('GET', '/repos/' + ORG + '/' + name, null, null, s.token);   // can the token reach it at all?
+    return shareFail(w, seen.status === 404
+      ? 'Your token made ' + ORG + '/' + name + ' but can’t reach it, so the board couldn’t be put in it. On GitHub, set the token’s Repository access to All repositories: the portal’s README, under Sharing a board, says how.' + again
+      : 'The repository ' + ORG + '/' + name + ' is made, but GitHub still wouldn’t take the board in it after half a minute.' + again);
+  }
+  forgetUnfinished();
   const failed = [];
   for (const p of s.people) { const er = await setPersonOn(name, p.login, p.role, s.token); if (er) failed.push('@' + p.login + ': ' + er); }
   // from now on the board is the shared one; My topics keeps a copy, marked so
