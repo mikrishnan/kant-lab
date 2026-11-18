@@ -437,6 +437,17 @@ reader's topic rather than the seminar's one board.
   with.
 - **Photograph the board** keeps it as it is now, to look at again or bring back. **Export**
   saves the one board to a file, and **Import** brings such a file's cards in beside yours.
+- **Giving someone a board.** The file Export writes carries the board whole, with the topic's
+  passages (where each stands and the words kept), the topic's note, and the annotations,
+  parallels and echoes on its passages. It leaves behind your notes on the passages, and any
+  annotation marked *only me*. Whoever is given it opens My topics and chooses **⋯ → Import a
+  board…**, and it becomes a topic of theirs, under the board's name (with a number after it if
+  they have a topic of that name already). Its passages are kept under it, and its board opens
+  as you left it. A passage they keep already is put under the new topic, not kept twice.
+  Nothing of theirs is changed otherwise, and **Undo** takes it all out again. Links on the board
+  to your other topics tell them it is *not among your topics in this browser*. A file exported before boards
+  carried their passages (November 2026) still makes a topic, but words kept on their own come
+  in as their whole passages.
 
 The board is kept with your topics, under the same `localStorage` key, so it goes wherever they
 go: into **Save to file**, and into your locked file on GitHub, if that is on. The board page
