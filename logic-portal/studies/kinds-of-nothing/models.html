@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three models · the kinds of nothing · Kant Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;600&display=swap');
+
+  /* The Logic Portal's palette and fonts, as on the study's own page. */
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5efe0;
+    --parchment-dark: #e8dfc8;
+    --panel: #faf7f0;
+    --card: #fbf8f1;
+    --accent: #5c3d1e;
+    --accent-light: #8b5e3c;
+    --faded: #7a6a52;
+    --line: #b8a88a;
+    --line-soft: #d9ccb0;
+    /* one colour for each model, from the portal's decade palette */
+    --m1: #5c6e3a;
+    --m2: #8b5e3c;
+    --m3: #3b5068;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: 'EB Garamond', Georgia, serif; font-size: 16px; line-height: 1.45; color: var(--ink); background: var(--parchment); }
+
+  header { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.55rem 1rem; border-bottom: 1px solid var(--line);
+           background: var(--parchment-dark); font-family: 'Cinzel', serif; font-size: 0.85rem; letter-spacing: 0.05em; }
+  header a { color: var(--accent); text-decoration: none; }
+  header a:hover { text-decoration: underline; }
+  header .slash { color: var(--line); }
+  header b { color: var(--accent); font-weight: 600; }
+
+  main { padding: 1rem 1.3rem 3rem; }
+  h1 { font-family: 'Cinzel', serif; font-weight: 600; font-size: 1.45rem; color: var(--accent); margin: 0 0 0.2rem; letter-spacing: 0.02em; }
+  .note { color: var(--faded); max-width: 60rem; margin: 0 0 0.8rem; }
+  .legend { display: flex; gap: 1.3rem; flex-wrap: wrap; font-size: 0.86rem; color: var(--faded); margin: 0 0 1rem; }
+  .sw { display: inline-block; width: 1.5rem; height: 0.8rem; border-radius: 3px; vertical-align: -1px; margin-right: 0.35rem; }
+  .sw.att { border: 1.5px solid var(--line); background: var(--card); }
+  .sw.ours { border: 1.5px dashed var(--accent-light); background: #fff; }
+
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.9rem; align-items: start; }
+  @media (max-width: 1000px) { .cards { grid-template-columns: 1fr; } }
+  .mcard { background: #fff; border: 1.5px solid var(--line-soft); border-radius: 10px; overflow: hidden; }
+  .mcard .top { padding: 0.45rem 0.8rem 0.5rem; color: #fff; }
+  .mcard .top b { font-family: 'Cinzel', serif; font-size: 1.05rem; letter-spacing: 0.04em; font-weight: 600; }
+  .mcard .top span { margin-left: 0.4rem; font-style: italic; opacity: 0.92; }
+  .mcard .top .anch { display: block; margin: 0.15rem 0 0; font-size: 0.82rem; }
+  .mcard .top .anch a { color: #fff; opacity: 0.9; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.45); margin-right: 0.5rem; }
+  .m1 .top { background: var(--m1); } .m2 .top { background: var(--m2); } .m3 .top { background: var(--m3); }
+  .meta { padding: 0.35rem 0.8rem; font-size: 0.84rem; color: var(--faded); border-bottom: 1px dotted var(--line-soft); background: var(--panel); }
+  .meta b { color: var(--accent); font-weight: 600; }
+
+  .sec { padding: 0.45rem 0.8rem 0.5rem; border-top: 1px dotted var(--line-soft); }
+  .sec.att { background: var(--card); }
+  .sec .k { display: block; font-family: 'Cinzel', serif; font-size: 0.66rem; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 0.2rem; }
+  .kind { margin: 0.25rem 0 0.45rem; }
+  .kind .lab { font-weight: 600; color: var(--accent); }
+  .kind .la { font-style: italic; color: var(--faded); margin-left: 0.3rem; }
+  .q { font-style: italic; }
+  .q::before { content: '“'; } .q::after { content: '”'; }
+  .cite { font-size: 0.8rem; color: var(--faded); white-space: nowrap; margin-left: 0.25rem; }
+  .cite a { color: var(--accent-light); }
+  ul.quotes { margin: 0; padding-left: 1.1rem; }
+  ul.quotes li { margin: 0.15rem 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .chip { border: 1px solid var(--line-soft); border-radius: 999px; padding: 0 0.5rem; font-size: 0.86rem; font-style: italic; background: #fff; }
+  .none { color: #a8997f; font-style: italic; font-size: 0.9rem; }
+
+  .sec.ours .slot { border: 1.5px dashed var(--accent-light); border-radius: 6px; padding: 0.3rem 0.55rem; min-height: 2rem; color: var(--faded); font-style: italic; font-size: 0.92rem; background: #fff; }
+  .sec.ours .slot.filled { font-style: normal; color: var(--ink); }
+  .ocr { padding: 0.35rem 0.8rem; font-size: 0.82rem; color: #7a4a00; background: #fff8e8; border-top: 1px dotted #c8a055; }
+</style>
+</head>
+<body>
+<header>
+  <a href="../../index.html">The Logic Portal</a><span class="slash">/</span>
+  <a href="../../index.html#studies">Studies</a><span class="slash">/</span>
+  <a href="index.html">The kinds of nothing</a><span class="slash">/</span>
+  <b>Three models</b>
+</header>
+<main>
+  <h1>Three models of nothing</h1>
+  <p class="note">A draft, for the seminar to correct. Each model has the same fields. The shaded fields are Kant’s words, cut from the portal’s own text of each passage, with its citation; click a citation to read the passage where it stands. The dashed fields are the seminar’s to state: what is divided, by what, the model’s problems, and what it does about earlier ones. They are empty until someone fills and signs them.</p>
+  <div class="legend"><span><span class="sw att"></span>Kant’s words, verbatim</span><span><span class="sw ours"></span>the seminar’s, signed</span><span>The cards are kept in <code>models.js</code>, beside this page.</span></div>
+  <div class="cards" id="cards"></div>
+</main>
+
+<script src="models.js"></script>
+<script>
+const PORTAL = '../../index.html';
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const keyOf = ref => ref.slice(0, ref.indexOf(':'));
+const idOf = ref => ref.slice(ref.indexOf(':') + 1);
+
+/* Where a passage opens in the portal, as on the study's page. */
+function portalHref(ref) {
+  const k = keyOf(ref), id = idOf(ref);
+  if (k === 'baumgarten' || k === 'meier') return PORTAL + '#read=' + k + '&at=' + encodeURIComponent(id);
+  if (k === 'refl-meta' || k === 'refl-logik') return PORTAL + '#refl=' + id.replace(/^r/, '');
+  return PORTAL + '#read=' + encodeURIComponent(k) + '&at=' + encodeURIComponent(id);
+}
+const link = x => '<a href="' + esc(portalHref(x.ref)) + '" target="_blank" rel="noopener">' + esc(x.cite) + '</a>';
+const quote = x => '<span class="q">' + esc(x.q) + '</span><span class="cite">' + link(x) + '</span>';
+const quotes = xs => xs.length ? '<ul class="quotes">' + xs.map(x => '<li>' + quote(x) + '</li>').join('') + '</ul>' : '<span class="none">none in the anchor passages</span>';
+const slot = (v, empty) => v && (!Array.isArray(v) || v.length)
+  ? '<div class="slot filled">' + (Array.isArray(v) ? v.map(esc).join('<br>') : esc(v)) + '</div>'
+  : '<div class="slot">' + esc(empty) + '</div>';
+
+function card(m) {
+  const S = m.seminar || {};
+  return '<div class="mcard ' + esc(m.color) + '">' +
+    '<div class="top"><b>' + esc(m.title) + '</b><span>' + esc(m.name) + '</span>' +
+      '<span class="anch">' + m.anchors.map(link).join('') + '</span></div>' +
+    (m.aa ? '<div class="meta">As the AA prints it: phase <b>' + esc(m.aa.phRaw) + '</b> · locus <b>' + esc(m.aa.loc) + '</b> · ' + esc(m.aa.sig) + '</div>' : '') +
+    '<div class="sec att"><span class="k">How Kant divides</span>' + quotes(m.division) + '</div>' +
+    '<div class="sec att"><span class="k">The kinds, in Kant’s words</span>' + m.kinds.map(x =>
+      '<div class="kind"><span class="lab">' + esc(x.label) + '</span>' + (x.la ? '<span class="la">' + esc(x.la) + '</span>' : '') + '<br>' + quote(x) + '</div>').join('') + '</div>' +
+    '<div class="sec att"><span class="k">His examples</span>' + quotes(m.examples) + '</div>' +
+    '<div class="sec att"><span class="k">Kant comparing them</span>' + quotes(m.compare) + '</div>' +
+    '<div class="sec att"><span class="k">Words for negating, in these passages</span><div class="chips">' + m.words.map(w => '<span class="chip">' + esc(w) + '</span>').join('') + '</div></div>' +
+    '<div class="sec ours"><span class="k">What is divided</span>' + slot(S.divided, 'for the seminar to state, and sign') + '</div>' +
+    '<div class="sec ours"><span class="k">By what</span>' + slot(S.criterion, 'for the seminar to state, and sign') + '</div>' +
+    '<div class="sec ours"><span class="k">Its problems</span>' + slot(S.problems, 'for the seminar to state, each with the passage it shows in') + '</div>' +
+    '<div class="sec ours"><span class="k">What it does about earlier problems</span>' + slot(S.answers, 'the seminar’s claim, with the passages it rests on') + '</div>' +
+    (m.ocr ? '<div class="ocr">' + esc(m.ocr) + '</div>' : '') +
+  '</div>';
+}
+
+$('cards').innerHTML = (typeof STUDY_MODELS === 'undefined' ? [] : STUDY_MODELS).map(card).join('') ||
+  '<p class="note">models.js did not load.</p>';
+</script>
+</body>
+</html>

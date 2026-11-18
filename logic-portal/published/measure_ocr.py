@@ -7,7 +7,8 @@ puts into the data files as meta.agreement, and which the portal shows beside ea
     python3 measure_ocr.py <folder of korpora pages>
 
 The folder holds the korpora.org pages as saved from https://korpora.org/kant/aa02/NNN.html and
-.../aa03/NNN.html, in subfolders aa02/ and aa03/. Their text is used only to measure ours: the
+.../aa03/NNN.html (and aa04/ for the Groundwork), in subfolders aa02/, aa03/ and aa04/; a
+volume whose folder is missing keeps the figures it has. Their text is used only to measure ours: the
 korpora.org terms allow scholarly use with the source named, and forbid passing the texts on, so
 nothing of theirs goes into this repository beyond these percentages.
 
@@ -72,12 +73,21 @@ def measure(path, folder, vol, start, marks):
     return out
 
 
+# (key in ocr-agreement.json, data file, korpora volume folder, start field, page-marks field)
+TEXTS = [('aa02', 'kant-aa02-ocr.js', 'aa02', 'aa', 'pb'),
+         ('krv-b', 'kant-krv-b-ocr.js', 'aa03', 'aa', 'aapb'),
+         ('gms', 'kant-gms-aa04-ocr.js', 'aa04', 'aa', 'pb')]
+
+
 if __name__ == '__main__':
+    # Each text whose korpora volume folder is present is measured again; the others keep the
+    # figures already in ocr-agreement.json.
     folder = sys.argv[1]
-    result = {
-        'aa02': measure(os.path.join(HERE, 'kant-aa02-ocr.js'), folder, 'aa02', 'aa', 'pb'),
-        'krv-b': measure(os.path.join(HERE, 'kant-krv-b-ocr.js'), folder, 'aa03', 'aa', 'aapb'),
-    }
-    with open(os.path.join(HERE, 'ocr-agreement.json'), 'w', encoding='utf-8') as f:
+    path = os.path.join(HERE, 'ocr-agreement.json')
+    result = json.load(open(path, encoding='utf-8')) if os.path.exists(path) else {}
+    for key, name, vol, start, marks in TEXTS:
+        if os.path.isdir(os.path.join(folder, vol)):
+            result[key] = measure(os.path.join(HERE, name), folder, vol, start, marks)
+    with open(path, 'w', encoding='utf-8') as f:
         json.dump(result, f, separators=(',', ':'))
         f.write('\n')

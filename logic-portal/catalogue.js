@@ -54,7 +54,16 @@
                                    the two (meta.otherFrom names that text); not in either print
                     aa, aapb       beside B's pages, AA III's own
                     fix            words an OCR text's extractor repaired: [[offset, the OCR's reading]]
-                  meta.query lists pages read uncertainly, which are shown with a query.
+                    par            the § a passage stands in, where the work numbers its §§ (the
+                                   KpV, the KU): cited "§ 59, A 251" or "§ 59, AA 5:351"
+                    scan           the page image's number in the viewer meta.scan names
+                    sic, supplied  in the KU, the misprints the DTA corrected ([[offset, the print's
+                                   reading]]) and the letters it supplied ([[offset, length]])
+                    gap            what the transcription left out where the passage stands ('table');
+                                   ours, where the Kant Lab transcribed it from the page image
+                    orig, origpb   in AA V, the pages of the edition AA follows, from its margin
+                  meta.query lists pages read uncertainly, which are shown with a query. A page
+                  label in brackets ([xi], [1]) is a number the print does not show.
    ───────────────────────────────────────────────────────────────────────────── */
 
 const PORTAL_TEXTS = [
@@ -161,8 +170,9 @@ const PORTAL_TEXTS = [
     credit: 'Alex' },
 
   // Kant's published works. Where each text comes from, its licence and how clean it is:
-  // published/README.md. AA I and the A edition are clean texts; AA II and the B edition are
-  // OCR of the old Academy edition, repaired by rule: check quotations against the page image.
+  // published/README.md. AA I, the Critique's A edition, the Critique of Judgment's and AA V's two
+  // Critiques are clean texts; AA II, the B edition and the Groundwork are OCR of the old Academy
+  // edition, repaired by rule: check quotations against the page image.
   { key: 'aa01', title: 'Kant, Schriften 1747–1756 (AA I)', short: 'AA I', layer: 'published',
     date: '1747–1756', year: 1747, vol: 1, shape: 'passages',
     file: 'published/kant-aa01.js', global: 'KANT_AA01',
@@ -190,6 +200,46 @@ const PORTAL_TEXTS = [
     source: 'The 1787 text as AA III (1904/1911) prints it, OCR of the Internet Archive’s scan, spelling repaired by rule: about 98% of words agree with the Bonner Kant-Korpus. B pages from AA III’s margin, a query where uncertain. Check quotations against the page image',
     accuracy: { ocr: true, words: 98, how: 'Measured on every page against the Bonner Kant-Korpus’s text of AA III, with spelling differences set aside. The OCR’s commonest misreadings were repaired by rule; each repaired word keeps the OCR’s reading in the data. B pages shown with a query are uncertain.' },
     credit: 'mikrishnan (OCR import)' },
+
+  { key: 'ku-a', title: 'Kritik der Urteilskraft, 1st ed. (A, 1790)', short: 'KU A', layer: 'published',
+    date: '1790', year: 1790, cite: 'A', shape: 'passages',
+    file: 'published/kant-ku-a.js', global: 'KANT_KU_A',
+    source: 'The 1790 print (Berlin und Libau: Lagarde und Friederich) as the Deutsches Textarchiv transcribed it (double-keyed), cited by § and A page, with a link to the DTA’s image of each page; not yet by AA V’s pages. CC BY-SA 4.0',
+    accuracy: { label: 'Clean text: typed twice and compared (Deutsches Textarchiv)', how: 'Keyed twice by the Deutsches Textarchiv and the two compared. Proofread here word for word against the print’s page images on four pages (A v, xx, 180 and 400; 762 words): one word differs, a turned letter in the print (uud) that the DTA gives as und. The DTA corrected nine misprints (the print’s reading is kept in the data) and left the table on A lvi untranscribed; it is transcribed here from the page image, and says so in its text. AA V’s text of the KU, with AA’s pages, is the next entry but one.' },
+    credit: 'mikrishnan (import of the DTA’s TEI)' },
+
+  { key: 'gms', title: 'Grundlegung zur Metaphysik der Sitten (AA IV, OCR)', short: 'GMS (OCR)', layer: 'published',
+    date: '1785', year: 1785, vol: 4, shape: 'passages',
+    file: 'published/kant-gms-aa04-ocr.js', global: 'KANT_GMS',
+    source: 'AA 4:385–463 (1903/1911), read by OCR from the Internet Archive’s scan with UB Mannheim’s Fraktur model, spelling repaired by rule: about 99% of words agree with the Bonner Kant-Korpus. No proofread transcription may be put in a public repository. Check quotations against the page image',
+    accuracy: { ocr: true, words: 99, how: 'Measured on every page against the Bonner Kant-Korpus’s text of AA IV, with spelling differences set aside: 98.8% of words agree over 77 pages, none under 96%. Read by Tesseract with the frak2021 model, which reads these pages far better than the Internet Archive’s own OCR (97.0% by the same measure). The commonest faults left are AA’s letter-spaced words, split or run together. Each repaired word keeps the OCR’s reading in the data.' },
+    credit: 'mikrishnan (OCR import)' },
+
+  // AA V, the old Academy edition's text of the second and third Critiques, as Project Gutenberg's
+  // volunteers transcribed and proofread it: cited by AA page, with every page marked.
+  { key: 'kpv-aa', title: 'Kritik der praktischen Vernunft (AA V)', short: 'KpV (AA V)', layer: 'published',
+    date: '1788', year: 1788, vol: 5, shape: 'passages',
+    file: 'published/kant-kpv-aa05.js', global: 'KANT_KPV_AA',
+    source: 'AA 5:1–163 (1908/1913), whose text follows the first edition of 1788, as Project Gutenberg’s volunteers (Distributed Proofreaders) transcribed and proofread it; cited by § and AA page, each page linked to the Internet Archive’s scan of AA V. Public domain',
+    accuracy: { label: 'Clean text: a proofread transcription of AA V (Project Gutenberg)', how: 'Transcribed and proofread by Distributed Proofreaders for Project Gutenberg (EBook #49543), with every AA page break marked. The transcribers corrected four misprints and listed them; the data keeps AA’s reading. The original edition’s pages, which AA V prints in its margin, are kept in the data.' },
+    credit: 'mikrishnan (import of Project Gutenberg’s transcription)' },
+
+  { key: 'ku-aa', title: 'Kritik der Urteilskraft (AA V)', short: 'KU (AA V)', layer: 'published',
+    date: '1790 (AA V follows the 2nd ed., 1793)', year: 1790, vol: 5, shape: 'passages',
+    file: 'published/kant-ku-aa05.js', global: 'KANT_KU_AA',
+    source: 'AA 5:165–485 (1908/1913), whose text follows the second edition of 1793, as Project Gutenberg’s volunteers (Distributed Proofreaders) transcribed and proofread it; cited by § and AA page, each page linked to the Internet Archive’s scan of AA V. Public domain',
+    accuracy: { label: 'Clean text: a proofread transcription of AA V (Project Gutenberg)', how: 'Transcribed and proofread by Distributed Proofreaders for Project Gutenberg (EBook #55925), with every AA page break marked. The transcribers corrected thirteen misprints and listed them; the data keeps AA’s reading. The second edition’s pages, which AA V prints in its margin, are kept in the data.' },
+    credit: 'mikrishnan (import of Project Gutenberg’s transcription)' },
+  // Christian Wolff's German Logic, the school logic Meier and Baumgarten wrote from: read off
+  // Munich's scan of the 1754 print by OCR, four readings of each page merged by vote, and not
+  // corrected. Cited by the print's own chapter, § and page. See wolff/README.md before quoting.
+  { key: 'wolff-dl', title: 'Wolff, Vernünfftige Gedancken von den Kräfften des menschlichen Verstandes (German Logic; OCR)', short: 'Wolff, Dt. Logik (OCR)', layer: 'tradition',
+    date: '1754 (1st ed. 1713)', year: 1713, shape: 'passages',
+    file: 'wolff/wolff-deutsche-logik-1754-ocr.js', global: 'WOLFF_DEUTSCHE_LOGIK',
+    source: 'Halle: Renger, 1754, from the copy in the Bayerische Staatsbibliothek (Ph.sp. 953), read by OCR off its scan (digitale-sammlungen.de) by wolff/wolff_ocr.py: the Vorrede, the Vorbericht, sixteen chapters and the two registers, with Wolff’s marginal summaries. Cited by chapter, § and page of this print. Check quotations against the page image',
+    accuracy: { ocr: true, words: 98, how: 'Proofread word by word against the scans on three pages (pp. 23, 135, 198): in the text 5 of 646 words misread, about 99% right; in Wolff’s marginal summaries 5 of 26, about 81%; 98% in all. The misreadings are chiefly the § sign read as a letter, words beside ornamental initials, and the marginal notes. Each page was read four times and merged by vote; where the readings disagreed and no majority decided (about 5% of words) the word is underlined, with the other reading on hover. Not corrected by hand.' },
+    credit: 'mikrishnan (OCR import)' },
+
 ];
 
 /* What the portal does not have, and why: shown in small type under the texts on the home page
@@ -234,6 +284,14 @@ const PORTAL_LAYERS = [
      map    for a text cut differently from the one the translation was made from: a pinned file
             naming, for each of the portal's passages, the entries that make it up (mapGlobal)
      who    the Contributors entry the portal credits for it
+     styles the styles it has, if not the two machine styles: ['pub'] for a published translation
+     pub    for a published translation: who translated it, when, and its status, as the portal shows it
+
+   A published translation is a translator's own, out of copyright, cut to the portal's passages by
+   matching its paragraphs to the German (Jesus's finder had it already cut at the AA pages); a
+   passage it could not be matched to with confidence has no English. A text with only a published
+   translation shows it whichever style is chosen. The few passages its translator did not translate
+   (title-page lines, contents) have a machine translation, and their note says so.
 
    These are machine translations, each following one published translator's stated method;
    neither translator translated these texts. The portal says so wherever it shows one.
@@ -242,6 +300,7 @@ const PORTAL_TR_STYLES = [
   { key: 'guyer', label: 'Guyer–Wood principles', tag: 'literal; one English word per German term; sentences kept whole' },
   { key: 'kemp', label: 'Kemp Smith principles', tag: 'faithful to the sense; readable English; tangled sentences resolved' },
 ];
+const PORTAL_TR_PUBLISHED = { key: 'pub', label: 'Published translation', tag: 'a translator’s own published translation, out of copyright, cut to these passages' };
 const PORTAL_TRANSLATIONS = [
   { text: 'meier', set: 'meier', key: 'meier:N', file: '../Individuals/Jesus-La-Paz/translations/meier-STYLE.js', who: 'jesus' },
   { text: 'refl-logik', set: 'refl', key: 'refl:N', file: '../Individuals/Jesus-La-Paz/translations/refl-STYLE.js', who: 'jesus' },
@@ -252,4 +311,23 @@ const PORTAL_TRANSLATIONS = [
     map: 'pinned/jaesche-translation-map.js', mapGlobal: 'PORTAL_PIN_JAESCHE_TR' },
   { text: 'baumgarten', set: 'baum', key: 'baum:N', file: '../Individuals/Jesus-La-Paz/translations/baum-STYLE.js', who: 'jesus' },
   { text: 'refl-meta', set: 'reflm', key: 'reflm:N', file: '../Individuals/Jesus-La-Paz/translations/reflm-STYLE.js', who: 'jesus' },
+  { text: 'dohna', set: 'dohna', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/dohna-STYLE.js', who: 'jesus' },
+  { text: 'poelitz', set: 'poelitz', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/poelitz-STYLE.js', who: 'jesus' },
+  { text: 'philippi', set: 'philippi', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/philippi-STYLE.js', who: 'jesus' },
+  { text: 'metaphysik-k3', set: 'metaphysik-k3', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/metaphysik-k3-STYLE.js', who: 'jesus' },
+  { text: 'metaphysik-mrongovius', set: 'metaphysik-mrongovius', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/metaphysik-mrongovius-STYLE.js', who: 'jesus' },
+  { text: 'logik-mrongovius', set: 'logik-mrongovius', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/logik-mrongovius-STYLE.js', who: 'jesus' },
+  { text: 'herder', set: 'herder', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/herder-STYLE.js', who: 'jesus' },
+  { text: 'krv-a', set: 'krv-a', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/krv-a-STYLE.js', who: 'jesus' },
+  { text: 'krv-b', set: 'krv-b', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/krv-b-STYLE.js', who: 'jesus' },
+  { text: 'aa01', set: 'aa01', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/aa01-STYLE.js', who: 'jesus' },
+  { text: 'aa02', set: 'aa02', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/aa02-STYLE.js', who: 'jesus' },
+  { text: 'gms', set: 'gms', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/gms-STYLE.js', who: 'jesus', styles: ['pub'],
+    pub: 'T. K. Abbott’s translation, Fundamental Principles of the Metaphysic of Morals (1873); public domain' },
+  { text: 'kpv-aa', set: 'kpv-aa', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/kpv-aa-STYLE.js', who: 'jesus', styles: ['pub'],
+    pub: 'T. K. Abbott’s translation, The Critique of Practical Reason (1879); public domain' },
+  { text: 'ku-aa', set: 'ku-aa', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/ku-aa-STYLE.js', who: 'jesus', styles: ['pub'],
+    pub: 'J. H. Bernard’s translation, Kant’s Critique of Judgement (2nd ed. 1914); public domain' },
+  { text: 'ku-a', set: 'ku-a', key: 'ID', file: '../Individuals/Jesus-La-Paz/translations/ku-a-STYLE.js', who: 'jesus', styles: ['pub'],
+    pub: 'J. H. Bernard’s translation of the second edition, Kant’s Critique of Judgement (2nd ed. 1914), matched to the 1790 text paragraph by paragraph; public domain' },
 ];

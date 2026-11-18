@@ -11,7 +11,9 @@ and then answers at once.
 ## Finding your way
 
 Four places, along the top (pressing **Read** again while reading goes back to the list of texts):
-- **Search** opens on one question box, with every text there to open and read in full.
+- **Search** opens on one question box, with every text there to open and read in full,
+  grouped by kind and in date order: the textbooks, Kant's notes, the logic lecture notes, the
+  metaphysics lecture notes, and the published works. **Read** groups them the same way.
 - **Read** lists the corpus. Open any text to read it through: its contents, a box to go
   to a §, an AA page or a Reflexion, and **Find in this text**, which marks every place a word
   or words stand in that text, with ‹ › (or Enter and Shift-Enter) to go from one to the next.
@@ -32,6 +34,11 @@ Four places, along the top (pressing **Read** again while reading goes back to t
   - note cards with phase chips coloured by decade, each opening Adickes' note;
   - lemma and Satz chips that tint the words in the § the note is on, page-position glyphs,
     and interpolated and vacat notes;
+  - **open in its full text ▾** under each note, which unfolds the note where it stands among
+    the notes around it, in the Academy edition's order, inside its card. It scrolls on its own,
+    drawing more as you go, and closes again with **close its full text ▴**, so the list of notes
+    keeps its place. **Read on in the pane ›** in the fold opens the note on its own, with its
+    Compare and Connections, as the link used to;
   - the decade filter, and search within the notes;
   - the Tradition tab (Meier);
   - Baumgarten's German glosses, misprint notes, 1757 pages, the "Handschriftliche
@@ -42,40 +49,6 @@ Four places, along the top (pressing **Read** again while reading goes back to t
 - **Explore** gathers the seminar's starting points: the doctrines classified passage by
   passage, the parallel passages, and the three lexicons.
 - **Contributors** lists who built what.
-
-**Class sessions and investigations.** A *session* is the record of one class: the passages the
-class looked at, in order, with the notes and questions it came up with. An *investigation* is
-a question the class wants to look into, bundled with the passages and notes that bear on it.
-It outlives the session that started it: later sessions add to it.
-
-- **In class.** The header's **Session** button opens a small panel at the bottom right. Turn on
-  **Recording**, then press **+ Session** on each passage the class examines: on a search hit,
-  on a paragraph of a full text, or beside the passage open on the right. Type a note or
-  question into the panel and press Enter.
-- **Afterwards: Organize and save.** This opens the session page over the portal, as the
-  Handouts page does. Tick items and press **+ New investigation from the ticked**, or **Add
-  the ticked** to an investigation already there. *Or add to one begun earlier* continues an
-  investigation from an earlier session. Each passage opens with ▸ to its whole text (and its
-  English, when the English is on), or all at once with *open all*; its citation, as in the panel,
-  opens it in the portal. Each investigation has a line saying what the question
-  is, and can have its own Canvas discussion; ✎ gives a passage a note. **Save for the class**
-  opens GitHub with the session as a file in [sessions/](sessions/), and you press *Commit
-  changes*.
-- **For students, inside the portal**, every passage is drawn live, with **Read it in
-  context**. `…/portal/?session=<name>` is a session, numbered, with its investigations and the
-  link to its Canvas discussion. `…/portal/?investigation=<name>` is an investigation, with what
-  each session added to it. `…/portal/?investigate` lists every investigation, newest first.
-  Under **Read** are the sessions and investigations.
-- **For Canvas.** Every page, and the session page, has **Copy for Canvas**. It copies rich text
-  for the forum: each passage cited, with its opening words, its note, and a link back to it in
-  the portal. The portal keeps no comments, and cannot post to Canvas itself, since that would
-  need a Canvas login and the site is public: paste the copy into the discussion.
-- **Export to Word**, on the session page (and **Word** in the panel), downloads the session as
-  a .docx: every passage whole, with its citation, its note, and its English when the English
-  is on, then the investigations with their items. It needs no saving for the class.
-
-Until it is saved, a session is kept in your own browser. The code is
-[class-sessions.js](class-sessions.js).
 
 Wherever you are, clicking an example (a search hit, a classified passage, a parallel) opens
 it **in its full text** on the right, scrolled to the passage and highlighted, so you can look
@@ -92,6 +65,487 @@ text, and a button offers to search for them everywhere.
 A search's results have two tabs: **Overview**, with the phrasings and where they occur, and
 **Passages**. The search options fold away under **Options**.
 
+## Handouts
+
+While you read, you can collect passages instead of copying them into a document. Press
+**Handouts** in the header and give the class password: it turns on *handout mode* and opens
+the Handouts page. The handouts are the class's, so nothing of them opens without the
+password; **Remember on this computer** spares asking again there, and **Lock**, on the
+Handouts page, forgets it. [handouts/README.md](handouts/README.md) says how the password is
+kept and what it can and cannot protect. Handout
+mode starts off, so nobody meets buttons they did not ask for, and the browser remembers the
+choice. The page's **+ Handout on passages** switch turns it off again; your handouts are kept.
+
+- **Add a passage.** Point at a passage in the search results or in a full text and press
+  **+ Handout**, or press **+ Add to handout** beside the passage open on the right. Its
+  English comes along with it.
+- **Add an excerpt.** Select some of a passage's words, in the original or in its English,
+  and press **+ Add these words to handout**. A few sentences come with the same sentences of the
+  English (matched sentence by sentence; where the sentences cannot be matched, roughly the
+  same stretch, and marked so), shown from the start for students; words picked in the English
+  bring the matching German. In Kant's published works the citation narrows to the pages the
+  words are on.
+- **English with every passage, or none.** One switch, **English**, in the Handouts page's top
+  bar, in Class view and Instructor view alike. On, every passage shows its English beside it,
+  for students who read no German or Latin, on the Handouts page and in every export; off, none
+  does. Where there is no room for two columns (a phone, a narrow window, the handout side by
+  side with the portal) the English goes beneath instead, and the exports keep it beneath. The
+  switch is this computer's choice and changes no handout. A passage added while the English was
+  off gets its English from the portal's translations the next time the portal opens, and keeps
+  it. Its words, label, note and marks stay as they were.
+- **Side by side.** **⇆ Side by side** on the Handouts page puts your handout in a column on the
+  right while you read and add on the left; drag its edge to make it wider, and **⤢ Full page**
+  to go back. The browser remembers which you chose.
+- **Arrange it.** **Handout** in the header opens your handouts. Keep as many as you like,
+  one per class, say. The one on screen is the one you add to. Drag any card by its ⠿ or its
+  top line, as in the Finder: drop it between two cards (a line shows where), drop a passage
+  onto a note to put it under that note, or drag it out of a note to anywhere else; notes and
+  passages move between sections the same way. ↑ and ↓ (⤒ and ⤓ for the top and the bottom)
+  also move a card. To move a note to another section without dragging, use the menu at its
+  top that says which section it is in (*in “Part one”*): choose the top or the end of any
+  section, or just after another note, and the note goes there with its passages, with **Undo**.
+  To have a passage in two places, under two headings say, choose where in **⧉ Show it twice…**
+  at the foot of its card. The two are linked, and both say *⧉ shown twice*: a label, note,
+  highlight, margin note or cut made in either, or its English hidden, is made in both. Moving or
+  deleting one moves or deletes that one alone, and **Make separate** unlinks it.
+  A card's buttons stay faint, and an empty label or note field blank, until
+  you point at the card. You can add section headings. An excerpt whose words cannot be found in
+  its passage shows the English of the whole passage.
+- **Fold sections and notes away.** ▾ on a section heading folds the section up to its heading
+  and what it holds (*3 passages, 1 note*); ▾ on a note folds it to its first line and its
+  number of passages; ▸ opens either again. **Fold all sections** shows just the outline, **Fold
+  all notes** just the notes' first lines, and **Open all** opens everything. A folded section
+  moves as a whole, by its ⠿ or with ↑ ↓ ⤒ ⤓, and a card dropped onto a folded section or note
+  goes in and stays folded away (with **Undo**). Folding only changes what is on screen, never
+  the handout or its exports; anything added to something folded in any other way (from the
+  portal, by ↑ ↓, from the trash) opens it, so nothing goes out of sight unasked.
+- **Join passages the portal divides.** Where a passage of the handout is followed by the next
+  one of the same text (or a later one), **Join with the next passage** makes them one passage
+  of the handout, cited across both (*AA 1:392–394*, *A 50–52 / B 74–76*); the portal's own texts
+  are not changed. Each part keeps its citation as a small marker in the text, which opens that
+  part where it stands in the reader; **Read it where it stands** goes to the first. **Split** gives the passages
+  back as they were. Students see a joined passage as one, with the same markers. To use one of
+  its passages again elsewhere in the handout, on its own, choose it under **Use one on its own…**
+  beneath the joined passage, or press **+ Handout** or **▾** on it in the portal: it comes in
+  whole, as a passage of its own, and the joined passage keeps it too.
+- **Say what you want to say.** **+ Note** adds a note: your setup, a claim, how some
+  passages bear on each other, a question for students. **+ Note in this section**, on a
+  section heading, adds one at the top of that section, just under its heading, and a note
+  shows the section it is in. What stands under a heading is set in a little. **Note**, at the top
+  of a note, is a title to type into: give the note one and it stands there in place of *Note*,
+  on the class screen and in the exports (in the Handout tool text as a `###` heading).
+- **Ask a question, and keep its answer back.** In a note, or in a passage's note, start a
+  paragraph with **Answer:**. On the class screen the question shows first, with only a small
+  **Answer ▸** beneath it (**2 answers ▸** for two such paragraphs in a row), which ↓ opens
+  before going on. On the Handouts page and in the exports the note stays
+  as you wrote it.
+  **Add passages here**, on a section heading, sends every passage you add in the portal to
+  the end of that section, in the order you add them, until you press it again or the
+  **Into: …** button in the header.
+  A note can stand on its own. To put
+  passages under it, press its **Collect here** button. Every passage you add in the portal
+  then goes under that note, until you press it again or the **Under: …** button in the
+  header. You can also move a passage with its **Under** list. Each passage has a
+  **Label** of your own, such as *Against X*, and a note of its own.
+- **Shorten a passage.** When a passage is more than students need, select the words to drop
+  and press **✂ Leave out**. […] stands in their place on the class screen and in every export,
+  and … in **Class view**, and the passage keeps its address: **Read it where it stands** still
+  opens it whole, at its paragraph in the reader. On the Handouts page the words stay,
+  struck through; click them to put them back, or press **Put back all that was left out**.
+  Whatever you leave out of the German goes out of the English beside it too. The two are
+  matched clause by clause, or sentence by sentence, as the translations keep them; a few words
+  inside a sentence take about the same stretch of the English, struck through with a dashed line
+  on the Handouts page for you to look over. Cuts made before this get their English the next
+  time the Handouts page shows them. Putting back the German puts back its English.
+- **Mark up the passages.** Select words of a passage, or of its English, and choose
+  **Highlight**, **Underline** or **✎ Margin note** (the selection takes whole words). A margin
+  note sits in the right margin, level with its words, which get a dotted line and a number;
+  on a narrow card it goes under the text. Click a highlight or underline to remove it, or
+  select words and press **Remove marks**; ✕ removes a margin note (with **Undo**), and one
+  left empty goes by itself. Highlights and underlines appear in the Word file, the PDF and the
+  Class view, and underlines as `__…__` in the Handout tool text; margin notes are yours
+  and stay on the Handouts page. A mark keeps its words, not their position, so it stays on
+  them however the passage is drawn.
+- **Change your mind.** ✕ moves a passage to the handout's **Trash**, which folds open on the
+  left. Click anything there to put it back where it was. **Empty the trash** clears it for
+  good.
+- **Export it** as **Word** (Pages opens it too), as a **PDF** (the browser's Print
+  window: choose *Save as PDF*), or as **Handout tool text**. The last is plain text in the
+  markup of Maya's Handout tool, which turns it into a handout in her house style. Notes,
+  labels and the passages under each note come along. Every export marks the English as
+  machine translation.
+- **Two views.** The Handouts page's top bar has **Class view** *for you* and **Instructor
+  view** *for Maya*. Class view is on whenever the page opens, and is the one to show the class:
+  what you have left out of each passage shows as … rather than struck through, and everything
+  that would add to or change a handout is put away (adding, moving, marking, typing, the trash,
+  **+ New handout**, **Open file**, and the **+ Handout** buttons on the portal's passages).
+  Reading, folding, exports and **Read it where it stands** stay. **Instructor view** is for
+  making and changing handouts. For the room's screen in large type, one passage after another,
+  there is still the [class screen](teaching/class-screen/), among the teaching tools.
+- **Show a handout to the class.** In Instructor view, **Show this handout to the class** puts
+  a copy of it where everyone with the class password finds it, on their own Handouts page under
+  **Shown to the class**: to read, fold, export and open where it stands, but not to change.
+  What you change afterwards follows by itself a few seconds later, and an open Handouts page
+  picks it up within half a minute. **Stop showing it** takes it away again, and so does deleting
+  the handout. Your margin notes and your trash stay out of the class's copy, as they stay out
+  of the exports. It works from the live site only. [handouts/README.md](handouts/README.md)
+  says where the copy is kept.
+
+Your handouts are kept in your own browser on your own computer. Nothing of them leaves it except
+a handout you show to the class. **Save to file** writes them all to one `.json`
+file, to keep or to open in another browser with **Open file**. Clearing the browser's
+site data deletes them.
+
+Each passage keeps its address in the portal (`textKey:id`, the same as in a `#p=` link)
+beside its words. So a later handout builder can bring passages in by reference rather than
+by copied text. **Read it where it stands**, or a click on the passage's citation, goes back to
+its paragraph in the reader, however the handout's copy has been changed: a note of Kant's opens
+beside the textbook § it is on, picked out among the notes there. The code
+is [handout-tray.js](handout-tray.js). It reads the portal only through `window.PORTAL`, and
+keeps everything under one `localStorage` key, `kantlab-handouts-v1`.
+
+## My topics
+
+While you read, you can keep the passages you find under topics of your own: *Nihil
+negativum*, *Real opposition*, whatever your research is following. They are yours alone. Press
+**My topics** in the header: it turns on the ☆ Topic buttons and opens the My topics page.
+The page's **☆ Topic on passages** switch turns the buttons off again, and your topics are kept.
+
+- **Keep a passage.** Point at a passage in the search results, in a full text, in Meier or
+  Baumgarten, or among Kant's notes, and press **☆ Topic**, or press it beside the passage open
+  on the right. Tick one or more of your topics, or type a new one and press Enter. A topic
+  works like a label, not a folder: one passage can stand under several topics at once, as one
+  passage with one note. A kept passage's button says where it is: *★ Real opposition*, *★ 3
+  topics*.
+- **Keep some of its words.** Select a few words of a passage, in the original or in its
+  English, and press **☆ Keep these words**. They are kept with the passage's address. In the
+  original, the selection can run on from one passage into the next ones of the same text, and
+  is kept as one stretch, cited by the pages its words are on: a sentence the transcription cut
+  across several short passages can be kept whole. A lecture paragraph long enough for the
+  portal to draw in pieces gets ☆ Topic beside the piece under the pointer, which offers **only
+  this part** as well as the whole passage; a run of short passages drawn together offers
+  to keep the run as one (*these 5 short passages together*). The picker offers first what you chose last. A passage
+  some of whose words are kept says so: *◐ Real opposition*.
+- **Read them.** The My topics page lists your topics on the left. Each passage shows its
+  citation, its opening words (**▾ the whole passage** shows all of it) and a note of your own.
+  Click the citation to read it where it stands in the reader. **Also under** shows only the
+  passages under two topics at once, and **Order** puts a topic as you arranged it (↑ ↓), the
+  newest first, or by the date of the text. Each topic has a note of its own, for the question
+  it is following.
+- **Find among them.** The box above the passages narrows them to those with every word you
+  type: in the citation, the work, the passage's words in full or your note on it, with case,
+  accents and ß left out of account, as on a topic's board. The words are marked where they
+  stand, and one further into the passage than its card shows, or in your note, is given
+  beneath its words, with the words round it. It looks in a topic, in **All passages** or in
+  **Unsorted**, and stays as you go from one to another; **Esc** clears it.
+- **Change your mind.** **×** on a topic's label takes the passage off that topic; a passage
+  under no topic is kept, under **Unsorted**. **✕** removes it from My topics, with **Undo**.
+  **Delete this topic**, on a topic, puts its passages under their other topics, or under
+  Unsorted: none of them goes.
+
+**A board for a topic.** Beside a topic's name is **▦ Make a board**, and once it has one, **▦
+Board**. It opens [the topic's board](topic-board.html), in the same tab, with the portal beside
+it: a board to put the topic's passages on as cards, move about, join with arrows and annotate.
+**← Passages**, at its top left, brings you back to the list. It is the board of the study [the
+kinds of nothing](studies/kinds-of-nothing/README.md#the-board), made the portal's own, for one
+reader's topic rather than the seminar's one board.
+
+- **You put the passages on it, one at a time.** A new board is empty. The topic's passages wait
+  under **Passages**, a tab in the side (or **Passage…** among the tools), in the order you
+  arranged them, with a count of those still waiting. Press **+ On the board**, or drag one onto
+  the board where you want it; dropped inside a group's frame, it goes into that group. **▾ read
+  it all here**, on a passage waiting, opens its words in full where it stands in the list (and,
+  for words you kept, the passage they are from); **▴ less** closes it again. A passage you put
+  under the topic later, anywhere in the portal, the portal beside the board included, joins
+  them there; nothing comes onto the board by itself. **Take it off the board**, on a passage's
+  card, sends it back to Passages; it stays under the topic.
+- **Find among them**, at the top of Passages, narrows both lists, those waiting and those on
+  the board, to the passages with every word you type: in the citation, the work, the passage's
+  words in full or your note on it, with case, accents and ß left out of account. The words are
+  marked where they stand, and a word further into the passage than its row shows is given
+  beneath it, with the words round it. **Esc** clears it.
+- **A passage you take off the topic** in the list keeps its card, drawn dashed and marked *no
+  longer under this topic*, with **Put it back under the topic** and **Take it off the board**,
+  so that its arrows are not lost without your saying so.
+- **Around them,** whatever you add: **Notes**, **Questions** (what the topic asks, in your
+  words), **Groups** (a named frame whose cards move with it), boxes, arrows named on the spot
+  (*develops*, *contradicts*, *qualifies*, *same as*, *cf.*, *answers?* to a question, or a word
+  of your own), drawing with a pen or an Apple Pencil, views, layers, **Focus** and **Find on the
+  board**.
+- **One passage in several groups.** A passage can stand in as many groups as it belongs to, as a
+  card in each: **+ in another group too**, in a passage card's side, puts a second card of it in
+  the group you choose. So does dragging a card into another group's frame with **⌥** held (a
+  plain drag moves it, as before), or dragging the passage from *On the board*, under Passages,
+  into a frame. Its cards are one passage: the same words, the same note and the same
+  annotations, so what you write on one shows on all of them. Each has its own heading, which a
+  second card starts with, and its own arrows, which it starts without. Each card says where the
+  others are, *also in ● Contradiction*, and goes to them when clicked; selecting one outlines
+  the rest. A passage goes into a group once: put it in again and you are taken to the card
+  already there. Taking one card off the board leaves the others; the passage goes back under
+  Passages with its last. **Change what it quotes** on one of its cards changes it on all of
+  them; **Split it in two…** leaves the others quoting the first part; and **Join into one
+  card** makes the passages' other cards cards of the joined one, one to a group.
+- **Tables.** Press **Table** and choose how many columns and rows on a small grid, or type the
+  numbers (12 and 40 at most), and whether the first row, the first column, both or neither are
+  headings; both can be changed later without losing a word. Type in a cell where it stands:
+  **Tab** goes on to the next, and in the last cell adds a row. A cell can hold the topic's
+  passages beside its words: drag one onto it from **Passages**, or choose it in the side, and
+  click it to read it beside the board. A passage in a cell stays under Passages, to go on the
+  board as a card as well. Rows and columns are inserted and deleted where you last clicked; a
+  column's edge widens it, the corner the whole table. **⌘C** or **Copy the table** copies it for
+  Word or a spreadsheet, each passage as its citation and a link to it in the portal. A table
+  copied from Word, a spreadsheet or a web page and pasted on the board becomes a table, with
+  headings only where it marked them; pasted into a cell being typed in, it fills the cells from
+  there on.
+- **Parallels in a cell.** A cell can hold parallels as it holds passages, each a chip in the
+  parallel's colour with its letter and name, *(a) nihil negativum*, or with its words in one
+  passage and their citation, *(a) “(nihil negativum)” · KrV A 291*. Drag a parallel's chip off a
+  passage card onto the cell, and it brings its words in that passage; drag its knot, or its line
+  under **Parallels**, and it comes as a whole. In the side, under the cell last clicked, **Link a
+  parallel to this cell…** does the same, listing first the parallels with words in the cell's
+  own passages, and beside each parallel in the cell a list chooses whether its chip quotes its
+  words in one passage or stands for it as a whole. **+ Put it in a cell**, in a parallel's side,
+  waits for the cell to be clicked. Click a chip in a cell and the parallel is shown on the board,
+  as from its chip on a card; one that quotes words goes to their card as well. While a parallel
+  is shown, the cells that name it are outlined in its colour, and its side lists them under
+  **In tables**. The chip reads the parallel afresh each time, so renaming or re-lettering it
+  changes every cell; a parallel deleted stays in its cells as the letter and name it had, marked
+  so. On a shared board, a parallel only you can see cannot go in a cell, since the cell is
+  everyone's.
+- **Arrows from and to one cell.** Each cell of a table has a **→** of its own, beside it when
+  the mouse is over it, or once it is tapped: drag it to a card (a passage, a note, a question,
+  a link to another topic), to another cell of any table, or to a group's frame or name, and
+  the arrow goes from that cell alone. An arrow drawn from any card's **→** goes to the cell it
+  is let go over; let go over the table's name or edge, it goes to the table as a whole, and
+  so does the table's own **→**. What it would go to is lit as you drag. **+ Arrow from this
+  cell**, in the side, does the same with two clicks. Over its table the arrow is drawn again
+  as far as the cell, with a dot where it leaves one, and it is named by the cell's headings,
+  *row “nihil privativum”, column “Wolff”*, or by number. It keeps to its cell when rows and
+  columns are inserted round it; deleting the cell's row or column asks first, and takes its
+  arrows too. **From the table as a whole instead**, in an arrow's side, lets go of the cell.
+  Any arrow can now go to or from a group as well: the group's side lists its arrows, and
+  deleting the group takes them.
+- **Click a card** to read its passage in full in the side, with the words you kept, if you kept
+  only some, and **your note on it**, which is the same note as in the list: write it in either.
+  The passage opens in the portal beside the board at the same time, under **Reading**.
+  **▾ read it all here**, on a card whose passage is longer than it shows, opens the card on the
+  board to the passage in full, above the cards it covers; **▴ less** closes it. An opened card
+  is not saved as opened.
+- **Change what a card quotes.** A passage is whatever the transcription made one paragraph,
+  from a line to six pages, so a card can quote less of it, or more. **Change what it quotes**,
+  in a passage card's side, shows the passage between the ones before and after it: select the
+  words you want there, or move the start or the end a sentence at a time (‖ marks where the
+  portal finds a sentence beginning; click one to move the nearer edge to it), or take in the
+  passage before or after. The card then cites the pages its words are on, *AA 24:882* rather
+  than *AA 24:880–885*, and says what it is cut from. **Split it in two…** makes two cards of
+  one at the ✂ you choose: your note stays with the first, and each arrow with the card you
+  say. Select cards of passages of one text (⇧-click) and **Join into one card** makes them one,
+  with any passages between them, every note, and a ¶ where the text began a new paragraph.
+  **⌘Z** undoes each, on the board and in My topics together. A passage that stands under
+  other topics too asks first: change it under all of them, or keep a copy for this topic
+  alone. The words and pages stay the text's; only where a stretch starts and ends is yours. A
+  stretch never runs from one Reflexion into the next, nor over more than 40 passages, and words
+  kept from the English stay as they are. On a shared board a card shows the stretch it was
+  shared with, but what it quotes can't yet be changed there.
+- **Annotate** some of a passage's words, or the whole of it, as on the study's board:
+  *Problem*, *Relevant to…*, *Interpretation*, *Comment*, with replies and *resolved*. An
+  annotation belongs to the passage, not the board, so it shows on every one of your boards
+  where that passage stands. *Relevant to…* can name a card on the board, or one cell of a
+  table: click it while you write, and a dotted thread joins the words to it. The cell keeps
+  the link as rows and columns are added or deleted round it. A card's side, or a cell's,
+  lists under *Relevant to it* every annotation that names it.
+  *Relevant to…* can also name **another of your topics**: start typing its name and choose it
+  from those offered, or pick it from the list of them all. The topic needs no board of its own.
+  The annotation shows the topic's name as it is now, and opens its board, making one if it has
+  none yet. The topic lists, in turn, the annotations relevant to it, each with its passage, the
+  words it is on and the board it was made on: in My topics, beneath the topic's note, and in the
+  side of its board when nothing is selected. One that names a card on its board by a link pasted
+  from there shows in that card's side too.
+- **Parallels: words that answer one another.** When several passages say the same thing, select
+  the words in one of them and choose **Parallel…** in the bar by them: name it (the words are
+  offered), and, if you like, say what kind of correspondence it is (*same words*, *same term*,
+  *translation*, *paraphrase*, *example*, *contrast*, *cf.*, or a word of your own). The parallel
+  is then *in hand*, like a highlighter picked up: click the next card, select the words there
+  that answer, and the bar offers **+ (a)** first. **Esc** puts it down. Each parallel has a
+  colour and a letter, (a), (b), kept with it, so that a note can say "see (b)". Its words are
+  tinted in its colour, with its letter after them, on the cards and in the side; each card
+  carries a chip for it; and a thread runs from each of its cards to a knot marked with its
+  letter. Pointing at any of its words, chips or knot lights them all. Click a chip or a knot, or
+  its words in the side, and it is **chosen**: each of its cards turns to its words, even those
+  further in than the card's opening, the rest of the board dims, and the side shows it, its
+  name, kind and note to change, each of its places with the words round them and a note of its
+  own, **Hold it**, **Compare its passages** and **Delete the parallel**. Beneath a passage in
+  the side, **Parallels** lists the words elsewhere that answer to its own, each opening its
+  card, or, for a passage not on this board, its place in the portal. **Parallels**, among the
+  tools, lists them all and downloads them as a list. Like an annotation, a parallel belongs to
+  its passages, so it shows on every one of your boards where they stand. It is what you said:
+  the page never adds words to one, nor joins two because they share words. Words it had to find
+  again, because the passage now has them elsewhere or twice, are outlined dashed.
+- **Echoes: stretches that answer one another, two at a time.** A parallel suits a term that
+  comes back; an echo suits an idea, a stretch of argument or a whole section that comes back in
+  another passage. Select the stretch, as long as you like, across the passages of a card that
+  runs on if need be, and choose **Echo…** in the bar, or press **Echo… the whole of it** beneath
+  a passage in the side. The stretch is then in hand. Select the stretch that answers it in
+  another passage and press **+ echoes …**, and say how close the two are (*close*, *partial*,
+  *loose*, or *checked: not alike*), and if you like what kind of echo it is (*same argument*,
+  *abridged*, *same steps, another order*…), in what respect, which draws on which, and a note.
+  The first stretch stays in hand, so the next stretch you choose answers it too. An echo joins
+  two stretches only: saying that A answers B and that B answers C says nothing of A and C, and
+  nothing is drawn between them. **Hold this stretch**, on an echo's end, holds that very
+  stretch, so that what else answers it is said of the same words. On the board, a strip down a
+  card's right edge marks where its stretches fall, and a ribbon joins the two stretches of each
+  echo, as wide as they are and paler the looser the echo; a pair found not alike is listed but
+  never drawn. Wherever a passage shows in full, in the side, in Compare or on a card opened, a
+  bracket in its margin marks each stretch, with a tick where it starts and where it ends.
+  Beneath a passage in the side, **Echoes** lists the stretches elsewhere that answer its own.
+  Click a ribbon, strip or bracket and the echo is **chosen**: the board dims round its two
+  cards and the side shows it, to change how close it is, its kind, respects, direction, note
+  and colour, to **Compare the two** or to delete it. **Echoes**, among the tools, lists them all,
+  downloads them as a list, and sets every stretch against every other in a matrix: shaded where
+  you made an echo, ≠ where you found two not alike, blank where nothing is said. Tick **show the
+  page's chains** and a dashed dot marks two stretches joined only through a third: the page's
+  finding, not yours. Click a blank cell, or such a dot, to judge the pair. A stretch's
+  **neighbourhood** shows the stretches you said answer it round it, and beyond them, grey and
+  dashed, those they answer in turn. Like a parallel, an echo belongs to its passages, is kept
+  with your annotations, and shows on every one of your boards where both stand. A stretch the
+  page had to find again is bracketed dashed.
+- **Compare.** Select two to four passage cards and press **Compare them side by side**, or
+  **Compare its passages** on a parallel, or **Compare the two** on an echo. The passages stand in
+  full in columns over the board, each passage of a card that runs on, and in the gutter between
+  two columns a band in each parallel's colour joins its words in the one to its words in the
+  other, and a broader ribbon joins the two stretches of each echo: bands that cross show the same
+  points made in another order. Click a band, or a parallel's words, and the columns move until
+  its words stand level; a ribbon or a bracket does the same for an echo. Words selected in a
+  column can be annotated or made a parallel or an echo as in the side. **‹ ›** reorder the
+  columns, **✕** takes one out, and **Back to the board** (Esc) closes it. Nothing about Compare
+  is saved.
+- **Link to another topic.** A link card stands on one board for another of your topics, as a
+  whole, or for one card or group on that topic's board, and shows what it points to as it is
+  now. Make one under **Boards**, a tab in the side (or **Link…** among the tools): choose the
+  topic, then **+ Link here** on the topic or on one of its board's cards, or drag it onto the
+  board. Or press **Copy a link to it** on a card or group, and paste it on another board (⌘V),
+  or into *Relevant to…* in an annotation. Arrows join a link card like any card, so that one
+  board can say how its passages bear on another topic's. Click it to see what it points to in
+  the side; **Open that board at it** goes there, centred on that card, and the browser's Back
+  button returns.
+- **Being linked to** puts nothing on the other board. The card or group linked to carries a
+  mark, **↖ 1**, and its side lists the links, with the arrows on them and **link back**. A
+  board's side lists the boards that link to it and those it links to. A link whose card has
+  gone from the other board is drawn dashed and says so, keeping what it was. A passage that
+  stands on several of your boards says *also on …*, dashed, since that is the page's own
+  finding, not a link you made. In My topics, a topic's heading says which topics it is linked
+  with.
+- **Photograph the board** keeps it as it is now, to look at again or bring back. **Export**
+  saves the one board to a file, and **Import** brings such a file's cards in beside yours.
+
+The board is kept with your topics, under the same `localStorage` key, so it goes wherever they
+go: into **Save to file**, and into your locked file on GitHub, if that is on. The board page
+itself never holds your token: the portal beside it sends each change to GitHub, as the portal
+sends its own. Deleting a topic deletes its board, and **Undo** brings both back. Passages and
+notes take little room, but drawing and photographs grow, and this browser gives the site about
+5 MB in all: the board warns once your topics and boards pass 2 MB.
+
+**Where they are kept.** In your own browser, on your own computer, under one `localStorage`
+key, `kantlab-topics-v1`, and nowhere else unless you choose. The line at the top of the page
+says how things stand. **Save to file**, in its **⋯** menu, writes them all to one `.json` file,
+to keep or to open in another browser with **Open file**, which merges the file with what is
+there rather than replacing it. Clearing the browser's site data deletes them, and Safari can
+clear a site's data by itself if you go a week of using Safari without opening it: keep a file.
+The line turns red when your last file is three weeks old, or when you have kept ten passages
+and saved no file yet.
+
+**On GitHub too, if you want the same topics on every computer.** **Keep on GitHub…**, in the
+⋯ menu, keeps a copy in one file of your own, `topics/<your GitHub name>.json`, in the
+seminar's private repository `kant-lab-seminar/queues`, which the kinds-of-nothing queue keeps
+its flags in. Everyone in the organisation can open that repository, so the file is locked in
+your browser before it leaves, with a passphrase only you know (PBKDF2-SHA-256, 600,000 rounds,
+then AES-GCM). They can see that your file is there and when it changed, never what is in it.
+Your browser's copy is still the one you work on: each change goes there at once, and to GitHub
+a few seconds later.
+
+1. Accept the invitation to `kant-lab-seminar`, and make a token, as for the queue
+   ([the queue's *Joining, once*](studies/kinds-of-nothing/README.md#joining-once)). If you have
+   joined the queue in this browser, its token serves, and the page offers it.
+2. Open My topics, choose **⋯ → Keep on GitHub…**, give the token, and choose a passphrase, typed
+   twice. Tick **Remember on this computer** only on a computer of your own: it keeps the token,
+   and a key made from the passphrase that can't be copied out of the browser.
+3. On another computer, do the same, with the same passphrase. Its topics and these are merged.
+
+**Nobody can recover a forgotten passphrase**, you included, so keep a file as well. **Change
+passphrase…** locks the file again under a new one; your other computers ask for it the next time
+they sync. **Stop keeping on GitHub here** forgets the token and key on that computer, and leaves
+both copies as they are.
+
+**When two copies meet** (GitHub's and this browser's, or a file you open), they become one. The
+same passage kept in both is one passage, and the later change to it wins. A passage or topic you
+deleted stays deleted, however old the copy that still has it. Two topics of the same name, made
+on two computers, become one, and a note changed in both copies keeps both versions, the second
+marked *— from another copy —*. The page tells you when a merge did one of those last two
+things, and otherwise says nothing. A board changed in only one copy takes that change; one
+changed in both is merged card by card, arrow by arrow, and where both changed the very same
+card, the board saved later has its way. Annotations are merged one by one, the later change to
+each standing.
+
+The code is [topics.js](topics.js), and the board [topic-board.html](topic-board.html), which
+began as a copy of the study's `board.html` and now goes its own way: an improvement to one
+reaches the other only by asking for it. Both read the portal only through `window.PORTAL`, as
+the handout tray does, the board in the portal beside it. Where the GitHub copy goes is set at its top (`GH`): to give the topics a
+repository of their own, change `repo` there, and give everyone's token that repository.
+
+### Sharing a board
+
+A topic's board can be shared with others in the seminar, for them to look at or to work on
+with you. GitHub, not the page, decides who may do which: each shared board is a private
+repository of its own in the seminar's organisation, and GitHub lets in only the people it is
+shared with, refusing a reader's save itself.
+
+- **Share.** On the topic's board, press **Share…** (beside *Export*). Name each person by their
+  GitHub username, as *can look* or *can work on it*: the list suggests the members of
+  `kant-lab-seminar`, and only members can be named. **Share** makes a private repository,
+  `kant-lab-seminar/board-<topic>-<four letters>`, for that board alone, copies the topic's
+  passages and the board into it, and lets in the people named. From then on the board is saved
+  there, and everyone who has it sees the others' changes within a few seconds. Cards, arrows,
+  annotations and passages added are signed with their author's GitHub name. The topic is marked
+  *shared* in My topics, which keeps a copy of the board too.
+- **What stays yours.** Your notes on the passages, and your annotations, are not copied in.
+  On a shared board each passage has a **note on the board**, which everyone sees, signed, and
+  beneath it **your own note**, your note in My topics, if you keep the passage there. An
+  annotation made with **only me** ticked stays in My topics and is not put on the board.
+- **Who has it…**, where *Share…* was, says who has the board. Change a person's role, add
+  someone, or take someone off: each takes effect at once. **Stop sharing…** brings the board
+  back into My topics, with everything done on it and the passages others added, takes everyone
+  off, and archives the repository, which keeps its history, read only. Nothing here ever
+  deletes a repository.
+- **A board shared with you** is listed in My topics under **Shared with me**, with whose it is;
+  its address, `topic-board.html#s=<repository>`, also opens it. A reader sees it live, marked
+  *Look only*. A collaborator works on it as on a board of their own, and adds passages to its
+  topic with **+ The passage open beside the board**, in its *Passages* panel, or with **☆ Topic**
+  anywhere in the portal, which lists the shared boards you may change. A passage given to one
+  waits in that board's *Passages* panel. **take it out of the topic** removes one not yet on the
+  board.
+- **Links** on a shared board to boards of yours that are not shared show the others only *a board
+  not shared with you*, and keep no copy of their names.
+- **The organisation's owners can always see every repository in it.** A shared board is private
+  from the rest of the seminar, not from them.
+
+**Setting it up, once (the organisation's owner).** Until this is done, every member of
+`kant-lab-seminar` can read every repository in it, shared boards included.
+
+1. *Teams* → *New team*: **Kant Lab**, with every member of the seminar in it. Then `queues` →
+   *Settings* → *Collaborators and teams* → add *Kant Lab* with **Write**, so that the queue and
+   everyone's topics file go on as now.
+2. *Settings* → *Member privileges* → *Base permissions* → **No permission**. From then on a member
+   sees a repository only if they, or a team of theirs, have been given it. Leave *members can
+   create private repositories* on. Do the team first, so that nobody loses `queues` in between.
+
+**Everyone's token, once.** A board shared with you opens with the token My topics keeps (*Keep on
+GitHub*), and a board page asks for one if this browser has none. It must reach the shared
+boards' repositories: on GitHub, *Settings* → *Developer settings* → *Fine-grained tokens* → your
+token → *Edit* → *Repository access* → **All repositories**, still with *kant-lab-seminar* as its
+owner, and *Contents: Read and write* as now. To share a board of your own, add **Administration:
+Read and write** as well: the page makes the board's repository and lets people into it with that.
+The token still goes only to `https://api.github.com`.
+
 ## Studies
 
 [studies/](studies/) holds research sandboxes beside the portal: a page for one question
@@ -99,6 +553,14 @@ that reads the same texts and opens each passage here, by its address, without c
 the portal. Features built for one question stay in its study. The first is
 [The kinds of nothing](studies/kinds-of-nothing/index.html). The **Studies** tab, beside Explore,
 lists them all, from `studies/studies.js`; a link to `index.html#studies` opens it.
+
+## Teaching tools
+
+[teaching/](teaching/) holds small tools for teaching with the portal, a new one most weeks.
+Like a study, each reads the same texts and the handouts without changing the portal.
+They are listed at [teaching/index.html](teaching/index.html), from `teaching/teaching.js`. The
+first is the [class screen](teaching/class-screen/index.html), which shows a handout in large
+type on the room's screen.
 
 ## What it does
 
@@ -158,6 +620,11 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   edition and `B 75` a page of the other. Each passage of the Critique shows its own pages and,
   where the matching found the same words, the other edition's beside them (`A 50–51 = B 74–75`).
   Pages that begin inside a passage are marked in the line, in all of Kant's published works.
+- **Go to a § or page of the Critique of Judgment.** In its jump box, `§ 59` opens the §, and
+  `254`, `A 254` or `xi` the page of the 1790 print. Each passage is cited by its § and page
+  (`§ 59, A 251`) and links to the Deutsches Textarchiv's image of that page. AA V's text of the
+  KU and of the Critique of Practical Reason are cited by § and AA page (`§ 59, AA 5:351`): `5:198`
+  in the search box, or `§ 7` or `30` in their jump box, goes there.
 - **Go through every result.** A passage opened from a search shows "‹ 3 of 22 ›" at the top
   of the right-hand pane. The arrows, or ← → and J K on the keyboard, open the next or
   previous result in the Passages list's order, and each result opened gets a tick in the list,
@@ -169,7 +636,8 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   and lists under it what shares its wording. Its textbook § comes first, then Kant's notes
   (whether the AA files them under the same § or not), the lectures and Jäsche, closest first.
   Pick one and it opens beneath, with the words the two share marked in both, darker where the
-  same words stand in a row. So you can see at once whether a note takes Meier's words or
+  same words stand in a row. **Open it in its full text ▾** unfolds it where it stands in its own
+  text, without leaving Compare. So you can see at once whether a note takes Meier's words or
   Baumgarten's, or has its counterpart in a lecture. Name any other passage in the box to
   compare it instead: `Refl. 4086`, `16:236` or `Meier § 125`. Click a sentence to compare it
   alone; a sentence found nearly whole elsewhere carries a small ≈ tag naming where.
@@ -189,7 +657,13 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   of two styles: following the stated principles of Guyer and Wood, or of Kemp Smith. These
   are Jesus's machine translations, made for the Meier–Kant comparison; neither
   translator translated these texts, and the pane says so under every one. There is English
-  for Meier, the Reflexionen on Meier, the three lectures and Jäsche, not yet for Baumgarten.
+  for Meier and Baumgarten, the Reflexionen on both, the lectures and Jäsche, Kant's works in
+  AA I and II, and both editions of the first Critique. The Groundwork and the Critique of Practical
+  Reason have instead T. K. Abbott's published translations, and the Critique of Judgment (both
+  the 1790 text and AA V's) J. H. Bernard's: the translators' own, out of copyright, cut to the
+  portal's passages by matching paragraphs, shown whichever style is chosen and labelled as such.
+  Every passage has English; the few the translators did not translate (title-page lines, the
+  1790 contents and list of misprints) have a machine translation, and their note says so.
   Each text's translation loads only when it is first wanted.
 - **Report a text error.** Every passage has a link, under its citation at the top of the
   right-hand pane (among the passage's actions in Connections), that opens the repository's *Text error*
@@ -199,8 +673,9 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   every passage of the full texts, under each of Kant's notes beside Meier, and under search hits
   and classified passages, where a long passage shows roughly the stretch of English that
   matches the German shown. The German and Latin never go. A bar under the header says what the
-  English is, switches between the two styles, and notes that Baumgarten and Kant's notes on
-  Baumgarten have no English yet. It also announces Maria's sentence-by-sentence translation,
+  English is and switches between the two styles. Every text has English. The published works'
+  (AA I, AA II and the two editions of the Critique, some 6 MB a style) loads only when one of
+  their passages is shown or the English is searched; the rest loads when English is switched on. It also announces Maria's sentence-by-sentence translation,
   which is coming to the whole portal, and links to a preview of it from Maria's branch.
   Every passage that has English also has a small **English** button of its own, which opens
   that passage's English under it and nothing else.
@@ -220,7 +695,9 @@ lists them all, from `studies/studies.js`; a link to `index.html#studies` opens 
   Maria's translation across the whole portal, which works differently: sentence by sentence,
   with a shared glossary, and with modes that let a reader try the German first. When that
   happens, remove the header switch, the bar, the per-passage buttons and `enLine`, rather than
-  running both side by side.
+  running both side by side. The texts read by OCR (the lectures of Philippi, Pölitz,
+  Dohna and Herder, the two Mrongovius and K3, and AA II and KrV B) were translated from the
+  uncorrected OCR, so their English silently mends obvious misreadings and says in a note where a reading was too garbled to be sure of.
 - **German learning mode** (on Maria's branch, not yet in the portal as published). A switch in
   the header, beside **English**, turns on Maria's translation and glossary from
   [reading.js](reading.js). It is off unless the reader turns it on, or the address asks for it
@@ -299,9 +776,10 @@ Every connection says where it comes from; the **Contributors** page lists every
 | Dates of the Reflexionen | Adickes' phases, `data/phases-adickes.js` |
 | The tradition behind Meier's §§ | the Meier Reader's `data/tradition-meier.js` |
 | English translations | Jesus's `translations/`, machine-made in two styles |
-| Kant's published works: AA I, AA II, the *Critique* in A and B | [published/](published/README.md): the BBAW's new edition of AA I, the Deutsches Textarchiv's 1781 *Critique*, and OCR of the old Academy edition's AA II and AA III |
+| Kant's published works: AA I, AA II, the *Critique* in A and B, the *Groundwork*, the *Critique of Practical Reason*, the *Critique of Judgment* in A and in AA V | [published/](published/README.md): the BBAW's new edition of AA I, the Deutsches Textarchiv's 1781 *Critique* and 1790 *Critique of Judgment*, Project Gutenberg's proofread transcriptions of AA V, and OCR of the old Academy edition's AA II, AA III and AA IV |
 | Four more AA XXIV lectures (Herder, Philippi, Pölitz, Dohna-Wundlacken) | [aa24-ocr/](aa24-ocr/README.md): uncorrected OCR of the Internet Archive's scan of AA XXIV |
 | AA XXIX's 1983 part: Metaphysik Mrongovius, Metaphysik K3, Logik Mrongovius | [aa29-ocr/](aa29-ocr/README.md): uncorrected OCR of the Internet Archive's scan, by the same extractor. AA XXIX's 1980 part is not in the portal (below) |
+| Wolff's German Logic (*Vernünfftige Gedancken von den Kräfften des menschlichen Verstandes*, 1754) | [wolff/](wolff/README.md): uncorrected OCR of Munich's scan of the 1754 print, four readings of each page merged by vote; cited by chapter, § and page of that print |
 
 ## Adding a text
 
@@ -311,9 +789,9 @@ else changes. A further transcript of AA XXIV comes out of `scripts/parse_logik.
 right shape already. A published work can use the plain `passages` shape: one passage per
 paragraph, each with its AA page. Passages are cited by AA page, so when a clean digital
 edition arrives its text can replace these transcriptions without breaking the links.
-[published/](published/README.md) has four such texts, and the fields they add (the
+[published/](published/README.md) has eight such texts, and the fields they add (the
 work in a volume, Kant's notes, the pages that begin inside a passage, the Critique's A and B
-pages) are listed in the catalogue's header.
+pages, the §§ of the second and third Critiques) are listed in the catalogue's header.
 
 ## The pinned files
 
@@ -348,10 +826,15 @@ When that data moves into `data/`, the pins can go.
 
 ## Limits
 
-- Many of its transcriptions are not clean. Of Kant's published works only AA I and the A
-  edition of the *Critique* are; AA II and the B edition are OCR of the old Academy edition,
-  about 96% and 98% of words right, and B's pages are uncertain where shown with a query (see
+- Many of its transcriptions are not clean. Of Kant's published works AA I, the A edition of
+  the *Critique*, the 1790 *Critique of Judgment* and AA V's two *Critiques* are; AA II, the B
+  edition and the *Groundwork* are OCR of the old Academy edition, about 96%, 98% and 99% of words
+  right, and B's pages are uncertain where shown with a query (see
   [published/](published/README.md)). Check quotations from OCR texts against the page image.
+- **Wolff's German Logic** is OCR of the 1754 print, about 99% of the words in the text right and
+  81% in his marginal summaries; words where its four readings disagreed with no majority are
+  underlined, with the other reading on hover. His Latin *Logica* was read too and is not in the
+  portal: about 91% (see [wolff/README.md](wolff/README.md)).
 - **AA XXIX is only half here.** The portal has its 1983 part (Metaphysik Mrongovius, Metaphysik
   K3, Logik Mrongovius), not its 1980 part (the Philosophische Enzyklopädie, Herder's notes on
   mathematics and physics, the Berliner and Danziger Physik, Moral Mrongovius II). The 1980 part

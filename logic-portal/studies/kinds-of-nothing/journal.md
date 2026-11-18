@@ -7,6 +7,167 @@ corrects it in their own words.
 Each entry: the date, who asked (GitHub username), what was asked for, what it showed,
 whether it helped, and what it got wrong or could not do.
 
+## 16 November 2026: annotating passages on the board
+
+*A draft, to be corrected by nikolasland in their own words.*
+
+- **Asked for:** while the seminar uses the board, a way to annotate passages live: to flag
+  problems, to mark what a passage, or a word in it, is relevant to, to note a possible
+  interpretation, and to comment.
+- **What there is:**
+  - **Annotating.** Select some of a passage's words in the side, or take the passage whole,
+    and choose *Problem*, *Relevant to…*, *Interpretation* or *Comment*. *Relevant to* takes
+    a word, another card, a Reflexion by number or a portal address. Every annotation is
+    signed, and anyone can reply; a problem can be marked resolved.
+  - **On the passage, not the card.** An annotation shows on every card where its passage
+    stands, by the passage's address and the words it was made on, and outlives the card.
+  - **Live.** Annotations are saved with the shared board, so they reach everyone's screen
+    within seconds. Two people annotating the same passage at once both keep theirs.
+  - **On the board.** A card carries a dot for each annotation, the annotated words are lit
+    in its excerpt, and *Relevant to* a card draws a dotted thread between the two, in a layer
+    each device can turn off. *Find on the board* searches annotations too.
+  - **The list.** *Annotations*, in the tools, lists them all, and downloads them.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:**
+  - annotations are on the board's passages, not in the portal's own reading pane;
+  - live means seconds: nobody sees an annotation as it is typed;
+  - a passage card shows only its first 320 characters, so annotations further in show as a
+    dot on the card and lit in the side;
+  - a whole room annotating flat out can reach the shared key's limit of about 500 saves an
+    hour; the page then waits, and nothing is lost.
+
+## 13 November 2026: one board for everyone
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** a quick way to ask for new features on the board, or new ways of
+  representing things, in real time, with someone other than the professor driving and an
+  easy flow of changes. For now, a single board that is the same for everyone, which anyone
+  can change once they have the password, rather than access for some people and not
+  others. Protections against accidental changes can come later.
+- **What there is:**
+  - **One board.** The board is kept in a private repository, `mikrishnan/kant-lab-board`,
+    and opened with the password, which is told in the seminar.
+  - **Saving.** Each change is saved for everyone a moment after it is made and appears on
+    the other screens within a few seconds. Changes made at the same moment are combined.
+    Each save is a commit, so the board's whole history is kept.
+  - **What is shared.** Photographs are kept for everyone. Each device keeps its own camera,
+    layers and view.
+  - **Previews.** A preview of a change opens the real board as a practice copy, which saves
+    nothing.
+  - **In class.** The README says how a driver asks for a change during the session and
+    merges it.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:**
+  - nothing stops an accidental change except undo, photographs and the history;
+  - the password guards a key that sits in a public repository, so it keeps out the casual,
+    not the determined;
+  - changes made at the very same moment to the very same card keep only the later one on
+    the board.
+
+## 13 November 2026: the board, by hand
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** moving the models around more fluidly, by clicking on a model and dragging
+  it. Pulling things visually further apart or closer together. Using a tablet, and drawing,
+  since it is hard to draw with a mouse.
+- **What there is:**
+  - **Models.** A model moves by any bare part of its frame. Its corner grip ⤡ spreads its
+    cards apart, or pulls them together.
+  - **Tools.** A tool palette on the board: Move, Select, Draw and Rub out, with five pen
+    colours. An Apple Pencil draws on the bare board whatever the tool. A line drawn from one
+    card to another can become an arrow, and a loop drawn round cards selects them or makes
+    them a model. Drawing made inside a model's frame moves and spreads with the model.
+  - **On an iPad.** A finger moves cards, models and the board; two fingers pinch to zoom; a
+    double tap writes. The side can be put away for more board.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:** drawing is kept for each view, in the browser it was made in,
+  like everything else on the board. Handwriting is not turned into text by the page, though an
+  iPad's own Scribble can write into its text boxes. A physical whiteboard cannot be linked to
+  it yet.
+
+## 13 November 2026: the board
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** something more visual than three panels of text. Each model should have its
+  own structure. We need arrows between the parts of different models, for example where one
+  concept in an earlier model splits into two in a later one, each with the passages that bear
+  on it. We need each model's problems, and how Kant tries to solve them later. We wanted the
+  freedom of the whiteboard, where structures are invented as we go and things are put in new
+  places, without its faults: you cannot link to texts, it fills up, you have to erase, nothing
+  is kept, and the interconnections overload it. We also wanted it to be more than flat:
+  three-dimensional, or many-dimensional.
+- **What there is:** `board.html`, and `board.js`, the study's board. The three models are
+  frames around cards. The cards are built only from Kant's labels, and each carries the
+  passages it rests on, quoted from the portal's text with a link to read each one beside the
+  board. Kant's divisions are drawn inside each frame. Anything can be dragged anywhere, and
+  you double-click to write on the board.
+  - **Arrows.** Drawn from a card's knob to another card, each typed (kept, renamed, split
+    into, merged from, dropped, new, answers?, or a type of one's own), stated in the seminar's
+    words, given its passages, and signed.
+  - **Problems.** Problem cards sit in their model's frame.
+  - **Models.** A model can be split by selecting cards and making them a model of their own,
+    and a card dropped into another frame joins that model.
+  - **The dimensions.** Layers switch the divisions, hypotheses, problems, passages, notes and
+    the computer's same-label links on and off. Views are other arrangements of the same cards.
+    Zoom gives depth: zoomed out a card is its name, zoomed in its first passage shows. Focus
+    shows only what is joined to one card. Photographs keep the board as it stood, to come back
+    to.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:**
+  - what anyone changes stays in their own browser, until it is exported and added to
+    `board.js`, so there is no shared board in class yet;
+  - passages pasted onto a card are marked *not yet checked* until they are checked against
+    the portal;
+  - the only statements on it are the problem and the claim about Refl. 3990 from this
+    session, both still to be put in mikrishnan's own words;
+  - the layers are fixed. Kinds of one's own, such as a tag for "time" or "contradiction", are
+    not there yet.
+
+## 13 November 2026: three models, as cards
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** the three models of nothing we found last session (1763, c. 1769 in Refl.
+  3990, 1781) written down in one format, so that each model's details and the changes between
+  them are easier to hold in view.
+- **What there is:** `models.html`, three cards side by side, and `models.js`, their data.
+  Each card has the same fields: how Kant divides, the kinds in Kant's words, his examples, Kant
+  comparing them, and the words for negating in the passages, each a quotation cut from the
+  portal's own text, with its citation opening the passage. Beside these, four empty fields for
+  the seminar: what is divided, by what, the model's problems, and what it does about earlier
+  ones.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do yet:**
+  - the seminar's fields are empty, and filling them means editing `models.js`;
+  - only one or a few anchor passages stand behind each model;
+  - *Negative Größen* is OCR, and its quotations keep the OCR's slips;
+  - the table, the trees and the crosswalk drawn from the cards are not built yet.
+
+## 11 November 2026: the queue, read without a token
+
+*A draft, to be corrected by mikrishnan in their own words.*
+
+- **Asked for:** anyone on the site to see the queue's passages, read only, without a token,
+  while those with a token still tick and add.
+- **What there is:** a public copy of the queue's passages, `queue-snapshot.js` (88 passages
+  on 11 November), made by `snapshot-queue.py`. Without a token the page shows it read only,
+  with the join form folded beneath; with one, the page is as before.
+- **What it showed:** to be answered.
+- **Did it help?** To be answered by the participants.
+- **What it cannot do:**
+  - the copy is as fresh as its last run, so passages added later show only once it is made
+    again;
+  - the ticks, the notes and who made them are not in it, by design: they stay in the private
+    repository.
+
 ## 4 November 2026: the queue
 
 *A draft, to be corrected by nikolasland in their own words.*

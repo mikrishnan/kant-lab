@@ -64,7 +64,10 @@ changing it. [README.md](README.md) describes it for a human.
 *The queue* describes both for a human.
 
 - **The flags live in `kant-lab-seminar/queues`, a private repository, never here.** Do not
-  copy flags, notes or readers' names into this repository: it is public.
+  copy flags, notes or readers' names into this repository: it is public. The one copy here is
+  `queue-snapshot.js`, the passages of `queue.json` alone, which the page shows read only to anyone
+  without a token. `snapshot-queue.py` makes it, drops `by` from the record of how the queue was
+  made, and takes no flag file. Refresh it when asked, after passages are added; never hand-edit it.
 - **The page writes only its own reader's file** (`flags/<login>.json`), and adds to
   `queue.json` only by appending. Numbers never move, so nothing takes a passage out.
 - **The token goes only to `https://api.github.com`.** Never add a way to point the page at
@@ -80,6 +83,41 @@ changing it. [README.md](README.md) describes it for a human.
 - **Testing it** needs the real repository and a token. Use a queue folder of its own,
   `queues/test-<something>/`, by changing `queue` in a scratch copy of the config, and
   delete that folder afterwards. Never test against `queues/nihil-negativum/`.
+
+## The board
+
+`board.html` is the study's board. Since 13 November 2026 there is one board, the same for
+everyone: `board.json` in the private repository `mikrishnan/kant-lab-board`, with its
+photographs in `photos/`. `board-shared.js` says where it is and holds its key. The
+README's *The board* describes it for a human.
+
+- **Never lose the shared board.** Every change to `board.html` must go on reading the
+  `board.json` that is there. Never rename the repository, the file, or the fields it has;
+  add new fields, and leave the ones the page does not know as they are, since it writes
+  them back. A page that cannot read the board must save nothing to it.
+- **What is each device's own stays out of `board.json`**: the camera, the layers shown,
+  the view, the tool. Otherwise one person moving about moves everyone's screen.
+- **The password is written nowhere**: not in a file, a commit message, a pull request,
+  the journal, or a test. `key` in `board-shared.js` is the token locked by it, made at
+  `board.html#setup`; replace the file only with what the setup gives back.
+- **The token goes only to `https://api.github.com`.** Never add a way to point the page
+  at another address.
+- **A copy away from the site saves nothing** unless the person there chooses to (`site`
+  in `board-shared.js`). Keep that: it is what lets a preview of a change show the real
+  board without touching it.
+- **Testing never writes to the shared board.** Use a scratch copy of the page whose
+  `fetch` answers from the browser's storage in place of GitHub, on a test origin such as
+  127.0.0.1, and delete the copy and that storage afterwards.
+- **Annotations** are `annotations` in `board.json`, one entry each, beside the cards, so that
+  two people annotating one passage at once both keep theirs. An annotation belongs to the
+  passage, not the card: `on` holds the passage's portal address (`ref` or `hash`) and the
+  words it was made on, verbatim (`exact`, with `prefix` and `suffix`); `card` is only where
+  it was made. Deleting a card deletes none, and bringing back a photograph or starting again
+  leaves them as they are, as it does the requests. One the page places by its own judgement
+  (`findWords()`) is drawn dashed, and one whose words have gone is placed nowhere: never
+  re-anchor one by a fuzzier guess.
+- `board.js` stays the study's starting board, and what the page shows anyone without the
+  password. Fold the shared board into it only when asked.
 
 ## House style and checks
 
