@@ -109,6 +109,15 @@
   .card.k-passage .pq { font-style: italic; line-height: 1.25; }
   .card.k-passage .pc { display: block; font-size: 0.75rem; color: var(--faded); margin-top: 0.2rem; }
   .card.k-passage .pc .pof { margin-left: 0.35rem; }
+  /* the English beneath a passage's German, with English on */
+  .tools .btn[aria-pressed="true"] { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  .pen { font-style: normal; line-height: 1.3; margin-top: 0.3rem; padding-top: 0.25rem; border-top: 1px dotted var(--line); }
+  .pen .enl { display: block; font-family: 'Cinzel', serif; font-size: 0.6rem; letter-spacing: 0.08em; color: var(--accent); margin-bottom: 0.1rem; }
+  .pen .enl i { font-family: 'EB Garamond', serif; font-style: italic; font-size: 0.74rem; letter-spacing: 0; color: var(--faded); margin-left: 0.2rem; }
+  .pen .none, .pen.wait { color: var(--faded); font-style: italic; }
+  .pen .enm { display: block; font-size: 0.8rem; color: var(--faded); font-style: italic; margin-top: 0.25rem; }
+  #details .pen { background: #fff; border: 1px solid var(--line); padding: 0.35rem 0.6rem; margin: 0 0 0.5rem; font-size: 0.92rem; line-height: 1.45; }
+  #details .pen .enl { font-size: 0.66rem; }
   .card.k-passage .para, #details .para { font-style: normal; color: var(--accent-light); font-size: 0.85em; }
   .card.slost { border-style: dashed; }
   #details .q .t .out { color: var(--faded); opacity: 0.75; }
@@ -697,6 +706,10 @@
     <input type="search" id="search" placeholder="Find on the board" aria-label="Find on the board"><span id="found"></span>
   </span>
   <span class="grp">
+    <button type="button" class="btn" id="enb" aria-pressed="false" title="Put the English beneath the German of every passage on the board, and in the side: the portal’s own translations">English</button>
+    <select class="vsel" id="ensty" aria-label="Which English" title="The style of the machine translation. A text that has only a published translation is shown in that." hidden><option value="guyer">Guyer–Wood principles</option><option value="kemp">Kemp Smith principles</option></select>
+  </span>
+  <span class="grp">
     <button type="button" class="btn" id="undo" title="Undo (⌘Z)">↶</button>
     <button type="button" class="btn" id="redo" title="Redo (⇧⌘Z)">↷</button>
   </span>
@@ -848,6 +861,9 @@ const ECHO_EDGE = 40;
 const ECHO_COLS = 4;
 const ECHO_MAX = 30;   // the most stretches the matrix sets against one another
 const PREFS = 'kantlab-topic-board-prefs-v1:';      // + the topic: this device's own camera, layers and view, kept apart from the board
+const EN_PREF = 'kantlab-topic-board-english';        // this device's English switch, { on, style }, the same on every board
+const EN_STYLES = { guyer: 'Guyer–Wood principles', kemp: 'Kemp Smith principles' };   // as catalogue.js names them
+const EN_CARD = 160;   // the characters of English a closed card shows; more, and the card opens to all of it
 
 /* ── State ────────────────────────────────────────────────────────────────── */
 let B;                 // the board: { models, items, arrows, views, removed }
@@ -859,6 +875,8 @@ let seenB = '';        // the board as kept, as last read or written here (the b
 let seenA = '[]';      // the annotations likewise
 let lost = '';         // why nothing can be saved: 'unreadable' (My topics would not read), 'gone' (the topic is not in it)
 let FW = null;         // the portal in the side, once its texts are in
+let EN = (() => { try { return Object.assign({ on: false, style: 'guyer' }, JSON.parse(localStorage.getItem(EN_PREF) || '{}')); } catch (e) { return { on: false, style: 'guyer' }; } })();
+let enT = 0;           // a redraw waiting for a translation file to come in
 let pendingStore = false;   // the store changed during a drag or an edit: taken in when it ends
 let SHM = false;       // a shared board: kept in a repository of its own, not in My topics
 let SH = null;         // its state: { repo, token, login, role: owner | collab | reader | archived, owner, sha, etag, base, status, … }
@@ -1316,6 +1334,57 @@ function fullText(ref) {
 }
 // The portal's reading of stretches, once its texts are in (index.html: stretchOf, placeWords, sentenceStarts).
 function STX() { return FW && FW.PORTAL && FW.PORTAL.stretchOf ? FW.PORTAL : null; }
+// A passage's English, read from the portal beside the board (index.html: trFor, trState, trEntry), as its
+// English mode shows it: { text, style, pub, part }; 'loading' while the portal or the translation file
+// comes in; 'failed' if the file would not load; null where the text has no English for it.
+function englishOf(ref) {
+  const X = FW && FW.PORTAL;
+  if (!X || !X.trFor || !X.trState || !X.trEntry) return 'loading';
+  try {
+    const i = X.BYID.get(ref), p = i != null ? X.P[i] : null, tr = p ? X.trFor(X.TEXTS[p.t]) : null;
+    if (!tr) return null;
+    const st = X.trState(tr, EN.style);
+    if (st === 'loading') { enWait(); return 'loading'; }
+    if (st !== 'ready') return 'failed';
+    const e = X.trEntry(tr, EN.style, p);
+    return e ? { text: String(e.text || ''), style: X.trStyleFor ? X.trStyleFor(tr, EN.style) : EN.style, pub: tr.pub || '', part: !!e.part } : null;
+  } catch (err) { return null; }
+}
+// Drawn again once the translation file is in; the portal's own redraw does not reach the board.
+function enWait() { if (enT) return; enT = setTimeout(() => { enT = 0; if (!EN.on) return; if (drag || editing) pendingStore = true; else renderAround(); }, 600); }
+// The English of the passages a card quotes, each once: two passages can share one stretch of a translation.
+function englishOfCard(it) {
+  if (!EN.on || it.kind !== 'passage' || (it.kx && it.kx.en)) return null;   // words kept from the English are English already
+  const qs = openQuotes(it).filter(q => q && q.ref); if (!qs.length) return null;
+  const got = qs.map(q => englishOf(q.ref)), es = got.filter(e => e && typeof e === 'object');
+  return { qs, got, es, texts: es.map(e => e.text).filter((t, k, xs) => t && xs.indexOf(t) === k) };
+}
+const enPlain = s => String(s).replace(/\*\*([^*\n]+)\*\*/g, '$1').replace(/\*([^*\n]+)\*/g, '$1');
+const enRich = s => esc(s).replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/\*([^*\n]+)\*/g, '<i>$1</i>');
+const enPara = ' <span class="para" title="A new passage">¶</span> ';
+// Beneath a card's German (n characters of it, as the card shows the German), or in the side, all of it (n = 0).
+function englishHtml(it, n) {
+  const E = englishOfCard(it); if (!E) return '';
+  if (E.got.includes('loading')) return '<div class="pen wait" lang="en">Loading the English…</div>';
+  if (!E.texts.length) return '<div class="pen" lang="en"><span class="none">' + (E.got.includes('failed') ? 'The translation file did not load.' : (E.qs.length > 1 ? 'No English for these passages.' : 'No English for this passage.')) + '</span></div>';
+  const s0 = E.es[0].style, what = s0 === 'pub' ? 'published translation' : 'machine translation, ' + (EN_STYLES[s0] || s0);
+  const kept = it.st ? !it.st.whole : !!(E.qs[0].kept && E.qs[0].q !== E.qs[0].kept);
+  const notes = [s0 === 'pub' && E.es[0].pub ? E.es[0].pub + '.' : 'A machine translation, unreviewed: check it against the German.',
+    kept ? 'The English is of the whole ' + (E.qs.length > 1 ? 'passages' : 'passage') + ', not only the words the card quotes.' : '',
+    E.es.some(e => e.part) ? 'The translation divides the text differently, so the English may begin before this passage or run on past it.' : '',
+    E.es.length < E.qs.length ? 'Some of these passages have no English.' : ''].filter(Boolean);
+  const lab = '<span class="enl">English<i>' + esc(what) + (kept ? ', of the whole passage' : '') + '</i></span>';
+  const short = '<span class="enl">English<i>' + (s0 === 'pub' ? 'published' : 'machine, ' + esc((EN_STYLES[s0] || s0).replace(/ principles$/, ''))) + (kept ? ', whole passage' : '') + '</i></span>';
+  if (!n) return '<div class="pen" lang="en">' + lab + E.texts.map(enRich).join(enPara) + '<span class="enm">' + esc(notes.join(' ')) + '</span></div>';
+  const all = E.texts.map(enPlain).join(' ¶ '), cut = all.length > n, t = cut ? all.slice(0, n - 1) + '…' : all;
+  return '<div class="pen" lang="en" title="' + esc(what + '. ' + notes.join(' ')) + '">' + short + esc(t).split(' ¶ ').join(enPara) + '</div>';
+}
+const englishLength = it => { const E = englishOfCard(it); return E ? E.texts.reduce((a, t) => a + t.length + 3, 0) : 0; };
+function setEnglish(on, style) {
+  EN = { on: !!on, style: style || EN.style };
+  try { localStorage.setItem(EN_PREF, JSON.stringify(EN)); } catch (e) { /* fine */ }
+  renderAround();
+}
 // Each passage card's words and standing, worked out afresh and never saved.
 function hydrate() {
   [B].concat(live ? [live.board] : []).forEach(b => (b.items || []).forEach(it => {
@@ -2721,7 +2790,7 @@ const openQuotes = it => it.st ? it.quotes || [] : (it.quotes || []).slice(0, 1)
 function canOpenCard(it) {
   const qs = openQuotes(it); if (!qs.length || !qs[0].q) return false;
   const some = q => !!(q.kept && q.q !== q.kept);
-  return qs.some(q => some(q) && q.full) || qs.reduce((n, q) => n + String(some(q) ? q.kept : q.q).length, 0) + 3 * (qs.length - 1) > 240;
+  return qs.some(q => some(q) && q.full) || qs.reduce((n, q) => n + String(some(q) ? q.kept : q.q).length, 0) + 3 * (qs.length - 1) > 240 || englishLength(it) > EN_CARD;
 }
 const isOpenCard = it => it.kind === 'passage' && cardOpen.has(it.id) && canOpenCard(it);
 function cardWhole(it) {
@@ -2743,7 +2812,7 @@ function cardHtml(it) {
     (ro() ? '' : colW(it).map((w, i) => '<span class="tcol" data-tcol="' + i + '" title="Drag to widen this column"></span>').join('') + '<span class="bgrip" title="Drag to widen the table"></span><span class="knob" title="Drag to another card, a cell or a group to draw an arrow from the whole table. Each cell has a → of its own.">→</span>') + '</div>';
   if (it.kind === 'passage') {
     const op = isOpenCard(it);
-    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 && q0.q ? (op ? cardWhole(it) : '<div class="pq">“' + excerpt(it, 240) + '”</div>') : '') +
+    inner = (it.label ? '<span class="ttl">' + esc(it.label) + '</span>' : '') + (q0 && q0.q ? (op ? cardWhole(it) : '<div class="pq">“' + excerpt(it, 240) + '”</div>') + englishHtml(it, op ? 0 : EN_CARD) : '') +
       (canOpenCard(it) ? '<button type="button" class="more" data-cardopen="' + esc(it.id) + '" aria-expanded="' + op + '">' + (op ? '▴ less' : '▾ read it all here') + '</button>' : '') +
       '<span class="pc">' + esc((it.st && it.st.cite) || (q0 && q0.cite) || it.cite || it.ref || '') + (it.st && !it.st.whole ? '<i class="pof">' + esc(stretchOfWhat(it.st)) + '</i>' : '') + '</span>' +
       (it.slost ? '<span class="flag">these words are no longer where they were kept</span>' : '') +
@@ -3011,6 +3080,7 @@ function renderLayers() {
     '<label><input type="checkbox" data-layer="' + L.key + '"' + (layerOn(L.key) ? ' checked' : '') + '>' + (L.mark ? '<i class="sq"></i>' : '<i style="border-top:2px ' + (L.dash ? (L.dash.startsWith('2') ? 'dotted' : 'dashed') : 'solid') + ' ' + L.color + '"></i>') + esc(L.label) + '<span class="n">' + count(L.key) + '</span></label>').join('');
 }
 function renderTools() {
+  $('enb').setAttribute('aria-pressed', EN.on ? 'true' : 'false'); $('ensty').hidden = !EN.on; $('ensty').value = EN.style;
   $('vsel').innerHTML = B.views.map(v => '<option value="' + esc(v.id) + '"' + (v.id === viewId ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('');
   $('undo').disabled = ro() || !undoStack.length; $('redo').disabled = ro() || !redoStack.length;
   $('photos').textContent = 'Photographs' + (photoList().length ? ' (' + photoList().length + ')' : '');
@@ -3137,6 +3207,7 @@ function sidePassage(it, m, arr) {
     if (q.kept && q.full) h += '<span class="k">The words you kept</span><div class="kept">“' + esc(q.kept) + '”</div>';
     h += '<span class="k">' + (q.full ? 'The passage, in full' : 'The passage') + '</span>' + quoteHtml(q, 0, false, it);
   }
+  h += englishHtml(it, 0);
   h += echoApparatus(it) + echoWholeRow(it);
   if (it.slost) h += '<p class="ocr">These words are no longer where they were kept in the text: it may have been extracted again since. The card keeps the copy My topics kept with them, and what it quotes can’t be changed here.</p>';
   if (sn && !lost && !SHM) h += '<div class="row"><button type="button" class="btn" data-act="stretch" title="Trim it to the words you want, or take in more">Change what it quotes</button><button type="button" class="btn" data-act="splitit">Split it in two…</button></div>';
@@ -5608,6 +5679,8 @@ $('vsel').addEventListener('change', () => {
 });
 $('vnew').addEventListener('click', newView);
 $('vmore').addEventListener('click', viewMenu);
+$('enb').addEventListener('click', () => setEnglish(!EN.on));
+$('ensty').addEventListener('change', e => setEnglish(true, e.target.value));
 $('search').addEventListener('input', () => { query = $('search').value.trim(); renderTools(); lit(); renderInk(neighbourhood()); });
 $('undo').addEventListener('click', undo);
 $('redo').addEventListener('click', redo);
