@@ -264,6 +264,11 @@ reader's topic rather than the seminar's one board.
   words in full or your note on it, with case, accents and ß left out of account. The words are
   marked where they stand, and a word further into the passage than its row shows is given
   beneath it, with the words round it. **Esc** clears it.
+- **Find on the board**, in the tools above it, lights every card with all the words you type,
+  and moves the board to the first of them: centred, and zoomed in to read it if you were
+  further out. **Enter**, or **›** beside the count (*1 of 4*), goes on to the next, in the
+  order one reads the board, row by row from the top; **Shift-Enter** or **‹** goes back. The
+  card the board is on has a darker ring than the others found.
 - **A passage you take off the topic** in the list keeps its card, drawn dashed and marked *no
   longer under this topic*, with **Put it back under the topic** and **Take it off the board**,
   so that its arrows are not lost without your saying so.

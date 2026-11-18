@@ -97,6 +97,9 @@
   .card:hover { box-shadow: 0 2px 8px rgba(60, 40, 10, 0.2); }
   .card.sel { outline: 3px solid var(--accent-light); outline-offset: 1px; }
   .card.hit { outline: 3px solid #d9a441; outline-offset: 1px; }
+  .card.hit.hitnow { outline-color: var(--accent); box-shadow: 0 0 0 7px rgba(217, 164, 65, 0.35); }
+  .fstep { border: 1px solid var(--line); background: #fff; color: var(--accent); border-radius: 999px; width: 1.5rem; padding: 0; cursor: pointer; font-size: 0.9rem; line-height: 1.3; }
+  .fstep:hover { border-color: var(--accent-light); background: var(--card); }
   .card.k-part { width: 168px; text-align: center; }
   .card.k-part .lab { display: block; font-weight: 600; color: var(--accent); font-size: 1.02rem; line-height: 1.15; }
   .card.k-part .lab.lat { font-style: italic; }
@@ -703,7 +706,8 @@
     <button type="button" class="linkish" id="vmore">this view…</button>
   </span>
   <span class="grp">
-    <input type="search" id="search" placeholder="Find on the board" aria-label="Find on the board"><span id="found"></span>
+    <input type="search" id="search" placeholder="Find on the board" aria-label="Find on the board" title="The board moves to the first card found. Enter goes on to the next, Shift-Enter back to the one before."><span id="found"></span>
+    <button type="button" class="fstep" id="fprev" title="The card found before (Shift-Enter)" aria-label="The card found before" hidden>‹</button><button type="button" class="fstep" id="fnext" title="The next card found (Enter)" aria-label="The next card found" hidden>›</button>
   </span>
   <span class="grp">
     <button type="button" class="btn" id="enb" aria-pressed="false" title="Put the English beneath the German of every passage on the board, and in the side: the portal’s own translations">English</button>
@@ -891,6 +895,9 @@ let form = null;       // the form open on the side, if any
 let mode = null;       // { linkFrom } while choosing where an arrow goes
 let focus = null;      // { id, hops }
 let query = '';
+let hitId = null;      // the card found that the board was last moved to
+let findT = 0;         // the move to the first card found, waiting for the typing to stop
+let camAnim = 0;       // the board gliding to a card found
 let ppQuery = '';      // what is being looked for among the topic's passages, under Passages
 let ppOpen = new Set(); // the topic's passages opened under Passages, to be read there in full, by id
 let cardOpen = new Set(); // passage cards opened on the board, to be read there in full, by card id; never saved
@@ -2870,6 +2877,7 @@ function lit() {
     el.classList.toggle('twinlit', tw.has(it.id));
     el.classList.toggle('dim', (nb && !nb.has(it.id)) || !matches(it) || (pc && !pc.has(it.id)) || (ecs && !ecs.has(it.id)));
     el.classList.toggle('hit', !!query && matches(it));
+    el.classList.toggle('hitnow', !!query && it.id === hitId);
   });
   return nb;
 }
@@ -3092,8 +3100,9 @@ function renderTools() {
   $('stage').classList.toggle('readonly', ro());
   document.querySelector('.tools').classList.toggle('ro', ro());
   const sb = $('sharebtn'); if (sb) { sb.hidden = SHM ? !(SH && SH.ready && SH.role === 'owner') : !topic || !!lost || !!live; sb.textContent = SHM ? 'Who has it…' : 'Share…'; }
-  const n = query ? B.items.filter(it => shown(it) && matches(it)).length : null;
-  $('found').textContent = n == null ? '' : n + ' found';
+  const hl = query ? hitList() : null, hi = hl ? hl.indexOf(hitId) : -1;
+  $('found').textContent = !hl ? '' : hi >= 0 ? (hi + 1) + ' of ' + hl.length : hl.length + ' found';
+  $('fprev').hidden = $('fnext').hidden = !hl || hl.length < 2;
   banner();
 }
 function banner() {
@@ -4770,6 +4779,37 @@ function flashAnn(id) {
   intoSide(el); el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1500);
 }
 // Bring a card into sight on the board, if it is out of it.
+// The cards the search finds, in the order one reads the board: row by row from the top, each row from the left.
+function hitList() {
+  return B.items.filter(it => shown(it) && matches(it)).map(it => ({ id: it.id, r: rect(it.id) })).filter(x => x.r)
+    .sort((a, b) => Math.floor(a.r.y / 60) - Math.floor(b.r.y / 60) || a.r.x - b.r.x).map(x => x.id);
+}
+// Move the board to the k-th card found (wrapping round), centred: zoomed in to read it (100%, or less if it
+// would not fit), or kept as close as it is if that is closer.
+function goHit(k) {
+  clearTimeout(findT); findT = 0;
+  const hl = query ? hitList() : [];
+  if (!hl.length) { hitId = null; renderTools(); lit(); return; }
+  hitId = hl[((k % hl.length) + hl.length) % hl.length];
+  renderTools(); lit();
+  const s = $('stage').getBoundingClientRect(), id = hitId, aim = k => { const r = rect(id); return r && { k, x: s.width / 2 - (r.x + r.w / 2) * k, y: s.height / 2 - (r.y + r.h / 2) * k }; };
+  const r = rect(id); if (!r) return;
+  const k2 = Math.max(0.15, Math.min(Math.max(cam.k, 1), (s.width - 80) / r.w, (s.height - 80) / r.h));
+  // a card drawn afresh on the way in (zoomed past the far view) can change its height: centred again on arrival
+  glide(aim(k2), () => { const a = hitId === id && aim(k2); if (a && (Math.abs(a.x - cam.x) > 2 || Math.abs(a.y - cam.y) > 2)) glide(a); });
+}
+const stepHit = d => { const hl = query ? hitList() : [], i = hl.indexOf(hitId); goHit(i < 0 ? (d > 0 ? 0 : -1) : i + d); };
+// The camera moved smoothly to where it is going; at once, for those who ask their system for less motion.
+function glide(to, then) {
+  cancelAnimationFrame(camAnim);
+  const from = { x: cam.x, y: cam.y, k: cam.k }, t0 = performance.now(), D = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 420;
+  const step = now => {
+    const t = D ? Math.min(1, (now - t0) / D) : 1, e = 1 - Math.pow(1 - t, 3);
+    cam.x = from.x + (to.x - from.x) * e; cam.y = from.y + (to.y - from.y) * e; cam.k = from.k + (to.k - from.k) * e; applyCam();
+    if (t < 1) camAnim = requestAnimationFrame(step); else { camAnim = 0; keepCam(); if (then) then(); }
+  };
+  camAnim = requestAnimationFrame(step);
+}
 function showCard(id) {
   const r = rect(id); if (!r || !shown(item(id))) return;
   const s = $('stage').getBoundingClientRect(), x = r.x * cam.k + cam.x, y = r.y * cam.k + cam.y;
@@ -4782,7 +4822,7 @@ function openAnn(id) {
   if (!w) { toast('Its passage is not on the board now.'); return; }
   select('card', [w.card]); showCard(w.card); flashAnn(id);
 }
-function findWord(w) { $('search').value = w; query = w; renderTools(); lit(); renderInk(neighbourhood()); toast('Lit: every card with “' + w + '”, on it or in its annotations.'); }
+function findWord(w) { $('search').value = w; query = w; hitId = null; renderTools(); lit(); renderInk(neighbourhood()); goHit(0); toast('Lit: every card with “' + w + '”, on it or in its annotations.'); }
 function newView() {
   if (ro()) return;
   const name = prompt('A name for the new view. It starts as a copy of this one, and changes to it leave this one as it is.', 'A view of my own');
@@ -5681,7 +5721,15 @@ $('vnew').addEventListener('click', newView);
 $('vmore').addEventListener('click', viewMenu);
 $('enb').addEventListener('click', () => setEnglish(!EN.on));
 $('ensty').addEventListener('change', e => setEnglish(true, e.target.value));
-$('search').addEventListener('input', () => { query = $('search').value.trim(); renderTools(); lit(); renderInk(neighbourhood()); });
+$('search').addEventListener('input', () => {
+  query = $('search').value.trim(); hitId = null; renderTools(); lit(); renderInk(neighbourhood());
+  clearTimeout(findT); findT = query ? setTimeout(() => goHit(0), 300) : 0;   // once the typing stops
+});
+$('search').addEventListener('keydown', e => { if (e.key === 'Enter' && query) { e.preventDefault(); if (findT) goHit(0); else stepHit(e.shiftKey ? -1 : 1); } });
+$('fprev').addEventListener('click', () => stepHit(-1));
+$('fnext').addEventListener('click', () => stepHit(1));
+// taking hold of the board stops a glide
+['pointerdown', 'wheel'].forEach(t => $('stage').addEventListener(t, () => { cancelAnimationFrame(camAnim); camAnim = 0; }, { capture: true, passive: true }));
 $('undo').addEventListener('click', undo);
 $('redo').addEventListener('click', redo);
 $('snap').addEventListener('click', () => {
