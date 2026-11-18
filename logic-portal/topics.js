@@ -662,6 +662,9 @@ css.textContent = `
   #mtpage .mtshh { font-family: 'Cinzel', serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--accent); margin: 0.2rem 0 0.25rem 0.3rem; }
   #mtpage .mtsh span, #mtpick .mtpshb span { color: var(--faded); font-size: 0.8rem; }
   #mtpage .mtshtag { font-size: 0.72rem; color: #3f6b2a; font-style: italic; }
+  #mtpage aside .mtlook { display: flex; gap: 0.4rem; align-items: center; margin: 0 0.3rem; }
+  #mtpage aside .mtlook input { width: 6.5rem; margin-top: 0; border-style: solid; letter-spacing: 0.08em; }
+  #mtpage aside .mtlook .btn { padding: 0.1rem 0.7rem; }
   #mtpick .mtpsh { margin-top: 0.6rem; }
   #mtpick .mtpshb { display: block; width: 100%; text-align: left; background: none; border: 1px solid var(--line-soft); border-radius: 5px; padding: 0.15rem 0.45rem; margin: 0.2rem 0; font: inherit; font-size: 0.9rem; color: var(--accent); cursor: pointer; }
   #mtpick .mtpshb:hover { background: var(--parchment); }
@@ -1147,6 +1150,11 @@ function openShared(repo) {
   const url = new URL('topic-board.html#s=' + encodeURIComponent(repo), location.href).href;
   try { (window.top || window).location.href = url; } catch (x) { location.href = url; }
 }
+// A board shown to the class, by its number: it opens with the class password, read only (topic-board.html#look=).
+function openLook(n) {
+  const url = new URL('topic-board.html#look=' + n, location.href).href;
+  try { (window.top || window).location.href = url; } catch (x) { location.href = url; }
+}
 // The file of a shared board, one passage, card, arrow, view or annotation to a line, as topic-board.html writes it.
 function sharedText(f) {
   const L = (k, a) => JSON.stringify(k) + ':[\n' + (a || []).map(x => JSON.stringify(x)).join(',\n') + '\n]';
@@ -1239,6 +1247,7 @@ function renderAside() {
     '<input type="text" class="mtnewt" placeholder="+ New topic, then Enter" spellcheck="false" maxlength="120">' +
     (sharedList().length ? '<hr><div class="mtshh">Shared with me</div>' + sharedList().sort((a, b) => a.topic.localeCompare(b.topic, 'de')).map(x =>
       '<button type="button" class="mtopic mtsh" data-mta="openshared" data-mtr="' + esc(x.repo) + '" title="' + esc(x.archived ? 'No longer shared: look only' : x.push ? 'You can work on it' : 'You can look at it') + '">' + esc(x.topic) + ' <span>@' + esc(x.owner || '?') + (x.archived ? ' · ended' : x.push ? '' : ' · look') + '</span></button>').join('') : '') +
+    '<hr><div class="mtshh">Shown to the class</div><form class="mtlook" novalidate><input type="text" class="mtlookn" inputmode="numeric" maxlength="4" placeholder="Its number" aria-label="The number of a board shown to the class" autocomplete="off" spellcheck="false"><button type="submit" class="btn">Look</button></form>' +
     (DB.topics.length ? '' : '<p class="mthint">A topic works like a label: one passage can stand under several, with one note of yours.</p>');
 }
 function listFor() {
@@ -1578,6 +1587,13 @@ page.addEventListener('keydown', e => {
   }
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !pk.hidden) closePicker(); });
+page.addEventListener('submit', e => {
+  const f = e.target.closest('.mtlook'); if (!f) return;
+  e.preventDefault();
+  const n = flat(f.querySelector('.mtlookn').value);
+  if (!/^\d{4}$/.test(n)) { toast('A board shown to the class has a number of four digits.'); return; }
+  openLook(n);
+});
 document.addEventListener('mousedown', e => {
   const m = page.querySelector('.mtmenu');
   if (!m.hidden && !e.target.closest('.mtmenuwrap')) m.hidden = true;
