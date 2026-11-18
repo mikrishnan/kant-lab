@@ -525,6 +525,21 @@ shared with, refusing a reader's save itself.
   board.
 - **Links** on a shared board to boards of yours that are not shared show the others only *a board
   not shared with you*, and keep no copy of their names.
+- **Shown to the class**, for people who are only to look at it, and need no GitHub account and no
+  token for that. In **Who has it…**, **Show it to the class…** gives the board a number of four
+  digits, and puts a copy of it in the public repository `kant-lab-seminar/looks`, locked with the
+  class password as the handouts are. The copy has everything on the board but its photographs.
+  Anyone then opens `topic-board.html#look=<number>`, or types the number into My topics under
+  *Shown to the class* and presses **Look**. They give the class password and see the board read
+  only, with the portal beside it. Everyone on the board sees the number in its status line.
+- **The copy follows the board.** A few seconds after each save, the page of whoever saved sends
+  it again, if that browser has the class password. A page that hasn't got it says *give the class
+  password* in its status line. Someone looking with no token sees a change within about five
+  minutes, the time GitHub's file server takes to catch up; with My topics' token in their browser,
+  within seconds. **Stop showing it…** takes the copy away, at once for a page opened from then on,
+  and within about five minutes for one open already. The repository's history keeps the copies
+  sent, still locked. Anyone with the class password can look at every board shown to the class.
+  To show a board of your own that isn't shared, share it first, with nobody if you like.
 - **The organisation's owners can always see every repository in it.** A shared board is private
   from the rest of the seminar, not from them.
 
@@ -537,6 +552,9 @@ shared with, refusing a reader's save itself.
 2. *Settings* → *Member privileges* → *Base permissions* → **No permission**. From then on a member
    sees a repository only if they, or a team of theirs, have been given it. Leave *members can
    create private repositories* on. Do the team first, so that nobody loses `queues` in between.
+3. `looks` → *Settings* → *Collaborators and teams* → add *Kant Lab* with **Write** too, so that
+   whoever shares a board can show it to the class. `looks` is public, and holds nothing that
+   reads without the class password.
 
 **Everyone's token, once.** A board shared with you opens with the token My topics keeps (*Keep on
 GitHub*), and a board page asks for one if this browser has none. It must reach the shared

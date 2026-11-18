@@ -26,8 +26,8 @@
    unexportable), so that the password is not asked again until "Lock" on the Handouts page.
    Without it, the key lasts as long as the page.
 
-   Read by the portal's handout-tray.js and by teaching/class-screen/, as window.KANTLAB_LOCK,
-   which no later script can replace.
+   Read by the portal's handout-tray.js, by teaching/class-screen/, and by topic-board.html for a
+   board shown to the class, as window.KANTLAB_LOCK, which no later script can replace.
    ═══════════════════════════════════════════════════════════════════════════ */
 Object.defineProperty(window, 'KANTLAB_LOCK', { enumerable: true, value: Object.freeze((() => {
   'use strict';
