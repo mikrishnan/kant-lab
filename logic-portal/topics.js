@@ -1260,7 +1260,8 @@ function listFor() {
 function renderMain() {
   const w = page.querySelector('.mtwrap'), t = topicOf(view);
   if (!DB.items.length && !DB.topics.length) {
-    w.innerHTML = '<div class="mthead"><h2>My topics</h2></div><p class="mtempty">Nothing kept yet. Point at a passage anywhere in the portal, in the search results, a full text or among Kant’s notes, and press <b>☆ Topic</b>. To keep only some of its words, select them and press <b>☆ Keep these words</b>. Your topics are kept in this browser, and nobody else sees them.</p>';
+    w.innerHTML = '<div class="mthead"><h2>My topics</h2></div><p class="mtempty">Nothing kept yet. Point at a passage anywhere in the portal, in the search results, a full text or among Kant’s notes, and press <b>☆ Topic</b>. To keep only some of its words, select them and press <b>☆ Keep these words</b>. Your topics are kept in this browser, and nobody else sees them.</p>' +
+      '<p class="mtempty">Given a topic’s board as a file? <button type="button" class="mtlink" data-mta="openfile">Import a board…</button> makes it a topic of yours.</p>';
     return;
   }
   const others = sortedTopics().filter(x => x.id !== view);
@@ -1450,7 +1451,8 @@ function drawMenu() {
   const m = page.querySelector('.mtmenu');
   m.innerHTML =
     '<button type="button" data-mta="savefile">Save to file</button><small>Everything, in one .json file, to keep or to open in another browser. The file is not locked: keep it somewhere of your own.</small>' +
-    '<button type="button" data-mta="openfile">Open file…</button><small>Merges a saved file with what is here. Nothing here is lost.</small><hr>' +
+    '<button type="button" data-mta="openfile">Open file…</button><small>Merges a saved file with what is here. Nothing here is lost.</small>' +
+    '<button type="button" data-mta="openfile">Import a board…</button><small>A topic’s board someone exported: it becomes a topic of yours, with its passages, cards and annotations. Nothing here is lost.</small><hr>' +
     (gh.on
       ? '<button type="button" data-mta="syncnow">Sync now</button><small>' + (gh.login ? 'Kept on GitHub as ' + esc(gh.login) + ', locked with your passphrase.' : '') + '</small>' +
         '<button type="button" data-mta="rekey"' + (gh.key ? '' : ' disabled') + '>Change passphrase…</button>' +
@@ -1627,14 +1629,95 @@ function saveFile() {
   renderStatus();
   toast('Saved to a file, in your Downloads. It is not locked: keep it somewhere of your own.');
 }
+/* A topic's board someone exported (Export, on topic-board.html) becomes a topic of one's own: a new topic of
+   that name, its passages kept under it, and the board with every card, arrow, group, view and photograph, and the
+   annotations that came with it. Nothing already here is changed, except that a passage kept here already is
+   put under the new topic too rather than kept twice. A file exported before boards carried their passages has
+   only the cards' addresses: their passages come in whole, from the portal's texts. */
+const BOARD_FILE = 'kantlab-topic-board';
+const freeSign = used => { for (let r = 0; r < 50; r++) for (let i = 0; i < 26; i++) { const s = String.fromCharCode(97 + i) + '′'.repeat(r); if (!used.has(s)) return s; } return 'z' + used.size; };
+// Every passage id (mt) anywhere in it, cards, table cells, photographs, links, given its new one.
+function remapMt(x, ids) {
+  if (Array.isArray(x)) x.forEach(y => remapMt(y, ids));
+  else if (isObj(x)) Object.keys(x).forEach(k => { if (k === 'mt' && typeof x[k] === 'string') { if (ids.has(x[k])) x[k] = ids.get(x[k]); } else remapMt(x[k], ids); });
+  return x;
+}
+function freeName(name) {
+  const taken = n => DB.topics.some(t => norm(t.name) === norm(n));
+  if (!taken(name)) return name;
+  for (let k = 2; ; k++) if (!taken(name + ' (' + k + ')')) return name + ' (' + k + ')';
+}
+function topicFromBoard(d, fname) {
+  const b0 = cleanBoard(isObj(d.board) ? clone(d.board) : null);
+  if (!b0) return false;
+  const str = x => typeof x === 'string' ? x : '';
+  const t = now(), name = freeName(clip(flat(str(d.topic)) || flat(fname.replace(/\.json$/i, '')) || 'A board', 120));
+  const topic = { id: 't-' + uid(), name, note: str(d.note), made: t, at: t, order: [] };
+  // the file's passages; from an older file, one for each passage its cards show
+  const older = !Array.isArray(d.passages);
+  const src = older
+    ? b0.items.filter(c => c.kind === 'passage' && typeof c.ref === 'string' && c.ref).map(c => ({ id: str(c.mt) || c.id, ref: c.ref, cite: str(c.cite) }))
+    : d.passages.filter(p => isObj(p) && typeof p.id === 'string' && typeof p.ref === 'string' && p.ref);
+  const ids = new Map(), made = [], reused = [];
+  src.forEach(p => {
+    if (ids.has(p.id)) return;
+    const excerpt = typeof p.excerpt === 'string' && p.excerpt ? p.excerpt : null;
+    const have = DB.items.find(x => x.ref === p.ref && flat(x.excerpt || '') === flat(excerpt || ''));
+    if (have) {
+      if (!have.topics.includes(topic.id)) { have.topics.push(topic.id); have.at = t; reused.push(have); }
+      ids.set(p.id, have.id); topic.order.push(have.id); return;
+    }
+    const k = idxOf(p.ref), q = k != null ? P[k] : null, T = q ? TEXTS[q.t] : null;
+    const it = { id: 'i-' + uid(), ref: p.ref, topics: [topic.id], cite: str(p.cite) || (q && q.cite) || '', work: str(p.work) || (T ? T.short || T.title || T.key : ''),
+      date: str(p.date) || (q ? q.dateLabel || T.date || '' : ''), words: str(p.words) || (q ? clip(flat(q.text), 300) : ''), excerpt, en: !!p.en, note: '', added: t, at: t };
+    if (excerpt && !it.en && spanOk(p.span)) it.span = { from: [p.span.from[0], +p.span.from[1]], to: [p.span.to[0], +p.span.to[1]], pre: str(p.span.pre).slice(0, 64), suf: str(p.span.suf).slice(0, 64) };
+    DB.items.push(it); made.push(it); ids.set(p.id, it.id); topic.order.push(it.id);
+  });
+  // the board, its cards naming the passages as they are kept here; where it was shared is not brought along
+  const board = remapMt(b0, ids);
+  delete board.shared; board.at = t;
+  // the annotations: those already here stay as they are; a parallel whose letter one here has takes the next free one
+  const haveA = new Set(DB.annotations.map(a => a.id)), used = new Set(DB.annotations.filter(a => a.kind === 'parallel' && a.sign).map(a => a.sign));
+  const anns = withId(d.annotations).filter(a => !haveA.has(a.id)).map(a => remapMt(clone(a), ids));
+  anns.forEach(a => {
+    // one deleted here before, as Undo does, comes back changed now, so that the deletion kept elsewhere doesn't take it again
+    if (DB.gone[a.id]) { delete DB.gone[a.id]; a.at = t; }
+    if (a.kind === 'parallel') { if (!a.sign || used.has(a.sign)) a.sign = freeSign(used); used.add(a.sign); }
+  });
+  DB.topics.push(topic); DB.boards[topic.id] = board; DB.annotations = DB.annotations.concat(anns);
+  save(); view = topic.id; also = ''; sortBy = 'arranged'; find = ''; render();
+  const cards = board.items.length;
+  toast('Made the topic “' + name + '” from “' + fname + '”: ' + plural(made.length + reused.length, 'passage') +
+    (reused.length ? ' (' + reused.length + ' kept here already)' : '') + ', its board with ' + plural(cards, 'card') +
+    (anns.length ? ', and ' + plural(anns.length, 'annotation') : '') + '.' +
+    (older ? ' The file is from before boards carried their passages, so any words kept on their own came in as their whole passages.' : ''), [
+    ['Open its board', () => { const url = new URL('topic-board.html#t=' + encodeURIComponent(topic.id), location.href).href; try { (window.top || window).location.href = url; } catch (x) { location.href = url; } }],
+    ['Undo', () => {
+      const at = now();
+      const k = DB.topics.findIndex(x => x.id === topic.id); if (k >= 0) DB.topics.splice(k, 1);
+      DB.gone[topic.id] = at; delete DB.boards[topic.id];
+      made.forEach(it => { const x = itemOf(it.id); if (x) dropItem(x); });
+      reused.forEach(it => { const x = itemOf(it.id); if (x) { x.topics = x.topics.filter(id => id !== topic.id); x.at = at; } });
+      const gone = new Set(anns.map(a => a.id));
+      DB.annotations = DB.annotations.filter(a => !gone.has(a.id)); gone.forEach(id => { DB.gone[id] = at; });
+      if (view === topic.id) view = 'all';
+      save(); render();
+    }]]);
+  return true;
+}
 fileIn.addEventListener('change', () => {
   const f = fileIn.files && fileIn.files[0];
   if (!f) return;
   const r = new FileReader();
   r.onload = () => {
-    let d = null;
-    try { d = clean(JSON.parse(String(r.result))); } catch (e) { d = null; }
-    if (!d) { toast('That file isn’t one of My topics. Nothing was changed.'); return; }
+    let raw = null, d = null;
+    try { raw = JSON.parse(String(r.result)); } catch (e) { raw = null; }
+    if (isObj(raw) && raw.kind === BOARD_FILE) {
+      if (!topicFromBoard(raw, f.name)) toast('That board’s file would not read. Nothing was changed.');
+      return;
+    }
+    d = clean(raw);
+    if (!d) { toast('That file isn’t one of My topics, or a topic’s board. Nothing was changed.'); return; }
     const n0 = DB.items.length, t0 = DB.topics.length, was = canon(DB);
     const m = merge(DB, d, null);
     DB = m.db; save(); render();

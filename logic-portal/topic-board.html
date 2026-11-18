@@ -6360,10 +6360,26 @@ function addFrom(into, from) {
   });
   return into;
 }
+// A passage as an exported board carries it: where it stands and the words kept, not the note on it, which
+// stays the reader's own, as on a shared board. With them, My topics can make the topic again from the file.
+const passageOut = x => Object.assign({ id: x.id, ref: x.ref, cite: x.cite || '', work: x.work || '', date: x.date || '', words: x.words || '',
+  excerpt: x.excerpt || null, en: !!x.en }, x.span ? { span: clone(x.span) } : {});
 $('export').addEventListener('click', () => {
-  const ids = new Set(annHere().map(a => a.id)), pids = new Set(parsHere().map(p => p.id).concat([...parsInTables()]));
-  const data = { kind: 'kantlab-topic-board', v: 1, topic: topic ? topic.name : '', saved: new Date().toISOString(), board: kept(),
-    annotations: (B.annotations || []).filter(a => a && (ids.has(a.id) || (a.kind === 'reply' && ids.has(a.re)) || (a.kind === 'parallel' && pids.has(a.id)) || (a.kind === 'place' && pids.has(a.re)))) };
+  const rb = realB(), refs = new Set();
+  rb.items.forEach(c => { if (c && c.kind === 'passage') [c.ref].concat((c.quotes || []).map(qAddr)).forEach(r => { if (r) refs.add(r); }); });
+  // an echo goes with the board when one of its stretches stands in a passage on it, as Echoes lists it here
+  const echoHere = a => a.kind === 'echo' && [a.a, a.b].some(e => e && Array.isArray(e.refs) && e.refs.some(r => refs.has(r)));
+  const ids = new Set(annHere().map(a => a.id).concat(echoesHere().map(e => e.id))), pids = new Set(parsHere().map(p => p.id).concat([...parsInTables()]));
+  // the topic's passages, and any other a card on the board shows
+  const ps = underTopic();
+  rb.items.forEach(c => { const x = c && c.kind === 'passage' && itemOf(c.mt); if (x && !ps.includes(x)) ps.push(x); });
+  const board = kept(); delete board.shared;   // where the board is shared is the sharer's; whoever opens the file starts unshared
+  // annotations marked only me stay behind, as they do on a shared board; the replies go with what they answer
+  const all = (B.annotations || []).filter(a => a && !a.only);
+  const top = new Set(all.filter(a => ids.has(a.id) || echoHere(a) || (a.kind === 'parallel' && pids.has(a.id))).map(a => a.id));
+  const data = { kind: 'kantlab-topic-board', v: 1, topic: topic ? topic.name : '', note: (topic && topic.note) || '', saved: new Date().toISOString(),
+    passages: ps.map(passageOut), board,
+    annotations: all.filter(a => top.has(a.id) || (a.kind === 'reply' && top.has(a.re)) || (a.kind === 'place' && pids.has(a.re))) };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
   const slug = String(topic ? topic.name : 'topic').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'topic';
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'topic-board-' + slug + '-' + today() + '.json';
