@@ -347,6 +347,15 @@ reader's topic rather than the seminar's one board.
   stretch never runs from one Reflexion into the next, nor over more than 40 passages, and words
   kept from the English stay as they are. On a shared board a card shows the stretch it was
   shared with, but what it quotes can't yet be changed there.
+- **English**, in the tools above the board, puts the portal's English beneath the German of
+  every passage card, and in full in the side when a card is chosen. Beside it you choose the
+  style of the machine translation, Guyer–Wood or Kemp Smith principles; a text that has only a
+  published translation shows that one. A card shows the first words of the English, as it does
+  of the German, and **▾ read it all here** opens it to all of both. Each English is labelled
+  *machine* or *published*, and where a card quotes only some of a passage's words, the English
+  is of the whole passage and says so. The switch is this device's, the same on every board, and
+  changes nobody else's screen. The cards grow taller with it, so cards laid close together can
+  overlap: **Tidy** lays the view out again.
 - **Annotate** some of a passage's words, or the whole of it, as on the study's board:
   *Problem*, *Relevant to…*, *Interpretation*, *Comment*, with replies and *resolved*. An
   annotation belongs to the passage, not the board, so it shows on every one of your boards
