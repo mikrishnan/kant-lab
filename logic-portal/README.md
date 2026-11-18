@@ -251,7 +251,7 @@ kinds of nothing](studies/kinds-of-nothing/README.md#the-board), made the portal
 reader's topic rather than the seminar's one board.
 
 - **You put the passages on it, one at a time.** A new board is empty. The topic's passages wait
-  under **Passages**, a tab in the side (or **Passage…** among the tools), in the order you
+  under **Passages**, a tab in the side (or **Passage…** under **Add ▾**), in the order you
   arranged them, with a count of those still waiting. Press **+ On the board**, or drag one onto
   the board where you want it; dropped inside a group's frame, it goes into that group. **▾ read
   it all here**, on a passage waiting, opens its words in full where it stands in the list (and,
@@ -259,6 +259,21 @@ reader's topic rather than the seminar's one board.
   under the topic later, anywhere in the portal, the portal beside the board included, joins
   them there; nothing comes onto the board by itself. **Take it off the board**, on a passage's
   card, sends it back to Passages; it stays under the topic.
+- **What it shows.** Everything you make on a board is kept, and the board draws what you ask
+  for. **Show**, among the tools, has five choices. **Argument**, where every board starts,
+  draws the cards, groups, arrows and questions, and each card counts the rest in one line
+  beneath its citation, in ink: a mark for each kind of annotation (■ a problem, ○ what it is
+  relevant to, ◆ an interpretation, ● a comment), its parallels' letters, its echoes (≈), where
+  else the passage stands (⧉) and the links to it from your other boards (↖), each piece a way
+  to what it counts. **Select a card** and its annotations, parallels and echoes come out on it:
+  the threads, knots and ribbons that join it to other cards are drawn, those cards are outlined
+  in gold, and the other arrows fade. Pointing at a card draws them faintly. **Words** draws
+  every parallel, **Stretches** every echo and **Notes** every annotation, each in its colours,
+  the groups giving theirs up meanwhile; **Everything** draws all of them at once, and
+  **custom…** sets the layers one by one. **Drawing** goes with any of them. A line at the foot
+  of the board says what in sight is not drawn, each count a way to show it. The choice is this
+  browser's, for each view, and a new view starts with the choice of the one it is made from.
+  The side always shows everything about what is selected, and so does Compare.
 - **Find among them**, at the top of Passages, narrows both lists, those waiting and those on
   the board, to the passages with every word you type: in the citation, the work, the passage's
   words in full or your note on it, with case, accents and ß left out of account. The words are
@@ -270,8 +285,9 @@ reader's topic rather than the seminar's one board.
 - **Around them,** whatever you add: **Notes**, **Questions** (what the topic asks, in your
   words), **Groups** (a named frame whose cards move with it), boxes, arrows named on the spot
   (*develops*, *contradicts*, *qualifies*, *same as*, *cf.*, *answers?* to a question, or a word
-  of your own), drawing with a pen or an Apple Pencil, views, layers, **Focus** and **Find on the
-  board**.
+  of your own), drawing with a pen or an Apple Pencil, views (**New view…** at the foot of the
+  view's list), **Focus** (select a card and press **F**: only what is joined to it stays, the
+  rest is put away until **Esc**) and **Find on the board**.
 - **One passage in several groups.** A passage can stand in as many groups as it belongs to, as a
   card in each: **+ in another group too**, in a passage card's side, puts a second card of it in
   the group you choose. So does dragging a card into another group's frame with **⌥** held (a
@@ -370,14 +386,15 @@ reader's topic rather than the seminar's one board.
   colour and a letter, (a), (b), kept with it, so that a note can say "see (b)". Its words are
   tinted in its colour, with its letter after them, on the cards and in the side; each card
   carries a chip for it; and a thread runs from each of its cards to a knot marked with its
-  letter. Pointing at any of its words, chips or knot lights them all. Click a chip or a knot, or
+  letter. On the board these show under **Words**, on a card selected and for the parallel
+  chosen; elsewhere a card's line gives the letter. Pointing at any of its words, chips or knot lights them all. Click a chip or a knot, or
   its words in the side, and it is **chosen**: each of its cards turns to its words, even those
   further in than the card's opening, the rest of the board dims, and the side shows it, its
   name, kind and note to change, each of its places with the words round them and a note of its
   own, **Hold it**, **Compare its passages** and **Delete the parallel**. Beneath a passage in
   the side, **Parallels** lists the words elsewhere that answer to its own, each opening its
-  card, or, for a passage not on this board, its place in the portal. **Parallels**, among the
-  tools, lists them all and downloads them as a list. Like an annotation, a parallel belongs to
+  card, or, for a passage not on this board, its place in the portal. **Parallels**, under
+  **Board ▾** (or by choosing **Words**), lists them all and downloads them as a list. Like an annotation, a parallel belongs to
   its passages, so it shows on every one of your boards where they stand. It is what you said:
   the page never adds words to one, nor joins two because they share words. Words it had to find
   again, because the passage now has them elsewhere or twice, are outlined dashed.
@@ -392,15 +409,17 @@ reader's topic rather than the seminar's one board.
   The first stretch stays in hand, so the next stretch you choose answers it too. An echo joins
   two stretches only: saying that A answers B and that B answers C says nothing of A and C, and
   nothing is drawn between them. **Hold this stretch**, on an echo's end, holds that very
-  stretch, so that what else answers it is said of the same words. On the board, a strip down a
-  card's right edge marks where its stretches fall, and a ribbon joins the two stretches of each
-  echo, as wide as they are and paler the looser the echo; a pair found not alike is listed but
+  stretch, so that what else answers it is said of the same words. On the board (under
+  **Stretches**, on a card selected and for the echo chosen; elsewhere a card's line counts
+  them), a strip down a card's right edge marks where its stretches fall, and a ribbon joins the
+  two stretches of each echo, as wide as they are and paler the looser the echo; a pair found not alike is listed but
   never drawn. Wherever a passage shows in full, in the side, in Compare or on a card opened, a
   bracket in its margin marks each stretch, with a tick where it starts and where it ends.
   Beneath a passage in the side, **Echoes** lists the stretches elsewhere that answer its own.
   Click a ribbon, strip or bracket and the echo is **chosen**: the board dims round its two
   cards and the side shows it, to change how close it is, its kind, respects, direction, note
-  and colour, to **Compare the two** or to delete it. **Echoes**, among the tools, lists them all,
+  and colour, to **Compare the two** or to delete it. **Echoes**, under **Board ▾** (or by
+  choosing **Stretches**), lists them all,
   downloads them as a list, and sets every stretch against every other in a matrix: shaded where
   you made an echo, ≠ where you found two not alike, blank where nothing is said. Tick **show the
   page's chains** and a dashed dot marks two stretches joined only through a third: the page's
@@ -421,7 +440,7 @@ reader's topic rather than the seminar's one board.
   is saved.
 - **Link to another topic.** A link card stands on one board for another of your topics, as a
   whole, or for one card or group on that topic's board, and shows what it points to as it is
-  now. Make one under **Boards**, a tab in the side (or **Link…** among the tools): choose the
+  now. Make one under **Boards**, a tab in the side (or **Link…** under **Add ▾**): choose the
   topic, then **+ Link here** on the topic or on one of its board's cards, or drag it onto the
   board. Or press **Copy a link to it** on a card or group, and paste it on another board (⌘V),
   or into *Relevant to…* in an annotation. Arrows join a link card like any card, so that one
@@ -435,7 +454,7 @@ reader's topic rather than the seminar's one board.
   stands on several of your boards says *also on …*, dashed, since that is the page's own
   finding, not a link you made. In My topics, a topic's heading says which topics it is linked
   with.
-- **Photograph the board** keeps it as it is now, to look at again or bring back. **Export**
+- **Photograph the board**, under **Board ▾**, keeps it as it is now, to look at again or bring back. **Export**
   saves the one board to a file, and **Import** brings such a file's cards in beside yours.
 
 The board is kept with your topics, under the same `localStorage` key, so it goes wherever they
@@ -499,7 +518,7 @@ with you. GitHub, not the page, decides who may do which: each shared board is a
 repository of its own in the seminar's organisation, and GitHub lets in only the people it is
 shared with, refusing a reader's save itself.
 
-- **Share.** On the topic's board, press **Share…** (beside *Export*). Name each person by their
+- **Share.** On the topic's board, press **Share…**, under **Board ▾**. Name each person by their
   GitHub username, as *can look* or *can work on it*: the list suggests the members of
   `kant-lab-seminar`, and only members can be named. **Share** makes a private repository,
   `kant-lab-seminar/board-<topic>-<four letters>`, for that board alone, copies the topic's

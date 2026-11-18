@@ -58,6 +58,25 @@
   #found { font-size: 0.82rem; color: var(--faded); min-width: 3.5rem; }
   .linkish { background: none; border: 0; padding: 0; color: var(--faded); cursor: pointer; text-decoration: underline; font-size: 0.86rem; }
   .linkish:hover { color: var(--accent); }
+  /* the toolbar's two menus, Add and Board, and the row of what the board shows */
+  .menu { position: relative; display: inline-flex; }
+  .menu .mlist { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 1000; min-width: 12rem; flex-direction: column; padding: 0.25rem;
+                 background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 4px 14px rgba(60, 40, 10, 0.18); }
+  .menu .mlist.mright { left: auto; right: 0; }
+  .menu.open .mlist { display: flex; }
+  .menu.open > .btn { background: var(--parchment-dark); }
+  .menu .mi { text-align: left; border: 0; background: none; color: var(--accent); padding: 0.22rem 0.65rem; border-radius: 6px; cursor: pointer; white-space: nowrap; font-size: 0.92rem; }
+  .menu .mi:hover, .menu .mi:focus-visible { background: var(--parchment-dark); outline: 0; }
+  .menu .mi.k-problem { color: var(--prob); }
+  .menu .mi[hidden] { display: none; }
+  .menu .msep { height: 1px; background: var(--line-soft); margin: 0.2rem 0.4rem; }
+  .lens { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.2rem; }
+  .lens .btn.on { background: var(--accent); color: var(--parchment); border-color: var(--accent); }
+  .lens .btn .n { color: var(--faded); font-size: 0.8em; margin-left: 0.28rem; }
+  .lens .btn.on .n { color: var(--parchment-dark); }
+  .lens .linkish { margin-left: 0.2rem; }
+  .lens .linkish.on { color: var(--accent); font-weight: 600; }
+  .tools .drw { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.88rem; color: var(--accent); margin-left: 0.35rem; cursor: pointer; white-space: nowrap; }
 
   .wrap { flex: 1; display: flex; min-height: 0; }
 
@@ -84,6 +103,11 @@
   #ink #ghost { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 4; }
   .dim { opacity: 0.14; }
   #ink .ar.dim { opacity: 0.08; }
+  /* what is attended to: the cards at the other ends of what joins a card selected, outlined; the rest faded */
+  .card.out { display: none; }   /* outside a focus */
+  .card.partner { outline: 2.5px solid #d9a441; outline-offset: 2px; }
+  #ink .fade, #drawn .fade { opacity: 0.3; }
+  #ink .lite, #drawn .lite { opacity: 0.5; }
 
   /* frame tabs: a model's name, and the handle that moves it */
   .ftab { position: absolute; color: #fff; border-radius: 7px 7px 7px 0; padding: 0.1rem 0.6rem 0.12rem; white-space: nowrap; cursor: move; font-size: 0.9rem; }
@@ -163,6 +187,9 @@
   #zoom #zk { min-width: 3.2rem; text-align: center; color: var(--faded); font-size: 0.82rem; }
   #banner { left: 50%; top: 12px; transform: translateX(-50%); padding: 0.3rem 0.8rem; display: none; align-items: center; gap: 0.6rem; max-width: 80%; }
   #banner.show { display: flex; }
+  #undrawn { left: 50%; bottom: 12px; transform: translateX(-50%); padding: 0.2rem 0.8rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.1rem 0.4rem; max-width: 62%; color: var(--faded); font-size: 0.82rem; }
+  #undrawn[hidden] { display: none; }
+  #undrawn .linkish { font-size: inherit; }
   #banner.photo { background: #eef2f6; border-color: #3b5068; }
   #banner .btn { font-size: 0.82rem; }
   #chooser { display: none; padding: 0.35rem; gap: 0.3rem; flex-wrap: wrap; width: 230px; }
@@ -282,6 +309,8 @@
   #details .ev input { margin-top: 0.25rem; flex: none; }
   #details .addq { border: 1px dashed var(--line); border-radius: 8px; padding: 0.2rem 0.6rem 0.6rem; margin-top: 0.5rem; background: #fff; }
   #details .intro p, #details .intro li { font-size: 0.95rem; }
+  #details .howto { margin: 0.9rem 0 0.4rem; }
+  #details .howto > summary { cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 0.3rem; }
   #details .intro p { margin: 0 0 0.55rem; }
   #details .intro ul { margin: 0 0 0.6rem; padding-left: 1.1rem; }
   #details .intro li { margin-bottom: 0.25rem; }
@@ -379,7 +408,7 @@
   .lockcard p.note { font-size: 0.88rem; color: var(--faded); }
   .lockcard a { color: var(--accent); overflow-wrap: anywhere; }
   .lockcard code { font-size: 0.85rem; background: var(--parchment-dark); padding: 0 0.3rem; border-radius: 3px; }
-  .tools.ro [data-add], .tools.ro #addp, .tools.ro #addl, .tools.ro #snap, .tools.ro #import { display: none; }
+  .tools.ro #addm, .tools.ro [data-add], .tools.ro [data-addbox], .tools.ro #addp, .tools.ro #addl, .tools.ro #snap, .tools.ro #import { display: none; }
   #details .onlyme { margin-left: 0.4rem; border: 1px dashed var(--faded); border-radius: 999px; padding: 0 0.4rem; font-size: 0.72rem; color: var(--faded); }
   #details .onlyc { display: flex; gap: 0.35rem; align-items: center; font-size: 0.84rem; color: var(--faded); margin: 0.3rem 0 0; }
 
@@ -470,6 +499,27 @@
   .card .anns { display: flex; flex-wrap: wrap; gap: 0.15rem 0.5rem; font-size: 0.72rem; color: var(--faded); margin-top: 0.25rem; font-style: normal; }
   .card .anns i { display: inline-block; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--kc); margin-right: 0.15rem; vertical-align: -0.05rem; }
   .card .anns i.hollow { background: transparent; box-shadow: inset 0 0 0 1.5px var(--kc); }
+  .card .anns i.sh-sq, .card .cline .cl-a i.sh-sq { border-radius: 1.5px; }
+  .card .anns i.sh-dia, .card .cline .cl-a i.sh-dia { border-radius: 1px; transform: rotate(45deg) scale(0.82); }
+  .card .anns i.sh-ring { background: transparent; box-shadow: inset 0 0 0 2px var(--kc); }
+  /* a card's line: what else it has, in ink; each piece leads to what it counts */
+  .card .cline { display: flex; flex-wrap: wrap; align-items: center; gap: 0.05rem 0.3rem; margin-top: 0.22rem; font-size: 0.72rem; color: var(--faded); font-style: normal; line-height: 1.35; }
+  .card .cline .sep { font-style: normal; opacity: 0.55; }
+  .card .cline .cl-a > span { margin-right: 0.35rem; } .card .cline .cl-a > span:last-child { margin-right: 0; }
+  .card .cline .cl-a i { display: inline-block; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--faded); margin-right: 0.12rem; vertical-align: -0.03rem; }
+  .card .cline .cl-a i.sh-ring, .card .cline .cl-a i.hollow { background: transparent; box-shadow: inset 0 0 0 1.5px var(--faded); }
+  .card .cline .pchip.ink { min-width: 0; height: auto; padding: 0 0.08rem; margin: 0; background: none; color: var(--faded); font: inherit; font-weight: 600; line-height: inherit; border-radius: 3px; }
+  .card .cline .pchip.ink:hover, .card .cline .pchip.ink.phov { color: var(--pc); box-shadow: none; }
+  .card .cline .pchip.ink.held { box-shadow: 0 0 0 1.5px #d9a441; }
+  .card .cline .cl-e[data-echo] { cursor: pointer; } .card .cline .cl-e[data-echo]:hover, .card .cline .cl-e.ehov { color: var(--pc); }
+  .card .cline .twin { display: inline; margin: 0; border: 0; background: none; padding: 0; font-size: inherit; color: inherit; border-radius: 0; }
+  .card .cline .twin:hover { color: var(--accent); }
+  .card .cline .cl-l { color: #2f5d8a; }
+  #world.far .card .cline { font-size: 1rem; }
+  #world.far .card .cline .pchip.ink { height: auto; min-width: 0; font-size: inherit; line-height: inherit; border-radius: 3px; }
+  #world.mute #ink .frame rect.f { fill: #9a8f7a; stroke: #b8a88a; }
+  #world.mute .ftab, #world.mute .fgrip { background: #8b7b62 !important; }
+  #world.mute .card.k-passage { border-left-color: var(--line) !important; }
   #world.far .card .anns { font-size: 1.05rem; }
   #ink .annt { pointer-events: auto; cursor: pointer; }
   #ink .annt path.hit { fill: none; stroke: transparent; stroke-width: 14; }
@@ -682,18 +732,22 @@
   <b>Its board</b>
 </header>
 <div class="tools">
-  <span class="grp"><span class="lbl">Add</span>
-    <button type="button" class="btn k-note" data-add="note" title="Anything, as on a whiteboard">Note</button>
-    <button type="button" class="btn k-problem" data-add="problem" title="A question the topic raises, in your words: draw arrows to it from the passages that may answer it">Question</button>
-    <button type="button" class="btn" data-add="table" title="A table: choose how many columns and rows, and whether its first row or column are headings. A table can also be pasted onto the board.">Table</button>
-    <button type="button" class="btn" data-add="model" title="A group: a named frame for cards, which move with it">Group</button>
-    <button type="button" class="btn" id="addp" title="The topic’s passages: put them on the board one at a time">Passage…</button>
-    <button type="button" class="btn" id="addl" title="A link to another of your topics, or to a card or group on its board">Link…</button>
+  <span class="grp">
+    <span class="menu" id="addm"><button type="button" class="btn" data-menu aria-haspopup="true" aria-expanded="false" title="Put something on the board">Add ▾</button><span class="mlist" role="menu">
+      <button type="button" class="mi k-note" data-add="note" title="Anything, as on a whiteboard">Note</button>
+      <button type="button" class="mi k-problem" data-add="problem" title="A question the topic raises, in your words: draw arrows to it from the passages that may answer it">Question</button>
+      <button type="button" class="mi" data-add="table" title="A table: choose how many columns and rows, and whether its first row or column are headings. A table can also be pasted onto the board.">Table</button>
+      <button type="button" class="mi" data-add="model" title="A group: a named frame for cards, which move with it">Group</button>
+      <button type="button" class="mi" data-addbox title="Then drag on the board to draw a box: a division you can name, resize, fill and draw arrows to (B)">Box</button>
+      <button type="button" class="mi" id="addp" title="The topic’s passages: put them on the board one at a time">Passage…</button>
+      <button type="button" class="mi" id="addl" title="A link to another of your topics, or to a card or group on its board">Link…</button>
+    </span></span>
   </span>
-  <span class="grp"><span class="lbl">View</span>
-    <select class="vsel" id="vsel" aria-label="View"></select>
-    <button type="button" class="btn" id="vnew" title="The same cards, in an arrangement of its own">New view</button>
-    <button type="button" class="linkish" id="vmore">this view…</button>
+  <span class="grp">
+    <select class="vsel" id="vsel" aria-label="View" title="The view: the same cards, in an arrangement of its own"></select>
+  </span>
+  <span class="grp"><span class="lbl">Show</span><span class="lens" id="lens" role="group" aria-label="What the board shows"></span>
+    <label class="drw" title="Your drawing on this view, beside whatever is shown"><input type="checkbox" id="drawchk"> Drawing</label>
   </span>
   <span class="grp">
     <input type="search" id="search" placeholder="Find on the board" aria-label="Find on the board"><span id="found"></span>
@@ -703,21 +757,21 @@
     <button type="button" class="btn" id="redo" title="Redo (⇧⌘Z)">↷</button>
   </span>
   <span class="grp">
-    <button type="button" class="btn solid" id="snap" title="Keep the board as it is now, to come back to">Photograph the board</button>
-    <button type="button" class="linkish" id="photos">Photographs</button>
-  </span>
-  <span class="grp">
-    <button type="button" class="btn" id="annsb" title="Every annotation on the board: problems, what passages are relevant to, interpretations and comments">Annotations</button>
-    <button type="button" class="btn" id="parsb" title="Every parallel on the board: words in several passages that answer one another">Parallels</button>
-    <button type="button" class="btn" id="echosb" title="Every echo on the board: stretches, two at a time, that answer one another; and what is and isn’t said between them">Echoes</button>
-  </span>
-  <span class="grp"><span id="sync"></span></span>
-  <span class="grp">
-    <button type="button" class="btn" id="sharebtn" title="Share this board with others in the seminar, to look at or to work on" hidden>Share…</button>
-    <button type="button" class="linkish" id="export">Export</button>
-    <button type="button" class="linkish" id="import">Import</button>
+    <span class="menu"><button type="button" class="btn" data-menu aria-haspopup="true" aria-expanded="false" title="Photographs, the lists of what is on the board, sharing, export and import">Board ▾</button><span class="mlist mright" role="menu">
+      <button type="button" class="mi" id="snap" title="Keep the board as it is now, to come back to">Photograph the board</button>
+      <button type="button" class="mi" id="photos">Photographs</button>
+      <span class="msep"></span>
+      <button type="button" class="mi" id="annsb" title="Every annotation on the board: problems, what passages are relevant to, interpretations and comments">Annotations</button>
+      <button type="button" class="mi" id="parsb" title="Every parallel on the board: words in several passages that answer one another">Parallels</button>
+      <button type="button" class="mi" id="echosb" title="Every echo on the board: stretches, two at a time, that answer one another; and what is and isn’t said between them">Echoes</button>
+      <span class="msep"></span>
+      <button type="button" class="mi" id="sharebtn" title="Share this board with others in the seminar, to look at or to work on" hidden>Share…</button>
+      <button type="button" class="mi" id="export">Export</button>
+      <button type="button" class="mi" id="import">Import</button>
+    </span></span>
     <input type="file" id="file" accept=".json,application/json" hidden>
   </span>
+  <span class="grp"><span id="sync"></span></span>
 </div>
 <div class="wrap">
   <div id="stage">
@@ -739,6 +793,7 @@
     <div id="layers" class="float"></div>
     <div id="zoom" class="float"><button type="button" id="zout" title="Zoom out">−</button><span id="zk">100%</span><button type="button" id="zin" title="Zoom in">+</button><button type="button" id="zfit" title="Show the whole view">Fit</button><button type="button" id="ztidy" title="Lay this view out again, a column per group">Tidy</button></div>
     <div id="banner" class="float"></div>
+    <div id="undrawn" class="float" role="status" hidden></div>
     <div id="chooser" class="float"></div>
     <div id="toast" class="float"></div>
   </div>
@@ -824,6 +879,19 @@ const LAYERS = [
   { key: 'parallels', label: 'Parallels, through their knots', color: '#3b5068' },
   { key: 'echoes', label: 'Echoes, as ribbons', color: '#6b4e7a' },
 ];
+// What the board shows: five choices, each a set of the layers above, and Custom, the layers one by one.
+// Argument is the board at rest: its cards, groups, arrows and questions. Annotations, parallels and echoes are
+// drawn on every card only with the choice of their own (or Everything); otherwise only where they are asked for:
+// on a card selected or pointed at, and for the parallel or echo chosen. Drawing has its own switch, beside any.
+// The choice is this device's, for each view, as the layers were; a view made from another keeps its choice.
+const RELS = ['annotations', 'parallels', 'echoes'];
+const LENSES = [
+  { key: 'argument', label: 'Argument', on: [], title: 'The argument: cards, groups, arrows and questions. Select a card to see its annotations, parallels and echoes; each card counts them in a line beneath its citation.' },
+  { key: 'words', label: 'Words', on: ['parallels'], count: 'parallels', title: 'Every parallel on the board: its words tinted on each of its cards, its letter, and the knot that joins them' },
+  { key: 'stretches', label: 'Stretches', on: ['echoes'], count: 'echoes', title: 'Every echo on the board: its strip down each card’s edge, and the ribbon between its two stretches' },
+  { key: 'notes', label: 'Notes', on: ['annotations'], count: 'annotations', title: 'Every annotation on the board: the words annotated, a mark for each kind, and the threads of Relevant to…' },
+  { key: 'everything', label: 'Everything', on: RELS, title: 'All of it at once' },
+];
 const INK = { division: '#b8a88a', hypothesis: '#5c3d1e', problem: '#8a3b12', computer: '#9a8f7a', passage: '#5c3d1e', note: '#5c3d1e' };
 const DASH = { problem: '7 4', computer: '2 4' };
 const FAR = 0.55, NEAR = 1.3;
@@ -834,10 +902,10 @@ const TABLE_CW = 140, TABLE_MINW = 48;
 const TABLE_TYPE = 'application/x-kantlab-table';   // a table copied from a board, whole: its headings, widths and passages too
 // What can be said about a passage, or some of its words. A new kind is one more line here.
 const ANN_KINDS = [
-  { key: 'problem', label: 'Problem', color: '#8a3b12', hint: 'What is wrong or puzzling here: an OCR slip, a reading that does not fit, a clash with another passage' },
-  { key: 'relevant', label: 'Relevant to…', color: '#2f5d8a', hint: 'Why, in a few words (optional)' },
-  { key: 'interpretation', label: 'Interpretation', color: '#5c6e3a', hint: 'A possible reading, in your words' },
-  { key: 'comment', label: 'Comment', color: '#9a6a1e', hint: 'Anything else' },
+  { key: 'problem', label: 'Problem', color: '#8a3b12', shape: 'sq', hint: 'What is wrong or puzzling here: an OCR slip, a reading that does not fit, a clash with another passage' },
+  { key: 'relevant', label: 'Relevant to…', color: '#2f5d8a', shape: 'ring', hint: 'Why, in a few words (optional)' },
+  { key: 'interpretation', label: 'Interpretation', color: '#5c6e3a', shape: 'dia', hint: 'A possible reading, in your words' },
+  { key: 'comment', label: 'Comment', color: '#9a6a1e', shape: 'dot', hint: 'Anything else' },
 ];
 const ANN_CTX = 32;   // the characters kept either side of the words annotated, so that they can be found again
 // Parallels: words in several passages that answer one another, each passage's words a place in it. The kinds
@@ -912,6 +980,9 @@ let copyTable = null;  // a table being copied by its button in the side
 let ehand = null;      // the stretch in hand, for an echo: one end as an echo keeps it, offered first by words selected, until put down
 let echoSel = null;    // the echo chosen, by id: its ribbon and brackets strong, the rest faint, until Esc
 let hovEcho = '';      // the echo pointed at, lit wherever its stretches stand
+let hovCard = '';      // the card pointed at: what joins it drawn faintly, whatever the board shows; never saved
+let ATT = null;        // what is attended to, worked out afresh each time the board is drawn (see attention)
+let undrawn = { pars: 0, echoes: 0, threads: 0 };   // what in sight was not drawn, the last time: for the line that says so
 let echoChains = false; // the matrix shows the page's chains through a middle stretch: never saved
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
@@ -937,9 +1008,29 @@ const roWhy = () => live ? 'This is a photograph. Bring it back to change it.' :
   SHM && SH && SH.role === 'look' ? 'This board is shown to the class: it can be looked at here, not changed.' :
   SHM && SH && SH.role === 'archived' ? 'This board is no longer shared: it can be looked at, not changed.' : SHM && SH && SH.role === 'reader' ? 'You can look at this board: @' + SH.owner + ' has not given you write access.' :
   SHM && (!SH || !SH.ready) ? 'The shared board is still opening.' : lost === 'unreadable' ? 'My topics would not read in this browser, so nothing here is saved.' : 'This topic is not in My topics in this browser, so nothing here is saved.';
-const layersOf = () => Object.assign({}, view().layers || {}, (prefs.layers || {})[viewId] || {});
+// The choice of what to show on this view: this device's, else the view's own, else the argument.
+const lensOf = () => { const k = (prefs.lens || {})[viewId] || view().lens || 'argument'; return k === 'custom' || LENSES.some(L => L.key === k) ? k : 'argument'; };
+const ownLayers = () => Object.assign({}, view().layers || {}, (prefs.layers || {})[viewId] || {});   // Custom's switches
+function lensLayers(k) {
+  const L = LENSES.find(x => x.key === k); if (!L) return ownLayers();
+  const out = {}; LAYERS.forEach(x => { out[x.key] = RELS.includes(x.key) ? L.on.includes(x.key) : true; });
+  out.drawing = ownLayers().drawing !== false;
+  return out;
+}
+const layersOf = () => lensLayers(lensOf());
 const layerOn = k => layersOf()[k] !== false;
-function showLayer(k, on) { prefs.layers = prefs.layers || {}; prefs.layers[viewId] = Object.assign(layersOf(), { [k]: on !== false }); savePrefs(); }
+function showLayer(k, on) { prefs.layers = prefs.layers || {}; prefs.layers[viewId] = Object.assign({}, prefs.layers[viewId] || {}, { [k]: on !== false }); savePrefs(); }
+// Choosing what to show. Custom starts from what was shown. Words, Stretches and Notes open their list in the side,
+// unless something there is being read or written.
+function setLens(k) {
+  if (k !== 'custom' && !LENSES.some(L => L.key === k)) return;
+  const was = lensOf(); if (k === was) return;
+  if (k === 'custom') { prefs.layers = prefs.layers || {}; prefs.layers[viewId] = lensLayers(was); }
+  prefs.lens = prefs.lens || {}; prefs.lens[viewId] = k; savePrefs();
+  const list = { words: { kind: 'parallels' }, stretches: { kind: 'echoes' }, notes: { kind: 'annotations', f: {} } }[k];
+  if (list && !form && !sel.kind && relCount(LENSES.find(L => L.key === k).count)) { form = list; document.body.classList.remove('sideclosed'); showSide('details'); }
+  render();
+}
 function loadPrefs() { try { prefs = JSON.parse(localStorage.getItem(PREFS + TID) || '{}') || {}; } catch (e) { prefs = {}; } }
 function savePrefs() { try { localStorage.setItem(PREFS + TID, JSON.stringify(prefs)); } catch (e) { /* fine */ } }
 const itemLayer = it => it.kind;
@@ -1230,23 +1321,10 @@ function linkIndex() {
   return LX;
 }
 const inMark = id => { const n = LX ? (LX.into.get(id) || []).length : 0; return n ? '<span class="inl" title="Linked from ' + n + (n === 1 ? ' card' : ' cards') + ' on other boards of yours: select it to see">↖ ' + n + '</span>' : ''; };
-// A passage card whose passage has other cards on this board says where they are, also in ● Contradiction,
-// and goes to the next of them when clicked. You put them there, so it is drawn solid, unlike also on.
-function twinChip(it) {
-  const tw = twinsOf(it); if (!tw.length) return '';
-  const gs = tw.map(c => model(c.model) || null), all = gs.every(Boolean);
-  const txt = tw.length === 1 ? 'also ' + placesSaid(tw) : 'also in ' + tw.length + (all ? ' groups' : ' other places');
-  return '<span class="twin" data-twin="' + esc(it.id) + '" title="The same passage has ' + (tw.length === 1 ? 'another card' : tw.length + ' other cards') + ' on this board, ' + esc(placesSaid(tw)) + '. Click to go to ' + (tw.length === 1 ? 'it' : 'the next') + '.">' +
-    gs.map(g => '<i style="background:' + esc(g ? g.color : '#b8a88a') + '"></i>').join('') + esc(txt) + '</span>';
-}
 // The card of the same passage after this one, round again to the first.
 function nextTwin(id) {
   const it = item(id), cs = it ? cardsOf(it.mt) : []; if (cs.length < 2) return;
   goCard(cs[(cs.findIndex(c => c.id === id) + 1) % cs.length].id);
-}
-function alsoChip(it) {
-  const ks = LX && it.mt ? LX.also.get(it.mt) || [] : [];
-  return ks.length ? '<span class="also" title="The same passage stands on the board of ' + esc(ks.map(x => topicName(x.t)).join(', ')) + '. The page found it; it is not a link you made.">also on ' + esc(ks.length === 1 ? topicName(ks[0].t) : ks.length + ' boards') + '</span>' : '';
 }
 // On a shared board, the passage open in the portal beside it, added to the topic's passages.
 function addFromPortal() {
@@ -2260,13 +2338,27 @@ function frameOf(m, skip) {
   const X = Math.max(...rs.map(r => r.x + r.w)) + 22, Y = Math.max(...rs.map(r => r.y + r.h)) + 22;
   return { x, y, w: X - x, h: Y - y };
 }
+// A group's frame; in a focus, round those of its cards that are in it, and one with none in it folded to its tab.
+function frameFor(m, nb) {
+  if (!nb) return frameOf(m);
+  const its = B.items.filter(it => it.model === m.id && shown(it)); if (!its.length) return null;
+  const skip = new Set(its.filter(it => !nb.has(it.id)).map(it => it.id));
+  if (skip.size === its.length) { const f = frameOf(m); return f ? Object.assign({}, f, { folded: true }) : null; }
+  return frameOf(m, skip);
+}
 const inside = (r, px, py) => r && px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h;
 
 /* ── Builders: what is lit ────────────────────────────────────────────────── */
 function neighbourhood() {
   if (!focus) return null;
   const keep = new Set([focus.id]); let edge = [focus.id];
-  const pw = layerOn('parallels') ? [...parPlaces().values()].filter(cs => cs.length > 1) : [];   // a parallel joins its cards, as an arrow does
+  // A parallel joins its cards, as an arrow does, and so do an echo and a thread of Relevant to…, while their kind is shown;
+  // a table joins each passage in its cells
+  const pw = [];
+  if (layerOn('parallels')) parPlaces().forEach(cs => { if (cs.length > 1) pw.push(cs); });
+  if (layerOn('echoes')) echoPlaces().forEach((w, id) => { const ec = echoById(id); if (ec && !isUnlike(ec)) pw.push(w.a.concat(w.b)); });
+  if (layerOn('annotations')) { const W = annPlaces(); (B.annotations || []).forEach(a => { if (a && a.kind === 'relevant' && a.to && a.to.card) pw.push((W.get(a.id) || []).map(x => x.card).concat([a.to.card])); }); }
+  B.items.forEach(it => { if (it.kind === 'table') grid(it).forEach(r => r.forEach(c => c.ps.forEach(p => { if (p.mt) cardsOf(p.mt).forEach(x => pw.push([it.id, x.id])); }))); });
   for (let h = 0; h < focus.hops; h++) {
     const next = [];
     B.arrows.filter(arrowShown).forEach(a => {
@@ -2412,35 +2504,37 @@ function excerpt(it, n) {
       if (k) h += ' <span class="para" title="A new paragraph in the text">¶</span> ';
       const cut = p.text.length > left, s = cut ? p.text.slice(0, Math.max(0, left - 1)) : p.text;
       const sh = xs => xs.filter(x => x.e > p.a && x.s < p.a + s.length).map(x => Object.assign({}, x, { s: Math.max(0, x.s - p.a), e: Math.min(s.length, x.e - p.a) }));
-      h += markText(s, layerOn('annotations') ? sh(placeOn(it, k).spans) : [], layerOn('parallels') ? sh(parsOn(it, k).spans) : []) + (cut ? '…' : '');
+      h += markText(s, sh(cardAnnSpans(it, k)), sh(cardParSpans(it, k))) + (cut ? '…' : '');
       left -= p.text.length + 3;
     });
     return h;
   }
   const q = it.quotes[0], only = !!(q.kept && q.q !== q.kept);
-  const P = layerOn('parallels') ? parsOn(it, 0).spans : [], fx = parSel && q.q ? P.find(x => x.p.id === parSel) : null;
+  const P = cardParSpans(it, 0), fx = parSel && q.q ? P.find(x => x.p.id === parSel) : null;
   if (fx) {
     const t = String(q.q); let w0 = Math.max(0, fx.s - PAR_WIN);
     if (w0 > 0) { const sp = t.indexOf(' ', w0); if (sp >= 0 && sp < fx.s) w0 = sp + 1; }
     const w1 = Math.min(t.length, Math.max(w0 + n, fx.e + 12)), s = t.slice(w0, w1);
     const sh = x => Object.assign({}, x, { s: Math.max(0, x.s - w0), e: Math.min(s.length, x.e - w0) }), near = x => x.e > w0 && x.s < w1;
-    const spans = layerOn('annotations') ? placeOn(it, 0).spans.filter(near).map(sh) : [];
+    const spans = cardAnnSpans(it, 0).filter(near).map(sh);
     return (w0 > 0 ? '…' : '') + markText(s, spans, P.filter(near).map(sh)) + (w1 < t.length ? '…' : '');
   }
   const t = String(only ? q.kept : q.q || ''), cut = t.length > n, s = cut ? t.slice(0, n - 1) : t;
   const clip = x => Object.assign({}, x, { e: Math.min(x.e, s.length) });
-  const spans = !only && layerOn('annotations') ? placeOn(it, 0).spans.filter(x => x.s < s.length).map(clip) : [];
+  const spans = !only ? cardAnnSpans(it, 0).filter(x => x.s < s.length).map(clip) : [];
   return markText(s, spans, only ? [] : P.filter(x => x.s < s.length).map(clip)) + (cut ? '…' : '');
 }
 // A dot on the card for each annotation on its passages, by kind; a resolved problem's is hollow.
 function annDots(it) {
-  if (!layerOn('annotations')) return '';
+  if (!(layerOn('annotations') || attCard(it))) return '';   // otherwise in the card's line
   const as = annsOfCard(it); if (!as.length) return '';
-  const n = {}; as.forEach(a => { const k = a.kind === 'problem' && a.resolved ? 'resolved' : a.kind; n[k] = (n[k] || 0) + 1; });
-  return '<span class="anns" title="' + as.length + (as.length === 1 ? ' annotation: click the card to read it' : ' annotations: click the card to read them') + '">' +
-    ANN_KINDS.filter(K => n[K.key]).map(K => '<span class="ak-' + K.key + '"><i></i>' + n[K.key] + '</span>').join('') +
-    (n.resolved ? '<span class="ak-problem"><i class="hollow"></i>' + n.resolved + ' resolved</span>' : '') + '</span>';
+  const n = annKinds(as);
+  return '<span class="anns" title="' + as.length + (as.length === 1 ? ' annotation: click the card to read it' : ' annotations: click the card to read them') + '">' + annMarks(n, true) + '</span>';
 }
+// How many of each kind, a resolved problem apart; and their marks, each kind its shape and, in full, its colour.
+function annKinds(as) { const n = {}; as.forEach(a => { const k = a.kind === 'problem' && a.resolved ? 'resolved' : a.kind; n[k] = (n[k] || 0) + 1; }); return n; }
+const annMarks = (n, words) => ANN_KINDS.filter(K => n[K.key]).map(K => '<span class="ak-' + K.key + '" title="' + esc(K.label) + '"><i class="sh-' + (K.shape || 'dot') + '"></i>' + n[K.key] + '</span>').join('') +
+  (n.resolved ? '<span class="ak-problem" title="Problem, resolved"><i class="sh-sq hollow"></i>' + n.resolved + (words ? ' resolved' : '') + '</span>' : '');
 
 /* ── Builders: parallels ──────────────────────────────────────────────────────
    A parallel is a set of places, each some words of one passage, that answer one another:
@@ -2504,9 +2598,8 @@ function placeWords(a, H, n) {
   return (pl.prefix ? '…' + esc(pl.prefix) : '') + '<b>' + esc(pl.exact) + '</b>' + (pl.suffix ? esc(pl.suffix) + '…' : '');
 }
 // A chip on a card for each parallel with words in its passage: clicked, the parallel is chosen.
-function parChips(it) {
-  if (!layerOn('parallels') || it.kind !== 'passage') return '';
-  const ps = parsOfCard(it); if (!ps.length) return '';
+function parChips(it, ps) {
+  if (it.kind !== 'passage' || !ps.length) return '';
   return '<span class="pchips">' + ps.map(p => '<button type="button" class="pchip' + (p.id === parSel ? ' on' : '') + (p.id === hand ? ' held' : '') + '" data-pchip="' + esc(p.id) + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '" title="' + esc('(' + parSign(p) + ') ' + p.label + (p.type ? ' · ' + p.type : '') + ': click to show it on the board') + '">' + esc(parSign(p)) + '</button>').join('') + '</span>';
 }
 const parHay = it => parsOfCard(it).map(p => [p.label, p.type, p.text].join(' ')).concat(parsOn(it, 0).spans.map(x => x.a.text || '')).join(' ');
@@ -2576,7 +2669,8 @@ function echoesOn(it, qi) {
   return out;
 }
 // The spans to mark in a passage shown in full: those of echoes, not of one found unlike, while their layer shows.
-const echoSpans = (it, qi) => layerOn('echoes') ? echoesOn(it, qi).spans.filter(x => !isUnlike(x.ec)) : [];
+const echoSpansAll = (it, qi) => echoesOn(it, qi).spans.filter(x => !isUnlike(x.ec));   // in the side and in Compare, always
+const echoSpans = (it, qi) => echoSpansAll(it, qi).filter(x => layerOn('echoes') || attCard(it) || strong(echoHow(x.ec.id)));   // on the board
 // How many brackets may stand side by side in a margin: the most stretches over any one place, counted on the words.
 function ebDepth(xs) {
   const pts = []; xs.forEach(x => { pts.push([x.s, 1]); pts.push([x.e, -1]); });
@@ -2626,7 +2720,7 @@ function endHere(ec, side) {
 const endState = H => H.away ? ' <span class="pg">not on this board</span>' : H.elsewhere ? ' <span class="pg">not in the words its card quotes, or no longer in the passage</span>' : H.waiting ? ' <span class="pg">waiting for the portal’s texts</span>' : '';
 // The cards of the chosen echo, or null when none is chosen.
 function echoCards() {
-  if (!echoSel || !layerOn('echoes')) return null;
+  if (!echoSel) return null;
   const W = echoPlaces().get(echoSel); return W ? new Set(W.a.concat(W.b)) : null;
 }
 // The stretches of a list of echoes, each once: key → { key, e: the end as first kept, ecs: [{ ec, side }] }.
@@ -2795,7 +2889,7 @@ function tableHtml(it) {
   return '<table style="width:' + cw.reduce((a, b) => a + b, 0) + 'px"><colgroup>' + cw.map(w => '<col style="width:' + w + 'px">').join('') + '</colgroup>' +
     g.map((row, r) => '<tr>' + row.map((c, k) => {
       const th = isHead(h, r, k), tag = th ? 'th' : 'td';
-      const on = parSel && layerOn('parallels') && c.pars.some(e => e.par === parSel) ? parById(parSel) : null;   // a cell naming the parallel chosen
+      const on = parSel && c.pars.some(e => e.par === parSel) ? parById(parSel) : null;   // a cell naming the parallel chosen
       const cls = [th && h.top && h.left && !r && !k ? 'corner' : '', at && at.r === r && at.c === k ? 'tsel' : '', on ? 'tpon' : ''].filter(Boolean).join(' ');
       return '<' + tag + (th ? ' scope="' + (h.top && r === 0 ? 'col' : 'row') + '"' : '') + (cls ? ' class="' + cls + '"' : '') + (on ? ' style="--pc:' + esc(parColor(on)) + '"' : '') + ' data-cell="' + r + ',' + k + '"' + (c.id ? ' data-cid="' + esc(c.id) + '"' : '') + '><div class="tw"><span class="tt">' + esc(c.t) + '</span>' +
         (c.ps.length ? '<span class="tps">' + c.ps.map((p, j) => { const P = cellPassage(p); return '<span class="tp' + (P.gone ? ' gone' : '') + '" data-tp="' + j + '" title="' + (P.gone ? 'No longer in My topics: the citation kept when it was put here' : 'Open it beside the board') + '">' + esc(P.cite) + '</span>'; }).join('') + '</span>' : '') +
@@ -2918,15 +3012,37 @@ const isOpenCard = it => it.kind === 'passage' && cardOpen.has(it.id) && canOpen
 function cardWhole(it) {
   const qs = openQuotes(it), only = qs.some(q => q.kept && q.q !== q.kept), para = ' <span class="para" title="A new paragraph in the text">¶</span> ';
   const E = qs.map((q, k) => echoSpans(it, k)), en = E.reduce((n, x) => n + x.length, 0);
-  const all = '<div class="pq' + (en ? ' eb" data-ebox="' + esc(it.id) + '|0|' + (qs.length - 1) + '" style="--ebn:' + ebDepth(E.flat()) : '') + '">“' + qs.map((q, k) => markText(String(q.q), layerOn('annotations') ? placeOn(it, k).spans : [], layerOn('parallels') ? parsOn(it, k).spans : [], E[k])).join(para) + '”</div>';
+  const all = '<div class="pq' + (en ? ' eb" data-ebox="' + esc(it.id) + '|0|' + (qs.length - 1) + '" style="--ebn:' + ebDepth(E.flat()) : '') + '">“' + qs.map((q, k) => markText(String(q.q), cardAnnSpans(it, k), cardParSpans(it, k), E[k])).join(para) + '”</div>';
   return only ? '<span class="pl">The words you kept</span><div class="pq">“' + qs.map(q => esc(q.kept || q.q)).join(para) + '”</div>' +
     (qs.every(q => q.full) ? '<span class="pl">' + (qs.length > 1 ? 'The passages, in full' : 'The passage, in full') + '</span>' + all : '') : all;
 }
 function toggleCard(id) { if (cardOpen.has(id)) cardOpen.delete(id); else cardOpen.add(id); renderBoard(); }
 
 /* ── Render: the board ────────────────────────────────────────────────────── */
+// One line beneath a card's citation, in ink, for what else it has and does not show in full: its annotations, a mark
+// for each kind; its parallels' letters; its echoes; its other cards, and other boards it stands on; the links to it from
+// other boards. Each piece leads to what it counts. pOut are the parallels and eOut the echoes not shown in full.
+function cardLine(it, pOut, eOut) {
+  const bits = [];
+  if (!(layerOn('annotations') || attCard(it))) {
+    const as = annsOfCard(it);
+    if (as.length) bits.push('<span class="cl-a" title="' + as.length + (as.length === 1 ? ' annotation: select the card to read it' : ' annotations: select the card to read them') + '">' + annMarks(annKinds(as)) + '</span>');
+  }
+  if (pOut.length) bits.push('<span class="cl-p">' + pOut.map(p => '<button type="button" class="pchip ink' + (p.id === hand ? ' held' : '') + '" data-pchip="' + esc(p.id) + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '" title="' + esc('(' + parSign(p) + ') ' + p.label + (p.type ? ' · ' + p.type : '') + ': click to show it on the board') + '">(' + esc(parSign(p)) + ')</button>').join('') + '</span>');
+  if (eOut.length) bits.push('<span class="cl-e"' + (eOut.length === 1 ? ' data-echo="' + esc(eOut[0].id) + '" style="--pc:' + echoColor(eOut[0]) + '"' : '') + ' title="' + esc(eOut.length === 1 ? 'Echoes ' + echoName(eOut[0]) + ': ' + echoWhat(eOut[0]) + '. Click to show it.' : eOut.length + ' echoes: select the card to see them') + '">≈ ' + eOut.length + '</span>');
+  if (it.kind === 'passage') {
+    const tw = twinsOf(it);
+    if (tw.length) bits.push('<span class="twin" data-twin="' + esc(it.id) + '" title="The same passage has ' + (tw.length === 1 ? 'another card' : tw.length + ' other cards') + ' on this board, ' + esc(placesSaid(tw)) + '. Click to go to ' + (tw.length === 1 ? 'it' : 'the next') + '.">⧉ ' + esc(tw.length === 1 ? placesSaid(tw) : tw.length + ' other cards') + '</span>');
+    const ks = LX && it.mt ? LX.also.get(it.mt) || [] : [];
+    if (ks.length) bits.push('<span class="cl-o" title="The same passage stands on the board of ' + esc(ks.map(x => topicName(x.t)).join(', ')) + '. The page found it; it is not a link you made.">on ' + esc(ks.length === 1 ? topicName(ks[0].t) : ks.length + ' other boards') + '</span>');
+  }
+  const ni = LX ? (LX.into.get(it.id) || []).length : 0;
+  if (ni) bits.push('<span class="cl-l" title="Linked from ' + ni + (ni === 1 ? ' card' : ' cards') + ' on other boards of yours: select it to see">↖ ' + ni + '</span>');
+  return bits.length ? '<span class="cline">' + bits.join('<i class="sep">·</i>') + '</span>' : '';
+}
 function cardHtml(it) {
   const m = model(it.model), col = m ? m.color : '#b8a88a';
+  let pOut = [], eOut = [];
   const q0 = (it.quotes || [])[0];
   let inner = '';
   if (it.kind === 'box') return '<div class="card k-box" data-id="' + esc(it.id) + '" style="width:' + (+it.w || 280) + 'px;height:' + (+it.h || 180) + 'px"><span class="blab">' + esc(it.label || '') + '</span>' + (ro() ? '' : '<span class="bgrip" title="Drag to resize"></span><span class="knob" title="Drag to another card, a cell of a table or a group to draw an arrow">→</span>') + '</div>';
@@ -2939,7 +3055,11 @@ function cardHtml(it) {
       '<span class="pc">' + esc((it.st && it.st.cite) || (q0 && q0.cite) || it.cite || it.ref || '') + (it.st && !it.st.whole ? '<i class="pof">' + esc(stretchOfWhat(it.st)) + '</i>' : '') + '</span>' +
       (it.slost ? '<span class="flag">these words are no longer where they were kept</span>' : '') +
       (it.off ? '<span class="flag">' + (it.off === 'gone' ? (SHM ? 'taken out of the topic' : 'no longer in My topics') : 'no longer under this topic') + '</span>' : '') +
-      (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it) + parChips(it) + echoStripHtml(it);
+      (it.fresh ? '<span class="newtag" title="Put under the topic since you last looked: move it where it belongs">new</span>' : '') + annDots(it);
+    const ps = parsOfCard(it), pIn = layerOn('parallels') || attCard(it) ? ps : ps.filter(p => strong(parHow(p.id)));
+    const es = echoStrip(it).filter(x => !isUnlike(x.ec)), eIn = layerOn('echoes') || attCard(it) ? es : es.filter(x => strong(echoHow(x.ec.id)));
+    pOut = ps.filter(p => !pIn.includes(p)); eOut = [...new Set(es.filter(x => !eIn.includes(x)).map(x => x.ec))].filter(ec => !eIn.some(x => x.ec === ec));
+    inner += parChips(it, pIn) + echoStripHtml(it, eIn);
   } else if (it.kind === 'link') {
     const L = it.lk || linkOf(it), gone = L.state !== 'ok';
     inner = '<span class="lt">↗ ' + esc(L.topic || 'another topic') + (L.whole ? ' · the whole topic' : L.group ? ' · a group' : '') + '</span>' +
@@ -2950,9 +3070,9 @@ function cardHtml(it) {
   } else {
     inner = '<span class="tag">' + (it.kind === 'problem' ? 'Question' : 'Note') + '</span><span class="txt">' + esc(it.text) + '</span>' + annDots(it) + (SHM && it.by ? '<span class="who">@' + esc(it.by) + '</span>' : '');
   }
-  inner += inMark(it.id) + (it.kind === 'passage' ? twinChip(it) + alsoChip(it) : '');
+  inner += cardLine(it, pOut, eOut);
   const lc = it.kind === 'link' && it.lk ? (it.lk.state !== 'ok' ? ' gone' : '') : '';
-  const pw = parSel && it.kind === 'passage' && layerOn('parallels') && parsOn(it, 0).spans.some(x => x.p.id === parSel) ? parColor(parById(parSel)) : '';   // turned to the chosen parallel's words
+  const pw = parSel && it.kind === 'passage' && parsOn(it, 0).spans.some(x => x.p.id === parSel) ? parColor(parById(parSel)) : '';   // turned to the chosen parallel's words
   return '<div class="card k-' + esc(it.kind) + (it.off ? ' off' : '') + (it.slost ? ' slost' : '') + (isOpenCard(it) ? ' open' : '') + lc + (pw ? ' pwin' : '') + '" data-id="' + esc(it.id) + '" style="border-left-color:' + (it.kind === 'passage' ? esc(col) : it.kind === 'link' && it.lk && it.lk.color ? esc(it.lk.color) : '') + (pw ? ';--pw:' + pw : '') + '">' + inner + (ro() ? '' : '<span class="knob" title="Drag to another card, a cell of a table or a group to draw an arrow">→</span>') + '</div>';
 }
 function renderCards() {
@@ -2972,17 +3092,56 @@ function renderCards() {
 }
 function placeCards() {
   $('cards').querySelectorAll('.card').forEach(el => { const p = posOf(el.dataset.id); el.style.left = p[0] + 'px'; el.style.top = p[1] + 'px'; });
+  const nb = focus ? neighbourhood() : null;
   $('cards').querySelectorAll('.ftab').forEach(el => {
-    const f = frameOf(model(el.dataset.model));
+    const f = frameFor(model(el.dataset.model), nb);
     el.style.display = f ? '' : 'none';
     if (f) { el.style.left = (f.x + 10) + 'px'; el.style.top = (f.y + 8) + 'px'; }
   });
   $('cards').querySelectorAll('.fgrip').forEach(el => {
-    const m = model(el.dataset.grip), f = frameOf(m), n = B.items.filter(i => i.model === m.id && shown(i)).length;
+    const m = model(el.dataset.grip), f = nb ? null : frameOf(m), n = B.items.filter(i => i.model === m.id && shown(i)).length;
     el.style.display = f && !f.empty && n > 1 ? '' : 'none';
     if (f) { el.style.left = (f.x + f.w - el.offsetWidth / 2 - 4) + 'px'; el.style.top = (f.y + f.h - el.offsetHeight / 2 - 4) + 'px'; }
   });
 }
+// The line at the foot of the board: what in sight is not drawn, each count a way to it, and how to see a card's own.
+function renderUndrawn() {
+  const el = $('undrawn'); if (!el) return;
+  const bits = [[undrawn.pars, 'parallel', 'parallels', 'words'], [undrawn.echoes, 'echo', 'echoes', 'stretches'], [undrawn.threads, 'thread of Relevant to…', 'threads of Relevant to…', 'notes']].filter(b => b[0]);
+  if (!bits.length) { el.hidden = true; el.innerHTML = ''; return; }
+  const n = ATT ? ATT.cards.size : 0;
+  el.hidden = false;
+  el.innerHTML = '<span>' + (n ? 'Drawn for the card' + (n === 1 ? '' : 's') + ' selected; not drawn:' : 'Not drawn here:') + '</span>' +
+    bits.map(b => '<button type="button" class="linkish" data-lensgo="' + b[3] + '" title="Show every one of them">' + b[0] + ' ' + esc(b[0] === 1 ? b[1] : b[2]) + '</button>').join('<span>·</span>') +
+    (n ? '' : '<span>· select a card for its own</span>');
+}
+/* ── What is attended to ──────────────────────────────────────────────────────
+   The cards selected, and more faintly the card pointed at. Every parallel, echo and thread of Relevant to… with a
+   place on one of them is drawn, whatever the board shows, and the cards at their other ends, and at the other ends
+   of its arrows, are outlined. Nothing of it is saved. */
+function attention() {
+  const S = new Set(sel.kind === 'card' ? sel.ids.filter(id => item(id)) : []), H = hovCard && !S.has(hovCard) && item(hovCard) ? hovCard : '';
+  const o = { cards: S, hov: H, pars: new Map(), echoes: new Map(), anns: new Map(), partners: new Set() };
+  if (!S.size && !H) return o;
+  const how = cs => cs.some(c => S.has(c)) ? 'sel' : H && cs.includes(H) ? 'hov' : '';
+  const put = (m, id, cs) => { const w = how(cs); if (!w || m.get(id) === 'sel') return; m.set(id, w); if (w === 'sel') cs.forEach(c => { if (!S.has(c)) o.partners.add(c); }); };
+  parPlaces().forEach((cs, id) => put(o.pars, id, cs));
+  echoPlaces().forEach((w, id) => { const ec = echoById(id); if (ec && !isUnlike(ec)) put(o.echoes, id, w.a.concat(w.b)); });
+  const W = annPlaces();
+  (B.annotations || []).forEach(a => { if (a && a.kind === 'relevant' && a.on && a.to && a.to.card && item(a.to.card)) put(o.anns, a.id, (W.get(a.id) || []).map(x => x.card).concat([a.to.card])); });
+  B.arrows.forEach(a => { if (S.has(a.from) && !S.has(a.to)) o.partners.add(a.to); if (S.has(a.to) && !S.has(a.from)) o.partners.add(a.from); });
+  return o;
+}
+const attCard = it => !!(ATT && it && ATT.cards.has(it.id));
+// How a parallel, an echo or a thread of Relevant to… is drawn: 'all' (its kind shown, or it is the one chosen or in
+// hand), 'sel' (it has a place on a card selected), 'hov' (on the card pointed at), or '' (not drawn).
+const parHow = id => layerOn('parallels') || id === parSel || id === hand ? 'all' : (ATT && ATT.pars.get(id)) || '';
+const echoHow = id => layerOn('echoes') || id === echoSel ? 'all' : (ATT && ATT.echoes.get(id)) || '';
+const annHow = id => layerOn('annotations') ? 'all' : (ATT && ATT.anns.get(id)) || '';
+const strong = h => h === 'all' || h === 'sel';
+// The marks in a card's words: every one of a kind shown, and on a card selected; elsewhere, those of what is drawn.
+function cardAnnSpans(it, k) { const xs = placeOn(it, k).spans; return layerOn('annotations') || attCard(it) ? xs : xs.filter(x => strong(annHow(x.a.id))); }
+function cardParSpans(it, k) { const xs = parsOn(it, k).spans; return layerOn('parallels') || attCard(it) ? xs : xs.filter(x => strong(parHow(x.p.id))); }
 function lit() {
   const nb = neighbourhood(), pc = parCards(), ecs = echoCards(), tw = new Set();
   if (sel.kind === 'card') sel.ids.forEach(id => twinsOf(item(id)).forEach(c => { if (!sel.ids.includes(c.id)) tw.add(c.id); }));   // the same passage's other cards
@@ -2990,7 +3149,9 @@ function lit() {
     const it = item(el.dataset.id);
     el.classList.toggle('sel', sel.kind === 'card' && sel.ids.includes(it.id));
     el.classList.toggle('twinlit', tw.has(it.id));
-    el.classList.toggle('dim', (nb && !nb.has(it.id)) || !matches(it) || (pc && !pc.has(it.id)) || (ecs && !ecs.has(it.id)));
+    el.classList.toggle('partner', !!(ATT && ATT.partners.has(it.id)));
+    el.classList.toggle('out', !!nb && !nb.has(it.id));
+    el.classList.toggle('dim', !matches(it) || (pc && !pc.has(it.id)) || (ecs && !ecs.has(it.id)));
     el.classList.toggle('hit', !!query && matches(it));
   });
   return nb;
@@ -3020,7 +3181,7 @@ function renderInk(nb) {
   $('defs').innerHTML = Object.entries(INK).map(([k, c]) => '<marker id="ah-' + k + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="' + c + '"/></marker>').join('');
   let f = '';
   if (layerOn('frames')) B.models.forEach(m => {
-    const r = frameOf(m); if (!r) return;
+    const r = frameFor(m, nb); if (!r || r.folded) return;
     const on = sel.kind === 'model' && sel.ids.includes(m.id);
     f += '<g class="frame' + (on ? ' sel' : '') + '" data-model="' + esc(m.id) + '"><rect class="f" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx="14" fill="' + esc(m.color) + '" fill-opacity="0.06" stroke="' + esc(m.color) + '"' + (r.empty ? ' stroke-dasharray="8 6"' : '') + '/>' +
       (r.empty ? '<text x="' + (r.x + r.w / 2) + '" y="' + (r.y + r.h - 22) + '" text-anchor="middle" font-size="13" font-style="italic" fill="#7a6a52">drop cards here</text>' : '') + '</g>';
@@ -3031,9 +3192,10 @@ function renderInk(nb) {
   B.arrows.filter(arrowShown).forEach(a => {
     const c = curve(a); if (!c) return;
     const col = INK[a.layer] || INK.hypothesis, on = sel.kind === 'arrow' && sel.ids.includes(a.id);
-    const dim = nb ? !(nb.has(a.from) && nb.has(a.to)) : query ? !(endMatches(a.from) && endMatches(a.to)) : pc ? !(pc.has(a.from) && pc.has(a.to)) : false;
+    if (nb && !(nb.has(a.from) && nb.has(a.to))) return;   // outside the focus: put away
+    const dim = query ? !(endMatches(a.from) && endMatches(a.to)) : pc ? !(pc.has(a.from) && pc.has(a.to)) : false, fade = !dim && !on && !!(ATT && ATT.cards.size) && !ATT.cards.has(a.from) && !ATT.cards.has(a.to);
     const label = a.layer === 'division' ? '' : a.type, lw = label.length * 6.7 + 18;
-    const cls = esc(a.layer) + (on ? ' sel' : '') + (dim ? ' dim' : ''), dash = DASH[a.layer] ? ' stroke-dasharray="' + DASH[a.layer] + '"' : '', head = ' marker-end="url(#ah-' + esc(a.layer in INK ? a.layer : 'hypothesis') + ')"';
+    const cls = esc(a.layer) + (on ? ' sel' : '') + (dim ? ' dim' : '') + (fade ? ' fade' : ''), dash = DASH[a.layer] ? ' stroke-dasharray="' + DASH[a.layer] + '"' : '', head = ' marker-end="url(#ah-' + esc(a.layer in INK ? a.layer : 'hypothesis') + ')"';
     const pill = label ? '<g class="pill"><rect x="' + (c.mx - lw / 2) + '" y="' + (c.my - 10) + '" width="' + lw + '" height="20" rx="10" stroke="' + col + '"' + (a.layer === 'computer' ? ' stroke-dasharray="2 3"' : '') + '/><text x="' + c.mx + '" y="' + (c.my + 4.5) + '" text-anchor="middle">' + esc(label) + '</text></g>' : '';
     h += '<g class="ar ' + cls + '" data-arrow="' + esc(a.id) + '">' + '<path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '" stroke="' + col + '"' + dash + head + '/>' + pill + '</g>';
     // An end at a cell lies under its table: over the table, and only there, the line is drawn again to the cell,
@@ -3049,20 +3211,22 @@ function renderInk(nb) {
   renderThreads(nb);
   renderParallels(nb);
   renderEchoes(nb);
+  renderUndrawn();
   renderDrawn();
 }
 // The cards of the chosen parallel, and the tables with a cell naming it, or null when none is chosen.
-function parCards() { return parSel && layerOn('parallels') ? new Set((parPlaces().get(parSel) || []).concat(cellsNaming(parSel).map(x => x.it.id))) : null; }
+function parCards() { return parSel ? new Set((parPlaces().get(parSel) || []).concat(cellsNaming(parSel).map(x => x.it.id))) : null; }
 // Each parallel with words on two or more cards in sight: a thread from each card to a knot marked with its letter,
 // at the middle of its cards. A knot, not a chain, so that no one place is drawn as answering another more than
 // the rest. Knots of parallels on the very same cards stand side by side, across the line between the first two.
 function renderParallels(nb) {
-  let h = '';
-  if (layerOn('parallels')) {
-    const W = parPlaces(), groups = new Map();
+  let h = '', n = 0;
+  {
+    const W = parPlaces(), groups = new Map(), fade = !!(ATT && ATT.cards.size);
     parsAll().forEach(p => {
-      const cs = (W.get(p.id) || []).filter(c => shown(item(c)) && rect(c)); if (cs.length < 2) return;
-      const k = cs.slice().sort().join(' '); if (!groups.has(k)) groups.set(k, []); groups.get(k).push({ p, cs });
+      const cs = (W.get(p.id) || []).filter(c => shown(item(c)) && rect(c) && (!nb || nb.has(c))); if (cs.length < 2) return;
+      const how = parHow(p.id); if (!how) { n++; return; }
+      const k = cs.slice().sort().join(' '); if (!groups.has(k)) groups.set(k, []); groups.get(k).push({ p, cs, how });
     });
     const mid = R => [R.x + R.w / 2, R.y + R.h / 2];
     const edge = (R, x, y) => { const [cx, cy] = mid(R), dx = x - cx, dy = y - cy, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, t = Math.min(ux ? (R.w / 2 + 3) / Math.abs(ux) : 1e9, uy ? (R.h / 2 + 3) / Math.abs(uy) : 1e9); return t < L - 12 ? [cx + ux * t, cy + uy * t] : null; };
@@ -3071,33 +3235,34 @@ function renderParallels(nb) {
       const dx = ms[1][0] - ms[0][0], dy = ms[1][1] - ms[0][1], L = Math.hypot(dx, dy) || 1, px = -dy / L, py = dx / L;
       list.forEach((o, i) => {
         const off = (i - (list.length - 1) / 2) * 28, kx = cx + px * off, ky = cy + py * off, p = o.p;
-        const on = p.id === parSel || p.id === hand, dim = !on && (!!parSel || (nb && !o.cs.every(c => nb.has(c))) || (!!query && !o.cs.some(c => matches(item(c)))));
+        const on = p.id === parSel || p.id === hand, dim = !on && (!!parSel || (!!query && !o.cs.some(c => matches(item(c))))), lite = o.how === 'hov' ? ' lite' : !on && fade && o.how === 'all' && ATT.pars.get(p.id) !== 'sel' ? ' fade' : '';
         const lines = o.cs.map(c => { const e = edge(rect(c), kx, ky); return e ? '<line x1="' + e[0].toFixed(1) + '" y1="' + e[1].toFixed(1) + '" x2="' + kx.toFixed(1) + '" y2="' + ky.toFixed(1) + '"/>' : ''; }).join('');
-        h += '<g class="part' + (on ? ' on' : '') + (dim ? ' dim' : '') + (p.id === hovPar ? ' phov' : '') + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '"><title>' + esc('(' + parSign(p) + ') ' + p.label + (p.type ? ' · ' + p.type : '') + ': words in ' + o.cs.length + ' passages on this board. Click to show it.') + '</title>' + lines +
+        h += '<g class="part' + (on ? ' on' : '') + (dim ? ' dim' : '') + lite + (p.id === hovPar ? ' phov' : '') + '" data-par="' + esc(p.id) + '" style="--pc:' + parColor(p) + '"><title>' + esc('(' + parSign(p) + ') ' + p.label + (p.type ? ' · ' + p.type : '') + ': words in ' + o.cs.length + ' passages on this board. Click to show it.') + '</title>' + lines +
           '<circle cx="' + kx.toFixed(1) + '" cy="' + ky.toFixed(1) + '" r="11"/><text x="' + kx.toFixed(1) + '" y="' + (ky + 4.5).toFixed(1) + '" text-anchor="middle">' + esc(parSign(p)) + '</text></g>';
       });
     });
   }
+  undrawn.pars = n;
   $('gpar').innerHTML = h;
 }
 /* ── Render: echoes on the board, and their brackets wherever a passage shows in full ── */
 // The strip down a passage card's right edge: where along its words each echo's stretch falls.
-function echoStripHtml(it) {
-  if (!layerOn('echoes') || it.kind !== 'passage') return '';
-  const xs = echoStrip(it).filter(x => !isUnlike(x.ec)); if (!xs.length) return '';
+function echoStripHtml(it, xs) {
+  if (it.kind !== 'passage' || !xs.length) return '';
   return '<span class="estrip">' + xs.map(x => '<i class="' + (x.placed ? 'placed' : '') + (x.ec.id === echoSel ? ' on' : '') + (echoSel && x.ec.id !== echoSel ? ' dim' : '') + (x.ec.id === hovEcho ? ' ehov' : '') + '" data-echo="' + esc(x.ec.id) + '" style="top:' + (x.f0 * 100).toFixed(1) + '%;height:' + ((x.f1 - x.f0) * 100).toFixed(1) + '%;--pc:' + echoColor(x.ec) + '" title="' + esc('Echoes ' + endCite(x.ec[other(x.side)]) + ': ' + echoWhat(x.ec) + '. Click to show it.') + '"></i>').join('') + '</span>';
 }
 // Each echo with both stretches on cards in sight: a ribbon from the one to the other, leaving each card at the
 // height of its stretch, as wide as the stretch, paler the looser the echo. Never dashed: dashes are the page's.
 function renderEchoes(nb) {
-  let h = '';
-  if (layerOn('echoes')) {
-    const W = echoPlaces(), strips = new Map(), stripOf = c => { if (!strips.has(c)) strips.set(c, echoStrip(item(c))); return strips.get(c); };
+  let h = '', n = 0;
+  {
+    const W = echoPlaces(), strips = new Map(), stripOf = c => { if (!strips.has(c)) strips.set(c, echoStrip(item(c))); return strips.get(c); }, fade = !!(ATT && ATT.cards.size);
     echoesAll().forEach(ec => {
       if (isUnlike(ec)) return;
       const w = W.get(ec.id); if (!w) return;
-      const pick = sd => { const cs = w[sd].filter(c => shown(item(c)) && rect(c)); return cs.includes(ec[sd].card) ? ec[sd].card : cs[0]; };
+      const pick = sd => { const cs = w[sd].filter(c => shown(item(c)) && rect(c) && (!nb || nb.has(c))); return cs.includes(ec[sd].card) ? ec[sd].card : cs[0]; };
       const ca = pick('a'), cb = pick('b'); if (!ca || !cb || ca === cb) return;
+      const how = echoHow(ec.id); if (!how) { n++; return; }
       const A = rect(ca), Z = rect(cb), sa = stripOf(ca).find(x => x.ec.id === ec.id && x.side === 'a'), sb = stripOf(cb).find(x => x.ec.id === ec.id && x.side === 'b');
       if (!A || !Z || !sa || !sb) return;
       const y = (R, f) => R.y + 6 + f * Math.max(0, R.h - 12);
@@ -3108,10 +3273,11 @@ function renderEchoes(nb) {
       else if (A.x >= Z.x + Z.w + 24) { x1 = A.x; x2 = Z.x + Z.w; c1 = c2 = (x1 + x2) / 2; }
       else { x1 = A.x + A.w; x2 = Z.x + Z.w; c1 = c2 = Math.max(x1, x2) + 70; }   // one over the other: out to the right and back
       const d = 'M' + x1 + ',' + a1 + ' C' + c1 + ',' + a1 + ' ' + c2 + ',' + b1 + ' ' + x2 + ',' + b1 + ' L' + x2 + ',' + b2 + ' C' + c2 + ',' + b2 + ' ' + c1 + ',' + a2 + ' ' + x1 + ',' + a2 + ' Z';
-      const on = ec.id === echoSel, dim = !on && (!!echoSel || !!parSel || (nb && !(nb.has(ca) && nb.has(cb))) || (!!query && !(matches(item(ca)) && matches(item(cb)))));
-      h += '<path class="erib' + (on ? ' on' : '') + (dim ? ' dim' : '') + (ec.id === hovEcho ? ' ehov' : '') + '" data-echo="' + esc(ec.id) + '" d="' + d + '" style="--pc:' + echoColor(ec) + ';--op:' + echoDeg(ec).op + '"><title>' + esc(echoName(ec) + ': ' + echoWhat(ec) + (ec.in && ec.in.length ? ' · in ' + ec.in.join('; ') : '') + (echoWay(ec) ? ' · ' + echoWay(ec) : '')) + '</title></path>';
+      const on = ec.id === echoSel, dim = !on && (!!echoSel || !!parSel || (!!query && !(matches(item(ca)) && matches(item(cb))))), lite = how === 'hov' ? ' lite' : !on && fade && how === 'all' && ATT.echoes.get(ec.id) !== 'sel' ? ' fade' : '';
+      h += '<path class="erib' + (on ? ' on' : '') + (dim ? ' dim' : '') + lite + (ec.id === hovEcho ? ' ehov' : '') + '" data-echo="' + esc(ec.id) + '" d="' + d + '" style="--pc:' + echoColor(ec) + ';--op:' + echoDeg(ec).op + '"><title>' + esc(echoName(ec) + ': ' + echoWhat(ec) + (ec.in && ec.in.length ? ' · in ' + ec.in.join('; ') : '') + (echoWay(ec) ? ' · ' + echoWay(ec) : '')) + '</title></path>';
     });
   }
+  undrawn.echoes = n;
   $('gecho').innerHTML = h;
 }
 // How far down its box an element stands, in the box's own layout (unscaled, unscrolled).
@@ -3121,12 +3287,13 @@ function relTop(el, box) { let y = 0, n = el; while (n && n !== box) { y += n.of
 // in columns side by side. Measured from the words once they are drawn.
 function drawBrackets(root) {
   if (!root) return;
+  const onBoard = root === $('cards');
   root.querySelectorAll('[data-ebox]').forEach(box => {
     box.querySelectorAll(':scope > .ebr').forEach(x => x.remove());
     if (!box.getClientRects().length) return;   // not shown: drawn when it is
     const [cid, qa, qb] = box.dataset.ebox.split('|'), it = item(cid); if (!it) return;
     const fl = new Map();
-    for (let k = +qa; k <= +qb; k++) echoSpans(it, k).forEach(x => {
+    for (let k = +qa; k <= +qb; k++) (onBoard ? echoSpans : echoSpansAll)(it, k).forEach(x => {
       const id = x.ec.id + ':' + x.side, f = fl.get(id) || { ec: x.ec, side: x.side, first: false, last: false, placed: false };
       f.first = f.first || x.first; f.last = f.last || x.last; f.placed = f.placed || x.placed; fl.set(id, f);
     });
@@ -3154,24 +3321,27 @@ function hoverEcho(id) {
 // Not an arrow: it makes no claim about the models.
 function renderThreads(nb) {
   let h = '', o = '';
-  const ts = layerOn('annotations') ? (B.annotations || []).filter(a => a && a.kind === 'relevant' && a.on && a.to && a.to.card && shown(item(a.to.card))) : [];
+  const ts = (B.annotations || []).filter(a => a && a.kind === 'relevant' && a.on && a.to && a.to.card && shown(item(a.to.card)) && (!nb || nb.has(a.to.card)));
+  let n = 0; const fade = !!(ATT && ATT.cards.size);
   if (ts.length) {
     const W = annPlaces();
     ts.forEach(a => {
-      const at = (W.get(a.id) || []).map(x => x.card).filter(c => shown(item(c))), from = at.includes(a.on.card) ? a.on.card : at[0];
+      const at = (W.get(a.id) || []).map(x => x.card).filter(c => shown(item(c)) && (!nb || nb.has(c))), from = at.includes(a.on.card) ? a.on.card : at[0];
       if (!from || from === a.to.card) return;
+      const how = annHow(a.id); if (!how) { n++; return; }
+      const lite = how === 'hov' ? ' lite' : fade && how === 'all' && ATT.anns.get(a.id) !== 'sel' ? ' fade' : '';
       // to one cell of a table, kept by the cell's id; to the table as a whole if that cell is no longer in it
       const it = item(a.to.card), cid = a.to.cell && it.kind === 'table' ? a.to.cell : null, gone = !!cid && !cellRC(it, cid);
       const c = curve({ from, to: a.to.card, toCell: gone ? null : cid, layer: 'annotation' }); if (!c) return;
-      const dim = nb ? !(nb.has(from) && nb.has(a.to.card)) : false;
-      h += '<g class="annt' + (dim ? ' dim' : '') + (gone ? ' gone' : '') + '" data-annid="' + esc(a.id) + '"><title>' + esc('Relevant to ' + toText(a.to) + (gone ? ' (drawn to the table as a whole)' : '') + (a.text ? ': ' + a.text : '') + (a.by ? ' (@' + a.by + ')' : '')) + '</title><path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '"/></g>';
+      h += '<g class="annt' + lite + (gone ? ' gone' : '') + '" data-annid="' + esc(a.id) + '"><title>' + esc('Relevant to ' + toText(a.to) + (gone ? ' (drawn to the table as a whole)' : '') + (a.text ? ': ' + a.text : '') + (a.by ? ' (@' + a.by + ')' : '')) + '</title><path class="hit" d="' + c.d + '"/><path class="v" d="' + c.d + '"/></g>';
       // the end at a cell lies under its table: over the table, and only there, the thread is drawn again, as an arrow's is
       if (!c.Z.card) return;
       const R = c.Z.card, cp = 'ca-' + a.id, faint = sel.kind === 'card' && sel.ids.includes(a.to.card);
       o += '<clipPath id="' + esc(cp) + '"><rect x="' + R.x + '" y="' + R.y + '" width="' + R.w + '" height="' + R.h + '"/></clipPath>' +
-        '<g class="annt cin' + (dim ? ' dim' : '') + (faint ? ' faint' : '') + '"><path class="v" d="' + c.d + '" clip-path="url(#' + esc(cp) + ')"/></g>';
+        '<g class="annt cin' + lite + (faint ? ' faint' : '') + '"><path class="v" d="' + c.d + '" clip-path="url(#' + esc(cp) + ')"/></g>';
     });
   }
+  undrawn.threads = n;
   $('gann').innerHTML = h;
   $('gcellann').innerHTML = o;
 }
@@ -3184,7 +3354,7 @@ function strokeD(pts) {
   const l = pts[pts.length - 1]; return d + ' L' + l[0] + ',' + l[1];
 }
 function renderDrawn() {
-  const ink = layerOn('drawing') ? view().ink || [] : [], dim = focus || query;
+  const ink = layerOn('drawing') ? view().ink || [] : [], dim = focus || query || parSel || echoSel;
   $('gdraw').innerHTML = ink.map(st => '<path d="' + strokeD(st.pts) + '" stroke="' + esc(st.color) + '" stroke-width="' + (+st.w || 3) + '"' + (dim ? ' opacity="0.2"' : '') + '/>').join('');
 }
 function applyCam() {
@@ -3193,8 +3363,15 @@ function applyCam() {
   if (w.classList.contains('far') !== far || w.classList.contains('near') !== near) { w.classList.toggle('far', far); w.classList.toggle('near', near); if (!editing) renderBoard(); }
   $('zk').textContent = Math.round(cam.k * 100) + '%';
 }
-function renderBoard() { renderCards(); const nb = lit(); renderInk(nb); }
+function renderBoard() { ATT = attention(); $('world').classList.toggle('mute', ['words', 'stretches', 'notes'].includes(lensOf())); renderCards(); const nb = lit(); renderInk(nb); }
+const relCount = k => k === 'annotations' ? annHere().length : k === 'parallels' ? parsHere().length : k === 'echoes' ? echoesHere().filter(ec => !isUnlike(ec)).length : 0;
 function renderLayers() {
+  const cur = lensOf();
+  $('lens').innerHTML = LENSES.map(L => '<button type="button" class="btn' + (L.key === cur ? ' on' : '') + '" data-lens="' + L.key + '" aria-pressed="' + (L.key === cur) + '" title="' + esc(L.title) + '">' + esc(L.label) + (L.count ? '<span class="n">' + relCount(L.count) + '</span>' : '') + '</button>').join('') +
+    '<button type="button" class="linkish' + (cur === 'custom' ? ' on' : '') + '" data-lens="custom" aria-pressed="' + (cur === 'custom') + '" title="The layers one by one">custom…</button>';
+  $('drawchk').checked = layerOn('drawing');
+  $('layers').hidden = cur !== 'custom';
+  if (cur !== 'custom') return;
   const count = k => k === 'annotations' ? annHere().length : k === 'parallels' ? parsHere().length : k === 'echoes' ? echoesHere().filter(ec => !isUnlike(ec)).length : k === 'drawing' ? (view().ink || []).length : k === 'frames' ? B.models.length : ['division', 'hypothesis', 'computer'].includes(k) ? B.arrows.filter(a => a.layer === k).length :
     k === 'problem' ? B.items.filter(i => i.kind === 'problem').length : B.items.filter(i => i.kind === k).length;
   const closed = $('layers').classList.contains('closed');
@@ -3202,7 +3379,8 @@ function renderLayers() {
     '<label><input type="checkbox" data-layer="' + L.key + '"' + (layerOn(L.key) ? ' checked' : '') + '>' + (L.mark ? '<i class="sq"></i>' : '<i style="border-top:2px ' + (L.dash ? (L.dash.startsWith('2') ? 'dotted' : 'dashed') : 'solid') + ' ' + L.color + '"></i>') + esc(L.label) + '<span class="n">' + count(L.key) + '</span></label>').join('');
 }
 function renderTools() {
-  $('vsel').innerHTML = B.views.map(v => '<option value="' + esc(v.id) + '"' + (v.id === viewId ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('');
+  $('vsel').innerHTML = B.views.map(v => '<option value="' + esc(v.id) + '"' + (v.id === viewId ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('') +
+    (ro() ? '' : '<option disabled>────</option><option value="+new">New view…</option><option value="+more">This view…</option>');
   $('undo').disabled = ro() || !undoStack.length; $('redo').disabled = ro() || !redoStack.length;
   $('photos').textContent = 'Photographs' + (photoList().length ? ' (' + photoList().length + ')' : '');
   const na = annHere().length, np = parsHere().length;
@@ -3229,8 +3407,8 @@ function banner() {
   else if (hand && parById(hand)) { const p = parById(hand); h = '<span>Holding <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>: select its words in another passage, and press <b>+ (' + esc(parSign(p)) + ')</b> by them.</span><button type="button" class="btn" data-b="nohand">Done (Esc)</button>'; }
   else if (offer && offer.kind === 'arrow') h = '<span>You drew from <b>' + esc(endName(offer.from.id, offer.from.rc)) + '</b> to <b>' + esc(endName(offer.to.id, offer.to.rc)) + '</b>.</span><button type="button" class="btn solid" data-b="o-arrow">Make it an arrow</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>';
   else if (offer && offer.kind === 'lasso') { const one = offer.ids.length === 1; h = '<span>You drew round ' + offer.ids.length + (one ? ' card' : ' cards') + '.</span><button type="button" class="btn solid" data-b="o-select">Select ' + (one ? 'it' : 'them') + '</button><button type="button" class="btn" data-b="o-model">Make ' + (one ? 'it' : 'them') + ' a group</button><button type="button" class="btn" data-b="o-keep">Keep it as drawing</button>'; }
-  else if (parSel && parById(parSel)) { const p = parById(parSel), n = (parPlaces().get(p.id) || []).length; h = '<span>Showing <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>' + (layerOn('parallels') ? ', its words on each of its ' + n + (n === 1 ? ' card' : ' cards') : ' (the Parallels layer is hidden)') + '</span>' + (n >= 2 && !compare ? '<button type="button" class="btn" data-b="parcompare">Compare its passages</button>' : '') + '<button type="button" class="btn" data-b="noparsel">Show everything (Esc)</button>'; }
-  else if (echoSel && echoById(echoSel)) { const ec = echoById(echoSel), W = echoPlaces().get(ec.id); h = '<span>Showing the echo <b style="color:' + echoColor(ec) + '">' + esc(short(echoName(ec), 70)) + '</b>' + (layerOn('echoes') ? '' : ' (the Echoes layer is hidden)') + '</span>' + (W && W.a.length && W.b.length && !compare ? '<button type="button" class="btn" data-b="ecompare">Compare the two</button>' : '') + '<button type="button" class="btn" data-b="noechosel">Show everything (Esc)</button>'; }
+  else if (parSel && parById(parSel)) { const p = parById(parSel), n = (parPlaces().get(p.id) || []).length; h = '<span>Showing <b style="color:' + parColor(p) + '">(' + esc(parSign(p)) + ') ' + esc(short(p.label, 40)) + '</b>' + ', its words on each of its ' + n + (n === 1 ? ' card' : ' cards') + '</span>' + (n >= 2 && !compare ? '<button type="button" class="btn" data-b="parcompare">Compare its passages</button>' : '') + '<button type="button" class="btn" data-b="noparsel">Show everything (Esc)</button>'; }
+  else if (echoSel && echoById(echoSel)) { const ec = echoById(echoSel), W = echoPlaces().get(ec.id); h = '<span>Showing the echo <b style="color:' + echoColor(ec) + '">' + esc(short(echoName(ec), 70)) + '</b>' + '' + '</span>' + (W && W.a.length && W.b.length && !compare ? '<button type="button" class="btn" data-b="ecompare">Compare the two</button>' : '') + '<button type="button" class="btn" data-b="noechosel">Show everything (Esc)</button>'; }
   else if (focus) { const it = item(focus.id); h = '<span>Only what is near <b>' + esc(it ? cardTitle(it) : '') + '</b></span><button type="button" class="btn' + (focus.hops === 1 ? ' solid' : '') + '" data-b="hop1">one step</button><button type="button" class="btn' + (focus.hops === 2 ? ' solid' : '') + '" data-b="hop2">two steps</button><button type="button" class="btn" data-b="nofocus">Show everything (Esc)</button>'; }
   b.innerHTML = h; b.classList.toggle('show', !!h);
 }
@@ -3242,7 +3420,7 @@ const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLo
 /* ── Render: the side ─────────────────────────────────────────────────────── */
 // A passage in the side. Given its card (it), its words can be selected and annotated, and its annotations are shown.
 function quoteHtml(q, i, removable, it) {
-  const href = portalHref(q), P = it && q.q ? placeOn(it, i) : null, E = P ? echoSpans(it, i) : [];
+  const href = portalHref(q), P = it && q.q ? placeOn(it, i) : null, E = P ? echoSpansAll(it, i) : [];
   return '<div class="q' + (E.length ? ' eb" data-ebox="' + esc(it.id) + '|' + i + '|' + i + '" style="--ebn:' + ebDepth(E) : '') + '">' + (q.q ? '<span class="t">“' + (P ? '<span data-qt="' + i + '" data-qcard="' + esc(it.id) + '">' + litText(q, P.spans, parsOn(it, i).spans, E) + '</span>' : esc(q.q)) + '”</span>' : '') + '<div class="c"><span>' + esc(q.cite || '') + '</span>' +
     (href ? '<button type="button" data-read="' + esc(href) + '">read it beside the board</button><a href="' + esc(href) + '" target="_blank" rel="noopener">↗</a>' : '') +
     (q.pasted ? '<span class="chk">pasted, not yet checked against the portal</span>' : '') +
@@ -3264,12 +3442,14 @@ function sideIntro() {
   const n = B.items.filter(i => i.kind === 'passage').length, gh = (() => { try { return !!localStorage.getItem(TOPICS_GH); } catch (e) { return false; } })();
   return '<div class="intro"><h2>' + esc(topic ? topic.name : 'A topic’s board') + '</h2><p class="sub">' + (LOOKING() ? 'Shown to the class' + (SH.owner ? ' by @' + esc(SH.owner) : '') + ': to look at here, not to change' : 'The board of a topic in My topics') + '</p>' +
     boardsAround() + pointedHereHtml() + (topic ? '<span class="k">' + (LOOKING() ? 'What the topic is for' : 'The topic, in your words') + '</span><textarea class="mtnote" data-mttopic placeholder="What this topic is for: a question, a hunch, what to look for next. The same note as at the top of its list in My topics."' + (lost || (SHM && !writable()) ? ' readonly' : '') + '>' + esc(topic.note || '') + '</textarea>' : '') +
-    (LOOKING() ? '<p>Click a card to read its passage in full, here or in the portal beside the board, and its annotations. Drag the bare board to move about, and zoom with the buttons at the bottom, or by pinching on an iPad. <i>View</i> shows the board’s other arrangements, if it has any; <i>Layers</i>, bottom left, shows or hides what is on it; <i>Find on the board</i> finds words on its cards.</p>' : '' +
+    (LOOKING() ? '<p>Click a card to read its passage in full, here or in the portal beside the board, and its annotations. Drag the bare board to move about, and zoom with the buttons at the bottom, or by pinching on an iPad. <i>View</i> shows the board’s other arrangements, if it has any; <i>Show</i>, in the tools, chooses what is drawn on it; <i>Find on the board</i> finds words on its cards.</p>' : '') +
+    '<details class="howto"' + (prefs.helpOpen || !B.items.length ? ' open' : '') + '><summary>How the board works</summary>' +
+    (LOOKING() ? '' : '' +
     '<p>The topic’s passages wait under <b>Passages</b>, in the side. Put them on the board one at a time, with <b>+ On the board</b> or by dragging one onto it, or into a group’s frame. A passage you put under the topic later, anywhere in the portal, joins them there; one taken off the board goes back. Click a card to read its passage in full, here or in the portal.</p>' +
     '<ul><li><b>Move</b> anything by dragging it. Drag the bare board to move about, or hold <kbd>Space</kbd> and drag anywhere. <i>Select</i>, or <kbd>⇧</kbd>-drag, takes several cards at once.</li>' +
     '<li><b>Draw an arrow</b> from a card’s <b>→</b> knob to another card, to a group’s frame, or to one cell of a table, and name it on the spot: <i>develops, contradicts, qualifies, same as, cf.</i>, or a word of your own. To a question, it is <i>answers?</i>.</li>' +
     '<li><b>Write anywhere</b>: double-click the board, type, and press Enter for a note; or choose a question or a box. <b>Questions</b> are what the topic asks, in your words.</li>' +
-    '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. <i>Relevant to…</i> can name a card on the board, or one cell of a table: click it. It can name another of your topics too: start typing its name and choose it from those offered, or from the list beneath; a topic needs no board for it. That topic lists the annotations relevant to it, in My topics and here in the side of its board. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, in the tools above, lists this board’s.</li>' +
+    '<li><b>Annotate a passage</b>: click its card, select some of its words here in the side, and choose <i>Problem</i>, <i>Relevant to…</i>, <i>Interpretation</i> or <i>Comment</i>; or press <i>annotate</i> beside its citation for the passage as a whole. <i>Relevant to…</i> can name a card on the board, or one cell of a table: click it. It can name another of your topics too: start typing its name and choose it from those offered, or from the list beneath; a topic needs no board for it. That topic lists the annotations relevant to it, in My topics and here in the side of its board. An annotation belongs to the passage: it shows on every one of your boards where that passage stands. <i>Annotations</i>, under <b>Board ▾</b>, lists this board’s.</li>' +
     '<li><b>Parallels</b>: when words in several passages answer one another, select them in one passage and choose <i>Parallel…</i>. The parallel is then in hand: select its words in the next passage and press <b>+ (a)</b> in the bar. Its words are tinted in its colour, with its letter, on every card; a thread runs from each of its cards to its knot; pointing at its words lights them everywhere; click a chip or a knot to show only it. Beneath a passage here, <i>Parallels</i> lists the words elsewhere that answer to its own. Select two to four cards and <i>Compare them side by side</i>.</li>' +
     '<li><b>Echoes</b>: when an idea or a stretch of argument comes back in another passage, select the stretch, across the passages of a card that runs on if need be, and choose <i>Echo…</i> (or <i>Echo… the whole of it</i> beneath a passage in the side). It is in hand: select the stretch that answers it in another passage, press <b>+ echoes</b>, and say how close they are, or that you checked and found them not alike. An echo joins two stretches only: A–B and B–C say nothing of A and C. A ribbon joins its stretches on the board; a bracket marks each in the margin wherever a passage shows in full. <i>Echoes</i>, among the tools, sets every stretch against every other, and can show the page’s chains through a third, dashed, as its finding, not yours.</li>' +
     '<li><b>Your note</b> on a passage, here in the side, is the note it has in My topics: write it in either.</li>' +
@@ -3281,14 +3461,14 @@ function sideIntro() {
     '<li><b>Draw</b> with <i>Draw</i> (<kbd>P</kbd>), or at any time with an Apple Pencil on the bare board. A line from one card to another can become an arrow, and a loop round cards selects them. <i>Rub out</i> (<kbd>E</kbd>) takes drawing away.</li>' +
     '<li><b>On an iPad</b>: a finger moves cards, groups and the board; two fingers pinch to zoom; a double tap writes; <b>»</b> puts this side away.</li></ul>') +
     '<span class="k">Its dimensions</span><ul>' +
-    '<li><b>Layers</b> (bottom left): show only the arrows, only the questions, only the drawing, or any mix.</li>' +
+    '<li><b>Show</b>, in the tools: <i>Argument</i> draws the cards, groups, arrows and questions, and each card counts the rest in a line beneath its citation, each piece of it a way to what it counts. <i>Words</i> draws every parallel, <i>Stretches</i> every echo, <i>Notes</i> every annotation, <i>Everything</i> all of them, and <i>custom…</i> the layers one by one. Whatever is shown, select a card and all that joins it comes out; point at one and it shows faintly. A line at the foot of the board says what is not drawn.</li>' +
     '<li><b>Views</b>: the same cards in other arrangements. Rearranging one view leaves the others as they were.</li>' +
-    '<li><b>Depth</b>: zoom out and a card is its citation; zoom in and its words show.</li>' +
-    '<li><b>Focus</b>: select a card and press <kbd>F</kbd> to see only what is joined to it.</li>' +
-    '<li><b>Time</b>: <i>Photograph the board</i> keeps it as it is now. Come back to any photograph later, or bring it back.</li></ul>' +
+    '<li><b>Depth</b>: zoom out and the cards’ words grow larger and their marks give way, to be read from afar; zoom in and they come back.</li>' +
+    '<li><b>Focus</b>: select a card and press <kbd>F</kbd>, and only what is joined to it stays; the rest is put away until <kbd>Esc</kbd>. <kbd>F</kbd> again goes two steps out.</li>' +
+    '<li><b>Time</b>: <i>Photograph the board</i>, under <b>Board ▾</b>, keeps it as it is now. Come back to any photograph later, or bring it back.</li></ul></details>' +
     (SHM && SH.role === 'look' ? '<span class="k">Where it is kept</span><p>This is a copy of a shared board' + (SH.owner ? ' of @' + esc(SH.owner) + '’s' : '') + ', shown to the class as board ' + esc(SH.look) + ': kept in <code>' + esc(ORG + '/' + LOOKS) + '</code>, locked with the class password, and sent again after each change to the board. It can be looked at here, not changed. Your own notes and annotations on its passages, in My topics, show beside it.</p>' :
     SHM ? '<span class="k">Where it is kept</span><p>In <code>' + esc(ORG + '/' + SH.repo) + '</code>, a private repository: GitHub lets in only the people it is shared with' + (SH.owner ? ', by @' + esc(SH.owner) : '') + '. Your own notes on its passages, and annotations marked only me, stay in My topics.</p>' : '') +
-    (SHM ? '' : '<span class="k">Where it is kept</span><p>With your topics, in this browser, and nobody else sees it. <i>Save to file</i>, in My topics, saves it with them' + (gh ? ', and it goes to GitHub with them, locked with your passphrase, through the portal beside the board' : '; with <i>Keep on GitHub</i> on, it goes there with them, locked') + '. <i>Export</i>, above, saves this board alone.</p>') +
+    (SHM ? '' : '<span class="k">Where it is kept</span><p>With your topics, in this browser, and nobody else sees it. <i>Save to file</i>, in My topics, saves it with them' + (gh ? ', and it goes to GitHub with them, locked with your passphrase, through the portal beside the board' : '; with <i>Keep on GitHub</i> on, it goes there with them, locked') + '. <i>Export</i>, under <b>Board ▾</b>, saves this board alone.</p>') +
     '<p style="font-size:0.85rem;color:var(--faded)">' + n + (n === 1 ? ' passage · ' : ' passages · ') + B.items.length + ' cards · ' + B.arrows.length + ' arrows · ' + B.views.length + (B.views.length === 1 ? ' view' : ' views') + ' · ' + photoList().length + (photoList().length === 1 ? ' photograph' : ' photographs') + '</p></div>';
 }
 function cardButtons(it, arr) {
@@ -3932,7 +4112,7 @@ function endWhere(ec, sd, H) {
 }
 // Beneath a passage: each echo with a stretch in what its card quotes, and the stretch elsewhere that answers.
 function echoApparatus(it) {
-  if (it.kind !== 'passage' || !layerOn('echoes')) return '';
+  if (it.kind !== 'passage') return '';
   const os = echoesOfCard(it), lost = openQuotes(it).flatMap((q, i) => echoesOn(it, i).lost);
   if (!os.length && !lost.length) return '';
   const row = (o, gone) => {
@@ -4917,7 +5097,7 @@ function newView() {
   const name = prompt('A name for the new view. It starts as a copy of this one, and changes to it leave this one as it is.', 'A view of my own');
   if (!name || !name.trim()) return;
   const v = view(), id = uid('v');
-  change(() => { B.views.push({ id, name: name.trim(), pos: clone(Object.assign({}, ...B.views.slice().reverse().map(w => w.pos), v.pos)), hidden: (v.hidden || []).slice(), layers: layersOf(), ink: clone(v.ink || []), by: me() || undefined, date: today() }); viewId = id; });
+  change(() => { B.views.push({ id, name: name.trim(), pos: clone(Object.assign({}, ...B.views.slice().reverse().map(w => w.pos), v.pos)), hidden: (v.hidden || []).slice(), layers: ownLayers(), lens: lensOf(), ink: clone(v.ink || []), by: me() || undefined, date: today() }); viewId = id; });
   render();
 }
 function viewMenu() {
@@ -5084,7 +5264,7 @@ $('stage').addEventListener('pointerdown', e => {
   if (more && !mode && !spaceDown && (tool === 'move' || tool === 'select')) { toggleCard(more.dataset.cardopen); return; }
   const knob = t.closest('.knob'), card = t.closest('.card'), tab = t.closest('.ftab'), grip = t.closest('.fgrip'), bgrip = t.closest('.bgrip'), ar = t.closest('.ar'), fr = t.closest('.frame'), th = t.closest('.annt');
   const tcolEl = t.closest('.tcol'), cellEl = t.closest('.k-table [data-cell]'), chipEl = t.closest('.k-table .tp'), ckEl = t.closest('.k-table .ck'), tparEl = t.closest('.k-table .tpar');
-  const erb = t.closest('.erib, .estrip i');   // an echo's ribbon, or its mark down a card's edge: chosen, not moved
+  const erb = t.closest('.erib, .estrip i, .cline .cl-e[data-echo]');   // an echo's ribbon, or its mark down a card's edge: chosen, not moved
   if (erb && !mode && !spaceDown && tool !== 'pen' && tool !== 'erase') { e.preventDefault(); chooseEcho(erb.dataset.echo); return; }
   const pk = t.closest('.part'), pch = t.closest('.pchip');   // a parallel's knot, or its chip on a card: chosen, not moved
   if ((pk || pch) && !mode && !spaceDown && tool !== 'pen' && tool !== 'erase') {
@@ -5519,6 +5699,19 @@ $('layers').addEventListener('change', e => {
   showLayer(k, e.target.checked); render();
 });
 $('layers').addEventListener('click', e => { if (e.target.closest('[data-fold]')) { $('layers').classList.toggle('closed'); renderLayers(); } });
+$('lens').addEventListener('click', e => { const b = e.target.closest('[data-lens]'); if (b) setLens(b.dataset.lens); });
+$('undrawn').addEventListener('click', e => { const b = e.target.closest('[data-lensgo]'); if (b) setLens(b.dataset.lensgo); });
+$('drawchk').addEventListener('change', e => { showLayer('drawing', e.target.checked); render(); });
+// The toolbar's menus: open on a click, closed by a choice, a click elsewhere, or Esc.
+function closeMenus() { document.querySelectorAll('.tools .menu.open').forEach(m => { m.classList.remove('open'); m.querySelector('[data-menu]').setAttribute('aria-expanded', 'false'); }); }
+document.querySelectorAll('.tools .menu > [data-menu]').forEach(b => b.addEventListener('click', () => {
+  const m = b.parentElement, open = !m.classList.contains('open'); closeMenus(); m.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open));
+  if (open) { const f = m.querySelector('.mi:not([hidden])'); if (f) f.focus(); }
+}));
+document.querySelectorAll('.tools .mlist').forEach(l => l.addEventListener('click', e => { if (e.target.closest('.mi')) setTimeout(closeMenus, 0); }));
+document.addEventListener('pointerdown', e => { if (!e.target.closest || !e.target.closest('.tools .menu')) closeMenus(); }, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.tools .menu.open')) { closeMenus(); e.stopPropagation(); e.preventDefault(); } }, true);
+document.querySelector('[data-addbox]').addEventListener('click', () => { if (ro()) return toast(roWhy()); setTool('box'); toast('Drag on the board to draw the box.'); });
 
 /* ── Echoes: a stretch selected, then Echo…, then the stretch that answers it, then how close ── */
 // The citation of a stretch of a card, from offset s in its passage qa to offset z in its passage qb: the portal's
@@ -5678,14 +5871,14 @@ function renderCompare() {
   C.querySelectorAll('.cbody').forEach(el => { compare.top[el.dataset.cc] = el.scrollTop; });
   const n = compare.ids.length, add = B.items.filter(it => it.kind === 'passage' && !compare.ids.includes(it.id));
   const col = (id, i) => {
-    const it = item(id), q = it.quotes[0] || {}, qs = openQuotes(it), E = qs.map((x, k) => echoSpans(it, k)), en = E.reduce((n, x) => n + x.length, 0);
+    const it = item(id), q = it.quotes[0] || {}, qs = openQuotes(it), E = qs.map((x, k) => echoSpansAll(it, k)), en = E.reduce((n, x) => n + x.length, 0);
     const para = ' <span class="para" title="A new paragraph in the text">¶</span> ';
     return '<div class="ccol"><div class="chead"><span class="cc">' + esc(it.label || q.cite || it.cite || 'A passage') + '</span>' +
       (i > 0 ? '<button type="button" data-cmove="' + i + '|-1" title="Move it to the left">‹</button>' : '') + (i < n - 1 ? '<button type="button" data-cmove="' + i + '|1" title="Move it to the right">›</button>' : '') +
       '<button type="button" data-cdrop="' + i + '" title="Take it out of the comparison">✕</button></div>' + (it.label && q.cite ? '<div class="csub">' + esc(q.cite) + '</div>' : '') +
       '<div class="cbody" data-cc="' + esc(id) + '">' + (q.q ? '<div class="ct' + (en ? ' eb' : '') + '"' + (en ? ' data-ebox="' + esc(id) + '|0|' + (qs.length - 1) + '"' : '') + ' style="' + (en ? '--ebn:' + ebDepth(E.flat()) + ';' : '') + ((compare.pad || {})[id] ? 'padding-top:' + (+compare.pad[id]) + 'px' : '') + '">' +
         // a card that runs over several passages shows each of them, its paragraphs marked, so that a stretch over them shows whole
-        qs.map((x, k) => x.q ? '<span data-qt="' + k + '" data-qcard="' + esc(id) + '">' + markText(String(x.q), layerOn('annotations') ? placeOn(it, k).spans : [], parsOn(it, k).spans, E[k]) + '</span>' : '').filter(Boolean).join(para) + '</div>' : '<p class="empty">No words for this passage yet.</p>') +
+        qs.map((x, k) => x.q ? '<span data-qt="' + k + '" data-qcard="' + esc(id) + '">' + markText(String(x.q), placeOn(it, k).spans, parsOn(it, k).spans, E[k]) + '</span>' : '').filter(Boolean).join(para) + '</div>' : '<p class="empty">No words for this passage yet.</p>') +
       (q.full === false ? '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal: these are the words My topics kept.' : 'The portal beside the board is still loading its texts: the passage in full follows in a moment.') + '</p>' : '') + '</div></div>';
   };
   C.innerHTML = '<div class="cbar"><b>Compare</b><span>' + (n === 1 ? 'One passage: add another to compare it with.' : n + ' passages side by side. A band joins the words of each parallel, a ribbon the stretches of each echo; click one to bring them level.') + '</span>' +
@@ -5802,13 +5995,13 @@ document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click',
   showSide('details'); renderSide();
 }));
 $('vsel').addEventListener('change', () => {
-  viewId = $('vsel').value; focus = null; sel = { kind: null, ids: [] }; form = null;
+  const pick = $('vsel').value;
+  if (pick === '+new' || pick === '+more') { $('vsel').value = viewId; if (pick === '+new') newView(); else viewMenu(); return; }
+  viewId = pick; focus = null; sel = { kind: null, ids: [] }; form = null;
   render();
   const c = camOf(); if (c) { cam = Object.assign({}, c); applyCam(); } else fit();
   if (!live) { prefs.viewId = viewId; savePrefs(); }
 });
-$('vnew').addEventListener('click', newView);
-$('vmore').addEventListener('click', viewMenu);
 $('search').addEventListener('input', () => { query = $('search').value.trim(); renderTools(); lit(); renderInk(neighbourhood()); });
 $('undo').addEventListener('click', undo);
 $('redo').addEventListener('click', redo);
@@ -5883,6 +6076,14 @@ function hoverPar(id) {
 }
 document.addEventListener('pointerover', e => { if (drag) return; const el = e.target.closest && e.target.closest('[data-echo], .ech[data-ech]'); hoverEcho(!el ? '' : el.dataset.echo || el.dataset.ech.split(' ').map(x => x.split(':')[0]).find(x => x === echoSel) || el.dataset.ech.split(' ').pop().split(':')[0]); });
 document.addEventListener('pointerover', e => { if (drag) return; const el = e.target.closest && e.target.closest('[data-par]'); hoverPar(el ? (el.dataset.par.split(' ').includes(parSel) ? parSel : el.dataset.par.split(' ').pop()) : ''); });
+// Pointing at a card draws what joins it, faintly, whatever the board shows: not while dragging, nor for a finger.
+let hovRaf = 0;
+function setHov(id) {
+  if (id === hovCard) return; hovCard = id;
+  cancelAnimationFrame(hovRaf); hovRaf = requestAnimationFrame(() => { if (drag) return; ATT = attention(); renderInk(neighbourhood()); });
+}
+$('cards').addEventListener('pointerover', e => { if (drag || e.pointerType === 'touch') return; const c = e.target.closest('.card'); setHov(c ? c.dataset.id : ''); });
+$('cards').addEventListener('pointerout', e => { const to = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('#cards .card') : null; if (!to) setHov(''); });
 // The store changed elsewhere: another tab of the portal, the portal beside the board, GitHub's copy arriving through it.
 window.addEventListener('storage', e => { if (e.key === TOPICS || e.key == null) takeIn(); });
 const boardId = h => { const u = new URLSearchParams(String(h).slice(1)); return u.get('look') ? 'l:' + u.get('look') : u.get('s') ? 's:' + u.get('s') : 't:' + (u.get('t') || ''); };
@@ -6236,6 +6437,7 @@ $('details').addEventListener('click', e => {
   if (act === 'selmodel') { select('card', B.items.filter(i => i.model === id && shown(i)).map(i => i.id)); return; }
   if (act === 'delmodel') { const na = B.arrows.filter(a => a.from === id || a.to === id).length, dup = B.items.filter(i => i.model === id && twinsOf(i).length).length; if (confirm('Delete this group? Its cards stay on the board, in no group.' + (na ? ' ' + (na === 1 ? 'The arrow drawn to or from it goes' : 'The ' + na + ' arrows drawn to or from it go') + ' with it.' : '') + (dup ? '\n\n' + (dup === 1 ? 'One of them is a passage that has another card on the board as well. It stays too, outside any group: take it off afterwards if you no longer want it.' : dup + ' of them are passages that have other cards on the board as well. They stay too, outside any group: take them off afterwards if you no longer want them.') : ''))) { change(() => { B.items.forEach(i => { if (i.model === id) i.model = null; }); B.models = B.models.filter(m => m.id !== id); B.arrows = B.arrows.filter(a => a.from !== id && a.to !== id); if (BASE.models.some(m => m.id === id)) B.removed.push(id); }); select(null, []); } return; }
 });
+$('details').addEventListener('toggle', e => { if (e.target.matches && e.target.matches('details.howto')) { prefs.helpOpen = e.target.open; savePrefs(); } }, true);
 $('details').addEventListener('change', e => {
   if (e.target.matches('[data-alsoin]') && sel.kind === 'card') { const it = item(sel.ids[0]), g = model(e.target.value); if (it && g) alsoIn(it, g); return; }
   if (e.target.matches('[data-sxa]') && form && form.kind === 'stretch') { form.ar[e.target.dataset.sxa] = +e.target.value; return; }
