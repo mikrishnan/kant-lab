@@ -1,8 +1,6 @@
-/* ADICKES' SIGLA in the Reflexionen. The Academy Edition marks a passage Kant inserted into a
-   note with a small raised letter after the parenthesis that opens it: g (gegenwärtig) when he
-   inserted it at the same time as the note, s (später) when he inserted it later; every other
-   parenthesis is Kant's own. (Key as given by Steve Naragon, "Kant: Overview of the Academy
-   Edition", under Adickes's abbreviations.) "Der Form (g nach) ist …". The transcription flattens that letter onto the line, where it
+/* ADICKES' SIGLA in the Reflexionen. The Academy Edition marks what Kant struck out and what
+   he added later with a small raised letter after the parenthesis that opens the passage:
+   "Der Form (g nach) ist …". The transcription flattens that letter onto the line, where it
    reads as a stray word. This draws it as the AA prints it, small and raised, with its meaning
    on hover.
 
@@ -13,8 +11,8 @@
    Included by index.html and topic-board.html. */
 (function () {
   const MEANING = {
-    g: 'g — gegenwärtig: inserted by Kant at the same time as the note (Adickes’ sign in the Academy Edition)',
-    s: 's — später: inserted by Kant at a later time (Adickes’ sign in the Academy Edition)'
+    g: 'g — gestrichen: struck out by Kant (Adickes’ sign in the Academy Edition)',
+    s: 's — a later addition by Kant (Adickes’ sign in the Academy Edition)'
   };
   // "(g " or "(s " opening a passage: the letter, then a space, then the passage's first character.
   const RX = /\(([gs]) (?=[^\s)])/g;
