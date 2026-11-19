@@ -57,6 +57,8 @@ const clip = (s, n) => s.length > n ? s.slice(0, n - 1) + '…' : s;
 const flat = s => String(s || '').replace(/\s+/g, ' ').trim();
 const paras = s => String(s || '').trim().split(/\n\s*\n/).map(flat).filter(Boolean);
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+// A property of an object for this page alone, never saved with it.
+const hide = (o, k, v) => Object.defineProperty(o, k, { value: v, writable: true, configurable: true, enumerable: false });
 const today = () => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
 const el = (tag, id, cls) => { const e = document.createElement(tag); if (id) e.id = id; if (cls) e.className = cls; return e; };
@@ -658,13 +660,18 @@ function addTo(i, target) {
      { kind: 'passage', from: [address, offset], to: [address, offset], label, note }
      { kind: 'passage', ref, words, english }   words kept that the portal can't place again
      { kind: 'note', title, text }              a note or a question on the board
+     { kind: 'heading', text }                  a group on the board, as a section heading
+   A passage's link, the same on two of them, says they are cards of one passage in two groups: they
+   become linked copies, as ⧉ Show it twice makes them, and the second is not skipped as sent already.
    A card that quotes a stretch, part of its passage or several passages in a row, comes as those
    passages, joined as Join joins them, with the words outside the stretch left out as ✂ Leave out
    leaves them: students see […], and on the Handouts page the words stay, struck through, to be
    put back. Its English follows the cuts when the card is drawn, as for any cut. It is cited by
    the stretch's own pages, and keeps the stretch it was made from (stretch: { from, to }), which is
    also how a card sent twice is known. `at` is where: null for where the handout is collecting,
-   as for + Handout; { end: true }; { section: id }; or { newHeading: text }. Nothing is sent, and
+   as for + Handout; { end: true }; { section: id }; { newHeading: text }; or { newHandout: name }, a
+   handout of its own, which becomes the one on screen. A list with headings in it goes as sections,
+   at the end or after the section chosen, never under a note. Nothing is sent, and
    nothing of the handouts is named, without the class password; the board asks for it (unlock),
    over its own page. */
 const unlocked = () => !!(LOCK && LOCK.key());
@@ -727,10 +734,15 @@ async function receive(list, at) {
   if (!(await unlockedNow())) return { ok: false, why: 'locked' };
   if (!PT.BYID || !P.length) return { ok: false, why: 'loading' };
   toOwn();
-  const h = own(), n = at ? null : collecting(), sec0 = at || n ? null : collectingSection();
-  const had = passagesOf(h), made = [], skipped = [];
-  (list || []).forEach(x => {
-    if (!x) return;
+  list = (list || []).filter(Boolean);
+  // A list with headings in it goes as sections: never under the note being collected into, nor inside a section.
+  const heads = list.some(x => x.kind === 'heading');
+  const prev = DB.current, fresh = at && at.newHandout != null ? blank(flat(at.newHandout) || 'Untitled handout') : null;
+  if (fresh) { DB.handouts.push(fresh); DB.current = fresh.id; }
+  const h = own(), n = at || heads ? null : collecting(), sec0 = at || n || heads ? null : collectingSection();
+  const had = passagesOf(h), made = [], skipped = [], links = {};
+  list.forEach(x => {
+    if (x.kind === 'heading') { made.push({ id: uid(), kind: 'heading', text: String(x.text || '').trim() }); return; }
     if (x.kind === 'note') {
       const t = String(x.text || '').trim();
       if (t) made.push({ id: uid(), kind: 'note', title: String(x.title || ''), text: t, items: [] }); else skipped.push({ x, why: 'it has nothing written on it' });
@@ -738,13 +750,22 @@ async function receive(list, at) {
     }
     const it = fromBoard(x);
     if (it.why) { skipped.push({ x, why: it.why }); return; }
-    if (had.concat(made).some(y => isPass(y) && sameSent(y, it))) { skipped.push({ x, why: 'it is in “' + h.name + '” already' }); return; }
+    // The same passage sent twice is skipped, but for a second copy linked to the first: a passage in two groups.
+    if (had.concat(made).some(y => isPass(y) && sameSent(y, it) && !(x.link && y.sentLink === x.link))) { skipped.push({ x, why: 'it is in “' + h.name + '” already' }); return; }
     if (flat(x.label)) it.label = String(x.label);
     if (flat(x.note)) it.note = String(x.note);
+    if (x.link) { hide(it, 'sentLink', x.link); (links[x.link] = links[x.link] || []).push(it); }
     made.push(it);
   });
-  const pass = made.filter(isPass), notes = made.filter(x => x.kind === 'note');
-  if (!made.length) return { ok: true, added: 0, notes: 0, skipped, handout: h.name, where: '' };
+  // A heading with nothing left under it, all its cards skipped, does not go.
+  for (let k = made.length - 1; k >= 0; k--) if (made[k].kind === 'heading' && (k === made.length - 1 || made[k + 1].kind === 'heading')) made.splice(k, 1);
+  // Copies of one passage, made linked as ⧉ Show it twice links them: what is changed in one is changed in all.
+  Object.values(links).forEach(cs => { cs = cs.filter(c => made.includes(c)); if (cs.length > 1) { const l = uid(); cs.forEach(c => { c.link = l; }); } });
+  const pass = made.filter(isPass), notes = made.filter(x => x.kind === 'note'), hds = made.filter(x => x.kind === 'heading');
+  if (!pass.length && !notes.length) {
+    if (fresh) { DB.handouts.splice(DB.handouts.indexOf(fresh), 1); DB.current = prev; }
+    return { ok: true, added: 0, notes: 0, headings: 0, skipped, handout: h.name, where: '' };
+  }
   let heading = null, where;
   if (n) {
     // a note holds passages, not notes: a note sent goes to the end of the section the note collecting is in
@@ -754,7 +775,8 @@ async function receive(list, at) {
   } else {
     const sec = at && at.section ? h.items.find(x => x.kind === 'heading' && x.id === at.section) || null : sec0;
     let k;
-    if (at && at.newHeading != null) { heading = { id: uid(), kind: 'heading', text: String(at.newHeading).trim() }; h.items.push(heading); k = h.items.length; where = 'under a new heading, “' + sectionName(heading) + '”'; }
+    if (fresh) { k = 0; where = 'a new handout'; }
+    else if (at && at.newHeading != null) { heading = { id: uid(), kind: 'heading', text: String(at.newHeading).trim() }; h.items.push(heading); k = h.items.length; where = 'under a new heading, “' + sectionName(heading) + '”'; }
     else if (sec) { k = sectionEnd(h, h.items.indexOf(sec)); where = 'at the end of “' + sectionName(sec) + '”'; }
     else { k = h.items.length; where = 'at its end'; }
     h.items.splice(k, 0, ...made);
@@ -762,17 +784,24 @@ async function receive(list, at) {
   save();
   if (pass.some(x => !x.en)) fillSoon();
   if (!page.hidden) render();
-  // Undo, by id, in the store as it is then: another tab may have changed it since.
+  // Undo, by id, in the store as it is then: another tab may have changed it since. A new handout goes whole,
+  // unless something has been added to it since.
   const ids = new Set(made.map(x => x.id)), hid = h.id, headId = heading && heading.id;
   const undo = () => {
     const g = DB.handouts.find(x => x.id === hid); if (!g) return;
-    g.items = g.items.filter(x => !ids.has(x.id));
-    g.items.forEach(x => { if (x.kind === 'note') x.items = kids(x).filter(y => !ids.has(y.id)); });
-    const k = g.items.findIndex(x => x.id === headId);
-    if (k >= 0 && sectionEnd(g, k) === k + 1) g.items.splice(k, 1);
+    const all = [].concat(...g.items.map(x => [x].concat(x.kind === 'note' ? kids(x) : [])));
+    if (fresh && all.every(x => ids.has(x.id)) && DB.handouts.length > 1) {
+      DB.handouts.splice(DB.handouts.indexOf(g), 1);
+      if (DB.current === hid) DB.current = DB.handouts.some(x => x.id === prev) ? prev : DB.handouts[0].id;
+    } else {
+      g.items = g.items.filter(x => !ids.has(x.id));
+      g.items.forEach(x => { if (x.kind === 'note') x.items = kids(x).filter(y => !ids.has(y.id)); });
+      const k = g.items.findIndex(x => x.id === headId);
+      if (k >= 0 && sectionEnd(g, k) === k + 1) g.items.splice(k, 1);
+    }
     save(); if (!page.hidden) render();
   };
-  return { ok: true, added: pass.length, notes: notes.length, skipped, handout: h.name, where, undo };
+  return { ok: true, added: pass.length, notes: notes.length, headings: hds.length, skipped, handout: h.name, handoutId: hid, fresh: !!fresh, where, heading: headId || null, undo };
 }
 
 /* ── Styles ──────────────────────────────────────────────────────────────── */

@@ -471,6 +471,20 @@ reader's topic rather than the seminar's one board.
   new tab (`index.html#handouts`). The class password is asked over the board, once, the first time.
   What is sent is a copy: nothing on the board changes, and a change made in the handout is not
   carried back. Tables, parallels, echoes, annotations, arrows and drawing don't go into a handout.
+- **The whole board to a handout.** **To a handout…**, under **Board ▾**, lays out what the view
+  shown holds as a list, to look over before anything is sent. The cards outside any group come
+  first, before any heading, since in a handout everything after a heading is in its section; then
+  each group, as a heading of the handout, in the order their frames are read on the board, with its
+  cards in the order they are read in it. Notes and questions stand where they are. Untick any line,
+  or a group's heading to leave out the group; move a line with ↑ ↓ or by dragging it, a group by
+  its heading; rename a heading for the handout without renaming the group. A passage in two groups
+  goes in each, as linked copies (*⧉ shown twice*) where its cards' headings agree, and as two
+  copies where they don't; the list says which. It goes to **a new handout**, named after the topic,
+  or to the handout on screen, at its end or after one of its sections. A group's side has **To a
+  handout…** for that group alone, and several cards selected have **Or as a list first…**. What is
+  in the handout already is not sent again, and a heading left with nothing under it doesn't go.
+  **Undo** takes a new handout away again whole. The list is never kept and changes nothing on the
+  board; tables, boxes and links to other boards are left out, and it says how many.
 - **Photograph the board**, under **Board ▾**, keeps it as it is now, to look at again or bring back. **Export**
   saves the one board to a file, and **Import** brings such a file's cards in beside yours.
 - **Giving someone a board.** The file Export writes carries the board whole, with the topic's
