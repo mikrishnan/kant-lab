@@ -369,6 +369,7 @@ function fillEn(it) {
     if (!it.parts.every(q => q.en)) return false;
     it.en = it.parts.map((q, k) => (k && gapBetween(it.parts[k - 1].ref, q.ref) ? '[…]\n\n' : '') + q.en).join('\n\n');
     Object.assign(it, { enStyle: it.parts[0].enStyle, enPart: it.parts.some(q => q.enPart) });
+    if (it.stretch) pairPlain(it);
     return true;
   }
   const k = idxOf(it.ref), got = k == null ? null : englishOf(P[k]);
@@ -377,6 +378,7 @@ function fillEn(it) {
   if (it.kind === 'excerpt') { const s = snippetOf(P[k], it.text, false, got); Object.assign(it, { en: s.en, enSnippet: s.enSnippet, enApprox: s.enApprox }); }
   else it.en = got.text;
   Object.assign(it, { enStyle: got.style, enPart: !!got.part });
+  if (it.stretch) pairPlain(it);
   return true;
 }
 // Whether an item's English, not kept with it yet, is on its way ('loading') or not to be had (null).
@@ -548,12 +550,12 @@ function joinCite(c1, c2) {
 }
 const joinedLabel = ps => (ps.find(p => flat(p.label)) || {}).label || '';
 const joinedNote = ps => ps.map(p => p.note).filter(n => flat(n)).join('\n\n');
-function joinNext(h, key) {
-  const a = at(h, key), x = a.it, y = a.list[a.i + 1];
-  if (!joinable(x, y)) { toast('Only a whole passage can be joined, to the next one in the handout, and only if that one comes later in the same text.'); return; }
+// x and y made one passage of the handout, x's parts first: what Join does, and what a card sent from a
+// topic's board quoting several passages in a row comes as.
+function joined(x, y) {
   const parts = partsOf(x).concat(partsOf(y));
   const gap = gapBetween(refsOf(x)[refsOf(x).length - 1], refsOf(y)[0]);
-  const j = {
+  return {
     id: uid(), kind: 'passage', ref: parts[0].ref, refs: parts.map(p => p.ref), parts,
     author: x.author, work: x.work, cite: joinCite(x.cite, y.cite), date: x.date,
     text: x.text + (gap ? '\n\n[…]' : '') + '\n\n' + y.text, from: 'original',
@@ -561,6 +563,11 @@ function joinNext(h, key) {
     en: x.en && y.en ? x.en + (gap ? '\n\n[…]' : '') + '\n\n' + y.en : null, enStyle: x.enStyle || y.enStyle,
     enPart: !!(x.enPart || y.enPart), enOn: !!(x.en && y.en && (x.enOn || y.enOn)), added: x.added,
   };
+}
+function joinNext(h, key) {
+  const a = at(h, key), x = a.it, y = a.list[a.i + 1];
+  if (!joinable(x, y)) { toast('Only a whole passage can be joined, to the next one in the handout, and only if that one comes later in the same text.'); return; }
+  const j = joined(x, y);
   a.list.splice(a.i, 2, j);
   save(); render();
   toast('Joined into one passage, ' + j.cite + '. In the portal it opens at the first part.', [
@@ -641,6 +648,131 @@ function addTo(i, target) {
     ['Undo', () => { const k = h.items.indexOf(it); if (k >= 0) { h.items.splice(k, 1); dropMade(); save(); if (!page.hidden) render(); } }],
     ['Label it', () => openPage(it.id)],
   ]);
+}
+
+/* ── From a topic's board ──────────────────────────────────────────────────
+   topic-board.html sends a card, or several, to the handout on screen through the portal beside
+   it: HANDOUTS.receive(list, at). Each passage is built here, as + Handout builds one, so that its
+   English, author, work and dating come as they always do. The board hands over only what its
+   card has:
+     { kind: 'passage', from: [address, offset], to: [address, offset], label, note }
+     { kind: 'passage', ref, words, english }   words kept that the portal can't place again
+     { kind: 'note', title, text }              a note or a question on the board
+   A card that quotes a stretch, part of its passage or several passages in a row, comes as those
+   passages, joined as Join joins them, with the words outside the stretch left out as ✂ Leave out
+   leaves them: students see […], and on the Handouts page the words stay, struck through, to be
+   put back. Its English follows the cuts when the card is drawn, as for any cut. It is cited by
+   the stretch's own pages, and keeps the stretch it was made from (stretch: { from, to }), which is
+   also how a card sent twice is known. `at` is where: null for where the handout is collecting,
+   as for + Handout; { end: true }; { section: id }; or { newHeading: text }. Nothing is sent, and
+   nothing of the handouts is named, without the class password; the board asks for it (unlock),
+   over its own page. */
+const unlocked = () => !!(LOCK && LOCK.key());
+async function unlockedNow() { if (!LOCK) return false; if (!LOCK.key()) await LOCK.remembered(); return unlocked(); }
+// Where the board can send to, as names: null until the class password is given.
+function places() {
+  if (!unlocked()) return null;
+  const h = own(), n = collecting(), sec = !n && collectingSection();
+  return { handout: h.name, collecting: n ? { kind: 'note', name: noteName(n) } : sec ? { kind: 'section', name: sectionName(sec) } : null,
+    sections: h.items.filter(x => x.kind === 'heading').map(x => ({ id: x.id, name: sectionName(x) })) };
+}
+// A cut, as ✂ Leave out makes one, of [s, e] of a passage's own words t.
+const cutMark = (t, s, e) => ({ id: uid(), k: 'cut', f: 'text', q: t.slice(s, e), pre: t.slice(Math.max(0, s - 30), s), post: t.slice(e, e + 30) });
+// One passage as a card has it: an item, or { why } where none can be made.
+function fromBoard(x) {
+  if (Array.isArray(x.from) && Array.isArray(x.to)) {
+    const st = PT.stretchOf ? PT.stretchOf(x.from, x.to) : null;
+    if (!st) return { why: 'its words are no longer where the card has them' };
+    let it = st.parts.map(p => itemFor(p.i, null, false)).reduce((a, b) => joined(a, b));
+    if (!st.whole) {
+      const f = st.parts[0], l = st.parts[st.parts.length - 1], tf = P[f.i].text, tl = P[l.i].text;
+      it.marks = [trimRange(tf, 0, f.a) && [tf].concat(trimRange(tf, 0, f.a)), trimRange(tl, l.b, tl.length) && [tl].concat(trimRange(tl, l.b, tl.length))]
+        .filter(Boolean).map(([t, s, e]) => cutMark(t, s, e));
+      it.cite = st.cite;
+      it.stretch = { from: st.from.slice(), to: st.to.slice() };
+      pairPlain(it);
+    }
+    return it;
+  }
+  const i = idxOf(x.ref);
+  if (i == null) return { why: 'the portal no longer has its address, ' + x.ref };
+  if (!x.words) return itemFor(i, null, false);
+  const it = itemFor(i, String(x.words), !!x.english);
+  if (!it.en) englishLater(it, i, 0);
+  return it;
+}
+/* A board card's cuts taken out of its English too, as soon as the English is in, so that the class never
+   sees the German cut and its English whole, in Class view or in an export: each part's German is matched
+   with that part's own English, as followCut does for a cut made on the page. A part whose English hasn't
+   come yet keeps its cut unpaired, for fillEn, or the page, to pair when it comes. */
+function pairPlain(it) {
+  if (it.kind !== 'passage') return;
+  (it.marks || []).filter(m => m.k === 'cut' && m.f === 'text' && !m.paired).forEach(m => {
+    for (const q of partsOf(it)) {
+      const r = findMark(q.text, m);
+      if (!r) continue;
+      const E = asDrawn(q.en || '');
+      if (!E) return;
+      const x = matchStretch(q.text, E, r[0], r[1]);
+      m.paired = true;
+      if (x) { const c = { id: uid(), k: 'cut', f: 'en', q: E.slice(x.a, x.b), pre: E.slice(Math.max(0, x.a - 30), x.a), post: E.slice(x.b, x.b + 30), of: m.id }; if (x.approx) c.approx = true; it.marks.push(c); }
+      return;
+    }
+  });
+}
+// The same passage, quoting the same words: a whole passage, a stretch, or an excerpt.
+const sameSent = (a, b) => a.kind === b.kind && refsOf(a).join(' ') === refsOf(b).join(' ') &&
+  JSON.stringify(a.stretch || null) === JSON.stringify(b.stretch || null) && (a.kind !== 'excerpt' || flat(a.text) === flat(b.text));
+async function receive(list, at) {
+  if (!(await unlockedNow())) return { ok: false, why: 'locked' };
+  if (!PT.BYID || !P.length) return { ok: false, why: 'loading' };
+  toOwn();
+  const h = own(), n = at ? null : collecting(), sec0 = at || n ? null : collectingSection();
+  const had = passagesOf(h), made = [], skipped = [];
+  (list || []).forEach(x => {
+    if (!x) return;
+    if (x.kind === 'note') {
+      const t = String(x.text || '').trim();
+      if (t) made.push({ id: uid(), kind: 'note', title: String(x.title || ''), text: t, items: [] }); else skipped.push({ x, why: 'it has nothing written on it' });
+      return;
+    }
+    const it = fromBoard(x);
+    if (it.why) { skipped.push({ x, why: it.why }); return; }
+    if (had.concat(made).some(y => isPass(y) && sameSent(y, it))) { skipped.push({ x, why: 'it is in “' + h.name + '” already' }); return; }
+    if (flat(x.label)) it.label = String(x.label);
+    if (flat(x.note)) it.note = String(x.note);
+    made.push(it);
+  });
+  const pass = made.filter(isPass), notes = made.filter(x => x.kind === 'note');
+  if (!made.length) return { ok: true, added: 0, notes: 0, skipped, handout: h.name, where: '' };
+  let heading = null, where;
+  if (n) {
+    // a note holds passages, not notes: a note sent goes to the end of the section the note collecting is in
+    kids(n).push(...pass);
+    if (notes.length) { let k = h.items.indexOf(n) + 1; while (k < h.items.length && h.items[k].kind !== 'heading') k++; h.items.splice(k, 0, ...notes); }
+    where = 'under “' + noteName(n) + '”';
+  } else {
+    const sec = at && at.section ? h.items.find(x => x.kind === 'heading' && x.id === at.section) || null : sec0;
+    let k;
+    if (at && at.newHeading != null) { heading = { id: uid(), kind: 'heading', text: String(at.newHeading).trim() }; h.items.push(heading); k = h.items.length; where = 'under a new heading, “' + sectionName(heading) + '”'; }
+    else if (sec) { k = sectionEnd(h, h.items.indexOf(sec)); where = 'at the end of “' + sectionName(sec) + '”'; }
+    else { k = h.items.length; where = 'at its end'; }
+    h.items.splice(k, 0, ...made);
+  }
+  save();
+  if (pass.some(x => !x.en)) fillSoon();
+  if (!page.hidden) render();
+  // Undo, by id, in the store as it is then: another tab may have changed it since.
+  const ids = new Set(made.map(x => x.id)), hid = h.id, headId = heading && heading.id;
+  const undo = () => {
+    const g = DB.handouts.find(x => x.id === hid); if (!g) return;
+    g.items = g.items.filter(x => !ids.has(x.id));
+    g.items.forEach(x => { if (x.kind === 'note') x.items = kids(x).filter(y => !ids.has(y.id)); });
+    const k = g.items.findIndex(x => x.id === headId);
+    if (k >= 0 && sectionEnd(g, k) === k + 1) g.items.splice(k, 1);
+    save(); if (!page.hidden) render();
+  };
+  return { ok: true, added: pass.length, notes: notes.length, skipped, handout: h.name, where, undo };
 }
 
 /* ── Styles ──────────────────────────────────────────────────────────────── */
@@ -2824,8 +2956,11 @@ function zip(files, type) {
   return new Blob([...parts, ...dir, new Uint8Array(end.buffer)], { type });
 }
 
-/* For checking from the console, as window.PORTAL is for the portal. */
-window.HANDOUTS = { get db() { return DB; }, get shown() { return CLASSH; }, toText: () => toText(cur()), docx: () => docxBlob(cur()), open: openPage };
+/* For checking from the console, as window.PORTAL is for the portal; and for a topic's board, which sends
+   its cards here through the portal beside it (From a topic's board, above). unlock asks for the class
+   password over the page it is given (the board's), and unlocks this one. */
+window.HANDOUTS = { get db() { return DB; }, get shown() { return CLASSH; }, toText: () => toText(cur()), docx: () => docxBlob(cur()), open: openPage,
+  places, receive, unlocked: unlockedNow, unlock: o => LOCK ? LOCK.ask(o) : Promise.resolve(false) };
 
 document.body.classList.toggle('hmode', mode);
 document.body.classList.toggle('hclassview', classView);
@@ -2835,5 +2970,12 @@ if (CS) classWatch();
 // The English that handouts' passages lack, fetched once the portal's texts are in: in the portal's
 // own window, not in the copy of it the class screen reads from, so that two never write at once.
 if (window === window.top && DB.handouts.some(h => enMode(h) && passagesOf(h).some(x => enWanted(h, x) && !x.en))) ready().then(fillSoon);
+// index.html#handouts, as a topic's board opens it: the Handouts page, once the class password is given.
+if (window === window.top && location.hash === '#handouts') ready().then(gate).then(ok => {
+  if (!ok) return;
+  history.replaceState(null, '', location.pathname + location.search);
+  if (!mode && !$('moremenu')) setMode(true, true);
+  openPage();
+});
 marks();
 })();

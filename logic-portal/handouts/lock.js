@@ -103,14 +103,16 @@ Object.defineProperty(window, 'KANTLAB_LOCK', { enumerable: true, value: Object.
 
   /* The prompt: a small card over the page, in the portal's look. Resolves true once the class
      password is given, false if it is put aside. After each wrong password it waits longer
-     before taking another (1, 2, 4 … 30 seconds). */
+     before taking another (1, 2, 4 … 30 seconds). opts.host is the document to show it over, if not
+     this one: a topic's board shows it over itself, to unlock the portal beside it. */
   let fails = 0, asking = null;
   function ask(opts) {
     if (KEY) return Promise.resolve(true);
     if (asking) return asking;
     const o = Object.assign({ title: 'Class password', text: 'The handouts are for the class. Enter the class password to go on.', cancel: 'Not now' }, opts || {});
+    const D = o.host && o.host.body ? o.host : document;
     asking = new Promise(res => {
-      const wrap = document.createElement('div');
+      const wrap = D.createElement('div');
       wrap.id = 'klock';
       wrap.setAttribute('role', 'dialog');
       wrap.setAttribute('aria-modal', 'true');
@@ -134,11 +136,11 @@ Object.defineProperty(window, 'KANTLAB_LOCK', { enumerable: true, value: Object.
       wrap.querySelector('b').textContent = o.title;
       wrap.querySelector('p').textContent = o.text;
       wrap.querySelector('.no').textContent = o.cancel;
-      document.body.appendChild(wrap);
+      D.body.appendChild(wrap);
       const f = wrap.querySelector('form'), pw = f.elements.pw, err = wrap.querySelector('.err'), go = wrap.querySelector('.go');
-      const done = ok => { wrap.remove(); asking = null; document.removeEventListener('keydown', esc, true); res(ok); };
+      const done = ok => { wrap.remove(); asking = null; D.removeEventListener('keydown', esc, true); res(ok); };
       const esc = e => { if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); done(false); } };
-      document.addEventListener('keydown', esc, true);
+      D.addEventListener('keydown', esc, true);
       wrap.querySelector('.no').addEventListener('click', () => done(false));
       f.addEventListener('submit', async e => {
         e.preventDefault();

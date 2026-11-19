@@ -199,6 +199,9 @@
   #chooser { width: 260px; }
   #toast { left: 50%; bottom: 14px; transform: translateX(-50%); padding: 0.3rem 0.8rem; display: none; }
   #toast.show { display: block; }
+  #toast .tact { margin-left: 0.5rem; font-size: inherit; }
+  #details .hsend select { flex: 1; width: auto; min-width: 0; }
+  #details .hsend + input[data-hnewhead] { margin-top: 0.35rem; }
 
   /* ── The side: what is selected, and the portal ── */
   #side { width: 400px; flex: none; border-left: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
@@ -987,6 +990,9 @@ let hovCard = '';      // the card pointed at: what joins it drawn faintly, what
 let ATT = null;        // what is attended to, worked out afresh each time the board is drawn (see attention)
 let undrawn = { pars: 0, echoes: 0, threads: 0 };   // what in sight was not drawn, the last time: for the line that says so
 let echoChains = false; // the matrix shows the page's chains through a middle stretch: never saved
+let hwhere = '';        // where + Handout sends, in the handout tray: '' where the handout is collecting, 'end', 'sec:<heading id>' or 'new'
+let hhead = '';         // the new heading's name, while 'new' is chosen
+let hnote = false;      // + Handout sends the notes on the passages too
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
@@ -3430,8 +3436,87 @@ function banner() {
 }
 function render() { hydrate(); renderTools(); renderLayers(); renderBoard(); renderSide(); renderPassages(); renderBoards(); renderCompare(); applyCam(); }
 let toastT;
-function toast(s) { const t = $('toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3800); }
+// A line at the foot of the board, with buttons if acts are given ([label, fn]), for longer then.
+function toast(s, acts) {
+  const t = $('toast'); t.textContent = s;
+  (acts || []).forEach(([label, fn]) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'linkish tact'; b.textContent = label;
+    b.addEventListener('click', () => { t.classList.remove('show'); fn(); });
+    t.append(' ', b);
+  });
+  t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), acts && acts.length ? 9000 : 3800);
+}
 const fmtDate = iso => { const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); };
+
+/* ── To a handout ─────────────────────────────────────────────────────────────
+   + Handout, in the side of a card or of several cards selected, sends them to the handout on screen in the
+   portal's handout tray, through the portal beside the board (HANDOUTS.receive, in handout-tray.js), as the
+   cards have them: a passage card's words, part of a passage or several in a row, cited by their own pages,
+   with its heading as the label; a note or a question as a note of the handout. The tray builds each, so that
+   the English comes as it always does, and this page writes nothing of the handouts itself. What is sent is a
+   copy: nothing on the board changes, and a handout changed in the tray is not carried back. The handouts are
+   the class's, so nothing is sent, and none of their names is shown here, before the class password is given;
+   it is asked over this page, once, and unlocks the portal beside it. */
+const HT = () => { try { return FW && FW.HANDOUTS && FW.HANDOUTS.receive ? FW.HANDOUTS : null; } catch (e) { return null; } };
+const sendable = it => !!it && (it.kind === 'passage' || ((it.kind === 'note' || it.kind === 'problem') && !!String(it.text || '').trim()));
+// What a card sends: a passage as it quotes it, or a note; withNote brings the note on the passage too.
+function sendOf(it, withNote) {
+  if (!sendable(it)) return null;
+  if (it.kind !== 'passage') return { kind: 'note', title: it.kind === 'problem' ? 'Question' : '', text: String(it.text).trim() };
+  const x = it.kx || itemOf(it.mt), q = (it.quotes && it.quotes[0]) || {};
+  const o = { kind: 'passage', label: it.label || '', note: withNote && x ? x.note || '' : '' };
+  const st = stretchNow(it);
+  if (st) return Object.assign(o, { from: st.from.slice(), to: st.to.slice() });
+  if (x && x.excerpt) return Object.assign(o, { ref: x.ref, words: x.excerpt, english: !!x.en });   // words from the English, or no longer where they were kept
+  return Object.assign(o, { ref: (x && x.ref) || q.ref || it.ref });
+}
+// Cards in the order they are read on the board: row by row, a row being the cards whose tops stand within
+// half a card of the first's, and left to right in each.
+function readingOrder(ids) {
+  const cs = ids.map(id => ({ id, r: rect(id) || { x: 0, y: 0, w: 0, h: 0 } })).sort((a, b) => a.r.y - b.r.y), rows = [];
+  cs.forEach(c => { const row = rows[rows.length - 1]; if (row && c.r.y < row.top + Math.max(30, row.h / 2)) row.cs.push(c); else rows.push({ top: c.r.y, h: c.r.h, cs: [c] }); });
+  return [].concat(...rows.map(row => row.cs.sort((a, b) => a.r.x - b.r.x).map(c => c.id)));
+}
+async function toHandout(ids) {
+  const H = HT();
+  if (!H) { toast('The portal beside the board is still loading. Try again in a moment.'); return; }
+  if (!(await H.unlocked()) && !(await H.unlock({ host: document, text: 'The handouts are for the class. Enter the class password to send cards from this board to your handout.' }))) return;
+  const its = readingOrder(ids).map(item).filter(sendable), list = its.map(it => sendOf(it, hnote));
+  if (!list.length) { toast('Only passages, notes and questions go into a handout.'); return; }
+  const at = hwhere === 'end' ? { end: true } : hwhere.startsWith('sec:') ? { section: hwhere.slice(4) } : hwhere === 'new' ? { newHeading: hhead.trim() } : null;
+  if (hwhere === 'new' && !hhead.trim()) { toast('Give the new heading a name first.'); const f = $('details').querySelector('[data-hnewhead]'); if (f) f.focus(); return; }
+  let r;
+  try { r = await H.receive(list, at); } catch (e) { toast('The handout tray could not take it (' + e.message + ').'); return; }
+  if (!r.ok) { toast(r.why === 'locked' ? 'The handouts open only with the class password.' : 'The portal beside the board is still loading its texts. Try again in a moment.'); return; }
+  const name = x => { const k = list.indexOf(x); return k >= 0 ? cardTitle(its[k]) : 'a card'; };
+  const skip = r.skipped.length ? ' Not sent: ' + r.skipped.map(k => name(k.x) + ', since ' + k.why).join('; ') + '.' : '';
+  const what = [r.added ? r.added + (r.added === 1 ? ' passage' : ' passages') : '', r.notes ? r.notes + (r.notes === 1 ? ' note' : ' notes') : ''].filter(Boolean).join(' and ');
+  if (!what) { toast('Nothing sent.' + skip); return; }
+  if (hwhere === 'new') { hwhere = ''; hhead = ''; }
+  toast('Sent ' + what + ' to “' + r.handout + '”, ' + r.where + '.' + skip, [
+    ['Undo', () => { r.undo(); toast('Taken out of “' + r.handout + '” again.'); renderSide(); }],
+    ['Open the handout', () => window.open(PORTAL + '#handouts', '_blank', 'noopener')]]);
+  renderSide();
+}
+// + Handout in the side, for the cards given: where it sends, once the class password is given, and whether the
+// notes on the passages go too. Nothing for cards that aren't passages, notes or questions.
+function handoutHtml(its) {
+  const ok = its.filter(sendable);
+  if (!ok.length) return '';
+  const H = HT(), pl = H && H.places ? H.places() : null, n = ok.length;
+  if (pl && hwhere.startsWith('sec:') && !pl.sections.some(x => 'sec:' + x.id === hwhere)) hwhere = '';
+  const cl = pl && pl.collecting, here = !pl ? '' : cl ? (cl.kind === 'note' ? 'Under “' + cl.name + '”, where it is collecting' : 'At the end of “' + cl.name + '”, where it is collecting') : 'At the end of “' + pl.handout + '”';
+  const where = pl ? '<select data-hwhere aria-label="Where in the handout it goes"><option value="">' + esc(here) + '</option>' +
+      (cl ? '<option value="end"' + (hwhere === 'end' ? ' selected' : '') + '>At the end of “' + esc(pl.handout) + '”</option>' : '') +
+      pl.sections.map(x => '<option value="sec:' + esc(x.id) + '"' + (hwhere === 'sec:' + x.id ? ' selected' : '') + '>At the end of “' + esc(x.name) + '”</option>').join('') +
+      '<option value="new"' + (hwhere === 'new' ? ' selected' : '') + '>Under a new heading…</option></select>'
+    : '<button type="button" class="linkish" data-act="hwhere" title="Choose where in the handout it goes (asks for the class password)">▾ where</button>';
+  const notes = ok.some(it => it.kind === 'passage' && (it.kx || {}).note);
+  return '<span class="k">To a handout</span><div class="row hsend" style="margin-top:0"><button type="button" class="btn" data-act="tohandout" title="Send ' + (n === 1 ? 'it' : 'them') + ' to the handout on screen in the portal’s Handouts, as ' + (n === 1 ? 'the card has it' : 'the cards have them') + '">+ Handout' + (n > 1 ? ', these ' + n : '') + '</button>' + where + '</div>' +
+    (pl && hwhere === 'new' ? '<input type="text" data-hnewhead placeholder="The new heading’s name" value="' + esc(hhead) + '">' : '') +
+    (notes ? '<label class="ev"><input type="checkbox" data-hnote' + (hnote ? ' checked' : '') + '>' + (SHM ? 'with the note on the board' : n === 1 ? 'with your note on it' : 'with your notes on them') + '</label>' : '') +
+    '<p class="by">' + (ok.some(it => it.kind === 'passage') ? 'As the card' + (n === 1 ? ' has it' : 's have them') + ': just the words ' + (n === 1 ? 'it quotes' : 'they quote') + ', cited by their pages, with ' + (n === 1 ? 'its heading' : 'each one’s heading') + ' as the label. ' : '') + 'A copy: nothing here changes.</p>';
+}
 
 /* ── Render: the side ─────────────────────────────────────────────────────── */
 // A passage in the side. Given its card (it), its words can be selected and annotated, and its annotations are shown.
@@ -3532,6 +3617,7 @@ function sidePassage(it, m, arr) {
   if (sn && !lost && !SHM) h += '<div class="row"><button type="button" class="btn" data-act="stretch" title="Trim it to the words you want, or take in more">Change what it quotes</button><button type="button" class="btn" data-act="splitit">Split it in two…</button></div>';
   if (!q.full) h += '<p class="ocr">' + (q.dead ? 'This address no longer opens in the portal. The words are the copy My topics kept when the passage was saved.' : 'The portal beside the board is still loading its texts, so these are the words My topics kept. The passage in full, and its annotations, follow in a moment.') + '</p>';
   else if (!ro()) h += '<p class="by">Select some of its words to annotate them, or to make them a <i>Parallel…</i> with words in other passages, or an <i>Echo…</i> of a stretch elsewhere' + (it.st && it.st.parts.length > 1 ? ', over as many of its passages as you like' : '') + '.</p>';
+  h += handoutHtml([it]);
   if (x && SHM) {
     const mine = DB && DB.items.find(y => y && y.ref === x.ref && (y.excerpt || '') === (x.excerpt || ''));
     h += '<span class="k">The note on the board</span><textarea class="mtnote" data-sharednote="' + esc(x.id) + '" placeholder="' + (writable() ? 'A note everyone on this board sees' : 'No note on the board') + '"' + (writable() ? '' : ' readonly') + '>' + esc(x.note || '') + '</textarea>' +
@@ -3551,6 +3637,7 @@ function sideCard(it) {
   const title = it.kind === 'box' ? 'A box' + (it.label ? ': ' + it.label : '') : it.kind === 'problem' ? 'A question' : 'A note';
   let h = '<h2>' + esc(title) + '</h2><p class="sub">' + mchip(m) + esc(m ? m.name || '' : '') + '</p>';
   if (it.text) h += '<span class="k">Written on the board</span><div class="stmt' + (it.kind === 'problem' ? ' problem' : '') + '">' + esc(it.text) + '</div>';
+  h += handoutHtml([it]);
   return h + relevantHtml(it.id) + linkedFromHtml(it.id) + pointedAtHtml(it.id) + cardButtons(it, arr);
 }
 function sideTable(it, m, arr) {
@@ -3628,7 +3715,7 @@ function sideCards(ids) {
   const join = !J ? '' : '<span class="k">Join them</span>' + (J.st
     ? '<p class="by" style="margin-top:0">One card, quoting ' + esc(J.st.cite) + (J.between.length ? ', with ' + (J.between.length === 1 ? 'the passage' : 'the passages') + ' between them that no card quotes (' + esc(J.between.join(', ')) + ')' : '') + '. It keeps the first card’s place, group and heading, the arrows of all of them, and every note.' + (nt ? (nt === 1 ? ' Their other card on the board becomes a card of it too.' : ' Their ' + nt + ' other cards on the board become cards of it too, one to a group.') : '') + '</p><div class="row" style="margin-top:0"><button type="button" class="btn solid" data-act="join">Join into one card</button></div>'
     : '<p class="by" style="margin-top:0">' + esc(J.why) + ' A group keeps them together instead.</p>');
-  return '<h2>' + its.length + ' cards</h2><p class="sub">' + its.map(it => esc(cardTitle(it))).join(' · ') + '</p>' + join +
+  return '<h2>' + its.length + ' cards</h2><p class="sub">' + its.map(it => esc(cardTitle(it))).join(' · ') + '</p>' + join + handoutHtml(its) +
     (np >= 2 ? '<div class="row" style="margin-top:0.2rem"><button type="button" class="btn solid" data-act="compare">' + (np > CMP_MAX ? 'Compare the first ' + CMP_MAX + ' side by side' : 'Compare them side by side') + '</button></div>' +
       (np > CMP_MAX ? '<p class="by">Compare sets ' + CMP_MAX + ' passages side by side at most.</p>' : '') : '') +
     (ro() ? '' : '<span class="k">Make a group</span><div class="row" style="margin-top:0"><button type="button" class="btn solid" data-act="newmodel">Make these a group of their own</button></div>' +
@@ -6083,6 +6170,7 @@ $('annbar').addEventListener('click', e => {
   const b = e.target.closest('[data-annk]'); if (b) startAnn(b.dataset.annk, annPick.card, annPick.qi, annPick);
 });
 $('details').addEventListener('keydown', e => {
+  if (e.target.matches('[data-hnewhead]') && e.key === 'Enter' && !e.isComposing) { e.preventDefault(); hhead = e.target.value; if (sel.kind === 'card') toHandout(sel.ids.slice()); return; }
   if (e.target.closest('[data-pform="new"]') && form && form.kind === 'parnew') {
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); makePar(); }
     else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); form = null; renderSide(); }
@@ -6143,6 +6231,7 @@ function noteSoon(fn) { clearTimeout(noteT); noteFn = fn; noteT = setTimeout(() 
 function noteNow() { if (noteFn) { clearTimeout(noteT); const f = noteFn; noteFn = null; f(); } }
 $('details').addEventListener('input', e => {
   const t = e.target;
+  if (t.matches('[data-hnewhead]')) { hhead = t.value; return; }
   if (t.matches('[data-ann-to]') && composing()) { form.toq = t.value; const s = t.closest('.anncomp').querySelector('[data-annsug]'); if (s) s.innerHTML = topicSugHtml(t.value); return; }
   if (t.matches('[data-tnew]') && form && form.kind === 'table') { const k = t.dataset.tnew, v = clampN(t.value, 0, TABLE_MAX[k]); if (v) { form[k] = v; tableFormSync(); } return; }
   if (t.matches('textarea[data-mtnote]')) { const mt = t.dataset.mtnote, v = t.value; noteSoon(() => setPassage(mt, x => { x.note = v; })); }
@@ -6443,6 +6532,8 @@ $('details').addEventListener('click', e => {
   if (act === 'pardel') { delPar(id); return; }
   if (act === 'parcell') { if (parById(id)) { mode = { parTo: id }; render(); } return; }
   if (act === 'compare') { openCompare(sel.ids); return; }
+  if (act === 'tohandout') { toHandout(sel.kind === 'card' ? sel.ids.slice() : []); return; }
+  if (act === 'hwhere') { const H = HT(); if (!H) { toast('The portal beside the board is still loading. Try again in a moment.'); return; } H.unlock({ host: document, text: 'The handouts are for the class. Enter the class password to choose where in your handout this goes.' }).then(ok => { if (ok) renderSide(); }); return; }
   if (act === 'cancel') { form = null; renderSide(); return; }
   if (act === 'followlink') { const it = item(id); if (it) followLink(it); return; }
   if (act === 'relink') { const it = item(id), L = it && linkOf(it); if (L && L.alt) { change(() => { it.to.item = L.alt.id; }); render(); toast('The link now points to its passage ' + L.alt.where + '.'); } return; }
@@ -6489,6 +6580,8 @@ $('details').addEventListener('click', e => {
 });
 $('details').addEventListener('toggle', e => { if (e.target.matches && e.target.matches('details.howto')) { prefs.helpOpen = e.target.open; savePrefs(); } }, true);
 $('details').addEventListener('change', e => {
+  if (e.target.matches('[data-hwhere]')) { hwhere = e.target.value; renderSide(); if (hwhere === 'new') { const f = $('details').querySelector('[data-hnewhead]'); if (f) f.focus(); } return; }
+  if (e.target.matches('[data-hnote]')) { hnote = e.target.checked; return; }
   if (e.target.matches('[data-alsoin]') && sel.kind === 'card') { const it = item(sel.ids[0]), g = model(e.target.value); if (it && g) alsoIn(it, g); return; }
   if (e.target.matches('[data-sxa]') && form && form.kind === 'stretch') { form.ar[e.target.dataset.sxa] = +e.target.value; return; }
   if (e.target.matches('[data-pf]') && sel.kind === 'par') { setParField(sel.ids[0], e.target.dataset.pf, e.target.value); return; }

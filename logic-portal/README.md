@@ -78,7 +78,8 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
 
 - **Add a passage.** Point at a passage in the search results or in a full text and press
   **+ Handout**, or press **+ Add to handout** beside the passage open on the right. Its
-  English comes along with it.
+  English comes along with it. From a topic's board, **+ Handout** in a card's side sends the card
+  as it quotes it (see [A board for a topic](#my-topics)).
 - **Add an excerpt.** Select some of a passage's words, in the original or in its English,
   and press **+ Add these words to handout**. A few sentences come with the same sentences of the
   English (matched sentence by sentence; where the sentences cannot be matched, roughly the
@@ -454,6 +455,22 @@ reader's topic rather than the seminar's one board.
   stands on several of your boards says *also on …*, dashed, since that is the page's own
   finding, not a link you made. In My topics, a topic's heading says which topics it is linked
   with.
+- **To a handout.** **+ Handout**, in the side of a passage card, a note or a question, or of several
+  cards selected, sends them to the handout on screen in **Handouts**, through the portal beside the
+  board. A passage card goes as it quotes it: a card cut to part of its passage, or running over
+  several, comes as those passages, joined, with the words outside the card's stretch left out, so
+  that students see […] and its English is cut to match; on the Handouts page the words stay, struck
+  through, to be put back. It is cited by the card's own pages, and its heading becomes its label.
+  A note or a question becomes a note of the handout, a question's titled *Question*. Several cards
+  go in the order they are read on the board, row by row and left to right. They go where the
+  handout is collecting, as **+ Handout** in the portal does, or where the list beside the button
+  says: the end of the handout, the end of one of its sections, or under a new heading. **with your
+  note on it** sends your note on the passage too, which students then see; it is off unless ticked.
+  A card already in the handout as it quotes it is not sent again, and the line that says what was
+  sent says so, with **Undo** and **Open the handout**, which opens the portal's Handouts page in a
+  new tab (`index.html#handouts`). The class password is asked over the board, once, the first time.
+  What is sent is a copy: nothing on the board changes, and a change made in the handout is not
+  carried back. Tables, parallels, echoes, annotations, arrows and drawing don't go into a handout.
 - **Photograph the board**, under **Board ▾**, keeps it as it is now, to look at again or bring back. **Export**
   saves the one board to a file, and **Import** brings such a file's cards in beside yours.
 - **Giving someone a board.** The file Export writes carries the board whole, with the topic's
