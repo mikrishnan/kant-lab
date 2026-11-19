@@ -554,10 +554,18 @@ shared with, refusing a reader's save itself.
   there, and everyone who has it sees the others' changes within a few seconds. Cards, arrows,
   annotations and passages added are signed with their author's GitHub name. The topic is marked
   *shared* in My topics, which keeps a copy of the board too.
-- **What stays yours.** Your notes on the passages, and your annotations, are not copied in.
-  On a shared board each passage has a **note on the board**, which everyone sees, signed, and
-  beneath it **your own note**, your note in My topics, if you keep the passage there. An
-  annotation made with **only me** ticked stays in My topics and is not put on the board.
+- **What goes with it, and what stays yours.** The board's parallels go with it, with their
+  words on its passages, and so do its echoes, signed with your name. They are part of what the
+  board shows, and its tables can name them. Your notes on the passages, and your other annotations
+  (comments, problems, interpretations, what is relevant to what), are not copied in. On a shared
+  board each passage has a **note on the board**, which everyone sees, signed, and beneath it **your
+  own note**, your note in My topics, if you keep the passage there. An annotation made with **only
+  me** ticked stays in My topics and is not put on the board.
+- **A board shared before parallels went with it** kept them in your My topics, so only you saw
+  them. **Share…** says so, under *Only you see these*, and **Put them on the shared board** puts
+  them on it, for everyone on it and the class. They are copied: yours stay in My topics, for your
+  other boards, and show again, as yours, if the board's copy is deleted. When you stop sharing, the
+  later change to each one stands.
 - **Share…** again, once the board is shared, says who has it. Change a person's role, add
   someone, or take someone off: each takes effect at once. **Stop sharing…** brings the board
   back into My topics, with everything done on it and the passages others added, takes everyone

@@ -1958,7 +1958,9 @@ function applyFile(f) {
   SH.shownAs = f.shownAs ? clone(f.shownAs) : null;
   SP = clone(f.passages); SG = clone(f.gone);
   const b = clone(f.board); photos = b.photos || []; delete b.photos; b.removed = b.removed || [];
-  b.annotations = clone(f.annotations).concat(privateAnns());
+  const onBoard = new Set(f.annotations.map(a => a.id)), mine = privateAnns();   // your own copy of one the board has too stays out of sight here, so that it shows once
+  SH.hidden = new Set(mine.filter(a => onBoard.has(a.id)).map(a => a.id));
+  b.annotations = clone(f.annotations).concat(mine.filter(a => !onBoard.has(a.id)));
   if (live) { live.board = b; B.annotations = b.annotations; } else B = b;
 }
 // Three copies of the file: as last read or saved here (base), as here (mine), as on GitHub now (theirs).
@@ -2098,14 +2100,22 @@ function saveShared(fn) {
     if (fn) fn(d);
     const priv = (realB().annotations || []).filter(a => a.only).map(a => { const c = clone(a); delete c.only; return c; });
     const ids = new Set(priv.map(a => a.id)), was = JSON.parse(seenA), wasIds = new Set(was.map(a => a && a.id));
+    // Your own copy of one the board has too is kept out of sight (SH.hidden), never taken for deleted: it stays
+    // in My topics for your other boards, and shows here again, as yours, if the board's copy is deleted.
+    const shared = new Set((realB().annotations || []).filter(a => !a.only).map(a => a.id)), hid = SH.hidden || new Set();
     d.gone = isObj(d.gone) ? d.gone : {};
-    was.forEach(a => { if (a && !ids.has(a.id)) d.gone[a.id] = now(); });   // deleted here, so that no other copy brings it back
-    const since = (Array.isArray(d.annotations) ? d.annotations : []).filter(a => a && !wasIds.has(a.id) && !ids.has(a.id));   // made elsewhere meanwhile
-    d.annotations = since.concat(priv);
+    was.forEach(a => { if (a && !ids.has(a.id) && !shared.has(a.id) && !hid.has(a.id)) d.gone[a.id] = now(); });   // deleted here, so that no other copy brings it back
+    const all = Array.isArray(d.annotations) ? d.annotations : [];
+    const since = all.filter(a => a && !wasIds.has(a.id) && !ids.has(a.id));   // made elsewhere meanwhile
+    const yours = all.filter(a => a && wasIds.has(a.id) && !ids.has(a.id) && (shared.has(a.id) || hid.has(a.id)));
+    d.annotations = since.concat(yours, priv);
+    SH.hidden = new Set(yours.concat(since).filter(a => shared.has(a.id)).map(a => a.id));
+    const back = yours.filter(a => !shared.has(a.id));   // the board's copy deleted: yours shows again
     if (SH.role === 'owner' && mineTopic()) { d.boards = isObj(d.boards) ? d.boards : {}; const b = clone(kept()); b.shared = Object.assign({}, isObj(d.boards[TID] && d.boards[TID].shared) ? d.boards[TID].shared : {}, { repo: SH.repo }); d.boards[TID] = Object.assign(b, { at: now() }); }
     try { localStorage.setItem(TOPICS, JSON.stringify(d)); DB = d; seenA = JSON.stringify(d.annotations); }
     catch (e) { toast('This browser would not keep what only you see. The shared board itself is saved.'); }
-    if (since.length) realB().annotations = (realB().annotations || []).concat(since.map(a => Object.assign(clone(a), { only: true })));
+    const fresh = since.filter(a => !shared.has(a.id)).concat(back);
+    if (fresh.length) realB().annotations = (realB().annotations || []).concat(fresh.map(a => Object.assign(clone(a), { only: true })));
   }
   scheduleShared();
   return true;
@@ -2116,7 +2126,7 @@ function takeInShared() {
   const d = readStore(); if (!d) return;
   DB = d;
   const st = Array.isArray(d.annotations) ? d.annotations : [], ta = JSON.stringify(st);
-  if (ta !== seenA) { realB().annotations = (realB().annotations || []).filter(a => !a.only).concat(st.map(a => Object.assign(clone(a), { only: true }))); seenA = ta; }
+  if (ta !== seenA) { const onB = realB().annotations || [], shared = new Set(onB.filter(a => !a.only).map(a => a.id)); SH.hidden = new Set(st.filter(a => a && shared.has(a.id)).map(a => a.id)); realB().annotations = onB.filter(a => !a.only).concat(st.filter(a => a && !shared.has(a.id)).map(a => Object.assign(clone(a), { only: true }))); seenA = ta; }
   if (SH.role === 'owner') ownerSync();
   afterRemote(); renderAround();
 }
@@ -3892,12 +3902,16 @@ function drawShare() {
       '<div class="row"><button type="button" class="btn solid" data-shopen>Open the shared board</button></div>' + (s.err ? '<p class="warn">' + esc(s.err) + '</p>' : '');
     return;
   }
-  const n = SHM && SH.shownAs ? SH.shownAs.n : '';
+  const n = SHM && SH.shownAs ? SH.shownAs.n : '', mine = SHM && SH.role === 'owner' ? onlyMineHere() : null;
   $('sharebody').innerHTML =
     (SHM ? '<p>Shared as <code>' + esc(ORG + '/' + SH.repo) + '</code>, a private repository. GitHub lets nobody in but the people below, you, and the organisation’s owners. A change here takes effect at once.</p>' +
         (n ? '<span class="k">The link for the class</span>' + linkHtml(n, dis) + '<div class="row"><button type="button" class="linkish" data-lkstop' + dis + '>Take the link away…</button></div>'
-          : '<span class="k">A link for the class</span><p>For anyone with the class password to look at it, with no GitHub account and no token. They can’t change it.</p><div class="row"><button type="button" class="btn solid" data-lkgo' + dis + '>Get a link for the class…</button></div>')
-      : '<p>Sharing makes a private repository in <code>' + esc(ORG) + '</code> for this board alone, copies in the topic’s passages and the board, and lets in the people you name, and nobody else but the organisation’s owners. Your notes on the passages, and your annotations, stay in My topics.</p>' +
+          : '<span class="k">A link for the class</span><p>For anyone with the class password to look at it, with no GitHub account and no token. They can’t change it.</p><div class="row"><button type="button" class="btn solid" data-lkgo' + dis + '>Get a link for the class…</button></div>') +
+        (mine && mine.all.length ? '<span class="k">Only you see these</span><p><b>' + esc(cap1(structWords(mine))) + '</b> on this board, made before you shared it, are kept only in your My topics, so nobody else on the board sees ' + (mine.all.length === 1 ? 'it' : 'them') + (n ? ', nor the class' : '') +
+          (mine.named ? ', though its tables name ' + (mine.named === mine.pars.length ? (mine.named === 1 ? 'it' : 'them') : mine.named + ' of the parallels') : '') + '.</p>' +
+          '<div class="row"><button type="button" class="btn solid" data-shbring' + dis + '>Put ' + (mine.all.length === 1 ? 'it' : 'them') + ' on the shared board</button></div>' +
+          '<p class="note">Your own copies stay in My topics, for your other boards. Your comments, problems and interpretations stay yours.</p>' : '')
+      : '<p>Sharing makes a private repository in <code>' + esc(ORG) + '</code> for this board alone, copies in the topic’s passages and the board, and lets in the people you name, and nobody else but the organisation’s owners. The board’s parallels and echoes go with it; your notes on the passages, and your other annotations, stay in My topics.</p>' +
         '<label class="chk lkchk"><input type="checkbox" data-shclass' + (s.forClass ? ' checked' : '') + dis + '> <span><b>Give it a link for the class too</b>: anyone with the class password can look at it there, with no GitHub account, and can’t change it. Name nobody below, and that is all sharing does.</span></label>') +
     (s.token ? '' : '<label class="f" for="shtok">Your GitHub token: it must reach all of kant-lab-seminar’s repositories, with <i>Administration: Read and write</i> to make one</label><input type="password" id="shtok" autocomplete="off" spellcheck="false">') +
     '<span class="k">People</span>' + (s.people.length ? s.people.map((p, i) => '<div class="prow"><b>@' + esc(p.login) + '</b>' + roleSel(p.role, 'data-prole="' + i + '"') + '<button type="button" class="linkish" data-pdel="' + i + '"' + dis + '>take off</button></div>').join('')
@@ -3906,6 +3920,31 @@ function drawShare() {
     '<datalist id="orgmembers">' + s.members.map(l => '<option value="' + esc(l) + '">').join('') + '</datalist>' +
     '<div class="row">' + (SHM ? '<button type="button" class="btn" data-shstop' + dis + '>Stop sharing…</button>' : '<button type="button" class="btn solid" data-shgo' + dis + '>Share</button>') + '<button type="button" class="linkish" data-shx>Close</button></div>' +
     (s.msg ? '<p class="ok">' + esc(s.msg) + '</p>' : '') + (s.err ? '<p class="warn">' + esc(s.err) + '</p>' : '');
+}
+/* The board's own drawing, among annotations: the parallels it shows or its tables name, each with its places on
+   this board, and the echoes it shows. Share puts them on the shared board, signed; the rest of your annotations,
+   comments, problems, interpretations and what passages are relevant to, stay yours in My topics. A board shared
+   before Share did so offers, in Share…, to put on it those made before it was shared (since), which Share left
+   in My topics: they are copied, keeping their ids, and your own copies stay for your other boards (SH.hidden). */
+function boardStructure(list, since) {
+  const old = a => !since || String(a.date || a.at || '') < since;
+  const W = parPlaces(), T = parsInTables(), E = echoPlaces();
+  const pars = list.filter(a => a && a.kind === 'parallel' && old(a) && (W.has(a.id) || T.has(a.id)));
+  const pids = new Set(pars.map(p => p.id));
+  const places = list.filter(a => a && a.kind === 'place' && pids.has(a.re) && !placeHere(a).away);
+  const echoes = list.filter(a => a && a.kind === 'echo' && old(a) && E.has(a.id));
+  return { pars, places, echoes, named: pars.filter(p => T.has(p.id)).length, all: pars.concat(places, echoes) };
+}
+const sharedSince = () => { const b = DB && isObj(DB.boards) ? DB.boards[TID] : null; return b && isObj(b.shared) ? String(b.shared.at || '') : ''; };
+const onlyMineHere = () => boardStructure((realB().annotations || []).filter(a => a && a.only), sharedSince());
+const structWords = x => [x.pars.length ? plural(x.pars.length, 'parallel') : '', x.echoes.length ? x.echoes.length + (x.echoes.length === 1 ? ' echo' : ' echoes') : ''].filter(Boolean).join(' and ');
+function bringIn() {
+  const s = shareSt; if (!s || !SHM || SH.role !== 'owner') return;
+  const x = onlyMineHere(); if (!x.all.length) return;
+  const ids = new Set(x.all.map(a => a.id));
+  if (!change(() => { (realB().annotations || []).forEach(a => { if (ids.has(a.id)) { delete a.only; if (!a.by) a.by = SH.login; } }); })) return;
+  s.err = ''; s.msg = 'Put on the shared board: ' + structWords(x) + '. Everyone on it sees them within a few seconds' + (SH.shownAs ? ', and the class within about five minutes' : '') + '.';
+  drawShare(); render();
 }
 // The link for the class, to copy: the address, the number, and what it gives.
 function linkHtml(n, dis) {
@@ -3938,7 +3977,7 @@ async function doShare() {
     try { localStorage.setItem(SHARE_UNFINISHED + TID, name); } catch (e) { /* the next Share makes another */ }
   }
   const b = clone(kept()); delete b.shared;
-  const file = { owner: s.login, topic: { id: TID, name: topic.name, note: topic.note || '' }, passages: underTopic().map(x => Object.assign(sharedPassage(x), { by: s.login, added: x.added || now() })), gone: {}, board: b, annotations: [], savedBy: s.login, savedAt: now() };
+  const file = { owner: s.login, topic: { id: TID, name: topic.name, note: topic.note || '' }, passages: underTopic().map(x => Object.assign(sharedPassage(x), { by: s.login, added: x.added || now() })), gone: {}, board: b, annotations: boardStructure(realB().annotations || [], '').all.map(a => Object.assign(clone(a), { by: a.by || s.login })), savedBy: s.login, savedAt: now() };
   let classWhy = '';   // why the link for the class could not be made, the board being shared all the same
   if (s.forClass) {
     const n = await freeLookNumber(s.token);
@@ -4005,7 +4044,9 @@ async function stopSharing() {
   const b = clone(kept()); b.shared = { repo: SH.repo, by: SH.login, at: now(), stopped: now() };
   d.boards = isObj(d.boards) ? d.boards : {}; d.boards[TID] = Object.assign(b, { at: now() });
   const have = new Set((d.annotations || []).map(a => a && a.id));
-  d.annotations = (Array.isArray(d.annotations) ? d.annotations : []).concat(fileNow().annotations.filter(a => !have.has(a.id)));   // the board's annotations, now on your passages
+  const onBoard = new Map(fileNow().annotations.map(a => [a.id, a]));   // the board's annotations, now on your passages; of your copy and the board's, the later change
+  d.annotations = (Array.isArray(d.annotations) ? d.annotations : []).map(a => { const f = a && onBoard.get(a.id); return f && String(f.at || f.date || '') > String(a.at || a.date || '') ? clone(f) : a; })
+    .concat(fileNow().annotations.filter(a => !have.has(a.id)));
   try { localStorage.setItem(TOPICS, JSON.stringify(d)); } catch (e) { return shareFail(null, 'This browser would not keep the board, so sharing goes on. Export the board, so nothing is lost.'); }
   s.msg = 'Taking everyone off, and archiving the repository…'; drawShare();
   const c = await gh('GET', repoPath() + '/collaborators?affiliation=direct&per_page=100', null, null, s.token);
@@ -6331,6 +6372,7 @@ $('sharedlg').addEventListener('click', async e => {
   const cp = t.closest('[data-lkcopy]');
   if (cp) { const n = cp.dataset.lkcopy; copyLook(n, () => { s.msg = 'Copied the link for the class. Anyone with the class password can open it.'; s.err = ''; drawShare(); }); return; }
   if (t.closest('[data-shopen]')) { location.reload(); return; }
+  if (t.closest('[data-shbring]')) { bringIn(); return; }
   if (t.closest('[data-shclass]')) { s.forClass = t.closest('[data-shclass]').checked; return; }
   if (t.closest('.lklink')) { t.closest('.lklink').select(); return; }
   if (t.closest('[data-shgo]')) { doShare(); return; }
