@@ -6812,5 +6812,6 @@ const settle = () => { renderBoard(); if (arriveAt) { arrive(); return; } const 
 requestAnimationFrame(settle);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!drag && !editing) settle(); else pendingStore = true; });   // drawn again, measured in its fonts, once the drag or the edit ends
 </script>
+<script src="ed-sigla.js?v=2026-11-18a"></script>
 </body>
 </html>
