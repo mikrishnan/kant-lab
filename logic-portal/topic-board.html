@@ -406,6 +406,9 @@
   .lockcard .warn { color: var(--prob); font-size: 0.9rem; }
   .lockcard .ok { color: #3f6b2a; font-size: 0.9rem; }
   .lockcard p.note { font-size: 0.88rem; color: var(--faded); }
+  .lockcard .lkrow { display: flex; gap: 0.5rem; align-items: center; margin: 0.2rem 0 0.1rem; }
+  .lockcard .lklink { flex: 1; min-width: 0; font-family: Menlo, monospace; font-size: 0.8rem !important; color: var(--accent); background: var(--panel) !important; }
+  .lockcard label.lkchk { display: flex; gap: 0.5rem; align-items: baseline; margin: 0.7rem 0 0.2rem; font-size: 0.92rem; cursor: pointer; }
   .lockcard a { color: var(--accent); overflow-wrap: anywhere; }
   .lockcard code { font-size: 0.85rem; background: var(--parchment-dark); padding: 0 0.3rem; border-radius: 3px; }
   .tools.ro #addm, .tools.ro [data-add], .tools.ro [data-addbox], .tools.ro #addp, .tools.ro #addl, .tools.ro #snap, .tools.ro #import { display: none; }
@@ -2147,7 +2150,7 @@ function startShared(repo, d) {
 }
 /* ── A board shown to the class ───────────────────────────────────────────────
    For those who are to look at a shared board, not work on it: they need no GitHub account and no
-   token. Its owner shows it to the class, in Who has it…, and it gets a number of four digits. A copy
+   token. Its owner gives it a link for the class, in Share…, and it gets a number of four digits. A copy
    of it goes to kant-lab-seminar/looks, a public repository, as <number>.json, locked with the class
    password (handouts/lock.js, as the handouts are), so that the number and the class password are all
    anyone needs: topic-board.html#look=<number>, or the number typed into My topics. The copy is the
@@ -2166,11 +2169,27 @@ const lookPath = n => '/repos/' + ORG + '/' + LOOKS + '/contents/' + n + '.json'
 // The address to give the class: this site's, or the live site's where this is a copy on someone's computer.
 const lookUrl = n => (/^https?:$/.test(location.protocol) && !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname) ? new URL('topic-board.html', location.href).href : SITE + 'topic-board.html') + '#look=' + n;
 // The copy the class sees: the board as last saved, without its photographs.
-function lookText(n) {
-  const f = SH.base, b = clone(f.board); delete b.photos;
+function lookText(f, n) {
+  const b = clone(f.board); delete b.photos;
   return JSON.stringify({ kind: 'kantlab-board-look', v: 1, n, owner: f.owner, topic: clone(f.topic), passages: f.passages, board: b, annotations: f.annotations, savedBy: f.savedBy || '', savedAt: f.savedAt || '' });
 }
-async function lookFile(n) { return JSON.stringify({ kind: 'kantlab-board-look', v: 1, n, from: SH.sha, at: now(), lock: JSON.parse(await LOCK.seal(lookText(n))) }) + '\n'; }
+async function lookFile(f, sha, n) { return JSON.stringify({ kind: 'kantlab-board-look', v: 1, n, from: sha, at: now(), lock: JSON.parse(await LOCK.seal(lookText(f, n))) }) + '\n'; }
+// A number for the class not yet taken: '' if none turns up, or { err } if GitHub can't be asked.
+async function freeLookNumber(T) {
+  for (let i = 0; i < 8; i++) {
+    const c = String(1000 + crypto.getRandomValues(new Uint32Array(1))[0] % 9000), r = await gh('GET', lookPath(c), null, null, T);
+    if (r.status === 404) return c;
+    if (!r.ok) return { err: r };
+  }
+  return '';
+}
+// The class password, given now or remembered: false if it is put aside.
+async function classKey(text) { return !!LOCK && (!!LOCK.key() || !!(await LOCK.remembered()) || await LOCK.ask({ title: 'Class password', text, cancel: 'Not now' })); }
+const LOOK_ASK = 'A board’s link for the class opens with the class password, so that only the class can look at it. Enter it to go on.';
+function copyLook(n, done) {
+  const url = lookUrl(n);
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, () => prompt('Copy this link:', url)); else prompt('Copy this link:', url);
+}
 const canSendLook = () => writable() && !!SH.shownAs && !!SH.base && !!LOCK && !!LOCK.key();
 function scheduleLook() {
   if (!SHM || !SH || !canSendLook()) return;
@@ -2194,7 +2213,7 @@ async function sendLook() {
       const keep = SH.etag; SH.etag = null; const got = await readFile(); SH.etag = keep;
       if (!got.file || !got.file.shownAs || got.file.shownAs.n !== n) return;
     } else { SH.lookErr = cur; renderSync(); return; }
-    const w = await gh('PUT', lookPath(n), Object.assign({ message: 'Board ' + n + ', shown to the class: sent by @' + SH.login + ' from the Logic Portal', content: b64e(await lookFile(n)) }, sha ? { sha } : {}));
+    const w = await gh('PUT', lookPath(n), Object.assign({ message: 'Board ' + n + ', shown to the class: sent by @' + SH.login + ' from the Logic Portal', content: b64e(await lookFile(SH.base, from, n)) }, sha ? { sha } : {}));
     if (w.ok) { SH.lookSent = n + ':' + from; SH.lookErr = null; }
     else if ((w.status === 409 || w.status === 422) && !SH.lookRetried) { SH.lookRetried = true; SH.lookAgain = true; }   // another page sent it at that moment
     else SH.lookErr = w;
@@ -2205,34 +2224,31 @@ async function sendLook() {
     if (SH.lookAgain) { SH.lookAgain = false; scheduleLook(); }
   }
 }
-// Show it to the class (the owner, in Who has it…): a number not yet taken, and the first copy.
+// A link for the class (the owner, in Share…): a number not yet taken, and the first copy.
 async function showToClass() {
   const s = shareSt; if (!s || !SHM || SH.role !== 'owner' || SH.shownAs) return;
-  if (!LOCK) { s.err = 'The class password can’t be read on this page, so the board can’t be shown to the class.'; drawShare(); return; }
-  if (!LOCK.key() && !(await LOCK.remembered()) && !(await LOCK.ask({ title: 'Class password', text: 'A board shown to the class is locked with the class password, so that only the class can open it. Enter it to go on.', cancel: 'Not now' }))) return;
+  if (!LOCK) { s.err = 'The class password can’t be read on this page, so the board can’t have a link for the class.'; drawShare(); return; }
+  if (!(await classKey(LOOK_ASK))) return;
   if (shareSt !== s) return;
   s.busy = true; s.err = ''; s.msg = 'Giving the board its number…'; drawShare();
   const rp = await gh('GET', '/repos/' + ORG + '/' + LOOKS, null, null, s.token);
   if (!rp.ok) return shareFail(rp, rp.status === 404 ? ORG + '/' + LOOKS + ', where the boards shown to the class are kept, isn’t there, or your token can’t reach it.' : '');
-  let n = '';
-  for (let i = 0; i < 8 && !n; i++) {
-    const c = String(1000 + crypto.getRandomValues(new Uint32Array(1))[0] % 9000), r = await gh('GET', lookPath(c), null, null, s.token);
-    if (r.status === 404) n = c; else if (!r.ok) return shareFail(r);
-  }
+  const n = await freeLookNumber(s.token);
+  if (isObj(n)) return shareFail(n.err);
   if (!n) return shareFail(null, 'No free number turned up. Try again.');
   if (!SH.base) return shareFail(null, 'The board hasn’t been read from GitHub yet. Try again in a moment.');
   SH.shownAs = { n, by: SH.login, at: now() };
-  const w = await gh('PUT', lookPath(n), { message: 'Board ' + n + ', shown to the class by @' + SH.login + ' from the Logic Portal', content: b64e(await lookFile(n)) }, null, s.token);
+  const w = await gh('PUT', lookPath(n), { message: 'Board ' + n + ', shown to the class by @' + SH.login + ' from the Logic Portal', content: b64e(await lookFile(SH.base, SH.sha, n)) }, null, s.token);
   if (!w.ok) { SH.shownAs = null; return shareFail(w, w.status === 403 || w.status === 404 ? 'Your token can’t put the board in ' + ORG + '/' + LOOKS + '. It needs that repository under Repository access (All repositories serves), with Contents: Read and write.' : ''); }
   SH.lookSent = n + ':' + SH.sha; SH.lookErr = null;
   scheduleShared();   // the number goes into board.json, so that everyone on the board sees it
-  s.busy = false; s.msg = 'Shown to the class, as board ' + n + '.'; drawShare(); renderSync();
+  s.busy = false; s.msg = 'Its link for the class is ready. Copy it, and send it round.'; drawShare(); renderSync();
 }
 // Stop showing it: the board says so first, so that nobody's page sends the copy again, and then the copy goes.
 async function stopShowing() {
   const s = shareSt; if (!s || !SHM || SH.role !== 'owner' || !SH.shownAs) return;
   const was = clone(SH.shownAs), n = was.n;
-  if (!confirm('Stop showing this board to the class?\n\nBoard ' + n + ' then opens for nobody: at once for a page opened from now on, and within about five minutes for one open already, since GitHub’s file server keeps a copy that long. The copies sent stay in the history of ' + ORG + '/' + LOOKS + ', still locked with the class password.')) return;
+  if (!confirm('Take away the board’s link for the class?\n\nBoard ' + n + ' then opens for nobody: at once for a page opened from now on, and within about five minutes for one open already, since GitHub’s file server keeps a copy that long. The copies sent stay in the history of ' + ORG + '/' + LOOKS + ', still locked with the class password.')) return;
   s.busy = true; s.err = ''; s.msg = 'Taking it away…'; drawShare();
   SH.shownAs = null; clearTimeout(SH.lookT); clearTimeout(SH.timer);
   await pushShared(0);
@@ -3390,7 +3406,7 @@ function renderTools() {
   renderSync();
   $('stage').classList.toggle('readonly', ro());
   document.querySelector('.tools').classList.toggle('ro', ro());
-  const sb = $('sharebtn'); if (sb) { sb.hidden = SHM ? !(SH && SH.ready && SH.role === 'owner') : !topic || !!lost || !!live; sb.textContent = SHM ? 'Who has it…' : 'Share…'; }
+  const sb = $('sharebtn'); if (sb) { sb.hidden = SHM ? !(SH && SH.ready && SH.role === 'owner') : !topic || !!lost || !!live; sb.textContent = 'Share…'; sb.title = SHM ? 'Who has this board, and its link for the class' : 'Share this board with others in the seminar, to look at or to work on, and give it a link for the class'; }
   const n = query ? B.items.filter(it => shown(it) && matches(it)).length : null;
   $('found').textContent = n == null ? '' : n + ' found';
   banner();
@@ -3782,28 +3798,39 @@ function drawShare() {
   const s = shareSt; if (!s) return;
   const dis = s.busy ? ' disabled' : '';
   const roleSel = (v, attr) => '<select ' + attr + dis + '><option value="read"' + (v === 'read' ? ' selected' : '') + '>can look</option><option value="write"' + (v === 'write' ? ' selected' : '') + '>can work on it</option></select>';
-  $('shareh').textContent = SHM ? 'Who has this board' : 'Share this board';
+  $('shareh').textContent = 'Share this board';
+  // just shared, with a link for the class: the link, before the board opens as shared
+  if (s.done) {
+    $('sharebody').innerHTML = '<p class="ok">' + esc(s.msg) + '</p>' + linkHtml(s.done.n, dis) +
+      '<div class="row"><button type="button" class="btn solid" data-shopen>Open the shared board</button></div>' + (s.err ? '<p class="warn">' + esc(s.err) + '</p>' : '');
+    return;
+  }
+  const n = SHM && SH.shownAs ? SH.shownAs.n : '';
   $('sharebody').innerHTML =
-    (SHM ? '<p>Shared as <code>' + esc(ORG + '/' + SH.repo) + '</code>, a private repository. GitHub lets nobody in but the people below, you, and the organisation’s owners. A change here takes effect at once.</p>'
+    (SHM ? '<p>Shared as <code>' + esc(ORG + '/' + SH.repo) + '</code>, a private repository. GitHub lets nobody in but the people below, you, and the organisation’s owners. A change here takes effect at once.</p>' +
+        (n ? '<span class="k">The link for the class</span>' + linkHtml(n, dis) + '<div class="row"><button type="button" class="linkish" data-lkstop' + dis + '>Take the link away…</button></div>'
+          : '<span class="k">A link for the class</span><p>For anyone with the class password to look at it, with no GitHub account and no token. They can’t change it.</p><div class="row"><button type="button" class="btn solid" data-lkgo' + dis + '>Get a link for the class…</button></div>')
       : '<p>Sharing makes a private repository in <code>' + esc(ORG) + '</code> for this board alone, copies in the topic’s passages and the board, and lets in the people you name, and nobody else but the organisation’s owners. Your notes on the passages, and your annotations, stay in My topics.</p>' +
-        '<p class="note">For the class only to look at it, with no GitHub account: share it, with nobody if you like, and then choose <i>Show it to the class</i> in <i>Who has it…</i>.</p>') +
+        '<label class="chk lkchk"><input type="checkbox" data-shclass' + (s.forClass ? ' checked' : '') + dis + '> <span><b>Give it a link for the class too</b>: anyone with the class password can look at it there, with no GitHub account, and can’t change it. Name nobody below, and that is all sharing does.</span></label>') +
     (s.token ? '' : '<label class="f" for="shtok">Your GitHub token: it must reach all of kant-lab-seminar’s repositories, with <i>Administration: Read and write</i> to make one</label><input type="password" id="shtok" autocomplete="off" spellcheck="false">') +
     '<span class="k">People</span>' + (s.people.length ? s.people.map((p, i) => '<div class="prow"><b>@' + esc(p.login) + '</b>' + roleSel(p.role, 'data-prole="' + i + '"') + '<button type="button" class="linkish" data-pdel="' + i + '"' + dis + '>take off</button></div>').join('')
       : '<p class="empty">' + (SHM ? 'Nobody but you yet.' : 'Nobody yet. Add someone below, or share it with nobody for now and add people later.') + '</p>') +
     '<div class="prow"><input type="text" data-pnew list="orgmembers" placeholder="a GitHub username, from the seminar" spellcheck="false" autocapitalize="off" autocomplete="off">' + roleSel('write', 'data-pnewrole') + '<button type="button" class="btn" data-padd' + dis + '>Add</button></div>' +
     '<datalist id="orgmembers">' + s.members.map(l => '<option value="' + esc(l) + '">').join('') + '</datalist>' +
-    (SHM ? (SH.shownAs
-      ? '<span class="k">Shown to the class</span><p>As board <b>' + esc(SH.shownAs.n) + '</b>. Anyone with the class password can look at it, with no GitHub account, at <a href="' + esc(lookUrl(SH.shownAs.n)) + '" target="_blank" rel="noopener">' + esc(lookUrl(SH.shownAs.n)) + '</a>, or by typing ' + esc(SH.shownAs.n) + ' into My topics. They can’t change it. Changes reach them within about five minutes; its photographs stay out.</p>' +
-        '<div class="row"><button type="button" class="btn" data-lkcopy' + dis + '>Copy the link</button><button type="button" class="linkish" data-lkstop' + dis + '>Stop showing it…</button></div>'
-      : '<span class="k">For the class to look at</span><p>Show it to the class, and anyone with the class password can look at it, with no GitHub account and no token. It gets a number of four digits, and a copy of it, without its photographs, goes to <code>' + esc(ORG + '/' + LOOKS) + '</code>, locked with the class password, and follows your changes.</p>' +
-        '<div class="row"><button type="button" class="btn" data-lkgo' + dis + '>Show it to the class…</button></div>') : '') +
     '<div class="row">' + (SHM ? '<button type="button" class="btn" data-shstop' + dis + '>Stop sharing…</button>' : '<button type="button" class="btn solid" data-shgo' + dis + '>Share</button>') + '<button type="button" class="linkish" data-shx>Close</button></div>' +
     (s.msg ? '<p class="ok">' + esc(s.msg) + '</p>' : '') + (s.err ? '<p class="warn">' + esc(s.err) + '</p>' : '');
+}
+// The link for the class, to copy: the address, the number, and what it gives.
+function linkHtml(n, dis) {
+  return '<div class="lkrow"><input type="text" readonly class="lklink" value="' + esc(lookUrl(n)) + '" aria-label="The board’s link for the class"><button type="button" class="btn solid" data-lkcopy="' + esc(n) + '"' + (dis || '') + '>Copy the link</button></div>' +
+    '<p class="note">Anyone with the class password can look at it there, with no GitHub account, or by typing <b>' + esc(n) + '</b> into My topics, under <i>Shown to the class</i>. They can’t change it. Your changes reach them within about five minutes; its photographs stay out. The copy they see is kept in <code>' + esc(ORG + '/' + LOOKS) + '</code>, locked with the class password.</p>';
 }
 function forgetUnfinished() { try { localStorage.removeItem(SHARE_UNFINISHED + TID); } catch (e) { /* nothing kept */ } }
 function shareFail(r, why) { const s = shareSt; if (!s) return; s.busy = false; s.msg = ''; s.err = why || cap1(ghMsg(r)) + '.'; drawShare(); }
 async function doShare() {
   const s = shareSt; if (!s.token) { s.err = 'Give your GitHub token.'; drawShare(); return; }
+  if (s.forClass && !(await classKey(LOOK_ASK))) return;
+  if (shareSt !== s) return;
   s.busy = true; s.err = ''; s.msg = 'Making the board’s repository…'; drawShare();
   if (!s.login) { const u = await gh('GET', '/user', null, null, s.token); if (!u.ok) return shareFail(u); s.login = u.data.login; }
   // A Share that made its repository but could not put the board in it is finished in that repository, not in another one.
@@ -3825,6 +3852,12 @@ async function doShare() {
   }
   const b = clone(kept()); delete b.shared;
   const file = { owner: s.login, topic: { id: TID, name: topic.name, note: topic.note || '' }, passages: underTopic().map(x => Object.assign(sharedPassage(x), { by: s.login, added: x.added || now() })), gone: {}, board: b, annotations: [], savedBy: s.login, savedAt: now() };
+  let classWhy = '';   // why the link for the class could not be made, the board being shared all the same
+  if (s.forClass) {
+    const n = await freeLookNumber(s.token);
+    if (n && !isObj(n)) file.shownAs = { n, by: s.login, at: now() };
+    else classWhy = isObj(n) ? (n.err.status === 404 || n.err.status === 403 ? 'your token can’t reach ' + ORG + '/' + LOOKS : ghMsg(n.err)) : 'no free number turned up';
+  }
   s.msg = 'Putting the board in it…'; drawShare();
   // A repository just made can answer "not found" for several seconds before it takes its first file, so keep trying.
   const t0 = Date.now(); let w = null, pause = 1000;
@@ -3843,14 +3876,29 @@ async function doShare() {
       : 'The repository ' + ORG + '/' + name + ' is made, but GitHub still wouldn’t take the board in it after half a minute.' + again);
   }
   forgetUnfinished();
+  let sha = w.data.content.sha;
+  if (file.shownAs) {   // the class's first copy; failing that, the board says nothing of a link
+    const n = file.shownAs.n;
+    s.msg = 'Making its link for the class…'; drawShare();
+    const lw = await gh('PUT', lookPath(n), { message: 'Board ' + n + ', shown to the class by @' + s.login + ' from the Logic Portal', content: b64e(await lookFile(file, sha, n)) }, null, s.token);
+    if (!lw.ok) {
+      classWhy = lw.status === 404 || lw.status === 403 ? 'your token can’t write to ' + ORG + '/' + LOOKS : ghMsg(lw);
+      delete file.shownAs;
+      const w2 = await gh('PUT', '/repos/' + ORG + '/' + name + '/contents/board.json', { message: 'The board of “' + topic.name + '”: no link for the class after all', content: b64e(fileText(file)), sha }, null, s.token);
+      if (w2.ok) sha = w2.data.content.sha;
+    }
+  }
   const failed = [];
   for (const p of s.people) { const er = await setPersonOn(name, p.login, p.role, s.token); if (er) failed.push('@' + p.login + ': ' + er); }
   // from now on the board is the shared one; My topics keeps a copy, marked so
   B.shared = { repo: name, by: s.login, at: now() }; save();
-  try { localStorage.setItem(SHARED_CACHE + name, JSON.stringify({ file: cleanFile(Object.assign({ kind: 'kantlab-shared-board' }, file)), sha: w.data.content.sha, role: 'owner', login: s.login })); } catch (x) { /* it is read from GitHub */ }
-  s.busy = false; s.msg = 'Shared.' + (failed.length ? ' GitHub would not let in ' + failed.join('; ') + '. Add them again from Who has it.' : ' Opening it…');
+  try { localStorage.setItem(SHARED_CACHE + name, JSON.stringify({ file: cleanFile(Object.assign({ kind: 'kantlab-shared-board' }, file)), sha, role: 'owner', login: s.login })); } catch (x) { /* it is read from GitHub */ }
+  const notIn = failed.length ? ' GitHub would not let in ' + failed.join('; ') + '. Add them again from Share…, once the board opens.' : '';
+  s.busy = false;
+  if (file.shownAs) { s.done = { repo: name, n: file.shownAs.n }; s.msg = 'Shared. Here is its link for the class.' + notIn; drawShare(); return; }   // it opens as shared when the link has been taken
+  s.msg = 'Shared.' + notIn + (classWhy ? ' It has no link for the class, since ' + classWhy + ': choose Share… again once the board opens.' : '') + ' Opening it…';
   drawShare();
-  setTimeout(() => location.reload(), failed.length ? 6000 : 900);
+  setTimeout(() => location.reload(), failed.length || classWhy ? 8000 : 900);
 }
 async function stopSharing() {
   const s = shareSt;
@@ -6160,7 +6208,7 @@ $('sharebtn').addEventListener('click', openShare);
 $('sharedlg').addEventListener('click', async e => {
   const s = shareSt; if (!s) return;
   const t = e.target, tok = $('shtok');
-  if (t.closest('[data-shx]')) { $('sharedlg').classList.remove('show'); shareSt = null; return; }
+  if (t.closest('[data-shx]')) { $('sharedlg').classList.remove('show'); shareSt = null; if (s.done) location.reload(); return; }
   if (tok && tok.value.trim()) { s.token = tok.value.trim(); try { sessionStorage.setItem(TOKEN_KEY, s.token); } catch (x) { /* used for now */ } }
   if (t.closest('[data-padd]')) {
     const login = String($('sharebody').querySelector('[data-pnew]').value || '').trim().replace(/^@/, ''), role = $('sharebody').querySelector('[data-pnewrole]').value;
@@ -6191,11 +6239,11 @@ $('sharedlg').addEventListener('click', async e => {
   }
   if (t.closest('[data-lkgo]')) { showToClass(); return; }
   if (t.closest('[data-lkstop]')) { stopShowing(); return; }
-  if (t.closest('[data-lkcopy]') && SH && SH.shownAs) {
-    const url = lookUrl(SH.shownAs.n), ok = () => { s.msg = 'Copied the link to board ' + SH.shownAs.n + '.'; drawShare(); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(ok, () => prompt('Copy this link:', url)); else prompt('Copy this link:', url);
-    return;
-  }
+  const cp = t.closest('[data-lkcopy]');
+  if (cp) { const n = cp.dataset.lkcopy; copyLook(n, () => { s.msg = 'Copied the link for the class. Anyone with the class password can open it.'; s.err = ''; drawShare(); }); return; }
+  if (t.closest('[data-shopen]')) { location.reload(); return; }
+  if (t.closest('[data-shclass]')) { s.forClass = t.closest('[data-shclass]').checked; return; }
+  if (t.closest('.lklink')) { t.closest('.lklink').select(); return; }
   if (t.closest('[data-shgo]')) { doShare(); return; }
   if (t.closest('[data-shstop]')) stopSharing();
 });
@@ -6205,10 +6253,12 @@ $('sharedlg').addEventListener('change', async e => {
   p.role = sel.value;
   if (SHM) { s.busy = true; drawShare(); const er = await setPersonOn(SH.repo, p.login, p.role, s.token); s.busy = false; s.err = er; s.msg = er ? '' : '@' + p.login + (p.role === 'write' ? ' can work on it now.' : ' can look at it now.'); drawShare(); }
 });
-$('sharedlg').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { $('sharedlg').classList.remove('show'); shareSt = null; } });
+$('sharedlg').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { const done = shareSt && shareSt.done; $('sharedlg').classList.remove('show'); shareSt = null; if (done) location.reload(); } });
 document.addEventListener('visibilitychange', () => { if (SHM && document.visibilityState === 'visible') checkShared(); });
 // The status line's own buttons: the class password, for a board shown to the class.
 $('sync').addEventListener('click', e => {
+  const cp = e.target.closest('[data-lookcopy]');
+  if (cp) { copyLook(cp.dataset.lookcopy, () => toast('Copied the link for the class. Anyone with the class password can look at the board there.')); return; }
   if (e.target.closest('[data-lookpw]')) openLook();
   else if (e.target.closest('[data-shownpw]')) givePassword();
 });
@@ -6505,7 +6555,7 @@ function renderSync() {
     if (lost === 'nolook') { cls = 'bad'; h = 'No board ' + SH.look + ' is shown to the class'; }
     else if (lost === 'lookpw') { cls = 'bad'; h = 'Locked'; more = ' <button type="button" class="linkish" data-lookpw>give the class password</button>'; }
     else if (!SH.ready && SH.status === 'error') { cls = 'bad'; h = SH.err && SH.err.status === -2 ? 'Locked with another class password' : SH.err && SH.err.status === -1 ? 'Can’t open it: its copy would not read' : 'Can’t open it: ' + ghMsg(SH.err); }
-    else if (SH.ready) { cls = 'saved'; h = 'Look only · shown to the class as board ' + SH.look + (SH.at ? ', as of ' + new Date(SH.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''); }
+    else if (SH.ready) { cls = 'saved'; more = ' <button type="button" class="linkish" data-lookcopy="' + esc(SH.look) + '">copy the link</button>'; h = 'Look only · shown to the class as board ' + SH.look + (SH.at ? ', as of ' + new Date(SH.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''); }
     el.className = cls; el.innerHTML = '<i></i>' + esc(h) + more;
     el.title = 'A copy of the board, locked with the class password, in ' + ORG + '/' + LOOKS + '. It follows the changes made to the board ' + (SH.token ? 'within a few seconds' : 'within about five minutes') + ', and can be looked at here, not changed.';
     return;
@@ -6525,7 +6575,8 @@ function renderSync() {
     let more = '';
     if (SH.ready && SH.shownAs) {
       h += ' · shown to the class as ' + SH.shownAs.n;
-      if (writable() && LOCK && !LOCK.key()) more = ' <button type="button" class="linkish" data-shownpw title="Your changes reach the class once this browser has the class password">give the class password</button>';
+      more = ' <button type="button" class="linkish" data-lookcopy="' + esc(SH.shownAs.n) + '" title="' + esc(lookUrl(SH.shownAs.n)) + '">copy the link</button>';
+      if (writable() && LOCK && !LOCK.key()) more += ' <button type="button" class="linkish" data-shownpw title="Your changes reach the class once this browser has the class password">give the class password</button>';
       else if (writable() && SH.lookErr) { cls = 'bad'; h += ', not sent: ' + ghMsg(SH.lookErr); }
     }
     el.className = cls; el.innerHTML = '<i></i>' + esc(h) + more;

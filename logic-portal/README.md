@@ -541,7 +541,7 @@ shared with, refusing a reader's save itself.
   On a shared board each passage has a **note on the board**, which everyone sees, signed, and
   beneath it **your own note**, your note in My topics, if you keep the passage there. An
   annotation made with **only me** ticked stays in My topics and is not put on the board.
-- **Who has it…**, where *Share…* was, says who has the board. Change a person's role, add
+- **Share…** again, once the board is shared, says who has it. Change a person's role, add
   someone, or take someone off: each takes effect at once. **Stop sharing…** brings the board
   back into My topics, with everything done on it and the passages others added, takes everyone
   off, and archives the repository, which keeps its history, read only. Nothing here ever
@@ -555,21 +555,23 @@ shared with, refusing a reader's save itself.
   board.
 - **Links** on a shared board to boards of yours that are not shared show the others only *a board
   not shared with you*, and keep no copy of their names.
-- **Shown to the class**, for people who are only to look at it, and need no GitHub account and no
-  token for that. In **Who has it…**, **Show it to the class…** gives the board a number of four
-  digits, and puts a copy of it in the public repository `kant-lab-seminar/looks`, locked with the
-  class password as the handouts are. The copy has everything on the board but its photographs.
-  Anyone then opens `topic-board.html#look=<number>`, or types the number into My topics under
-  *Shown to the class* and presses **Look**. They give the class password and see the board read
-  only, with the portal beside it. Everyone on the board sees the number in its status line.
+- **A link for the class**, for people who are only to look at the board, and need no GitHub
+  account and no token for that. Tick **Give it a link for the class too** when you share, and
+  name nobody if the link is all you want. On a board shared already, **Share…** has **Get a link
+  for the class…**. Either way the class password is asked for, and the board gets a number of
+  four digits. A copy of it, everything on the board but its photographs, goes to the public
+  repository `kant-lab-seminar/looks`, locked with the class password as the handouts are.
+  **Share…** then shows the link, `topic-board.html#look=<number>`, with **Copy the link**.
+  Whoever has it gives the class password and sees the board read only, with the portal beside it.
+  They can also type the number into My topics, under *Shown to the class*, and press **Look**.
+  Everyone on the board sees the number in its status line, with *copy the link* beside it.
 - **The copy follows the board.** A few seconds after each save, the page of whoever saved sends
   it again, if that browser has the class password. A page that hasn't got it says *give the class
   password* in its status line. Someone looking with no token sees a change within about five
   minutes, the time GitHub's file server takes to catch up; with My topics' token in their browser,
-  within seconds. **Stop showing it…** takes the copy away, at once for a page opened from then on,
+  within seconds. **Take the link away…**, in Share…, removes the copy, at once for a page opened from then on,
   and within about five minutes for one open already. The repository's history keeps the copies
   sent, still locked. Anyone with the class password can look at every board shown to the class.
-  To show a board of your own that isn't shared, share it first, with nobody if you like.
 - **The organisation's owners can always see every repository in it.** A shared board is private
   from the rest of the seminar, not from them.
 
