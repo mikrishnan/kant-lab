@@ -202,6 +202,31 @@
   #toast .tact { margin-left: 0.5rem; font-size: inherit; }
   #details .hsend select { flex: 1; width: auto; min-width: 0; }
   #details .hsend + input[data-hnewhead] { margin-top: 0.35rem; }
+  /* To a handout…: the list of what goes, in order */
+  .hocard { width: 44rem; max-height: calc(100vh - 2rem); display: flex; flex-direction: column; }
+  .hocard #hobody { overflow: auto; min-height: 0; }
+  .hocard .hoopt { display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; align-items: center; font-size: 0.92rem; margin: 0.25rem 0; }
+  .hocard .hoopt > b { font-weight: 400; color: var(--faded); font-size: 0.82rem; min-width: 2.6rem; }
+  .hocard .hoopt label { display: inline-flex; gap: 0.3rem; align-items: center; cursor: pointer; }
+  .hocard .hoopt input[type=text] { width: 16rem; }
+  .hocard .holist { border: 1px solid var(--line); border-radius: 8px; background: var(--parchment); margin: 0.6rem 0; font-size: 0.9rem; }
+  .hocard .holi { display: flex; gap: 0.45rem; align-items: center; padding: 0.22rem 0.5rem; border-bottom: 1px solid var(--parchment-dark); background: #fff; }
+  .hocard .holi:last-child { border-bottom: 0; }
+  .hocard .holi.hd { background: var(--parchment-dark); font-family: 'Cinzel', serif; font-size: 0.78rem; letter-spacing: 0.06em; color: var(--accent); }
+  .hocard .holi.hd input[type=text] { flex: 1; font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--accent); background: transparent; border: 1px solid transparent; border-radius: 4px; padding: 0.05rem 0.3rem; }
+  .hocard .holi.hd input[type=text]:hover, .hocard .holi.hd input[type=text]:focus { border-color: var(--line); background: #fff; }
+  .hocard .holi.off { opacity: 0.5; }
+  .hocard .holi .g { cursor: grab; color: var(--faded); user-select: none; }
+  .hocard .holi .ci { font-weight: 600; white-space: nowrap; }
+  .hocard .holi .w { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--faded); font-style: italic; }
+  .hocard .holi.nt .w { font-style: normal; color: var(--ink); }
+  .hocard .holi .tg { font-size: 0.74rem; border: 1px solid var(--line); border-radius: 8px; padding: 0 0.4rem; color: var(--faded); white-space: nowrap; }
+  .hocard .holi .tg.lab { color: var(--accent); border-color: var(--accent); }
+  .hocard .holi .mv { border: 0; background: none; color: var(--faded); cursor: pointer; padding: 0 0.15rem; font-size: 0.8rem; }
+  .hocard .holi .mv:hover { color: var(--accent); }
+  .hocard .holi.dropb { box-shadow: inset 0 2px 0 var(--accent); }
+  .hocard .hoempty { padding: 0.4rem 0.6rem; color: var(--faded); font-size: 0.85rem; }
+  .hocard .hoout { font-size: 0.85rem; color: var(--faded); margin: 0.2rem 0 0.7rem; }
 
   /* ── The side: what is selected, and the portal ── */
   #side { width: 400px; flex: none; border-left: 1px solid var(--line); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
@@ -771,6 +796,7 @@
       <button type="button" class="mi" id="parsb" title="Every parallel on the board: words in several passages that answer one another">Parallels</button>
       <button type="button" class="mi" id="echosb" title="Every echo on the board: stretches, two at a time, that answer one another; and what is and isn’t said between them">Echoes</button>
       <span class="msep"></span>
+      <button type="button" class="mi" id="tohandoutbtn" title="Send the board, or a group or the cards selected, to a handout: laid out first as a list, its groups as headings">To a handout…</button>
       <button type="button" class="mi" id="sharebtn" title="Share this board with others in the seminar, to look at or to work on" hidden>Share…</button>
       <button type="button" class="mi" id="export">Export</button>
       <button type="button" class="mi" id="import">Import</button>
@@ -818,6 +844,7 @@
 <div id="annbar" class="annbar" role="toolbar" aria-label="Annotate these words, or make them a parallel"></div>
 <div id="lock" class="lock" role="dialog" aria-modal="true" aria-labelledby="lockh"><div class="lockcard"><h2 id="lockh"></h2><div id="lockbody"></div></div></div>
 <div id="sharedlg" class="lock" role="dialog" aria-modal="true" aria-labelledby="shareh"><div class="lockcard wide"><h2 id="shareh"></h2><div id="sharebody"></div></div></div>
+<div id="hodlg" class="lock" role="dialog" aria-modal="true" aria-labelledby="hoh"><div class="lockcard wide hocard"><h2 id="hoh"></h2><div id="hobody"></div></div></div>
 
 <!-- The class password, as the handouts have it: a board shown to the class is locked with it. -->
 <script src="handouts/lock.js"></script>
@@ -993,6 +1020,8 @@ let echoChains = false; // the matrix shows the page's chains through a middle s
 let hwhere = '';        // where + Handout sends, in the handout tray: '' where the handout is collecting, 'end', 'sec:<heading id>' or 'new'
 let hhead = '';         // the new heading's name, while 'new' is chosen
 let hnote = false;      // + Handout sends the notes on the passages too
+let HO = null;          // To a handout…, while its list is open: { scope, gid, offerG, secs: [{ gid, title, on, cards: [{ id, on }] }], count, out, into, name, where, hnote }
+let hoDrag = null;      // a line of that list being dragged: { s, c } (c null for a section's heading)
 
 /* ── Builders: the board ──────────────────────────────────────────────────── */
 const $ = id => document.getElementById(id);
@@ -3472,10 +3501,17 @@ function sendOf(it, withNote) {
 }
 // Cards in the order they are read on the board: row by row, a row being the cards whose tops stand within
 // half a card of the first's, and left to right in each.
-function readingOrder(ids) {
-  const cs = ids.map(id => ({ id, r: rect(id) || { x: 0, y: 0, w: 0, h: 0 } })).sort((a, b) => a.r.y - b.r.y), rows = [];
+const readingOrder = ids => byReading(ids.map(id => ({ id, r: rect(id) })));
+function byReading(xs) {
+  const cs = xs.map(c => ({ id: c.id, r: c.r || { x: 0, y: 0, w: 0, h: 0 } })).sort((a, b) => a.r.y - b.r.y), rows = [];
   cs.forEach(c => { const row = rows[rows.length - 1]; if (row && c.r.y < row.top + Math.max(30, row.h / 2)) row.cs.push(c); else rows.push({ top: c.r.y, h: c.r.h, cs: [c] }); });
   return [].concat(...rows.map(row => row.cs.sort((a, b) => a.r.x - b.r.x).map(c => c.id)));
+}
+// What was not sent, grouped by why: "Not sent, since it is in “Week 9” already: § 7, A 291."
+function skipText(r, name) {
+  const by = new Map();
+  r.skipped.forEach(k => { if (!by.has(k.why)) by.set(k.why, []); by.get(k.why).push(name(k.x)); });
+  return [...by].map(([why, ns]) => ' Not sent, since ' + (ns.length > 1 ? why.replace(/^it is /, 'they are ').replace(/^its /, 'their ').replace(/^it has /, 'they have ').replace('the card has them', 'their cards have them') : why) + ': ' + ns.join('; ') + '.').join('');
 }
 async function toHandout(ids) {
   const H = HT();
@@ -3489,7 +3525,7 @@ async function toHandout(ids) {
   try { r = await H.receive(list, at); } catch (e) { toast('The handout tray could not take it (' + e.message + ').'); return; }
   if (!r.ok) { toast(r.why === 'locked' ? 'The handouts open only with the class password.' : 'The portal beside the board is still loading its texts. Try again in a moment.'); return; }
   const name = x => { const k = list.indexOf(x); return k >= 0 ? cardTitle(its[k]) : 'a card'; };
-  const skip = r.skipped.length ? ' Not sent: ' + r.skipped.map(k => name(k.x) + ', since ' + k.why).join('; ') + '.' : '';
+  const skip = skipText(r, name);
   const what = [r.added ? r.added + (r.added === 1 ? ' passage' : ' passages') : '', r.notes ? r.notes + (r.notes === 1 ? ' note' : ' notes') : ''].filter(Boolean).join(' and ');
   if (!what) { toast('Nothing sent.' + skip); return; }
   if (hwhere === 'new') { hwhere = ''; hhead = ''; }
@@ -3515,7 +3551,142 @@ function handoutHtml(its) {
   return '<span class="k">To a handout</span><div class="row hsend" style="margin-top:0"><button type="button" class="btn" data-act="tohandout" title="Send ' + (n === 1 ? 'it' : 'them') + ' to the handout on screen in the portal’s Handouts, as ' + (n === 1 ? 'the card has it' : 'the cards have them') + '">+ Handout' + (n > 1 ? ', these ' + n : '') + '</button>' + where + '</div>' +
     (pl && hwhere === 'new' ? '<input type="text" data-hnewhead placeholder="The new heading’s name" value="' + esc(hhead) + '">' : '') +
     (notes ? '<label class="ev"><input type="checkbox" data-hnote' + (hnote ? ' checked' : '') + '>' + (SHM ? 'with the note on the board' : n === 1 ? 'with your note on it' : 'with your notes on them') + '</label>' : '') +
-    '<p class="by">' + (ok.some(it => it.kind === 'passage') ? 'As the card' + (n === 1 ? ' has it' : 's have them') + ': just the words ' + (n === 1 ? 'it quotes' : 'they quote') + ', cited by their pages, with ' + (n === 1 ? 'its heading' : 'each one’s heading') + ' as the label. ' : '') + 'A copy: nothing here changes.</p>';
+    '<p class="by">' + (ok.some(it => it.kind === 'passage') ? 'As the card' + (n === 1 ? ' has it' : 's have them') + ': just the words ' + (n === 1 ? 'it quotes' : 'they quote') + ', cited by their pages, with ' + (n === 1 ? 'its heading' : 'each one’s heading') + ' as the label. ' : '') + 'A copy: nothing here changes.' +
+      (n > 1 ? ' <button type="button" class="linkish" data-act="hosel" title="Laid out first as a list, their groups as headings, to look over and reorder">Or as a list first, with their groups as headings…</button>' : '') + '</p>';
+}
+
+/* ── To a handout…: the board, a group or a selection, as a list first ───────────────────────────────
+   What + Handout does for a card, for many at once, laid out first as a list to look over. The cards outside any
+   group come first, before any heading, since in a handout everything after a heading is in its section; then each
+   group, as a heading of the handout, in the order their frames are read on the board, its cards in the order they
+   are read in it. Notes and questions stand where they are. Only what the view shown shows is in it. A passage in
+   two groups goes in each, as linked copies, where its cards' headings agree; where they differ, as two copies.
+   Every line can be unticked, moved with ↑ ↓ or dragged, and a heading renamed for the handout. Nothing of the list
+   changes the board, and nothing of it is kept. It goes to a new handout, named after the topic, or to the handout
+   on screen, at its end or after one of its sections. */
+const hoTopic = () => (topic && topic.name) || (STOPIC && STOPIC.name) || '';
+function hoBuild(scope, gid) {
+  const g = gid ? model(gid) : null;
+  const pool = scope === 'sel' ? sel.ids.map(item).filter(Boolean) : B.items.filter(it => shown(it) && (!g || groupOf(it) === gid));
+  const go = pool.filter(sendable), lines = ids => readingOrder(ids).map(id => ({ id, on: true }));
+  const secs = [{ gid: null, title: '', on: true, cards: lines(go.filter(it => !groupOf(it)).map(it => it.id)) }];
+  byReading(B.models.filter(m => go.some(it => groupOf(it) === m.id)).map(m => ({ id: m.id, r: frameOf(m) })))
+    .forEach(id => secs.push({ gid: id, title: model(id).title || 'Untitled group', on: true, cards: lines(go.filter(it => groupOf(it) === id).map(it => it.id)) }));
+  const n = k => pool.filter(it => it.kind === k).length;
+  return { secs, count: go.length, out: { table: n('table'), box: n('box'), link: n('link') } };
+}
+async function openToHandout(scope, gid) {
+  const H = HT();
+  if (!H) { toast('The portal beside the board is still loading. Try again in a moment.'); return; }
+  if (!(await H.unlocked()) && !(await H.unlock({ host: document, text: 'The handouts are for the class. Enter the class password to send this board to a handout.' }))) return;
+  const b = hoBuild(scope, gid);
+  if (!b.count) { toast(scope === 'sel' ? 'None of the cards selected is a passage, a note or a question.' : 'Nothing here goes into a handout: only passages, notes and questions do.'); return; }
+  const g = gid ? model(gid) : null;
+  HO = Object.assign(b, { scope, gid: gid || null, offerG: gid || (sel.kind === 'model' ? sel.ids[0] : null), into: 'new', name: g ? (hoTopic() && hoTopic() !== g.title ? hoTopic() + ': ' : '') + g.title : hoTopic() || 'From a board', where: '', hnote: false });
+  $('hodlg').classList.add('show'); drawHO();
+  const f = $('hobody').querySelector('[data-hosend]'); if (f) f.focus();
+}
+function closeHO() { HO = null; hoDrag = null; $('hodlg').classList.remove('show'); }
+// What goes, in order, as the tray takes it (HANDOUTS.receive), with the card each line is from (null for a heading).
+function hoList() {
+  const list = [], its = [];
+  HO.secs.forEach(sc => {
+    const cs = sc.on ? sc.cards.filter(c => c.on).map(c => item(c.id)).filter(sendable) : [];
+    if (!cs.length) return;
+    if (sc.gid) { list.push({ kind: 'heading', text: sc.title.trim() || 'Untitled section' }); its.push(null); }
+    cs.forEach(it => { list.push(sendOf(it, HO.hnote)); its.push(it); });
+  });
+  const by = {};
+  its.forEach((it, k) => { if (it && it.kind === 'passage' && it.mt) (by[it.mt] = by[it.mt] || []).push(k); });
+  Object.entries(by).forEach(([mt, ks]) => { if (ks.length > 1 && ks.every(k => (its[k].label || '') === (its[ks[0]].label || ''))) ks.forEach(k => { list[k].link = mt; }); });
+  return { list, its };
+}
+function hoRow(it, si, ci, on, twins) {
+  let h = '<span class="g" title="Drag it to another place in the list">⠿</span><input type="checkbox" data-hotick' + (on ? ' checked' : '') + ' aria-label="Send it">';
+  if (it.kind === 'passage') {
+    const st = stretchNow(it), q = (it.quotes && it.quotes[0]) || {};
+    h += '<span class="ci">' + esc(st ? st.cite : q.cite || it.cite || 'a passage') + '</span><span class="w">' + esc(short(st ? st.text : q.kept || q.q || '', 90)) + '</span>' +
+      (it.label ? '<span class="tg lab">' + esc(short(it.label, 28)) + '</span>' : '') +
+      (st && !st.whole ? '<span class="tg">' + (st.parts.length > 1 ? st.parts.length + ' passages in a row' : 'part of the passage') + '</span>' : '');
+    const tw = twins.filter(t => t.it !== it);
+    if (tw.length) { const same = tw.every(t => (t.it.label || '') === (it.label || '')); h += '<span class="tg" title="' + (same ? 'The same passage: linked copies in the handout, so that what is changed in one is changed in the other' : 'The same passage, but its cards have different headings: two copies, not linked') + '">' + (same ? '⧉ also in ' : 'also in ') + esc(short(tw.map(t => t.title || 'no group').join(', '), 30)) + (same ? '' : ', not linked') + '</span>'; }
+  } else h += '<span class="w">' + (it.kind === 'problem' ? '<b>Question:</b> ' : '<b>Note:</b> ') + esc(short(it.text, 110)) + '</span>';
+  return '<div class="holi' + (on ? '' : ' off') + (it.kind === 'passage' ? '' : ' nt') + '" draggable="true" data-hos="' + si + '" data-hoc="' + ci + '">' + h +
+    '<button type="button" class="mv" data-homv="-1" title="Move it up">↑</button><button type="button" class="mv" data-homv="1" title="Move it down">↓</button></div>';
+}
+function drawHO() {
+  if (!HO) return;
+  const pl = HT() && HT().places ? HT().places() : null, D = $('hobody');
+  if (HO.into === 'current' && HO.where && !(pl && pl.sections.some(x => 'sec:' + x.id === HO.where))) HO.where = '';
+  // each passage's lines in the list, ticked, to say where its other cards are
+  const at = {};
+  HO.secs.forEach(sc => sc.on && sc.cards.forEach(c => { const it = item(c.id); if (c.on && it && it.kind === 'passage' && it.mt) (at[it.mt] = at[it.mt] || []).push({ it, title: sc.title }); }));
+  const g = HO.offerG ? model(HO.offerG) : null, ns = sel.kind === 'card' ? sel.ids.filter(id => sendable(item(id))).length : 0;
+  const { list } = hoList(), np = list.filter(x => x.kind === 'passage').length, nh = list.filter(x => x.kind === 'heading').length, nn = list.filter(x => x.kind === 'note').length;
+  $('hoh').textContent = 'To a handout' + (hoTopic() ? ' · ' + hoTopic() : '');
+  let h = '<div class="hoopt"><b>Send</b>' +
+    '<label><input type="radio" name="hoscope" value="view"' + (HO.scope === 'view' && !HO.gid ? ' checked' : '') + '> the board, as this view shows it</label>' +
+    (g ? '<label><input type="radio" name="hoscope" value="group"' + (HO.gid ? ' checked' : '') + '> the group “' + esc(short(g.title, 30)) + '”</label>' : '') +
+    (ns ? '<label><input type="radio" name="hoscope" value="sel"' + (HO.scope === 'sel' ? ' checked' : '') + '> the ' + (ns === 1 ? 'card' : ns + ' cards') + ' selected</label>' : '') + '</div>' +
+    '<div class="hoopt"><b>Into</b><label><input type="radio" name="hointo" value="new"' + (HO.into === 'new' ? ' checked' : '') + '> a new handout, named</label><input type="text" data-honame value="' + esc(HO.name) + '" aria-label="The new handout’s name"></div>' +
+    (pl ? '<div class="hoopt"><b></b><label><input type="radio" name="hointo" value="current"' + (HO.into === 'current' ? ' checked' : '') + '> “' + esc(short(pl.handout, 40)) + '”, the one on screen,</label><select data-howhere aria-label="Where in it">' +
+      '<option value="">at its end</option>' + pl.sections.map(x => '<option value="sec:' + esc(x.id) + '"' + (HO.where === 'sec:' + x.id ? ' selected' : '') + '>after its section “' + esc(short(x.name, 40)) + '”</option>').join('') + '</select></div>' : '');
+  if (HO.secs.some(sc => sc.cards.some(c => { const it = item(c.id); return it && it.kind === 'passage' && (it.kx || {}).note; })))
+    h += '<div class="hoopt"><b>With</b><label><input type="checkbox" data-hohnote' + (HO.hnote ? ' checked' : '') + '> ' + (SHM ? 'the notes on the board on the passages' : 'your notes on the passages') + ', which students then see</label></div>';
+  h += '<div class="holist">';
+  HO.secs.forEach((sc, si) => {
+    if (!sc.gid) { if (sc.cards.length && HO.secs.length > 1) h += '<div class="holi hd" data-hos="0" data-hoc="">Outside any group: before the first heading</div>'; }
+    else h += '<div class="holi hd' + (sc.on ? '' : ' off') + '" draggable="true" data-hos="' + si + '" data-hoc=""><span class="g" title="Drag the group to another place">⠿</span><input type="checkbox" data-hotick' + (sc.on ? ' checked' : '') + ' aria-label="Send this group">' +
+      '<input type="text" data-hotitle value="' + esc(sc.title) + '" aria-label="Its heading in the handout" title="Its heading in the handout: renaming it here does not rename the group">' +
+      '<span class="tg">' + (sc.cards.length ? plural(sc.cards.length, 'card') : 'empty: no heading goes') + '</span>' +
+      (si > 1 ? '<button type="button" class="mv" data-homv="-1" title="Move the group up">↑</button>' : '') + (si < HO.secs.length - 1 ? '<button type="button" class="mv" data-homv="1" title="Move the group down">↓</button>' : '') + '</div>';
+    sc.cards.forEach((c, ci) => { const it = item(c.id); if (it) h += hoRow(it, si, ci, sc.on && c.on, (it.mt && at[it.mt]) || []); });
+  });
+  h += '</div>';
+  const o = HO.out, outs = [o.table && plural(o.table, 'table'), o.box && plural(o.box, 'box').replace('boxs', 'boxes'), o.link && plural(o.link, 'link') + ' to other boards'].filter(Boolean);
+  h += '<p class="hoout">' + (outs.length ? 'Not sent: ' + esc(outs.join(', ')) + ', which a handout can’t hold. ' : '') + 'Parallels, echoes, annotations, arrows and drawing stay on the board. Each passage goes as its card quotes it, cited by its pages, with its heading as its label. A copy: nothing on the board changes.</p>';
+  const what = [np && plural(np, 'passage'), nh && plural(nh, 'heading'), nn && plural(nn, 'note')].filter(Boolean);
+  h += '<div class="row"><button type="button" class="btn solid" data-hosend' + (np + nn ? '' : ' disabled') + '>' + (np + nn ? 'Send ' + esc(what.length > 1 ? what.slice(0, -1).join(', ') + ' and ' + what[what.length - 1] : what[0]) : 'Nothing ticked') + '</button><button type="button" class="linkish" data-hox>Cancel</button></div>';
+  const keep = D.scrollTop; D.innerHTML = h; D.scrollTop = keep;
+}
+// A line moved: a card by d within the list, across a group's edge into the next; a group by d among the groups.
+function hoMove(si, ci, d) {
+  const S = HO.secs;
+  if (ci == null) { const t = si + d; if (si < 1 || t < 1 || t >= S.length) return; S.splice(t, 0, S.splice(si, 1)[0]); return; }
+  const sc = S[si], c = sc.cards[ci], t = ci + d;
+  if (t >= 0 && t < sc.cards.length) { sc.cards.splice(ci, 1); sc.cards.splice(t, 0, c); return; }
+  const ns = si + d; if (ns < 0 || ns >= S.length) return;
+  sc.cards.splice(ci, 1);
+  if (d < 0) S[ns].cards.push(c); else S[ns].cards.unshift(c);
+}
+// A line dropped on another: a card goes before the line it is dropped on (to the top of a group, on its heading);
+// a group goes before the group it is dropped on.
+function hoDrop(from, si, ci) {
+  const S = HO.secs;
+  if (from.c == null) { if (from.s < 1) return; const t = Math.max(1, si); if (t === from.s) return; const m = S.splice(from.s, 1)[0]; S.splice(t > from.s ? t - 1 : t, 0, m); return; }
+  const c = S[from.s].cards.splice(from.c, 1)[0]; if (!c) return;
+  let k = ci == null ? 0 : ci;
+  if (from.s === si && ci != null && from.c < ci) k--;
+  S[si].cards.splice(k, 0, c);
+}
+async function hoSend() {
+  if (!HO) return;
+  const { list, its } = hoList();
+  if (!list.some(x => x.kind !== 'heading')) return;
+  const H = HT(); if (!H) { toast('The portal beside the board is still loading. Try again in a moment.'); return; }
+  const at = HO.into === 'new' ? { newHandout: HO.name.trim() || hoTopic() || 'From a board' } : HO.where.startsWith('sec:') ? { section: HO.where.slice(4) } : { end: true };
+  let r;
+  try { r = await H.receive(list, at); } catch (e) { toast('The handout tray could not take it (' + e.message + ').'); return; }
+  if (!r.ok) { toast(r.why === 'locked' ? 'The handouts open only with the class password.' : 'The portal beside the board is still loading its texts. Try again in a moment.'); return; }
+  closeHO();
+  const name = x => { const k = list.indexOf(x); return k >= 0 && its[k] ? cardTitle(its[k]) : 'a card'; };
+  const skip = skipText(r, name);
+  const what = [r.added && plural(r.added, 'passage'), r.headings && plural(r.headings, 'heading'), r.notes && plural(r.notes, 'note')].filter(Boolean);
+  if (!r.added && !r.notes) { toast('Nothing sent.' + skip); return; }
+  toast('Sent ' + (what.length > 1 ? what.slice(0, -1).join(', ') + ' and ' + what[what.length - 1] : what[0]) + (r.fresh ? ' to a new handout, “' + r.handout + '”.' : ' to “' + r.handout + '”, ' + r.where + '.') + skip, [
+    ['Undo', () => { r.undo(); toast(r.fresh ? 'The new handout, “' + r.handout + '”, is gone again.' : 'Taken out of “' + r.handout + '” again.'); renderSide(); }],
+    ['Open the handout', () => window.open(PORTAL + '#handouts', '_blank', 'noopener')]]);
+  renderSide();
 }
 
 /* ── Render: the side ─────────────────────────────────────────────────────── */
@@ -3740,7 +3911,8 @@ function sideModel0(m) {
   const its = B.items.filter(i => i.model === m.id);
   return '<h2>' + esc(m.title) + '</h2><p class="sub">' + esc(m.name || 'A group') + '</p>' +
     '<span class="k">Its cards</span>' + (its.length ? its.map(it => '<button type="button" class="rel" data-card="' + esc(it.id) + '">' + esc(cardTitle(it)) + '</button>').join('') : '<p class="empty">None yet. Drop cards into its frame.</p>') +
-    (ro() ? '' : '<div class="row"><button type="button" class="btn solid" data-act="editmodel">Rename it</button><button type="button" class="btn" data-act="selmodel">Select its cards</button><button type="button" class="linkish" data-act="delmodel">Delete the group</button></div>');
+    (ro() ? '' : '<div class="row"><button type="button" class="btn solid" data-act="editmodel">Rename it</button><button type="button" class="btn" data-act="selmodel">Select its cards</button><button type="button" class="linkish" data-act="delmodel">Delete the group</button></div>') +
+    (its.some(sendable) ? '<div class="row"><button type="button" class="btn" data-act="hogroup" title="Send the group to a handout, as a heading with its cards under it: laid out first as a list">To a handout…</button></div>' : '');
 }
 // What links to a card or group here from other boards, with the arrows there, and the way back.
 function linkedFromHtml(id) {
@@ -6342,6 +6514,52 @@ $('sharedlg').addEventListener('change', async e => {
   p.role = sel.value;
   if (SHM) { s.busy = true; drawShare(); const er = await setPersonOn(SH.repo, p.login, p.role, s.token); s.busy = false; s.err = er; s.msg = er ? '' : '@' + p.login + (p.role === 'write' ? ' can work on it now.' : ' can look at it now.'); drawShare(); }
 });
+$('tohandoutbtn').addEventListener('click', () => openToHandout(sel.kind === 'card' && sel.ids.length > 1 ? 'sel' : 'view', sel.kind === 'model' ? sel.ids[0] : null));
+$('hodlg').addEventListener('click', e => {
+  if (!HO) return;
+  const t = e.target;
+  if (t === $('hodlg') || t.closest('[data-hox]')) { closeHO(); return; }
+  if (t.closest('[data-hosend]')) { hoSend(); return; }
+  const mv = t.closest('[data-homv]'), li = t.closest('.holi');
+  if (mv && li) { hoMove(+li.dataset.hos, li.dataset.hoc === '' ? null : +li.dataset.hoc, +mv.dataset.homv); drawHO(); return; }
+});
+$('hodlg').addEventListener('change', e => {
+  if (!HO) return;
+  const t = e.target, li = t.closest('.holi');
+  if (t.matches('[data-hotick]') && li) { const sc = HO.secs[+li.dataset.hos]; if (li.dataset.hoc === '') sc.on = t.checked; else sc.cards[+li.dataset.hoc].on = t.checked; drawHO(); return; }
+  if (t.name === 'hoscope') { const g = t.value === 'group' && model(HO.offerG) ? HO.offerG : null, sc = t.value === 'sel' ? 'sel' : 'view'; Object.assign(HO, hoBuild(sc, g), { scope: sc, gid: g }); drawHO(); return; }
+  if (t.name === 'hointo') { HO.into = t.value; drawHO(); return; }
+  if (t.matches('[data-howhere]')) { HO.where = t.value; HO.into = 'current'; drawHO(); return; }
+  if (t.matches('[data-hohnote]')) { HO.hnote = t.checked; return; }
+});
+$('hodlg').addEventListener('input', e => {
+  if (!HO) return;
+  const t = e.target, li = t.closest('.holi');
+  if (t.matches('[data-honame]')) { HO.name = t.value; if (HO.into !== 'new') { HO.into = 'new'; const r = $('hobody').querySelector('input[name="hointo"][value="new"]'); if (r) r.checked = true; } return; }
+  if (t.matches('[data-hotitle]') && li) { HO.secs[+li.dataset.hos].title = t.value; return; }
+});
+$('hodlg').addEventListener('keydown', e => {
+  e.stopPropagation();
+  if (e.key === 'Escape') { closeHO(); return; }
+  if (e.key === 'Enter' && e.target.matches('[data-honame], [data-hotitle]')) { e.preventDefault(); hoSend(); }
+});
+// Dragging a line of the list: a card before another, or to the top of a group on its heading; a group before another.
+$('hodlg').addEventListener('dragstart', e => {
+  const li = e.target.closest && e.target.closest('.holi[draggable="true"]'); if (!li || !HO) return;
+  hoDrag = { s: +li.dataset.hos, c: li.dataset.hoc === '' ? null : +li.dataset.hoc };
+  e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', ''); } catch (x) { /* fine */ }
+});
+$('hodlg').addEventListener('dragover', e => {
+  const li = hoDrag && e.target.closest && e.target.closest('.holi'); if (!li) return;
+  if (hoDrag.c == null && li.dataset.hoc !== '') return;   // a group goes before a group
+  e.preventDefault(); $('hobody').querySelectorAll('.dropb').forEach(x => x.classList.remove('dropb')); li.classList.add('dropb');
+});
+$('hodlg').addEventListener('drop', e => {
+  const li = hoDrag && e.target.closest && e.target.closest('.holi'); if (!li) return;
+  e.preventDefault();
+  hoDrop(hoDrag, +li.dataset.hos, li.dataset.hoc === '' ? null : +li.dataset.hoc); hoDrag = null; drawHO();
+});
+$('hodlg').addEventListener('dragend', () => { hoDrag = null; const D = $('hobody'); if (D) D.querySelectorAll('.dropb').forEach(x => x.classList.remove('dropb')); });
 $('sharedlg').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { const done = shareSt && shareSt.done; $('sharedlg').classList.remove('show'); shareSt = null; if (done) location.reload(); } });
 document.addEventListener('visibilitychange', () => { if (SHM && document.visibilityState === 'visible') checkShared(); });
 // The status line's own buttons: the class password, for a board shown to the class.
@@ -6533,6 +6751,8 @@ $('details').addEventListener('click', e => {
   if (act === 'parcell') { if (parById(id)) { mode = { parTo: id }; render(); } return; }
   if (act === 'compare') { openCompare(sel.ids); return; }
   if (act === 'tohandout') { toHandout(sel.kind === 'card' ? sel.ids.slice() : []); return; }
+  if (act === 'hogroup') { if (model(id)) openToHandout('view', id); return; }
+  if (act === 'hosel') { if (sel.kind === 'card' && sel.ids.length) openToHandout('sel'); return; }
   if (act === 'hwhere') { const H = HT(); if (!H) { toast('The portal beside the board is still loading. Try again in a moment.'); return; } H.unlock({ host: document, text: 'The handouts are for the class. Enter the class password to choose where in your handout this goes.' }).then(ok => { if (ok) renderSide(); }); return; }
   if (act === 'cancel') { form = null; renderSide(); return; }
   if (act === 'followlink') { const it = item(id); if (it) followLink(it); return; }
