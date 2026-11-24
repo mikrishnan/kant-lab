@@ -120,6 +120,16 @@ choice. The page's **+ Handout on passages** switch turns it off again; your han
   goes in and stays folded away (with **Undo**). Folding only changes what is on screen, never
   the handout or its exports; anything added to something folded in any other way (from the
   portal, by ↑ ↓, from the trash) opens it, so nothing goes out of sight unasked.
+- **Search them.** In Class view and Instructor view alike, **Search this handout…**, above the
+  handout, tints every place its words stand: in headings, notes and their titles, and in the
+  passages' citations, labels, words, English, notes and margin notes. **Enter** goes to the next,
+  **Shift-Enter** to the one before, and ⌘F (Ctrl-F) comes to the box while the page is open.
+  **Search all handouts…**, at the top of the list on the left, shows the places in every
+  handout listed there; click one to open that handout at it. A section or note folded away
+  opens when a place you go to is inside it. A word's spellings count as one, as in the
+  portal's search (*Urteil* finds *Urtheil*), and a * ends a word any way (*urth\**). What is
+  searched is what the page shows: in Class view not the words you left out, and the English
+  only while **English** is on.
 - **Join passages the portal divides.** Where a passage of the handout is followed by the next
   one of the same text (or a later one), **Join with the next passage** makes them one passage
   of the handout, cited across both (*AA 1:392–394*, *A 50–52 / B 74–76*); the portal's own texts
