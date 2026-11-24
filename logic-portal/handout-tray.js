@@ -1035,6 +1035,43 @@ css.textContent = `
   .hcard .hcopysel select:hover, .hcard .hcopysel select:focus { border-color: var(--line); outline: none; }
   .hcard .hcopysel option, .hcard .hcopysel optgroup { color: var(--ink); }
   .hcard .htag.hlinked { border-style: solid; }
+  /* Searching the handouts: tinted as the portal's Find in this text tints its finds */
+  ::highlight(hsrch) { background-color: #cfe2f3; }
+  ::highlight(hsrch-cur) { background-color: #8fbbe0; }
+  #hpage .hfind { position: sticky; top: -1.2rem; z-index: 6; display: flex; margin: -1.2rem 0 0.4rem 1rem; padding: 0.75rem 0 0.3rem; background: var(--parchment); }   /* stuck flush with the top: main's padding is 1.2rem */
+  #hpage .hfindbox { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 6px; background: var(--card); overflow: hidden; }
+  #hpage .hfindbox:focus-within { border-color: var(--accent-light); }
+  #hpage .hfindin { width: 16rem; max-width: 52vw; border: none; background: transparent; font: inherit; font-size: 0.92rem; padding: 0.22rem 0.55rem; }
+  #hpage .hfindin:focus { outline: none; }
+  #hpage .hfindbox button { background: none; border: none; border-left: 1px solid var(--line-soft); color: var(--accent); cursor: pointer; font: inherit; padding: 0 0.55rem; }
+  #hpage .hfindbox button:hover { background: var(--parchment-dark); }
+  #hpage .hfind:not(.on) .hfindbox button { display: none; }
+  #hpage .hfindn { align-self: center; padding: 0 0.5rem; border-left: 1px solid var(--line-soft); font-size: 0.8rem; color: var(--faded); white-space: nowrap; }
+  #hpage .hfindn:empty { display: none; }
+  #hpage .hwrap { position: relative; }
+  #hpage .hsrch-in { position: relative; z-index: 4; background-color: transparent !important; }
+  #hpage .hsrchlay { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 3; pointer-events: none; }
+  #hpage .hsrchmir { position: absolute; margin: 0; overflow: hidden; white-space: pre-wrap; overflow-wrap: break-word; color: transparent; border-style: solid; border-color: transparent; pointer-events: none; }
+  #hpage .hsrchmir mark { color: transparent; background: #cfe2f3; border-radius: 2px; padding: 0; }
+  #hpage .hsrchmir mark.cur { background: #8fbbe0; }
+  #hpage aside .hsrch { position: sticky; top: -1rem; z-index: 2; margin: -1rem -1rem 0.7rem; padding: 1rem 1rem 0.4rem; background: var(--parchment); }
+  #hpage aside .hsrchin { display: block; width: 100%; box-sizing: border-box; font: inherit; font-size: 0.92rem; padding: 0.24rem 0.55rem; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+  #hpage aside .hsrchin:focus { outline: none; border-color: var(--accent-light); }
+  #hpage aside .hlist[hidden], #hpage aside .hsrchres[hidden] { display: none; }
+  #hpage aside .hsr { margin: 0 0 0.8rem; }
+  #hpage aside .hsrh { display: block; width: 100%; text-align: left; background: none; border: 1px solid transparent; border-radius: 6px; padding: 0.3rem 0.55rem; cursor: pointer; font: inherit; color: var(--ink); }
+  #hpage aside .hsrh:hover { background: var(--card); }
+  #hpage aside .hsr.on .hsrh { background: var(--card); border-color: var(--line); }
+  #hpage aside .hsrh .n { display: block; color: var(--faded); font-size: 0.78rem; }
+  #hpage aside .hsrrow { display: block; width: calc(100% - 0.7rem); text-align: left; background: none; border: none; border-left: 2px solid var(--line-soft); margin: 0.2rem 0 0.2rem 0.7rem; padding: 0.15rem 0.5rem; cursor: pointer; font: inherit; font-size: 0.84rem; line-height: 1.3; color: var(--ink); }
+  #hpage aside .hsrrow:hover { background: var(--card); border-left-color: var(--accent-light); }
+  #hpage aside .hsrrow .wh { display: block; color: var(--accent); font-size: 0.76rem; }
+  #hpage aside .hsrrow .tx { display: block; color: #4b4034; }
+  #hpage aside .hsrrow mark { background: #cfe2f3; color: inherit; border-radius: 2px; padding: 0 1px; }
+  #hpage aside .hsrmore { margin: 0.1rem 0 0 1.25rem; font-size: 0.8rem; }
+  #hpage.docked aside .hsrch { position: static; flex-basis: 100%; margin: 0; padding: 0; }
+  #hpage.docked aside .hlist { display: contents; }
+  #hpage.docked aside .hsrchres { flex-basis: 100%; }
   #hback { position: fixed; z-index: 46; left: 50%; top: 0.55rem; transform: translateX(-50%); }
   #hprint { display: none; }
   @media print {
@@ -1318,6 +1355,8 @@ sb.addEventListener('click', () => {
 });
 
 /* ── The Handouts page ────────────────────────────────────────────────────── */
+// The two search boxes' tip (Searching the handouts, below)
+const SRCH_TIP = 'Words anywhere in the handouts, folded-away parts too, which open to show them. A word’s spellings count as one, as in the portal’s search (Urteil finds Urtheil), and a * ends a word any way (urth*).';
 const page = el('div', 'hpage');
 page.hidden = true;
 page.innerHTML = '<div class="hdockgrip" title="Drag to make the handout wider or narrower"></div>' +
@@ -1337,7 +1376,11 @@ page.innerHTML = '<div class="hdockgrip" title="Drag to make the handout wider o
   '<span class="hfile"><button type="button" class="linkish" data-h="save" title="Every handout, in one file, to keep or to move to another browser">Save to file</button>' +
   '<button type="button" class="linkish" data-h="open" title="Adds the handouts in a saved file to these">Open file</button></span>' +
   '<input type="file" accept=".json,application/json" hidden></div>' +
-  '<div class="hbody"><aside></aside><main><div class="hwrap"></div></main></div>';
+  '<div class="hbody"><aside><div class="hsrch" role="search"><input type="search" class="hsrchin" spellcheck="false" placeholder="Search all handouts…" aria-label="Search all handouts" title="' + SRCH_TIP + ' Enter opens the first place found.">' +
+  '</div><div class="hsrchres" hidden></div><div class="hlist"></div></aside>' +
+  '<main><div class="hfind" role="search"><span class="hfindbox"><input type="search" class="hfindin" spellcheck="false" placeholder="Search this handout…" aria-label="Search this handout" title="' + SRCH_TIP + ' Enter for the next, Shift-Enter for the one before.">' +
+  '<button type="button" data-hs="-1" title="The one before (Shift-Enter)">‹</button><span class="hfindn" aria-live="polite"></span><button type="button" data-hs="1" title="The next (Enter)">›</button></span></div>' +
+  '<div class="hwrap"></div></main></div>';
 document.body.appendChild(page);
 const picker = page.querySelector('input[type=file]');
 
@@ -1438,6 +1481,7 @@ function render() {
   if (classView) page.querySelectorAll('.hwrap [data-mf]').forEach(t => collapseCuts(t, '…'));
   if (!lk && pairCuts(h)) { save(); render(); return; }   // German cuts whose English has not followed yet
   if (enMode(h) && passagesOf(h).some(x => enWanted(h, x) && !x.en)) fillSoon();
+  findPaint();   // what "Search this handout" found, on the page as now drawn
 }
 // The column on the left: the class's handouts, this browser's own, the class box, trash and backups.
 // Drawn with the page, and alone when only the class's copy has changed, so that what is being typed
@@ -1447,7 +1491,8 @@ function renderAside() {
   // The class's handouts first, those not this browser's own; then this browser's own, unless it has
   // nothing of its own and the class has something to read.
   const cls = classOthers(), ownShown = !cls.length || !isEmpty() || !classView;
-  page.querySelector('aside').innerHTML =
+  // the list alone: the search box above it keeps what is typed in it, and its results follow
+  page.querySelector('aside .hlist').innerHTML =
     (cls.length || /loading|err/.test(classSt.st) ? '<div class="hgrp">Shown to the class</div>' + cls.map(x =>
       '<button type="button" class="hl cls' + (viewing === x.id ? ' on' : '') + '" data-cpick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
       '<span class="n">' + plural(countOf(x), 'passage') + ' · to read</span></button>').join('') + classStHtml() + (ownShown ? '<div class="hgrp">In this browser</div>' : '') : '') +
@@ -1455,6 +1500,7 @@ function renderAside() {
       '<button type="button" class="hl' + (!ro && x.id === h.id ? ' on' : '') + '" data-pick="' + esc(x.id) + '">' + esc(x.name || 'Untitled handout') +
       '<span class="n">' + plural(countOf(x), 'passage') + (classHas(x.id) ? ' · <span class="hshown">shown to the class</span>' : '') + '</span></button>').join('') : '') +
     (classView ? (ownShown ? backupHtml() : '') : '<button type="button" class="btn hnew" data-h="new">+ New handout</button>' + classHtml(h) + (ro ? '' : trashHtml(h)) + backupHtml());
+  srchSide();
 }
 // A text box as tall as its text. Measured only once it has a width, or a box drawn in a
 // hidden or squeezed window would come out absurdly tall; drawn again when the window resizes.
@@ -2468,6 +2514,345 @@ page.addEventListener('click', e => {
    and, in Instructor view with a handout shown to the class open, a new handout of one's own, or
    no longer showing it. */
 const RO_OK = new Set(['close', 'dock', 'classview', 'instructorview', 'lock', 'go', 'gopart', 'fold', 'foldall', 'foldnotes', 'unfoldall', 'docx', 'pdf', 'txt', 'save', 'bkdir', 'bkresume', 'new', 'stopclass', 'classretry', 'classkey', 'classsetupno']);
+
+/* ── Searching the handouts ──────────────────────────────────────────────────
+   Two boxes, in Class view and Instructor view alike. "Search this handout", above it, finds every
+   place its words stand: its title, headings, notes and their titles, and its passages' citations,
+   labels, words, English, notes and margin notes, tinted as the portal's Find in this text tints
+   its finds, the one gone to darker. Enter goes to the next, Shift-Enter to the one before, and
+   ⌘F (Ctrl-F) comes to the box while the page is open (a second time, the browser's own Find).
+   "Search all handouts", at the top of the list on the left, goes through every handout listed
+   there and shows the places in each; a click opens that handout at that place, with the words in
+   the box above it. A section or a note folded away opens when a place gone to is inside it, and
+   stays open, as if opened by hand.
+   A word's spellings count as one, as in the portal's search (Urteil finds Urtheil), and a * ends
+   a word any way (urth*); the letters as typed are found as well, inside words too, capitals,
+   accents and line breaks aside. What is searched is what the page shows: in Class view not the
+   words left out of a passage, and the English only while the English switch is on. Nothing here
+   changes a handout. A passage's words are tinted with the browser's highlights (CSS.highlights),
+   which leave its markup alone; a text box's, on a copy of its text laid just beneath it. */
+let F = { q: '', Q: null, h: null, list: [], i: -1, fields: [], curR: null, scroll: false, going: false };   // "Search this handout"
+let sideQ = '', findT = 0, sideT = 0, layT = 0;
+const findIn = page.querySelector('.hfindin'), findN = page.querySelector('.hfindn'), sideIn = page.querySelector('.hsrchin');
+const HL_OK = !!(window.CSS && CSS.highlights && typeof window.Highlight === 'function');
+const SIDE_MAX = 3;   // places shown under each handout in "Search all handouts"; the rest open from "and N more"
+
+// A text with capitals, accents and runs of spaces aside, and where each of its letters stands in it.
+const FOLDC = new Map(), TOKC = new Map();
+const keep = (C, k, v) => { if (C.size > 3000) C.clear(); C.set(k, v); return v; };
+function foldMap(s) {
+  const c = FOLDC.get(s);
+  if (c) return c;
+  let t = '', sp = true;
+  const at = [];
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i], n = s.charCodeAt(i);
+    if (n === 32 || n === 10 || n === 9 || n === 13 || n === 160 || (n > 127 && /\s/.test(ch))) { if (!sp) { t += ' '; at.push(i); sp = true; } continue; }
+    sp = false;
+    const f = n < 128 ? ch.toLowerCase() : ch === 'ſ' ? 's' : ch === 'ß' ? 'ss' : /[’‘‛ʼ]/.test(ch) ? "'" : ch.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    for (let j = 0; j < f.length; j++) { t += f[j]; at.push(i); }
+  }
+  return keep(FOLDC, s, { t, at });
+}
+// A text's words, each as [start, end, its spelling as the portal's search reduces it].
+const normW = w => PT.normWord ? PT.normWord(w) : w;
+function tokensOf(s) {
+  const c = TOKC.get(s);
+  if (c) return c;
+  const out = [], re = /[\p{L}\p{M}]+/gu;
+  for (let m; (m = re.exec(s));) out.push([m.index, m.index + m[0].length, normW(m[0].toLowerCase())]);
+  return keep(TOKC, s, out);
+}
+// What is typed, ready to search with; null for less than two letters.
+function srchQuery(raw) {
+  const q = String(raw || '').replace(/\s+/g, ' ').trim();
+  if (q.length < 2) return null;
+  const words = q.match(/[\p{L}\p{M}]+\*?/gu) || [], sub = foldMap(q.replace(/\*/g, '')).t.trim();
+  return { q, sub: sub.length >= 2 ? sub : '',
+    words: words.length && words.join(' ') === q ? words.map(w => ({ n: normW(w.replace(/\*$/, '').toLowerCase()), star: w.endsWith('*') })) : null };
+}
+// Where Q is in the text s: [[start, end], …], in order, places that overlap made one.
+function hitsIn(s, Q) {
+  s = String(s || '');
+  const out = [];
+  if (!s || !Q) return out;
+  if (Q.words) {
+    const T = tokensOf(s), W = Q.words;
+    for (let t = 0; t + W.length <= T.length; t++) {
+      let ok = true;
+      for (let j = 0; j < W.length && ok; j++) ok = W[j].star ? T[t + j][2].startsWith(W[j].n) : T[t + j][2] === W[j].n;
+      if (ok) out.push([T[t][0], T[t + W.length - 1][1]]);
+    }
+  }
+  if (Q.sub) {
+    const M = foldMap(s), L = Q.sub.length;
+    for (let k = M.t.indexOf(Q.sub); k >= 0; k = M.t.indexOf(Q.sub, k + L)) out.push([M.at[k], M.at[k + L - 1] + 1]);
+  }
+  out.sort((a, b) => a[0] - b[0]);
+  const one = [];
+  out.forEach(x => { const p = one[one.length - 1]; if (p && x[0] < p[1]) p[1] = Math.max(p[1], x[1]); else one.push(x.slice()); });
+  return one;
+}
+
+/* Every field of handout h that the page draws, in the page's order: { id: its item's (or '' for the
+   handout's title), f: which field, s: its words as the page shows them, it, hide: the folded
+   section or note, if any, that keeps it out of sight }. */
+function srchFields(h) {
+  const out = [], hd = hiders(h).m;
+  const add = (it, f, s, hide) => { s = String(s == null ? '' : s); if (s.trim()) out.push({ id: it ? it.id : '', f, s, it, hide }); };
+  add(null, 'name', h.name, []);
+  h.items.forEach(x => {
+    const hs = hd.get(x.id) || [];
+    if (x.kind === 'heading') add(x, 'head', x.text, []);
+    else if (x.kind === 'note') {
+      add(x, 'title', x.title, hs);
+      add(x, 'ntext', x.text, noteFolded(x) ? hs.concat([x]) : hs);   // folded, a note shows its title and only the first line of this
+      kids(x).forEach(y => srchPassage(y, hd.get(y.id) || [], add));
+    } else if (isPass(x)) srchPassage(x, hs, add);
+  });
+  return out;
+}
+function srchPassage(it, hs, add) {
+  const b = byline(it), cut = (s, f) => classView ? cutOut(s, marksOf(it, f)) : String(s || '');
+  add(it, 'cite', b.author + ', ' + b.work + ', ' + it.cite + (datingOf(it) || ''), hs);
+  add(it, 'label', it.label, hs);
+  const ps = partsOf(it);
+  const de = it.parts ? ps.map((p, k) => (k && gapBetween(ps[k - 1].ref, p.ref) ? '[…]\n\n' : '') + p.text).join('\n\n') : it.text;
+  add(it, 'de', it.from === 'english' ? asDrawn(cut(de, 'text')) : cut(de, 'text'), hs);
+  if (enShown(null, it)) add(it, 'en', asDrawn(cut(it.en, 'en')), hs);
+  add(it, 'note', it.note, hs);
+  (it.marks || []).forEach(m => { if (m.k === 'mn') add(it, 'mn:' + m.id, m.note, hs); });
+}
+// Every place Q stands in handout h: { fd: its field, k: which in that field, a, b }.
+function srchList(h, Q) {
+  const out = [];
+  if (Q) srchFields(h).forEach(fd => hitsIn(fd.s, Q).forEach(([a, b], k) => out.push({ fd, k, a, b })));
+  return out;
+}
+const sameHit = (x, y) => x.fd.id === y.fd.id && x.fd.f === y.fd.f && x.k === y.k;
+// With the English switched off: how many places its English would have, to say so.
+const enOffHits = (h, Q) => showEn || !Q ? 0 : passagesOf(h).reduce((n, it) =>
+  n + (it.from !== 'english' && it.en ? hitsIn(asDrawn(classView ? cutOut(it.en, marksOf(it, 'en')) : it.en), Q).length : 0), 0);
+
+// A field, as drawn on the page.
+function domField(fd) {
+  const w = page.querySelector('.hwrap');
+  if (fd.f === 'name') return w.querySelector('.hname');
+  const c = w.querySelector('.hcard[data-id="' + CSS.escape(fd.id) + '"]');
+  if (!c) return null;
+  if (fd.f.startsWith('mn:')) return c.querySelector('textarea[data-mnt="' + CSS.escape(fd.f.slice(3)) + '"]');
+  const sel = { head: ':scope > input[data-f="text"]', title: ':scope > .hcite input.nlab', ntext: ':scope > .hnotetext', cite: ':scope > .hcite > .w',
+    label: ':scope > .hlab', de: '[data-mf="text"]', en: '[data-mf="en"]', note: ':scope > .hnote' }[fd.f];
+  return sel ? c.querySelector(sel) : null;
+}
+// Where Q is in a field on the page: { box, hits: [[a, b]] } for a text box, { hits: [Range] } for
+// words drawn (a joined passage's citations, margin-note numbers and tags aside).
+function domHits(f, Q) {
+  if (f.matches('input, textarea')) return { box: f, hits: hitsIn(f.value, Q), cur: -1 };
+  const ns = [], walk = document.createTreeWalker(f, NodeFilter.SHOW_TEXT);
+  let s = '';
+  for (let n; (n = walk.nextNode());) {
+    if (n.parentElement.closest('.mk-n, .hpart, .htag')) continue;
+    ns.push([n, s.length]); s += n.data;
+  }
+  const at = (o, end) => { let j = ns.length - 1; while (j > 0 && (end ? ns[j][1] >= o : ns[j][1] > o)) j--; return [ns[j][0], o - ns[j][1]]; };
+  return { hits: hitsIn(s, Q).map(([a, b]) => { const r = document.createRange(), x = at(a, false), y = at(b, true); r.setStart(x[0], x[1]); r.setEnd(y[0], y[1]); return r; }) };
+}
+
+function srchUnpaint() {
+  if (HL_OK) { CSS.highlights.delete('hsrch'); CSS.highlights.delete('hsrch-cur'); }
+  const L = page.querySelector('.hwrap > .hsrchlay');
+  if (L) L.remove();
+  page.querySelectorAll('.hsrch-in').forEach(x => x.classList.remove('hsrch-in'));
+  F.fields = []; F.curR = null;
+}
+// "Search this handout", on the page as drawn: called at the end of every drawing, and when the
+// words in the box change (fresh: then the first place on view is gone to, or, if every place is
+// folded away, the first).
+function findPaint(fresh) {
+  srchUnpaint();
+  const h = cur();
+  if (F.h !== h.id) { F.h = h.id; F.list = []; F.i = -1; }
+  const was = F.list[F.i];
+  F.list = srchList(h, F.Q);
+  F.i = was ? F.list.findIndex(m => sameHit(m, was)) : -1;
+  if (F.i < 0 && F.list.length) {
+    const v = F.list.findIndex(m => !m.fd.hide.length);
+    if (v < 0 && !F.going) return findGo(0);
+    F.i = Math.max(0, v);
+    if (fresh) F.scroll = true;
+  }
+  const ranges = [], seen = new Map();
+  F.list.forEach((m, j) => {
+    if (m.fd.hide.length) return;
+    const key = m.fd.id + '\u0001' + m.fd.f;
+    let d = seen.get(key);
+    if (d === undefined) {
+      const f = domField(m.fd);
+      d = f && f.getClientRects().length ? domHits(f, F.Q) : null;
+      if (d && d.box) { d.bg = getComputedStyle(f).backgroundColor; f.classList.add('hsrch-in'); F.fields.push(d); }
+      seen.set(key, d);
+    }
+    const x = d && d.hits[m.k];
+    if (!x) return;
+    if (d.box) { if (j === F.i) d.cur = m.k; }
+    else { ranges.push(x); if (j === F.i) F.curR = x; }
+  });
+  if (HL_OK && ranges.length) CSS.highlights.set('hsrch', new Highlight(...ranges));
+  if (HL_OK && F.curR) { const c = new Highlight(F.curR); c.priority = 1; CSS.highlights.set('hsrch-cur', c); }
+  findCount();
+  layoutSoon();
+}
+function findCount() {
+  page.querySelector('.hfind').classList.toggle('on', !!F.Q);
+  findN.title = '';
+  if (!F.Q) { findN.textContent = ''; return; }
+  if (F.list.length) { findN.textContent = (F.i + 1) + ' of ' + F.list.length; return; }
+  const off = enOffHits(cur(), F.Q);
+  findN.textContent = off ? 'none; ' + off + ' in the English' : 'none';
+  if (off) findN.title = 'The English is switched off, so it is not searched. Turn on English, above, to see ' + (off === 1 ? 'it' : 'them') + '.';
+}
+// Go to place i: open what is folded over it, tint it darker, and scroll it into view.
+function findGo(i) {
+  if (!F.list.length) return;
+  F.i = ((i % F.list.length) + F.list.length) % F.list.length;
+  F.scroll = true;
+  const m = F.list[F.i];
+  if (!m.fd.hide.length) { findPaint(); return; }
+  F.going = true;
+  try { fold(m.fd.hide.map(x => x.id), false); render(); } finally { F.going = false; }
+}
+const findStep = d => { if (findIn.value !== F.q) findRun(); else findGo(F.i + d); };
+function findRun() {
+  clearTimeout(findT);
+  F.q = findIn.value; F.Q = srchQuery(F.q); F.i = -1;
+  findPaint(true);
+}
+
+/* The tints in text boxes: for each, a copy of its text, in its own font and at its own place, with
+   the places marked, laid just beneath the box, whose own background is set aside meanwhile
+   (.hsrch-in) so that the copy's shows through. Laid out once the page has its layout, and again
+   whenever it changes. */
+const MIRROR = ['boxSizing', 'fontFamily', 'fontSize', 'fontStyle', 'fontWeight', 'fontVariant', 'fontStretch', 'letterSpacing', 'wordSpacing', 'lineHeight',
+  'textTransform', 'textIndent', 'textAlign', 'tabSize', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+  'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth', 'borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomLeftRadius', 'borderBottomRightRadius'];
+function mirror(d, W) {
+  const f = d.box, r = f.getBoundingClientRect();
+  if (!r.width || !r.height) return null;
+  const cs = getComputedStyle(f), m = el('div', null, 'hsrchmir');
+  MIRROR.forEach(p => { m.style[p] = cs[p]; });
+  Object.assign(m.style, { left: (r.left - W.left) + 'px', top: (r.top - W.top) + 'px', width: r.width + 'px', height: r.height + 'px', backgroundColor: d.bg });
+  if (f.tagName === 'INPUT') { m.style.whiteSpace = 'pre'; m.style.lineHeight = Math.max(0, f.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) + 'px'; }
+  const s = f.value;
+  let at = 0, html = '';
+  d.hits.forEach(([a, b], k) => { html += esc(s.slice(at, a)) + '<mark' + (k === d.cur ? ' class="cur"' : '') + '>' + esc(s.slice(a, b)) + '</mark>'; at = b; });
+  m.innerHTML = html + esc(s.slice(at)) + '\n';
+  return m;
+}
+function layoutSoon() { cancelAnimationFrame(layT); layT = requestAnimationFrame(srchLayout); }
+function srchLayout() {
+  const w = page.querySelector('.hwrap'), old = w.querySelector(':scope > .hsrchlay');
+  if (old) old.remove();
+  if (page.hidden || !F.Q) return;
+  let curEl = null;
+  if (F.fields.length) {
+    const L = el('div', null, 'hsrchlay'), W = w.getBoundingClientRect();
+    L.setAttribute('aria-hidden', 'true');
+    w.appendChild(L);
+    F.fields.forEach(d => {
+      const m = mirror(d, W);
+      if (!m) return;
+      L.appendChild(m);
+      m.scrollTop = d.box.scrollTop; m.scrollLeft = d.box.scrollLeft;
+      curEl = m.querySelector('mark.cur') || curEl;
+    });
+  }
+  if (!F.scroll) return;
+  F.scroll = false;
+  const r = F.curR ? F.curR.getBoundingClientRect() : curEl ? curEl.getBoundingClientRect() : null;
+  if (!r || !(r.width || r.height)) return;
+  const sc = page.querySelector('main'), R = sc.getBoundingClientRect(), bar = page.querySelector('.hfind').offsetHeight;
+  if (r.top < R.top + bar + 12 || r.bottom > R.bottom - 12) sc.scrollTop += r.top - R.top - sc.clientHeight / 3;
+}
+new ResizeObserver(() => { if (!page.hidden && F.fields.length) layoutSoon(); }).observe(page.querySelector('.hwrap'));
+
+/* "Search all handouts": in place of the list of handouts while something is typed in it. */
+function srchWhere(m) {
+  const it = m.fd.it, f = m.fd.f;
+  if (f === 'name') return 'The handout’s title';
+  if (f === 'head') return 'Heading';
+  if (f === 'title' || f === 'ntext') return 'Note' + (flat(it.title) ? ': ' + clip(flat(it.title), 40) : '');
+  return byline(it).author + ', ' + it.cite + ({ en: ' · English', note: ' · its note', label: ' · its label' }[f] || (f.startsWith('mn:') ? ' · margin note' : ''));
+}
+// A place, with a little of what stands on either side of it.
+function srchSnip(m) {
+  const s = m.fd.s, ws = t => esc(t.replace(/\s+/g, ' '));
+  let x = Math.max(0, m.a - 40), y = Math.min(s.length, m.b + 70);
+  if (x > 0) { const k = s.slice(x, m.a).search(/\s/); if (k >= 0) x += k + 1; }
+  if (y < s.length) { const k = s.slice(m.b, y).search(/\s\S*$/); if (k > 0) y = m.b + k; }
+  return (x > 0 ? '…' : '') + ws(s.slice(x, m.a)) + '<mark>' + ws(s.slice(m.a, m.b)) + '</mark>' + ws(s.slice(m.b, y)) + (y < s.length ? '…' : '');
+}
+function srchSide() {
+  const box = page.querySelector('.hsrchres'), list = page.querySelector('aside .hlist'), Q = srchQuery(sideQ);
+  if (!Q) { box.hidden = true; box.innerHTML = ''; list.hidden = false; return; }
+  list.hidden = true; box.hidden = false;
+  // the handouts the list shows, in its order
+  const cls = classOthers(), ownShown = !cls.length || !isEmpty() || !classView;
+  const hs = cls.map(h => ({ h, cls: true })).concat(ownShown ? DB.handouts.map(h => ({ h, cls: false })) : []);
+  let n = 0, places = 0, off = 0;
+  const btn = (x, j, cl, body) => '<button type="button" class="' + cl + '" data-sh="' + esc(x.h.id) + '"' + (x.cls ? ' data-scls="1"' : '') + ' data-sn="' + j + '">' + body + '</button>';
+  const html = hs.map(x => {
+    const L = srchList(x.h, Q);
+    if (!L.length) { off += enOffHits(x.h, Q); return ''; }
+    n++; places += L.length;
+    const on = x.cls ? viewing === x.h.id : !viewing && x.h.id === DB.current;
+    return '<div class="hsr' + (on ? ' on' : '') + '">' +
+      btn(x, 0, 'hsrh', esc(x.h.name || 'Untitled handout') + '<span class="n">' + plural(L.length, 'place') + (x.cls ? ' · shown to the class' : '') + '</span>') +
+      L.slice(0, SIDE_MAX).map((m, j) => btn(x, j, 'hsrrow', '<span class="wh">' + esc(srchWhere(m)) + '</span><span class="tx">' + srchSnip(m) + '</span>')).join('') +
+      (L.length > SIDE_MAX ? btn(x, SIDE_MAX, 'linkish hsrmore', 'and ' + (L.length - SIDE_MAX) + ' more here ›') : '') + '</div>';
+  }).join('');
+  box.innerHTML = '<div class="hgrp">' + (places ? plural(places, 'place') + ' in ' + plural(n, 'handout') : 'In none of the handouts') + '</div>' + html +
+    (!places && off ? '<p class="muted small">The English is switched off, so it is not searched; it has ' + plural(off, 'place') + '. Turn on English, above, to see ' + (off === 1 ? 'it' : 'them') + '.</p>' : '');
+}
+// A place found on the left: its handout opened, the words in "Search this handout", and the place gone to.
+function srchOpen(id, isCls, n) {
+  if (isCls) viewing = id;
+  else { viewing = null; if (DB.current !== id) { DB.current = id; save(); } }
+  findIn.value = sideQ; F.q = sideQ; F.Q = srchQuery(sideQ); F.h = null;
+  render();
+  findGo(n);
+}
+
+findIn.addEventListener('input', () => { clearTimeout(findT); if (!findIn.value) findRun(); else findT = setTimeout(findRun, 200); });
+findIn.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); findStep(e.shiftKey ? -1 : 1); }
+  else if (e.key === 'Escape' && findIn.value) { e.preventDefault(); findIn.value = ''; findRun(); }
+});
+sideIn.addEventListener('input', () => { clearTimeout(sideT); sideT = setTimeout(() => { sideQ = sideIn.value; srchSide(); }, sideIn.value ? 150 : 0); });
+sideIn.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault(); clearTimeout(sideT); sideQ = sideIn.value; srchSide();
+    const b = page.querySelector('.hsrchres .hsrrow');
+    if (b) b.click();
+  } else if (e.key === 'Escape' && sideIn.value) { e.preventDefault(); clearTimeout(sideT); sideIn.value = sideQ = ''; srchSide(); }
+});
+page.addEventListener('click', e => {
+  const s = e.target.closest('[data-hs]');
+  if (s) { if (findIn.value) findStep(+s.dataset.hs); else findIn.focus(); return; }
+  const r = e.target.closest('[data-sh]');
+  if (r) srchOpen(r.dataset.sh, !!r.dataset.scls, +r.dataset.sn);
+});
+// Typing in the handout itself (Instructor view): its places found again once the typing pauses.
+page.addEventListener('input', e => {
+  if (!F.Q || e.target === findIn || e.target === sideIn) return;
+  clearTimeout(findT); findT = setTimeout(() => findPaint(), 300);
+});
+document.addEventListener('keydown', e => {
+  if (page.hidden || e.altKey || e.shiftKey || !(e.metaKey || e.ctrlKey) || String(e.key).toLowerCase() !== 'f') return;
+  if (document.activeElement === findIn) return;                         // a second time: the browser's own Find
+  if (docked && !page.contains(document.activeElement)) return;          // side by side, at work in the portal: the portal's
+  e.preventDefault(); findIn.focus(); findIn.select();
+});
 
 /* ── The class's copy ─────────────────────────────────────────────────────
    "Show this handout to the class", in Instructor view, puts a copy of it where everyone with
